@@ -30,7 +30,7 @@ export default class DatabaseDriver {
     return this.stream;
   }
 
-  protected async query(stmt: hrana.InStmt) {
+  async query(stmt: hrana.InStmt) {
     const stream = this.getStream();
     const r = await stream.query(stmt);
 
@@ -38,6 +38,17 @@ export default class DatabaseDriver {
     console.info("Result", r);
 
     return r;
+  }
+
+  async multipleQuery(statements: string[]): Promise<hrana.RowsResult | null> {
+    const stream = this.getStream();
+    let lastResult: hrana.RowsResult | null = null;
+
+    for (const statement of statements) {
+      lastResult = await stream.query(statement);
+    }
+
+    return lastResult;
   }
 
   close() {

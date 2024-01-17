@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { LucideX } from "lucide-react";
+import { LucidePlus, LucideX } from "lucide-react";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -12,17 +12,22 @@ interface WindowTabsProps {
   tabs: WindowTabItemProps[];
   selected: number;
   onSelectChange: (selectedIndex: number) => void;
+  onTabsChange: (value: WindowTabItemProps[]) => void;
 }
 
 export default function WindowTabs({
   tabs,
   selected,
   onSelectChange,
+  onTabsChange,
 }: WindowTabsProps) {
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex-grow-0 flex-shrink-0">
         <div className="flex p-2 gap-2">
+          <Button size={"sm"} variant={"outline"}>
+            <LucidePlus className="w-4 h-4" />
+          </Button>
           {tabs.map((tab, idx) => {
             return (
               <Button
@@ -32,7 +37,14 @@ export default function WindowTabs({
                 onClick={() => onSelectChange(idx)}
               >
                 {tab.title}
-                <LucideX className="w-4 h-4 ml-2" />
+                <LucideX
+                  className="w-4 h-4 ml-2"
+                  onClick={() => {
+                    onTabsChange(
+                      tabs.filter((nextTab) => nextTab.key !== tab.key)
+                    );
+                  }}
+                />
               </Button>
             );
           })}

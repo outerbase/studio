@@ -17,7 +17,7 @@ function SchemaViewmItem({ icon: Icon, title }: SchemaViewItemProps) {
     <div
       onDoubleClick={() => {
         openTabs({
-          key: title,
+          key: "table_" + title,
           name: title,
           type: "table",
           tableName: title,

@@ -11,6 +11,7 @@ import TableDataContent from "./TableDataContent";
 import useMessageListener from "@/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
+import QueryWindow from "@/app/(windows)/QueryWindow";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -25,21 +26,32 @@ export default function DatabaseGui() {
   }, []);
 
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-  const [tabs, setTabs] = useState<WindowTabItemProps[]>([]);
+  const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
+    { title: "Query", key: "query", component: <QueryWindow /> },
+  ]);
 
   useMessageListener<OpenTabsProps>(
     MessageChannelName.OPEN_NEW_TAB,
     (newTab) => {
       setTabs((prev) => {
         if (newTab && newTab.tableName) {
-          return [
-            ...prev,
-            {
-              title: newTab.name,
-              key: newTab.key,
-              component: <TableDataContent tableName={newTab.tableName} />,
-            },
-          ];
+          // Check if there is duplicated
+          const foundIndex = prev.findIndex((tab) => tab.key === newTab.key);
+
+          if (foundIndex >= 0) {
+            setSelectedTabIndex(foundIndex);
+          } else {
+            setSelectedTabIndex(prev.length);
+
+            return [
+              ...prev,
+              {
+                title: newTab.name,
+                key: newTab.key,
+                component: <TableDataContent tableName={newTab.tableName} />,
+              },
+            ];
+          }
         }
         return prev;
       });
@@ -62,6 +74,7 @@ export default function DatabaseGui() {
             tabs={tabs}
             selected={selectedTabIndex}
             onSelectChange={setSelectedTabIndex}
+            onTabsChange={setTabs}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
