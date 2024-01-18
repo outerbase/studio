@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
  
+:root {
+  --color-table-grid: #eee;
+  --color-table-change: #f6e58d;
+
+  --color-table-cell-number: #2980b9;
+  --color-table-cell-code: #95a5a6;
+
+  --color-table-row-selected: #e4e6f1;
+  --color-table-row-removed: #ff6b81;
+  --color-table-row-new: #7bed9f;
+
+  /* For Scroll */
+  --color-scrollbar: #0001;
+  --color-scrollbar-track: #0001;
+  --color-scrollbar-hover: #0005;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

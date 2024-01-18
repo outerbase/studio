@@ -1,70 +1,56 @@
+import TextCell from "@/app/(components)/Cells/TextCell";
+import OptimizeTable from "@/app/(components)/OptimizeTable";
 import * as hrana from "@libsql/hrana-client";
-import { Column, ReactGrid } from "@silevis/reactgrid";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface ResultTableProps {
   data: hrana.RowsResult;
 }
 
 export default function ResultTable({ data }: ResultTableProps) {
-  const [resultHeaders, setResultHeaders] = useState<
-    { type: string; name: string; index: number }[]
-  >([]);
-  const [columns, setColumns] = useState<Column[]>([]);
+  const [selectedRowsIndex, setSelectedRowsIndex] = useState<number[]>([]);
 
-  useEffect(() => {
-    setResultHeaders(
-      data.columnNames.map((columnName, columnIndex) => {
-        return {
-          index: columnIndex,
-          type: data.columnDecltypes[columnIndex] ?? "TEXT",
-          name: columnName ?? "",
-        };
-      })
-    );
+  const handleSelectedRowsChange = (selectedRows: number[]) => {
+    setSelectedRowsIndex(selectedRows);
+  };
 
-    setColumns(
-      data.columnNames.map((columnName) => {
-        return {
-          columnId: columnName ?? "",
-          width: 150,
-        };
-      })
-    );
+  const headerMemo = useMemo(() => {
+    return data.columnNames.map((header, idx) => ({
+      name: header || "",
+      resizable: true,
+      initialSize: Math.max((header ?? "").length * 10, 150),
+    }));
   }, [data]);
 
-  const rows = useMemo(() => {
-    const headerRow = {
-      rowId: "header",
-      cells: resultHeaders.map((header) => ({
-        type: "header",
-        text: header.name,
-      })),
-    };
+  const renderCell = useCallback(
+    (y: number, x: number) => {
+      if (data.rows[y]) {
+        return (
+          <TextCell value={data.rows[y][x] as string} />
+          // <TableCell
+          //   key={data[y].rowIndex + '_' + x + '_' + revision}
+          //   value={data[y].data[headers[x].name]}
+          //   header={headers[x]}
+          //   col={x}
+          //   row={data[y].rowIndex}
+          //   readOnly={!updatableTables[headers[x]?.schema?.table || '']}
+          // />
+        );
+      }
+      return <></>;
+    },
+    [data]
+  );
 
-    const dataRows = data.rows.map((row, rowIdx) => {
-      return {
-        rowId: rowIdx,
-        cells: resultHeaders.map((header) => {
-          if (
-            header.type.indexOf("INTEGER") === 0 ||
-            header.type.indexOf("NUMBER") === 0
-          ) {
-            return {
-              type: "number",
-              value: row[header.name] as number,
-            };
-          }
-
-          return {
-            type: "text",
-            text: row[header.name] as string,
-          };
-        }),
-      };
-    });
-    return [headerRow, ...dataRows];
-  }, [data, resultHeaders]);
-
-  return <ReactGrid rows={rows} columns={columns} />;
+  return (
+    <OptimizeTable
+      headers={headerMemo}
+      data={data.rows}
+      renderAhead={20}
+      renderCell={renderCell}
+      rowHeight={35}
+      selectedRowsIndex={selectedRowsIndex}
+      onSelectedRowsIndexChanged={handleSelectedRowsChange}
+    />
+  );
 }
