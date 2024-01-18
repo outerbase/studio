@@ -37,7 +37,7 @@ export default function ResultTable({ data }: ResultTableProps) {
           // />
         );
       }
-      return <></>;
+      return <TextCell value={""} />;
     },
     [data]
   );
