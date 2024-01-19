@@ -13,21 +13,34 @@ import { Button } from "@/components/ui/button";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import ResultTable from "@/components/result/ResultTable";
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
+import { MultipleQueryProgress, multipleQuery } from "@/lib/multiple-query";
+import QueryProgressLog from "../(components)/QueryProgressLog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [code, setCode] = useState("");
-  const [result, setResult] = useState<hrana.RowsResult | null>(null);
+  const [result, setResult] = useState<hrana.RowsResult>();
+  const [progress, setProgress] = useState<MultipleQueryProgress>();
 
   const onRunClicked = () => {
     const statements = splitQuery(code).map((statement) =>
       statement.toString()
     );
 
-    databaseDriver
-      .multipleQuery(statements)
-      .then(setResult)
+    // Reset the result and make a new query
+    setResult(undefined);
+    setProgress(undefined);
+
+    multipleQuery(databaseDriver, statements, (currentProgrss) => {
+      setProgress(currentProgrss);
+    })
+      .then(({ last }) => {
+        if (last) {
+          setResult(last);
+        }
+      })
       .catch(console.error);
   };
 
@@ -50,8 +63,13 @@ export default function QueryWindow() {
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={80}>
-        {result ? <ResultTable data={result} /> : null}
+      <ResizablePanel defaultSize={80} style={{ position: "relative" }}>
+        {result && <ResultTable data={result} />}
+        {!result && progress && (
+          <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+            <QueryProgressLog progress={progress} />
+          </div>
+        )}
       </ResizablePanel>
     </ResizablePanelGroup>
   );
