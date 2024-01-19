@@ -1,5 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { DatabaseSchemaItem } from "@/drivers/DatabaseDriver";
 import { cn } from "@/lib/utils";
@@ -36,12 +37,16 @@ function SchemaViewmItem({ icon: Icon, title }: SchemaViewItemProps) {
 }
 
 export default function SchemaView() {
+  const { updateTableList } = useAutoComplete();
   const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
   const { databaseDriver } = useDatabaseDriver();
 
   useEffect(() => {
-    databaseDriver.getTableList().then(setSchemaItems);
-  }, [databaseDriver]);
+    databaseDriver.getTableList().then((tableList) => {
+      setSchemaItems(tableList);
+      updateTableList(tableList.map((table) => table.name));
+    });
+  }, [databaseDriver, updateTableList]);
 
   return (
     <ScrollArea className="h-full">

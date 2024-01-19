@@ -4,6 +4,8 @@ import { useMemo, useEffect, useState } from "react";
 import DatabaseGui from "./DatabaseGui";
 import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 import { ConnectionConfigScreen } from "./ConnectionConfigScreen";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 
 function MainConnection({
   credential,
@@ -44,7 +46,11 @@ export default function MainScreen() {
   );
 
   return credential ? (
-    <MainConnection credential={credential} />
+    <AutoCompleteProvider>
+      <TooltipProvider>
+        <MainConnection credential={credential} />
+      </TooltipProvider>
+    </AutoCompleteProvider>
   ) : (
     <div className="flex flex-wrap w-screen h-screen justify-center content-center">
       <ConnectionConfigScreen onConnect={setCredential} />

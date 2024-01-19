@@ -1,13 +1,15 @@
 import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable from "@/app/(components)/OptimizeTable";
 import * as hrana from "@libsql/hrana-client";
+import { LucideKey } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 interface ResultTableProps {
   data: hrana.RowsResult;
+  primaryKey?: string[];
 }
 
-export default function ResultTable({ data }: ResultTableProps) {
+export default function ResultTable({ data, primaryKey }: ResultTableProps) {
   const [selectedRowsIndex, setSelectedRowsIndex] = useState<number[]>([]);
 
   const handleSelectedRowsChange = (selectedRows: number[]) => {
@@ -19,8 +21,11 @@ export default function ResultTable({ data }: ResultTableProps) {
       name: header || "",
       resizable: true,
       initialSize: Math.max((header ?? "").length * 10, 150),
+      icon: (primaryKey ?? []).includes(header ?? "") ? (
+        <LucideKey className="w-4 h-4 text-red-500" />
+      ) : undefined,
     }));
-  }, [data]);
+  }, [data, primaryKey]);
 
   const renderCell = useCallback(
     (y: number, x: number) => {

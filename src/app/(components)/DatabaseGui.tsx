@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import SchemaView from "./SchemaView";
 import WindowTabs, { WindowTabItemProps } from "./WindowTabs";
-import TableDataContent from "./TableDataContent";
+import TableDataContent from "../(windows)/TableDataWindow";
 import useMessageListener from "@/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
@@ -34,13 +34,26 @@ export default function DatabaseGui() {
     MessageChannelName.OPEN_NEW_TAB,
     (newTab) => {
       setTabs((prev) => {
-        if (newTab && newTab.tableName) {
-          // Check if there is duplicated
-          const foundIndex = prev.findIndex((tab) => tab.key === newTab.key);
+        if (newTab) {
+          if (newTab.type === "table" && newTab.tableName) {
+            // Check if there is duplicated
+            const foundIndex = prev.findIndex((tab) => tab.key === newTab.key);
 
-          if (foundIndex >= 0) {
-            setSelectedTabIndex(foundIndex);
-          } else {
+            if (foundIndex >= 0) {
+              setSelectedTabIndex(foundIndex);
+            } else {
+              setSelectedTabIndex(prev.length);
+
+              return [
+                ...prev,
+                {
+                  title: newTab.name,
+                  key: newTab.key,
+                  component: <TableDataContent tableName={newTab.tableName} />,
+                },
+              ];
+            }
+          } else if (newTab.type === "query") {
             setSelectedTabIndex(prev.length);
 
             return [
@@ -48,11 +61,12 @@ export default function DatabaseGui() {
               {
                 title: newTab.name,
                 key: newTab.key,
-                component: <TableDataContent tableName={newTab.tableName} />,
+                component: <QueryWindow />,
               },
             ];
           }
         }
+
         return prev;
       });
     }

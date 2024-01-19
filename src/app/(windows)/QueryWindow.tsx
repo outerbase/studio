@@ -12,8 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import ResultTable from "@/components/result/ResultTable";
+import { useAutoComplete } from "@/context/AutoCompleteProvider";
 
 export default function QueryWindow() {
+  const { schema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [code, setCode] = useState("");
   const [result, setResult] = useState<hrana.RowsResult | null>(null);
@@ -34,7 +36,7 @@ export default function QueryWindow() {
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
           <div className="flex-grow overflow-hidden">
-            <SqlEditor value={code} onChange={setCode} />
+            <SqlEditor value={code} onChange={setCode} schema={schema} />
           </div>
           <div className="flex-grow-0 flex-shrink-0">
             <Separator />

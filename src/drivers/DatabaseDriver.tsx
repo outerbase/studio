@@ -4,6 +4,18 @@ export interface DatabaseSchemaItem {
   name: string;
 }
 
+export interface DatabaseTableColumn {
+  name: string;
+  type: string;
+  nullable: boolean;
+  pk: boolean;
+}
+
+export interface DatabaseTableSchema {
+  columns: DatabaseTableColumn[];
+  pk: string[];
+}
+
 export default class DatabaseDriver {
   protected client: hrana.WsClient;
   protected stream?: hrana.WsStream;
@@ -65,6 +77,24 @@ export default class DatabaseDriver {
           name: row.name as string,
         };
       });
+  }
+
+  async getTableSchema(tableName: string): Promise<DatabaseTableSchema> {
+    const sql = "SELECT * FROM pragma_table_info(?);";
+    const binding = [tableName];
+    const result = await this.query([sql, binding]);
+
+    const columns: DatabaseTableColumn[] = result.rows.map((row) => ({
+      name: row.name?.toString() ?? "",
+      type: row.type?.toString() ?? "",
+      nullable: !row.notnull,
+      pk: !!row.pk,
+    }));
+
+    return {
+      columns,
+      pk: columns.filter((col) => col.pk).map((col) => col.name),
+    };
   }
 
   async selectFromTable(

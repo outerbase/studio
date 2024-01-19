@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import openNewQuery from "@/messages/openNewQuery";
 import { LucidePlus, LucideX } from "lucide-react";
 
 export interface WindowTabItemProps {
@@ -25,7 +26,13 @@ export default function WindowTabs({
     <div className="flex flex-col w-full h-full">
       <div className="flex-grow-0 flex-shrink-0">
         <div className="flex p-2 gap-2">
-          <Button size={"sm"} variant={"outline"}>
+          <Button
+            size={"sm"}
+            variant={"outline"}
+            onClick={() => {
+              openNewQuery();
+            }}
+          >
             <LucidePlus className="w-4 h-4" />
           </Button>
           {tabs.map((tab, idx) => {
