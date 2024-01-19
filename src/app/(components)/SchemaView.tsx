@@ -5,8 +5,14 @@ import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { DatabaseSchemaItem } from "@/drivers/DatabaseDriver";
 import { cn } from "@/lib/utils";
 import { openTabs } from "@/messages/openTabs";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { LucideIcon, Table2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface SchemaViewItemProps {
   icon: LucideIcon;
@@ -41,6 +47,8 @@ export default function SchemaView() {
   const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
   const { databaseDriver } = useDatabaseDriver();
 
+  const contextRef = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
     databaseDriver.getTableList().then((tableList) => {
       setSchemaItems(tableList);
@@ -57,6 +65,38 @@ export default function SchemaView() {
           );
         })}
       </div>
+
+      <button
+        onClick={() => {
+          if (contextRef.current) {
+            console.log(contextRef.current);
+            var ev1 = new MouseEvent("contextmenu", {
+              bubbles: true,
+              cancelable: false,
+              view: window,
+              button: 2,
+              buttons: 2,
+              clientX: 500,
+              clientY: 200,
+            });
+            contextRef.current.dispatchEvent(ev1);
+          }
+        }}
+      >
+        Control the trigger
+      </button>
+
+      <ContextMenu onOpenChange={console.log}>
+        <ContextMenuTrigger ref={contextRef}>
+          <div>Right click</div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>Profile</ContextMenuItem>
+          <ContextMenuItem>Billing</ContextMenuItem>
+          <ContextMenuItem>Team</ContextMenuItem>
+          <ContextMenuItem>Subscription</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     </ScrollArea>
   );
 }

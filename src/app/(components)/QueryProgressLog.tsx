@@ -72,7 +72,7 @@ export default function QueryProgressLog({
                   ago.
                 </div>
               )}
-              <code className="p-2 bg-yellow-50 block mt-2 overflow-x-scroll w-full text-sm">
+              <code className="p-2 bg-yellow-50 block mt-2 overflow-x-auto w-full text-sm">
                 <pre>{detail.sql}</pre>
               </code>
             </div>
