@@ -11,6 +11,7 @@ import {
   OpenContextMenuList,
   openContextMenuFromEvent,
 } from "@/messages/openContextMenu";
+import OpacityLoading from "./OpacityLoading";
 
 interface SchemaViewItemProps {
   icon: LucideIcon;
@@ -60,10 +61,13 @@ function SchemaViewmItem({
 export default function SchemaView() {
   const { updateTableList } = useAutoComplete();
   const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
+  const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const { databaseDriver } = useDatabaseDriver();
 
   const fetchSchema = useCallback(() => {
+    setLoading(true);
+
     databaseDriver.getTableList().then((tableList) => {
       const sortedTableList = [...tableList];
       sortedTableList.sort((a, b) => {
@@ -72,6 +76,7 @@ export default function SchemaView() {
 
       setSchemaItems(sortedTableList);
       updateTableList(tableList.map((table) => table.name));
+      setLoading(false);
     });
   }, [databaseDriver, updateTableList]);
 
@@ -95,6 +100,7 @@ export default function SchemaView() {
       className="h-full select-none"
       onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
     >
+      {loading && <OpacityLoading />}
       <div className="flex flex-col p-2 pr-4">
         {schemaItems.map((item, schemaIndex) => {
           return (
