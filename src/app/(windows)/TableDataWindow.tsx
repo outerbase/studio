@@ -37,6 +37,8 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const [finalOffset, setFinalOffset] = useState(0);
   const [finalLimit, setFinalLimit] = useState(50);
 
+  const [revision, setRevision] = useState(1);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -55,13 +57,20 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     };
 
     fetchData().then().catch(console.error);
-  }, [databaseDriver, tableName, updateTableSchema, finalOffset, finalLimit]);
+  }, [
+    databaseDriver,
+    tableName,
+    updateTableSchema,
+    finalOffset,
+    finalLimit,
+    revision,
+  ]);
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       <div className="flex-shrink-0 flex-grow-0">
         <div className="flex p-1 gap-1">
-          <Button variant={"ghost"} size={"sm"}>
+          <Button variant={"ghost"} size={"sm"} disabled>
             <LucideSave className="w-4 h-4 mr-2" />
             Save
           </Button>
@@ -70,6 +79,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             variant={"ghost"}
             size={"sm"}
             className="text-red-500 hover:text-red-500"
+            disabled
           >
             Discard Change
           </Button>
@@ -78,7 +88,12 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             <Separator orientation="vertical" />
           </div>
 
-          <Button variant={"ghost"} size={"sm"}>
+          <Button
+            variant={"ghost"}
+            size={"sm"}
+            onClick={() => setRevision((prev) => prev + 1)}
+            disabled={loading}
+          >
             <LucideRefreshCcw className="w-4 h-4 mr-2 text-green-600" />
             Refresh
           </Button>
@@ -87,7 +102,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             <Separator orientation="vertical" />
           </div>
 
-          <Button variant={"ghost"} size={"sm"}>
+          <Button variant={"ghost"} size={"sm"} disabled>
             <LucidePlusCircle className="w-4 h-4 mr-2 text-green-600" />
             Add
           </Button>
