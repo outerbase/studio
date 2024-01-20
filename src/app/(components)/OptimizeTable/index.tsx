@@ -13,6 +13,7 @@ export interface OptimizeTableHeaderProps {
   icon?: ReactElement;
   rightIcon?: ReactElement;
   tooltip?: string;
+  onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
 }
 
 export interface OptimizeTableHeaderWithIndexProps

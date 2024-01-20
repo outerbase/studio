@@ -5,23 +5,35 @@ import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { DatabaseSchemaItem } from "@/drivers/DatabaseDriver";
 import { cn } from "@/lib/utils";
 import { openTabs } from "@/messages/openTabs";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { LucideIcon, Table2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  OpenContextMenuList,
+  openContextMenuFromEvent,
+} from "@/messages/openContextMenu";
 
 interface SchemaViewItemProps {
   icon: LucideIcon;
   title: string;
+  selected: boolean;
+  onClick: () => void;
+  onContextMenu: React.MouseEventHandler;
 }
 
-function SchemaViewmItem({ icon: Icon, title }: SchemaViewItemProps) {
+function SchemaViewmItem({
+  icon: Icon,
+  title,
+  onClick,
+  selected,
+  onContextMenu,
+}: SchemaViewItemProps) {
   return (
     <div
+      onMouseDown={onClick}
+      onContextMenu={(e) => {
+        onContextMenu(e);
+        onClick();
+      }}
       onDoubleClick={() => {
         openTabs({
           key: "table_" + title,
@@ -31,7 +43,10 @@ function SchemaViewmItem({ icon: Icon, title }: SchemaViewItemProps) {
         });
       }}
       className={cn(
-        buttonVariants({ variant: "ghost", size: "sm" }),
+        buttonVariants({
+          variant: selected ? "default" : "ghost",
+          size: "sm",
+        }),
         "justify-start",
         "cursor-pointer"
       )}
@@ -45,58 +60,57 @@ function SchemaViewmItem({ icon: Icon, title }: SchemaViewItemProps) {
 export default function SchemaView() {
   const { updateTableList } = useAutoComplete();
   const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const { databaseDriver } = useDatabaseDriver();
 
-  const contextRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
+  const fetchSchema = useCallback(() => {
     databaseDriver.getTableList().then((tableList) => {
-      setSchemaItems(tableList);
+      const sortedTableList = [...tableList];
+      sortedTableList.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+
+      setSchemaItems(sortedTableList);
       updateTableList(tableList.map((table) => table.name));
     });
   }, [databaseDriver, updateTableList]);
 
+  const prepareContextMenu = useCallback(
+    (tableName?: string) => {
+      return [
+        { title: "Copy Name", disabled: !tableName },
+        { separator: true },
+        { title: "Refresh", onClick: fetchSchema },
+      ] as OpenContextMenuList;
+    },
+    [fetchSchema]
+  );
+
+  useEffect(() => {
+    fetchSchema();
+  }, [fetchSchema]);
+
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea
+      className="h-full select-none"
+      onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
+    >
       <div className="flex flex-col p-2 pr-4">
-        {schemaItems.map((item) => {
+        {schemaItems.map((item, schemaIndex) => {
           return (
-            <SchemaViewmItem key={item.name} title={item.name} icon={Table2} />
+            <SchemaViewmItem
+              onContextMenu={openContextMenuFromEvent(
+                prepareContextMenu(item.name)
+              )}
+              key={item.name}
+              title={item.name}
+              icon={Table2}
+              selected={schemaIndex === selectedIndex}
+              onClick={() => setSelectedIndex(schemaIndex)}
+            />
           );
         })}
       </div>
-
-      <button
-        onClick={() => {
-          if (contextRef.current) {
-            console.log(contextRef.current);
-            var ev1 = new MouseEvent("contextmenu", {
-              bubbles: true,
-              cancelable: false,
-              view: window,
-              button: 2,
-              buttons: 2,
-              clientX: 500,
-              clientY: 200,
-            });
-            contextRef.current.dispatchEvent(ev1);
-          }
-        }}
-      >
-        Control the trigger
-      </button>
-
-      <ContextMenu onOpenChange={console.log}>
-        <ContextMenuTrigger ref={contextRef}>
-          <div>Right click</div>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem>Profile</ContextMenuItem>
-          <ContextMenuItem>Billing</ContextMenuItem>
-          <ContextMenuItem>Team</ContextMenuItem>
-          <ContextMenuItem>Subscription</ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
     </ScrollArea>
   );
 }

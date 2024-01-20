@@ -18,6 +18,11 @@ export default function TableHeader({
       key={header.name}
       title={header.tooltip}
       className={sticky ? styles.stickyColumn : undefined}
+      onContextMenu={(e) => {
+        if (header.onContextMenu) {
+          header.onContextMenu(e, idx);
+        }
+      }}
     >
       {header.icon && (
         <div className={styles.tableHeaderIcon}>{header.icon}</div>

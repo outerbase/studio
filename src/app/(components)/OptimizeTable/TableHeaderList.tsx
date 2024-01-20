@@ -1,5 +1,5 @@
-import { OptimizeTableHeaderWithIndexProps } from '.';
-import TableHeader from './TableHeader';
+import { OptimizeTableHeaderWithIndexProps } from ".";
+import TableHeader from "./TableHeader";
 
 export default function TableHeaderList({
   headers,

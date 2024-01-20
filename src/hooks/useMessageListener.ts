@@ -10,14 +10,8 @@ export default function useMessageListener<T = unknown>(
 
   useEffect(() => {
     if (window) {
-      const listener = (e: MessageEvent<{ channel?: string; data?: T }>) => {
-        if (e.data?.channel === channel) {
-          callback(e.data.data);
-        }
-      };
-
-      window.addEventListener("message", listener);
-      return () => window.removeEventListener("message", listener);
+      window.internalPubSub.addListener(channel, callback);
+      return () => window.internalPubSub.removeListener(channel, callback);
     }
   }, [channel, callback]);
 }

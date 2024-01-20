@@ -67,7 +67,7 @@ export default function QueryProgressLog({
                 <div className="text-sm">
                   Executing this query&nbsp;
                   <strong>
-                    {formatTimeAgo(currentTime - detail.start)}
+                    {formatTimeAgo(Date.now() - detail.start)}
                   </strong>{" "}
                   ago.
                 </div>

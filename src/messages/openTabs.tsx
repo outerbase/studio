@@ -8,8 +8,5 @@ export interface OpenTabsProps {
 }
 
 export function openTabs(props: OpenTabsProps) {
-  return window.postMessage({
-    channel: MessageChannelName.OPEN_NEW_TAB,
-    data: props,
-  });
+  return window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
 }
