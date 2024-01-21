@@ -53,7 +53,7 @@ export default function QueryWindow() {
           </div>
           <div className="flex-grow-0 flex-shrink-0">
             <Separator />
-            <div className="flex gap-2 p-2">
+            <div className="flex gap-2 p-1">
               <Button variant={"ghost"} onClick={onRunClicked}>
                 <LucidePlay className="w-4 h-4 mr-2" />
                 Run
@@ -63,7 +63,7 @@ export default function QueryWindow() {
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={80} style={{ position: "relative" }}>
+      <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
         {result && <ResultTable data={result} />}
         {!result && progress && (
           <div className="w-full h-full overflow-y-auto overflow-x-hidden">

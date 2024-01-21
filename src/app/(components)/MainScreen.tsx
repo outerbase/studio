@@ -3,11 +3,11 @@ import DatabaseDriver from "@/drivers/DatabaseDriver";
 import { useMemo, useEffect, useState, useLayoutEffect } from "react";
 import DatabaseGui from "./DatabaseGui";
 import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
-import { ConnectionConfigScreen } from "./ConnectionConfigScreen";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./ContentMenuHandler";
 import InternalPubSub from "@/lib/internal-pubsub";
+import { useParams } from "next/navigation";
 
 function MainConnection({
   credential,
@@ -35,17 +35,11 @@ function MainConnection({
 }
 
 export default function MainScreen() {
-  const [credential, setCredential] = useState<{
-    url: string;
-    token: string;
-  } | null>(
-    process.env.NEXT_PUBLIC_TESTING_DATABASE_URL
-      ? {
-          url: process.env.NEXT_PUBLIC_TESTING_DATABASE_URL as string,
-          token: process.env.NEXT_PUBLIC_TESTING_DATABASE_TOKEN as string,
-        }
-      : null
-  );
+  const { session_id: sessionId } = useParams<{ session_id: string }>();
+
+  const sessionCredential: { url: string; token: string } = useMemo(() => {
+    return JSON.parse(sessionStorage.getItem("sess_" + sessionId) ?? "{}");
+  }, [sessionId]);
 
   /**
    * We use useLayoutEffect because it executes before
@@ -58,18 +52,14 @@ export default function MainScreen() {
     window.internalPubSub = new InternalPubSub();
   }, []);
 
-  return credential ? (
+  return (
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
-          <MainConnection credential={credential} />
+          <MainConnection credential={sessionCredential} />
         </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
     </>
-  ) : (
-    <div className="flex flex-wrap w-screen h-screen justify-center content-center">
-      <ConnectionConfigScreen onConnect={setCredential} />
-    </div>
   );
 }

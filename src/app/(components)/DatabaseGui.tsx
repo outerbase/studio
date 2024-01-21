@@ -12,6 +12,7 @@ import useMessageListener from "@/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
 import QueryWindow from "@/app/(windows)/QueryWindow";
+import TopNavigation from "./TopNavigation";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -73,7 +74,15 @@ export default function DatabaseGui() {
   );
 
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-screen flex flex-col">
+      <div className="flex border-b">
+        <div className="bg-blue-700 pr-2 pl-2 flex items-center text-white mr-2">
+          LibSQL <strong>Studio</strong>
+        </div>
+        <div className="p-1">
+          <TopNavigation />
+        </div>
+      </div>
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel
           minSize={5}
