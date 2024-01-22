@@ -1,6 +1,11 @@
 .cell {
   line-height: 35px;
   height: 35px;
+  border: 1px solid transparent;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.focus {
+  border: 1px solid #e00;
 }

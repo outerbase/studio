@@ -22,19 +22,48 @@ export interface OptimizeTableHeaderWithIndexProps
   sticky: boolean;
 }
 
-interface OptimizeTableProps {
-  data: unknown[];
-  stickyHeaderIndex?: number;
-  headers: OptimizeTableHeaderProps[];
-  renderCell: (y: number, x: number) => ReactElement;
-  rowHeight: number;
-  renderAhead: number;
+export interface OptimizeTableCellRenderProps {
+  y: number;
+  x: number;
+  isFocus: boolean;
+}
 
-  newRowsIndex?: number[];
-  removedRowsIndex?: number[];
+interface TableCellListCommonProps {
+  renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
+  rowHeight: number;
+  data: unknown[];
+  focusIndex?: [number, number];
+  onFocusIndexChange?: (cellIndex: [number, number]) => void;
 
   selectedRowsIndex: number[]; // Array of selected row indices
+}
+
+export interface OptimizeTableProps extends TableCellListCommonProps {
+  stickyHeaderIndex?: number;
+  headers: OptimizeTableHeaderProps[];
+  renderAhead: number;
+  newRowsIndex?: number[];
+  removedRowsIndex?: number[];
   onSelectedRowsIndexChanged: (selectedRows: number[]) => void; // Callback for row selection changes
+}
+
+interface RenderCellListProps extends TableCellListCommonProps {
+  hasSticky: boolean;
+  onHeaderResize: (idx: number, newWidth: number) => void;
+  headerIndex: number[];
+  customStyles?: React.CSSProperties;
+  headers: OptimizeTableHeaderWithIndexProps[];
+  removedRowsIndexSet: Set<number>;
+  newRowsIndexSet: Set<number>;
+  rowEnd: number;
+  rowStart: number;
+  headerSizes: number[];
+  colEnd: number;
+  colStart: number;
+}
+
+function hasFocus(y: number, x: number, focus?: [number, number]) {
+  return !!focus && focus[0] === y && focus[1] === x;
 }
 
 function renderCellList({
@@ -54,24 +83,9 @@ function renderCellList({
   rowHeight,
   onHeaderResize,
   data,
-}: {
-  hasSticky: boolean;
-  onHeaderResize: (idx: number, newWidth: number) => void;
-  headerIndex: number[];
-  customStyles?: React.CSSProperties;
-  headers: OptimizeTableHeaderWithIndexProps[];
-  renderCell: (y: number, x: number) => ReactElement;
-  removedRowsIndexSet: Set<number>;
-  newRowsIndexSet: Set<number>;
-  rowEnd: number;
-  rowStart: number;
-  selectedRowsIndex: number[];
-  headerSizes: number[];
-  colEnd: number;
-  colStart: number;
-  rowHeight: number;
-  data: unknown[];
-}) {
+  focusIndex,
+  onFocusIndexChange,
+}: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
 
   const templateSizes = headersWithIndex
@@ -107,8 +121,25 @@ function renderCellList({
       >
         {hasSticky && (
           <td className={styles.stickyColumn}>
-            <div className={styles.tableCellContent}>
-              {renderCell(absoluteRowIndex, headersWithIndex[0].index)}
+            <div
+              className={styles.tableCellContent}
+              onMouseDown={() => {
+                if (onFocusIndexChange)
+                  onFocusIndexChange([
+                    absoluteRowIndex,
+                    headersWithIndex[0].index,
+                  ]);
+              }}
+            >
+              {renderCell({
+                y: absoluteRowIndex,
+                x: headersWithIndex[0].index,
+                isFocus: hasFocus(
+                  absoluteRowIndex,
+                  headersWithIndex[0].index,
+                  focusIndex
+                ),
+              })}
             </div>
           </td>
         )}
@@ -126,8 +157,18 @@ function renderCellList({
 
           return (
             <td key={cellIndex + colStart}>
-              <div className={styles.tableCellContent}>
-                {renderCell(absoluteRowIndex, header.index)}
+              <div
+                className={styles.tableCellContent}
+                onMouseDown={() => {
+                  if (onFocusIndexChange)
+                    onFocusIndexChange([absoluteRowIndex, header.index]);
+                }}
+              >
+                {renderCell({
+                  y: absoluteRowIndex,
+                  x: header.index,
+                  isFocus: hasFocus(absoluteRowIndex, header.index, focusIndex),
+                })}
               </div>
             </td>
           );
@@ -172,6 +213,8 @@ export default function OptimizeTable({
   removedRowsIndex,
   selectedRowsIndex,
   onSelectedRowsIndexChanged,
+  focusIndex,
+  onFocusIndexChange,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -206,13 +249,15 @@ export default function OptimizeTable({
       removedRowsIndex,
     });
 
-  const allHeaderIndex = [
-    ...(stickyHeaderIndex !== undefined ? [stickyHeaderIndex] : []),
-    ...new Array(headers.length)
-      .fill(false)
-      .map((_, idx) => idx)
-      .filter((idx) => idx !== stickyHeaderIndex),
-  ];
+  const allHeaderIndex = useMemo(() => {
+    return [
+      ...(stickyHeaderIndex !== undefined ? [stickyHeaderIndex] : []),
+      ...new Array(headers.length)
+        .fill(false)
+        .map((_, idx) => idx)
+        .filter((idx) => idx !== stickyHeaderIndex),
+    ];
+  }, [headers.length, stickyHeaderIndex]);
 
   return useMemo(() => {
     const common = {
@@ -231,6 +276,8 @@ export default function OptimizeTable({
       onHeaderResize,
       data,
       hasSticky: stickyHeaderIndex !== undefined,
+      focusIndex,
+      onFocusIndexChange,
     };
 
     return (
@@ -263,5 +310,9 @@ export default function OptimizeTable({
     newRowsIndexSet,
     removedRowsIndexSet,
     stickyHeaderIndex,
+    focusIndex,
+    onFocusIndexChange,
+    allHeaderIndex,
+    handleRowClick,
   ]);
 }

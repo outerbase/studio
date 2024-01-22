@@ -1,5 +1,6 @@
 import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
+  OptimizeTableCellRenderProps,
   OptimizeTableHeaderProps,
 } from "@/app/(components)/OptimizeTable";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
@@ -13,13 +14,10 @@ interface ResultTableProps {
   tableName?: string;
 }
 
-export default function ResultTable({
-  data,
-  tableName,
-  primaryKey,
-}: ResultTableProps) {
+export default function ResultTable({ data, primaryKey }: ResultTableProps) {
   const [selectedRowsIndex, setSelectedRowsIndex] = useState<number[]>([]);
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
+  const [focusIndex, setFocusIndex] = useState<[number, number]>();
 
   const handleSelectedRowsChange = (selectedRows: number[]) => {
     setSelectedRowsIndex(selectedRows);
@@ -49,12 +47,12 @@ export default function ResultTable({
           ]),
         } as OptimizeTableHeaderProps)
     );
-  }, [data, primaryKey, stickyHeaderIndex, tableName]);
+  }, [data, primaryKey, stickyHeaderIndex]);
 
   const renderCell = useCallback(
-    (y: number, x: number) => {
+    ({ y, x, isFocus }: OptimizeTableCellRenderProps) => {
       if (data.rows[y]) {
-        return <TextCell value={data.rows[y][x] as string} />;
+        return <TextCell value={data.rows[y][x] as string} focus={isFocus} />;
       }
       return <TextCell value={""} />;
     },
@@ -63,6 +61,8 @@ export default function ResultTable({
 
   return (
     <OptimizeTable
+      focusIndex={focusIndex}
+      onFocusIndexChange={setFocusIndex}
       stickyHeaderIndex={stickyHeaderIndex}
       headers={headerMemo}
       data={data.rows}

@@ -4,6 +4,7 @@
   overflow: auto;
   position: relative;
   font-size: 12px;
+  user-select: none;
 }
 
 .tableContainer table {
