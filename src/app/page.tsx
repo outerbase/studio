@@ -1,11 +1,18 @@
 import { Metadata } from "next";
-import { ConnectionConfigScreen } from "./(components)/ConnectionConfigScreen";
+import dynamic from "next/dynamic";
 
 export const metadata: Metadata = {
   title: "LibSQL Studio - Fast and powerful LibSQL client on your browser",
   description:
     "LibSQL Studio - Fast and powerful LibSQL client on your browser",
 };
+
+const ConnectionConfigScreen = dynamic(
+  () => import("./(components)/ConnectionConfigScreen"),
+  {
+    ssr: false,
+  }
+);
 
 export default function Home() {
   return (

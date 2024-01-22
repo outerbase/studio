@@ -7,7 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./ContentMenuHandler";
 import InternalPubSub from "@/lib/internal-pubsub";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { Metadata } from "next";
 
 function MainConnection({
   credential,
@@ -34,12 +35,21 @@ function MainConnection({
   );
 }
 
-export default function MainScreen() {
-  const { session_id: sessionId } = useParams<{ session_id: string }>();
+function InvalidSession() {
+  const router = useRouter();
 
+  useEffect(() => {
+    router.push("/");
+  }, [router]);
+
+  return <div></div>;
+}
+
+export default function MainScreen() {
+  const router = useRouter();
   const sessionCredential: { url: string; token: string } = useMemo(() => {
-    return JSON.parse(sessionStorage.getItem("sess_" + sessionId) ?? "{}");
-  }, [sessionId]);
+    return JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+  }, []);
 
   /**
    * We use useLayoutEffect because it executes before
@@ -50,9 +60,15 @@ export default function MainScreen() {
   useLayoutEffect(() => {
     console.info("Injecting message into window object");
     window.internalPubSub = new InternalPubSub();
-  }, []);
+  }, [sessionCredential, router]);
 
-  return (
+  useEffect(() => {
+    if (sessionCredential.url) {
+      document.title = sessionCredential.url + " - LibSQL Studio";
+    }
+  }, [sessionCredential]);
+
+  return sessionCredential?.url ? (
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
@@ -61,5 +77,7 @@ export default function MainScreen() {
       </AutoCompleteProvider>
       <ContextMenuHandler />
     </>
+  ) : (
+    <InvalidSession />
   );
 }

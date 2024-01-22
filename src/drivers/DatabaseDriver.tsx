@@ -64,6 +64,7 @@ export default class DatabaseDriver {
   }
 
   close() {
+    if (this.stream) this.stream.close();
     this.client.close();
   }
 
