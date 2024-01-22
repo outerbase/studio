@@ -1,6 +1,6 @@
 import * as hrana from "@libsql/hrana-client";
 import { useState } from "react";
-import { splitQuery } from "dbgate-query-splitter";
+import { splitQuery, sqliteSplitterOptions } from "dbgate-query-splitter";
 import { LucidePlay } from "lucide-react";
 import SqlEditor from "@/components/SqlEditor";
 import {
@@ -25,9 +25,10 @@ export default function QueryWindow() {
   const [progress, setProgress] = useState<MultipleQueryProgress>();
 
   const onRunClicked = () => {
-    const statements = splitQuery(code).map((statement) =>
-      statement.toString()
-    );
+    const statements = splitQuery(code, {
+      ...sqliteSplitterOptions,
+      adaptiveGoSplit: true,
+    }).map((statement) => statement.toString());
 
     // Reset the result and make a new query
     setResult(undefined);
