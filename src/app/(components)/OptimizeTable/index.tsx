@@ -1,7 +1,14 @@
-import { useState, ReactElement, useRef, useMemo } from "react";
+import {
+  useState,
+  ReactElement,
+  useRef,
+  useMemo,
+  SetStateAction,
+  Dispatch,
+  useCallback,
+} from "react";
 import styles from "./styles.module.css";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
-import useTableSelectionHandler from "./useTableSelectionHandler";
 import TableFakeBodyPadding from "./TableFakeBodyPadding";
 import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
@@ -25,7 +32,7 @@ export interface OptimizeTableHeaderWithIndexProps
 export interface OptimizeTableCellRenderProps {
   y: number;
   x: number;
-  isFocus: boolean;
+  state: OptimizeTableInternalState;
 }
 
 interface TableCellListCommonProps {
@@ -34,17 +41,19 @@ interface TableCellListCommonProps {
   data: unknown[];
   focusIndex?: [number, number];
   onFocusIndexChange?: (cellIndex: [number, number]) => void;
-
-  selectedRowsIndex: number[]; // Array of selected row indices
 }
 
 export interface OptimizeTableProps extends TableCellListCommonProps {
   stickyHeaderIndex?: number;
   headers: OptimizeTableHeaderProps[];
   renderAhead: number;
-  newRowsIndex?: number[];
-  removedRowsIndex?: number[];
-  onSelectedRowsIndexChanged: (selectedRows: number[]) => void; // Callback for row selection changes
+}
+
+export interface OptimizeTableInternalState {
+  selectedRows: Set<number>;
+  removedRows: Set<number>;
+  newRows: Set<number>;
+  focus: { y: number; x: number } | null;
 }
 
 interface RenderCellListProps extends TableCellListCommonProps {
@@ -53,17 +62,32 @@ interface RenderCellListProps extends TableCellListCommonProps {
   headerIndex: number[];
   customStyles?: React.CSSProperties;
   headers: OptimizeTableHeaderWithIndexProps[];
-  removedRowsIndexSet: Set<number>;
-  newRowsIndexSet: Set<number>;
   rowEnd: number;
   rowStart: number;
   headerSizes: number[];
   colEnd: number;
   colStart: number;
+  internalState: OptimizeTableInternalState;
+  rerender: () => void;
 }
 
-function hasFocus(y: number, x: number, focus?: [number, number]) {
-  return !!focus && focus[0] === y && focus[1] === x;
+function handleTableCellMouseDown({
+  internalState,
+  y,
+  x,
+  rerender,
+}: {
+  y: number;
+  x: number;
+  ctrl?: boolean;
+  shift?: boolean;
+  internalState: OptimizeTableInternalState;
+  rerender: () => void;
+}) {
+  internalState.selectedRows.clear();
+  internalState.selectedRows.add(y);
+  internalState.focus = { y, x };
+  rerender();
 }
 
 function renderCellList({
@@ -73,18 +97,15 @@ function renderCellList({
   headerSizes,
   headers,
   renderCell,
-  newRowsIndexSet,
-  removedRowsIndexSet,
   rowEnd,
   rowStart,
-  selectedRowsIndex,
   colEnd,
   colStart,
   rowHeight,
   onHeaderResize,
+  internalState,
   data,
-  focusIndex,
-  onFocusIndexChange,
+  rerender,
 }: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
 
@@ -105,11 +126,11 @@ function renderCellList({
 
     let rowClass = undefined;
 
-    if (newRowsIndexSet.has(absoluteRowIndex)) {
+    if (internalState.newRows.has(absoluteRowIndex)) {
       rowClass = styles.newRow;
-    } else if (removedRowsIndexSet.has(absoluteRowIndex)) {
+    } else if (internalState.removedRows.has(absoluteRowIndex)) {
       rowClass = styles.removedRow;
-    } else if (selectedRowsIndex.includes(absoluteRowIndex)) {
+    } else if (internalState.selectedRows.has(absoluteRowIndex)) {
       rowClass = styles.selectedRow;
     }
 
@@ -124,21 +145,18 @@ function renderCellList({
             <div
               className={styles.tableCellContent}
               onMouseDown={() => {
-                if (onFocusIndexChange)
-                  onFocusIndexChange([
-                    absoluteRowIndex,
-                    headersWithIndex[0].index,
-                  ]);
+                handleTableCellMouseDown({
+                  y: absoluteRowIndex,
+                  x: headersWithIndex[0].index,
+                  internalState,
+                  rerender,
+                });
               }}
             >
               {renderCell({
                 y: absoluteRowIndex,
                 x: headersWithIndex[0].index,
-                isFocus: hasFocus(
-                  absoluteRowIndex,
-                  headersWithIndex[0].index,
-                  focusIndex
-                ),
+                state: internalState,
               })}
             </div>
           </td>
@@ -160,14 +178,18 @@ function renderCellList({
               <div
                 className={styles.tableCellContent}
                 onMouseDown={() => {
-                  if (onFocusIndexChange)
-                    onFocusIndexChange([absoluteRowIndex, header.index]);
+                  handleTableCellMouseDown({
+                    y: absoluteRowIndex,
+                    x: header.index,
+                    internalState,
+                    rerender,
+                  });
                 }}
               >
                 {renderCell({
                   y: absoluteRowIndex,
                   x: header.index,
-                  isFocus: hasFocus(absoluteRowIndex, header.index, focusIndex),
+                  state: internalState,
                 })}
               </div>
             </td>
@@ -209,14 +231,24 @@ export default function OptimizeTable({
   renderCell,
   rowHeight,
   renderAhead,
-  newRowsIndex,
-  removedRowsIndex,
-  selectedRowsIndex,
-  onSelectedRowsIndexChanged,
-  focusIndex,
-  onFocusIndexChange,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const internalState = useMemo<OptimizeTableInternalState>(() => {
+    return {
+      selectedRows: new Set(),
+      removedRows: new Set(),
+      newRows: new Set(),
+      focus: null,
+    };
+  }, []);
+
+  // This is our trigger re-render the whole table
+  const [revision, setRevision] = useState(1);
+
+  const rerender = useCallback(() => {
+    setRevision((prev) => prev + 1);
+  }, [setRevision]);
 
   const [headerSizes] = useState(() => {
     return headers.map((header) => header.initialSize);
@@ -241,14 +273,6 @@ export default function OptimizeTable({
 
   const { rowStart, rowEnd, colEnd, colStart } = visibileRange;
 
-  const { handleRowClick, newRowsIndexSet, removedRowsIndexSet } =
-    useTableSelectionHandler({
-      onSelectedRowsIndexChanged,
-      selectedRowsIndex,
-      newRowsIndex,
-      removedRowsIndex,
-    });
-
   const allHeaderIndex = useMemo(() => {
     return [
       ...(stickyHeaderIndex !== undefined ? [stickyHeaderIndex] : []),
@@ -264,28 +288,21 @@ export default function OptimizeTable({
       headerSizes,
       headers: headerWithIndex,
       renderCell,
-      newRowsIndexSet,
-      removedRowsIndexSet,
       rowEnd,
       rowStart,
       colEnd,
       colStart,
-      handleRowClick,
-      selectedRowsIndex,
       rowHeight,
       onHeaderResize,
       data,
       hasSticky: stickyHeaderIndex !== undefined,
-      focusIndex,
-      onFocusIndexChange,
+      internalState,
+      rerender,
+      revision,
     };
 
     return (
-      <div
-        ref={containerRef}
-        className={styles.tableContainer}
-        onMouseDown={handleRowClick}
-      >
+      <div ref={containerRef} className={styles.tableContainer}>
         <div
           style={{
             height: (data.length + 1) * rowHeight + 10,
@@ -306,13 +323,10 @@ export default function OptimizeTable({
     rowHeight,
     headerWithIndex,
     onHeaderResize,
-    selectedRowsIndex,
-    newRowsIndexSet,
-    removedRowsIndexSet,
     stickyHeaderIndex,
-    focusIndex,
-    onFocusIndexChange,
     allHeaderIndex,
-    handleRowClick,
+    internalState,
+    rerender,
+    revision,
   ]);
 }

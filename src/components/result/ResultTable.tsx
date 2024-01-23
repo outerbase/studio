@@ -15,13 +15,8 @@ interface ResultTableProps {
 }
 
 export default function ResultTable({ data, primaryKey }: ResultTableProps) {
-  const [selectedRowsIndex, setSelectedRowsIndex] = useState<number[]>([]);
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
   const [focusIndex, setFocusIndex] = useState<[number, number]>();
-
-  const handleSelectedRowsChange = (selectedRows: number[]) => {
-    setSelectedRowsIndex(selectedRows);
-  };
 
   const headerMemo = useMemo(() => {
     return data.columnNames.map(
@@ -50,7 +45,10 @@ export default function ResultTable({ data, primaryKey }: ResultTableProps) {
   }, [data, primaryKey, stickyHeaderIndex]);
 
   const renderCell = useCallback(
-    ({ y, x, isFocus }: OptimizeTableCellRenderProps) => {
+    ({ y, x, state }: OptimizeTableCellRenderProps) => {
+      const isFocus =
+        !!state.focus && state.focus.x === x && state.focus.y === y;
+
       if (data.rows[y]) {
         return <TextCell value={data.rows[y][x] as string} focus={isFocus} />;
       }
@@ -69,8 +67,6 @@ export default function ResultTable({ data, primaryKey }: ResultTableProps) {
       renderAhead={20}
       renderCell={renderCell}
       rowHeight={35}
-      selectedRowsIndex={selectedRowsIndex}
-      onSelectedRowsIndexChanged={handleSelectedRowsChange}
     />
   );
 }
