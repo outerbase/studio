@@ -1,12 +1,4 @@
-import {
-  useState,
-  ReactElement,
-  useRef,
-  useMemo,
-  SetStateAction,
-  Dispatch,
-  useCallback,
-} from "react";
+import { useState, ReactElement, useRef, useMemo, useCallback } from "react";
 import styles from "./styles.module.css";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
 import TableFakeBodyPadding from "./TableFakeBodyPadding";
@@ -77,6 +69,8 @@ function handleTableCellMouseDown({
   internalState,
   y,
   x,
+  ctrl,
+  shift,
   rerender,
 }: {
   y: number;
@@ -86,8 +80,19 @@ function handleTableCellMouseDown({
   internalState: OptimizeTableInternalState;
   rerender: () => void;
 }) {
-  internalState.selectedRows.clear();
-  internalState.selectedRows.add(y);
+  if (ctrl) {
+    // Multiple select
+    if (internalState.selectedRows.has(y)) {
+      internalState.selectedRows.delete(y);
+    } else {
+      internalState.selectedRows.add(y);
+    }
+  } else {
+    // Single select
+    internalState.selectedRows.clear();
+    internalState.selectedRows.add(y);
+  }
+
   internalState.focus = { y, x };
   rerender();
 }
@@ -107,7 +112,6 @@ function renderCellList({
   onHeaderResize,
   internalState,
   data,
-  onContextMenu,
   rerender,
 }: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
@@ -118,6 +122,21 @@ function renderCellList({
 
   const onHeaderSizeWithRemap = (idx: number, newWidth: number) => {
     onHeaderResize(headerSizes[headersWithIndex[idx].index], newWidth);
+  };
+
+  const handleCellClicked = (y: number, x: number) => {
+    return (e: React.MouseEvent) => {
+      if (e.button !== 2) {
+        handleTableCellMouseDown({
+          y,
+          x,
+          internalState,
+          ctrl: e.ctrlKey || e.metaKey,
+          shift: e.shiftKey,
+          rerender,
+        });
+      }
+    };
   };
 
   const windowArray = new Array(rowEnd - rowStart)
@@ -146,22 +165,10 @@ function renderCellList({
         {hasSticky && (
           <td
             className={styles.stickyColumn}
-            onContextMenu={() => {
-              handleTableCellMouseDown({
-                y: absoluteRowIndex,
-                x: headersWithIndex[0].index,
-                internalState,
-                rerender,
-              });
-            }}
-            onMouseDown={() => {
-              handleTableCellMouseDown({
-                y: absoluteRowIndex,
-                x: headersWithIndex[0].index,
-                internalState,
-                rerender,
-              });
-            }}
+            onMouseDown={handleCellClicked(
+              absoluteRowIndex,
+              headersWithIndex[0].index
+            )}
           >
             <div className={styles.tableCellContent}>
               {renderCell({
@@ -187,22 +194,7 @@ function renderCellList({
           return (
             <td
               key={cellIndex + colStart}
-              onContextMenu={() => {
-                handleTableCellMouseDown({
-                  y: absoluteRowIndex,
-                  x: header.index,
-                  internalState,
-                  rerender,
-                });
-              }}
-              onMouseDown={() => {
-                handleTableCellMouseDown({
-                  y: absoluteRowIndex,
-                  x: header.index,
-                  internalState,
-                  rerender,
-                });
-              }}
+              onMouseDown={handleCellClicked(absoluteRowIndex, header.index)}
             >
               <div className={styles.tableCellContent}>
                 {renderCell({
@@ -328,7 +320,6 @@ export default function OptimizeTable({
         className={styles.tableContainer}
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
-          console.log("context menu");
           e.preventDefault();
           e.stopPropagation();
         }}

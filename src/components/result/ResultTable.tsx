@@ -5,6 +5,7 @@ import OptimizeTable, {
   OptimizeTableInternalState,
 } from "@/app/(components)/OptimizeTable";
 import {
+  exportRowsToExcel,
   exportRowsToSqlInsert,
   selectArrayFromIndexList,
   transformResultToArray,
@@ -88,8 +89,25 @@ export default function ResultTable({
         {
           title: "Copy Row As",
           sub: [
-            { title: "Copy as Excel" },
-            { title: "Copy as JSON" },
+            {
+              title: "Copy as Excel",
+              onClick: () => {
+                const selectedRowsIndex = Array.from(
+                  state.selectedRows.values()
+                );
+
+                const headers = data.columnNames.map((column) => column ?? "");
+
+                if (selectedRowsIndex.length > 0) {
+                  const rows = transformResultToArray(
+                    headers,
+                    selectArrayFromIndexList(data.rows, selectedRowsIndex)
+                  );
+
+                  window.navigator.clipboard.writeText(exportRowsToExcel(rows));
+                }
+              },
+            },
             {
               title: "Copy as INSERT SQL",
               onClick: () => {

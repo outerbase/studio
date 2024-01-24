@@ -38,6 +38,19 @@ export function exportRowsToSqlInsert(
   return result.join("\r\n");
 }
 
-export function exportRowsToJson() {}
+function cellToExcelValue(value: unknown) {
+  if (value === undefined) return "";
+  if (value === null) return "NULL";
+  return value.toString();
+}
 
-export function exportRowsToExcel() {}
+export function exportRowsToExcel(records: unknown[][]) {
+  let result: string[] = [];
+
+  for (const record of records) {
+    const line = record.map(cellToExcelValue).join("\t");
+    result.push(line);
+  }
+
+  return result.join("\r\n");
+}

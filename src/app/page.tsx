@@ -16,8 +16,13 @@ const ConnectionConfigScreen = dynamic(
 
 export default function Home() {
   return (
-    <main className="flex flex-wrap w-screen h-screen justify-center content-center">
-      <ConnectionConfigScreen />
-    </main>
+    <>
+      <head>
+        <link rel="prefetch" href="/client" />
+      </head>
+      <main className="flex flex-wrap w-screen h-screen justify-center content-center">
+        <ConnectionConfigScreen />
+      </main>
+    </>
   );
 }
