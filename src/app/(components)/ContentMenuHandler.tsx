@@ -1,6 +1,9 @@
 import useMessageListener from "@/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
-import { OpenContextMenuOptions } from "@/messages/openContextMenu";
+import {
+  OpenContextMenuList,
+  OpenContextMenuOptions,
+} from "@/messages/openContextMenu";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -8,8 +11,60 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuCheckboxItem,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
 } from "@/components/ui/context-menu";
 import { useEffect, useRef, useState } from "react";
+import { LucideIcon } from "lucide-react";
+
+function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
+  return menu.map((item, menuIndex) => {
+    if (item.separator) {
+      return <ContextMenuSeparator key={menuIndex} />;
+    }
+
+    if (item.type === "check") {
+      return (
+        <ContextMenuCheckboxItem
+          key={menuIndex}
+          checked={item.checked}
+          onClick={item.onClick}
+          disabled={item.disabled}
+        >
+          {item.title}
+        </ContextMenuCheckboxItem>
+      );
+    }
+
+    if (item.sub) {
+      return (
+        <ContextMenuSub key={menuIndex}>
+          <ContextMenuSubTrigger inset>{item.title}</ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-48">
+            <ContextMenuList menu={item.sub} />
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+      );
+    }
+
+    return (
+      <ContextMenuItem
+        key={menuIndex}
+        onClick={item.onClick}
+        disabled={item.disabled}
+        inset={!item.icon}
+      >
+        {item.icon && <item.icon className="w-4 h-4 mr-2" />}
+        {item.title}
+        {item.shortcut && (
+          <ContextMenuShortcut>{item.shortcut}</ContextMenuShortcut>
+        )}
+      </ContextMenuItem>
+    );
+  });
+}
 
 export default function ContextMenuHandler() {
   const contextRef = useRef<HTMLSpanElement>(null);
@@ -51,35 +106,8 @@ export default function ContextMenuHandler() {
           <ContextMenuTrigger ref={contextRef}>
             <div></div>
           </ContextMenuTrigger>
-          <ContextMenuContent>
-            {menu.contextMenu.map((item, menuIndex) => {
-              if (item.separator) {
-                return <ContextMenuSeparator key={menuIndex} />;
-              }
-
-              if (item.type === "check") {
-                return (
-                  <ContextMenuCheckboxItem
-                    key={menuIndex}
-                    checked={item.checked}
-                    onClick={item.onClick}
-                    disabled={item.disabled}
-                  >
-                    {item.title}
-                  </ContextMenuCheckboxItem>
-                );
-              }
-
-              return (
-                <ContextMenuItem
-                  key={menuIndex}
-                  onClick={item.onClick}
-                  disabled={item.disabled}
-                >
-                  {item.title}
-                </ContextMenuItem>
-              );
-            })}
+          <ContextMenuContent className="w-64">
+            <ContextMenuList menu={menu.contextMenu} />
           </ContextMenuContent>
         </ContextMenu>
       ) : null}

@@ -1,13 +1,17 @@
 import React from "react";
 import { MessageChannelName } from "./const";
+import { LucideIcon } from "lucide-react";
 
 export type OpenContextMenuList = {
   type?: "check";
   checked?: boolean;
   title?: string;
+  shortcut?: string;
   separator?: boolean;
   disabled?: boolean;
   onClick?: () => void;
+  sub?: OpenContextMenuList;
+  icon?: LucideIcon;
 }[];
 
 export interface OpenContextMenuOptions {

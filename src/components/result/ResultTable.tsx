@@ -2,11 +2,12 @@ import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderProps,
+  OptimizeTableInternalState,
 } from "@/app/(components)/OptimizeTable";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import * as hrana from "@libsql/hrana-client";
 import { LucideKey } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 interface ResultTableProps {
   data: hrana.RowsResult;
@@ -16,7 +17,6 @@ interface ResultTableProps {
 
 export default function ResultTable({ data, primaryKey }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
-  const [focusIndex, setFocusIndex] = useState<[number, number]>();
 
   const headerMemo = useMemo(() => {
     return data.columnNames.map(
@@ -57,10 +57,41 @@ export default function ResultTable({ data, primaryKey }: ResultTableProps) {
     [data]
   );
 
+  const onCellContextMenu = useCallback(
+    ({
+      state,
+      event,
+    }: {
+      state: OptimizeTableInternalState;
+      event: React.MouseEvent;
+    }) => {
+      openContextMenuFromEvent([
+        {
+          title: "Copy Cell Value",
+          onClick: () => {
+            if (state.focus) {
+              const y = state.focus.y;
+              const x = state.focus.x;
+              window.navigator.clipboard.writeText(data.rows[y][x] as string);
+            }
+          },
+        },
+        {
+          title: "Copy Row As",
+          sub: [
+            { title: "Copy as Excel" },
+            { title: "Copy as JSON" },
+            { title: "Copy as INSERT SQL" },
+          ],
+        },
+      ])(event);
+    },
+    [data]
+  );
+
   return (
     <OptimizeTable
-      focusIndex={focusIndex}
-      onFocusIndexChange={setFocusIndex}
+      onContextMenu={onCellContextMenu}
       stickyHeaderIndex={stickyHeaderIndex}
       headers={headerMemo}
       data={data.rows}

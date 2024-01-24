@@ -39,8 +39,10 @@ interface TableCellListCommonProps {
   renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
   data: unknown[];
-  focusIndex?: [number, number];
-  onFocusIndexChange?: (cellIndex: [number, number]) => void;
+  onContextMenu?: (props: {
+    state: OptimizeTableInternalState;
+    event: React.MouseEvent;
+  }) => void;
 }
 
 export interface OptimizeTableProps extends TableCellListCommonProps {
@@ -105,6 +107,7 @@ function renderCellList({
   onHeaderResize,
   internalState,
   data,
+  onContextMenu,
   rerender,
 }: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
@@ -141,18 +144,26 @@ function renderCellList({
         className={rowClass}
       >
         {hasSticky && (
-          <td className={styles.stickyColumn}>
-            <div
-              className={styles.tableCellContent}
-              onMouseDown={() => {
-                handleTableCellMouseDown({
-                  y: absoluteRowIndex,
-                  x: headersWithIndex[0].index,
-                  internalState,
-                  rerender,
-                });
-              }}
-            >
+          <td
+            className={styles.stickyColumn}
+            onContextMenu={() => {
+              handleTableCellMouseDown({
+                y: absoluteRowIndex,
+                x: headersWithIndex[0].index,
+                internalState,
+                rerender,
+              });
+            }}
+            onMouseDown={() => {
+              handleTableCellMouseDown({
+                y: absoluteRowIndex,
+                x: headersWithIndex[0].index,
+                internalState,
+                rerender,
+              });
+            }}
+          >
+            <div className={styles.tableCellContent}>
               {renderCell({
                 y: absoluteRowIndex,
                 x: headersWithIndex[0].index,
@@ -174,18 +185,26 @@ function renderCellList({
           if (header.sticky) return null;
 
           return (
-            <td key={cellIndex + colStart}>
-              <div
-                className={styles.tableCellContent}
-                onMouseDown={() => {
-                  handleTableCellMouseDown({
-                    y: absoluteRowIndex,
-                    x: header.index,
-                    internalState,
-                    rerender,
-                  });
-                }}
-              >
+            <td
+              key={cellIndex + colStart}
+              onContextMenu={() => {
+                handleTableCellMouseDown({
+                  y: absoluteRowIndex,
+                  x: header.index,
+                  internalState,
+                  rerender,
+                });
+              }}
+              onMouseDown={() => {
+                handleTableCellMouseDown({
+                  y: absoluteRowIndex,
+                  x: header.index,
+                  internalState,
+                  rerender,
+                });
+              }}
+            >
+              <div className={styles.tableCellContent}>
                 {renderCell({
                   y: absoluteRowIndex,
                   x: header.index,
@@ -231,6 +250,7 @@ export default function OptimizeTable({
   renderCell,
   rowHeight,
   renderAhead,
+  onContextMenu,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -299,10 +319,20 @@ export default function OptimizeTable({
       internalState,
       rerender,
       revision,
+      onContextMenu,
     };
 
     return (
-      <div ref={containerRef} className={styles.tableContainer}>
+      <div
+        ref={containerRef}
+        className={styles.tableContainer}
+        onContextMenu={(e) => {
+          if (onContextMenu) onContextMenu({ state: internalState, event: e });
+          console.log("context menu");
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <div
           style={{
             height: (data.length + 1) * rowHeight + 10,
@@ -326,6 +356,7 @@ export default function OptimizeTable({
     stickyHeaderIndex,
     allHeaderIndex,
     internalState,
+    onContextMenu,
     rerender,
     revision,
   ]);
