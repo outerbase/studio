@@ -1,5 +1,5 @@
 export function escapeIdentity(str: string) {
-  return `'${str.replace(/"/g, `""`)}"`;
+  return `"${str.replace(/"/g, `""`)}"`;
 }
 
 export function escapeSqlString(str: string) {

@@ -4,6 +4,11 @@ import OptimizeTable, {
   OptimizeTableHeaderProps,
   OptimizeTableInternalState,
 } from "@/app/(components)/OptimizeTable";
+import {
+  exportRowsToSqlInsert,
+  selectArrayFromIndexList,
+  transformResultToArray,
+} from "@/lib/export-helper";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import * as hrana from "@libsql/hrana-client";
 import { LucideKey } from "lucide-react";
@@ -15,7 +20,11 @@ interface ResultTableProps {
   tableName?: string;
 }
 
-export default function ResultTable({ data, primaryKey }: ResultTableProps) {
+export default function ResultTable({
+  data,
+  primaryKey,
+  tableName,
+}: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
 
   const headerMemo = useMemo(() => {
@@ -81,12 +90,36 @@ export default function ResultTable({ data, primaryKey }: ResultTableProps) {
           sub: [
             { title: "Copy as Excel" },
             { title: "Copy as JSON" },
-            { title: "Copy as INSERT SQL" },
+            {
+              title: "Copy as INSERT SQL",
+              onClick: () => {
+                const selectedRowsIndex = Array.from(
+                  state.selectedRows.values()
+                );
+
+                const headers = data.columnNames.map((column) => column ?? "");
+
+                if (selectedRowsIndex.length > 0) {
+                  const rows = transformResultToArray(
+                    headers,
+                    selectArrayFromIndexList(data.rows, selectedRowsIndex)
+                  );
+
+                  window.navigator.clipboard.writeText(
+                    exportRowsToSqlInsert(
+                      tableName ?? "UnknownTable",
+                      headers,
+                      rows
+                    )
+                  );
+                }
+              },
+            },
           ],
         },
       ])(event);
     },
-    [data]
+    [data, tableName]
   );
 
   return (

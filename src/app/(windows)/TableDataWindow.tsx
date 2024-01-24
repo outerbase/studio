@@ -183,7 +183,13 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       </div>
       <div className="flex-grow overflow-hidden relative">
         {loading && <OpacityLoading />}
-        {data ? <ResultTable data={data} primaryKey={tableSchema?.pk} /> : null}
+        {data ? (
+          <ResultTable
+            data={data}
+            primaryKey={tableSchema?.pk}
+            tableName={tableName}
+          />
+        ) : null}
       </div>
     </div>
   );
