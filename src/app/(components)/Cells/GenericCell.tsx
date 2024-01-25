@@ -11,7 +11,7 @@ export default function GenericCell({
   onFocus,
   focus,
 }: TableCellProps<unknown>) {
-  const className = [styles.cell, focus ? styles.focus : null]
+  const className = [styles.cell, focus ? styles.focus : null, "pl-2 pr-2"]
     .filter(Boolean)
     .join(" ");
 

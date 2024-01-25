@@ -1,14 +1,12 @@
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import * as hrana from "@libsql/hrana-client";
 import { useEffect, useState } from "react";
 import ResultTable from "@/components/result/ResultTable";
 import { Button } from "@/components/ui/button";
 import {
   LucideArrowLeft,
   LucideArrowRight,
-  LucidePlusCircle,
+  LucideKey,
   LucideRefreshCcw,
-  LucideSave,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
@@ -19,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import OpacityLoading from "../(components)/OpacityLoading";
+import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
 
 interface TableDataContentProps {
   tableName: string;
@@ -28,7 +27,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<hrana.RowsResult>();
+  const [data, setData] = useState<OptimizeTableState>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
 
   const [offset, setOffset] = useState("0");
@@ -42,18 +41,19 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      setData(
-        await databaseDriver.selectFromTable(tableName, {
-          limit: finalLimit,
-          offset: finalOffset,
-        })
-      );
 
-      const schema = await databaseDriver.getTableSchema(tableName);
+      const dataResult = await databaseDriver.selectFromTable(tableName, {
+        limit: finalLimit,
+        offset: finalOffset,
+      });
+
+      const schemaResult = await databaseDriver.getTableSchema(tableName);
+      setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
+
       setLoading(false);
 
-      setTableSchema(schema);
-      updateTableSchema(tableName, schema.columns);
+      setTableSchema(schemaResult);
+      updateTableSchema(tableName, schemaResult.columns);
     };
 
     fetchData().then().catch(console.error);
@@ -160,13 +160,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       </div>
       <div className="flex-grow overflow-hidden relative">
         {loading && <OpacityLoading />}
-        {data ? (
-          <ResultTable
-            data={data}
-            primaryKey={tableSchema?.pk}
-            tableName={tableName}
-          />
-        ) : null}
+        {data ? <ResultTable data={data} tableName={tableName} /> : null}
       </div>
     </div>
   );

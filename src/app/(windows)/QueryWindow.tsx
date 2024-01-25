@@ -1,4 +1,3 @@
-import * as hrana from "@libsql/hrana-client";
 import { useState } from "react";
 import { splitQuery, sqliteSplitterOptions } from "dbgate-query-splitter";
 import { LucidePlay } from "lucide-react";
@@ -15,13 +14,13 @@ import ResultTable from "@/components/result/ResultTable";
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import { MultipleQueryProgress, multipleQuery } from "@/lib/multiple-query";
 import QueryProgressLog from "../(components)/QueryProgressLog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [code, setCode] = useState("");
-  const [result, setResult] = useState<hrana.RowsResult>();
+  const [data, setData] = useState<OptimizeTableState>();
   const [progress, setProgress] = useState<MultipleQueryProgress>();
 
   const onRunClicked = () => {
@@ -31,7 +30,7 @@ export default function QueryWindow() {
     }).map((statement) => statement.toString());
 
     // Reset the result and make a new query
-    setResult(undefined);
+    setData(undefined);
     setProgress(undefined);
 
     multipleQuery(databaseDriver, statements, (currentProgrss) => {
@@ -39,7 +38,7 @@ export default function QueryWindow() {
     })
       .then(({ last }) => {
         if (last) {
-          setResult(last);
+          setData(OptimizeTableState.createFromResult(last));
         }
       })
       .catch(console.error);
@@ -65,8 +64,8 @@ export default function QueryWindow() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
-        {result && <ResultTable data={result} />}
-        {!result && progress && (
+        {data && <ResultTable data={data} />}
+        {!data && progress && (
           <div className="w-full h-full overflow-y-auto overflow-x-hidden">
             <QueryProgressLog progress={progress} />
           </div>
