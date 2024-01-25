@@ -93,56 +93,53 @@ function ConnectionEdit({ onComplete }: { onComplete: () => void }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger>
-        <Button variant={"link"}>Add New Connection</Button>
+        <p className="text-sm hover:underline">Add New Connection</p>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>New Connection</SheetTitle>
 
           {error && (
-            <SheetDescription>
-              <div className="bg-red-200 rounded p-4">
-                <div>
-                  <strong>Error</strong>
-                </div>
-                {error}
+            <div className="bg-red-200 rounded p-4">
+              <div>
+                <strong>Error</strong>
               </div>
-            </SheetDescription>
+              {error}
+            </div>
           )}
 
-          <SheetDescription>
-            <div className="flex flex-col gap-4 mt-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="url">Name</Label>
-                <Input
-                  id="url"
-                  placeholder=""
-                  value={name}
-                  onChange={(e) => setName(e.currentTarget.value)}
-                />
-              </div>
-
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="url">Link</Label>
-                <Input
-                  id="url"
-                  placeholder="wss://example.turso.io"
-                  value={url}
-                  onChange={(e) => setUrl(e.currentTarget.value)}
-                />
-              </div>
-
-              <div className="flex flex-col space-y-1.5 mb-5">
-                <Label htmlFor="url">Token</Label>
-                <Textarea
-                  placeholder=""
-                  rows={5}
-                  value={token}
-                  onChange={(e) => setToken(e.currentTarget.value)}
-                />
-              </div>
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="url">Name</Label>
+              <Input
+                id="url"
+                placeholder=""
+                value={name}
+                onChange={(e) => setName(e.currentTarget.value)}
+              />
             </div>
-          </SheetDescription>
+
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="url">Link</Label>
+              <Input
+                id="url"
+                placeholder="wss://example.turso.io"
+                value={url}
+                onChange={(e) => setUrl(e.currentTarget.value)}
+              />
+            </div>
+
+            <div className="flex flex-col space-y-1.5 mb-5">
+              <Label htmlFor="url">Token</Label>
+              <Textarea
+                placeholder=""
+                rows={5}
+                value={token}
+                onChange={(e) => setToken(e.currentTarget.value)}
+              />
+            </div>
+          </div>
+
           <SheetFooter>
             <Button onClick={onSaveClicked}>Save</Button>
           </SheetFooter>

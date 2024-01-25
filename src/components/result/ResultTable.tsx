@@ -1,3 +1,4 @@
+import GenericCell from "@/app/(components)/Cells/GenericCell";
 import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
@@ -60,9 +61,11 @@ export default function ResultTable({
         !!state.focus && state.focus.x === x && state.focus.y === y;
 
       if (data.rows[y]) {
-        return <TextCell value={data.rows[y][x] as string} focus={isFocus} />;
+        return (
+          <GenericCell value={data.rows[y][x] as string} focus={isFocus} />
+        );
       }
-      return <TextCell value={""} />;
+      return <GenericCell value={""} />;
     },
     [data]
   );

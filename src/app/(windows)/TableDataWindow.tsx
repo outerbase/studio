@@ -70,24 +70,6 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     <div className="flex flex-col overflow-hidden w-full h-full">
       <div className="flex-shrink-0 flex-grow-0">
         <div className="flex p-1 gap-1">
-          <Button variant={"ghost"} size={"sm"} disabled>
-            <LucideSave className="w-4 h-4 mr-2" />
-            Save
-          </Button>
-
-          <Button
-            variant={"ghost"}
-            size={"sm"}
-            className="text-red-500 hover:text-red-500"
-            disabled
-          >
-            Discard Change
-          </Button>
-
-          <div>
-            <Separator orientation="vertical" />
-          </div>
-
           <Button
             variant={"ghost"}
             size={"sm"}
@@ -98,16 +80,11 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             Refresh
           </Button>
 
+          <div className="flex flex-grow" />
+
           <div>
             <Separator orientation="vertical" />
           </div>
-
-          <Button variant={"ghost"} size={"sm"} disabled>
-            <LucidePlusCircle className="w-4 h-4 mr-2 text-green-600" />
-            Add
-          </Button>
-
-          <div className="flex-grow"></div>
 
           <Button
             variant={"ghost"}
@@ -138,7 +115,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 bg-gray-100 rounded text-xs"
+                  className="p-1 pl-2 pr-2 bg-gray-100 rounded text-xs h-full"
                   alt="Limit"
                 />
               </TooltipTrigger>
@@ -161,7 +138,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 bg-gray-100 rounded text-xs"
+                  className="p-1 pl-2 pr-2 bg-gray-100 rounded text-xs h-full"
                   alt="Offset"
                 />
               </TooltipTrigger>
