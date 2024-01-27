@@ -2,6 +2,7 @@ import GenericCell from "@/app/(components)/Cells/GenericCell";
 import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
+  OptimizeTableHeaderWithIndexProps,
 } from "@/app/(components)/OptimizeTable";
 import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
@@ -16,32 +17,6 @@ interface ResultTableProps {
 export default function ResultTable({ data, tableName }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
 
-  // const headerMemo = useMemo(() => {
-  //   return data.columnNames.map(
-  //     (header, idx) =>
-  //       ({
-  //         name: header || "",
-  //         resizable: true,
-  //         initialSize: Math.max((header ?? "").length * 10, 150),
-  //         icon: (primaryKey ?? []).includes(header ?? "") ? (
-  //           <LucideKey className="w-4 h-4 text-red-500" />
-  //         ) : undefined,
-  //         onContextMenu: openContextMenuFromEvent([
-  //           {
-  //             title: "Pin Header",
-  //             type: "check",
-  //             checked: stickyHeaderIndex === idx,
-  //             onClick: () => {
-  //               setStickHeaderIndex(
-  //                 idx === stickyHeaderIndex ? undefined : idx
-  //               );
-  //             },
-  //           },
-  //         ]),
-  //       } as OptimizeTableHeaderProps)
-  //   );
-  // }, [data, primaryKey, stickyHeaderIndex]);
-
   const renderCell = useCallback(
     ({ y, x, state }: OptimizeTableCellRenderProps) => {
       const isFocus = state.hasFocus(y, x);
@@ -52,6 +27,24 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       //return <GenericCell value={""} />;
     },
     []
+  );
+
+  const onHeaderContextMenu = useCallback(
+    (e: React.MouseEvent, header: OptimizeTableHeaderWithIndexProps) => {
+      openContextMenuFromEvent([
+        {
+          title: "Pin Header",
+          type: "check",
+          checked: stickyHeaderIndex === header.index,
+          onClick: () => {
+            setStickHeaderIndex(
+              header.index === stickyHeaderIndex ? undefined : header.index
+            );
+          },
+        },
+      ])(e);
+    },
+    [stickyHeaderIndex]
   );
 
   const onCellContextMenu = useCallback(
@@ -118,6 +111,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
     <OptimizeTable
       internalState={data}
       onContextMenu={onCellContextMenu}
+      onHeaderContextMenu={onHeaderContextMenu}
       stickyHeaderIndex={stickyHeaderIndex}
       renderAhead={20}
       renderCell={renderCell}

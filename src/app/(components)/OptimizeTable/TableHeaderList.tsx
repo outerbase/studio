@@ -26,7 +26,11 @@ export default function TableHeaderList({
               header={header}
               idx={idx}
               onHeaderResize={onHeaderResize}
-              onContextMenu={(e) => {}}
+              onContextMenu={(e) => {
+                if (onHeaderContextMenu) {
+                  onHeaderContextMenu(e, header);
+                }
+              }}
             />
           );
         })}

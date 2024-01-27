@@ -32,7 +32,10 @@ interface TableCellListCommonProps {
   internalState: OptimizeTableState;
   renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
-  onHeaderContextMenu?: (header: OptimizeTableHeaderWithIndexProps) => void;
+  onHeaderContextMenu?: (
+    e: React.MouseEvent,
+    header: OptimizeTableHeaderWithIndexProps
+  ) => void;
   onContextMenu?: (props: {
     state: OptimizeTableState;
     event: React.MouseEvent;
@@ -100,6 +103,7 @@ function renderCellList({
   onHeaderResize,
   internalState,
   rerender,
+  onHeaderContextMenu,
 }: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
 
@@ -207,6 +211,7 @@ function renderCellList({
         sticky={hasSticky}
         headers={headersWithIndex}
         onHeaderResize={onHeaderSizeWithRemap}
+        onHeaderContextMenu={onHeaderContextMenu}
       />
 
       <TableFakeBodyPadding
