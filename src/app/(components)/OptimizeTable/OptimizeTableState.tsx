@@ -10,11 +10,16 @@ interface OptimizeTableRowValue {
   changeKey?: number;
 }
 
+type TableChangeEventCallback = (state: OptimizeTableState) => void;
+
 export default class OptimizeTableState {
   protected focus: [number, number] | null = null;
   protected selectedRows = new Set<number>();
   protected data: OptimizeTableRowValue[] = [];
   protected headers: OptimizeTableHeaderProps[] = [];
+
+  protected changeCallback: TableChangeEventCallback[] = [];
+  protected changeDebounceTimerId: NodeJS.Timeout | null = null;
 
   protected changeCounter = 1;
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
@@ -49,6 +54,25 @@ export default class OptimizeTableState {
   }
 
   // ------------------------------------------------
+  // Event Handlers
+  // ------------------------------------------------
+  addChangeListener(cb: TableChangeEventCallback) {
+    this.changeCallback.push(cb);
+  }
+
+  removeChangeListener(cb: TableChangeEventCallback) {
+    this.changeCallback = this.changeCallback.filter((c) => c !== cb);
+  }
+
+  protected broadcastChange() {
+    if (this.changeDebounceTimerId) return false;
+    this.changeDebounceTimerId = setTimeout(() => {
+      this.changeDebounceTimerId = null;
+      this.changeCallback.forEach((cb) => cb(this));
+    }, 5);
+  }
+
+  // ------------------------------------------------
   // Handle headers and data
   // ------------------------------------------------
   getHeaders() {
@@ -61,6 +85,12 @@ export default class OptimizeTableState {
       return rowChange[this.headers[x].name] ?? this.getOriginalValue(y, x);
     }
     return this.getOriginalValue(y, x);
+  }
+
+  hasCellChange(y: number, x: number) {
+    const changeLog = this.data[y]?.change;
+    if (!changeLog) return false;
+    return this.headers[x].name in changeLog;
   }
 
   getOriginalValue(y: number, x: number): unknown {
@@ -95,6 +125,8 @@ export default class OptimizeTableState {
         this.changeLogs[row.changeKey] = row;
       }
     }
+
+    this.broadcastChange();
   }
 
   getChangedRows() {
@@ -124,10 +156,12 @@ export default class OptimizeTableState {
 
   setFocus(y: number, x: number) {
     this.focus = [y, x];
+    this.broadcastChange();
   }
 
   clearFocus() {
     this.focus = null;
+    this.broadcastChange();
   }
 
   // ------------------------------------------------
@@ -135,6 +169,7 @@ export default class OptimizeTableState {
   // ------------------------------------------------
   clearSelect() {
     this.selectedRows.clear();
+    this.broadcastChange();
   }
 
   getSelectedRowCount() {
@@ -161,6 +196,7 @@ export default class OptimizeTableState {
     } else {
       this.selectedRows.add(y);
     }
+    this.broadcastChange();
   }
 
   isRowSelected(y: number) {

@@ -1,18 +1,29 @@
+import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import GenericCell from "./GenericCell";
 import styles from "./styles.module.css";
+import { useState } from "react";
 
 interface TableCellProps<T = unknown> {
   value: T;
+  isChanged?: boolean;
   focus?: boolean;
-  editMode?: boolean;
+  onChange?: (newValue: DatabaseValue<string>) => void;
 }
 
 export default function TextCell({
   value,
   focus,
-  editMode,
+  isChanged,
+  onChange,
 }: TableCellProps<string>) {
-  const className = [styles.cell, focus ? styles.focus : null]
+  const [editMode, setEditMode] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+
+  const className = [
+    styles.cell,
+    focus ? styles.focus : null,
+    isChanged ? styles.change : null,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -20,13 +31,31 @@ export default function TextCell({
     return (
       <div className={className}>
         <input
+          autoFocus
+          onBlur={() => {
+            if (onChange) onChange(editValue);
+            setEditMode(false);
+          }}
+          onChange={(e) => {
+            setEditValue(e.currentTarget.value);
+          }}
           type="text"
           className="w-full h-full outline-none pl-2 pr-2 border-0"
-          value={value}
+          value={editValue}
         />
       </div>
     );
   }
 
-  return <GenericCell value={value} focus={focus} />;
+  return (
+    <GenericCell
+      value={value}
+      focus={focus}
+      isChanged={isChanged}
+      onDoubleClick={() => {
+        setEditMode(true);
+        setEditValue(value);
+      }}
+    />
+  );
 }

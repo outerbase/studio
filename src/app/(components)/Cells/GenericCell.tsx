@@ -3,21 +3,34 @@ import styles from "./styles.module.css";
 interface TableCellProps<T = unknown> {
   value: T;
   focus?: boolean;
+  isChanged?: boolean;
   onFocus?: () => void;
+  onDoubleClick?: () => void;
 }
 
 export default function GenericCell({
   value,
   onFocus,
+  isChanged,
   focus,
+  onDoubleClick,
 }: TableCellProps<unknown>) {
-  const className = [styles.cell, focus ? styles.focus : null, "pl-2 pr-2"]
+  const className = [
+    styles.cell,
+    focus ? styles.focus : null,
+    "pl-2 pr-2",
+    isChanged ? styles.change : null,
+  ]
     .filter(Boolean)
     .join(" ");
 
   if (value === null) {
     return (
-      <div className={className} onMouseDown={onFocus}>
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
         <span className="text-gray-500">NULL</span>
       </div>
     );
@@ -25,7 +38,11 @@ export default function GenericCell({
 
   if (typeof value === "number") {
     return (
-      <div className={className} onMouseDown={onFocus}>
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
         <span className="text-blue-700 block text-right">{value}</span>
       </div>
     );
@@ -41,7 +58,11 @@ export default function GenericCell({
     );
 
     return (
-      <div className={className} onMouseDown={onFocus}>
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
         <div className="flex">
           <div className="mr-2 justify-center items-center flex-col">
             <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
@@ -55,7 +76,11 @@ export default function GenericCell({
   }
 
   return (
-    <div className={className} onMouseDown={onFocus}>
+    <div
+      className={className}
+      onMouseDown={onFocus}
+      onDoubleClick={onDoubleClick}
+    >
       {(value as any).toString()}
     </div>
   );

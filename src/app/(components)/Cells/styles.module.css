@@ -7,3 +7,7 @@
 .focus {
   border: 1px solid #e00;
 }
+
+.change {
+  background: #f6e58d !important;
+}

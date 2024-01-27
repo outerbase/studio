@@ -21,8 +21,19 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
     ({ y, x, state }: OptimizeTableCellRenderProps) => {
       const isFocus = state.hasFocus(y, x);
 
+      if (state.hasCellChange(y, x)) {
+        console.log(y, x);
+      }
+
       return (
-        <TextCell value={state.getValue(y, x) as string} focus={isFocus} />
+        <TextCell
+          value={state.getValue(y, x) as string}
+          focus={isFocus}
+          isChanged={state.hasCellChange(y, x)}
+          onChange={(newValue) => {
+            state.changeValue(y, x, newValue);
+          }}
+        />
       );
       //return <GenericCell value={""} />;
     },

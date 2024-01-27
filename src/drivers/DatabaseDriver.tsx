@@ -1,5 +1,7 @@
 import * as hrana from "@libsql/hrana-client";
 
+export type DatabaseValue<T = unknwon> = T | undefined | null;
+
 export interface DatabaseSchemaItem {
   name: string;
 }

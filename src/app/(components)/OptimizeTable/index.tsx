@@ -1,4 +1,11 @@
-import { useState, ReactElement, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  ReactElement,
+  useRef,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
 import styles from "./styles.module.css";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
 import TableFakeBodyPadding from "./TableFakeBodyPadding";
@@ -58,7 +65,6 @@ interface RenderCellListProps extends TableCellListCommonProps {
   headerSizes: number[];
   colEnd: number;
   colStart: number;
-  rerender: () => void;
 }
 
 function handleTableCellMouseDown({
@@ -67,14 +73,12 @@ function handleTableCellMouseDown({
   x,
   ctrl,
   shift,
-  rerender,
 }: {
   y: number;
   x: number;
   ctrl?: boolean;
   shift?: boolean;
   internalState: OptimizeTableState;
-  rerender: () => void;
 }) {
   if (ctrl) {
     internalState.selectRow(y, true);
@@ -85,7 +89,6 @@ function handleTableCellMouseDown({
   }
 
   internalState.setFocus(y, x);
-  rerender();
 }
 
 function renderCellList({
@@ -102,7 +105,6 @@ function renderCellList({
   rowHeight,
   onHeaderResize,
   internalState,
-  rerender,
   onHeaderContextMenu,
 }: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
@@ -124,7 +126,6 @@ function renderCellList({
           internalState,
           ctrl: e.ctrlKey || e.metaKey,
           shift: e.shiftKey,
-          rerender,
         });
       }
     };
@@ -245,6 +246,15 @@ export default function OptimizeTable({
     setRevision((prev) => prev + 1);
   }, [setRevision]);
 
+  useEffect(() => {
+    const changeCallback = () => {
+      rerender();
+    };
+
+    internalState.addChangeListener(changeCallback);
+    return () => internalState.removeChangeListener(changeCallback);
+  }, [internalState, rerender]);
+
   const headers = useMemo(() => {
     return internalState.getHeaders();
   }, [internalState]);
@@ -295,7 +305,6 @@ export default function OptimizeTable({
       onHeaderResize,
       hasSticky: stickyHeaderIndex !== undefined,
       internalState,
-      rerender,
       revision,
       onContextMenu,
       onHeaderContextMenu,
@@ -335,7 +344,6 @@ export default function OptimizeTable({
     internalState,
     onContextMenu,
     onHeaderContextMenu,
-    rerender,
     revision,
   ]);
 }
