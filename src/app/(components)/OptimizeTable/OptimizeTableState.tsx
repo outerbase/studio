@@ -3,6 +3,7 @@ import { OptimizeTableHeaderProps } from ".";
 import * as hrana from "@libsql/hrana-client";
 import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { LucideKey } from "lucide-react";
+import { convertSqliteType } from "@/lib/sql-helper";
 
 interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -29,11 +30,12 @@ export default class OptimizeTableState {
     schemaResult?: DatabaseTableSchema
   ) {
     return new OptimizeTableState(
-      dataResult.columnNames.map((headerName) => {
+      dataResult.columnNames.map((headerName, idx) => {
         return {
           initialSize: 150,
           name: headerName ?? "",
           resizable: true,
+          dataType: convertSqliteType(dataResult.columnDecltypes[idx]),
           icon: schemaResult?.pk.includes(headerName ?? "") ? (
             <LucideKey className="w-4 h-4 text-red-500" />
           ) : undefined,

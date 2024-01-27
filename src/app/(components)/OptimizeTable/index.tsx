@@ -13,10 +13,18 @@ import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
 import OptimizeTableState from "./OptimizeTableState";
 
+export enum TableColumnDataType {
+  TEXT = 1,
+  INTEGER = 2,
+  REAL = 3,
+  BLOB = 4,
+}
+
 export interface OptimizeTableHeaderProps {
   name: string;
   initialSize: number;
   resizable?: boolean;
+  dataType?: TableColumnDataType;
   icon?: ReactElement;
   rightIcon?: ReactElement;
   tooltip?: string;
@@ -33,6 +41,7 @@ export interface OptimizeTableCellRenderProps {
   y: number;
   x: number;
   state: OptimizeTableState;
+  header: OptimizeTableHeaderWithIndexProps;
 }
 
 interface TableCellListCommonProps {
@@ -167,6 +176,7 @@ function renderCellList({
                 y: absoluteRowIndex,
                 x: headersWithIndex[0].index,
                 state: internalState,
+                header: headers[headersWithIndex[0].index],
               })}
             </div>
           </td>
@@ -193,6 +203,7 @@ function renderCellList({
                   y: absoluteRowIndex,
                   x: header.index,
                   state: internalState,
+                  header: headers[header.index],
                 })}
               </div>
             </td>

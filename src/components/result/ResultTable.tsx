@@ -3,11 +3,12 @@ import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
+  TableColumnDataType,
 } from "@/app/(components)/OptimizeTable";
 import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -18,24 +19,23 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
 
   const renderCell = useCallback(
-    ({ y, x, state }: OptimizeTableCellRenderProps) => {
+    ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
       const isFocus = state.hasFocus(y, x);
 
-      if (state.hasCellChange(y, x)) {
-        console.log(y, x);
+      if (header.dataType === TableColumnDataType.TEXT) {
+        return (
+          <TextCell
+            value={state.getValue(y, x) as string}
+            focus={isFocus}
+            isChanged={state.hasCellChange(y, x)}
+            onChange={(newValue) => {
+              state.changeValue(y, x, newValue);
+            }}
+          />
+        );
       }
 
-      return (
-        <TextCell
-          value={state.getValue(y, x) as string}
-          focus={isFocus}
-          isChanged={state.hasCellChange(y, x)}
-          onChange={(newValue) => {
-            state.changeValue(y, x, newValue);
-          }}
-        />
-      );
-      //return <GenericCell value={""} />;
+      return <GenericCell value={state.getValue(y, x) as string} />;
     },
     []
   );

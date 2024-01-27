@@ -1,7 +1,7 @@
 import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import GenericCell from "./GenericCell";
 import styles from "./styles.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface TableCellProps<T = unknown> {
   value: T;
@@ -18,6 +18,10 @@ export default function TextCell({
 }: TableCellProps<string>) {
   const [editMode, setEditMode] = useState(false);
   const [editValue, setEditValue] = useState(value);
+
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
 
   const className = [
     styles.cell,
@@ -49,12 +53,11 @@ export default function TextCell({
 
   return (
     <GenericCell
-      value={value}
+      value={editValue}
       focus={focus}
       isChanged={isChanged}
       onDoubleClick={() => {
         setEditMode(true);
-        setEditValue(value);
       }}
     />
   );
