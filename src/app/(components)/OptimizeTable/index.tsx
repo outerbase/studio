@@ -32,6 +32,7 @@ interface TableCellListCommonProps {
   internalState: OptimizeTableState;
   renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
+  onHeaderContextMenu?: (header: OptimizeTableHeaderWithIndexProps) => void;
   onContextMenu?: (props: {
     state: OptimizeTableState;
     event: React.MouseEvent;
@@ -228,6 +229,7 @@ export default function OptimizeTable({
   rowHeight,
   renderAhead,
   onContextMenu,
+  onHeaderContextMenu,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -291,6 +293,7 @@ export default function OptimizeTable({
       rerender,
       revision,
       onContextMenu,
+      onHeaderContextMenu,
     };
 
     return (
@@ -326,6 +329,7 @@ export default function OptimizeTable({
     allHeaderIndex,
     internalState,
     onContextMenu,
+    onHeaderContextMenu,
     rerender,
     revision,
   ]);

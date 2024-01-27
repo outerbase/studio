@@ -6,6 +6,8 @@ import { LucideKey } from "lucide-react";
 
 interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
+  change?: Record<string, unknown>;
+  changeKey?: number;
 }
 
 export default class OptimizeTableState {
@@ -13,6 +15,9 @@ export default class OptimizeTableState {
   protected selectedRows = new Set<number>();
   protected data: OptimizeTableRowValue[] = [];
   protected headers: OptimizeTableHeaderProps[] = [];
+
+  protected changeCounter = 1;
+  protected changeLogs: Record<number, OptimizeTableRowValue> = {};
 
   static createFromResult(
     dataResult: hrana.RowsResult,
@@ -44,14 +49,56 @@ export default class OptimizeTableState {
   }
 
   // ------------------------------------------------
-  // Handle data
+  // Handle headers and data
   // ------------------------------------------------
   getHeaders() {
     return this.headers;
   }
 
   getValue(y: number, x: number): unknown {
+    const rowChange = this.data[y].change;
+    if (rowChange) {
+      return rowChange[this.headers[x].name] ?? this.getOriginalValue(y, x);
+    }
+    return this.getOriginalValue(y, x);
+  }
+
+  getOriginalValue(y: number, x: number): unknown {
     return this.data[y].raw[this.headers[x].name];
+  }
+
+  changeValue(y: number, x: number, newValue: unknown) {
+    const oldValue = this.getOriginalValue(y, x);
+
+    const row = this.data[y];
+    const headerName = this.headers[x].name;
+
+    if (oldValue === newValue) {
+      const rowChange = row.change;
+      if (rowChange && rowChange[headerName]) {
+        delete rowChange[headerName];
+        if (Object.entries(rowChange).length === 0) {
+          if (row.changeKey) {
+            delete this.changeLogs[row.changeKey];
+            delete row["changeKey"];
+          }
+          delete row["change"];
+        }
+      }
+    } else {
+      const rowChange = row.change;
+      if (rowChange) {
+        rowChange[headerName] = newValue;
+      } else {
+        row.changeKey = ++this.changeCounter;
+        row.change = { [headerName]: newValue };
+        this.changeLogs[row.changeKey] = row;
+      }
+    }
+  }
+
+  getChangedRows() {
+    return Object.values(this.changeLogs);
   }
 
   getRowsCount() {
