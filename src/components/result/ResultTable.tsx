@@ -1,73 +1,76 @@
 import GenericCell from "@/app/(components)/Cells/GenericCell";
+import NumberCell from "@/app/(components)/Cells/NumberCell";
 import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
-  OptimizeTableHeaderProps,
-  OptimizeTableInternalState,
+  OptimizeTableHeaderWithIndexProps,
+  TableColumnDataType,
 } from "@/app/(components)/OptimizeTable";
-import {
-  exportRowsToExcel,
-  exportRowsToSqlInsert,
-  selectArrayFromIndexList,
-  transformResultToArray,
-} from "@/lib/export-helper";
+import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
+import { DatabaseValue } from "@/drivers/DatabaseDriver";
+import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
-import * as hrana from "@libsql/hrana-client";
-import { LucideKey } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 interface ResultTableProps {
-  data: hrana.RowsResult;
-  primaryKey?: string[];
+  data: OptimizeTableState;
   tableName?: string;
 }
 
-export default function ResultTable({
-  data,
-  primaryKey,
-  tableName,
-}: ResultTableProps) {
+export default function ResultTable({ data, tableName }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
 
-  const headerMemo = useMemo(() => {
-    return data.columnNames.map(
-      (header, idx) =>
-        ({
-          name: header || "",
-          resizable: true,
-          initialSize: Math.max((header ?? "").length * 10, 150),
-          icon: (primaryKey ?? []).includes(header ?? "") ? (
-            <LucideKey className="w-4 h-4 text-red-500" />
-          ) : undefined,
-          onContextMenu: openContextMenuFromEvent([
-            {
-              title: "Pin Header",
-              type: "check",
-              checked: stickyHeaderIndex === idx,
-              onClick: () => {
-                setStickHeaderIndex(
-                  idx === stickyHeaderIndex ? undefined : idx
-                );
-              },
-            },
-          ]),
-        } as OptimizeTableHeaderProps)
-    );
-  }, [data, primaryKey, stickyHeaderIndex]);
-
   const renderCell = useCallback(
-    ({ y, x, state }: OptimizeTableCellRenderProps) => {
-      const isFocus =
-        !!state.focus && state.focus.x === x && state.focus.y === y;
+    ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
+      const isFocus = state.hasFocus(y, x);
 
-      if (data.rows[y]) {
+      if (header.dataType === TableColumnDataType.TEXT) {
         return (
-          <GenericCell value={data.rows[y][x] as string} focus={isFocus} />
+          <TextCell
+            readOnly={!tableName}
+            value={state.getValue(y, x) as DatabaseValue<string>}
+            focus={isFocus}
+            isChanged={state.hasCellChange(y, x)}
+            onChange={(newValue) => {
+              state.changeValue(y, x, newValue);
+            }}
+          />
+        );
+      } else if (header.dataType === TableColumnDataType.INTEGER) {
+        return (
+          <NumberCell
+            readOnly={!tableName}
+            value={state.getValue(y, x) as DatabaseValue<number>}
+            focus={isFocus}
+            isChanged={state.hasCellChange(y, x)}
+            onChange={(newValue) => {
+              state.changeValue(y, x, newValue);
+            }}
+          />
         );
       }
-      return <GenericCell value={""} />;
+
+      return <GenericCell value={state.getValue(y, x) as string} />;
     },
-    [data]
+    [tableName]
+  );
+
+  const onHeaderContextMenu = useCallback(
+    (e: React.MouseEvent, header: OptimizeTableHeaderWithIndexProps) => {
+      openContextMenuFromEvent([
+        {
+          title: "Pin Header",
+          type: "check",
+          checked: stickyHeaderIndex === header.index,
+          onClick: () => {
+            setStickHeaderIndex(
+              header.index === stickyHeaderIndex ? undefined : header.index
+            );
+          },
+        },
+      ])(e);
+    },
+    [stickyHeaderIndex]
   );
 
   const onCellContextMenu = useCallback(
@@ -75,17 +78,20 @@ export default function ResultTable({
       state,
       event,
     }: {
-      state: OptimizeTableInternalState;
+      state: OptimizeTableState;
       event: React.MouseEvent;
     }) => {
       openContextMenuFromEvent([
         {
           title: "Copy Cell Value",
           onClick: () => {
-            if (state.focus) {
-              const y = state.focus.y;
-              const x = state.focus.x;
-              window.navigator.clipboard.writeText(data.rows[y][x] as string);
+            const focus = state.getFocus();
+            if (focus) {
+              const y = focus.y;
+              const x = focus.x;
+              window.navigator.clipboard.writeText(
+                data.getValue(y, x) as string
+              );
             }
           },
         },
@@ -95,42 +101,26 @@ export default function ResultTable({
             {
               title: "Copy as Excel",
               onClick: () => {
-                const selectedRowsIndex = Array.from(
-                  state.selectedRows.values()
-                );
-
-                const headers = data.columnNames.map((column) => column ?? "");
-
-                if (selectedRowsIndex.length > 0) {
-                  const rows = transformResultToArray(
-                    headers,
-                    selectArrayFromIndexList(data.rows, selectedRowsIndex)
+                if (state.getSelectedRowCount() > 0) {
+                  window.navigator.clipboard.writeText(
+                    exportRowsToExcel(state.getSelectedRowsArray())
                   );
-
-                  window.navigator.clipboard.writeText(exportRowsToExcel(rows));
                 }
               },
             },
             {
               title: "Copy as INSERT SQL",
               onClick: () => {
-                const selectedRowsIndex = Array.from(
-                  state.selectedRows.values()
-                );
+                const headers = state
+                  .getHeaders()
+                  .map((column) => column?.name ?? "");
 
-                const headers = data.columnNames.map((column) => column ?? "");
-
-                if (selectedRowsIndex.length > 0) {
-                  const rows = transformResultToArray(
-                    headers,
-                    selectArrayFromIndexList(data.rows, selectedRowsIndex)
-                  );
-
+                if (state.getSelectedRowCount() > 0) {
                   window.navigator.clipboard.writeText(
                     exportRowsToSqlInsert(
                       tableName ?? "UnknownTable",
                       headers,
-                      rows
+                      state.getSelectedRowsArray()
                     )
                   );
                 }
@@ -145,10 +135,10 @@ export default function ResultTable({
 
   return (
     <OptimizeTable
+      internalState={data}
       onContextMenu={onCellContextMenu}
+      onHeaderContextMenu={onHeaderContextMenu}
       stickyHeaderIndex={stickyHeaderIndex}
-      headers={headerMemo}
-      data={data.rows}
       renderAhead={20}
       renderCell={renderCell}
       rowHeight={35}

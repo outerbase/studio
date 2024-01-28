@@ -1,20 +1,10 @@
 import { escapeIdentity, escapeSqlValue } from "./sql-helper";
-import * as hrana from "@libsql/hrana-client";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: Array<T>,
   indexList: number[]
 ): Array<T> {
   return indexList.map((index) => data[index]);
-}
-
-export function transformResultToArray(
-  headers: string[],
-  data: Array<hrana.Row>
-): unknown[][] {
-  return data.map((row) => {
-    return headers.map((header) => row[header]);
-  });
 }
 
 export function exportRowsToSqlInsert(

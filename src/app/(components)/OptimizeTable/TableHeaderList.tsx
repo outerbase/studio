@@ -5,10 +5,15 @@ export default function TableHeaderList({
   headers,
   onHeaderResize,
   sticky,
+  onHeaderContextMenu,
 }: {
   headers: OptimizeTableHeaderWithIndexProps[];
   onHeaderResize: (idx: number, newWidth: number) => void;
   sticky: boolean;
+  onHeaderContextMenu?: (
+    e: React.MouseEvent,
+    header: OptimizeTableHeaderWithIndexProps
+  ) => void;
 }) {
   return (
     <thead>
@@ -21,6 +26,11 @@ export default function TableHeaderList({
               header={header}
               idx={idx}
               onHeaderResize={onHeaderResize}
+              onContextMenu={(e) => {
+                if (onHeaderContextMenu) {
+                  onHeaderContextMenu(e, header);
+                }
+              }}
             />
           );
         })}

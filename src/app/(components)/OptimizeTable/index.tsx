@@ -1,14 +1,30 @@
-import { useState, ReactElement, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  ReactElement,
+  useRef,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
 import styles from "./styles.module.css";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
 import TableFakeBodyPadding from "./TableFakeBodyPadding";
 import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
+import OptimizeTableState from "./OptimizeTableState";
+
+export enum TableColumnDataType {
+  TEXT = 1,
+  INTEGER = 2,
+  REAL = 3,
+  BLOB = 4,
+}
 
 export interface OptimizeTableHeaderProps {
   name: string;
   initialSize: number;
   resizable?: boolean;
+  dataType?: TableColumnDataType;
   icon?: ReactElement;
   rightIcon?: ReactElement;
   tooltip?: string;
@@ -24,30 +40,27 @@ export interface OptimizeTableHeaderWithIndexProps
 export interface OptimizeTableCellRenderProps {
   y: number;
   x: number;
-  state: OptimizeTableInternalState;
+  state: OptimizeTableState;
+  header: OptimizeTableHeaderWithIndexProps;
 }
 
 interface TableCellListCommonProps {
+  internalState: OptimizeTableState;
   renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
-  data: unknown[];
+  onHeaderContextMenu?: (
+    e: React.MouseEvent,
+    header: OptimizeTableHeaderWithIndexProps
+  ) => void;
   onContextMenu?: (props: {
-    state: OptimizeTableInternalState;
+    state: OptimizeTableState;
     event: React.MouseEvent;
   }) => void;
 }
 
 export interface OptimizeTableProps extends TableCellListCommonProps {
   stickyHeaderIndex?: number;
-  headers: OptimizeTableHeaderProps[];
   renderAhead: number;
-}
-
-export interface OptimizeTableInternalState {
-  selectedRows: Set<number>;
-  removedRows: Set<number>;
-  newRows: Set<number>;
-  focus: { y: number; x: number } | null;
 }
 
 interface RenderCellListProps extends TableCellListCommonProps {
@@ -61,8 +74,6 @@ interface RenderCellListProps extends TableCellListCommonProps {
   headerSizes: number[];
   colEnd: number;
   colStart: number;
-  internalState: OptimizeTableInternalState;
-  rerender: () => void;
 }
 
 function handleTableCellMouseDown({
@@ -71,30 +82,22 @@ function handleTableCellMouseDown({
   x,
   ctrl,
   shift,
-  rerender,
 }: {
   y: number;
   x: number;
   ctrl?: boolean;
   shift?: boolean;
-  internalState: OptimizeTableInternalState;
-  rerender: () => void;
+  internalState: OptimizeTableState;
 }) {
   if (ctrl) {
-    // Multiple select
-    if (internalState.selectedRows.has(y)) {
-      internalState.selectedRows.delete(y);
-    } else {
-      internalState.selectedRows.add(y);
-    }
+    internalState.selectRow(y, true);
   } else {
     // Single select
-    internalState.selectedRows.clear();
-    internalState.selectedRows.add(y);
+    internalState.clearSelect();
+    internalState.selectRow(y);
   }
 
-  internalState.focus = { y, x };
-  rerender();
+  internalState.setFocus(y, x);
 }
 
 function renderCellList({
@@ -111,8 +114,7 @@ function renderCellList({
   rowHeight,
   onHeaderResize,
   internalState,
-  data,
-  rerender,
+  onHeaderContextMenu,
 }: RenderCellListProps) {
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
 
@@ -133,7 +135,6 @@ function renderCellList({
           internalState,
           ctrl: e.ctrlKey || e.metaKey,
           shift: e.shiftKey,
-          rerender,
         });
       }
     };
@@ -148,11 +149,11 @@ function renderCellList({
 
     let rowClass = undefined;
 
-    if (internalState.newRows.has(absoluteRowIndex)) {
-      rowClass = styles.newRow;
-    } else if (internalState.removedRows.has(absoluteRowIndex)) {
-      rowClass = styles.removedRow;
-    } else if (internalState.selectedRows.has(absoluteRowIndex)) {
+    // if (internalState.newRows.has(absoluteRowIndex)) {
+    //   rowClass = styles.newRow;
+    // } else if (internalState.removedRows.has(absoluteRowIndex)) {
+    //   rowClass = styles.removedRow;
+    if (internalState.isRowSelected(absoluteRowIndex)) {
       rowClass = styles.selectedRow;
     }
 
@@ -175,6 +176,7 @@ function renderCellList({
                 y: absoluteRowIndex,
                 x: headersWithIndex[0].index,
                 state: internalState,
+                header: headers[headersWithIndex[0].index],
               })}
             </div>
           </td>
@@ -201,6 +203,7 @@ function renderCellList({
                   y: absoluteRowIndex,
                   x: header.index,
                   state: internalState,
+                  header: headers[header.index],
                 })}
               </div>
             </td>
@@ -220,11 +223,12 @@ function renderCellList({
         sticky={hasSticky}
         headers={headersWithIndex}
         onHeaderResize={onHeaderSizeWithRemap}
+        onHeaderContextMenu={onHeaderContextMenu}
       />
 
       <TableFakeBodyPadding
         colCount={headerIndex.length}
-        rowCount={data.length}
+        rowCount={internalState.getRowsCount()}
         rowEnd={rowEnd}
         rowStart={rowStart}
         rowHeight={rowHeight}
@@ -236,24 +240,15 @@ function renderCellList({
 }
 
 export default function OptimizeTable({
-  data,
-  headers,
   stickyHeaderIndex,
+  internalState,
   renderCell,
   rowHeight,
   renderAhead,
   onContextMenu,
+  onHeaderContextMenu,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const internalState = useMemo<OptimizeTableInternalState>(() => {
-    return {
-      selectedRows: new Set(),
-      removedRows: new Set(),
-      newRows: new Set(),
-      focus: null,
-    };
-  }, []);
 
   // This is our trigger re-render the whole table
   const [revision, setRevision] = useState(1);
@@ -261,6 +256,19 @@ export default function OptimizeTable({
   const rerender = useCallback(() => {
     setRevision((prev) => prev + 1);
   }, [setRevision]);
+
+  useEffect(() => {
+    const changeCallback = () => {
+      rerender();
+    };
+
+    internalState.addChangeListener(changeCallback);
+    return () => internalState.removeChangeListener(changeCallback);
+  }, [internalState, rerender]);
+
+  const headers = useMemo(() => {
+    return internalState.getHeaders();
+  }, [internalState]);
 
   const [headerSizes] = useState(() => {
     return headers.map((header) => header.initialSize);
@@ -280,7 +288,7 @@ export default function OptimizeTable({
     headers: headerWithIndex,
     renderAhead,
     rowHeight,
-    totalRowCount: data.length,
+    totalRowCount: internalState.getRowsCount(),
   });
 
   const { rowStart, rowEnd, colEnd, colStart } = visibileRange;
@@ -306,12 +314,11 @@ export default function OptimizeTable({
       colStart,
       rowHeight,
       onHeaderResize,
-      data,
       hasSticky: stickyHeaderIndex !== undefined,
       internalState,
-      rerender,
       revision,
       onContextMenu,
+      onHeaderContextMenu,
     };
 
     return (
@@ -326,7 +333,7 @@ export default function OptimizeTable({
       >
         <div
           style={{
-            height: (data.length + 1) * rowHeight + 10,
+            height: (internalState.getRowsCount() + 1) * rowHeight + 10,
           }}
         >
           {renderCellList({ headerIndex: allHeaderIndex, ...common })}
@@ -338,7 +345,6 @@ export default function OptimizeTable({
     rowStart,
     colEnd,
     colStart,
-    data,
     renderCell,
     headerSizes,
     rowHeight,
@@ -348,7 +354,7 @@ export default function OptimizeTable({
     allHeaderIndex,
     internalState,
     onContextMenu,
-    rerender,
+    onHeaderContextMenu,
     revision,
   ]);
 }

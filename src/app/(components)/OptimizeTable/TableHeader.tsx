@@ -1,3 +1,4 @@
+import React from "react";
 import { OptimizeTableHeaderProps } from ".";
 import TableHeaderResizeHandler from "./TableHeaderResizeHandler";
 import styles from "./styles.module.css";
@@ -6,23 +7,21 @@ export default function TableHeader({
   idx,
   header,
   onHeaderResize,
+  onContextMenu,
   sticky,
 }: {
   idx: number;
   sticky: boolean;
   header: OptimizeTableHeaderProps;
   onHeaderResize: (idx: number, newWidth: number) => void;
+  onContextMenu?: React.MouseEventHandler;
 }) {
   return (
     <th
       key={header.name}
       title={header.tooltip}
       className={sticky ? styles.stickyColumn : undefined}
-      onContextMenu={(e) => {
-        if (header.onContextMenu) {
-          header.onContextMenu(e, idx);
-        }
-      }}
+      onContextMenu={onContextMenu}
     >
       {header.icon && (
         <div className={styles.tableHeaderIcon}>{header.icon}</div>

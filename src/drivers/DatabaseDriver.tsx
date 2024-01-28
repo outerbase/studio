@@ -1,5 +1,7 @@
 import * as hrana from "@libsql/hrana-client";
 
+export type DatabaseValue<T = unknown> = T | undefined | null;
+
 export interface DatabaseSchemaItem {
   name: string;
 }
@@ -50,17 +52,6 @@ export default class DatabaseDriver {
     console.info("Result", r);
 
     return r;
-  }
-
-  async multipleQuery(statements: string[]): Promise<hrana.RowsResult | null> {
-    const stream = this.getStream();
-    let lastResult: hrana.RowsResult | null = null;
-
-    for (const statement of statements) {
-      lastResult = await stream.query(statement);
-    }
-
-    return lastResult;
   }
 
   close() {
