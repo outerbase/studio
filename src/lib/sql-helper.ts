@@ -42,18 +42,75 @@ export function convertSqliteType(
   return TableColumnDataType.BLOB;
 }
 
+export function generateSelectOneWithConditionStatement(
+  tableName: string,
+  condition: Record<string, unknown>
+) {
+  const wherePart = Object.entries(condition)
+    .map(
+      ([columnName, value]) =>
+        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
+    )
+    .join(" AND ");
+
+  return `SELECT * FROM ${escapeIdentity(
+    tableName
+  )} WHERE ${wherePart} LIMIT 1 OFFSET 0;`;
+}
+
+export function generateInsertStatement(
+  tableName: string,
+  value: Record<string, unknown>
+): { sql?: string; error?: string } {
+  let fieldPart: string[] = [];
+  let valuePart: unknown[] = [];
+
+  for (const entry of Object.entries(value)) {
+    fieldPart.push(entry[0]);
+    valuePart.push(entry[1]);
+  }
+
+  if (fieldPart.length === 0) {
+    return { sql: `INSERT INTO ${escapeIdentity(tableName)}() VALUES();` };
+  }
+
+  return {
+    sql: `INSERT INTO ${escapeIdentity(tableName)}(${fieldPart
+      .map(escapeIdentity)
+      .join(", ")}) VALUES(${valuePart.map(escapeSqlValue).join(", ")});`,
+  };
+}
+
+
 export function generateUpdateStatementFromChange(
   tableName: string,
   whereColumnName: string[],
   original: Record<string, unknown>,
   changeValue: Record<string, unknown>
-) {
-  if (tableName === "") return null;
-  if (whereColumnName.length === 0) return null;
-  if (Object.keys(changeValue).length === 0) return null;
+): { sql?: string; error?: string } {
+  if (tableName === "") return { error: "Table name is not specified" };
+  if (whereColumnName.length === 0)
+    return { error: "There is no where column" };
+  if (Object.keys(changeValue).length === 0)
+    return { error: "There is no value to update" };
 
   for (const col of whereColumnName) {
-    if (!(col in original)) return null;
+    if (!(col in original))
+      return {
+        error: `${whereColumnName} does not exist inside original value`,
+      };
+
+    if (original[col] === null || original[col] === undefined) {
+      return {
+        error: `${whereColumnName} value is NULL or undefined. It is unsafe to UPDATE this row.`,
+      };
+    }
+
+    if (changeValue[col] === null) {
+      return {
+        error: `${whereColumnName} is primary key. Set it to NULL is unsafe.`,
+      };
+    }
   }
 
   const setPart = Object.entries(changeValue)
@@ -67,7 +124,9 @@ export function generateUpdateStatementFromChange(
     wherePart.push(`${escapeIdentity(col)} = ${escapeSqlValue(original[col])}`);
   }
 
-  return `UPDATE ${escapeIdentity(
-    tableName
-  )} SET ${setPart} WHERE ${wherePart.join(" AND ")}`;
+  return {
+    sql: `UPDATE ${escapeIdentity(
+      tableName
+    )} SET ${setPart} WHERE ${wherePart.join(" AND ")}`,
+  };
 }

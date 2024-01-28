@@ -153,7 +153,9 @@ function renderCellList({
     //   rowClass = styles.newRow;
     // } else if (internalState.removedRows.has(absoluteRowIndex)) {
     //   rowClass = styles.removedRow;
-    if (internalState.isRowSelected(absoluteRowIndex)) {
+    if (internalState.isNewRow(absoluteRowIndex)) {
+      rowClass = styles.newRow;
+    } else if (internalState.isRowSelected(absoluteRowIndex)) {
       rowClass = styles.selectedRow;
     }
 

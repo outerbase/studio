@@ -1,3 +1,4 @@
+import { escapeSqlValue } from "@/lib/sql-helper";
 import * as hrana from "@libsql/hrana-client";
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
@@ -16,6 +17,7 @@ export interface DatabaseTableColumn {
 export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
+  autoIncrement: boolean;
 }
 
 export default class DatabaseDriver {
@@ -46,9 +48,9 @@ export default class DatabaseDriver {
 
   async query(stmt: hrana.InStmt) {
     const stream = this.getStream();
-    const r = await stream.query(stmt);
 
     console.info("Querying", stmt);
+    const r = await stream.query(stmt);
     console.info("Result", r);
 
     return r;
@@ -83,9 +85,23 @@ export default class DatabaseDriver {
       pk: !!row.pk,
     }));
 
+    // Check auto increment
+    const seqCount = await this.query(
+      `SELECT COUNT(*) AS total FROM sqlite_sequence WHERE name=${escapeSqlValue(
+        tableName
+      )};`
+    );
+
+    let hasAutoIncrement = false;
+    const seqRow = seqCount.rows[0];
+    if (seqRow && Number(seqRow[0] ?? 0) > 0) {
+      hasAutoIncrement = true;
+    }
+
     return {
       columns,
       pk: columns.filter((col) => col.pk).map((col) => col.name),
+      autoIncrement: hasAutoIncrement,
     };
   }
 

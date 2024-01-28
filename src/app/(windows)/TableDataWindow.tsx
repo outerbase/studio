@@ -7,6 +7,7 @@ import {
   LucideArrowLeft,
   LucideArrowRight,
   LucideKey,
+  LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
 } from "lucide-react";
@@ -20,7 +21,10 @@ import {
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import OpacityLoading from "../(components)/OpacityLoading";
 import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
-import { generateUpdateStatementFromChange } from "@/lib/sql-helper";
+import {
+  generateInsertStatement,
+  generateUpdateStatementFromChange,
+} from "@/lib/sql-helper";
 import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
 
 interface TableDataContentProps {
@@ -89,32 +93,78 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     if (!data) return;
     if (tableSchema.pk.length === 0) return;
 
-    const rowChanges = data.getChangedRows();
+    const rowChangeList = data.getChangedRows();
     const plans: ExecutePlan[] = [];
 
-    for (const row of rowChanges) {
-      if (row.change) {
-        const sql = generateUpdateStatementFromChange(
-          tableName,
-          tableSchema.pk,
-          row.raw,
-          row.change
-        );
+    for (const row of rowChangeList) {
+      const rowChange = row.change;
+      if (rowChange) {
+        const pk = tableSchema.pk;
+
+        const updateCondition = pk.reduce((condition, pkColumnName) => {
+          condition[pkColumnName] =
+            rowChange[pkColumnName] ?? row.raw[pkColumnName];
+          return condition;
+        }, {} as Record<string, unknown>);
+
+        const { sql, error: generatedError } = row.isNewRow
+          ? generateInsertStatement(tableName, rowChange)
+          : generateUpdateStatementFromChange(
+              tableName,
+              tableSchema.pk,
+              row.raw,
+              rowChange
+            );
 
         if (sql) {
-          plans.push({ sql, row });
+          plans.push({
+            sql,
+            row,
+            tableName,
+            updateCondition,
+            autoIncrement: tableSchema.autoIncrement,
+          });
+        } else {
+          alert(generatedError);
+          return;
         }
       }
     }
 
     if (plans.length > 0) {
       executePlans(databaseDriver, plans)
-        .then(() => {
-          data.applyChanges();
+        .then(({ success, error: errorMessage, plans }) => {
+          if (success) {
+            data.applyChanges(
+              plans.map((plan) => ({
+                row: plan.row,
+                updated: plan.updatedRowData ?? {},
+              }))
+            );
+          } else {
+            alert(errorMessage);
+          }
         })
         .catch(console.error);
     }
   }, [databaseDriver, tableName, tableSchema, data]);
+
+  const onDiscard = useCallback(() => {
+    if (data) {
+      data.disardAllChange();
+    }
+  }, [data]);
+
+  const onNewRow = useCallback(() => {
+    if (data) {
+      const focus = data.getFocus();
+      if (focus) {
+        data.insertNewRow(focus.y);
+      } else {
+        data.insertNewRow();
+      }
+    }
+  }, [data]);
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
@@ -136,6 +186,24 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                 {changeNumber}
               </span>
             )}
+          </Button>
+
+          <Button
+            variant={"ghost"}
+            size={"sm"}
+            disabled={!changeNumber}
+            onClick={onDiscard}
+          >
+            <span className="text-red-500">Discard Change</span>
+          </Button>
+
+          <div>
+            <Separator orientation="vertical" />
+          </div>
+
+          <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
+            <LucidePlus className="w-4 h-4 mr-2 text-green-600" />
+            New Row
           </Button>
 
           <Button

@@ -9,6 +9,7 @@ export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
   change?: Record<string, unknown>;
   changeKey?: number;
+  isNewRow?: boolean;
 }
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
@@ -66,11 +67,17 @@ export default class OptimizeTableState {
     this.changeCallback = this.changeCallback.filter((c) => c !== cb);
   }
 
-  protected broadcastChange() {
+
+  protected broadcastChange(instant?: boolean) {
+    if (instant) {
+      if (this.changeDebounceTimerId) clearTimeout(this.changeDebounceTimerId);
+      this.changeCallback.reverse().forEach((cb) => cb(this));
+    }
+
     if (this.changeDebounceTimerId) return false;
     this.changeDebounceTimerId = setTimeout(() => {
       this.changeDebounceTimerId = null;
-      this.changeCallback.forEach((cb) => cb(this));
+      this.changeCallback.reverse().forEach((cb) => cb(this));
     }, 5);
   }
 
@@ -82,7 +89,7 @@ export default class OptimizeTableState {
   }
 
   getValue(y: number, x: number): unknown {
-    const rowChange = this.data[y].change;
+    const rowChange = this.data[y]?.change;
     if (rowChange) {
       return rowChange[this.headers[x].name] ?? this.getOriginalValue(y, x);
     }
@@ -96,7 +103,7 @@ export default class OptimizeTableState {
   }
 
   getOriginalValue(y: number, x: number): unknown {
-    return this.data[y].raw[this.headers[x].name];
+    return this.data[y]?.raw[this.headers[x].name];
   }
 
   changeValue(y: number, x: number, newValue: unknown) {
@@ -139,17 +146,63 @@ export default class OptimizeTableState {
     return this.data.length;
   }
 
-  applyChanges() {
+  disardAllChange() {
+    const newRows: OptimizeTableRowValue[] = [];
+
+    for (const row of Object.values(this.changeLogs)) {
+      if (row.isNewRow) {
+        newRows.push(row);
+        delete row.change;
+        delete row.changeKey;
+        delete row.isNewRow;
+      } else {
+        delete row.change;
+        delete row.changeKey;
+      }
+    }
+
+    // Remove all new rows
+    this.data = this.data.filter((row) => !newRows.includes(row));
+    this.changeLogs = {};
+
+    this.broadcastChange(true);
+  }
+
+  applyChanges(
+    updatedRows: {
+      row: OptimizeTableRowValue;
+      updated: Record<string, unknown>;
+    }[]
+  ) {
     const rowChanges = this.getChangedRows();
 
     for (const row of rowChanges) {
-      row.raw = { ...row.raw, ...row.change };
+      const updated = updatedRows.find((updateRow) => updateRow.row === row);
+      row.raw = { ...row.raw, ...row.change, ...updated?.updated };
       delete row.changeKey;
       delete row.change;
+      delete row.isNewRow;
     }
 
     this.changeLogs = {};
     this.broadcastChange();
+  }
+
+  insertNewRow(index: number = 0) {
+    const newRow = {
+      isNewRow: true,
+      raw: {},
+      change: {},
+      changeKey: ++this.changeCounter,
+    };
+
+    this.data.splice(index, 0, newRow);
+    this.changeLogs[newRow.changeKey] = newRow;
+    this.broadcastChange();
+  }
+
+  isNewRow(index: number) {
+    return !!this.data[index]?.isNewRow;
   }
 
   // ------------------------------------------------
