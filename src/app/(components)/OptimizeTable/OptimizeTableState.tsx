@@ -67,6 +67,7 @@ export default class OptimizeTableState {
     this.changeCallback = this.changeCallback.filter((c) => c !== cb);
   }
 
+
   protected broadcastChange(instant?: boolean) {
     if (instant) {
       if (this.changeDebounceTimerId) clearTimeout(this.changeDebounceTimerId);

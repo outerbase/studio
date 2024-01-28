@@ -81,6 +81,7 @@ export function generateInsertStatement(
   };
 }
 
+
 export function generateUpdateStatementFromChange(
   tableName: string,
   whereColumnName: string[],
