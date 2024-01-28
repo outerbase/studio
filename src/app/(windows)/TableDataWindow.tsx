@@ -90,21 +90,30 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     if (!data) return;
     if (tableSchema.pk.length === 0) return;
 
-    const rowChanges = data.getChangedRows();
+    const rowChangeList = data.getChangedRows();
     const plans: ExecutePlan[] = [];
 
-    for (const row of rowChanges) {
-      if (row.change) {
+    for (const row of rowChangeList) {
+      const rowChange = row.change;
+      if (rowChange) {
+        const pk = tableSchema.pk;
+
+        const updateCondition = pk.reduce((condition, pkColumnName) => {
+          condition[pkColumnName] =
+            rowChange[pkColumnName] ?? row.raw[pkColumnName];
+          return condition;
+        }, {} as Record<string, unknown>);
+
         const { sql, error: generatedError } =
           generateUpdateStatementFromChange(
             tableName,
             tableSchema.pk,
             row.raw,
-            row.change
+            rowChange
           );
 
         if (sql) {
-          plans.push({ sql, row });
+          plans.push({ sql, row, tableName, updateCondition });
         } else {
           alert(generatedError);
           return;
@@ -114,9 +123,14 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
     if (plans.length > 0) {
       executePlans(databaseDriver, plans)
-        .then(({ success, error: errorMessage }) => {
+        .then(({ success, error: errorMessage, plans }) => {
           if (success) {
-            data.applyChanges();
+            data.applyChanges(
+              plans.map((plan) => ({
+                row: plan.row,
+                updated: plan.updatedRowData ?? {},
+              }))
+            );
           } else {
             alert(errorMessage);
           }

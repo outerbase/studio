@@ -36,7 +36,10 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
             }}
           />
         );
-      } else if (header.dataType === TableColumnDataType.INTEGER) {
+      } else if (
+        header.dataType === TableColumnDataType.INTEGER ||
+        header.dataType === TableColumnDataType.REAL
+      ) {
         return (
           <NumberCell
             readOnly={!tableName}

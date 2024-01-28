@@ -167,11 +167,17 @@ export default class OptimizeTableState {
     this.broadcastChange(true);
   }
 
-  applyChanges() {
+  applyChanges(
+    updatedRows: {
+      row: OptimizeTableRowValue;
+      updated: Record<string, unknown>;
+    }[]
+  ) {
     const rowChanges = this.getChangedRows();
 
     for (const row of rowChanges) {
-      row.raw = { ...row.raw, ...row.change };
+      const updated = updatedRows.find((updateRow) => updateRow.row === row);
+      row.raw = { ...row.raw, ...row.change, ...updated?.updated };
       delete row.changeKey;
       delete row.change;
     }

@@ -42,6 +42,22 @@ export function convertSqliteType(
   return TableColumnDataType.BLOB;
 }
 
+export function generateSelectOneWithConditionStatement(
+  tableName: string,
+  condition: Record<string, unknown>
+) {
+  const wherePart = Object.entries(condition)
+    .map(
+      ([columnName, value]) =>
+        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
+    )
+    .join(" AND ");
+
+  return `SELECT * FROM ${escapeIdentity(
+    tableName
+  )} WHERE ${wherePart} LIMIT 1 OFFSET 0;`;
+}
+
 export function generateUpdateStatementFromChange(
   tableName: string,
   whereColumnName: string[],
