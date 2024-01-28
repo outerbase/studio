@@ -36,6 +36,30 @@ export default function GenericCell({
     );
   }
 
+  if (value === undefined) {
+    return (
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
+        <span className="text-gray-500">DEFAULT</span>
+      </div>
+    );
+  }
+
+  if (typeof value === "string") {
+    return (
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
+        <span className="text-gray-500">{value}</span>
+      </div>
+    );
+  }
+
   if (typeof value === "number") {
     return (
       <div
@@ -75,6 +99,7 @@ export default function GenericCell({
     );
   }
 
+  console.log("unknown", value);
   return (
     <div
       className={className}

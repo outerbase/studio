@@ -1,4 +1,5 @@
 import GenericCell from "@/app/(components)/Cells/GenericCell";
+import NumberCell from "@/app/(components)/Cells/NumberCell";
 import TextCell from "@/app/(components)/Cells/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
@@ -6,6 +7,7 @@ import OptimizeTable, {
   TableColumnDataType,
 } from "@/app/(components)/OptimizeTable";
 import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
+import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import React, { useCallback, useState } from "react";
@@ -25,7 +27,20 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       if (header.dataType === TableColumnDataType.TEXT) {
         return (
           <TextCell
-            value={state.getValue(y, x) as string}
+            readOnly={!tableName}
+            value={state.getValue(y, x) as DatabaseValue<string>}
+            focus={isFocus}
+            isChanged={state.hasCellChange(y, x)}
+            onChange={(newValue) => {
+              state.changeValue(y, x, newValue);
+            }}
+          />
+        );
+      } else if (header.dataType === TableColumnDataType.INTEGER) {
+        return (
+          <NumberCell
+            readOnly={!tableName}
+            value={state.getValue(y, x) as DatabaseValue<number>}
             focus={isFocus}
             isChanged={state.hasCellChange(y, x)}
             onChange={(newValue) => {
@@ -37,7 +52,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
 
       return <GenericCell value={state.getValue(y, x) as string} />;
     },
-    []
+    [tableName]
   );
 
   const onHeaderContextMenu = useCallback(

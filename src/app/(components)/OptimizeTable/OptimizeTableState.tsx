@@ -41,7 +41,7 @@ export default class OptimizeTableState {
           ) : undefined,
         };
       }),
-      dataResult.rows
+      dataResult.rows.map((r) => ({ ...r }))
     );
   }
 
@@ -107,7 +107,7 @@ export default class OptimizeTableState {
 
     if (oldValue === newValue) {
       const rowChange = row.change;
-      if (rowChange && rowChange[headerName]) {
+      if (rowChange && headerName in rowChange) {
         delete rowChange[headerName];
         if (Object.entries(rowChange).length === 0) {
           if (row.changeKey) {
@@ -141,6 +141,7 @@ export default class OptimizeTableState {
 
   applyChanges() {
     const rowChanges = this.getChangedRows();
+
     for (const row of rowChanges) {
       row.raw = { ...row.raw, ...row.change };
       delete row.changeKey;
