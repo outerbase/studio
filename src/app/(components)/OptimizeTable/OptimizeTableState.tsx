@@ -9,6 +9,7 @@ export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
   change?: Record<string, unknown>;
   changeKey?: number;
+  isNewRow?: boolean;
 }
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
@@ -150,6 +151,23 @@ export default class OptimizeTableState {
 
     this.changeLogs = {};
     this.broadcastChange();
+  }
+
+  insertNewRow(index: number = 0) {
+    const newRow = {
+      isNewRow: true,
+      raw: {},
+      change: {},
+      changeKey: ++this.changeCounter,
+    };
+
+    this.data.splice(index, 0, newRow);
+    this.changeLogs[newRow.changeKey] = newRow;
+    this.broadcastChange();
+  }
+
+  isNewRow(index: number) {
+    return !!this.data[index].isNewRow;
   }
 
   // ------------------------------------------------

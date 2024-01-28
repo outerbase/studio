@@ -7,6 +7,7 @@ import {
   LucideArrowLeft,
   LucideArrowRight,
   LucideKey,
+  LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
 } from "lucide-react";
@@ -94,27 +95,46 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
     for (const row of rowChanges) {
       if (row.change) {
-        const sql = generateUpdateStatementFromChange(
-          tableName,
-          tableSchema.pk,
-          row.raw,
-          row.change
-        );
+        const { sql, error: generatedError } =
+          generateUpdateStatementFromChange(
+            tableName,
+            tableSchema.pk,
+            row.raw,
+            row.change
+          );
 
         if (sql) {
           plans.push({ sql, row });
+        } else {
+          alert(generatedError);
+          return;
         }
       }
     }
 
     if (plans.length > 0) {
       executePlans(databaseDriver, plans)
-        .then(() => {
-          data.applyChanges();
+        .then(({ success, error: errorMessage }) => {
+          if (success) {
+            data.applyChanges();
+          } else {
+            alert(errorMessage);
+          }
         })
         .catch(console.error);
     }
   }, [databaseDriver, tableName, tableSchema, data]);
+
+  const onNewRow = useCallback(() => {
+    if (data) {
+      const focus = data.getFocus();
+      if (focus) {
+        data.insertNewRow(focus.y);
+      } else {
+        data.insertNewRow();
+      }
+    }
+  }, [data]);
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
@@ -136,6 +156,11 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                 {changeNumber}
               </span>
             )}
+          </Button>
+
+          <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
+            <LucidePlus className="w-4 h-4 mr-2 text-green-600" />
+            New Row
           </Button>
 
           <Button

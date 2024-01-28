@@ -9,16 +9,18 @@ export interface ExecutePlan {
 export async function executePlans(
   driver: DatabaseDriver,
   plans: ExecutePlan[]
-) {
+): Promise<{ success: boolean; error?: string }> {
   try {
     await driver.query("BEGIN TRANSACTION;");
 
     for (const plan of plans) {
-      await driver.query(plan.sql);
+      const result = await driver.query(plan.sql);
     }
 
     await driver.query("COMMIT");
-  } catch {
+    return { success: true };
+  } catch (e) {
     await driver.query("ROLLBACK");
+    return { success: false, error: (e as any).toString() };
   }
 }
