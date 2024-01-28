@@ -41,3 +41,33 @@ export function convertSqliteType(
 
   return TableColumnDataType.BLOB;
 }
+
+export function generateUpdateStatementFromChange(
+  tableName: string,
+  whereColumnName: string[],
+  original: Record<string, unknown>,
+  changeValue: Record<string, unknown>
+) {
+  if (tableName === "") return null;
+  if (whereColumnName.length === 0) return null;
+  if (Object.keys(changeValue).length === 0) return null;
+
+  for (const col of whereColumnName) {
+    if (!(col in original)) return null;
+  }
+
+  const setPart = Object.entries(changeValue)
+    .map(([colName, value]) => {
+      return `${escapeIdentity(colName)} = ${escapeSqlValue(value)}`;
+    })
+    .join(", ");
+
+  const wherePart: string[] = [];
+  for (const col of whereColumnName) {
+    wherePart.push(`${escapeIdentity(col)} = ${escapeSqlValue(original[col])}`);
+  }
+
+  return `UPDATE ${escapeIdentity(
+    tableName
+  )} SET ${setPart} WHERE ${wherePart.join(" AND ")}`;
+}

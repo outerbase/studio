@@ -5,7 +5,7 @@ import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { LucideKey } from "lucide-react";
 import { convertSqliteType } from "@/lib/sql-helper";
 
-interface OptimizeTableRowValue {
+export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
   change?: Record<string, unknown>;
   changeKey?: number;
@@ -137,6 +137,18 @@ export default class OptimizeTableState {
 
   getRowsCount() {
     return this.data.length;
+  }
+
+  applyChanges() {
+    const rowChanges = this.getChangedRows();
+    for (const row of rowChanges) {
+      row.raw = { ...row.raw, ...row.change };
+      delete row.changeKey;
+      delete row.change;
+    }
+
+    this.changeLogs = {};
+    this.broadcastChange();
   }
 
   // ------------------------------------------------

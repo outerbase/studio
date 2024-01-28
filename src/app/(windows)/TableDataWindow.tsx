@@ -1,12 +1,14 @@
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ResultTable from "@/components/result/ResultTable";
 import { Button } from "@/components/ui/button";
 import {
+  Badge,
   LucideArrowLeft,
   LucideArrowRight,
   LucideKey,
   LucideRefreshCcw,
+  LucideSaveAll,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
@@ -18,6 +20,8 @@ import {
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import OpacityLoading from "../(components)/OpacityLoading";
 import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
+import { generateUpdateStatementFromChange } from "@/lib/sql-helper";
+import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
 
 interface TableDataContentProps {
   tableName: string;
@@ -29,6 +33,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OptimizeTableState>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
+  const [changeNumber, setChangeNumber] = useState(0);
 
   const [offset, setOffset] = useState("0");
   const [limit, setLimit] = useState("50");
@@ -37,6 +42,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const [finalLimit, setFinalLimit] = useState(50);
 
   const [revision, setRevision] = useState(1);
+  const [lastQueryTimestamp, setLastQueryTimestamp] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +60,8 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
       setTableSchema(schemaResult);
       updateTableSchema(tableName, schemaResult.columns);
+      setLastQueryTimestamp(Date.now());
+      setChangeNumber(0);
     };
 
     fetchData().then().catch(console.error);
@@ -66,10 +74,70 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     revision,
   ]);
 
+  useEffect(() => {
+    if (data) {
+      const callback = (state: OptimizeTableState) => {
+        setChangeNumber(state.getChangedRows().length);
+      };
+      data.addChangeListener(callback);
+      return () => data.removeChangeListener(callback);
+    }
+  }, [data]);
+
+  const onCommit = useCallback(() => {
+    if (!tableSchema) return;
+    if (!data) return;
+    if (tableSchema.pk.length === 0) return;
+
+    const rowChanges = data.getChangedRows();
+    const plans: ExecutePlan[] = [];
+
+    for (const row of rowChanges) {
+      if (row.change) {
+        const sql = generateUpdateStatementFromChange(
+          tableName,
+          tableSchema.pk,
+          row.raw,
+          row.change
+        );
+
+        if (sql) {
+          plans.push({ sql, row });
+        }
+      }
+    }
+
+    if (plans.length > 0) {
+      executePlans(databaseDriver, plans)
+        .then(() => {
+          data.applyChanges();
+        })
+        .catch(console.error);
+    }
+  }, [databaseDriver, tableName, tableSchema, data]);
+
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       <div className="flex-shrink-0 flex-grow-0">
         <div className="flex p-1 gap-1">
+          <Button
+            variant={"ghost"}
+            size={"sm"}
+            disabled={!changeNumber}
+            onClick={onCommit}
+          >
+            <LucideSaveAll className="w-4 h-4 mr-2 text-green-600" />
+            Commit
+            {!!changeNumber && (
+              <span
+                className="ml-2 bg-red-500 text-white leading-5 w-5 h-5 rounded-full"
+                style={{ fontSize: 9 }}
+              >
+                {changeNumber}
+              </span>
+            )}
+          </Button>
+
           <Button
             variant={"ghost"}
             size={"sm"}
@@ -160,7 +228,13 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       </div>
       <div className="flex-grow overflow-hidden relative">
         {loading && <OpacityLoading />}
-        {data ? <ResultTable data={data} tableName={tableName} /> : null}
+        {data ? (
+          <ResultTable
+            data={data}
+            tableName={tableName}
+            key={lastQueryTimestamp}
+          />
+        ) : null}
       </div>
     </div>
   );
