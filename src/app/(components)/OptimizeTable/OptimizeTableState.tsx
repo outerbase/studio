@@ -180,6 +180,7 @@ export default class OptimizeTableState {
       row.raw = { ...row.raw, ...row.change, ...updated?.updated };
       delete row.changeKey;
       delete row.change;
+      delete row.isNewRow;
     }
 
     this.changeLogs = {};

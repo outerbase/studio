@@ -58,6 +58,29 @@ export function generateSelectOneWithConditionStatement(
   )} WHERE ${wherePart} LIMIT 1 OFFSET 0;`;
 }
 
+export function generateInsertStatement(
+  tableName: string,
+  value: Record<string, unknown>
+): { sql?: string; error?: string } {
+  let fieldPart: string[] = [];
+  let valuePart: unknown[] = [];
+
+  for (const entry of Object.entries(value)) {
+    fieldPart.push(entry[0]);
+    valuePart.push(entry[1]);
+  }
+
+  if (fieldPart.length === 0) {
+    return { sql: `INSERT INTO ${escapeIdentity(tableName)}() VALUES();` };
+  }
+
+  return {
+    sql: `INSERT INTO ${escapeIdentity(tableName)}(${fieldPart
+      .map(escapeIdentity)
+      .join(", ")}) VALUES(${valuePart.map(escapeSqlValue).join(", ")});`,
+  };
+}
+
 export function generateUpdateStatementFromChange(
   tableName: string,
   whereColumnName: string[],

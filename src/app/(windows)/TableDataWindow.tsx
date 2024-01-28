@@ -21,7 +21,10 @@ import {
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import OpacityLoading from "../(components)/OpacityLoading";
 import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
-import { generateUpdateStatementFromChange } from "@/lib/sql-helper";
+import {
+  generateInsertStatement,
+  generateUpdateStatementFromChange,
+} from "@/lib/sql-helper";
 import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
 
 interface TableDataContentProps {
@@ -104,16 +107,23 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           return condition;
         }, {} as Record<string, unknown>);
 
-        const { sql, error: generatedError } =
-          generateUpdateStatementFromChange(
-            tableName,
-            tableSchema.pk,
-            row.raw,
-            rowChange
-          );
+        const { sql, error: generatedError } = row.isNewRow
+          ? generateInsertStatement(tableName, rowChange)
+          : generateUpdateStatementFromChange(
+              tableName,
+              tableSchema.pk,
+              row.raw,
+              rowChange
+            );
 
         if (sql) {
-          plans.push({ sql, row, tableName, updateCondition });
+          plans.push({
+            sql,
+            row,
+            tableName,
+            updateCondition,
+            autoIncrement: tableSchema.autoIncrement,
+          });
         } else {
           alert(generatedError);
           return;

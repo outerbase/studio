@@ -6,6 +6,7 @@ export interface ExecutePlan {
   row: OptimizeTableRowValue;
   sql: string;
   tableName: string;
+  autoIncrement: boolean;
   updateCondition: Record<string, unknown>;
   updatedRowData?: Record<string, unknown>;
 }
@@ -18,9 +19,17 @@ export async function executePlans(
     await driver.query("BEGIN TRANSACTION;");
 
     for (const plan of plans) {
-      await driver.query(plan.sql);
+      const result = await driver.query(plan.sql);
 
-      // Get the updated value
+      if (
+        plan.autoIncrement &&
+        Object.values(plan.updateCondition)[0] === undefined
+      ) {
+        plan.updateCondition[Object.keys(plan.updateCondition)[0]] = Number(
+          result.lastInsertRowid
+        );
+      }
+
       const updateResult = await driver.query(
         generateSelectOneWithConditionStatement(
           plan.tableName,
