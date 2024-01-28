@@ -125,6 +125,12 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     }
   }, [databaseDriver, tableName, tableSchema, data]);
 
+  const onDiscard = useCallback(() => {
+    if (data) {
+      data.disardAllChange();
+    }
+  }, [data]);
+
   const onNewRow = useCallback(() => {
     if (data) {
       const focus = data.getFocus();
@@ -157,6 +163,19 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
               </span>
             )}
           </Button>
+
+          <Button
+            variant={"ghost"}
+            size={"sm"}
+            disabled={!changeNumber}
+            onClick={onDiscard}
+          >
+            <span className="text-red-500">Discard Change</span>
+          </Button>
+
+          <div>
+            <Separator orientation="vertical" />
+          </div>
 
           <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
             <LucidePlus className="w-4 h-4 mr-2 text-green-600" />
