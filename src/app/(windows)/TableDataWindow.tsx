@@ -26,6 +26,7 @@ import {
   generateUpdateStatementFromChange,
 } from "@/lib/sql-helper";
 import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
+import { validateOperation } from "@/lib/validation";
 
 interface TableDataContentProps {
   tableName: string;
@@ -107,7 +108,20 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           return condition;
         }, {} as Record<string, unknown>);
 
-        const { sql, error: generatedError } = row.isNewRow
+        const { valid, reason } = validateOperation({
+          operation: row.isNewRow ? "INSERT" : "UPDATE",
+          autoIncrement: tableSchema.autoIncrement,
+          changeValue: rowChange,
+          originalValue: row.raw,
+          primaryKey: tableSchema.pk,
+        });
+
+        if (!valid) {
+          alert(reason);
+          return;
+        }
+
+        const sql = row.isNewRow
           ? generateInsertStatement(tableName, rowChange)
           : generateUpdateStatementFromChange(
               tableName,
@@ -116,18 +130,13 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
               rowChange
             );
 
-        if (sql) {
-          plans.push({
-            sql,
-            row,
-            tableName,
-            updateCondition,
-            autoIncrement: tableSchema.autoIncrement,
-          });
-        } else {
-          alert(generatedError);
-          return;
-        }
+        plans.push({
+          sql,
+          row,
+          tableName,
+          updateCondition,
+          autoIncrement: tableSchema.autoIncrement,
+        });
       }
     }
 

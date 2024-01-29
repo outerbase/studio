@@ -9,7 +9,7 @@ export function escapeSqlString(str: string) {
 }
 
 export function escapeSqlBinary(value: ArrayBuffer) {
-  return "";
+  throw "not implement";
 }
 
 export function escapeSqlValue(value: unknown) {
@@ -37,7 +37,12 @@ export function convertSqliteType(
 
   if (type.indexOf("BLOB") >= 0) return TableColumnDataType.BLOB;
 
-  if (type.indexOf("REAL") >= 0) return TableColumnDataType.REAL;
+  if (
+    type.indexOf("REAL") >= 0 ||
+    type.indexOf("DOUBLE") ||
+    type.indexOf("FLOAT")
+  )
+    return TableColumnDataType.REAL;
 
   return TableColumnDataType.BLOB;
 }
@@ -61,7 +66,7 @@ export function generateSelectOneWithConditionStatement(
 export function generateInsertStatement(
   tableName: string,
   value: Record<string, unknown>
-): { sql?: string; error?: string } {
+): string {
   let fieldPart: string[] = [];
   let valuePart: unknown[] = [];
 
@@ -69,50 +74,17 @@ export function generateInsertStatement(
     fieldPart.push(entry[0]);
     valuePart.push(entry[1]);
   }
-
-  if (fieldPart.length === 0) {
-    return { sql: `INSERT INTO ${escapeIdentity(tableName)}() VALUES();` };
-  }
-
-  return {
-    sql: `INSERT INTO ${escapeIdentity(tableName)}(${fieldPart
-      .map(escapeIdentity)
-      .join(", ")}) VALUES(${valuePart.map(escapeSqlValue).join(", ")});`,
-  };
+  return `INSERT INTO ${escapeIdentity(tableName)}(${fieldPart
+    .map(escapeIdentity)
+    .join(", ")}) VALUES(${valuePart.map(escapeSqlValue).join(", ")});`;
 }
-
 
 export function generateUpdateStatementFromChange(
   tableName: string,
   whereColumnName: string[],
   original: Record<string, unknown>,
   changeValue: Record<string, unknown>
-): { sql?: string; error?: string } {
-  if (tableName === "") return { error: "Table name is not specified" };
-  if (whereColumnName.length === 0)
-    return { error: "There is no where column" };
-  if (Object.keys(changeValue).length === 0)
-    return { error: "There is no value to update" };
-
-  for (const col of whereColumnName) {
-    if (!(col in original))
-      return {
-        error: `${whereColumnName} does not exist inside original value`,
-      };
-
-    if (original[col] === null || original[col] === undefined) {
-      return {
-        error: `${whereColumnName} value is NULL or undefined. It is unsafe to UPDATE this row.`,
-      };
-    }
-
-    if (changeValue[col] === null) {
-      return {
-        error: `${whereColumnName} is primary key. Set it to NULL is unsafe.`,
-      };
-    }
-  }
-
+): string {
   const setPart = Object.entries(changeValue)
     .map(([colName, value]) => {
       return `${escapeIdentity(colName)} = ${escapeSqlValue(value)}`;
@@ -124,9 +96,7 @@ export function generateUpdateStatementFromChange(
     wherePart.push(`${escapeIdentity(col)} = ${escapeSqlValue(original[col])}`);
   }
 
-  return {
-    sql: `UPDATE ${escapeIdentity(
-      tableName
-    )} SET ${setPart} WHERE ${wherePart.join(" AND ")}`,
-  };
+  return `UPDATE ${escapeIdentity(
+    tableName
+  )} SET ${setPart} WHERE ${wherePart.join(" AND ")}`;
 }

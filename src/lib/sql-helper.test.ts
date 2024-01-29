@@ -4,38 +4,55 @@ import {
   convertSqliteType,
   escapeIdentity,
   escapeSqlString,
+  generateInsertStatement,
 } from "./sql-helper";
 
-test("escape sql string", () => {
-  expect(escapeSqlString("i'm testing")).toBe("'i''m testing'");
-  expect(escapeSqlString("There are 'two' single quote")).toBe(
-    "'There are ''two'' single quote'"
-  );
+describe("Escape SQL", () => {
+  it("escape sql string", () => {
+    expect(escapeSqlString("i'm testing")).toBe("'i''m testing'");
+    expect(escapeSqlString("There are 'two' single quote")).toBe(
+      "'There are ''two'' single quote'"
+    );
+  });
+
+  it("escape sql identity", () => {
+    expect(escapeIdentity(`col"name`)).toBe(`"col""name"`);
+  });
 });
 
-test("escape sql identity", () => {
-  expect(escapeIdentity(`col"name`)).toBe(`"col""name"`);
-});
-
-test("generate export insert from rows", () => {
-  expect(
-    exportRowsToSqlInsert(
-      "users",
-      ["id", "name", "age"],
+describe("Generate SQL Statement", () => {
+  test("Generate export rows to SQL statements", () => {
+    expect(
+      exportRowsToSqlInsert(
+        "users",
+        ["id", "name", "age"],
+        [
+          [undefined, "Visal", 35],
+          [2, "Turso", null],
+        ]
+      )
+    ).toBe(
       [
-        [undefined, "Visal", 35],
-        [2, "Turso", null],
-      ]
-    )
-  ).toBe(
-    [
-      `INSERT INTO "users"("id", "name", "age") VALUES(DEFAULT, 'Visal', 35);`,
-      `INSERT INTO "users"("id", "name", "age") VALUES(2, 'Turso', NULL);`,
-    ].join("\r\n")
-  );
+        `INSERT INTO "users"("id", "name", "age") VALUES(DEFAULT, 'Visal', 35);`,
+        `INSERT INTO "users"("id", "name", "age") VALUES(2, 'Turso', NULL);`,
+      ].join("\r\n")
+    );
+  });
+
+  it("Generate insert statement from object", () => {
+    expect(
+      generateInsertStatement("users", {
+        name: "Visal",
+        age: 50,
+        title: "O'reilly",
+      })
+    ).toBe(
+      `INSERT INTO "users"("name", "age", "title") VALUES('Visal', 50, 'O''reilly');`
+    );
+  });
 });
 
-test("convert to correct type", () => {
+describe("Mapping sqlite column type to our table type", () => {
   const integerType = [
     "INT",
     "INTEGER",
@@ -49,7 +66,9 @@ test("convert to correct type", () => {
   ];
 
   for (const type of integerType) {
-    expect(convertSqliteType(type)).toBe(TableColumnDataType.INTEGER);
+    it(`${type} column type should be INTEGER`, () => {
+      expect(convertSqliteType(type)).toBe(TableColumnDataType.INTEGER);
+    });
   }
 
   const textType = [
@@ -64,13 +83,15 @@ test("convert to correct type", () => {
   ];
 
   for (const type of textType) {
-    expect(convertSqliteType(type)).toBe(TableColumnDataType.TEXT);
+    it(`${type} column type should be TEXT`, () =>
+      expect(convertSqliteType(type)).toBe(TableColumnDataType.TEXT));
   }
 
   expect(convertSqliteType("BLOB")).toBe(TableColumnDataType.BLOB);
 
   const realType = ["REAL", "DOUBLE", "DOUBLE PRECISION", "FLOAT"];
   for (const type of realType) {
-    expect(convertSqliteType(type)).toBe(TableColumnDataType.REAL);
+    it(`${type} column should be REAL`, () =>
+      expect(convertSqliteType(type)).toBe(TableColumnDataType.REAL));
   }
 });
