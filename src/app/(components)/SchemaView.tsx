@@ -83,7 +83,13 @@ export default function SchemaView() {
   const prepareContextMenu = useCallback(
     (tableName?: string) => {
       return [
-        { title: "Copy Name", disabled: !tableName },
+        {
+          title: "Copy Name",
+          disabled: !tableName,
+          onClick: () => {
+            window.navigator.clipboard.writeText(tableName ?? "");
+          },
+        },
         { separator: true },
         { title: "Refresh", onClick: fetchSchema },
       ] as OpenContextMenuList;
