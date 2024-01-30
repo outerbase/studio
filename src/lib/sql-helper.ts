@@ -79,10 +79,23 @@ export function generateInsertStatement(
     .join(", ")}) VALUES(${valuePart.map(escapeSqlValue).join(", ")});`;
 }
 
-export function generateUpdateStatementFromChange(
+export function generateDeleteStatement(
   tableName: string,
-  whereColumnName: string[],
-  original: Record<string, unknown>,
+  where: Record<string, unknown>
+) {
+  let wherePart: string = Object.entries(where)
+    .map(
+      ([columnName, value]) =>
+        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
+    )
+    .join(" AND ");
+
+  return `DELETE FROM ${escapeIdentity(tableName)} WHERE ${wherePart}`;
+}
+
+export function genereteUpdateStatement(
+  tableName: string,
+  where: Record<string, unknown>,
   changeValue: Record<string, unknown>
 ): string {
   const setPart = Object.entries(changeValue)
@@ -91,12 +104,14 @@ export function generateUpdateStatementFromChange(
     })
     .join(", ");
 
-  const wherePart: string[] = [];
-  for (const col of whereColumnName) {
-    wherePart.push(`${escapeIdentity(col)} = ${escapeSqlValue(original[col])}`);
-  }
+  let wherePart: string = Object.entries(where)
+    .map(
+      ([columnName, value]) =>
+        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
+    )
+    .join(" AND ");
 
   return `UPDATE ${escapeIdentity(
     tableName
-  )} SET ${setPart} WHERE ${wherePart.join(" AND ")}`;
+  )} SET ${setPart} WHERE ${wherePart};`;
 }

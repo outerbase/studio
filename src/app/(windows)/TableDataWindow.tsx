@@ -3,10 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 import ResultTable from "@/components/result/ResultTable";
 import { Button } from "@/components/ui/button";
 import {
-  Badge,
   LucideArrowLeft,
   LucideArrowRight,
-  LucideKey,
+  LucideDelete,
   LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
@@ -22,8 +21,9 @@ import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import OpacityLoading from "../(components)/OpacityLoading";
 import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
 import {
+  generateDeleteStatement,
   generateInsertStatement,
-  generateUpdateStatementFromChange,
+  genereteUpdateStatement,
 } from "@/lib/sql-helper";
 import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
 import { validateOperation } from "@/lib/validation";
@@ -102,14 +102,18 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       if (rowChange) {
         const pk = tableSchema.pk;
 
-        const updateCondition = pk.reduce((condition, pkColumnName) => {
+        const wherePrimaryKey = pk.reduce((condition, pkColumnName) => {
           condition[pkColumnName] =
             rowChange[pkColumnName] ?? row.raw[pkColumnName];
           return condition;
         }, {} as Record<string, unknown>);
 
+        let operation: "UPDATE" | "INSERT" | "DELETE" = "UPDATE";
+        if (row.isNewRow) operation = "INSERT";
+        if (row.isRemoved) operation = "DELETE";
+
         const { valid, reason } = validateOperation({
-          operation: row.isNewRow ? "INSERT" : "UPDATE",
+          operation,
           autoIncrement: tableSchema.autoIncrement,
           changeValue: rowChange,
           originalValue: row.raw,
@@ -121,20 +125,21 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           return;
         }
 
-        const sql = row.isNewRow
-          ? generateInsertStatement(tableName, rowChange)
-          : generateUpdateStatementFromChange(
-              tableName,
-              tableSchema.pk,
-              row.raw,
-              rowChange
-            );
+        let sql: string | undefined;
+
+        if (row.isNewRow) {
+          sql = generateInsertStatement(tableName, rowChange);
+        } else if (row.isRemoved) {
+          sql = generateDeleteStatement(tableName, wherePrimaryKey);
+        } else {
+          sql = genereteUpdateStatement(tableName, wherePrimaryKey, rowChange);
+        }
 
         plans.push({
           sql,
           row,
           tableName,
-          updateCondition,
+          updateCondition: wherePrimaryKey,
           autoIncrement: tableSchema.autoIncrement,
         });
       }
@@ -166,12 +171,13 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
   const onNewRow = useCallback(() => {
     if (data) {
-      const focus = data.getFocus();
-      if (focus) {
-        data.insertNewRow(focus.y);
-      } else {
-        data.insertNewRow();
-      }
+      data.insertNewRow();
+    }
+  }, [data]);
+
+  const onRemoveRow = useCallback(() => {
+    if (data) {
+      data.removeRow();
     }
   }, [data]);
 
@@ -213,6 +219,11 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
             <LucidePlus className="w-4 h-4 mr-2 text-green-600" />
             New Row
+          </Button>
+
+          <Button variant={"ghost"} size={"sm"} onClick={onRemoveRow}>
+            <LucideDelete className="w-4 h-4 mr-2 text-red-600" />
+            Remove
           </Button>
 
           <Button

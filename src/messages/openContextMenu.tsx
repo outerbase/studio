@@ -9,6 +9,7 @@ export type OpenContextMenuList = {
   shortcut?: string;
   separator?: boolean;
   disabled?: boolean;
+  destructive?: boolean;
   onClick?: () => void;
   sub?: OpenContextMenuList;
   icon?: LucideIcon;

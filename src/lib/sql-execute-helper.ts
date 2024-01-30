@@ -30,14 +30,19 @@ export async function executePlans(
         );
       }
 
-      const updateResult = await driver.query(
-        generateSelectOneWithConditionStatement(
-          plan.tableName,
-          plan.updateCondition
-        )
-      );
+      let updateResult = {};
+      if (!plan.row.isRemoved) {
+        updateResult = (
+          await driver.query(
+            generateSelectOneWithConditionStatement(
+              plan.tableName,
+              plan.updateCondition
+            )
+          )
+        ).rows[0];
+      }
 
-      plan.updatedRowData = { ...updateResult.rows[0] };
+      plan.updatedRowData = { ...updateResult };
     }
 
     await driver.query("COMMIT");

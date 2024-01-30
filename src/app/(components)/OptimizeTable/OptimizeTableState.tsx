@@ -10,6 +10,7 @@ export interface OptimizeTableRowValue {
   change?: Record<string, unknown>;
   changeKey?: number;
   isNewRow?: boolean;
+  isRemoved?: boolean;
 }
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
@@ -66,7 +67,6 @@ export default class OptimizeTableState {
   removeChangeListener(cb: TableChangeEventCallback) {
     this.changeCallback = this.changeCallback.filter((c) => c !== cb);
   }
-
 
   protected broadcastChange(instant?: boolean) {
     if (instant) {
@@ -158,6 +158,7 @@ export default class OptimizeTableState {
       } else {
         delete row.change;
         delete row.changeKey;
+        delete row.isRemoved;
       }
     }
 
@@ -175,6 +176,7 @@ export default class OptimizeTableState {
     }[]
   ) {
     const rowChanges = this.getChangedRows();
+    const removedRows = rowChanges.filter((row) => row.isRemoved);
 
     for (const row of rowChanges) {
       const updated = updatedRows.find((updateRow) => updateRow.row === row);
@@ -182,13 +184,25 @@ export default class OptimizeTableState {
       delete row.changeKey;
       delete row.change;
       delete row.isNewRow;
+      delete row.isRemoved;
+    }
+
+    if (removedRows.length > 0) {
+      this.data = this.data.filter((row) => !removedRows.includes(row));
     }
 
     this.changeLogs = {};
     this.broadcastChange();
   }
 
-  insertNewRow(index: number = 0) {
+  insertNewRow(index: number = -1) {
+    if (index === -1) {
+      const focus = this.getFocus();
+      if (focus) index = focus.y;
+    }
+
+    if (index < 0) index = 0;
+
     const newRow = {
       isNewRow: true,
       raw: {},
@@ -203,6 +217,36 @@ export default class OptimizeTableState {
 
   isNewRow(index: number) {
     return !!this.data[index]?.isNewRow;
+  }
+
+  removeRow(index: number = -1) {
+    if (index === -1) {
+      // Remove the row at focus
+      const focus = this.getFocus();
+      if (focus) index = focus.y;
+    }
+
+    const row = this.data[index];
+
+    if (row) {
+      if (row.isNewRow && row.changeKey) {
+        delete this.changeLogs[row.changeKey];
+        this.data = this.data.filter((dataRow) => dataRow != row);
+      } else {
+        row.isRemoved = true;
+        if (!row.changeKey) {
+          row.change = {};
+          row.changeKey = ++this.changeCounter;
+          this.changeLogs[row.changeKey] = row;
+        }
+      }
+    }
+
+    this.broadcastChange();
+  }
+
+  isRemovedRow(index: number) {
+    return !!this.data[index]?.isRemoved;
   }
 
   // ------------------------------------------------

@@ -149,11 +149,9 @@ function renderCellList({
 
     let rowClass = undefined;
 
-    // if (internalState.newRows.has(absoluteRowIndex)) {
-    //   rowClass = styles.newRow;
-    // } else if (internalState.removedRows.has(absoluteRowIndex)) {
-    //   rowClass = styles.removedRow;
-    if (internalState.isNewRow(absoluteRowIndex)) {
+    if (internalState.isRemovedRow(absoluteRowIndex)) {
+      rowClass = styles.removedRow;
+    } else if (internalState.isNewRow(absoluteRowIndex)) {
       rowClass = styles.newRow;
     } else if (internalState.isRowSelected(absoluteRowIndex)) {
       rowClass = styles.selectedRow;

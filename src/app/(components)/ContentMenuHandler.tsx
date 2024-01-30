@@ -57,7 +57,11 @@ function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
         inset={!item.icon}
       >
         {item.icon && <item.icon className="w-4 h-4 mr-2" />}
-        {item.title}
+        {item.destructive ? (
+          <span className="text-red-500">{item.title}</span>
+        ) : (
+          item.title
+        )}
         {item.shortcut && (
           <ContextMenuShortcut>{item.shortcut}</ContextMenuShortcut>
         )}

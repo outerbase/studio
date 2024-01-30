@@ -10,6 +10,7 @@ import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableSt
 import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
+import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
 
 interface ResultTableProps {
@@ -130,6 +131,21 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
               },
             },
           ],
+        },
+        { separator: true },
+        {
+          title: "Insert row",
+          icon: LucidePlus,
+          onClick: () => {
+            data.insertNewRow();
+          },
+        },
+        {
+          title: "Delete selected row(s)",
+          icon: LucideTrash2,
+          onClick: () => {
+            data.removeRow();
+          },
         },
       ])(event);
     },
