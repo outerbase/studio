@@ -64,7 +64,8 @@ export default function useTableVisibilityRecalculation({
 
   // Recalculate the visibility again when we scroll the container
   useEffect(() => {
-    if (containerRef.current) {
+    const ref = containerRef.current;
+    if (ref) {
       const onContainerScroll = (e: Event) => {
         recalculateVisible(e.currentTarget as HTMLDivElement);
         e.preventDefault();
@@ -72,8 +73,7 @@ export default function useTableVisibilityRecalculation({
       };
 
       containerRef.current.addEventListener("scroll", onContainerScroll);
-      return () =>
-        containerRef.current?.removeEventListener("scroll", onContainerScroll);
+      return () => ref.removeEventListener("scroll", onContainerScroll);
     }
   }, [containerRef, recalculateVisible]);
 

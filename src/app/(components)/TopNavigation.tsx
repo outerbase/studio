@@ -30,28 +30,6 @@ export default function TopNavigation() {
             </NavigationMenuLink>
           </div>
         </NavigationMenuItem>
-
-        <NavigationMenuItem>
-          <Link href="/blog" passHref target="_blank" legacyBehavior>
-            <NavigationMenuLink
-              className={navigationMenuTriggerStyle()}
-              target="_blank"
-            >
-              Blog
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-
-        <NavigationMenuItem>
-          <Link href="/about" passHref target="_blank" legacyBehavior>
-            <NavigationMenuLink
-              className={navigationMenuTriggerStyle()}
-              target="_blank"
-            >
-              About
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );

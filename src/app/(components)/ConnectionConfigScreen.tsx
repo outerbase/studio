@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { LucideDatabase, LucidePen, LucideTrash } from "lucide-react";
+import { LucideDatabase, LucideTrash } from "lucide-react";
 import parseSafeJson from "@/lib/json-safe";
 import {
   Sheet,
@@ -19,11 +19,11 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { validateConnectionEndpoint } from "@/lib/validation";
+import { appVersion } from "@/env";
 
 interface ConnectionItem {
   id: string;
@@ -198,7 +198,7 @@ export default function ConnectionConfigScreen() {
     <Card className="w-[450px]">
       <CardHeader>
         <div
-          className="mb-4 flex gap-2 text-2xl text-white font-semibold items-center justify-center pt-4 pb-4 rounded-lg select-none"
+          className="mb-4 flex gap-2 items-center justify-center pt-4 pb-4 rounded-lg select-none text-white"
           style={{ background: "#2C5FC3" }}
         >
           <img
@@ -206,7 +206,10 @@ export default function ConnectionConfigScreen() {
             alt="LibSQL Studio"
             className="w-16 h-16"
           />
-          LibSQL Studio
+          <div>
+            <h1 className="text-2xl font-semibold">LibSQL Studio</h1>
+            <p className="text-sm">v{appVersion}</p>
+          </div>
         </div>
 
         <CardDescription>

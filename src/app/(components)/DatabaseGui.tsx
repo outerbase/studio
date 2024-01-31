@@ -13,6 +13,7 @@ import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
 import QueryWindow from "@/app/(windows)/QueryWindow";
 import TopNavigation from "./TopNavigation";
+import { appVersion } from "@/env";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -77,7 +78,8 @@ export default function DatabaseGui() {
     <div className="h-screen w-screen flex flex-col">
       <div className="flex border-b">
         <div className="bg-blue-700 pr-2 pl-2 flex items-center text-white mr-2">
-          LibSQL <strong>Studio</strong>
+          LibSQL <strong>Studio</strong>{" "}
+          <span className="text-xs ml-2">v{appVersion}</span>
         </div>
         <div className="p-1">
           <TopNavigation />
