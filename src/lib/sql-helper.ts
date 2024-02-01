@@ -1,4 +1,5 @@
 import { TableColumnDataType } from "@/app/(components)/OptimizeTable";
+import { hex } from "./bit-operation";
 
 export function escapeIdentity(str: string) {
   return `"${str.replace(/"/g, `""`)}"`;
@@ -9,7 +10,7 @@ export function escapeSqlString(str: string) {
 }
 
 export function escapeSqlBinary(value: ArrayBuffer) {
-  throw "not implement";
+  return `x'${hex(value)}'`;
 }
 
 export function escapeSqlValue(value: unknown) {
@@ -90,10 +91,10 @@ export function generateDeleteStatement(
     )
     .join(" AND ");
 
-  return `DELETE FROM ${escapeIdentity(tableName)} WHERE ${wherePart}`;
+  return `DELETE FROM ${escapeIdentity(tableName)} WHERE ${wherePart};`;
 }
 
-export function genereteUpdateStatement(
+export function generateUpdateStatement(
   tableName: string,
   where: Record<string, unknown>,
   changeValue: Record<string, unknown>

@@ -3,8 +3,12 @@ import { exportRowsToSqlInsert } from "./export-helper";
 import {
   convertSqliteType,
   escapeIdentity,
+  escapeSqlBinary,
   escapeSqlString,
+  escapeSqlValue,
+  generateDeleteStatement,
   generateInsertStatement,
+  generateUpdateStatement,
 } from "./sql-helper";
 
 describe("Escape SQL", () => {
@@ -17,6 +21,15 @@ describe("Escape SQL", () => {
 
   it("escape sql identity", () => {
     expect(escapeIdentity(`col"name`)).toBe(`"col""name"`);
+  });
+
+  it("escape blob", () => {
+    const buffer = new Uint8Array([
+      93, 65, 64, 42, 188, 75, 42, 118, 185, 113, 157, 145, 16, 23, 197, 146,
+    ]).buffer;
+
+    expect(escapeSqlValue(buffer)).toBe(`x'5D41402ABC4B2A76B9719D911017C592'`);
+    expect(escapeSqlBinary(buffer)).toBe(`x'5D41402ABC4B2A76B9719D911017C592'`);
   });
 });
 
@@ -48,6 +61,26 @@ describe("Generate SQL Statement", () => {
       })
     ).toBe(
       `INSERT INTO "users"("name", "age", "title") VALUES('Visal', 50, 'O''reilly');`
+    );
+  });
+
+  it("Generate update statement", () => {
+    expect(
+      generateUpdateStatement(
+        "users",
+        {
+          id: 5,
+        },
+        { age: 50, title: "O'reilly" }
+      )
+    ).toBe(
+      `UPDATE "users" SET "age" = 50, "title" = 'O''reilly' WHERE "id" = 5;`
+    );
+  });
+
+  it("Generate delete statement", () => {
+    expect(generateDeleteStatement("users", { id: 5 })).toBe(
+      `DELETE FROM "users" WHERE "id" = 5;`
     );
   });
 });

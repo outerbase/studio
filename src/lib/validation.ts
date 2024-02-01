@@ -16,8 +16,20 @@ export function validateOperation({
     .some((value) => value === null || value === undefined);
 
   const hasAnyUpdatePrimaryKeyNull = primaryKey
-    .map((pkColumnName) => changeValue[pkColumnName])
+    .map((pkColumnName) =>
+      changeValue[pkColumnName] === undefined
+        ? originalValue[pkColumnName]
+        : changeValue[pkColumnName]
+    )
     .some((value) => value === null || value === undefined);
+
+  if (primaryKey.length === 0) {
+    return {
+      valid: false,
+      reason:
+        "This table does not have any primary key. It is not safe to perform any update/delete/insert operation.",
+    };
+  }
 
   if (operation === "DELETE") {
     if (hasAnyPrimaryKeyNull)
@@ -62,11 +74,11 @@ export function validateConnectionEndpoint(
     const url = new URL(endpoint);
 
     if (url.protocol !== "wss:") {
-      return [true, "We only support wss:// at the moment."];
+      return [false, "We only support wss:// at the moment."];
     }
 
-    return [false, ""];
+    return [true, ""];
   } catch {
-    return [true, "Your URL is not valid"];
+    return [false, "Your URL is not valid"];
   }
 }

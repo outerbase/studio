@@ -23,7 +23,7 @@ import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState
 import {
   generateDeleteStatement,
   generateInsertStatement,
-  genereteUpdateStatement,
+  generateUpdateStatement,
 } from "@/lib/sql-helper";
 import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
 import { validateOperation } from "@/lib/validation";
@@ -132,7 +132,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         } else if (row.isRemoved) {
           sql = generateDeleteStatement(tableName, wherePrimaryKey);
         } else {
-          sql = genereteUpdateStatement(tableName, wherePrimaryKey, rowChange);
+          sql = generateUpdateStatement(tableName, wherePrimaryKey, rowChange);
         }
 
         plans.push({
