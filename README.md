@@ -1,6 +1,6 @@
 # LibSQL Studio
 
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=invisal_libsql-studio&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=invisal_libsql-studio) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=invisal_libsql-studio&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=invisal_libsql-studio)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=invisal_libsql-studio&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=invisal_libsql-studio) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=invisal_libsql-studio&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=invisal_libsql-studio) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=invisal_libsql-studio&metric=coverage)](https://sonarcloud.io/summary/new_code?id=invisal_libsql-studio)
 
 LibSQL Studio is a lightweight LibSQL graphical client on your browser written using NextJS.
 
