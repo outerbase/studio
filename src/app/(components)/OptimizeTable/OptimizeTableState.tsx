@@ -1,5 +1,5 @@
 import { selectArrayFromIndexList } from "@/lib/export-helper";
-import { OptimizeTableHeaderProps } from ".";
+import { OptimizeTableHeaderProps, TableColumnDataType } from ".";
 import * as hrana from "@libsql/hrana-client";
 import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { LucideKey } from "lucide-react";
@@ -33,11 +33,33 @@ export default class OptimizeTableState {
   ) {
     return new OptimizeTableState(
       dataResult.columnNames.map((headerName, idx) => {
+        let initialSize = 150;
+        const dataType = convertSqliteType(dataResult.columnDecltypes[idx]);
+
+        if (
+          dataType === TableColumnDataType.INTEGER ||
+          dataType === TableColumnDataType.REAL
+        ) {
+          initialSize = 100;
+        } else if (dataType === TableColumnDataType.BLOB) {
+          initialSize = 150;
+        } else if (dataType === TableColumnDataType.TEXT) {
+          // Use 100 first rows to determine the good initial size
+          let maxSize = 0;
+          for (let i = 0; i < Math.min(dataResult.rows.length, 100); i++) {
+            maxSize = Math.max(
+              (dataResult.rows[i][headerName ?? ""]?.toString() ?? "").length
+            );
+          }
+
+          initialSize = Math.max(150, Math.min(500, maxSize * 8));
+        }
+
         return {
-          initialSize: 150,
+          initialSize,
           name: headerName ?? "",
           resizable: true,
-          dataType: convertSqliteType(dataResult.columnDecltypes[idx]),
+          dataType,
           icon: schemaResult?.pk.includes(headerName ?? "") ? (
             <LucideKey className="w-4 h-4 text-red-500" />
           ) : undefined,
