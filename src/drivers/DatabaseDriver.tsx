@@ -12,12 +12,53 @@ export interface DatabaseTableColumn {
   type: string;
   nullable: boolean;
   pk: boolean;
+  constraint?: DatabaseTableColumnConstraint;
+}
+
+export type DatabaseColumnConflict =
+  | "ROLLBACK"
+  | "ABORT"
+  | "FAIL"
+  | "IGNORE"
+  | "REPLACE";
+
+export interface DatabaseForeignKeyCaluse {
+  tableName: string;
+  column: string[];
+}
+
+export interface DatabaseTableColumnConstraint {
+  name: string;
+
+  primaryKey?: boolean;
+  primaryKeyOrder?: "ASC" | "DESC";
+  primaryKeyConflict?: DatabaseColumnConflict;
+  autoIncrement?: boolean;
+
+  notNull?: boolean;
+  notNullConflict?: DatabaseColumnConflict;
+
+  unique?: boolean;
+  uniqueConflict?: DatabaseColumnConflict;
+
+  checkExpression?: string;
+
+  defaultValue?: unknown;
+  defaultExpression?: string;
+
+  collate?: string;
+
+  generatedExpression?: string;
+  generatedType?: "STORED" | "VIRTUAL";
+
+  foreignKey?: DatabaseForeignKeyCaluse;
 }
 
 export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
   autoIncrement: boolean;
+  tableName?: string;
 }
 
 export default class DatabaseDriver {

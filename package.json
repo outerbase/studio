@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@codemirror/lang-sql": "^6.5.5",
+    "@lezer/common": "^1.2.1",
+    "@lezer/lr": "^1.4.0",
     "@libsql/hrana-client": "^0.5.5",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dialog": "^1.0.5",
