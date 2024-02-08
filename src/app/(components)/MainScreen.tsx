@@ -7,9 +7,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./ContentMenuHandler";
 import InternalPubSub from "@/lib/internal-pubsub";
-import { useParams, useRouter } from "next/navigation";
-import { Metadata } from "next";
+import { useRouter } from "next/navigation";
 import { normalizeConnectionEndpoint } from "@/lib/validation";
+import { SchemaProvider } from "@/screens/DatabaseScreen/SchemaProvider";
 
 function MainConnection({
   credential,
@@ -76,9 +76,11 @@ export default function MainScreen() {
   return sessionCredential?.url ? (
     <>
       <AutoCompleteProvider>
-        <TooltipProvider>
-          <MainConnection credential={sessionCredential} />
-        </TooltipProvider>
+        <SchemaProvider>
+          <TooltipProvider>
+            <MainConnection credential={sessionCredential} />
+          </TooltipProvider>
+        </SchemaProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
     </>
