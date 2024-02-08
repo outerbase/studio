@@ -88,6 +88,10 @@ class Cursor {
     return "";
   }
 
+  type(): string | undefined {
+    return this.ptr?.type.name;
+  }
+
   enterParens(): Cursor | null {
     if (this.ptr && this.ptr.firstChild) {
       if (this.ptr.firstChild.name !== "(") return null;
@@ -206,8 +210,39 @@ export function parseColumnConstraint(
       uniqueConflict: conflict,
       ...parseColumnConstraint(cursor),
     };
-  } else if (cursor.matchKeyword("CHECK")) {
   } else if (cursor.matchKeyword("DEFAULT")) {
+    let defaultValue: unknown | undefined;
+    let defaultExpression: string | undefined;
+
+    cursor.next();
+
+    if (cursor.type() === "String") {
+      defaultValue = cursor.read().slice(1, -1);
+      cursor.next();
+    } else if (cursor.type() === "Operator") {
+      if (cursor.match("+")) {
+        cursor.next();
+        defaultValue = Number(cursor.read());
+        cursor.next();
+      } else if (cursor.match("-")) {
+        cursor.next();
+        defaultValue = -Number(cursor.read());
+        cursor.next();
+      }
+    } else if (cursor.type() === "Number") {
+      defaultValue = Number(cursor.read());
+      cursor.next();
+    } else if (cursor.type() === "Parens") {
+      defaultExpression = cursor.read();
+    }
+
+    return {
+      name: "",
+      defaultValue,
+      defaultExpression,
+      ...parseColumnConstraint(cursor),
+    };
+  } else if (cursor.matchKeyword("CHECK")) {
   } else if (cursor.matchKeyword("COLLATE")) {
   } else if (cursor.matchKeyword("REFERENCES")) {
   } else if (cursor.matchKeyword("GENERATED")) {

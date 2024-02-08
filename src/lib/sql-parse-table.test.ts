@@ -46,8 +46,28 @@ it("parse column constraint", () => {
 
   expect(pcc(`default 'Visal'`)).toEqual({
     name: "",
-    default: "Visal",
-  });
+    defaultValue: "Visal",
+  } as DatabaseTableColumnConstraint);
+
+  expect(pcc(`default -5`)).toEqual({
+    name: "",
+    defaultValue: -5,
+  } as DatabaseTableColumnConstraint);
+
+  expect(pcc(`default +5.5`)).toEqual({
+    name: "",
+    defaultValue: 5.5,
+  } as DatabaseTableColumnConstraint);
+
+  expect(pcc(`default 5.5`)).toEqual({
+    name: "",
+    defaultValue: 5.5,
+  } as DatabaseTableColumnConstraint);
+
+  expect(pcc(`default (round(julianday('now'))`)).toEqual({
+    name: "",
+    defaultExpression: `(round(julianday('now'))`,
+  } as DatabaseTableColumnConstraint);
 });
 
 // it("parse create table with virtual column", () => {
