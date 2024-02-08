@@ -69,8 +69,8 @@ function ConnectionEdit({ onComplete }: { onComplete: () => void }) {
 
   const onSaveClicked = () => {
     // Validate the connection
-    const [isUrlInvalid, urlInvalidMessage] = validateConnectionEndpoint(url);
-    if (isUrlInvalid) {
+    const [isValid, urlInvalidMessage] = validateConnectionEndpoint(url);
+    if (!isValid) {
       setError(urlInvalidMessage);
       return;
     }
