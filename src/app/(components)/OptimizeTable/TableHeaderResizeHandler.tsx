@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
-import styles from './styles.module.css';
+import { useRef, useState, useEffect } from "react";
+import styles from "./styles.module.css";
 
 export default function TableHeaderResizeHandler({
   idx,
@@ -62,9 +62,9 @@ export default function TableHeaderResizeHandler({
             onResize(idx, width);
 
             if (table) {
-              const columns = table.style.gridTemplateColumns.split(' ');
-              columns[idx] = width + 'px';
-              table.style.gridTemplateColumns = columns.join(' ');
+              const columns = table.style.gridTemplateColumns.split(" ");
+              columns[idx] = width + "px";
+              table.style.gridTemplateColumns = columns.join(" ");
             }
 
             if (edgeResizing) {
@@ -76,12 +76,12 @@ export default function TableHeaderResizeHandler({
           setResizing(false);
         };
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
 
         return () => {
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
         };
       }
     }
