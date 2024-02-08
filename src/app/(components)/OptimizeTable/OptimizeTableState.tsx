@@ -41,8 +41,6 @@ export default class OptimizeTableState {
           dataType === TableColumnDataType.REAL
         ) {
           initialSize = 100;
-        } else if (dataType === TableColumnDataType.BLOB) {
-          initialSize = 150;
         } else if (dataType === TableColumnDataType.TEXT) {
           // Use 100 first rows to determine the good initial size
           let maxSize = 0;
