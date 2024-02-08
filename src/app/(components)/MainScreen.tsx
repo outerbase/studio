@@ -9,6 +9,7 @@ import ContextMenuHandler from "./ContentMenuHandler";
 import InternalPubSub from "@/lib/internal-pubsub";
 import { useParams, useRouter } from "next/navigation";
 import { Metadata } from "next";
+import { normalizeConnectionEndpoint } from "@/lib/validation";
 
 function MainConnection({
   credential,
@@ -48,7 +49,11 @@ function InvalidSession() {
 export default function MainScreen() {
   const router = useRouter();
   const sessionCredential: { url: string; token: string } = useMemo(() => {
-    return JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+    const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+    return {
+      url: normalizeConnectionEndpoint(config.url),
+      token: config.token,
+    };
   }, []);
 
   /**
