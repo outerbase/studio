@@ -1,3 +1,4 @@
+"use client";
 import ConnectingDialog from "@/screens/DatabaseScreen/ConnectingDialog";
 
 export default function ConnectionErrorMessageStory() {
