@@ -34,29 +34,38 @@ export function SchemaProvider({ children }: PropsWithChildren) {
   const [loading, setLoading] = useState(true);
   const { databaseDriver } = useDatabaseDriver();
 
-  const fetchSchema = useCallback(() => {
-    setLoading(true);
+  const fetchSchema = useCallback(
+    (refresh?: boolean) => {
+      console.log("refresh", refresh);
 
-    databaseDriver
-      .getTableList()
-      .then((tableList) => {
-        const sortedTableList = [...tableList];
-        sortedTableList.sort((a, b) => {
-          return a.name.localeCompare(b.name);
+      if (refresh) {
+        setLoading(true);
+      }
+
+      databaseDriver
+        .getTableList()
+        .then((tableList) => {
+          const sortedTableList = [...tableList];
+          sortedTableList.sort((a, b) => {
+            return a.name.localeCompare(b.name);
+          });
+
+          setSchemaItems(sortedTableList);
+          updateTableList(tableList.map((table) => table.name));
+
+          setError(undefined);
+          setLoading(false);
+        })
+        .catch((e) => {
+          setError(e.message);
+          setLoading(false);
         });
-
-        setSchemaItems(sortedTableList);
-        setError(undefined);
-        updateTableList(tableList.map((table) => table.name));
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-      });
-  }, [databaseDriver, updateTableList, setError]);
+    },
+    [databaseDriver, updateTableList, setError]
+  );
 
   useEffect(() => {
-    fetchSchema();
+    fetchSchema(true);
   }, [fetchSchema]);
 
   if (error || loading) {

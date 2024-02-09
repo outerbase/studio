@@ -71,7 +71,7 @@ export default function SchemaView() {
           },
         },
         { separator: true },
-        { title: "Refresh", onClick: refresh },
+        { title: "Refresh", onClick: () => refresh() },
       ] as OpenContextMenuList;
     },
     [refresh]
