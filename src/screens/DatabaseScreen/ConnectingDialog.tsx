@@ -6,12 +6,12 @@ export default function ConnectingDialog({
   message,
   url,
   onRetry,
-}: {
+}: Readonly<{
   loading?: boolean;
   url?: string;
   message?: string;
   onRetry?: () => void;
-}) {
+}>) {
   const router = useRouter();
 
   let body = (

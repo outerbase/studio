@@ -57,7 +57,7 @@ function SchemaViewmItem({
 }
 
 export default function SchemaView() {
-  const { refresh, schema, loading } = useSchema();
+  const { refresh, schema } = useSchema();
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const prepareContextMenu = useCallback(
@@ -82,7 +82,6 @@ export default function SchemaView() {
       className="h-full select-none"
       onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
     >
-      {loading && <OpacityLoading />}
       <div className="flex flex-col p-2 pr-4">
         {schema.map((item, schemaIndex) => {
           return (

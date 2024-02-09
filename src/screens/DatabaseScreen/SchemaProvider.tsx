@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import ConnectingDialog from "./ConnectingDialog";
@@ -14,10 +15,8 @@ import ConnectingDialog from "./ConnectingDialog";
 const SchemaContext = createContext<{
   schema: DatabaseSchemaItem[];
   refresh: () => void;
-  loading: boolean;
 }>({
   schema: [],
-  loading: false,
   refresh: () => {
     throw new Error("Not implemented");
   },
@@ -27,7 +26,7 @@ export function useSchema() {
   return useContext(SchemaContext);
 }
 
-export function SchemaProvider({ children }: PropsWithChildren) {
+export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
   const { updateTableList } = useAutoComplete();
   const [error, setError] = useState<string>();
   const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
@@ -36,8 +35,6 @@ export function SchemaProvider({ children }: PropsWithChildren) {
 
   const fetchSchema = useCallback(
     (refresh?: boolean) => {
-      console.log("refresh", refresh);
-
       if (refresh) {
         setLoading(true);
       }
@@ -68,6 +65,10 @@ export function SchemaProvider({ children }: PropsWithChildren) {
     fetchSchema(true);
   }, [fetchSchema]);
 
+  const props = useMemo(() => {
+    return { schema: schemaItems, refresh: fetchSchema };
+  }, [schemaItems, fetchSchema]);
+
   if (error || loading) {
     return (
       <ConnectingDialog
@@ -79,10 +80,6 @@ export function SchemaProvider({ children }: PropsWithChildren) {
   }
 
   return (
-    <SchemaContext.Provider
-      value={{ schema: schemaItems, refresh: fetchSchema, loading }}
-    >
-      {children}
-    </SchemaContext.Provider>
+    <SchemaContext.Provider value={props}>{children}</SchemaContext.Provider>
   );
 }
