@@ -6,6 +6,7 @@ import {
 } from "@/drivers/DatabaseDriver";
 import { SQLite } from "@codemirror/lang-sql";
 import { SyntaxNode, Tree, TreeCursor } from "@lezer/common";
+import { unescapeIdentity } from "./sql-helper";
 
 class Cursor {
   protected ptr: SyntaxNode | null;
@@ -45,7 +46,7 @@ class Cursor {
 
   consumeIdentifier() {
     if (this.ptr) {
-      const id = this.read();
+      const id = unescapeIdentity(this.read());
       this.next();
       return id;
     }
@@ -119,12 +120,22 @@ function parseColumnDef(cursor: Cursor): DatabaseTableColumn | null {
   const columnName = cursor.consumeIdentifier();
   if (!columnName) return null;
 
-  const dataType = cursor.readKeyword();
+  let dataType = cursor.read();
+  cursor.next();
+
+  // Handle case such as VARCHAR(255) where we need to read
+  // something inside the parens
+  if (cursor.type() === "Parens") {
+    dataType += cursor.read();
+    cursor.next();
+  }
+
+  const constraint = parseColumnConstraint(cursor);
 
   return {
     name: columnName,
-    pk: false,
-    nullable: false,
+    pk: constraint?.primaryKey,
+    constraint,
     type: dataType,
   };
 }
@@ -182,7 +193,6 @@ export function parseColumnConstraint(
     }
 
     return {
-      name: "",
       primaryKey: true,
       primaryKeyOrder,
       autoIncrement,
@@ -196,7 +206,6 @@ export function parseColumnConstraint(
 
     const conflict = parseConstraintConflict(cursor);
     return {
-      name: "",
       notNull: true,
       notNullConflict: conflict,
       ...parseColumnConstraint(cursor),
@@ -205,7 +214,6 @@ export function parseColumnConstraint(
     cursor.next();
     const conflict = parseConstraintConflict(cursor);
     return {
-      name: "",
       unique: true,
       uniqueConflict: conflict,
       ...parseColumnConstraint(cursor),
@@ -237,7 +245,6 @@ export function parseColumnConstraint(
     }
 
     return {
-      name: "",
       defaultValue,
       defaultExpression,
       ...parseColumnConstraint(cursor),
@@ -245,7 +252,61 @@ export function parseColumnConstraint(
   } else if (cursor.matchKeyword("CHECK")) {
   } else if (cursor.matchKeyword("COLLATE")) {
   } else if (cursor.matchKeyword("REFERENCES")) {
-  } else if (cursor.matchKeyword("GENERATED")) {
+    cursor.next();
+    const foreignTableName = cursor.consumeIdentifier();
+    const foreignColumns: string[] = [];
+
+    // Trying to find the parens by skipping all other rule
+    // We may visit more rule in the future, but at the moment
+    // it is too complex to handle all the rules.
+    // We will just grab foreign key column first
+    while (true) {
+      if (cursor.end()) break;
+      if (cursor.type() === "Parens") break;
+      if (cursor.match(",")) break;
+      cursor.next();
+    }
+
+    const columnPtr = cursor.enterParens();
+
+    if (columnPtr) {
+      while (!columnPtr.end()) {
+        foreignColumns.push(columnPtr.consumeIdentifier());
+
+        if (!columnPtr.match(",")) break;
+        columnPtr.next();
+      }
+    }
+
+    return {
+      foreignKey: {
+        tableName: foreignTableName,
+        column: foreignColumns,
+      },
+      ...parseColumnConstraint(cursor),
+    };
+  } else if (cursor.match("GENERATED")) {
+    cursor.next();
+    if (!cursor.match("ALWAYS"))
+      throw new Error("GENERATED should follow by ALWAYS");
+
+    cursor.next();
+    if (!cursor.match("AS"))
+      throw new Error("GENERATED ALWAYS should follow by AS");
+
+    cursor.next();
+    const expr = cursor.read();
+
+    cursor.next();
+    const virtualColumnType = cursor.matchKeyword("STORED")
+      ? "STORED"
+      : "VIRTUAL";
+
+    return {
+      generatedType: virtualColumnType,
+      generatedExpression: expr,
+      ...parseColumnConstraint(cursor),
+    };
   }
 
   return undefined;
@@ -315,10 +376,18 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
   const defCursor = cursor.enterParens();
   const defs = defCursor ? parseTableDefinition(defCursor) : { columns: [] };
 
+  const pk = defs.columns
+    .filter((col) => col.constraint?.primaryKey)
+    .map((col) => col.name);
+
+  const autoIncrement = defs.columns.some(
+    (col) => !!col.constraint?.autoIncrement
+  );
+
   return {
     tableName,
     ...defs,
-    pk: [],
-    autoIncrement: false,
+    pk,
+    autoIncrement,
   };
 }

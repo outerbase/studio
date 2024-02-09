@@ -10,8 +10,7 @@ export interface DatabaseSchemaItem {
 export interface DatabaseTableColumn {
   name: string;
   type: string;
-  nullable: boolean;
-  pk: boolean;
+  pk?: boolean;
   constraint?: DatabaseTableColumnConstraint;
 }
 
@@ -28,7 +27,7 @@ export interface DatabaseForeignKeyCaluse {
 }
 
 export interface DatabaseTableColumnConstraint {
-  name: string;
+  name?: string;
 
   primaryKey?: boolean;
   primaryKeyOrder?: "ASC" | "DESC";
@@ -122,7 +121,6 @@ export default class DatabaseDriver {
     const columns: DatabaseTableColumn[] = result.rows.map((row) => ({
       name: row.name?.toString() ?? "",
       type: row.type?.toString() ?? "",
-      nullable: !row.notnull,
       pk: !!row.pk,
     }));
 

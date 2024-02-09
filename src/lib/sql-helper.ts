@@ -5,6 +5,13 @@ export function escapeIdentity(str: string) {
   return `"${str.replace(/"/g, `""`)}"`;
 }
 
+export function unescapeIdentity(str: string) {
+  let r = str.replace(/^["`]/g, "");
+  r = r.replace(/["`]$/g, "");
+  r = r.replace(/""/g, `"`);
+  return r;
+}
+
 export function escapeSqlString(str: string) {
   return `'${str.replace(/'/g, `''`)}'`;
 }

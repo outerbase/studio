@@ -9,6 +9,7 @@ import {
   generateDeleteStatement,
   generateInsertStatement,
   generateUpdateStatement,
+  unescapeIdentity,
 } from "./sql-helper";
 
 describe("Escape SQL", () => {
@@ -30,6 +31,11 @@ describe("Escape SQL", () => {
 
     expect(escapeSqlValue(buffer)).toBe(`x'5D41402ABC4B2A76B9719D911017C592'`);
     expect(escapeSqlBinary(buffer)).toBe(`x'5D41402ABC4B2A76B9719D911017C592'`);
+  });
+
+  it("unescape identity", () => {
+    expect(unescapeIdentity(`"users"`)).toBe("users");
+    expect(unescapeIdentity(`"us""ers"`)).toBe(`us"ers`);
   });
 });
 
