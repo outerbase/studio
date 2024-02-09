@@ -31,7 +31,9 @@ function MainConnection({
 
   return (
     <DatabaseDriverProvider driver={database}>
-      <DatabaseGui />
+      <SchemaProvider>
+        <DatabaseGui />
+      </SchemaProvider>
     </DatabaseDriverProvider>
   );
 }
@@ -76,11 +78,9 @@ export default function MainScreen() {
   return sessionCredential?.url ? (
     <>
       <AutoCompleteProvider>
-        <SchemaProvider>
-          <TooltipProvider>
-            <MainConnection credential={sessionCredential} />
-          </TooltipProvider>
-        </SchemaProvider>
+        <TooltipProvider>
+          <MainConnection credential={sessionCredential} />
+        </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
     </>

@@ -23,8 +23,10 @@ export interface DatabaseTableSchema {
 export default class DatabaseDriver {
   protected client: hrana.WsClient;
   protected stream?: hrana.WsStream;
+  protected endpoint: string = "";
 
   constructor(url: string, authToken: string) {
+    this.endpoint = url;
     this.client = hrana.openWs(url, authToken);
   }
 
@@ -44,6 +46,10 @@ export default class DatabaseDriver {
     }
 
     return this.stream;
+  }
+
+  getEndpoint() {
+    return this.endpoint;
   }
 
   async query(stmt: hrana.InStmt) {
