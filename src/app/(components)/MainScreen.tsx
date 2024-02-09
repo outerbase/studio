@@ -7,8 +7,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./ContentMenuHandler";
 import InternalPubSub from "@/lib/internal-pubsub";
-import { useParams, useRouter } from "next/navigation";
-import { Metadata } from "next";
+import { useRouter } from "next/navigation";
+import { normalizeConnectionEndpoint } from "@/lib/validation";
+import { SchemaProvider } from "@/screens/DatabaseScreen/SchemaProvider";
 
 function MainConnection({
   credential,
@@ -30,7 +31,9 @@ function MainConnection({
 
   return (
     <DatabaseDriverProvider driver={database}>
-      <DatabaseGui />
+      <SchemaProvider>
+        <DatabaseGui />
+      </SchemaProvider>
     </DatabaseDriverProvider>
   );
 }
@@ -48,7 +51,11 @@ function InvalidSession() {
 export default function MainScreen() {
   const router = useRouter();
   const sessionCredential: { url: string; token: string } = useMemo(() => {
-    return JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+    const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+    return {
+      url: normalizeConnectionEndpoint(config.url),
+      token: config.token,
+    };
   }, []);
 
   /**
