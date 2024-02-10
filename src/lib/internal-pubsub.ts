@@ -1,4 +1,5 @@
 export default class InternalPubSub {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected listeners: Record<string, ((obj: any) => void)[]> = {};
 
   addListener<T = unknown>(channel: string, callback: (obj: T) => void) {

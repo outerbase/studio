@@ -8,7 +8,6 @@ import {
   OpenContextMenuList,
   openContextMenuFromEvent,
 } from "@/messages/openContextMenu";
-import OpacityLoading from "./OpacityLoading";
 import { useSchema } from "@/screens/DatabaseScreen/SchemaProvider";
 
 interface SchemaViewItemProps {

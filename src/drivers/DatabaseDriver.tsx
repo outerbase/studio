@@ -10,14 +10,57 @@ export interface DatabaseSchemaItem {
 export interface DatabaseTableColumn {
   name: string;
   type: string;
-  nullable: boolean;
-  pk: boolean;
+  pk?: boolean;
+  constraint?: DatabaseTableColumnConstraint;
+}
+
+export type DatabaseColumnConflict =
+  | "ROLLBACK"
+  | "ABORT"
+  | "FAIL"
+  | "IGNORE"
+  | "REPLACE";
+
+export interface DatabaseForeignKeyCaluse {
+  foreignTableName: string;
+  foreignColumns: string[];
+  columns?: string[];
+}
+
+export interface DatabaseTableColumnConstraint {
+  name?: string;
+
+  primaryKey?: boolean;
+  primaryColumns?: string[];
+  primaryKeyOrder?: "ASC" | "DESC";
+  primaryKeyConflict?: DatabaseColumnConflict;
+  autoIncrement?: boolean;
+
+  notNull?: boolean;
+  notNullConflict?: DatabaseColumnConflict;
+
+  unique?: boolean;
+  uniqueConflict?: DatabaseColumnConflict;
+
+  checkExpression?: string;
+
+  defaultValue?: unknown;
+  defaultExpression?: string;
+
+  collate?: string;
+
+  generatedExpression?: string;
+  generatedType?: "STORED" | "VIRTUAL";
+
+  foreignKey?: DatabaseForeignKeyCaluse;
 }
 
 export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
   autoIncrement: boolean;
+  tableName?: string;
+  constraints?: DatabaseTableColumnConstraint[];
 }
 
 export default class DatabaseDriver {
@@ -87,7 +130,6 @@ export default class DatabaseDriver {
     const columns: DatabaseTableColumn[] = result.rows.map((row) => ({
       name: row.name?.toString() ?? "",
       type: row.type?.toString() ?? "",
-      nullable: !row.notnull,
       pk: !!row.pk,
     }));
 
@@ -105,7 +147,9 @@ export default class DatabaseDriver {
       if (seqRow && Number(seqRow[0] ?? 0) > 0) {
         hasAutoIncrement = true;
       }
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       columns,

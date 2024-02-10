@@ -12,7 +12,7 @@ export function exportRowsToSqlInsert(
   headers: string[],
   records: unknown[][]
 ): string {
-  let result: string[] = [];
+  const result: string[] = [];
 
   const headersPart = headers.map(escapeIdentity).join(", ");
 
@@ -35,7 +35,7 @@ function cellToExcelValue(value: unknown) {
 }
 
 export function exportRowsToExcel(records: unknown[][]) {
-  let result: string[] = [];
+  const result: string[] = [];
 
   for (const record of records) {
     const line = record.map(cellToExcelValue).join("\t");

@@ -106,7 +106,7 @@ export default function GenericCell({
       onMouseDown={onFocus}
       onDoubleClick={onDoubleClick}
     >
-      {(value as any).toString()}
+      {value.toString()}
     </div>
   );
 }
