@@ -320,11 +320,7 @@ export function parseColumnConstraint(
     // We may visit more rule in the future, but at the moment
     // it is too complex to handle all the rules.
     // We will just grab foreign key column first
-    while (
-      !cursor.end() ||
-      !(cursor.type() === "Parens") ||
-      !cursor.match(",")
-    ) {
+    while (!cursor.end() && cursor.type() !== "Parens" && !cursor.match(",")) {
       cursor.next();
     }
 
