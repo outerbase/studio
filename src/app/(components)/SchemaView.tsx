@@ -1,17 +1,15 @@
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAutoComplete } from "@/context/AutoCompleteProvider";
-import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { DatabaseSchemaItem } from "@/drivers/DatabaseDriver";
 import { cn } from "@/lib/utils";
 import { openTabs } from "@/messages/openTabs";
 import { LucideIcon, Table2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   OpenContextMenuList,
   openContextMenuFromEvent,
 } from "@/messages/openContextMenu";
 import OpacityLoading from "./OpacityLoading";
+import { useSchema } from "@/screens/DatabaseScreen/SchemaProvider";
 
 interface SchemaViewItemProps {
   icon: LucideIcon;
@@ -59,26 +57,8 @@ function SchemaViewmItem({
 }
 
 export default function SchemaView() {
-  const { updateTableList } = useAutoComplete();
-  const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { refresh, schema } = useSchema();
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const { databaseDriver } = useDatabaseDriver();
-
-  const fetchSchema = useCallback(() => {
-    setLoading(true);
-
-    databaseDriver.getTableList().then((tableList) => {
-      const sortedTableList = [...tableList];
-      sortedTableList.sort((a, b) => {
-        return a.name.localeCompare(b.name);
-      });
-
-      setSchemaItems(sortedTableList);
-      updateTableList(tableList.map((table) => table.name));
-      setLoading(false);
-    });
-  }, [databaseDriver, updateTableList]);
 
   const prepareContextMenu = useCallback(
     (tableName?: string) => {
@@ -91,24 +71,19 @@ export default function SchemaView() {
           },
         },
         { separator: true },
-        { title: "Refresh", onClick: fetchSchema },
+        { title: "Refresh", onClick: () => refresh() },
       ] as OpenContextMenuList;
     },
-    [fetchSchema]
+    [refresh]
   );
-
-  useEffect(() => {
-    fetchSchema();
-  }, [fetchSchema]);
 
   return (
     <ScrollArea
       className="h-full select-none"
       onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
     >
-      {loading && <OpacityLoading />}
       <div className="flex flex-col p-2 pr-4">
-        {schemaItems.map((item, schemaIndex) => {
+        {schema.map((item, schemaIndex) => {
           return (
             <SchemaViewmItem
               onContextMenu={openContextMenuFromEvent(

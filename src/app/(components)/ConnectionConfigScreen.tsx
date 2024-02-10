@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { validateConnectionEndpoint } from "@/lib/validation";
 import { appVersion } from "@/env";
+import ErrorMessage from "@/components/custom/ErrorMessage";
 
 interface ConnectionItem {
   id: string;
@@ -69,8 +70,8 @@ function ConnectionEdit({ onComplete }: { onComplete: () => void }) {
 
   const onSaveClicked = () => {
     // Validate the connection
-    const [isUrlInvalid, urlInvalidMessage] = validateConnectionEndpoint(url);
-    if (isUrlInvalid) {
+    const [isValid, urlInvalidMessage] = validateConnectionEndpoint(url);
+    if (!isValid) {
       setError(urlInvalidMessage);
       return;
     }
@@ -173,11 +174,14 @@ export default function ConnectionConfigScreen() {
     [router]
   );
 
-  const onConnectClicked = () => {
+  const [valid, errorMessage] = validateConnectionEndpoint(url);
+
+  const onConnectClicked = useCallback(() => {
+    if (!valid) return;
     if (url && token) {
       connect(url, token);
     }
-  };
+  }, [valid, connect, url, token]);
 
   const onConnectionListChange = () => {
     setConnections(getConnections());
@@ -256,6 +260,7 @@ export default function ConnectionConfigScreen() {
                 value={url}
                 onChange={(e) => setUrl(e.currentTarget.value)}
               />
+              {url && errorMessage && <ErrorMessage message={errorMessage} />}
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="token">Token</Label>

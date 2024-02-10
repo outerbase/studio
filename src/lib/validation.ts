@@ -73,12 +73,16 @@ export function validateConnectionEndpoint(
   try {
     const url = new URL(endpoint);
 
-    if (url.protocol !== "wss:") {
-      return [false, "We only support wss:// at the moment."];
+    if (url.protocol !== "wss:" && url.protocol !== "libsql:") {
+      return [false, "We only support wss:// or libsql:// at the moment."];
     }
 
     return [true, ""];
   } catch {
     return [false, "Your URL is not valid"];
   }
+}
+
+export function normalizeConnectionEndpoint(endpoint: string) {
+  return endpoint.replace(/^libsql:\/\//, "wss://");
 }

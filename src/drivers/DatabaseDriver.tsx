@@ -66,8 +66,10 @@ export interface DatabaseTableSchema {
 export default class DatabaseDriver {
   protected client: hrana.WsClient;
   protected stream?: hrana.WsStream;
+  protected endpoint: string = "";
 
   constructor(url: string, authToken: string) {
+    this.endpoint = url;
     this.client = hrana.openWs(url, authToken);
   }
 
@@ -87,6 +89,10 @@ export default class DatabaseDriver {
     }
 
     return this.stream;
+  }
+
+  getEndpoint() {
+    return this.endpoint;
   }
 
   async query(stmt: hrana.InStmt) {
@@ -128,17 +134,20 @@ export default class DatabaseDriver {
     }));
 
     // Check auto increment
-    const seqCount = await this.query(
-      `SELECT COUNT(*) AS total FROM sqlite_sequence WHERE name=${escapeSqlValue(
-        tableName
-      )};`
-    );
-
     let hasAutoIncrement = false;
-    const seqRow = seqCount.rows[0];
-    if (seqRow && Number(seqRow[0] ?? 0) > 0) {
-      hasAutoIncrement = true;
-    }
+
+    try {
+      const seqCount = await this.query(
+        `SELECT COUNT(*) AS total FROM sqlite_sequence WHERE name=${escapeSqlValue(
+          tableName
+        )};`
+      );
+
+      const seqRow = seqCount.rows[0];
+      if (seqRow && Number(seqRow[0] ?? 0) > 0) {
+        hasAutoIncrement = true;
+      }
+    } catch {}
 
     return {
       columns,
