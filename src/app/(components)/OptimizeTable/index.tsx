@@ -81,7 +81,6 @@ function handleTableCellMouseDown({
   y,
   x,
   ctrl,
-  shift,
 }: {
   y: number;
   x: number;

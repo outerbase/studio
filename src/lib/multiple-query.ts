@@ -56,7 +56,7 @@ export async function multipleQuery(
       }
     } catch (e) {
       log.end = Date.now();
-      log.error = (e as any).toString();
+      log.error = (e as Error).toString();
 
       if (onProgress) {
         onProgress({

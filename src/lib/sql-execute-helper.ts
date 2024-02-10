@@ -49,6 +49,6 @@ export async function executePlans(
     return { success: true, plans };
   } catch (e) {
     await driver.query("ROLLBACK");
-    return { success: false, error: (e as any).toString(), plans: [] };
+    return { success: false, error: (e as Error).toString(), plans: [] };
   }
 }

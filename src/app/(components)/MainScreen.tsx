@@ -1,14 +1,13 @@
 "use client";
 import DatabaseDriver from "@/drivers/DatabaseDriver";
-import { useMemo, useEffect, useState, useLayoutEffect } from "react";
+import { useMemo, useEffect, useLayoutEffect } from "react";
 import DatabaseGui from "./DatabaseGui";
 import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./ContentMenuHandler";
 import InternalPubSub from "@/lib/internal-pubsub";
-import { useParams, useRouter } from "next/navigation";
-import { Metadata } from "next";
+import { useRouter } from "next/navigation";
 
 function MainConnection({
   credential,

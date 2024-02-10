@@ -17,7 +17,6 @@ import {
   ContextMenuSubContent,
 } from "@/components/ui/context-menu";
 import { useEffect, useRef, useState } from "react";
-import { LucideIcon } from "lucide-react";
 
 function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
   return menu.map((item, menuIndex) => {

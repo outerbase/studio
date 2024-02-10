@@ -126,7 +126,9 @@ describe("Mapping sqlite column type to our table type", () => {
       expect(convertSqliteType(type)).toBe(TableColumnDataType.TEXT));
   }
 
-  expect(convertSqliteType("BLOB")).toBe(TableColumnDataType.BLOB);
+  it("BLOB column type", () => {
+    expect(convertSqliteType("BLOB")).toBe(TableColumnDataType.BLOB);
+  });
 
   const realType = ["REAL", "DOUBLE", "DOUBLE PRECISION", "FLOAT"];
   for (const type of realType) {

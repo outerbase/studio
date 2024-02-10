@@ -75,8 +75,8 @@ export function generateInsertStatement(
   tableName: string,
   value: Record<string, unknown>
 ): string {
-  let fieldPart: string[] = [];
-  let valuePart: unknown[] = [];
+  const fieldPart: string[] = [];
+  const valuePart: unknown[] = [];
 
   for (const entry of Object.entries(value)) {
     fieldPart.push(entry[0]);
@@ -91,7 +91,7 @@ export function generateDeleteStatement(
   tableName: string,
   where: Record<string, unknown>
 ) {
-  let wherePart: string = Object.entries(where)
+  const wherePart: string = Object.entries(where)
     .map(
       ([columnName, value]) =>
         `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
@@ -112,7 +112,7 @@ export function generateUpdateStatement(
     })
     .join(", ");
 
-  let wherePart: string = Object.entries(where)
+  const wherePart: string = Object.entries(where)
     .map(
       ([columnName, value]) =>
         `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`

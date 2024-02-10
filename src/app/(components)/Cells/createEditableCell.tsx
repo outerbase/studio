@@ -1,5 +1,5 @@
 import { DatabaseValue } from "@/drivers/DatabaseDriver";
-import { useState, useEffect, FunctionComponent } from "react";
+import { useState, useEffect } from "react";
 import GenericCell from "./GenericCell";
 import styles from "./styles.module.css";
 

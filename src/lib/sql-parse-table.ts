@@ -5,7 +5,7 @@ import {
   DatabaseTableSchema,
 } from "@/drivers/DatabaseDriver";
 import { SQLite } from "@codemirror/lang-sql";
-import { SyntaxNode, Tree, TreeCursor } from "@lezer/common";
+import { SyntaxNode, TreeCursor } from "@lezer/common";
 import { unescapeIdentity } from "./sql-helper";
 
 class Cursor {
@@ -38,7 +38,7 @@ class Cursor {
     if (keywords.length === 0) return;
     if (this.matchKeyword(keywords[0])) {
       this.next();
-      for (let k of keywords.slice(1)) {
+      for (const k of keywords.slice(1)) {
         this.expectKeyword(k);
       }
     }
@@ -94,7 +94,7 @@ class Cursor {
   }
 
   enterParens(): Cursor | null {
-    if (this.ptr && this.ptr.firstChild) {
+    if (this.ptr?.firstChild) {
       if (this.ptr.firstChild.name !== "(") return null;
       if (!this.ptr.firstChild.nextSibling) return null;
       return new Cursor(this.ptr.firstChild.nextSibling.cursor(), this.sql);
@@ -240,7 +240,7 @@ export function parseColumnConstraint(
       ...parseColumnConstraint(cursor),
     };
   } else if (cursor.matchKeyword("DEFAULT")) {
-    let defaultValue: unknown | undefined;
+    let defaultValue: unknown;
     let defaultExpression: string | undefined;
 
     cursor.next();
@@ -271,7 +271,25 @@ export function parseColumnConstraint(
       ...parseColumnConstraint(cursor),
     };
   } else if (cursor.matchKeyword("CHECK")) {
+    cursor.next();
+
+    const expr = cursor.read();
+    cursor.next();
+
+    return {
+      checkExpression: expr,
+      ...parseColumnConstraint(cursor),
+    };
   } else if (cursor.matchKeyword("COLLATE")) {
+    cursor.next();
+
+    const collationName = cursor.read();
+    cursor.next();
+
+    return {
+      collate: collationName,
+      ...parseColumnConstraint(cursor),
+    };
   } else if (cursor.matchKeyword("FOREIGN")) {
     cursor.next();
 
@@ -302,10 +320,11 @@ export function parseColumnConstraint(
     // We may visit more rule in the future, but at the moment
     // it is too complex to handle all the rules.
     // We will just grab foreign key column first
-    while (true) {
-      if (cursor.end()) break;
-      if (cursor.type() === "Parens") break;
-      if (cursor.match(",")) break;
+    while (
+      !cursor.end() ||
+      !(cursor.type() === "Parens") ||
+      !cursor.match(",")
+    ) {
       cursor.next();
     }
 
@@ -415,7 +434,6 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
 
   ptr.firstChild();
   ptr.firstChild();
-  // console.log(ptr.tree?.toString());
 
   const cursor = new Cursor(ptr, sql);
   cursor.expectKeyword("CREATE");

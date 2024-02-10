@@ -17,7 +17,7 @@ export default function QueryProgressLog({
 }: {
   progress: MultipleQueryProgress;
 }) {
-  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
     if (!progress.error) {
