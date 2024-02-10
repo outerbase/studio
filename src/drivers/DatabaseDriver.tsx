@@ -147,7 +147,9 @@ export default class DatabaseDriver {
       if (seqRow && Number(seqRow[0] ?? 0) > 0) {
         hasAutoIncrement = true;
       }
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       columns,
