@@ -26,6 +26,12 @@ it("parse column constraint", () => {
     autoIncrement: true,
   } as DatabaseTableColumnConstraint);
 
+  expect(pcc("primary key(first_name, last_name)")).toEqual({
+    primaryKey: true,
+    autoIncrement: false,
+    primaryColumns: ["first_name", "last_name"],
+  } as DatabaseTableColumnConstraint);
+
   expect(pcc("primary key on conflict rollback not null")).toEqual({
     primaryKey: true,
     autoIncrement: false,
@@ -65,10 +71,20 @@ it("parse column constraint", () => {
     defaultExpression: `(round(julianday('now'))`,
   } as DatabaseTableColumnConstraint);
 
+  expect(
+    pcc(`foreign key ("user_id") references "users" on delete cascade ("id")`)
+  ).toEqual({
+    foreignKey: {
+      columns: ["user_id"],
+      foreignTableName: "users",
+      foreignColumns: ["id"],
+    },
+  } as DatabaseTableColumnConstraint);
+
   expect(pcc(`references "users" on delete cascade ("id")`)).toEqual({
     foreignKey: {
-      tableName: "users",
-      column: ["id"],
+      foreignTableName: "users",
+      foreignColumns: ["id"],
     },
   } as DatabaseTableColumnConstraint);
 
@@ -92,6 +108,7 @@ it("parse create table", () => {
     tableName: "invoice_detail",
     pk: ["id"],
     autoIncrement: true,
+    constraints: [],
     columns: [
       {
         name: "id",
@@ -107,8 +124,8 @@ it("parse create table", () => {
         type: "integer",
         constraint: {
           foreignKey: {
-            tableName: "product",
-            column: ["id"],
+            foreignTableName: "product",
+            foreignColumns: ["id"],
           },
         },
       },
@@ -134,6 +151,52 @@ it("parse create table", () => {
           generatedExpression: "(price * qty)",
           generatedType: "VIRTUAL",
         },
+      },
+    ],
+  } as DatabaseTableSchema);
+});
+
+it("parse create table with table constraints", () => {
+  const sql = `create table "users"(
+    first_name varchar,
+    last_name varchar,
+    category_id integer,
+    primary key(first_name, last_name),
+    foreign key(category_id) references category(id)
+  );`;
+
+  expect(p(sql)).toEqual({
+    tableName: "users",
+    pk: ["first_name", "last_name"],
+    autoIncrement: false,
+    constraints: [
+      {
+        primaryKey: true,
+        autoIncrement: false,
+        primaryColumns: ["first_name", "last_name"],
+      },
+      {
+        foreignKey: {
+          columns: ["category_id"],
+          foreignColumns: ["id"],
+          foreignTableName: "category",
+        },
+      },
+    ],
+    columns: [
+      {
+        name: "first_name",
+        type: "varchar",
+        pk: true,
+      },
+      {
+        name: "last_name",
+        type: "varchar",
+        pk: true,
+      },
+      {
+        name: "category_id",
+        type: "integer",
       },
     ],
   } as DatabaseTableSchema);

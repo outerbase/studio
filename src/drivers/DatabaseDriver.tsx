@@ -22,14 +22,16 @@ export type DatabaseColumnConflict =
   | "REPLACE";
 
 export interface DatabaseForeignKeyCaluse {
-  tableName: string;
-  column: string[];
+  foreignTableName: string;
+  foreignColumns: string[];
+  columns?: string[];
 }
 
 export interface DatabaseTableColumnConstraint {
   name?: string;
 
   primaryKey?: boolean;
+  primaryColumns?: string[];
   primaryKeyOrder?: "ASC" | "DESC";
   primaryKeyConflict?: DatabaseColumnConflict;
   autoIncrement?: boolean;
@@ -58,6 +60,7 @@ export interface DatabaseTableSchema {
   pk: string[];
   autoIncrement: boolean;
   tableName?: string;
+  constraints?: DatabaseTableColumnConstraint[];
 }
 
 export default class DatabaseDriver {

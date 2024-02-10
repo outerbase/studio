@@ -156,6 +156,19 @@ function parseConstraintConflict(
   }
 }
 
+export function parseColumnList(columnPtr: Cursor) {
+  const columns: string[] = [];
+
+  while (!columnPtr.end()) {
+    columns.push(columnPtr.consumeIdentifier());
+
+    if (!columnPtr.match(",")) break;
+    columnPtr.next();
+  }
+
+  return columns;
+}
+
 export function parseColumnConstraint(
   cursor: Cursor
 ): DatabaseTableColumnConstraint | undefined {
@@ -169,6 +182,7 @@ export function parseColumnConstraint(
     };
   } else if (cursor.matchKeyword("PRIMARY")) {
     let primaryKeyOrder: "ASC" | "DESC" | undefined;
+    let primaryColumns: string[] | undefined;
     let autoIncrement = false;
 
     cursor.next();
@@ -176,6 +190,12 @@ export function parseColumnConstraint(
       throw new Error("PRIMARY must follow by KEY");
 
     cursor.next();
+
+    const parens = cursor.enterParens();
+    if (parens) {
+      primaryColumns = parseColumnList(parens);
+      cursor.next();
+    }
 
     if (cursor.matchKeyword("ASC")) {
       primaryKeyOrder = "ASC";
@@ -195,6 +215,7 @@ export function parseColumnConstraint(
     return {
       primaryKey: true,
       primaryKeyOrder,
+      primaryColumns,
       autoIncrement,
       primaryKeyConflict: conflict,
       ...parseColumnConstraint(cursor),
@@ -251,10 +272,31 @@ export function parseColumnConstraint(
     };
   } else if (cursor.matchKeyword("CHECK")) {
   } else if (cursor.matchKeyword("COLLATE")) {
+  } else if (cursor.matchKeyword("FOREIGN")) {
+    cursor.next();
+
+    if (!cursor.match("KEY")) throw new Error("FOREIGN should follow by KEY");
+    cursor.next();
+
+    const parens = cursor.enterParens();
+
+    if (!parens) throw new Error("FOREIGN KEY should follow by column list");
+
+    const columns = parseColumnList(parens);
+    cursor.next();
+    const refConstraint = parseColumnConstraint(cursor);
+
+    return {
+      foreignKey: {
+        foreignTableName: refConstraint?.foreignKey?.foreignTableName ?? "",
+        foreignColumns: refConstraint?.foreignKey?.foreignColumns ?? [],
+        columns,
+      },
+    };
   } else if (cursor.matchKeyword("REFERENCES")) {
     cursor.next();
     const foreignTableName = cursor.consumeIdentifier();
-    const foreignColumns: string[] = [];
+    let foreignColumns: string[] = [];
 
     // Trying to find the parens by skipping all other rule
     // We may visit more rule in the future, but at the moment
@@ -270,18 +312,13 @@ export function parseColumnConstraint(
     const columnPtr = cursor.enterParens();
 
     if (columnPtr) {
-      while (!columnPtr.end()) {
-        foreignColumns.push(columnPtr.consumeIdentifier());
-
-        if (!columnPtr.match(",")) break;
-        columnPtr.next();
-      }
+      foreignColumns = parseColumnList(columnPtr);
     }
 
     return {
       foreignKey: {
-        tableName: foreignTableName,
-        column: foreignColumns,
+        foreignTableName,
+        foreignColumns,
       },
       ...parseColumnConstraint(cursor),
     };
@@ -312,15 +349,13 @@ export function parseColumnConstraint(
   return undefined;
 }
 
-function parseTableConstraint(cursor: Cursor) {
-  return null;
-}
-
 function parseTableDefinition(cursor: Cursor): {
   columns: DatabaseTableColumn[];
+  constraints: DatabaseTableColumnConstraint[];
 } {
   let moveNext = true;
   const columns: DatabaseTableColumn[] = [];
+  const constraints: DatabaseTableColumnConstraint[] = [];
 
   while (moveNext) {
     moveNext = false;
@@ -334,8 +369,11 @@ function parseTableDefinition(cursor: Cursor): {
         "FOREIGN",
       ])
     ) {
-      const constraint = parseTableConstraint(cursor);
-      if (constraint) moveNext = true;
+      const constraint = parseColumnConstraint(cursor);
+      if (constraint) {
+        constraints.push(constraint);
+        moveNext = true;
+      }
     } else {
       const column = parseColumnDef(cursor);
       if (column) {
@@ -352,7 +390,21 @@ function parseTableDefinition(cursor: Cursor): {
     cursor.next();
   }
 
-  return { columns };
+  for (const constraint of constraints) {
+    if (constraint.primaryKey && constraint.primaryColumns) {
+      for (const pkColumn of constraint.primaryColumns) {
+        const column = columns.find(
+          (col) => pkColumn.toLowerCase() === col.name.toLowerCase()
+        );
+
+        if (column) {
+          column.pk = true;
+        }
+      }
+    }
+  }
+
+  return { columns, constraints };
 }
 
 // Our parser follows this spec
@@ -374,11 +426,11 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
   const tableName = cursor.consumeIdentifier();
 
   const defCursor = cursor.enterParens();
-  const defs = defCursor ? parseTableDefinition(defCursor) : { columns: [] };
+  const defs = defCursor
+    ? parseTableDefinition(defCursor)
+    : { columns: [], constraints: [] };
 
-  const pk = defs.columns
-    .filter((col) => col.constraint?.primaryKey)
-    .map((col) => col.name);
+  const pk = defs.columns.filter((col) => col.pk).map((col) => col.name);
 
   const autoIncrement = defs.columns.some(
     (col) => !!col.constraint?.autoIncrement
