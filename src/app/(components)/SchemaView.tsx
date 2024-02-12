@@ -70,6 +70,18 @@ export default function SchemaView() {
           },
         },
         { separator: true },
+        {
+          title: "Edit Table",
+          disabled: !tableName,
+          onClick: () => {
+            openTabs({
+              key: "_schema_" + tableName,
+              name: "Edit " + tableName,
+              tableName,
+              type: "schema",
+            });
+          },
+        },
         { title: "Refresh", onClick: () => refresh() },
       ] as OpenContextMenuList;
     },

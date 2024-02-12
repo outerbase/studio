@@ -3,7 +3,7 @@ import { MessageChannelName } from "./const";
 export interface OpenTabsProps {
   name: string;
   key: string;
-  type: "table" | "query";
+  type: "table" | "query" | "schema";
   tableName?: string;
 }
 

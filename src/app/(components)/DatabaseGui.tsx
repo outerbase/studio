@@ -14,6 +14,7 @@ import { OpenTabsProps } from "@/messages/openTabs";
 import QueryWindow from "@/app/(windows)/QueryWindow";
 import TopNavigation from "./TopNavigation";
 import { appVersion } from "@/env";
+import SchemaEditorTab from "@/screens/WindowTabs/SchemaEditorTab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -66,6 +67,24 @@ export default function DatabaseGui() {
                 component: <QueryWindow />,
               },
             ];
+          } else if (newTab.type === "schema" && newTab.tableName) {
+            // Check if there is duplicated
+            const foundIndex = prev.findIndex((tab) => tab.key === newTab.key);
+
+            if (foundIndex >= 0) {
+              setSelectedTabIndex(foundIndex);
+            } else {
+              setSelectedTabIndex(prev.length);
+
+              return [
+                ...prev,
+                {
+                  title: newTab.name,
+                  key: newTab.key,
+                  component: <SchemaEditorTab tableName={newTab.tableName} />,
+                },
+              ];
+            }
           }
         }
 
