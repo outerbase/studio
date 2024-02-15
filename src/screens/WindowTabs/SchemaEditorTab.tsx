@@ -1,5 +1,7 @@
 import OpacityLoading from "@/app/(components)/OpacityLoading";
-import SchemaEditor from "@/components/custom/SchemaEditor";
+import SchemaEditor, {
+  DatabaseTableSchemaChange,
+} from "@/components/custom/SchemaEditor";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { useEffect, useState } from "react";
@@ -12,14 +14,25 @@ export default function SchemaEditorTab({
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
   const { databaseDriver } = useDatabaseDriver();
-  const [schema, setSchema] = useState<DatabaseTableSchema>();
+  const [schema, setSchema] = useState<DatabaseTableSchemaChange>();
 
   useEffect(() => {
     databaseDriver
       .getTableSchema(tableName)
-      .then(setSchema)
+      .then((schema) => {
+        setSchema({
+          name: {
+            old: schema.tableName,
+            new: schema.tableName,
+          },
+          columns: schema.columns.map((col) => ({
+            old: col,
+            new: structuredClone(col),
+          })),
+        });
+      })
       .catch(console.error);
-  }, [databaseDriver, tableName]);
+  }, [databaseDriver, setSchema, tableName]);
 
   if (!schema) {
     return (
@@ -29,5 +42,5 @@ export default function SchemaEditorTab({
     );
   }
 
-  return <SchemaEditor initialSchema={schema} />;
+  return <SchemaEditor value={schema} onChange={setSchema} />;
 }
