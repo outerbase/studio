@@ -62,6 +62,7 @@ export interface DatabaseTableSchema {
   autoIncrement: boolean;
   tableName?: string;
   constraints?: DatabaseTableColumnConstraint[];
+  createScript?: string;
 }
 
 export default class DatabaseDriver {
@@ -170,7 +171,8 @@ export default class DatabaseDriver {
     try {
       const def = result.rows.find((row) => row.type === "table");
       if (def) {
-        return parseCreateTableScript(def.sql as string);
+        const createScript = def.sql as string;
+        return { ...parseCreateTableScript(createScript), createScript };
       }
     } catch (e) {
       console.error(e);

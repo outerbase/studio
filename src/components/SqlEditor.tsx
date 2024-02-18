@@ -37,13 +37,20 @@ const theme = createTheme({
 
 interface SqlEditorProps {
   value: string;
-  onChange: (value: string) => void;
+  readOnly?: boolean;
+  onChange?: (value: string) => void;
   schema?: Record<string, string[]>;
 }
 
-export default function SqlEditor({ value, onChange, schema }: SqlEditorProps) {
+export default function SqlEditor({
+  value,
+  onChange,
+  schema,
+  readOnly,
+}: Readonly<SqlEditorProps>) {
   return (
     <CodeMirror
+      readOnly={readOnly}
       autoFocus
       theme={theme}
       value={value}

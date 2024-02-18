@@ -1,9 +1,14 @@
 import OpacityLoading from "@/app/(components)/OpacityLoading";
+import SqlEditor from "@/components/SqlEditor";
 import SchemaEditor, {
   DatabaseTableSchemaChange,
-} from "@/components/custom/SchemaEditor";
+} from "@/components/schema-editor";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { useEffect, useState } from "react";
 
 interface SchemaEditorTabProps {
@@ -29,6 +34,7 @@ export default function SchemaEditorTab({
             old: col,
             new: structuredClone(col),
           })),
+          createScript: schema.createScript,
         });
       })
       .catch(console.error);
@@ -42,5 +48,15 @@ export default function SchemaEditorTab({
     );
   }
 
-  return <SchemaEditor value={schema} onChange={setSchema} />;
+  return (
+    <ResizablePanelGroup direction="vertical">
+      <ResizablePanel>
+        <SchemaEditor value={schema} onChange={setSchema} />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel>
+        <SqlEditor value={schema.createScript ?? ""} readOnly />
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  );
 }
