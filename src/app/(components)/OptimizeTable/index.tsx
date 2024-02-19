@@ -324,7 +324,7 @@ export default function OptimizeTable({
 
     return (
       <div
-        tabIndex={10}
+        tabIndex={-1}
         onKeyDown={(e) => {
           if (onKeyDown) onKeyDown(internalState, e);
         }}
