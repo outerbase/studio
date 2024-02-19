@@ -15,6 +15,7 @@ import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import { MultipleQueryProgress, multipleQuery } from "@/lib/multiple-query";
 import QueryProgressLog from "../(components)/QueryProgressLog";
 import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
+import { KEY_BINDING } from "@/lib/key-matcher";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
@@ -44,19 +45,34 @@ export default function QueryWindow() {
       .catch(console.error);
   };
 
+  console.log(KEY_BINDING.run.toCodeMirrorKey());
+
   return (
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
           <div className="flex-grow overflow-hidden">
-            <SqlEditor value={code} onChange={setCode} schema={schema} />
+            <SqlEditor
+              value={code}
+              onChange={setCode}
+              schema={schema}
+              onKeyDown={(e) => {
+                if (KEY_BINDING.run.match(e)) {
+                  onRunClicked();
+                  e.preventDefault();
+                }
+              }}
+            />
           </div>
           <div className="flex-grow-0 flex-shrink-0">
             <Separator />
-            <div className="flex gap-2 p-1">
+            <div className="flex gap-1 p-1">
               <Button variant={"ghost"} onClick={onRunClicked}>
                 <LucidePlay className="w-4 h-4 mr-2" />
-                Run
+                Run{" "}
+                <span className="text-xs ml-2 px-2 bg-secondary py-1 rounded">
+                  {KEY_BINDING.run.toString()}
+                </span>
               </Button>
             </div>
           </div>
