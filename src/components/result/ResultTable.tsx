@@ -9,6 +9,7 @@ import OptimizeTable, {
 import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
 import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
+import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
@@ -88,6 +89,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       openContextMenuFromEvent([
         {
           title: "Copy Cell Value",
+          shortcut: KEY_BINDING.copy.toString(),
           onClick: () => {
             const focus = state.getFocus();
             if (focus) {
@@ -152,6 +154,20 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
     [data, tableName]
   );
 
+  const onKeyDown = useCallback(
+    (state: OptimizeTableState, e: React.KeyboardEvent) => {
+      if (KEY_BINDING.copy.match(e as React.KeyboardEvent<HTMLDivElement>)) {
+        const focus = state.getFocus();
+        if (focus) {
+          const y = focus.y;
+          const x = focus.x;
+          window.navigator.clipboard.writeText(state.getValue(y, x) as string);
+        }
+      }
+    },
+    []
+  );
+
   return (
     <OptimizeTable
       internalState={data}
@@ -161,6 +177,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       renderAhead={20}
       renderCell={renderCell}
       rowHeight={35}
+      onKeyDown={onKeyDown}
     />
   );
 }
