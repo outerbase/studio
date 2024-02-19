@@ -2,6 +2,11 @@ import { tags as t } from "@lezer/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql, SQLite } from "@codemirror/lang-sql";
+import { KeyboardEventHandler, useMemo } from "react";
+
+import { defaultKeymap } from "@codemirror/commands";
+import { keymap } from "@codemirror/view";
+import { KEY_BINDING } from "@/lib/key-matcher";
 
 const theme = createTheme({
   theme: "light",
@@ -39,12 +44,34 @@ interface SqlEditorProps {
   value: string;
   onChange: (value: string) => void;
   schema?: Record<string, string[]>;
+  onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
 }
 
-export default function SqlEditor({ value, onChange, schema }: SqlEditorProps) {
+export default function SqlEditor({
+  value,
+  onChange,
+  schema,
+  onKeyDown,
+}: SqlEditorProps) {
+  const keyExtensions = useMemo(() => {
+    return keymap.of([
+      {
+        key: KEY_BINDING.run.toCodeMirrorKey(),
+        preventDefault: true,
+        run: () => true,
+      },
+      ...defaultKeymap,
+    ]);
+  }, []);
+
   return (
     <CodeMirror
       autoFocus
+      onKeyDown={onKeyDown}
+      basicSetup={{
+        defaultKeymap: false,
+        drawSelection: false,
+      }}
       theme={theme}
       value={value}
       height="100%"
@@ -54,6 +81,7 @@ export default function SqlEditor({ value, onChange, schema }: SqlEditorProps) {
         height: "100%",
       }}
       extensions={[
+        keyExtensions,
         sql({
           dialect: SQLite,
           schema,
