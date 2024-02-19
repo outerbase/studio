@@ -74,4 +74,5 @@ export default class KeyMatcher {
 
 export const KEY_BINDING = {
   run: new KeyMatcher({ ctrl: true, key: "Enter" }),
+  copy: new KeyMatcher({ ctrl: true, key: "c" }),
 };

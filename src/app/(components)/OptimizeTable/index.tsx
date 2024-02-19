@@ -1,4 +1,4 @@
-import {
+import React, {
   useState,
   ReactElement,
   useRef,
@@ -56,6 +56,7 @@ interface TableCellListCommonProps {
     state: OptimizeTableState;
     event: React.MouseEvent;
   }) => void;
+  onKeyDown?: (state: OptimizeTableState, event: React.KeyboardEvent) => void;
 }
 
 export interface OptimizeTableProps extends TableCellListCommonProps {
@@ -246,6 +247,7 @@ export default function OptimizeTable({
   renderAhead,
   onContextMenu,
   onHeaderContextMenu,
+  onKeyDown,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -322,6 +324,10 @@ export default function OptimizeTable({
 
     return (
       <div
+        tabIndex={10}
+        onKeyDown={(e) => {
+          if (onKeyDown) onKeyDown(internalState, e);
+        }}
         ref={containerRef}
         className={styles.tableContainer}
         onContextMenu={(e) => {
@@ -354,6 +360,7 @@ export default function OptimizeTable({
     internalState,
     onContextMenu,
     onHeaderContextMenu,
+    onKeyDown,
     revision,
   ]);
 }
