@@ -5,13 +5,14 @@ import { LucideIcon } from "lucide-react";
 export type OpenContextMenuList = {
   type?: "check";
   checked?: boolean;
-  title?: string;
+  title?: string | JSX.Element;
   shortcut?: string;
   separator?: boolean;
   disabled?: boolean;
   destructive?: boolean;
   onClick?: () => void;
   sub?: OpenContextMenuList;
+  subWidth?: number;
   icon?: LucideIcon;
 }[];
 
