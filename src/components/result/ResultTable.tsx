@@ -86,7 +86,64 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       state: OptimizeTableState;
       event: React.MouseEvent;
     }) => {
+      const randomUUID = crypto.randomUUID();
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const hasFocus = !!state.getFocus();
+
+      function setFocusValue(newValue: unknown) {
+        const focusCell = state.getFocus();
+        if (focusCell) {
+          state.changeValue(focusCell.y, focusCell.x, newValue);
+        }
+      }
+
       openContextMenuFromEvent([
+        {
+          title: "Insert Value",
+          disabled: !hasFocus,
+          subWidth: 200,
+          sub: [
+            {
+              title: <pre>NULL</pre>,
+              onClick: () => {
+                setFocusValue(null);
+              },
+            },
+            {
+              title: <pre>DEFAULT</pre>,
+              onClick: () => {
+                setFocusValue(undefined);
+              },
+            },
+            { separator: true },
+            {
+              title: (
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">Unix Timestamp</span>
+                  <span>{timestamp}</span>
+                </div>
+              ),
+              onClick: () => {
+                setFocusValue(timestamp);
+              },
+            },
+            { separator: true },
+            {
+              title: (
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">UUID </span>
+                  <span>{randomUUID}</span>
+                </div>
+              ),
+              onClick: () => {
+                setFocusValue(randomUUID);
+              },
+            },
+          ],
+        },
+        {
+          separator: true,
+        },
         {
           title: "Copy Cell Value",
           shortcut: KEY_BINDING.copy.toString(),

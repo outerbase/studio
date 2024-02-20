@@ -41,7 +41,10 @@ function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
       return (
         <ContextMenuSub key={menuIndex}>
           <ContextMenuSubTrigger inset>{item.title}</ContextMenuSubTrigger>
-          <ContextMenuSubContent className="w-48">
+          <ContextMenuSubContent
+            className={!item.subWidth ? "w-48" : ""}
+            style={{ width: item.subWidth ? undefined : item.subWidth }}
+          >
             <ContextMenuList menu={item.sub} />
           </ContextMenuSubContent>
         </ContextMenuSub>
