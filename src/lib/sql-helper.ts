@@ -1,5 +1,6 @@
 import { TableColumnDataType } from "@/app/(components)/OptimizeTable";
 import { hex } from "./bit-operation";
+import { IdentifyResult } from "sql-query-identifier/lib/defines";
 
 export function escapeIdentity(str: string) {
   return `"${str.replace(/"/g, `""`)}"`;
@@ -122,4 +123,14 @@ export function generateUpdateStatement(
   return `UPDATE ${escapeIdentity(
     tableName
   )} SET ${setPart} WHERE ${wherePart};`;
+}
+
+export function selectStatementFromPosition(
+  statements: IdentifyResult[],
+  pos: number
+): IdentifyResult | undefined {
+  for (const statement of statements) {
+    if (statement.end + 1 >= pos) return statement;
+  }
+  return undefined;
 }
