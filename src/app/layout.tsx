@@ -21,25 +21,8 @@ export default function RootLayout({
         <link rel="prefetch" href="/client" />
       </head>
       <body className={inter.className}>
-        {process.env.NEXT_PUBLIC_GA && (
-          <>
-            <Script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA}`}
-            />
-            <Script id="ga">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-
-          gtag('consent', 'default', {
-            'ad_storage': 'denied',
-            'analytics_storage': 'denied'
-          });
-
-          gtag('js', new Date());
-          gtag('config', '${process.env.NEXT_PUBLIC_GA}');
-        `}</Script>
-          </>
+        {process.env.ENABLE_ANALYTIC && (
+          <Script async defer src="https://scripts.withcabin.com/hello.js" />
         )}
         {children}
       </body>
