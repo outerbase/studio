@@ -111,7 +111,9 @@ export default class OptimizeTableState {
   getValue(y: number, x: number): unknown {
     const rowChange = this.data[y]?.change;
     if (rowChange) {
-      return rowChange[this.headers[x].name] ?? this.getOriginalValue(y, x);
+      return this.headers[x].name in rowChange
+        ? rowChange[this.headers[x].name]
+        : this.getOriginalValue(y, x);
     }
     return this.getOriginalValue(y, x);
   }

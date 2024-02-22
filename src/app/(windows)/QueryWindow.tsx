@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { splitQuery, sqliteSplitterOptions } from "dbgate-query-splitter";
+import { useRef, useState } from "react";
+import { identify } from "sql-query-identifier";
 import { LucidePlay } from "lucide-react";
 import SqlEditor from "@/components/SqlEditor";
 import {
@@ -15,6 +15,9 @@ import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import { MultipleQueryProgress, multipleQuery } from "@/lib/multiple-query";
 import QueryProgressLog from "../(components)/QueryProgressLog";
 import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
+import { KEY_BINDING } from "@/lib/key-matcher";
+import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import { selectStatementFromPosition } from "@/lib/sql-helper";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
@@ -22,26 +25,46 @@ export default function QueryWindow() {
   const [code, setCode] = useState("");
   const [data, setData] = useState<OptimizeTableState>();
   const [progress, setProgress] = useState<MultipleQueryProgress>();
+  const editorRef = useRef<ReactCodeMirrorRef>(null);
+  const [lineNumber, setLineNumber] = useState(0);
+  const [columnNumber, setColumnNumber] = useState(0);
 
-  const onRunClicked = () => {
-    const statements = splitQuery(code, {
-      ...sqliteSplitterOptions,
-      adaptiveGoSplit: true,
-    }).map((statement) => statement.toString());
+  const onRunClicked = (all = false) => {
+    const statements = identify(code, {
+      dialect: "sqlite",
+      strict: false,
+    });
 
-    // Reset the result and make a new query
-    setData(undefined);
-    setProgress(undefined);
+    let finalStatements: string[] = [];
 
-    multipleQuery(databaseDriver, statements, (currentProgrss) => {
-      setProgress(currentProgrss);
-    })
-      .then(({ last }) => {
-        if (last) {
-          setData(OptimizeTableState.createFromResult(last));
-        }
+    const editor = editorRef.current;
+
+    if (all) {
+      finalStatements = statements.map((s) => s.text);
+    } else if (editor && editor.view) {
+      const position = editor.view.state.selection.main.head;
+      const statement = selectStatementFromPosition(statements, position);
+
+      if (statement) {
+        finalStatements = [statement.text];
+      }
+    }
+
+    if (finalStatements.length > 0) {
+      // Reset the result and make a new query
+      setData(undefined);
+      setProgress(undefined);
+
+      multipleQuery(databaseDriver, finalStatements, (currentProgrss) => {
+        setProgress(currentProgrss);
       })
-      .catch(console.error);
+        .then(({ last }) => {
+          if (last) {
+            setData(OptimizeTableState.createFromResult(last));
+          }
+        })
+        .catch(console.error);
+    }
   };
 
   return (
@@ -49,15 +72,43 @@ export default function QueryWindow() {
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
           <div className="flex-grow overflow-hidden">
-            <SqlEditor value={code} onChange={setCode} schema={schema} />
+            <SqlEditor
+              ref={editorRef}
+              value={code}
+              onChange={setCode}
+              schema={schema}
+              onCursorChange={(_, line, col) => {
+                setLineNumber(line);
+                setColumnNumber(col);
+              }}
+              onKeyDown={(e) => {
+                if (KEY_BINDING.run.match(e)) {
+                  onRunClicked();
+                  e.preventDefault();
+                }
+              }}
+            />
           </div>
           <div className="flex-grow-0 flex-shrink-0">
             <Separator />
-            <div className="flex gap-2 p-1">
-              <Button variant={"ghost"} onClick={onRunClicked}>
+            <div className="flex gap-1 p-1">
+              <Button variant={"ghost"} onClick={() => onRunClicked()}>
                 <LucidePlay className="w-4 h-4 mr-2" />
-                Run
+                Run Current{" "}
+                <span className="text-xs ml-2 px-2 bg-secondary py-1 rounded">
+                  {KEY_BINDING.run.toString()}
+                </span>
               </Button>
+
+              <Button variant={"ghost"} onClick={() => onRunClicked(true)}>
+                <LucidePlay className="w-4 h-4 mr-2" />
+                Run All
+              </Button>
+
+              <div className="grow justify-end items-center flex text-sm mr-2 gap-2">
+                <div>Ln {lineNumber}</div>
+                <div>Col {columnNumber + 1}</div>
+              </div>
             </div>
           </div>
         </div>

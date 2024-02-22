@@ -9,8 +9,10 @@ import {
   generateDeleteStatement,
   generateInsertStatement,
   generateUpdateStatement,
+  selectStatementFromPosition,
   unescapeIdentity,
 } from "./sql-helper";
+import { identify } from "sql-query-identifier";
 
 describe("Escape SQL", () => {
   it("escape sql string", () => {
@@ -135,4 +137,30 @@ describe("Mapping sqlite column type to our table type", () => {
     it(`${type} column should be REAL`, () =>
       expect(convertSqliteType(type)).toBe(TableColumnDataType.REAL));
   }
+});
+
+function ss(sql: string) {
+  const pos = sql.indexOf("|");
+  const statements = identify(sql.replace("|", ""));
+  return selectStatementFromPosition(statements, pos);
+}
+
+describe("Select current query", () => {
+  it("select current query", () => {
+    expect(ss("select * from |t1; update t1 set name='visal';")?.text).toBe(
+      "select * from t1;"
+    );
+
+    expect(ss("select * from t1|; update t1 set name='visal';")?.text).toBe(
+      "select * from t1;"
+    );
+
+    expect(ss("select * from t1;| update t1 set name='visal';")?.text).toBe(
+      "select * from t1;"
+    );
+
+    expect(ss("select * from t1; update| t1 set name='visal';")?.text).toBe(
+      "update t1 set name='visal';"
+    );
+  });
 });

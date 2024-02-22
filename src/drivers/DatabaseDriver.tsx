@@ -184,11 +184,19 @@ export default class DatabaseDriver {
   async selectFromTable(
     tableName: string,
     options: {
+      whereRaw?: string;
       limit: number;
       offset: number;
     }
   ): Promise<hrana.RowsResult> {
-    const sql = `SELECT * FROM ${this.escapeId(tableName)} LIMIT ? OFFSET ?;`;
+    const whereRaw = options.whereRaw?.trim();
+
+    const sql = `SELECT * FROM ${this.escapeId(tableName)}${
+      whereRaw ? ` WHERE ${whereRaw} ` : ""
+    } LIMIT ? OFFSET ?;`;
+
+    console.log(sql);
+
     const binding = [options.limit, options.offset];
     return await this.query([sql, binding]);
   }

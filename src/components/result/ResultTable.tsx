@@ -9,6 +9,7 @@ import OptimizeTable, {
 import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
 import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
+import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
@@ -85,9 +86,67 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       state: OptimizeTableState;
       event: React.MouseEvent;
     }) => {
+      const randomUUID = crypto.randomUUID();
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const hasFocus = !!state.getFocus();
+
+      function setFocusValue(newValue: unknown) {
+        const focusCell = state.getFocus();
+        if (focusCell) {
+          state.changeValue(focusCell.y, focusCell.x, newValue);
+        }
+      }
+
       openContextMenuFromEvent([
         {
+          title: "Insert Value",
+          disabled: !hasFocus,
+          subWidth: 200,
+          sub: [
+            {
+              title: <pre>NULL</pre>,
+              onClick: () => {
+                setFocusValue(null);
+              },
+            },
+            {
+              title: <pre>DEFAULT</pre>,
+              onClick: () => {
+                setFocusValue(undefined);
+              },
+            },
+            { separator: true },
+            {
+              title: (
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">Unix Timestamp</span>
+                  <span>{timestamp}</span>
+                </div>
+              ),
+              onClick: () => {
+                setFocusValue(timestamp);
+              },
+            },
+            { separator: true },
+            {
+              title: (
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">UUID </span>
+                  <span>{randomUUID}</span>
+                </div>
+              ),
+              onClick: () => {
+                setFocusValue(randomUUID);
+              },
+            },
+          ],
+        },
+        {
+          separator: true,
+        },
+        {
           title: "Copy Cell Value",
+          shortcut: KEY_BINDING.copy.toString(),
           onClick: () => {
             const focus = state.getFocus();
             if (focus) {
@@ -152,6 +211,20 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
     [data, tableName]
   );
 
+  const onKeyDown = useCallback(
+    (state: OptimizeTableState, e: React.KeyboardEvent) => {
+      if (KEY_BINDING.copy.match(e as React.KeyboardEvent<HTMLDivElement>)) {
+        const focus = state.getFocus();
+        if (focus) {
+          const y = focus.y;
+          const x = focus.x;
+          window.navigator.clipboard.writeText(state.getValue(y, x) as string);
+        }
+      }
+    },
+    []
+  );
+
   return (
     <OptimizeTable
       internalState={data}
@@ -161,6 +234,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       renderAhead={20}
       renderCell={renderCell}
       rowHeight={35}
+      onKeyDown={onKeyDown}
     />
   );
 }

@@ -6,6 +6,7 @@ import {
   LucideArrowLeft,
   LucideArrowRight,
   LucideDelete,
+  LucideFilter,
   LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
@@ -35,10 +36,14 @@ interface TableDataContentProps {
 export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
+  const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OptimizeTableState>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
   const [changeNumber, setChangeNumber] = useState(0);
+
+  const [where, setWhere] = useState("");
+  const [whereInput, setWhereInput] = useState("");
 
   const [offset, setOffset] = useState("0");
   const [limit, setLimit] = useState("50");
@@ -53,20 +58,26 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     const fetchData = async () => {
       setLoading(true);
 
-      const dataResult = await databaseDriver.selectFromTable(tableName, {
-        limit: finalLimit,
-        offset: finalOffset,
-      });
+      try {
+        const dataResult = await databaseDriver.selectFromTable(tableName, {
+          whereRaw: where,
+          limit: finalLimit,
+          offset: finalOffset,
+        });
 
-      const schemaResult = await databaseDriver.getTableSchema(tableName);
-      setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
+        const schemaResult = await databaseDriver.getTableSchema(tableName);
+        setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
 
-      setLoading(false);
-
-      setTableSchema(schemaResult);
-      updateTableSchema(tableName, schemaResult.columns);
-      setLastQueryTimestamp(Date.now());
-      setChangeNumber(0);
+        setTableSchema(schemaResult);
+        updateTableSchema(tableName, schemaResult.columns);
+        setLastQueryTimestamp(Date.now());
+        setChangeNumber(0);
+        setError(undefined);
+      } catch (e) {
+        setError((e as Error).toString());
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData().then().catch(console.error);
@@ -74,6 +85,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     databaseDriver,
     tableName,
     updateTableSchema,
+    where,
     finalOffset,
     finalLimit,
     revision,
@@ -186,7 +198,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       <div className="flex-shrink-0 flex-grow-0">
         <div className="flex p-1 gap-1">
           <Button
-            variant={"ghost"}
+            variant={"outline"}
             size={"sm"}
             disabled={!changeNumber}
             onClick={onCommit}
@@ -204,7 +216,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           </Button>
 
           <Button
-            variant={"ghost"}
+            variant={"outline"}
             size={"sm"}
             disabled={!changeNumber}
             onClick={onDiscard}
@@ -212,31 +224,46 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             <span className="text-red-500">Discard Change</span>
           </Button>
 
-          <div>
+          <div className="mr-2">
             <Separator orientation="vertical" />
           </div>
 
-          <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
-            <LucidePlus className="w-4 h-4 mr-2 text-green-600" />
-            New Row
+          <Button variant={"outline"} size={"sm"} onClick={onNewRow}>
+            <LucidePlus className="w-4 h-4 text-green-600" />
           </Button>
 
-          <Button variant={"ghost"} size={"sm"} onClick={onRemoveRow}>
-            <LucideDelete className="w-4 h-4 mr-2 text-red-600" />
-            Remove
+          <Button variant={"outline"} size={"sm"} onClick={onRemoveRow}>
+            <LucideDelete className="w-4 h-4 text-red-600" />
           </Button>
 
           <Button
-            variant={"ghost"}
+            variant={"outline"}
             size={"sm"}
             onClick={() => setRevision((prev) => prev + 1)}
             disabled={loading}
           >
-            <LucideRefreshCcw className="w-4 h-4 mr-2 text-green-600" />
-            Refresh
+            <LucideRefreshCcw className="w-4 h-4 text-green-600" />
           </Button>
 
-          <div className="flex flex-grow" />
+          <div className="flex flex-grow mx-2">
+            <div className="bg-secondary rounded overflow-hidden flex items-center w-full">
+              <div className="text-sm px-2 text-gray-500 bg-gray-200 h-full flex items-center">
+                <LucideFilter className="h-4 w-4 text-black" />
+              </div>
+              <input
+                type="text"
+                placeholder="eg: id=5"
+                value={whereInput}
+                onChange={(e) => setWhereInput(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setWhere(e.currentTarget.value);
+                  }
+                }}
+                className="bg-inherit p-1 pl-2 pr-2 outline-none text-sm font-mono h-full flex-grow"
+              />
+            </div>
+          </div>
 
           <div>
             <Separator orientation="vertical" />
@@ -316,7 +343,12 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       </div>
       <div className="flex-grow overflow-hidden relative">
         {loading && <OpacityLoading />}
-        {data ? (
+        {error && (
+          <div className="text-red-500 p-5">
+            <pre>{error}</pre>
+          </div>
+        )}
+        {data && !error ? (
           <ResultTable
             data={data}
             tableName={tableName}

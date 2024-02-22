@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,12 @@ export default function RootLayout({
       <head>
         <link rel="prefetch" href="/client" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {process.env.ENABLE_ANALYTIC && (
+          <Script async defer src="https://scripts.withcabin.com/hello.js" />
+        )}
+        {children}
+      </body>
     </html>
   );
 }
