@@ -1,9 +1,15 @@
 import {
+  DatabaseColumnConflict,
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
 } from "@/drivers/DatabaseDriver";
 import { DatabaseTableColumnChange, DatabaseTableSchemaChange } from ".";
-import { ChangeEvent, Dispatch, SetStateAction, useCallback } from "react";
+import {
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useCallback,
+} from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +31,7 @@ import { TableColumnDataType } from "@/app/(components)/OptimizeTable";
 import { convertSqliteType } from "@/lib/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./ColumnDefaultValueInput";
+import TableCombobox from "../table-combobox/TableCombobox";
 
 function changeColumnOnIndex(
   idx: number,
@@ -65,6 +72,48 @@ function changeColumnOnIndex(
   });
 }
 
+function ConflictClauseOptions({
+  value,
+  onChange,
+}: Readonly<{
+  value?: DatabaseColumnConflict;
+  onChange?: (v: DatabaseColumnConflict) => void;
+}>) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="bg-white">
+        <SelectValue placeholder="Conflict" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="ROLLBACK">Rollback</SelectItem>
+        <SelectItem value="ABORT">Abort</SelectItem>
+        <SelectItem value="FAIL">Fail</SelectItem>
+        <SelectItem value="IGNORE">Ignore</SelectItem>
+        <SelectItem value="REPLACE">Replace</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+function ColumnConstraintContainer({
+  onRemoved,
+  name,
+  children,
+}: Readonly<
+  PropsWithChildren<{ name: string; disabled?: boolean; onRemoved: () => void }>
+>) {
+  return (
+    <div className="flex gap-2">
+      <div className="flex items-center flex-shrink-0">
+        <Trash2 size={14} className="text-red-500" onClick={onRemoved} />
+      </div>
+      <div className="flex items-center w-[80px] flex-shrink-0">{name}</div>
+      <div className="flex gap-2 flex-grow">{children}</div>
+      <div className={"w-[80px] flex-shrink-0"}></div>
+    </div>
+  );
+}
+
 function ColumnItem({
   value,
   idx,
@@ -76,39 +125,12 @@ function ColumnItem({
 }) {
   const disabled = !!value.old;
 
-  const onNameChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      changeColumnOnIndex(idx, { name: e.currentTarget.value }, onChange);
+  const change = useCallback(
+    (newValue: Partial<DatabaseTableColumn> | null) => {
+      changeColumnOnIndex(idx, newValue, onChange);
     },
-    [onChange, idx]
+    [idx, onChange]
   );
-
-  const onTypeChange = useCallback(
-    (newType: string) => {
-      if (!disabled) {
-        changeColumnOnIndex(idx, { type: newType }, onChange);
-      }
-    },
-    [onChange, idx, disabled]
-  );
-
-  const onDefaultValueChange = useCallback(
-    (constraint: DatabaseTableColumnConstraint) => {
-      changeColumnOnIndex(idx, { constraint }, onChange);
-    },
-    [onChange, idx]
-  );
-
-  const onNotNullChange = useCallback(
-    (notNull: boolean) => {
-      changeColumnOnIndex(idx, { constraint: { notNull } }, onChange);
-    },
-    [onChange, idx]
-  );
-
-  const onRemoved = useCallback(() => {
-    changeColumnOnIndex(idx, null, onChange);
-  }, [idx, onChange]);
 
   let highlightClassName = "";
   if (value.new === null) {
@@ -130,19 +152,22 @@ function ColumnItem({
   if (normalizeType === TableColumnDataType.BLOB) type = "BLOB";
 
   return (
-    <div className="p-1 text-sm">
-      <div className={"flex " + highlightClassName}>
+    <div className={"p-1 text-sm " + highlightClassName}>
+      <div className="flex">
         <div className="mt-3 pl-2 w-[30px] text-red-600">
           {column.pk && <LucideKey size={15} />}
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <div className={"flex p-1 gap-2"}>
             <Input
               value={column.name}
               className={"w-[200px] bg-white"}
-              onChange={onNameChange}
+              onChange={(e) => change({ name: e.currentTarget.value })}
             />
-            <Select value={type} onValueChange={onTypeChange}>
+            <Select
+              value={type}
+              onValueChange={(newType) => change({ type: newType })}
+            >
               <SelectTrigger className="w-[180px] bg-white">
                 <SelectValue placeholder="Select datatype" />
               </SelectTrigger>
@@ -153,9 +178,12 @@ function ColumnItem({
                 <SelectItem value="BLOB">Blob</SelectItem>
               </SelectContent>
             </Select>
+
             <div className="w-[180px]">
               <ColumnDefaultValueInput
-                onChange={onDefaultValueChange}
+                onChange={(constraint: DatabaseTableColumnConstraint) =>
+                  change({ constraint })
+                }
                 constraint={column.constraint}
                 disabled={disabled}
               />
@@ -164,33 +192,146 @@ function ColumnItem({
               <Checkbox
                 disabled={disabled}
                 checked={column.constraint?.notNull}
-                onCheckedChange={onNotNullChange}
+                onCheckedChange={(notNull: boolean) =>
+                  change({ constraint: { notNull } })
+                }
               />
             </div>
           </div>
 
-          {column.constraint?.generatedExpression && (
-            <div className="flex gap-2">
-              <div className="flex items-center">
-                <Trash2 size={14} className="text-red-500" />
-              </div>
-              <div className="flex items-center">Generating</div>
+          {column.constraint?.foreignKey && (
+            <ColumnConstraintContainer
+              name="Foreign Key"
+              onRemoved={() => {
+                change({
+                  constraint: {
+                    unique: undefined,
+                    uniqueConflict: undefined,
+                  },
+                });
+              }}
+            >
+              <TableCombobox
+                value={column.constraint.foreignKey.foreignTableName}
+                onChange={(newTable) => {
+                  change({
+                    constraint: {
+                      foreignKey: {
+                        ...column?.constraint?.foreignKey,
+                        foreignTableName: newTable,
+                      },
+                    },
+                  });
+                }}
+              />
+            </ColumnConstraintContainer>
+          )}
+
+          {column.constraint?.primaryKey && (
+            <ColumnConstraintContainer
+              name="Primary Key"
+              onRemoved={() => {
+                change({
+                  constraint: {
+                    primaryKey: undefined,
+                    primaryKeyConflict: undefined,
+                    primaryKeyOrder: undefined,
+                  },
+                });
+              }}
+            >
+              <Select>
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Order" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ASC">ASC</SelectItem>
+                  <SelectItem value="DESC">DESC</SelectItem>
+                </SelectContent>
+              </Select>
+              <ConflictClauseOptions />
+            </ColumnConstraintContainer>
+          )}
+
+          {column.constraint?.unique && (
+            <ColumnConstraintContainer
+              name="Unique"
+              onRemoved={() => {
+                change({
+                  constraint: {
+                    unique: undefined,
+                    uniqueConflict: undefined,
+                  },
+                });
+              }}
+            >
+              <ConflictClauseOptions />
+            </ColumnConstraintContainer>
+          )}
+
+          {column.constraint?.generatedExpression !== undefined && (
+            <ColumnConstraintContainer
+              name="Generating"
+              onRemoved={() =>
+                change({
+                  constraint: {
+                    generatedExpression: undefined,
+                    generatedType: undefined,
+                  },
+                })
+              }
+            >
               <Input
-                placeholder="Default Value"
-                className="font-mono"
+                disabled={disabled}
+                placeholder="Generate Expression"
+                className="font-mono bg-white"
+                onChange={(e) => {
+                  change({
+                    constraint: {
+                      generatedExpression: e.currentTarget.value,
+                    },
+                  });
+                }}
                 value={column.constraint.generatedExpression ?? ""}
               />
-              <Select value={type}>
-                <SelectTrigger className="w-[100px]">
+              <Select
+                value={column.constraint?.generatedType}
+                onValueChange={(type) => {
+                  change({
+                    constraint: {
+                      generatedType: type as "STORED" | "VIRTUAL",
+                    },
+                  });
+                }}
+              >
+                <SelectTrigger className="w-[100px] bg-white">
                   <SelectValue placeholder="Select datatype" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="INTEGER">Virtual</SelectItem>
-                  <SelectItem value="REAL">Stored</SelectItem>
+                  <SelectItem value="VIRTUAL">Virtual</SelectItem>
+                  <SelectItem value="STORED">Stored</SelectItem>
                 </SelectContent>
               </Select>
-              <div className={"w-[135px]"}></div>
-            </div>
+            </ColumnConstraintContainer>
+          )}
+
+          {column.constraint?.checkExpression !== undefined && (
+            <ColumnConstraintContainer
+              name="Check"
+              onRemoved={() => {
+                change({
+                  constraint: {
+                    checkExpression: undefined,
+                  },
+                });
+              }}
+            >
+              <Input
+                placeholder="Check Expression"
+                className="font-mono bg-white"
+                value={column.constraint.checkExpression ?? ""}
+              />
+            </ColumnConstraintContainer>
           )}
         </div>
         <div className="flex w-[40px] text-xs ml-3">
@@ -204,23 +345,60 @@ function ColumnItem({
               <DropdownMenuContent>
                 <DropdownMenuLabel>Constraint</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem inset disabled={disabled}>
+                <DropdownMenuItem
+                  inset
+                  disabled={disabled}
+                  onClick={() => {
+                    change({ constraint: { primaryKey: true } });
+                  }}
+                >
                   Primary Key
                 </DropdownMenuItem>
-                <DropdownMenuItem inset disabled={disabled}>
+                <DropdownMenuItem
+                  inset
+                  disabled={disabled}
+                  onClick={() => {
+                    change({ constraint: { unique: true } });
+                  }}
+                >
                   Unique
                 </DropdownMenuItem>
-                <DropdownMenuItem inset disabled={disabled}>
+                <DropdownMenuItem
+                  inset
+                  disabled={disabled}
+                  onClick={() => {
+                    change({
+                      constraint: {
+                        checkExpression: "",
+                      },
+                    });
+                  }}
+                >
                   Check Constraint
                 </DropdownMenuItem>
                 <DropdownMenuItem inset disabled={disabled}>
                   Foreign Key
                 </DropdownMenuItem>
-                <DropdownMenuItem inset disabled={disabled}>
+                <DropdownMenuItem
+                  inset
+                  disabled={disabled}
+                  onClick={() => {
+                    change({
+                      constraint: {
+                        generatedType: "VIRTUAL",
+                        generatedExpression: "",
+                      },
+                    });
+                  }}
+                >
                   Virtuality
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onRemoved}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    change(null);
+                  }}
+                >
                   <LucideTrash2 className="mr-1" />
                   Remove
                 </DropdownMenuItem>

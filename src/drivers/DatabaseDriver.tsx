@@ -22,10 +22,19 @@ export type DatabaseColumnConflict =
   | "IGNORE"
   | "REPLACE";
 
-export interface DatabaseForeignKeyCaluse {
+export type DatabaseForeignKeyAction =
+  | "SET_NULL"
+  | "SET_DEFAULT"
+  | "CASCADE"
+  | "RESTRICT"
+  | "NO_ACTION";
+
+export interface DatabaseForeignKeyClause {
   foreignTableName: string;
-  foreignColumns: string[];
+  foreignColumns?: string[];
   columns?: string[];
+  onUpdate?: DatabaseForeignKeyAction;
+  onDelete?: DatabaseForeignKeyAction;
 }
 
 export interface DatabaseTableColumnConstraint {
@@ -53,7 +62,7 @@ export interface DatabaseTableColumnConstraint {
   generatedExpression?: string;
   generatedType?: "STORED" | "VIRTUAL";
 
-  foreignKey?: DatabaseForeignKeyCaluse;
+  foreignKey?: DatabaseForeignKeyClause;
 }
 
 export interface DatabaseTableSchema {

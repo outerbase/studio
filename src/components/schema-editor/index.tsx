@@ -48,11 +48,9 @@ export default function SchemaEditor({ value, onChange }: Readonly<Props>) {
     });
   }, [value, onChange]);
 
-  console.log(value);
-
   return (
     <div className="w-full h-full flex flex-col">
-      <div>
+      <div className="flex-grow-0 flex-shrink-0">
         <div className="p-1 flex gap-2">
           <Button variant="ghost">Save</Button>
           <Button variant="ghost">Discard Change</Button>
@@ -81,6 +79,8 @@ export default function SchemaEditor({ value, onChange }: Readonly<Props>) {
           </DropdownMenu>
         </div>
         <Separator />
+      </div>
+      <div className="flex-grow overflow-y-auto">
         <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
       </div>
     </div>
