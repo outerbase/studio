@@ -37,7 +37,7 @@ import TableColumnCombobox from "../table-combobox/TableColumnCombobox";
 function changeColumnOnIndex(
   idx: number,
   value: Partial<DatabaseTableColumn> | null,
-  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange | undefined>>
+  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>
 ) {
   onChange((prev) => {
     if (prev) {
@@ -122,7 +122,7 @@ function ColumnItem({
 }: {
   value: DatabaseTableColumnChange;
   idx: number;
-  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange | undefined>>;
+  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }) {
   const disabled = !!value.old;
 
@@ -432,7 +432,7 @@ export default function SchemaEditorColumnList({
   onChange,
 }: Readonly<{
   columns: DatabaseTableColumnChange[];
-  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange | undefined>>;
+  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }>) {
   return (
     <div className="flex flex-col gap-2 mb-4 p-4 flex-grow">

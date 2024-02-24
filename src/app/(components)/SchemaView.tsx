@@ -2,13 +2,14 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { openTabs } from "@/messages/openTabs";
-import { LucideIcon, Table2 } from "lucide-react";
+import { LucideIcon, LucideSearch, Table2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import {
   OpenContextMenuList,
   openContextMenuFromEvent,
 } from "@/messages/openContextMenu";
 import { useSchema } from "@/screens/DatabaseScreen/SchemaProvider";
+import { appVersion } from "@/env";
 
 interface SchemaViewItemProps {
   icon: LucideIcon;
@@ -71,6 +72,16 @@ export default function SchemaView() {
         },
         { separator: true },
         {
+          title: "Create New Table",
+          onClick: () => {
+            openTabs({
+              key: "_create_schema",
+              name: "Create Table",
+              type: "schema",
+            });
+          },
+        },
+        {
           title: "Edit Table",
           disabled: !tableName,
           onClick: () => {
@@ -82,6 +93,7 @@ export default function SchemaView() {
             });
           },
         },
+        { separator: true },
         { title: "Refresh", onClick: () => refresh() },
       ] as OpenContextMenuList;
     },
@@ -89,26 +101,44 @@ export default function SchemaView() {
   );
 
   return (
-    <ScrollArea
-      className="h-full select-none"
-      onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
-    >
-      <div className="flex flex-col p-2 pr-4">
-        {schema.map((item, schemaIndex) => {
-          return (
-            <SchemaViewmItem
-              onContextMenu={openContextMenuFromEvent(
-                prepareContextMenu(item.name)
-              )}
-              key={item.name}
-              title={item.name}
-              icon={Table2}
-              selected={schemaIndex === selectedIndex}
-              onClick={() => setSelectedIndex(schemaIndex)}
-            />
-          );
-        })}
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="pt-2 px-2 flex h-10">
+        <div className="bg-secondary rounded overflow-hidden flex items-center ml-3 flex-grow">
+          <div className="text-sm px-2 h-full flex items-center">
+            <LucideSearch className="h-4 w-4 text-black" />
+          </div>
+          <input
+            type="text"
+            className="bg-inherit p-1 pl-2 pr-2 outline-none text-sm  h-full flex-grow"
+          />
+        </div>
       </div>
-    </ScrollArea>
+      <ScrollArea
+        className="flex-grow select-none"
+        onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
+      >
+        <div className="flex flex-col p-2 pr-4">
+          {schema.map((item, schemaIndex) => {
+            return (
+              <SchemaViewmItem
+                onContextMenu={openContextMenuFromEvent(
+                  prepareContextMenu(item.name)
+                )}
+                key={item.name}
+                title={item.name}
+                icon={Table2}
+                selected={schemaIndex === selectedIndex}
+                onClick={() => setSelectedIndex(schemaIndex)}
+              />
+            );
+          })}
+        </div>
+      </ScrollArea>
+      <div className="bg-blue-700 h-8 flex items-center px-2 text-white">
+        <span>LibSQL</span>
+        <strong>Studio</strong>
+        <span className="text-xs ml-2">v{appVersion}</span>
+      </div>
+    </div>
   );
 }

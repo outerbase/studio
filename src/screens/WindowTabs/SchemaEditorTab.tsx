@@ -13,35 +13,48 @@ import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { useEffect, useState } from "react";
 
 interface SchemaEditorTabProps {
-  tableName: string;
+  tableName?: string;
 }
+
+const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
+  name: {
+    old: "",
+    new: "",
+  },
+  columns: [],
+  createScript: "",
+};
 
 export default function SchemaEditorTab({
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
   const { databaseDriver } = useDatabaseDriver();
-  const [schema, setSchema] = useState<DatabaseTableSchemaChange>();
+  const [schema, setSchema] = useState<DatabaseTableSchemaChange>(EMPTY_SCHEMA);
+  const [loading, setLoading] = useState(!!tableName);
 
   useEffect(() => {
-    databaseDriver
-      .getTableSchema(tableName)
-      .then((schema) => {
-        setSchema({
-          name: {
-            old: schema.tableName,
-            new: schema.tableName,
-          },
-          columns: schema.columns.map((col) => ({
-            old: col,
-            new: structuredClone(col),
-          })),
-          createScript: schema.createScript,
-        });
-      })
-      .catch(console.error);
+    if (tableName) {
+      databaseDriver
+        .getTableSchema(tableName)
+        .then((schema) => {
+          setSchema({
+            name: {
+              old: schema.tableName,
+              new: schema.tableName,
+            },
+            columns: schema.columns.map((col) => ({
+              old: col,
+              new: structuredClone(col),
+            })),
+            createScript: schema.createScript,
+          });
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
   }, [databaseDriver, setSchema, tableName]);
 
-  if (!schema) {
+  if (loading) {
     return (
       <div>
         <OpacityLoading />
