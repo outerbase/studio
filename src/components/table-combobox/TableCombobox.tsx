@@ -33,16 +33,17 @@ export default function TableCombobox({
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder="Search table name..." />
 
           <CommandEmpty>No table found.</CommandEmpty>
-          <CommandGroup className="max-h-[250px] overflow-y-scroll">
+          <CommandGroup className="max-h-[250px] overflow-y-auto">
             {schema.map((table) => (
               <CommandItem
                 key={table.name}
                 value={table.name}
                 onSelect={() => {
                   onChange(table.name);
+                  setOpen(false);
                 }}
               >
                 <Check

@@ -8,6 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Separator } from "@/components/ui/separator";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { useEffect, useState } from "react";
 
@@ -54,8 +55,14 @@ export default function SchemaEditorTab({
         <SchemaEditor value={schema} onChange={setSchema} />
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel>
-        <SqlEditor value={schema.createScript ?? ""} readOnly />
+      <ResizablePanel collapsible>
+        <div className="flex flex-col h-full">
+          <div className="px-3 py-2 text-xs font-semibold">Preview</div>
+          <Separator />
+          <div className="flex-grow overflow-hidden">
+            <SqlEditor value={schema.createScript ?? ""} readOnly />
+          </div>
+        </div>
       </ResizablePanel>
     </ResizablePanelGroup>
   );

@@ -30,7 +30,7 @@ export type DatabaseForeignKeyAction =
   | "NO_ACTION";
 
 export interface DatabaseForeignKeyClause {
-  foreignTableName: string;
+  foreignTableName?: string;
   foreignColumns?: string[];
   columns?: string[];
   onUpdate?: DatabaseForeignKeyAction;

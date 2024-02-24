@@ -32,6 +32,7 @@ import { convertSqliteType } from "@/lib/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./ColumnDefaultValueInput";
 import TableCombobox from "../table-combobox/TableCombobox";
+import TableColumnCombobox from "../table-combobox/TableColumnCombobox";
 
 function changeColumnOnIndex(
   idx: number,
@@ -103,13 +104,13 @@ function ColumnConstraintContainer({
   PropsWithChildren<{ name: string; disabled?: boolean; onRemoved: () => void }>
 >) {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 ml-6 border-l border-dashed pl-3">
       <div className="flex items-center flex-shrink-0">
         <Trash2 size={14} className="text-red-500" onClick={onRemoved} />
       </div>
       <div className="flex items-center w-[80px] flex-shrink-0">{name}</div>
       <div className="flex gap-2 flex-grow">{children}</div>
-      <div className={"w-[80px] flex-shrink-0"}></div>
+      <div className={"w-[20px] flex-shrink-0"}></div>
     </div>
   );
 }
@@ -205,8 +206,7 @@ function ColumnItem({
               onRemoved={() => {
                 change({
                   constraint: {
-                    unique: undefined,
-                    uniqueConflict: undefined,
+                    foreignKey: undefined,
                   },
                 });
               }}
@@ -224,6 +224,12 @@ function ColumnItem({
                   });
                 }}
               />
+              {column.constraint.foreignKey.foreignTableName && (
+                <TableColumnCombobox
+                  value=""
+                  tableName={column.constraint.foreignKey.foreignTableName}
+                />
+              )}
             </ColumnConstraintContainer>
           )}
 
@@ -338,7 +344,7 @@ function ColumnItem({
           <div className="mt-3">
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <div className="bg-yellow-400 w-6 h-6 rounded flex justify-center items-center cursor">
+                <div className="w-6 h-6 rounded flex justify-center items-center cursor">
                   <MoreHorizontal size={15} />
                 </div>
               </DropdownMenuTrigger>
@@ -376,7 +382,17 @@ function ColumnItem({
                 >
                   Check Constraint
                 </DropdownMenuItem>
-                <DropdownMenuItem inset disabled={disabled}>
+                <DropdownMenuItem
+                  inset
+                  disabled={disabled}
+                  onClick={() => {
+                    change({
+                      constraint: {
+                        foreignKey: {},
+                      },
+                    });
+                  }}
+                >
                   Foreign Key
                 </DropdownMenuItem>
                 <DropdownMenuItem
