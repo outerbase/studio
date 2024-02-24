@@ -246,7 +246,16 @@ function ColumnItem({
                 });
               }}
             >
-              <Select>
+              <Select
+                value={column.constraint.primaryKeyOrder}
+                onValueChange={(v) => {
+                  change({
+                    constraint: {
+                      primaryKeyOrder: v as "DESC" | "ASC",
+                    },
+                  });
+                }}
+              >
                 <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Order" />
                 </SelectTrigger>
@@ -255,7 +264,16 @@ function ColumnItem({
                   <SelectItem value="DESC">DESC</SelectItem>
                 </SelectContent>
               </Select>
-              <ConflictClauseOptions />
+              <ConflictClauseOptions
+                value={column.constraint.primaryKeyConflict}
+                onChange={(v) => {
+                  change({
+                    constraint: {
+                      primaryKeyConflict: v,
+                    },
+                  });
+                }}
+              />
             </ColumnConstraintContainer>
           )}
 
@@ -271,7 +289,16 @@ function ColumnItem({
                 });
               }}
             >
-              <ConflictClauseOptions />
+              <ConflictClauseOptions
+                value={column.constraint.uniqueConflict}
+                onChange={(v) => {
+                  change({
+                    constraint: {
+                      uniqueConflict: v,
+                    },
+                  });
+                }}
+              />
             </ColumnConstraintContainer>
           )}
 
@@ -336,6 +363,13 @@ function ColumnItem({
                 placeholder="Check Expression"
                 className="font-mono bg-white"
                 value={column.constraint.checkExpression ?? ""}
+                onChange={(e) => {
+                  change({
+                    constraint: {
+                      checkExpression: e.currentTarget.value,
+                    },
+                  });
+                }}
               />
             </ColumnConstraintContainer>
           )}

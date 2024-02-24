@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { useEffect, useState } from "react";
+import generateSqlSchemaChange from "@/lib/sql-generate.schema";
+import { useEffect, useMemo, useState } from "react";
 
 interface SchemaEditorTabProps {
   tableName?: string;
@@ -54,6 +55,10 @@ export default function SchemaEditorTab({
     }
   }, [databaseDriver, setSchema, tableName]);
 
+  const previewScript = useMemo(() => {
+    return generateSqlSchemaChange(schema);
+  }, [schema]);
+
   if (loading) {
     return (
       <div>
@@ -73,7 +78,7 @@ export default function SchemaEditorTab({
           <div className="px-3 py-2 text-xs font-semibold">Preview</div>
           <Separator />
           <div className="flex-grow overflow-hidden">
-            <SqlEditor value={schema.createScript ?? ""} readOnly />
+            <SqlEditor value={previewScript} readOnly />
           </div>
         </div>
       </ResizablePanel>
