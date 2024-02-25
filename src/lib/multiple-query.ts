@@ -17,6 +17,24 @@ export interface MultipleQueryProgress {
   error?: boolean;
 }
 
+export async function executeQuries(
+  driver: DatabaseDriver,
+  statements: string[]
+) {
+  try {
+    await driver.query("BEGIN TRANSACTION;");
+
+    for (const statement of statements) {
+      await driver.query(statement);
+    }
+
+    await driver.query("COMMIT");
+  } catch (e) {
+    await driver.query("ROLLBACK");
+    throw e;
+  }
+}
+
 export async function multipleQuery(
   driver: DatabaseDriver,
   statements: string[],
