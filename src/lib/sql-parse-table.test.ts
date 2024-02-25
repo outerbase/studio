@@ -67,6 +67,10 @@ it("parse column constraint", () => {
     defaultValue: 5.5,
   } as DatabaseTableColumnConstraint);
 
+  expect(pcc(`default current_timestamp`)).toEqual({
+    defaultExpression: "current_timestamp",
+  } as DatabaseTableColumnConstraint);
+
   expect(pcc(`default (round(julianday('now'))`)).toEqual({
     defaultExpression: `(round(julianday('now'))`,
   } as DatabaseTableColumnConstraint);

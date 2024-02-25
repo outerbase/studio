@@ -263,6 +263,15 @@ export function parseColumnConstraint(
       cursor.next();
     } else if (cursor.type() === "Parens") {
       defaultExpression = cursor.read();
+    } else if (
+      cursor.match("current_timestamp") ||
+      cursor.match("current_time") ||
+      cursor.match("current_date") ||
+      cursor.match("true") ||
+      cursor.match("false") ||
+      cursor.match("null")
+    ) {
+      defaultExpression = cursor.read();
     }
 
     return {

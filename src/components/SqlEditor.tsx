@@ -45,7 +45,8 @@ const theme = createTheme({
 
 interface SqlEditorProps {
   value: string;
-  onChange: (value: string) => void;
+  readOnly?: boolean;
+  onChange?: (value: string) => void;
   schema?: Record<string, string[]>;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   onCursorChange?: (
@@ -57,7 +58,14 @@ interface SqlEditorProps {
 
 const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
   function SqlEditor(
-    { value, onChange, schema, onKeyDown, onCursorChange }: SqlEditorProps,
+    {
+      value,
+      onChange,
+      schema,
+      onKeyDown,
+      onCursorChange,
+      readOnly,
+    }: SqlEditorProps,
     ref
   ) {
     const keyExtensions = useMemo(() => {
@@ -75,6 +83,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       <CodeMirror
         ref={ref}
         autoFocus
+        readOnly={readOnly}
         onKeyDown={onKeyDown}
         basicSetup={{
           defaultKeymap: false,
