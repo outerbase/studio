@@ -58,6 +58,7 @@ function SchemaViewmItem({
 
 export default function SchemaView() {
   const { refresh, schema } = useSchema();
+  const [search, setSearch] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const prepareContextMenu = useCallback(
@@ -110,6 +111,12 @@ export default function SchemaView() {
           <input
             type="text"
             className="bg-inherit p-1 pl-2 pr-2 outline-none text-sm  h-full flex-grow"
+            value={search}
+            placeholder="Search table"
+            onChange={(e) => {
+              setSelectedIndex(-1);
+              setSearch(e.currentTarget.value);
+            }}
           />
         </div>
       </div>
@@ -118,20 +125,24 @@ export default function SchemaView() {
         onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
       >
         <div className="flex flex-col p-2 pr-4">
-          {schema.map((item, schemaIndex) => {
-            return (
-              <SchemaViewmItem
-                onContextMenu={openContextMenuFromEvent(
-                  prepareContextMenu(item.name)
-                )}
-                key={item.name}
-                title={item.name}
-                icon={Table2}
-                selected={schemaIndex === selectedIndex}
-                onClick={() => setSelectedIndex(schemaIndex)}
-              />
-            );
-          })}
+          {schema
+            .filter((s) => {
+              return s.name.toLowerCase().indexOf(search.toLowerCase()) >= 0;
+            })
+            .map((item, schemaIndex) => {
+              return (
+                <SchemaViewmItem
+                  onContextMenu={openContextMenuFromEvent(
+                    prepareContextMenu(item.name)
+                  )}
+                  key={item.name}
+                  title={item.name}
+                  icon={Table2}
+                  selected={schemaIndex === selectedIndex}
+                  onClick={() => setSelectedIndex(schemaIndex)}
+                />
+              );
+            })}
         </div>
       </ScrollArea>
       <div className="bg-blue-700 h-8 flex items-center px-2 text-white">
