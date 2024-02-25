@@ -83,7 +83,7 @@ function geneateCreateColumn(col: DatabaseTableColumn): string {
 
 export default function generateSqlSchemaChange(
   change: DatabaseTableSchemaChange
-): string {
+): string[] {
   const isCreateScript = !change.name.old;
 
   const lines = [];
@@ -106,11 +106,13 @@ export default function generateSqlSchemaChange(
   }
 
   if (isCreateScript) {
-    return `CREATE TABLE ${escapeIdentity(
-      change.name.new || "no_table_name"
-    )}(\n${lines.map((line) => "  " + line).join(",\n")}\n);`;
+    return [
+      `CREATE TABLE ${escapeIdentity(
+        change.name.new || "no_table_name"
+      )}(\n${lines.map((line) => "  " + line).join(",\n")}\n)`,
+    ];
   } else {
     const alter = `ALTER TABLE ${escapeIdentity(change.name.old ?? "")} `;
-    return lines.map((line) => alter + line).join(";\n");
+    return lines.map((line) => alter + line);
   }
 }

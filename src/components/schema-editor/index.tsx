@@ -27,11 +27,16 @@ export interface DatabaseTableSchemaChange {
 }
 
 interface Props {
+  onSave: () => void;
   value: DatabaseTableSchemaChange;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }
 
-export default function SchemaEditor({ value, onChange }: Readonly<Props>) {
+export default function SchemaEditor({
+  value,
+  onChange,
+  onSave,
+}: Readonly<Props>) {
   const onAddColumn = useCallback(() => {
     onChange({
       ...value,
@@ -53,7 +58,9 @@ export default function SchemaEditor({ value, onChange }: Readonly<Props>) {
     <div className="w-full h-full flex flex-col">
       <div className="flex-grow-0 flex-shrink-0">
         <div className="p-1 flex gap-2">
-          <Button variant="ghost">Save</Button>
+          <Button variant="ghost" onClick={onSave}>
+            Save
+          </Button>
           <Button variant="ghost">Discard Change</Button>
 
           <div>
