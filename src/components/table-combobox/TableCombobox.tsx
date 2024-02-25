@@ -16,16 +16,18 @@ import { Separator } from "../ui/separator";
 export default function TableCombobox({
   value,
   onChange,
+  disabled,
 }: {
   value?: string;
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const { schema, refresh } = useSchema();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={disabled}>
         <Button variant="outline" className="justify-between w-[200px]">
           {value ?? "No table selected"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

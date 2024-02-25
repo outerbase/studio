@@ -11,6 +11,7 @@ import { Dispatch, SetStateAction, useCallback } from "react";
 import { Button } from "../ui/button";
 import SchemaEditorColumnList from "./SchemaEditorColumnList";
 import { Input } from "../ui/input";
+import { checkSchemaChange } from "@/lib/sql-generate.schema";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;
@@ -28,6 +29,7 @@ export interface DatabaseTableSchemaChange {
 
 interface Props {
   onSave: () => void;
+  onDiscard: () => void;
   value: DatabaseTableSchemaChange;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }
@@ -36,6 +38,7 @@ export default function SchemaEditor({
   value,
   onChange,
   onSave,
+  onDiscard,
 }: Readonly<Props>) {
   const onAddColumn = useCallback(() => {
     onChange({
@@ -54,14 +57,23 @@ export default function SchemaEditor({
     });
   }, [value, onChange]);
 
+  const hasChange = checkSchemaChange(value);
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-grow-0 flex-shrink-0">
         <div className="p-1 flex gap-2">
-          <Button variant="ghost" onClick={onSave}>
+          <Button variant="ghost" onClick={onSave} disabled={!hasChange}>
             Save
           </Button>
-          <Button variant="ghost">Discard Change</Button>
+          <Button
+            variant="ghost"
+            onClick={onDiscard}
+            disabled={!hasChange}
+            className="text-red-500"
+          >
+            Discard Change
+          </Button>
 
           <div>
             <Separator orientation="vertical" />
@@ -73,9 +85,9 @@ export default function SchemaEditor({
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant="ghost">
+              <Button variant="ghost" disabled>
                 <LucideShieldPlus className="w-4 h-4 mr-1" />
-                Add Constraint
+                Add Constraint (coming soon)
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>

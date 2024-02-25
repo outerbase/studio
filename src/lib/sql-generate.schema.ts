@@ -1,6 +1,26 @@
-import { DatabaseTableSchemaChange } from "@/components/schema-editor";
+import {
+  DatabaseTableColumnChange,
+  DatabaseTableSchemaChange,
+} from "@/components/schema-editor";
 import { escapeIdentity, escapeSqlValue } from "./sql-helper";
+import deepEqual from "deep-equal";
 import { DatabaseTableColumn } from "@/drivers/DatabaseDriver";
+
+export function checkSchemaColumnChange(change: DatabaseTableColumnChange) {
+  return !deepEqual(change.old, change.new);
+}
+
+export function checkSchemaChange(change: DatabaseTableSchemaChange) {
+  if (change.name.new !== change.name.old) return true;
+
+  for (const col of change.columns) {
+    if (checkSchemaColumnChange(col)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 function wrapParen(str: string) {
   if (str.length >= 2 && str[0] === "(" && str[str.length - 1] === ")")
@@ -76,6 +96,21 @@ function geneateCreateColumn(col: DatabaseTableColumn): string {
 
   if (col.constraint?.checkExpression) {
     tokens.push("CHECK " + wrapParen(col.constraint.checkExpression));
+  }
+
+  const foreignTableName = col.constraint?.foreignKey?.foreignTableName;
+  const foreignColumnName = (col.constraint?.foreignKey?.foreignColumns ?? [
+    undefined,
+  ])[0];
+
+  if (foreignTableName && foreignColumnName) {
+    tokens.push(
+      [
+        "REFERENCES",
+        escapeIdentity(foreignTableName) +
+          `(${escapeIdentity(foreignColumnName)})`,
+      ].join(" ")
+    );
   }
 
   return tokens.join(" ");

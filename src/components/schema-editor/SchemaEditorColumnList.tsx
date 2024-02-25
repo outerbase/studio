@@ -33,6 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./ColumnDefaultValueInput";
 import TableCombobox from "../table-combobox/TableCombobox";
 import TableColumnCombobox from "../table-combobox/TableColumnCombobox";
+import { checkSchemaColumnChange } from "@/lib/sql-generate.schema";
 
 function changeColumnOnIndex(
   idx: number,
@@ -76,13 +77,15 @@ function changeColumnOnIndex(
 function ConflictClauseOptions({
   value,
   onChange,
+  disabled,
 }: Readonly<{
   value?: DatabaseColumnConflict;
   onChange?: (v: DatabaseColumnConflict) => void;
+  disabled?: boolean;
 }>) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="bg-white">
+      <SelectTrigger className="bg-white" disabled={disabled}>
         <SelectValue placeholder="Conflict" />
       </SelectTrigger>
       <SelectContent>
@@ -100,14 +103,21 @@ function ColumnConstraintContainer({
   onRemoved,
   name,
   children,
+  disabled,
 }: Readonly<
   PropsWithChildren<{ name: string; disabled?: boolean; onRemoved: () => void }>
 >) {
   return (
     <div className="flex gap-2 ml-6 border-l border-dashed pl-3">
-      <div className="flex items-center flex-shrink-0">
-        <Trash2 size={14} className="text-red-500" onClick={onRemoved} />
-      </div>
+      {!disabled && (
+        <div className="flex items-center flex-shrink-0">
+          <Trash2
+            size={14}
+            className="text-red-500 cursor-pointer"
+            onClick={onRemoved}
+          />
+        </div>
+      )}
       <div className="flex items-center w-[80px] flex-shrink-0">{name}</div>
       <div className="flex gap-2 flex-grow">{children}</div>
       <div className={"w-[20px] flex-shrink-0"}></div>
@@ -138,7 +148,7 @@ function ColumnItem({
     highlightClassName = "bg-red-50";
   } else if (value.old === null) {
     highlightClassName = "bg-green-100";
-  } else if (value.new?.name !== value.old?.name) {
+  } else if (checkSchemaColumnChange(value)) {
     highlightClassName = "bg-yellow-100";
   }
 
@@ -161,6 +171,7 @@ function ColumnItem({
         <div className="flex flex-col gap-1">
           <div className={"flex p-1 gap-2"}>
             <Input
+              autoFocus
               value={column.name}
               className={"w-[200px] bg-white"}
               onChange={(e) => change({ name: e.currentTarget.value })}
@@ -168,6 +179,7 @@ function ColumnItem({
             <Select
               value={type}
               onValueChange={(newType) => change({ type: newType })}
+              disabled={disabled}
             >
               <SelectTrigger className="w-[180px] bg-white">
                 <SelectValue placeholder="Select datatype" />
@@ -203,6 +215,7 @@ function ColumnItem({
           {column.constraint?.foreignKey && (
             <ColumnConstraintContainer
               name="Foreign Key"
+              disabled={disabled}
               onRemoved={() => {
                 change({
                   constraint: {
@@ -213,6 +226,7 @@ function ColumnItem({
             >
               <TableCombobox
                 value={column.constraint.foreignKey.foreignTableName}
+                disabled={disabled}
                 onChange={(newTable) => {
                   change({
                     constraint: {
@@ -226,7 +240,22 @@ function ColumnItem({
               />
               {column.constraint.foreignKey.foreignTableName && (
                 <TableColumnCombobox
-                  value=""
+                  value={
+                    (column.constraint.foreignKey?.foreignColumns ?? [
+                      undefined,
+                    ])[0]
+                  }
+                  disabled={disabled}
+                  onChange={(colName) => {
+                    change({
+                      constraint: {
+                        foreignKey: {
+                          ...column?.constraint?.foreignKey,
+                          foreignColumns: [colName],
+                        },
+                      },
+                    });
+                  }}
                   tableName={column.constraint.foreignKey.foreignTableName}
                 />
               )}
@@ -236,6 +265,7 @@ function ColumnItem({
           {column.constraint?.primaryKey && (
             <ColumnConstraintContainer
               name="Primary Key"
+              disabled={disabled}
               onRemoved={() => {
                 change({
                   constraint: {
@@ -248,6 +278,7 @@ function ColumnItem({
             >
               <Select
                 value={column.constraint.primaryKeyOrder}
+                disabled={disabled}
                 onValueChange={(v) => {
                   change({
                     constraint: {
@@ -266,6 +297,7 @@ function ColumnItem({
               </Select>
               <ConflictClauseOptions
                 value={column.constraint.primaryKeyConflict}
+                disabled={disabled}
                 onChange={(v) => {
                   change({
                     constraint: {
@@ -280,6 +312,7 @@ function ColumnItem({
           {column.constraint?.unique && (
             <ColumnConstraintContainer
               name="Unique"
+              disabled={disabled}
               onRemoved={() => {
                 change({
                   constraint: {
@@ -291,6 +324,7 @@ function ColumnItem({
             >
               <ConflictClauseOptions
                 value={column.constraint.uniqueConflict}
+                disabled={disabled}
                 onChange={(v) => {
                   change({
                     constraint: {
@@ -305,6 +339,7 @@ function ColumnItem({
           {column.constraint?.generatedExpression !== undefined && (
             <ColumnConstraintContainer
               name="Generating"
+              disabled={disabled}
               onRemoved={() =>
                 change({
                   constraint: {
@@ -351,6 +386,7 @@ function ColumnItem({
           {column.constraint?.checkExpression !== undefined && (
             <ColumnConstraintContainer
               name="Check"
+              disabled={disabled}
               onRemoved={() => {
                 change({
                   constraint: {
@@ -362,6 +398,7 @@ function ColumnItem({
               <Input
                 placeholder="Check Expression"
                 className="font-mono bg-white"
+                disabled={disabled}
                 value={column.constraint.checkExpression ?? ""}
                 onChange={(e) => {
                   change({

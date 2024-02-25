@@ -17,7 +17,14 @@ import { cn } from "@/lib/utils";
 export default function TableColumnCombobox({
   value,
   tableName,
-}: Readonly<{ tableName: string; value?: string }>) {
+  onChange,
+  disabled,
+}: Readonly<{
+  tableName: string;
+  value?: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}>) {
   const { databaseDriver } = useDatabaseDriver();
   const [open, setOpen] = useState(false);
   const [schema, setSchema] = useState<DatabaseTableSchema>();
@@ -41,7 +48,7 @@ export default function TableColumnCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
+      <PopoverTrigger disabled={disabled}>
         <Button variant="outline" className="justify-between w-[200px]">
           {value ?? "No column selected"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -54,7 +61,14 @@ export default function TableColumnCombobox({
           <CommandEmpty>No column found.</CommandEmpty>
           <CommandGroup className="max-h-[250px] overflow-y-auto">
             {schema?.columns.map((column) => (
-              <CommandItem key={column.name} value={column.name}>
+              <CommandItem
+                key={column.name}
+                value={column.name}
+                onSelect={() => {
+                  onChange(column.name);
+                  setOpen(false);
+                }}
+              >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",

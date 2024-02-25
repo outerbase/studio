@@ -90,17 +90,17 @@ export default function SchemaEditorTab({
     setIsExecuting(true);
     executeQuries(databaseDriver, previewScript)
       .then(() => {
-        if (schema.name.old) {
-          fetchTable(schema.name?.new || schema.name?.old || "").then(() =>
-            setIsSaving(false)
-          );
-        } else if (schema.name.new) {
+        if (schema.name.new !== schema.name.old) {
           refreshSchema();
           replaceCurrentTab({
             component: <SchemaEditorTab tableName={schema.name.new} />,
             key: "_schema_" + schema.name.new,
             title: "Edit " + schema.name.new,
           });
+        } else if (schema.name.old) {
+          fetchTable(schema.name?.new || schema.name?.old || "").then(() =>
+            setIsSaving(false)
+          );
         }
       })
       .catch((err) => alert((err as Error).message))
@@ -115,6 +115,20 @@ export default function SchemaEditorTab({
     replaceCurrentTab,
     refreshSchema,
   ]);
+
+  const onDiscard = useCallback(() => {
+    setSchema((prev) => {
+      return {
+        name: { ...prev.name, new: prev.name.old },
+        columns: prev.columns
+          .map((col) => ({
+            old: col.old,
+            new: structuredClone(col.old),
+          }))
+          .filter((col) => col.old),
+      };
+    });
+  }, [setSchema]);
 
   if (loading) {
     return (
@@ -152,6 +166,7 @@ export default function SchemaEditorTab({
             value={schema}
             onChange={setSchema}
             onSave={onSaveToggle}
+            onDiscard={onDiscard}
           />
         </ResizablePanel>
         <ResizableHandle />
