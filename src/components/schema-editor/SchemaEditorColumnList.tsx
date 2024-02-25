@@ -43,7 +43,7 @@ function changeColumnOnIndex(
   onChange((prev) => {
     if (prev) {
       const columns = [...(prev?.columns ?? [])];
-      if (columns[idx] && columns[idx].new) {
+      if (columns[idx]?.new) {
         columns[idx].new =
           value === null
             ? null
@@ -129,11 +129,11 @@ function ColumnItem({
   value,
   idx,
   onChange,
-}: {
+}: Readonly<{
   value: DatabaseTableColumnChange;
   idx: number;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
-}) {
+}>) {
   const disabled = !!value.old;
 
   const change = useCallback(

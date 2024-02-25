@@ -14,11 +14,11 @@ export default function ColumnDefaultValueInput({
   constraint,
   disabled,
   onChange,
-}: {
+}: Readonly<{
   constraint?: DatabaseTableColumnConstraint;
   disabled?: boolean;
   onChange: (constraint: DatabaseTableColumnConstraint) => void;
-}) {
+}>) {
   const display = useMemo(() => {
     if (
       constraint?.defaultValue !== undefined &&

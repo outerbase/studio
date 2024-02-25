@@ -23,8 +23,7 @@ export function checkSchemaChange(change: DatabaseTableSchemaChange) {
 }
 
 function wrapParen(str: string) {
-  if (str.length >= 2 && str[0] === "(" && str[str.length - 1] === ")")
-    return str;
+  if (str.length >= 2 && str.startsWith("(") && str.endsWith(")")) return str;
   return "(" + str + ")";
 }
 

@@ -17,11 +17,11 @@ export default function TableCombobox({
   value,
   onChange,
   disabled,
-}: {
+}: Readonly<{
   value?: string;
   onChange: (v: string) => void;
   disabled?: boolean;
-}) {
+}>) {
   const [open, setOpen] = useState(false);
   const { schema, refresh } = useSchema();
 

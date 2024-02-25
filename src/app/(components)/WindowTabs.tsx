@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import openNewQuery from "@/messages/openNewQuery";
 import { LucidePlus, LucideX } from "lucide-react";
-import { createContext, useCallback, useContext } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -21,7 +21,7 @@ const WindowTabsContext = createContext<{
   replaceCurrentTab: (tab: WindowTabItemProps) => void;
 }>({
   replaceCurrentTab: () => {
-    throw "Not implemented";
+    throw new Error("Not implemented");
   },
 });
 
@@ -45,8 +45,13 @@ export default function WindowTabs({
     [tabs, selected, onTabsChange]
   );
 
+  const contextValue = useMemo(
+    () => ({ replaceCurrentTab }),
+    [replaceCurrentTab]
+  );
+
   return (
-    <WindowTabsContext.Provider value={{ replaceCurrentTab }}>
+    <WindowTabsContext.Provider value={contextValue}>
       <div className="flex flex-col w-full h-full">
         <div className="flex-grow-0 flex-shrink-0">
           <div className="flex p-2 gap-2">
