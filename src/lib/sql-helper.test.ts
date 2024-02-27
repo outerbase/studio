@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/app/(components)/OptimizeTable";
+import { TableColumnDataType } from "@/components/table-optimized";
 import { exportRowsToSqlInsert } from "./export-helper";
 import {
   convertSqliteType,

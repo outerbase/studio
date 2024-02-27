@@ -10,7 +10,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import ConnectingDialog from "./ConnectingDialog";
+import ConnectingDialog from "../components/connection-dialog";
 
 const SchemaContext = createContext<{
   schema: DatabaseSchemaItem[];

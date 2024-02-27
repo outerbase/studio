@@ -8,7 +8,7 @@ import {
   OpenContextMenuList,
   openContextMenuFromEvent,
 } from "@/messages/openContextMenu";
-import { useSchema } from "@/screens/DatabaseScreen/SchemaProvider";
+import { useSchema } from "@/context/SchemaProvider";
 import { appVersion } from "@/env";
 
 interface SchemaViewItemProps {

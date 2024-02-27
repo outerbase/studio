@@ -1,6 +1,6 @@
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { useCallback, useEffect, useState } from "react";
-import ResultTable from "@/components/result/ResultTable";
+import ResultTable from "@/components/query-result-table";
 import { Button } from "@/components/ui/button";
 import {
   LucideArrowLeft,
@@ -19,8 +19,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
-import OpacityLoading from "../(components)/OpacityLoading";
-import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
+import OpacityLoading from "../loading-opacity";
+import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import {
   generateDeleteStatement,
   generateInsertStatement,
