@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/app/(components)/OptimizeTable";
+import { TableColumnDataType } from "@/components/table-optimized";
 import { hex } from "./bit-operation";
 import { IdentifyResult } from "sql-query-identifier/lib/defines";
 

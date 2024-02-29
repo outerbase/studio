@@ -5,14 +5,14 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useEffect, useState } from "react";
-import SchemaView from "./SchemaView";
-import WindowTabs, { WindowTabItemProps } from "./WindowTabs";
-import TableDataContent from "../(windows)/TableDataWindow";
+import SchemaView from "./schema-sidebar";
+import WindowTabs, { WindowTabItemProps } from "./windows-tab";
+import TableDataContent from "./tabs/table-data-tab";
 import useMessageListener from "@/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
-import QueryWindow from "@/app/(windows)/QueryWindow";
-import SchemaEditorTab from "@/screens/WindowTabs/SchemaEditorTab";
+import QueryWindow from "@/components/tabs/query-tab";
+import SchemaEditorTab from "@/components/tabs/schema-editor-tab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;

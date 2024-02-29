@@ -1,6 +1,6 @@
-import OpacityLoading from "@/app/(components)/OpacityLoading";
-import { useTabsContext } from "@/app/(components)/WindowTabs";
-import SqlEditor from "@/components/SqlEditor";
+import OpacityLoading from "@/components/loading-opacity";
+import { useTabsContext } from "@/components/windows-tab";
+import SqlEditor from "@/components/sql-editor";
 import SchemaEditor, {
   DatabaseTableSchemaChange,
 } from "@/components/schema-editor";
@@ -22,7 +22,7 @@ import { executeQuries } from "@/lib/multiple-query";
 import generateSqlSchemaChange from "@/lib/sql-generate.schema";
 import { LucideLoader, LucideSave } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSchema } from "../DatabaseScreen/SchemaProvider";
+import { useSchema } from "../../context/SchemaProvider";
 
 interface SchemaEditorTabProps {
   tableName?: string;

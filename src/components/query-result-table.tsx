@@ -1,12 +1,12 @@
-import GenericCell from "@/app/(components)/Cells/GenericCell";
-import NumberCell from "@/app/(components)/Cells/NumberCell";
-import TextCell from "@/app/(components)/Cells/TextCell";
+import GenericCell from "@/components/table-cell/GenericCell";
+import NumberCell from "@/components/table-cell/NumberCell";
+import TextCell from "@/components/table-cell/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
   TableColumnDataType,
-} from "@/app/(components)/OptimizeTable";
-import OptimizeTableState from "@/app/(components)/OptimizeTable/OptimizeTableState";
+} from "@/components/table-optimized";
+import OptimizeTableState from "@/components/table-optimized/OptimizeTableState";
 import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";

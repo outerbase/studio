@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const ConnectionConfigScreen = dynamic(
-  () => import("./(components)/ConnectionConfigScreen"),
+  () => import("../components/connection-config-list"),
   {
     ssr: false,
   }

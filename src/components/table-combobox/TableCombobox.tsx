@@ -9,7 +9,7 @@ import {
   CommandItem,
 } from "../ui/command";
 import { cn } from "@/lib/utils";
-import { useSchema } from "@/screens/DatabaseScreen/SchemaProvider";
+import { useSchema } from "@/context/SchemaProvider";
 import { useState } from "react";
 import { Separator } from "../ui/separator";
 

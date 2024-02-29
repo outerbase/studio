@@ -1,4 +1,4 @@
-import { OptimizeTableRowValue } from "@/app/(components)/OptimizeTable/OptimizeTableState";
+import { OptimizeTableRowValue } from "@/components/table-optimized/OptimizeTableState";
 import DatabaseDriver from "@/drivers/DatabaseDriver";
 import { generateSelectOneWithConditionStatement } from "./sql-helper";
 

@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { TableColumnDataType } from "@/app/(components)/OptimizeTable";
+import { TableColumnDataType } from "@/components/table-optimized";
 import { convertSqliteType } from "@/lib/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./ColumnDefaultValueInput";

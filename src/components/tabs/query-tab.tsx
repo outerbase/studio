@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import { LucidePlay } from "lucide-react";
-import SqlEditor from "@/components/SqlEditor";
+import SqlEditor from "@/components/sql-editor";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -10,11 +10,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import ResultTable from "@/components/result/ResultTable";
+import ResultTable from "@/components/query-result-table";
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import { MultipleQueryProgress, multipleQuery } from "@/lib/multiple-query";
-import QueryProgressLog from "../(components)/QueryProgressLog";
-import OptimizeTableState from "../(components)/OptimizeTable/OptimizeTableState";
+import QueryProgressLog from "../query-progress-log";
+import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { selectStatementFromPosition } from "@/lib/sql-helper";
