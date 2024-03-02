@@ -68,8 +68,8 @@ export default function createEditableCell<T = unknown>({
             type="text"
             className={
               align === "right"
-                ? "w-full h-full outline-none pl-2 pr-2 border-0 text-right"
-                : "w-full h-full outline-none pl-2 pr-2 border-0"
+                ? "bg-background w-full h-full outline-none pl-2 pr-2 border-0 text-right"
+                : "bg-background w-full h-full outline-none pl-2 pr-2 border-0"
             }
             value={editValue ?? ""}
           />

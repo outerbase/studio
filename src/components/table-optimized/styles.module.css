@@ -25,7 +25,7 @@
 
 .tableContainer td,
 .tableContainer th {
-  @apply bg-background border-b border-r;
+  @apply border-b border-r;
   overflow: hidden;
 }
 
@@ -87,7 +87,7 @@
 }
 
 .removedRow td {
-  @apply bg-red-400;
+  @apply bg-red-200;
 }
 
 .stickyColumn {

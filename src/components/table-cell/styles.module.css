@@ -8,6 +8,10 @@
   border: 1px solid #e00;
 }
 
+:global(.dark) .change {
+  @apply bg-yellow-600;
+}
+
 .change {
-  background: #f6e58d !important;
+  @apply bg-yellow-200;
 }
