@@ -2,7 +2,13 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { openTabs } from "@/messages/openTabs";
-import { LucideIcon, LucideSearch, Table2 } from "lucide-react";
+import {
+  LucideIcon,
+  LucideSearch,
+  LucideSun,
+  LucideSunMoon,
+  Table2,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import {
   OpenContextMenuList,
@@ -10,6 +16,7 @@ import {
 } from "@/messages/openContextMenu";
 import { useSchema } from "@/context/SchemaProvider";
 import { appVersion } from "@/env";
+import { useTheme } from "@/context/theme-provider";
 
 interface SchemaViewItemProps {
   icon: LucideIcon;
@@ -60,6 +67,7 @@ export default function SchemaView() {
   const { refresh, schema } = useSchema();
   const [search, setSearch] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const { theme, toggleTheme } = useTheme();
 
   const prepareContextMenu = useCallback(
     (tableName?: string) => {
@@ -149,6 +157,21 @@ export default function SchemaView() {
         <span>LibSQL</span>
         <strong>Studio</strong>
         <span className="text-xs ml-2">v{appVersion}</span>
+        <div className="grow" />
+        <div
+          role="button"
+          className="px-2 flex items-center h-full -mr-2"
+          tabIndex={-1}
+          onClick={() => {
+            toggleTheme();
+          }}
+        >
+          {theme === "dark" ? (
+            <LucideSun className="w-4 h-4" />
+          ) : (
+            <LucideSunMoon className="w-4 h-4" />
+          )}
+        </div>
       </div>
     </div>
   );

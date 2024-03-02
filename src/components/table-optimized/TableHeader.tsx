@@ -16,11 +16,18 @@ export default function TableHeader({
   onHeaderResize: (idx: number, newWidth: number) => void;
   onContextMenu?: React.MouseEventHandler;
 }) {
+  const className = [
+    sticky ? styles.stickyColumn : undefined,
+    "dark:bg-gray-900 bg-gray-100",
+  ]
+    .filter(Boolean)
+    .join();
+
   return (
     <th
       key={header.name}
       title={header.tooltip}
-      className={sticky ? styles.stickyColumn : undefined}
+      className={className}
       onContextMenu={onContextMenu}
     >
       {header.icon && (

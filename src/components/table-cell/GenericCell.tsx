@@ -55,7 +55,7 @@ export default function GenericCell({
         onMouseDown={onFocus}
         onDoubleClick={onDoubleClick}
       >
-        <span className="text-gray-500">{value}</span>
+        <span className="text-gray-500 dark:text-gray-300">{value}</span>
       </div>
     );
   }
@@ -67,7 +67,9 @@ export default function GenericCell({
         onMouseDown={onFocus}
         onDoubleClick={onDoubleClick}
       >
-        <span className="text-blue-700 block text-right">{value}</span>
+        <span className="text-blue-700 dark:text-blue-300 block text-right">
+          {value}
+        </span>
       </div>
     );
   }
