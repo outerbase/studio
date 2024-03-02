@@ -204,8 +204,6 @@ export default class DatabaseDriver {
       whereRaw ? ` WHERE ${whereRaw} ` : ""
     } LIMIT ? OFFSET ?;`;
 
-    console.log(sql);
-
     const binding = [options.limit, options.offset];
     return await this.query([sql, binding]);
   }
