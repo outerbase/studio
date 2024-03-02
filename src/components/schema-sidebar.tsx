@@ -114,7 +114,7 @@ export default function SchemaView() {
       <div className="pt-2 px-2 flex h-10">
         <div className="bg-secondary rounded overflow-hidden flex items-center ml-3 flex-grow">
           <div className="text-sm px-2 h-full flex items-center">
-            <LucideSearch className="h-4 w-4 text-black" />
+            <LucideSearch className="h-4 w-4 text-black dark:text-white" />
           </div>
           <input
             type="text"

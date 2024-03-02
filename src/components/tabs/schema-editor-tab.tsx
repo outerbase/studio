@@ -23,6 +23,7 @@ import generateSqlSchemaChange from "@/lib/sql-generate.schema";
 import { LucideLoader, LucideSave } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSchema } from "../../context/SchemaProvider";
+import CodePreview from "../code-preview";
 
 interface SchemaEditorTabProps {
   tableName?: string;
@@ -143,9 +144,7 @@ export default function SchemaEditorTab({
       <AlertDialog open={isSaving} onOpenChange={onSaveToggle}>
         <AlertDialogContent>
           Are you sure you want to run this change?
-          <pre className="p-2 bg-secondary text-sm">
-            {previewScript.join(";\n")}
-          </pre>
+          <CodePreview code={previewScript.join(";\n")} />
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button onClick={onSave}>

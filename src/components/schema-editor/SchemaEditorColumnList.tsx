@@ -85,7 +85,7 @@ function ConflictClauseOptions({
 }>) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="bg-white" disabled={disabled}>
+      <SelectTrigger className="bg-background" disabled={disabled}>
         <SelectValue placeholder="Conflict" />
       </SelectTrigger>
       <SelectContent>
@@ -145,9 +145,9 @@ function ColumnItem({
 
   let highlightClassName = "";
   if (value.new === null) {
-    highlightClassName = "bg-red-50";
+    highlightClassName = "bg-red-50 dark:bg-red-800";
   } else if (value.old === null) {
-    highlightClassName = "bg-green-100";
+    highlightClassName = "bg-green-100 dark:bg-green-800";
   } else if (checkSchemaColumnChange(value)) {
     highlightClassName = "bg-yellow-100";
   }
@@ -165,7 +165,7 @@ function ColumnItem({
   return (
     <div className={"p-1 text-sm " + highlightClassName}>
       <div className="flex">
-        <div className="mt-3 pl-2 w-[30px] text-red-600">
+        <div className="mt-3 pl-2 w-[30px] text-orange-600 dark:text-yellow-400">
           {column.pk && <LucideKey size={15} />}
         </div>
         <div className="flex flex-col gap-1">
@@ -173,7 +173,7 @@ function ColumnItem({
             <Input
               autoFocus
               value={column.name}
-              className={"w-[200px] bg-white"}
+              className={"w-[200px] bg-background"}
               onChange={(e) => change({ name: e.currentTarget.value })}
             />
             <Select
@@ -181,7 +181,7 @@ function ColumnItem({
               onValueChange={(newType) => change({ type: newType })}
               disabled={disabled}
             >
-              <SelectTrigger className="w-[180px] bg-white">
+              <SelectTrigger className="w-[180px] bg-background">
                 <SelectValue placeholder="Select datatype" />
               </SelectTrigger>
               <SelectContent>
@@ -287,7 +287,7 @@ function ColumnItem({
                   });
                 }}
               >
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Order" />
                 </SelectTrigger>
                 <SelectContent>
@@ -352,7 +352,7 @@ function ColumnItem({
               <Input
                 disabled={disabled}
                 placeholder="Generate Expression"
-                className="font-mono bg-white"
+                className="font-mono bg-background"
                 onChange={(e) => {
                   change({
                     constraint: {
@@ -372,7 +372,7 @@ function ColumnItem({
                   });
                 }}
               >
-                <SelectTrigger className="w-[100px] bg-white">
+                <SelectTrigger className="w-[100px] bg-background">
                   <SelectValue placeholder="Select datatype" />
                 </SelectTrigger>
                 <SelectContent>
@@ -397,7 +397,7 @@ function ColumnItem({
             >
               <Input
                 placeholder="Check Expression"
-                className="font-mono bg-white"
+                className="font-mono bg-background"
                 disabled={disabled}
                 value={column.constraint.checkExpression ?? ""}
                 onChange={(e) => {

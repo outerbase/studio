@@ -1,5 +1,6 @@
 import { MultipleQueryProgress } from "@/lib/multiple-query";
 import { useEffect, useState } from "react";
+import CodePreview from "./code-preview";
 
 function formatTimeAgo(ms: number) {
   if (ms < 1000) {
@@ -72,9 +73,9 @@ export default function QueryProgressLog({
                   ago.
                 </div>
               )}
-              <code className="p-2 bg-yellow-50 block mt-2 overflow-x-auto w-full text-sm">
-                <pre>{detail.sql}</pre>
-              </code>
+
+              <div className="mt-3" />
+              <CodePreview code={detail.sql} />
             </div>
           );
         })}
