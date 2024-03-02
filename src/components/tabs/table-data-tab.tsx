@@ -247,8 +247,8 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
           <div className="flex flex-grow mx-2">
             <div className="bg-secondary rounded overflow-hidden flex items-center w-full">
-              <div className="text-sm px-2 text-gray-500 bg-gray-200 h-full flex items-center">
-                <LucideFilter className="h-4 w-4 text-black" />
+              <div className="text-sm px-2 text-gray-500 bg-gray-200 dark:bg-gray-700 h-full flex items-center">
+                <LucideFilter className="h-4 w-4 text-black dark:text-white" />
               </div>
               <input
                 type="text"
@@ -298,7 +298,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 pl-2 pr-2 bg-gray-100 rounded text-xs h-full"
+                  className="p-1 pl-2 pr-2 bg-gray-100 dark:bg-gray-800 rounded text-xs h-full"
                   alt="Limit"
                 />
               </TooltipTrigger>
@@ -321,7 +321,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 pl-2 pr-2 bg-gray-100 rounded text-xs h-full"
+                  className="p-1 pl-2 pr-2 bg-gray-100 dark:bg-gray-800 rounded text-xs h-full"
                   alt="Offset"
                 />
               </TooltipTrigger>

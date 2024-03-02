@@ -10,6 +10,7 @@ import InternalPubSub from "@/lib/internal-pubsub";
 import { useRouter } from "next/navigation";
 import { normalizeConnectionEndpoint } from "@/lib/validation";
 import { SchemaProvider } from "@/context/SchemaProvider";
+import ThemeProvider from "@/context/theme-provider";
 
 function MainConnection({
   credential,
@@ -30,11 +31,13 @@ function MainConnection({
   }, [database]);
 
   return (
-    <DatabaseDriverProvider driver={database}>
-      <SchemaProvider>
-        <DatabaseGui />
-      </SchemaProvider>
-    </DatabaseDriverProvider>
+    <ThemeProvider>
+      <DatabaseDriverProvider driver={database}>
+        <SchemaProvider>
+          <DatabaseGui />
+        </SchemaProvider>
+      </DatabaseDriverProvider>
+    </ThemeProvider>
   );
 }
 

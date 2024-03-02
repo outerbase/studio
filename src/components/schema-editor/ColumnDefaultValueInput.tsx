@@ -116,7 +116,7 @@ export default function ColumnDefaultValueInput({
   return (
     <Popover>
       <PopoverTrigger>
-        <div className="flex text-left shadow-sm py-2 px-3 rounded-md border w-[180px] h-full bg-white">
+        <div className="flex text-left shadow-sm py-2 px-3 rounded-md border w-[180px] h-full bg-background">
           <div className="flex-grow">{display || "EMPTY STRING"}</div>
           <div className="text-gray-400 flex items-center">
             <ChevronsUpDown size={14} />
