@@ -78,10 +78,20 @@ export default class DatabaseDriver {
   protected client: hrana.WsClient;
   protected stream?: hrana.WsStream;
   protected endpoint: string = "";
+  protected authToken = "";
 
   constructor(url: string, authToken: string) {
     this.endpoint = url;
-    this.client = hrana.openWs(url, authToken);
+    this.authToken = authToken;
+    this.client = hrana.openWs(this.endpoint, this.authToken);
+  }
+
+  protected connect() {
+    if (this.stream) {
+      this.stream.close();
+    }
+
+    this.client = hrana.openWs(this.endpoint, this.authToken);
   }
 
   protected escapeId(id: string) {
@@ -90,6 +100,11 @@ export default class DatabaseDriver {
 
   protected getStream(): hrana.WsStream {
     if (this.stream) {
+      if (this.client.closed) {
+        console.info("Reconnect");
+        this.connect();
+      }
+
       if (this.stream.closed) {
         console.info("Open Stream");
         this.stream = this.client.openStream();
