@@ -38,6 +38,7 @@ describe("Escape SQL", () => {
   it("unescape identity", () => {
     expect(unescapeIdentity(`"users"`)).toBe("users");
     expect(unescapeIdentity(`"us""ers"`)).toBe(`us"ers`);
+    expect(unescapeIdentity(`[users]`)).toBe(`users`);
   });
 });
 

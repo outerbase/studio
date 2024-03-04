@@ -7,8 +7,8 @@ export function escapeIdentity(str: string) {
 }
 
 export function unescapeIdentity(str: string) {
-  let r = str.replace(/^["`]/g, "");
-  r = r.replace(/["`]$/g, "");
+  let r = str.replace(/^["`[]/g, "");
+  r = r.replace(/["`\]]$/g, "");
   r = r.replace(/""/g, `"`);
   return r;
 }

@@ -73,7 +73,11 @@ export function validateConnectionEndpoint(
   try {
     const url = new URL(endpoint);
 
-    if (url.protocol !== "wss:" && url.protocol !== "libsql:") {
+    if (
+      url.protocol !== "wss:" &&
+      url.protocol !== "libsql:" &&
+      url.protocol !== "ws:"
+    ) {
       return [false, "We only support wss:// or libsql:// at the moment."];
     }
 
