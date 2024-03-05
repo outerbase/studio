@@ -9,7 +9,7 @@
 }
 
 :global(.dark) .change {
-  @apply bg-yellow-600;
+  @apply bg-yellow-500;
 }
 
 .change {

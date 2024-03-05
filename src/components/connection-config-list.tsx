@@ -227,7 +227,7 @@ export default function ConnectionConfigScreen() {
             return (
               <div
                 key={connection.id}
-                className="bg-gray-100 p-2 rounded flex items-center cursor-pointer hover:bg-gray-200"
+                className="bg-gray-100 dark:bg-gray-800 p-2 rounded flex items-center cursor-pointer hover:bg-gray-200"
                 onDoubleClick={() => onSavedConnectionConnect(connection)}
               >
                 <LucideDatabase className="mr-4 ml-2" />
@@ -237,7 +237,7 @@ export default function ConnectionConfigScreen() {
                 </div>
                 <div className="">
                   <div
-                    className="w-7 h-7 rounded-full bg-gray-300 flex justify-center items-center hover:bg-black hover:text-white"
+                    className="w-7 h-7 rounded-full bg-gray-300 dark:bg-gray-600 flex justify-center items-center hover:bg-black hover:text-white"
                     onClick={() => onSavedConnectionRemoved(connection)}
                   >
                     <LucideTrash className="w-3 h-3" />

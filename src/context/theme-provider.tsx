@@ -27,7 +27,7 @@ export function useTheme() {
 
 export default function ThemeProvider({ children }: PropsWithChildren) {
   const [theme, setTheme] = useState<ThemeType>(
-    localStorage.getItem("theme") === "light" ? "light" : "dark"
+    localStorage.getItem("theme") === "dark" ? "dark" : "light"
   );
 
   const toggleTheme = useCallback(() => {
