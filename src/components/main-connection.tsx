@@ -7,10 +7,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./context-menu-handler";
 import InternalPubSub from "@/lib/internal-pubsub";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { normalizeConnectionEndpoint } from "@/lib/validation";
 import { SchemaProvider } from "@/context/SchemaProvider";
 import ThemeProvider from "@/context/theme-provider";
+
+export interface ConnectionCredential {
+  url: string;
+  token: string;
+}
 
 function MainConnection({
   credential,
@@ -51,15 +56,10 @@ function InvalidSession() {
   return <div></div>;
 }
 
-export default function MainScreen() {
+function MainConnectionContainer({
+  credential,
+}: Readonly<{ credential: ConnectionCredential }>) {
   const router = useRouter();
-  const sessionCredential: { url: string; token: string } = useMemo(() => {
-    const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
-    return {
-      url: normalizeConnectionEndpoint(config.url),
-      token: config.token,
-    };
-  }, []);
 
   /**
    * We use useLayoutEffect because it executes before
@@ -70,19 +70,19 @@ export default function MainScreen() {
   useLayoutEffect(() => {
     console.info("Injecting message into window object");
     window.internalPubSub = new InternalPubSub();
-  }, [sessionCredential, router]);
+  }, [credential, router]);
 
   useEffect(() => {
-    if (sessionCredential.url) {
-      document.title = sessionCredential.url + " - LibSQL Studio";
+    if (credential.url) {
+      document.title = credential.url + " - LibSQL Studio";
     }
-  }, [sessionCredential]);
+  }, [credential]);
 
-  return sessionCredential?.url ? (
+  return credential?.url ? (
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
-          <MainConnection credential={sessionCredential} />
+          <MainConnection credential={credential} />
         </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
@@ -90,4 +90,27 @@ export default function MainScreen() {
   ) : (
     <InvalidSession />
   );
+}
+
+export default function MainScreen() {
+  const params = useSearchParams();
+
+  const finalCredential = useMemo(() => {
+    const connectionParams = params.get("c");
+    if (connectionParams) {
+      const [port, token] = connectionParams.split(":");
+      return {
+        url: "ws://localhost:" + port,
+        token,
+      };
+    }
+
+    const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+    return {
+      url: normalizeConnectionEndpoint(config.url),
+      token: config.token as string,
+    };
+  }, [params]);
+
+  return <MainConnectionContainer credential={finalCredential} />;
 }
