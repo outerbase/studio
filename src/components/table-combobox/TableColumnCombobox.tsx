@@ -44,7 +44,7 @@ export default function TableColumnCombobox({
           });
         });
     }
-  }, [schema, tableName, databaseDriver]);
+  }, [tableName, databaseDriver]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
