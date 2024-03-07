@@ -84,6 +84,7 @@ export default class DatabaseDriver {
     this.endpoint = url;
     this.authToken = authToken;
     this.client = hrana.openWs(this.endpoint, this.authToken);
+    this.client.intMode = "bigint";
   }
 
   protected connect() {
@@ -92,6 +93,7 @@ export default class DatabaseDriver {
     }
 
     this.client = hrana.openWs(this.endpoint, this.authToken);
+    this.client.intMode = "bigint";
   }
 
   protected escapeId(id: string) {

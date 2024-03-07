@@ -66,7 +66,7 @@ export default function GenericCell({
     );
   }
 
-  if (typeof value === "number") {
+  if (typeof value === "number" || typeof value === "bigint") {
     return (
       <div
         className={className}
@@ -80,7 +80,7 @@ export default function GenericCell({
               : "text-blue-700 dark:text-blue-300 block text-right"
           }
         >
-          {value}
+          {value.toString()}
         </span>
       </div>
     );
