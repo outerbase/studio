@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Script from "next/script";
+import { PropsWithChildren } from "react";
 
 function Topbar() {
   return (
@@ -39,7 +40,7 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
 
 function Footer() {
   return (
-    <div className="mt-12 border-t py-4">
+    <div className="border-t py-4 text-sm">
       <div className="mx-auto container">© 2024 Visal .In. | LibSQL Studio</div>
     </div>
   );
@@ -82,8 +83,29 @@ function HeroSection() {
 
       <div className="flex flex-col gap-4 justify-center mt-8 md:flex-row">
         <LinkButton title="Connect to LibSQL" url="/connect" />
-        <LinkButton title="Open Sqlite Database" url="#" />
+        <LinkButton title="Open Sqlite Database" url="#sqlite" />
       </div>
+    </div>
+  );
+}
+
+function FeatureItem({
+  children,
+  reverse,
+}: PropsWithChildren<{ reverse?: boolean }>) {
+  const contentDom = (
+    <div className="md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center">
+      {children}
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col md:flex-row gap-8">
+      {reverse && contentDom}
+      <div className="md:w-1/2 lg:w-1/2">
+        <div className="h-[300px] bg-gray-500"></div>
+      </div>
+      {!reverse && contentDom}
     </div>
   );
 }
@@ -95,6 +117,101 @@ export default function MainPage() {
       <Topbar />
       <HeroSection />
       <Screenshot />
+      <div className="bg-zinc-800 py-12 mt-12">
+        <div className="max-w-[900px] px-4 mx-auto flex flex-col gap-12">
+          <FeatureItem reverse>
+            <h2 className="text-xl mb-4 font-semibold text-white">
+              Powerful Data Editor
+            </h2>
+
+            <div className="flex flex-col gap-4">
+              <p>
+                The handy data editor allows you to add, delete, and edit
+                information.
+              </p>
+
+              <p>
+                Any changes you make in the data editor are saved on your device
+                and can be submitted all at once.
+              </p>
+
+              <p>
+                You can export any table or result set in various formats such
+                as CSV, JSON, and SQL.
+              </p>
+            </div>
+          </FeatureItem>
+
+          <FeatureItem>
+            <h2 className="text-xl mb-4 font-semibold text-white">
+              Writing and Running SQL
+            </h2>
+
+            <div className="flex flex-col gap-4">
+              <p>
+                LibSQL Studio offers a simple query editor with auto-completion
+                features. You can run multiple queries and view their results
+              </p>
+              <p>Enjoy unlimited query tab.</p>
+            </div>
+          </FeatureItem>
+
+          <FeatureItem reverse>
+            <h2 className="text-xl mb-4 font-semibold text-white">
+              Create and Edit Table
+            </h2>
+            <p>
+              LibSQL Studio allows you to quickly create, modify, and remove
+              table columns with just a few clicks without writing any SQL.
+            </p>
+
+            <p className="mt-4">
+              Before executing, you have the option to preview the SQL script
+              for creating or modifying a table.
+            </p>
+          </FeatureItem>
+
+          <FeatureItem>
+            <h2 className="text-xl mb-4 font-semibold text-white">
+              No Download
+            </h2>
+            <p>
+              There is no need to download anything. LibSQL Studio runs directly
+              in your favorite web browser, making it compatible across
+              different platforms.
+            </p>
+
+            <h2 className="text-xl mb-4 font-semibold text-white mt-8">
+              Open Source and Free
+            </h2>
+
+            <p>
+              LibSQL Studio is open source and completely free to use. You have
+              the opportunity to suggest new features or even contribute to
+              adding them yourself.
+            </p>
+          </FeatureItem>
+        </div>
+      </div>
+
+      <div className="bg-zinc-200 p-4">
+        <div className="container mx-auto text-center my-8">
+          <h2 id="sqlite" className="text-2xl font-semibold">
+            Running SQLite in Your Browser
+          </h2>
+          <p className="mt-4 max-w-[500px] mx-auto">
+            Since browser has no file access and sqlite database is a file, we
+            need to run agent to remove this browser restriction.
+          </p>
+
+          <div className="mt-4 max-w-[500px] mx-auto bg-zinc-700 text-left p-2 px-4 text-white rounded">
+            <code>
+              <pre>npx sqlstudio open hello.db</pre>
+            </code>
+          </div>
+        </div>
+      </div>
+
       <Footer />
     </main>
   );
