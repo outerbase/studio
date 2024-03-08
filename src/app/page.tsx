@@ -1,6 +1,13 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import { PropsWithChildren } from "react";
+
+export const metadata: Metadata = {
+  title: "LibSQL Studio - Fast and powerful LibSQL client on your browser",
+  description:
+    "LibSQL Studio - Fast and powerful LibSQL client on your browser",
+};
 
 function Topbar() {
   return (
