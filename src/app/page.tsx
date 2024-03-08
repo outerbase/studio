@@ -94,16 +94,18 @@ function FeatureItem({
   image,
   reverse,
 }: PropsWithChildren<{ reverse?: boolean; image?: string }>) {
-  const contentDom = (
-    <div className="md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center">
-      {children}
-    </div>
-  );
-
   return (
     <div className="flex flex-col md:flex-row gap-8">
-      {reverse && contentDom}
-      <div className="md:w-1/2 lg:w-1/2">
+      <div
+        className={
+          reverse
+            ? "md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center order-1"
+            : "md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center order-1 lg:order-3"
+        }
+      >
+        {children}
+      </div>
+      <div className="md:w-1/2 lg:w-1/2 order-2">
         {image ? (
           <img
             src={image}
@@ -114,7 +116,6 @@ function FeatureItem({
           <div className="h-[300px] bg-gray-500"></div>
         )}
       </div>
-      {!reverse && contentDom}
     </div>
   );
 }
