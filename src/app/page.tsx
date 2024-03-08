@@ -31,7 +31,7 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   return (
     <Link
       href={url}
-      className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-700 text-center"
+      className="text-lg px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-700 text-center"
     >
       {title}
     </Link>
@@ -91,8 +91,9 @@ function HeroSection() {
 
 function FeatureItem({
   children,
+  image,
   reverse,
-}: PropsWithChildren<{ reverse?: boolean }>) {
+}: PropsWithChildren<{ reverse?: boolean; image?: string }>) {
   const contentDom = (
     <div className="md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center">
       {children}
@@ -103,7 +104,15 @@ function FeatureItem({
     <div className="flex flex-col md:flex-row gap-8">
       {reverse && contentDom}
       <div className="md:w-1/2 lg:w-1/2">
-        <div className="h-[300px] bg-gray-500"></div>
+        {image ? (
+          <img
+            src={image}
+            className="w-full rounded shadow-lg"
+            alt="Data Editor"
+          />
+        ) : (
+          <div className="h-[300px] bg-gray-500"></div>
+        )}
       </div>
       {!reverse && contentDom}
     </div>
@@ -119,7 +128,7 @@ export default function MainPage() {
       <Screenshot />
       <div className="bg-zinc-800 py-12 mt-12">
         <div className="max-w-[900px] px-4 mx-auto flex flex-col gap-12">
-          <FeatureItem reverse>
+          <FeatureItem reverse image="/data-editor.png">
             <h2 className="text-xl mb-4 font-semibold text-white">
               Powerful Data Editor
             </h2>
@@ -142,7 +151,7 @@ export default function MainPage() {
             </div>
           </FeatureItem>
 
-          <FeatureItem>
+          <FeatureItem image="/sql-editor.png">
             <h2 className="text-xl mb-4 font-semibold text-white">
               Writing and Running SQL
             </h2>
@@ -156,7 +165,7 @@ export default function MainPage() {
             </div>
           </FeatureItem>
 
-          <FeatureItem reverse>
+          <FeatureItem reverse image="/edit-table.png">
             <h2 className="text-xl mb-4 font-semibold text-white">
               Create and Edit Table
             </h2>
@@ -171,7 +180,7 @@ export default function MainPage() {
             </p>
           </FeatureItem>
 
-          <FeatureItem>
+          <FeatureItem image="/open-source.png">
             <h2 className="text-xl mb-4 font-semibold text-white">
               No Download
             </h2>
