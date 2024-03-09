@@ -1,6 +1,14 @@
-import { OptimizeTableRowValue } from "@/components/table-optimized/OptimizeTableState";
-import DatabaseDriver from "@/drivers/DatabaseDriver";
-import { generateSelectOneWithConditionStatement } from "./sql-helper";
+import OptimizeTableState, {
+  OptimizeTableRowValue,
+} from "@/components/table-optimized/OptimizeTableState";
+import DatabaseDriver, { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
+import { validateOperation } from "@/lib/validation";
+import {
+  generateDeleteStatement,
+  generateInsertStatement,
+  generateSelectOneWithConditionStatement,
+  generateUpdateStatement,
+} from "./sql-helper";
 
 export interface ExecutePlan {
   row: OptimizeTableRowValue;
@@ -9,6 +17,67 @@ export interface ExecutePlan {
   autoIncrement: boolean;
   updateCondition: Record<string, unknown>;
   updatedRowData?: Record<string, unknown>;
+}
+
+function generateTableChangePlan({
+  tableName,
+  tableSchema,
+  data,
+}: {
+  tableName: string;
+  tableSchema: DatabaseTableSchema;
+  data: OptimizeTableState;
+}): { error: string | null; plans: ExecutePlan[] } {
+  const rowChangeList = data.getChangedRows();
+  const plans: ExecutePlan[] = [];
+
+  for (const row of rowChangeList) {
+    const rowChange = row.change;
+    if (rowChange) {
+      const pk = tableSchema.pk;
+
+      const wherePrimaryKey = pk.reduce((condition, pkColumnName) => {
+        condition[pkColumnName] = row.raw[pkColumnName];
+        return condition;
+      }, {} as Record<string, unknown>);
+
+      let operation: "UPDATE" | "INSERT" | "DELETE" = "UPDATE";
+      if (row.isNewRow) operation = "INSERT";
+      if (row.isRemoved) operation = "DELETE";
+
+      const { valid, reason } = validateOperation({
+        operation,
+        autoIncrement: tableSchema.autoIncrement,
+        changeValue: rowChange,
+        originalValue: row.raw,
+        primaryKey: tableSchema.pk,
+      });
+
+      if (!valid) {
+        return { plans: [], error: reason ?? "" };
+      }
+
+      let sql: string | undefined;
+
+      if (row.isNewRow) {
+        sql = generateInsertStatement(tableName, rowChange);
+      } else if (row.isRemoved) {
+        sql = generateDeleteStatement(tableName, wherePrimaryKey);
+      } else {
+        sql = generateUpdateStatement(tableName, wherePrimaryKey, rowChange);
+      }
+
+      plans.push({
+        sql,
+        row,
+        tableName,
+        updateCondition: wherePrimaryKey,
+        autoIncrement: tableSchema.autoIncrement,
+      });
+    }
+  }
+
+  return { plans, error: null };
 }
 
 export async function executePlans(
@@ -51,4 +120,51 @@ export async function executePlans(
     await driver.query("ROLLBACK");
     return { success: false, error: (e as Error).toString(), plans: [] };
   }
+}
+
+export async function commitChange({
+  driver,
+  tableName,
+  tableSchema,
+  data,
+}: {
+  driver: DatabaseDriver;
+  tableName: string;
+  tableSchema: DatabaseTableSchema;
+  data: OptimizeTableState;
+}): Promise<{ errorMessage?: string }> {
+  const { plans, error: planErrorMessage } = generateTableChangePlan({
+    tableName,
+    tableSchema,
+    data,
+  });
+
+  if (planErrorMessage) {
+    return { errorMessage: planErrorMessage };
+  }
+
+  if (plans.length > 0) {
+    try {
+      const {
+        success,
+        error: errorMessage,
+        plans: executedPlans,
+      } = await executePlans(driver, plans);
+
+      if (success) {
+        data.applyChanges(
+          executedPlans.map((plan) => ({
+            row: plan.row,
+            updated: plan.updatedRowData ?? {},
+          }))
+        );
+      } else {
+        return { errorMessage };
+      }
+    } catch (e) {
+      return { errorMessage: (e as Error).message };
+    }
+  }
+
+  return {};
 }
