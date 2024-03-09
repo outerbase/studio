@@ -7,6 +7,7 @@ import {
   LucideArrowRight,
   LucideDelete,
   LucideFilter,
+  LucideLoader,
   LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
@@ -21,13 +22,7 @@ import {
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import OpacityLoading from "../loading-opacity";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import {
-  generateDeleteStatement,
-  generateInsertStatement,
-  generateUpdateStatement,
-} from "@/lib/sql-helper";
-import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
-import { validateOperation } from "@/lib/validation";
+import { commitChange } from "@/lib/sql-execute-helper";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,6 +54,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
   const [finalOffset, setFinalOffset] = useState(0);
   const [finalLimit, setFinalLimit] = useState(50);
+  const [isExecuting, setIsExecuting] = useState(false);
 
   const [revision, setRevision] = useState(1);
   const [lastQueryTimestamp, setLastQueryTimestamp] = useState(0);
@@ -114,72 +110,14 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     if (!tableSchema) return;
     if (!data) return;
 
-    const rowChangeList = data.getChangedRows();
-    const plans: ExecutePlan[] = [];
+    setIsExecuting(true);
 
-    for (const row of rowChangeList) {
-      const rowChange = row.change;
-      if (rowChange) {
-        const pk = tableSchema.pk;
-
-        const wherePrimaryKey = pk.reduce((condition, pkColumnName) => {
-          condition[pkColumnName] = row.raw[pkColumnName];
-          return condition;
-        }, {} as Record<string, unknown>);
-
-        let operation: "UPDATE" | "INSERT" | "DELETE" = "UPDATE";
-        if (row.isNewRow) operation = "INSERT";
-        if (row.isRemoved) operation = "DELETE";
-
-        const { valid, reason } = validateOperation({
-          operation,
-          autoIncrement: tableSchema.autoIncrement,
-          changeValue: rowChange,
-          originalValue: row.raw,
-          primaryKey: tableSchema.pk,
-        });
-
-        if (!valid) {
-          setExecuteError(reason ?? "");
-          return;
-        }
-
-        let sql: string | undefined;
-
-        if (row.isNewRow) {
-          sql = generateInsertStatement(tableName, rowChange);
-        } else if (row.isRemoved) {
-          sql = generateDeleteStatement(tableName, wherePrimaryKey);
-        } else {
-          sql = generateUpdateStatement(tableName, wherePrimaryKey, rowChange);
-        }
-
-        plans.push({
-          sql,
-          row,
-          tableName,
-          updateCondition: wherePrimaryKey,
-          autoIncrement: tableSchema.autoIncrement,
-        });
-      }
-    }
-
-    if (plans.length > 0) {
-      executePlans(databaseDriver, plans)
-        .then(({ success, error: errorMessage, plans }) => {
-          if (success) {
-            data.applyChanges(
-              plans.map((plan) => ({
-                row: plan.row,
-                updated: plan.updatedRowData ?? {},
-              }))
-            );
-          } else {
-            setExecuteError(errorMessage ?? "");
-          }
-        })
-        .catch(console.error);
-    }
+    commitChange({ driver: databaseDriver, tableName, tableSchema, data })
+      .then(({ errorMessage }) => {
+        if (errorMessage) setExecuteError(errorMessage);
+      })
+      .catch(console.error)
+      .finally(() => setIsExecuting(false));
   }, [databaseDriver, tableName, tableSchema, data, setExecuteError]);
 
   const onDiscard = useCallback(() => {
@@ -219,10 +157,14 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           <Button
             variant={"outline"}
             size={"sm"}
-            disabled={!changeNumber}
+            disabled={!changeNumber || isExecuting}
             onClick={onCommit}
           >
-            <LucideSaveAll className="w-4 h-4 mr-2 text-green-600" />
+            {isExecuting ? (
+              <LucideLoader className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <LucideSaveAll className="w-4 h-4 mr-2 text-green-600" />
+            )}
             Commit
             {!!changeNumber && (
               <span
