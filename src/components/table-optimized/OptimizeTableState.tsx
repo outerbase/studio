@@ -333,6 +333,18 @@ export default class OptimizeTableState {
     this.broadcastChange();
   }
 
+  selectRange(y1: number, y2: number) {
+    const maxY = Math.max(y1, y2);
+    const minY = Math.min(y1, y2);
+
+    this.selectedRows.clear();
+    for (let i = minY; i <= maxY; i++) {
+      this.selectedRows.add(i);
+    }
+
+    this.broadcastChange();
+  }
+
   isRowSelected(y: number) {
     return this.selectedRows.has(y);
   }
