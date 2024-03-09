@@ -38,7 +38,6 @@ export function openContextMenuFromEvent(contextMenu: OpenContextMenuList) {
     });
 
     e.preventDefault();
-    e.stopPropagation();
     return false;
   };
 }

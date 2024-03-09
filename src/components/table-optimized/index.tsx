@@ -81,14 +81,20 @@ function handleTableCellMouseDown({
   internalState,
   y,
   x,
+  rightClick,
   ctrl,
 }: {
   y: number;
   x: number;
+  rightClick: boolean;
   ctrl?: boolean;
   shift?: boolean;
   internalState: OptimizeTableState;
 }) {
+  if (rightClick) {
+    if (internalState.getSelectedRowIndex().includes(y)) return;
+  }
+
   if (ctrl) {
     internalState.selectRow(y, true);
   } else {
@@ -128,15 +134,14 @@ function renderCellList({
 
   const handleCellClicked = (y: number, x: number) => {
     return (e: React.MouseEvent) => {
-      if (e.button !== 2) {
-        handleTableCellMouseDown({
-          y,
-          x,
-          internalState,
-          ctrl: e.ctrlKey || e.metaKey,
-          shift: e.shiftKey,
-        });
-      }
+      handleTableCellMouseDown({
+        y,
+        x,
+        rightClick: e.button === 2,
+        internalState,
+        ctrl: e.ctrlKey || e.metaKey,
+        shift: e.shiftKey,
+      });
     };
   };
 
@@ -195,7 +200,7 @@ function renderCellList({
 
           return (
             <td
-              key={cellIndex + colStart}
+              key={actualIndex}
               onMouseDown={handleCellClicked(absoluteRowIndex, header.index)}
             >
               <div className={styles.tableCellContent}>
@@ -332,8 +337,8 @@ export default function OptimizeTable({
         className={styles.tableContainer}
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
+          console.log("context menu");
           e.preventDefault();
-          e.stopPropagation();
         }}
       >
         <div
