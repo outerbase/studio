@@ -82,6 +82,7 @@ function handleTableCellMouseDown({
   y,
   x,
   rightClick,
+  shift,
   ctrl,
 }: {
   y: number;
@@ -97,6 +98,11 @@ function handleTableCellMouseDown({
 
   if (ctrl) {
     internalState.selectRow(y, true);
+  } else if (shift) {
+    const focus = internalState.getFocus();
+    if (focus) {
+      internalState.selectRange(focus.y, y);
+    }
   } else {
     // Single select
     internalState.clearSelect();
@@ -334,6 +340,9 @@ export default function OptimizeTable({
           if (onKeyDown) onKeyDown(internalState, e);
         }}
         ref={containerRef}
+        style={{
+          outline: "none",
+        }}
         className={styles.tableContainer}
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
