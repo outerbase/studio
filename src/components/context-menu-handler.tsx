@@ -105,6 +105,7 @@ export default function ContextMenuHandler() {
     <div style={{ position: "fixed", left: -20, top: -20 }}>
       {menu ? (
         <ContextMenu
+          modal={false}
           onOpenChange={(isOpen) => {
             if (!isOpen) setMenu(undefined);
           }}
