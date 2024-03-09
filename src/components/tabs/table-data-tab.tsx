@@ -28,6 +28,13 @@ import {
 } from "@/lib/sql-helper";
 import { ExecutePlan, executePlans } from "@/lib/sql-execute-helper";
 import { validateOperation } from "@/lib/validation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from "../ui/alert-dialog";
 
 interface TableDataContentProps {
   tableName: string;
@@ -37,6 +44,8 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [error, setError] = useState<string>();
+  const [executeError, setExecuteError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OptimizeTableState>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
@@ -104,7 +113,6 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const onCommit = useCallback(() => {
     if (!tableSchema) return;
     if (!data) return;
-    if (tableSchema.pk.length === 0) return;
 
     const rowChangeList = data.getChangedRows();
     const plans: ExecutePlan[] = [];
@@ -115,8 +123,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         const pk = tableSchema.pk;
 
         const wherePrimaryKey = pk.reduce((condition, pkColumnName) => {
-          condition[pkColumnName] =
-            rowChange[pkColumnName] ?? row.raw[pkColumnName];
+          condition[pkColumnName] = row.raw[pkColumnName];
           return condition;
         }, {} as Record<string, unknown>);
 
@@ -133,7 +140,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         });
 
         if (!valid) {
-          alert(reason);
+          setExecuteError(reason ?? "");
           return;
         }
 
@@ -168,12 +175,12 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
               }))
             );
           } else {
-            alert(errorMessage);
+            setExecuteError(errorMessage ?? "");
           }
         })
         .catch(console.error);
     }
-  }, [databaseDriver, tableName, tableSchema, data]);
+  }, [databaseDriver, tableName, tableSchema, data, setExecuteError]);
 
   const onDiscard = useCallback(() => {
     if (data) {
@@ -195,6 +202,18 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
+      {executeError && (
+        <AlertDialog open={true}>
+          <AlertDialogContent>
+            <AlertDialogDescription>{executeError} </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setExecuteError(null)}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
       <div className="flex-shrink-0 flex-grow-0">
         <div className="flex p-1 gap-1">
           <Button
