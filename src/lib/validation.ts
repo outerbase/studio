@@ -76,19 +76,20 @@ export function validateConnectionEndpoint(
     if (
       url.protocol !== "wss:" &&
       url.protocol !== "libsql:" &&
-      url.protocol !== "ws:"
+      url.protocol !== "ws:" &&
+      url.protocol !== "http:" &&
+      url.protocol !== "https:"
     ) {
-      return [false, "We only support wss:// or libsql:// at the moment."];
+      return [
+        false,
+        "We only support wss://, ws://, http://, https://, libsql:// at the moment.",
+      ];
     }
 
     return [true, ""];
   } catch {
     return [false, "Your URL is not valid"];
   }
-}
-
-export function normalizeConnectionEndpoint(endpoint: string) {
-  return endpoint.replace(/^libsql:\/\//, "wss://");
 }
 
 export function isLinkString(str: string) {

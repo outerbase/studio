@@ -1,9 +1,9 @@
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import { OptimizeTableHeaderProps, TableColumnDataType } from ".";
-import * as hrana from "@libsql/hrana-client";
 import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { LucideKey } from "lucide-react";
 import { convertSqliteType } from "@/lib/sql-helper";
+import { ResultSet } from "@libsql/client/web";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -28,13 +28,13 @@ export default class OptimizeTableState {
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
 
   static createFromResult(
-    dataResult: hrana.RowsResult,
+    dataResult: ResultSet,
     schemaResult?: DatabaseTableSchema
   ) {
     return new OptimizeTableState(
-      dataResult.columnNames.map((headerName, idx) => {
+      dataResult.columns.map((headerName, idx) => {
         let initialSize = 150;
-        const dataType = convertSqliteType(dataResult.columnDecltypes[idx]);
+        const dataType = convertSqliteType(dataResult.columnTypes[idx]);
 
         if (
           dataType === TableColumnDataType.INTEGER ||

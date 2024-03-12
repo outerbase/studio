@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { executeQuries } from "@/lib/multiple-query";
 import generateSqlSchemaChange from "@/lib/sql-generate.schema";
 import { LucideLoader, LucideSave } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -89,7 +88,8 @@ export default function SchemaEditorTab({
 
   const onSave = useCallback(() => {
     setIsExecuting(true);
-    executeQuries(databaseDriver, previewScript)
+    databaseDriver
+      .transaction(previewScript)
       .then(() => {
         if (schema.name.new !== schema.name.old) {
           refreshSchema();

@@ -1,6 +1,11 @@
 import { escapeSqlValue } from "@/lib/sql-helper";
 import { parseCreateTableScript } from "@/lib/sql-parse-table";
-import * as hrana from "@libsql/hrana-client";
+import {
+  createClient,
+  Client,
+  InStatement,
+  ResultSet,
+} from "@libsql/client/web";
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
 
@@ -75,66 +80,44 @@ export interface DatabaseTableSchema {
 }
 
 export default class DatabaseDriver {
-  protected client: hrana.WsClient;
-  protected stream?: hrana.WsStream;
+  protected client: Client;
   protected endpoint: string = "";
   protected authToken = "";
 
   constructor(url: string, authToken: string) {
     this.endpoint = url;
     this.authToken = authToken;
-    this.client = hrana.openWs(this.endpoint, this.authToken);
-    this.client.intMode = "bigint";
-  }
 
-  protected connect() {
-    if (this.stream) {
-      this.stream.close();
-    }
-
-    this.client = hrana.openWs(this.endpoint, this.authToken);
-    this.client.intMode = "bigint";
+    this.client = createClient({
+      url: this.endpoint,
+      authToken: this.authToken,
+      intMode: "bigint",
+    });
   }
 
   protected escapeId(id: string) {
     return id.replace(/"/g, '""');
   }
 
-  protected getStream(): hrana.WsStream {
-    if (this.stream) {
-      if (this.client.closed) {
-        console.info("Reconnect");
-        this.connect();
-      }
-
-      if (this.stream.closed) {
-        console.info("Open Stream");
-        this.stream = this.client.openStream();
-      }
-    } else {
-      console.info("Open Stream");
-      this.stream = this.client.openStream();
-    }
-
-    return this.stream;
-  }
-
   getEndpoint() {
     return this.endpoint;
   }
 
-  async query(stmt: hrana.InStmt) {
-    const stream = this.getStream();
+  async query(stmt: InStatement) {
+    const stream = this.client;
 
     console.info("Querying", stmt);
-    const r = await stream.query(stmt);
+    const r = await stream.execute(stmt);
     console.info("Result", r);
 
     return r;
   }
 
+  transaction(stmt: InStatement[]) {
+    return this.client.batch(stmt, "write");
+  }
+
   close() {
-    if (this.stream) this.stream.close();
     this.client.close();
   }
 
@@ -155,7 +138,7 @@ export default class DatabaseDriver {
   ): Promise<DatabaseTableSchema> {
     const sql = "SELECT * FROM pragma_table_info(?);";
     const binding = [tableName];
-    const result = await this.query([sql, binding]);
+    const result = await this.query({ sql, args: binding });
 
     const columns: DatabaseTableColumn[] = result.rows.map((row) => ({
       name: row.name?.toString() ?? "",
@@ -214,7 +197,7 @@ export default class DatabaseDriver {
       limit: number;
       offset: number;
     }
-  ): Promise<hrana.RowsResult> {
+  ): Promise<ResultSet> {
     const whereRaw = options.whereRaw?.trim();
 
     const sql = `SELECT * FROM ${this.escapeId(tableName)}${
@@ -222,6 +205,6 @@ export default class DatabaseDriver {
     } LIMIT ? OFFSET ?;`;
 
     const binding = [options.limit, options.offset];
-    return await this.query([sql, binding]);
+    return await this.query({ sql, args: binding });
   }
 }

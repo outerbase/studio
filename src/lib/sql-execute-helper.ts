@@ -85,10 +85,11 @@ export async function executePlans(
   plans: ExecutePlan[]
 ): Promise<{ success: boolean; plans: ExecutePlan[]; error?: string }> {
   try {
-    await driver.query("BEGIN TRANSACTION;");
+    const results = await driver.transaction(plans.map((plan) => plan.sql));
 
-    for (const plan of plans) {
-      const result = await driver.query(plan.sql);
+    for (let i = 0; i < plans.length; i++) {
+      const plan = plans[i];
+      const result = results[i];
 
       if (
         plan.autoIncrement &&
@@ -114,10 +115,8 @@ export async function executePlans(
       plan.updatedRowData = { ...updateResult };
     }
 
-    await driver.query("COMMIT");
     return { success: true, plans };
   } catch (e) {
-    await driver.query("ROLLBACK");
     return { success: false, error: (e as Error).toString(), plans: [] };
   }
 }
