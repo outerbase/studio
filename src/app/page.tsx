@@ -1,6 +1,8 @@
+import TopbarProfile from "@/components/topbar-profile";
+import { Button } from "@/components/ui/button";
+import { getSessionFromCookie } from "@/lib/auth";
 import { Metadata } from "next";
 import Link from "next/link";
-import Script from "next/script";
 import { PropsWithChildren } from "react";
 
 export const metadata: Metadata = {
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
     "LibSQL Studio - Fast and powerful LibSQL client on your browser",
 };
 
-function Topbar() {
+async function Topbar() {
+  const { user } = await getSessionFromCookie();
+
   return (
     <header className="border-b">
       <div className="mx-auto container flex">
@@ -17,18 +21,15 @@ function Topbar() {
           LibSQL <strong>Studio</strong>
         </h1>
         <div className="grow" />
-        <div className="flex items-center pt-1">
-          <a
-            className="github-button"
-            href="https://github.com/invisal/libsql-studio"
-            data-color-scheme="no-preference: light; light: light; dark: dark;"
-            data-size="large"
-            data-show-count="true"
-            aria-label="Star invisal/libsql-studio on GitHub"
-          >
-            Star
-          </a>
-        </div>
+        {user ? (
+          <TopbarProfile user={user} />
+        ) : (
+          <div className="flex items-center">
+            <Link href="/login">
+              <Button>Sign In</Button>
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );
@@ -85,7 +86,14 @@ function HeroSection() {
 
       <p className="text-center max-w-[500px] mx-auto mt-6 text-lg">
         LibSQL Studio is powerful and lightweight libSQL and Sqlite client that
-        run from your browser. Cross platform and no download needed.
+        run from your browser. Cross platform and no download needed. We are{" "}
+        <Link
+          href="https://github.com/invisal/libsql-studio"
+          className="underline font-bold text-blue-600"
+          target="_blank"
+        >
+          open source
+        </Link>
       </p>
 
       <div className="flex flex-col gap-4 justify-center mt-8 md:flex-row">
@@ -127,10 +135,9 @@ function FeatureItem({
   );
 }
 
-export default function MainPage() {
+export default async function MainPage() {
   return (
     <main>
-      <Script async defer src="https://buttons.github.io/buttons.js" />
       <Topbar />
       <HeroSection />
       <Screenshot />

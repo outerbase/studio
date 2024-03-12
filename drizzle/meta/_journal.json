@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1710049140295,
+      "tag": "0000_solid_scream",
+      "breakpoints": true
+    }
+  ]
+}
