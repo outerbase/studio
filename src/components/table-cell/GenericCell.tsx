@@ -1,4 +1,7 @@
+import { useMemo } from "react";
 import styles from "./styles.module.css";
+import { isLinkString } from "@/lib/validation";
+import DisplayLinkCell from "./display-link-cell";
 
 interface TableCellProps<T = unknown> {
   value: T;
@@ -24,37 +27,21 @@ export default function GenericCell({
     .filter(Boolean)
     .join(" ");
 
-  if (value === null) {
-    return (
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
-        <span className="text-gray-500">NULL</span>
-      </div>
-    );
-  }
+  const content = useMemo(() => {
+    if (value === null) {
+      return <span className="text-gray-500">NULL</span>;
+    }
 
-  if (value === undefined) {
-    return (
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
-        <span className="text-gray-500">DEFAULT</span>
-      </div>
-    );
-  }
+    if (value === undefined) {
+      return <span className="text-gray-500">DEFAULT</span>;
+    }
 
-  if (typeof value === "string") {
-    return (
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
+    if (typeof value === "string") {
+      if (isLinkString(value)) {
+        return <DisplayLinkCell link={value} />;
+      }
+
+      return (
         <span
           className={
             isChanged ? "text-black" : "text-gray-500 dark:text-gray-300"
@@ -62,17 +49,11 @@ export default function GenericCell({
         >
           {value}
         </span>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (typeof value === "number" || typeof value === "bigint") {
-    return (
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
+    if (typeof value === "number" || typeof value === "bigint") {
+      return (
         <span
           className={
             isChanged
@@ -82,25 +63,19 @@ export default function GenericCell({
         >
           {value.toString()}
         </span>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (value instanceof ArrayBuffer) {
-    const sliceByte = value.slice(0, 64);
-    const base64Text = btoa(
-      new Uint8Array(sliceByte).reduce(
-        (data, byte) => data + String.fromCharCode(byte),
-        ""
-      )
-    );
+    if (value instanceof ArrayBuffer) {
+      const sliceByte = value.slice(0, 64);
+      const base64Text = btoa(
+        new Uint8Array(sliceByte).reduce(
+          (data, byte) => data + String.fromCharCode(byte),
+          ""
+        )
+      );
 
-    return (
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
+      return (
         <div className="flex">
           <div className="mr-2 justify-center items-center flex-col">
             <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
@@ -109,18 +84,19 @@ export default function GenericCell({
           </div>
           <div className="text-orange-600">{base64Text}</div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  console.log("unknown", value);
+    return <span>{value.toString()}</span>;
+  }, [value, isChanged]);
+
   return (
     <div
       className={className}
       onMouseDown={onFocus}
       onDoubleClick={onDoubleClick}
     >
-      {value.toString()}
+      {content}
     </div>
   );
 }
