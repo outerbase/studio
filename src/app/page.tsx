@@ -1,4 +1,5 @@
 import TopbarProfile from "@/components/topbar-profile";
+import { Button } from "@/components/ui/button";
 import { getSessionFromCookie } from "@/lib/auth";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -20,7 +21,15 @@ async function Topbar() {
           LibSQL <strong>Studio</strong>
         </h1>
         <div className="grow" />
-        {user ? <TopbarProfile user={user} /> : <div></div>}
+        {user ? (
+          <TopbarProfile user={user} />
+        ) : (
+          <div className="flex items-center">
+            <Link href="/login">
+              <Button>Sign In</Button>
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

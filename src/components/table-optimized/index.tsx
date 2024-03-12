@@ -346,7 +346,6 @@ export default function OptimizeTable({
         className={styles.tableContainer}
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
-          console.log("context menu");
           e.preventDefault();
         }}
       >

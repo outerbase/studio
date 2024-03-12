@@ -24,6 +24,7 @@ export default function TopbarProfile({ user }: Readonly<{ user: User }>) {
           <span>{user.name}</span>
         </div>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent>
         <Link href="/connect">
           <DropdownMenuItem>
@@ -32,7 +33,10 @@ export default function TopbarProfile({ user }: Readonly<{ user: User }>) {
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem inset>Logout</DropdownMenuItem>
+
+        <Link href="/logout">
+          <DropdownMenuItem inset>Logout</DropdownMenuItem>
+        </Link>
       </DropdownMenuContent>
     </DropdownMenu>
   );

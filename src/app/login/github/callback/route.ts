@@ -36,8 +36,8 @@ export async function GET(request: Request): Promise<Response> {
         ),
     });
 
-    if (existingUser) {
-      const session = await lucia.createSession(existingUser.id, {
+    if (existingUser?.userId) {
+      const session = await lucia.createSession(existingUser.userId, {
         auth_id: existingUser.id,
         user_agent: headerStore.get("user-agent"),
       });
@@ -61,11 +61,13 @@ export async function GET(request: Request): Promise<Response> {
     const userId = generateId(15);
     const authId = generateId(15);
 
-    // Replace this with your own DB client.
     await db.insert(user).values({ id: userId, name: githubUser.login });
-    await db
-      .insert(user_oauth)
-      .values({ id: authId, provider: "GITHUB", providerId: githubUser.id });
+    await db.insert(user_oauth).values({
+      id: authId,
+      provider: "GITHUB",
+      providerId: githubUser.id,
+      userId: userId,
+    });
 
     const session = await lucia.createSession(userId, {
       auth_id: userId,
