@@ -1,4 +1,3 @@
-import { DatabaseTableColumn } from "@/drivers/DatabaseDriver";
 import { LucidePlus, LucideShieldPlus } from "lucide-react";
 import {
   DropdownMenu,
@@ -12,6 +11,7 @@ import { Button } from "../ui/button";
 import SchemaEditorColumnList from "./SchemaEditorColumnList";
 import { Input } from "../ui/input";
 import { checkSchemaChange } from "@/lib/sql-generate.schema";
+import { DatabaseTableColumn } from "@/drivers/base-driver";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;

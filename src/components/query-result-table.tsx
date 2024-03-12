@@ -7,13 +7,13 @@ import OptimizeTable, {
   TableColumnDataType,
 } from "@/components/table-optimized";
 import OptimizeTableState from "@/components/table-optimized/OptimizeTableState";
-import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import BigNumberCell from "./table-cell/BigNumberCell";
+import { DatabaseValue } from "@/drivers/base-driver";
 
 interface ResultTableProps {
   data: OptimizeTableState;

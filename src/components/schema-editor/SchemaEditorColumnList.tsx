@@ -1,8 +1,3 @@
-import {
-  DatabaseColumnConflict,
-  DatabaseTableColumn,
-  DatabaseTableColumnConstraint,
-} from "@/drivers/DatabaseDriver";
 import { DatabaseTableColumnChange, DatabaseTableSchemaChange } from ".";
 import {
   Dispatch,
@@ -34,6 +29,11 @@ import ColumnDefaultValueInput from "./ColumnDefaultValueInput";
 import TableCombobox from "../table-combobox/TableCombobox";
 import TableColumnCombobox from "../table-combobox/TableColumnCombobox";
 import { checkSchemaColumnChange } from "@/lib/sql-generate.schema";
+import {
+  DatabaseColumnConflict,
+  DatabaseTableColumn,
+  DatabaseTableColumnConstraint,
+} from "@/drivers/base-driver";
 
 function changeColumnOnIndex(
   idx: number,

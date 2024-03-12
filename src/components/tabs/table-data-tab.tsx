@@ -13,7 +13,6 @@ import {
   LucideSaveAll,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +29,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "../ui/alert-dialog";
+import { DatabaseTableSchema } from "@/drivers/base-driver";
 
 interface TableDataContentProps {
   tableName: string;

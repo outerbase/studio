@@ -1,9 +1,9 @@
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import { OptimizeTableHeaderProps, TableColumnDataType } from ".";
-import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import { LucideKey } from "lucide-react";
 import { convertSqliteType } from "@/lib/sql-helper";
 import { ResultSet } from "@libsql/client/web";
+import { DatabaseTableSchema } from "@/drivers/base-driver";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;

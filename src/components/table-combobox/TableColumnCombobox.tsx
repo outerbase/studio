@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { PopoverContent } from "../ui/popover";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
 import {
   Command,
   CommandEmpty,
@@ -13,6 +12,7 @@ import {
   CommandItem,
 } from "../ui/command";
 import { cn } from "@/lib/utils";
+import { DatabaseTableSchema } from "@/drivers/base-driver";
 
 export default function TableColumnCombobox({
   value,
