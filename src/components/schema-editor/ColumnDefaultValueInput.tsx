@@ -1,4 +1,3 @@
-import { DatabaseTableColumnConstraint } from "@/drivers/DatabaseDriver";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,6 +8,7 @@ import {
 import { ChevronsUpDown } from "lucide-react";
 import { ChangeEvent, useCallback, useMemo } from "react";
 import { Input } from "../ui/input";
+import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
 
 export default function ColumnDefaultValueInput({
   constraint,

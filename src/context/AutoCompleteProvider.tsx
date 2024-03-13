@@ -1,4 +1,4 @@
-import { DatabaseTableColumn } from "@/drivers/DatabaseDriver";
+import { DatabaseTableColumn } from "@/drivers/base-driver";
 import {
   PropsWithChildren,
   createContext,

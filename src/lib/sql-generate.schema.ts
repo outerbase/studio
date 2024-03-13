@@ -4,7 +4,7 @@ import {
 } from "@/components/schema-editor";
 import { escapeIdentity, escapeSqlValue } from "./sql-helper";
 import deepEqual from "deep-equal";
-import { DatabaseTableColumn } from "@/drivers/DatabaseDriver";
+import { DatabaseTableColumn } from "@/drivers/base-driver";
 
 export function checkSchemaColumnChange(change: DatabaseTableColumnChange) {
   return !deepEqual(change.old, change.new);

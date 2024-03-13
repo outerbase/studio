@@ -98,7 +98,6 @@ function HeroSection() {
 
       <div className="flex flex-col gap-4 justify-center mt-8 md:flex-row">
         <LinkButton title="Connect to LibSQL" url="/connect" />
-        <LinkButton title="Open Sqlite Database" url="#sqlite" />
       </div>
     </div>
   );
@@ -215,24 +214,6 @@ export default async function MainPage() {
               adding them yourself.
             </p>
           </FeatureItem>
-        </div>
-      </div>
-
-      <div className="bg-zinc-200 p-4">
-        <div className="container mx-auto text-center my-8">
-          <h2 id="sqlite" className="text-2xl font-semibold">
-            Running SQLite in Your Browser
-          </h2>
-          <p className="mt-4 max-w-[500px] mx-auto">
-            Since browser has no file access and sqlite database is a file, we
-            need to run agent to remove this browser restriction.
-          </p>
-
-          <div className="mt-4 max-w-[500px] mx-auto bg-zinc-700 text-left p-2 px-4 text-white rounded">
-            <code>
-              <pre>npx sqlstudio open hello.db</pre>
-            </code>
-          </div>
         </div>
       </div>
 

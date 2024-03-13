@@ -8,7 +8,6 @@ import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./context-menu-handler";
 import InternalPubSub from "@/lib/internal-pubsub";
 import { useRouter, useSearchParams } from "next/navigation";
-import { normalizeConnectionEndpoint } from "@/lib/validation";
 import { SchemaProvider } from "@/context/SchemaProvider";
 import ThemeProvider from "@/context/theme-provider";
 
@@ -107,7 +106,7 @@ export default function MainScreen() {
 
     const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
     return {
-      url: normalizeConnectionEndpoint(config.url),
+      url: config.url,
       token: config.token as string,
     };
   }, [params]);

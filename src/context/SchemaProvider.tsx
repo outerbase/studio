@@ -1,6 +1,5 @@
 import { useAutoComplete } from "@/context/AutoCompleteProvider";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
-import { DatabaseSchemaItem } from "@/drivers/DatabaseDriver";
 import {
   PropsWithChildren,
   createContext,
@@ -11,6 +10,7 @@ import {
   useState,
 } from "react";
 import ConnectingDialog from "../components/connection-dialog";
+import { DatabaseSchemaItem } from "@/drivers/base-driver";
 
 const SchemaContext = createContext<{
   schema: DatabaseSchemaItem[];

@@ -1,7 +1,7 @@
 import {
   DatabaseTableColumnConstraint,
   DatabaseTableSchema,
-} from "@/drivers/DatabaseDriver";
+} from "@/drivers/base-driver";
 import {
   buildSyntaxCursor,
   parseColumnConstraint,

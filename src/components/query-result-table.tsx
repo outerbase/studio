@@ -7,13 +7,13 @@ import OptimizeTable, {
   TableColumnDataType,
 } from "@/components/table-optimized";
 import OptimizeTableState from "@/components/table-optimized/OptimizeTableState";
-import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import BigNumberCell from "./table-cell/BigNumberCell";
+import { DatabaseValue } from "@/drivers/base-driver";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -88,6 +88,26 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
     [stickyHeaderIndex]
   );
 
+  const copyCallback = useCallback((state: OptimizeTableState) => {
+    const focus = state.getFocus();
+    if (focus) {
+      const y = focus.y;
+      const x = focus.x;
+      window.navigator.clipboard.writeText(state.getValue(y, x) as string);
+    }
+  }, []);
+
+  const pasteCallback = useCallback((state: OptimizeTableState) => {
+    const focus = state.getFocus();
+    if (focus) {
+      const y = focus.y;
+      const x = focus.x;
+      window.navigator.clipboard.readText().then((pasteValue) => {
+        state.changeValue(y, x, pasteValue);
+      });
+    }
+  }, []);
+
   const onCellContextMenu = useCallback(
     ({
       state,
@@ -158,15 +178,18 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
           title: "Copy Cell Value",
           shortcut: KEY_BINDING.copy.toString(),
           onClick: () => {
-            const focus = state.getFocus();
-            if (focus) {
-              const y = focus.y;
-              const x = focus.x;
-              window.navigator.clipboard.writeText(
-                data.getValue(y, x) as string
-              );
-            }
+            copyCallback(state);
           },
+        },
+        {
+          title: "Paste",
+          shortcut: KEY_BINDING.paste.toString(),
+          onClick: () => {
+            pasteCallback(state);
+          },
+        },
+        {
+          separator: true,
         },
         {
           title: "Copy Row As",
@@ -218,21 +241,20 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         },
       ])(event);
     },
-    [data, tableName]
+    [data, tableName, copyCallback, pasteCallback]
   );
 
   const onKeyDown = useCallback(
     (state: OptimizeTableState, e: React.KeyboardEvent) => {
       if (KEY_BINDING.copy.match(e as React.KeyboardEvent<HTMLDivElement>)) {
-        const focus = state.getFocus();
-        if (focus) {
-          const y = focus.y;
-          const x = focus.x;
-          window.navigator.clipboard.writeText(state.getValue(y, x) as string);
-        }
+        copyCallback(state);
+      } else if (
+        KEY_BINDING.paste.match(e as React.KeyboardEvent<HTMLDivElement>)
+      ) {
+        pasteCallback(state);
       }
     },
-    []
+    [copyCallback, pasteCallback]
   );
 
   return (

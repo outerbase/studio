@@ -1,12 +1,12 @@
-import {
-  DatabaseColumnConflict,
-  DatabaseTableColumn,
-  DatabaseTableColumnConstraint,
-  DatabaseTableSchema,
-} from "@/drivers/DatabaseDriver";
 import { SQLite } from "@codemirror/lang-sql";
 import { SyntaxNode, TreeCursor } from "@lezer/common";
 import { unescapeIdentity } from "./sql-helper";
+import {
+  DatabaseTableColumn,
+  DatabaseColumnConflict,
+  DatabaseTableColumnConstraint,
+  DatabaseTableSchema,
+} from "@/drivers/base-driver";
 
 class Cursor {
   protected ptr: SyntaxNode | null;

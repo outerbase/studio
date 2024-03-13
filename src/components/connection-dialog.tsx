@@ -34,7 +34,7 @@ export default function ConnectingDialog({
         </p>
         <div className="mt-4 flex gap-4">
           <Button onClick={onRetry}>Retry</Button>
-          <Button variant={"secondary"} onClick={() => router.push("/")}>
+          <Button variant={"secondary"} onClick={() => router.push("/connect")}>
             Back
           </Button>
         </div>

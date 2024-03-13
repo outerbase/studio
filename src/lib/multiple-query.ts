@@ -1,5 +1,5 @@
 import DatabaseDriver from "@/drivers/DatabaseDriver";
-import { RowsResult } from "@libsql/hrana-client";
+import { ResultSet } from "@libsql/client/web";
 
 export interface MultipleQueryProgressItem {
   order: number;
@@ -17,32 +17,14 @@ export interface MultipleQueryProgress {
   error?: boolean;
 }
 
-export async function executeQuries(
-  driver: DatabaseDriver,
-  statements: string[]
-) {
-  try {
-    await driver.query("BEGIN TRANSACTION;");
-
-    for (const statement of statements) {
-      await driver.query(statement);
-    }
-
-    await driver.query("COMMIT");
-  } catch (e) {
-    await driver.query("ROLLBACK");
-    throw e;
-  }
-}
-
 export async function multipleQuery(
   driver: DatabaseDriver,
   statements: string[],
   onProgress?: (progress: MultipleQueryProgress) => void
 ) {
   const logs: MultipleQueryProgressItem[] = [];
-  const result: RowsResult[] = [];
-  let lastResult: RowsResult | undefined;
+  const result: ResultSet[] = [];
+  let lastResult: ResultSet | undefined;
 
   for (let i = 0; i < statements.length; i++) {
     const statement = statements[i];
@@ -62,9 +44,9 @@ export async function multipleQuery(
       const r = await driver.query(statement);
 
       log.end = Date.now();
-      log.affectedRow = r.affectedRowCount;
+      log.affectedRow = r.rowsAffected;
 
-      if (r.columnNames.length > 0) {
+      if (r.columns.length > 0) {
         lastResult = r;
         result.push(r);
       }

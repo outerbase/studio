@@ -1,8 +1,4 @@
-import {
-  normalizeConnectionEndpoint,
-  validateConnectionEndpoint,
-  validateOperation,
-} from "./validation";
+import { validateConnectionEndpoint, validateOperation } from "./validation";
 
 describe("Operation Validation", () => {
   it("UPDATE with primary key SHOULD be valid operation", () => {
@@ -211,16 +207,6 @@ describe("Validate the connection endpoint", () => {
   it("Non wss:// is not valid endpoint", () => {
     expect(validateConnectionEndpoint("https://testing.example.com")[0]).toBe(
       false
-    );
-  });
-
-  it("Transform libsql:// to wss://", () => {
-    expect(normalizeConnectionEndpoint("libsql://testing.example.com")).toBe(
-      "wss://testing.example.com"
-    );
-
-    expect(normalizeConnectionEndpoint("wss://testing.example.com")).toBe(
-      "wss://testing.example.com"
     );
   });
 });

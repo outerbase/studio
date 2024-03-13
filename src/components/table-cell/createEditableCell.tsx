@@ -1,7 +1,7 @@
-import { DatabaseValue } from "@/drivers/DatabaseDriver";
 import { useState, useEffect } from "react";
 import GenericCell from "./GenericCell";
 import styles from "./styles.module.css";
+import { DatabaseValue } from "@/drivers/base-driver";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;

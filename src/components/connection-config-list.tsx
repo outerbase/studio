@@ -22,9 +22,9 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { validateConnectionEndpoint } from "@/lib/validation";
 import { appVersion } from "@/env";
 import ErrorMessage from "@/components/custom/ErrorMessage";
+import { validateConnectionEndpoint } from "@/lib/validation";
 
 interface ConnectionItem {
   id: string;
@@ -178,7 +178,7 @@ export default function ConnectionConfigScreen() {
 
   const onConnectClicked = useCallback(() => {
     if (!valid) return;
-    if (url && token) {
+    if (url) {
       connect(url, token);
     }
   }, [valid, connect, url, token]);
