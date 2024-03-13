@@ -1,11 +1,7 @@
 import OptimizeTableState, {
   OptimizeTableRowValue,
 } from "@/components/table-optimized/OptimizeTableState";
-<<<<<<< HEAD
-import DatabaseDriver, { DatabaseTableSchema } from "@/drivers/DatabaseDriver";
-=======
 import DatabaseDriver from "@/drivers/DatabaseDriver";
->>>>>>> develop
 import { validateOperation } from "@/lib/validation";
 import {
   generateDeleteStatement,
@@ -13,10 +9,7 @@ import {
   generateSelectOneWithConditionStatement,
   generateUpdateStatement,
 } from "./sql-helper";
-<<<<<<< HEAD
-=======
 import { DatabaseTableSchema } from "@/drivers/base-driver";
->>>>>>> develop
 
 export interface ExecutePlan {
   row: OptimizeTableRowValue;
