@@ -10,6 +10,7 @@ export async function GET(request: Request): Promise<Response> {
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const headerStore = headers();
+  const GITHUB_API_URL = "https://api.github.com";
 
   const storedState = cookies().get("github_oauth_state")?.value ?? null;
   if (!code || !state || !storedState || state !== storedState) {
@@ -19,13 +20,24 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   try {
-    const tokens = await github.validateAuthorizationCode(code);
-    const githubUserResponse = await fetch("https://api.github.com/user", {
+    const token = await github.validateAuthorizationCode(code);
+    const githubUserResponse = await fetch(`${GITHUB_API_URL}/user`, {
       headers: {
-        Authorization: `Bearer ${tokens.accessToken}`,
+        Authorization: `Bearer ${token.accessToken}`,
       },
     });
     const githubUser: GitHubUser = await githubUserResponse.json();
+
+    if (githubUser.email === null) {
+      const resp = await fetch(`${GITHUB_API_URL}/user/emails`, {
+        headers: {
+          Authorization: `Bearer ${token.accessToken}`,
+        },
+      });
+      const githubEmails: GitHubEmail[] = await resp.json();
+      githubUser.email =
+        githubEmails.find((email) => email.primary)?.email || null;
+    }
 
     // Replace this with your own DB client.
     const existingUser = await db.query.user_oauth.findFirst({
@@ -61,7 +73,9 @@ export async function GET(request: Request): Promise<Response> {
     const userId = generateId(15);
     const authId = generateId(15);
 
-    await db.insert(user).values({ id: userId, name: githubUser.login });
+    await db
+      .insert(user)
+      .values({ id: userId, name: githubUser.login, email: githubUser.email });
     await db.insert(user_oauth).values({
       id: authId,
       provider: "GITHUB",
@@ -106,4 +120,12 @@ export async function GET(request: Request): Promise<Response> {
 interface GitHubUser {
   id: string;
   login: string;
+  email: string | null;
+}
+
+interface GitHubEmail {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+  visibility: "public" | "private";
 }
