@@ -61,7 +61,9 @@ export async function GET(request: Request): Promise<Response> {
     const userId = generateId(15);
     const authId = generateId(15);
 
-    await db.insert(user).values({ id: userId, name: githubUser.login });
+    await db
+      .insert(user)
+      .values({ id: userId, name: githubUser.login, email: githubUser.email });
     await db.insert(user_oauth).values({
       id: authId,
       provider: "GITHUB",
@@ -106,4 +108,5 @@ export async function GET(request: Request): Promise<Response> {
 interface GitHubUser {
   id: string;
   login: string;
+  email: string;
 }
