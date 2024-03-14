@@ -14,6 +14,7 @@ export const user = sqliteTable("user", {
   createdAt: text("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+  email: text("email"),
 });
 
 export const user_session = sqliteTable(

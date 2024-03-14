@@ -29,6 +29,7 @@ export default function TableHeaderList({
               onContextMenu={(e) => {
                 if (onHeaderContextMenu) {
                   onHeaderContextMenu(e, header);
+                  e.stopPropagation();
                 }
               }}
             />

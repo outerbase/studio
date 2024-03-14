@@ -8,6 +8,13 @@
       "when": 1710049140295,
       "tag": "0000_solid_scream",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710401496821,
+      "tag": "0001_crazy_eternals",
+      "breakpoints": true
     }
   ]
 }

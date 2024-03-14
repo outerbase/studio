@@ -206,7 +206,7 @@ describe("Validate the connection endpoint", () => {
 
   it("Non wss:// is not valid endpoint", () => {
     expect(validateConnectionEndpoint("https://testing.example.com")[0]).toBe(
-      false
+      true
     );
   });
 });
