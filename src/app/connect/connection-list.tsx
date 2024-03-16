@@ -32,7 +32,7 @@ export default function ConnectionList() {
 
   const onRemoveConnectionComplete = useCallback(
     (conn: SavedConnectionItem) => {
-      if (conn.storage === "local_storage") {
+      if (conn.storage === "local") {
         setLocalSavedConns(SavedConnectionLocalStorage.getList());
         onRemoveConnectionClose();
       }

@@ -1,6 +1,6 @@
 import parseSafeJson from "../../lib/json-safe";
 
-export type SavedConnectionStorage = "e2e" | "local_storage";
+export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 
 export const CONNECTION_LABEL_COLORS: Record<SavedConnectionLabel, string> = {
@@ -64,7 +64,7 @@ function configToRaw(
 
 function mapRaw(data: SavedConnectionRawLocalStorage): SavedConnectionItem {
   return {
-    storage: "local_storage",
+    storage: "local",
     label: data.label,
     id: data.id,
     name: data.name,
@@ -76,7 +76,7 @@ function mapDetailRaw(
   data: SavedConnectionRawLocalStorage
 ): SavedConnectionItemDetail {
   return {
-    storage: "local_storage",
+    storage: "local",
     id: data.id,
     name: data.name,
     description: data.description,
@@ -125,7 +125,7 @@ export class SavedConnectionLocalStorage {
     return {
       id,
       name: data.name,
-      storage: "local_storage",
+      storage: "local",
       description: data.description,
       label: data.label,
     };
@@ -146,7 +146,7 @@ export class SavedConnectionLocalStorage {
     return {
       id: uuid,
       name: conn.name,
-      storage: "local_storage",
+      storage: "local",
       description: conn.description,
       label: conn.label,
     };

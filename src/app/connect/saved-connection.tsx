@@ -36,7 +36,7 @@ export default function SaveConnection({
       if (storage) {
         const finalConfig: SavedConnectionItemWithoutId = { ...data, storage };
 
-        if (!finalConfig.storage || finalConfig.storage === "local_storage") {
+        if (!finalConfig.storage || finalConfig.storage === "local") {
           const conn = SavedConnectionLocalStorage.save(finalConfig);
 
           onSaveComplete({

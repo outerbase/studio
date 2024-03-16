@@ -33,7 +33,7 @@ function SaveConnectionTypeItem({
 export default function SaveConnectionType({
   onContinue,
 }: Readonly<{ onContinue: (type: SavedConnectionStorage) => void }>) {
-  const [type, setType] = useState<SavedConnectionStorage>("e2e");
+  const [type, setType] = useState<SavedConnectionStorage>("local");
 
   return (
     <div>
@@ -41,16 +41,16 @@ export default function SaveConnectionType({
 
       <div className="flex flex-col gap-4">
         <SaveConnectionTypeItem
-          onClick={() => setType("e2e")}
-          active={type === "e2e"}
-          title="Remote with Encryption"
-          description="Securely store your database credential on our server with end-to-end encryption using your master password."
-        />
-        <SaveConnectionTypeItem
-          onClick={() => setType("local_storage")}
-          active={type === "local_storage"}
+          onClick={() => setType("local")}
+          active={type === "local"}
           title="Local Storage"
           description="Store your database credential on your local storage."
+        />
+        <SaveConnectionTypeItem
+          onClick={() => setType("remote")}
+          active={type === "remote"}
+          title="Remote"
+          description="Securely store your database credential on our server."
         />
       </div>
 

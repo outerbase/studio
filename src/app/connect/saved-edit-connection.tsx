@@ -36,7 +36,7 @@ function EditLocal({
         onSaveComplete({
           id: id,
           name: conn.name,
-          storage: "local_storage",
+          storage: "local",
           description: conn.description,
           label: conn.label,
         });

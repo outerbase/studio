@@ -49,3 +49,19 @@ export const user_oauth = sqliteTable(
     providerUniqueId: unique().on(table.provider, table.providerId),
   })
 );
+
+export const database = sqliteTable("database", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  name: text("name"),
+  description: text("description"),
+  color: text("color").default("gray"),
+  driver: text("driver").default("turso"),
+  host: text("host"),
+  token: text("token"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});

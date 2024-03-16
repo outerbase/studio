@@ -15,6 +15,13 @@
       "when": 1710401496821,
       "tag": "0001_crazy_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1710593011265,
+      "tag": "0002_careful_big_bertha",
+      "breakpoints": true
     }
   ]
 }
