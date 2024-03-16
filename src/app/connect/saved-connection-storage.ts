@@ -47,24 +47,85 @@ interface SavedConnectionRawLocalStorage {
   last_used: number;
 }
 
+function configToRaw(
+  id: string,
+  data: SavedConnectionItemConfig
+): SavedConnectionRawLocalStorage {
+  return {
+    id,
+    name: data.name,
+    url: data.config.url,
+    token: data.config.token,
+    label: data.label,
+    last_used: Date.now(),
+    description: data.description ?? "",
+  };
+}
+
+function mapRaw(data: SavedConnectionRawLocalStorage): SavedConnectionItem {
+  return {
+    storage: "local_storage",
+    label: data.label,
+    id: data.id,
+    name: data.name,
+    description: data.description ?? "",
+  };
+}
+
+function mapDetailRaw(
+  data: SavedConnectionRawLocalStorage
+): SavedConnectionItemDetail {
+  return {
+    storage: "local_storage",
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    label: data.label,
+    config: {
+      token: data.token,
+      url: data.url,
+    },
+  };
+}
+
 export class SavedConnectionLocalStorage {
   static getList(): SavedConnectionItem[] {
     return parseSafeJson<SavedConnectionRawLocalStorage[]>(
       localStorage.getItem("connections"),
       []
-    ).map((conn) => ({
-      storage: "local_storage",
-      label: conn.label,
-      id: conn.id,
-      name: conn.name,
-      description: conn.description ?? "",
-    }));
+    ).map(mapRaw);
   }
 
-  static save(conn: SavedConnectionItemWithoutId): SavedConnectionItemDetail {
-    const uuid = crypto.randomUUID();
-    const finalConn = { ...conn, id: uuid };
+  static update(
+    id: string,
+    data: SavedConnectionItemConfig
+  ): SavedConnectionItem {
+    const previousConnList = parseSafeJson<SavedConnectionRawLocalStorage[]>(
+      localStorage.getItem("connections"),
+      []
+    );
 
+    const tmp = previousConnList.map((t) => {
+      if (t.id === id) {
+        return configToRaw(id, data);
+      }
+
+      return t;
+    });
+
+    localStorage.setItem("connections", JSON.stringify(tmp));
+
+    return {
+      id,
+      name: data.name,
+      storage: "local_storage",
+      description: data.description,
+      label: data.label,
+    };
+  }
+
+  static save(conn: SavedConnectionItemWithoutId): SavedConnectionItem {
+    const uuid = crypto.randomUUID();
     const previousConnList = parseSafeJson<SavedConnectionRawLocalStorage[]>(
       localStorage.getItem("connections"),
       []
@@ -73,19 +134,27 @@ export class SavedConnectionLocalStorage {
     localStorage.setItem(
       "connections",
       JSON.stringify([
-        {
-          id: finalConn.id,
-          name: finalConn.name,
-          url: finalConn.config.url,
-          token: finalConn.config.token,
-          label: finalConn.label,
-          last_used: Date.now(),
-          description: finalConn.description ?? "",
-        },
+        configToRaw(uuid, conn),
         ...previousConnList,
       ] as SavedConnectionRawLocalStorage[])
     );
 
-    return finalConn;
+    return {
+      id: uuid,
+      name: conn.name,
+      storage: "local_storage",
+      description: conn.description,
+      label: conn.label,
+    };
+  }
+
+  static get(id: string) {
+    const found = parseSafeJson<SavedConnectionRawLocalStorage[]>(
+      localStorage.getItem("connections"),
+      []
+    ).find((raw) => raw.id === id);
+
+    if (found) return mapDetailRaw(found);
+    return null;
   }
 }

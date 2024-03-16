@@ -2,20 +2,23 @@
 import { useCallback, useState } from "react";
 import ConnectionDialogContent from "./saved-connection-content";
 import SaveConnectionType from "./saved-connection-type";
-import ConnectionDialog from "./connection-dialog";
 import {
+  SavedConnectionItem,
   SavedConnectionItemConfig,
   SavedConnectionItemWithoutId,
   SavedConnectionLocalStorage,
   SavedConnectionStorage,
 } from "@/app/connect/saved-connection-storage";
+import SavedConnectionConfig from "./saved-connection-config";
 
 type SaveConnectionStep = "storage" | "config";
 
 export default function SaveConnection({
   onSaveComplete,
+  onClose,
 }: Readonly<{
-  onSaveComplete: (storageType: SavedConnectionStorage) => void;
+  onSaveComplete: (storageType: SavedConnectionItem) => void;
+  onClose: () => void;
 }>) {
   const [storage, setStorage] = useState<SavedConnectionStorage>();
   const [step, setStep] = useState<SaveConnectionStep>("storage");
@@ -34,8 +37,15 @@ export default function SaveConnection({
         const finalConfig: SavedConnectionItemWithoutId = { ...data, storage };
 
         if (!finalConfig.storage || finalConfig.storage === "local_storage") {
-          SavedConnectionLocalStorage.save(finalConfig);
-          onSaveComplete(storage);
+          const conn = SavedConnectionLocalStorage.save(finalConfig);
+
+          onSaveComplete({
+            id: conn.id,
+            name: finalConfig.name,
+            storage,
+            description: finalConfig.description,
+            label: finalConfig.label,
+          });
         }
       }
     },
@@ -43,11 +53,11 @@ export default function SaveConnection({
   );
 
   return (
-    <ConnectionDialogContent>
+    <ConnectionDialogContent title="New Connection" onClose={onClose}>
       {step === "storage" && (
         <SaveConnectionType onContinue={onConnectionTypeSelected} />
       )}
-      {step === "config" && <ConnectionDialog onSave={onSaveConnection} />}
+      {step === "config" && <SavedConnectionConfig onSave={onSaveConnection} />}
     </ConnectionDialogContent>
   );
 }

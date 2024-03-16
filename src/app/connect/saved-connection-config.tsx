@@ -10,6 +10,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
+interface Props {
+  onSave: (conn: SavedConnectionItemConfig) => void;
+  initialData?: SavedConnectionItemConfig;
+}
+
 function ColorItem({
   color,
   selected,
@@ -24,14 +29,19 @@ function ColorItem({
   return <div className={className} onClick={onClick}></div>;
 }
 
-export default function ConnectionDialog({
+export default function SavedConnectionConfig({
   onSave,
-}: Readonly<{ onSave: (conn: SavedConnectionItemConfig) => void }>) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [color, setColor] = useState<SavedConnectionLabel>("gray");
-  const [url, setURL] = useState("");
-  const [token, setToken] = useState("");
+  initialData,
+}: Readonly<Props>) {
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [description, setDescription] = useState(
+    initialData?.description ?? ""
+  );
+  const [color, setColor] = useState<SavedConnectionLabel>(
+    initialData?.label ?? "gray"
+  );
+  const [url, setURL] = useState(initialData?.config?.url ?? "");
+  const [token, setToken] = useState(initialData?.config?.token ?? "");
 
   const onSaveClicked = () => {
     onSave({ label: color, name, description, config: { url, token } });
@@ -42,6 +52,7 @@ export default function ConnectionDialog({
       <div>
         <div className="text-xs mb-2">Name</div>
         <Input
+          autoFocus
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.currentTarget.value)}
