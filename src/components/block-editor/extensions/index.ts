@@ -7,5 +7,5 @@ export const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
     codeBlock: CodeBlock
-  }
+  },
 })

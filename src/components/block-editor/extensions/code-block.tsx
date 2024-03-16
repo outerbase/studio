@@ -12,11 +12,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, scoped } from "@/lib/utils";
-import { createReactBlockSpec } from "@blocknote/react";
+import { createReactBlockSpec } from "../utils/create-block-spec";
 import ReactCodeMirror from "@uiw/react-codemirror";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { langs, type LanguageName } from "@uiw/codemirror-extensions-langs";
 import { useState } from "react";
+import { InputRule } from "@tiptap/core";
 
 export const CodeBlock = createReactBlockSpec(
   {
@@ -32,6 +33,23 @@ export const CodeBlock = createReactBlockSpec(
     },
   },
   {
+    addInputRules: () => [
+      new InputRule({
+        find: /^```([a-zA-Z0-9]+)?\n$/,
+        handler: ({ state, match, chain }) => {
+          const supposeLanguage = match[1];
+          const language = langs[supposeLanguage as LanguageName]
+            ? supposeLanguage
+            : "plaintext";
+          const code = "";
+
+          (chain() as any).BNUpdateBlock(state.selection.from, {
+            type: "codeBlock",
+            props: { language, code },
+          });
+        },
+      }),
+    ],
     render: ({ block, editor }) => {
       const extensions = scoped(() => {
         const lang = langs[block.props.language as LanguageName];
