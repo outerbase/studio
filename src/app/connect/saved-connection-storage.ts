@@ -88,6 +88,13 @@ function mapDetailRaw(
   };
 }
 
+function getAllConnections() {
+  return parseSafeJson<SavedConnectionRawLocalStorage[]>(
+    localStorage.getItem("connections"),
+    []
+  );
+}
+
 export class SavedConnectionLocalStorage {
   static getList(): SavedConnectionItem[] {
     return parseSafeJson<SavedConnectionRawLocalStorage[]>(
@@ -96,16 +103,16 @@ export class SavedConnectionLocalStorage {
     ).map(mapRaw);
   }
 
+  static remove(id: string) {
+    const tmp = getAllConnections().filter((conn) => conn.id !== id);
+    localStorage.setItem("connections", JSON.stringify(tmp));
+  }
+
   static update(
     id: string,
     data: SavedConnectionItemConfig
   ): SavedConnectionItem {
-    const previousConnList = parseSafeJson<SavedConnectionRawLocalStorage[]>(
-      localStorage.getItem("connections"),
-      []
-    );
-
-    const tmp = previousConnList.map((t) => {
+    const tmp = getAllConnections().map((t) => {
       if (t.id === id) {
         return configToRaw(id, data);
       }
@@ -126,10 +133,7 @@ export class SavedConnectionLocalStorage {
 
   static save(conn: SavedConnectionItemWithoutId): SavedConnectionItem {
     const uuid = crypto.randomUUID();
-    const previousConnList = parseSafeJson<SavedConnectionRawLocalStorage[]>(
-      localStorage.getItem("connections"),
-      []
-    );
+    const previousConnList = getAllConnections();
 
     localStorage.setItem(
       "connections",
