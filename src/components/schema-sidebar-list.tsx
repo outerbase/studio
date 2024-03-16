@@ -69,6 +69,8 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
 
   const prepareContextMenu = useCallback(
     (tableName?: string) => {
+      console.log(tableName);
+
       return [
         {
           title: "Copy Name",
@@ -114,15 +116,24 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   return (
     <ScrollArea
       className="flex-grow select-none"
-      onContextMenu={openContextMenuFromEvent(prepareContextMenu())}
+      onContextMenu={(e) =>
+        openContextMenuFromEvent(
+          prepareContextMenu(
+            selectedIndex && schema[selectedIndex]
+              ? schema[selectedIndex].name
+              : undefined
+          )
+        )(e)
+      }
     >
       <div className="flex flex-col p-2 pr-4">
         {filteredSchema.map((item, schemaIndex) => {
           return (
             <SchemaViewItem
-              onContextMenu={openContextMenuFromEvent(
-                prepareContextMenu(item.name)
-              )}
+              onContextMenu={(e) => {
+                openContextMenuFromEvent(prepareContextMenu(item.name))(e);
+                e.stopPropagation();
+              }}
               key={item.name}
               title={item.name}
               icon={Table2}
