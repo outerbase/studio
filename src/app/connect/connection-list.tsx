@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SaveConnection from "./saved-connection";
 import {
   CONNECTION_LABEL_COLORS,
@@ -70,9 +70,13 @@ function ConnectionItemCard({
 export default function ConnectionList() {
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [editConnection, setEditConnection] = useState<SavedConnectionItem>();
-  const [localSavedConns, setlocalSavedConns] = useState(() => {
-    return SavedConnectionLocalStorage.getList();
-  });
+  const [localSavedConns, setlocalSavedConns] = useState<SavedConnectionItem[]>(
+    []
+  );
+
+  useEffect(() => {
+    setlocalSavedConns(SavedConnectionLocalStorage.getList());
+  }, [setlocalSavedConns]);
 
   const onSaveComplete = useCallback(() => {
     setlocalSavedConns(SavedConnectionLocalStorage.getList());
