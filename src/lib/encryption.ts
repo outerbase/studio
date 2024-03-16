@@ -19,7 +19,21 @@ function arrayBufferToBase64(buffer: Uint8Array) {
   return window.btoa(binary);
 }
 
-export async function browserDeriveKey(password: string, salt: ArrayBuffer) {
+export function generateAesKey() {
+  return window.crypto.subtle.generateKey(
+    {
+      name: "AES-GCM",
+      length: 256,
+    },
+    true,
+    ["encrypt", "decrypt"]
+  );
+}
+
+export async function generateAesKeyFromPassword(
+  password: string,
+  salt: ArrayBuffer
+) {
   const enc = new TextEncoder();
 
   const material = await window.crypto.subtle.importKey(
@@ -44,34 +58,38 @@ export async function browserDeriveKey(password: string, salt: ArrayBuffer) {
   );
 }
 
-export async function browserEncrypt(key: CryptoKey, text: string) {
+export async function encryptBytes(key: CryptoKey, data: ArrayBufferLike) {
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(text);
-
-  const cipherText = await window.crypto.subtle.encrypt(
+  const c = await window.crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
-    encoded
+    data
   );
-
-  return arrayBufferToBase64(
-    new Uint8Array([...iv, ...new Uint8Array(cipherText)])
-  );
+  return new Uint8Array([...iv, ...new Uint8Array(c)]);
 }
 
-export async function browserDecrypt(key: CryptoKey, base64: string) {
-  const buffer = base64ToArrayBuffer(base64);
-  const iv = buffer.slice(0, 12);
-  const ciphertext = buffer.slice(12);
+export async function decryptBytes(key: CryptoKey, data: ArrayBufferLike) {
+  const iv = data.slice(0, 12);
+  const c = data.slice(12);
 
-  const decrypted = await window.crypto.subtle.decrypt(
+  const d = await window.crypto.subtle.decrypt(
     {
       name: "AES-GCM",
       iv: iv,
     },
     key,
-    ciphertext
+    c
   );
 
-  return new TextDecoder().decode(decrypted);
+  return d;
+}
+
+export async function encryptTextToBase64(key: CryptoKey, text: string) {
+  const encoded = new TextEncoder().encode(text);
+  return arrayBufferToBase64(await encryptBytes(key, encoded));
+}
+
+export async function decryptBase64ToText(key: CryptoKey, base64: string) {
+  const d = await decryptBytes(key, base64ToArrayBuffer(base64));
+  return new TextDecoder().decode(d);
 }
