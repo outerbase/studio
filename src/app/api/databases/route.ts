@@ -12,7 +12,7 @@ export const GET = withUser(async ({ user }) => {
     .where(eq(database.userId, user.id));
 
   return NextResponse.json({
-    own_databases: dbs.map(
+    databases: dbs.map(
       (d) =>
         ({
           id: d.id,

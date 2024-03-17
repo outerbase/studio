@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "cf834c86-c51e-49d6-bf35-4c649ddef18c",
-  "prevId": "1752cbef-1ce6-4863-bcef-5ffad31ac535",
+  "id": "94f4b68a-4b33-4572-b51e-ab70c5da8f05",
+  "prevId": "cf834c86-c51e-49d6-bf35-4c649ddef18c",
   "tables": {
     "database": {
       "name": "database",
@@ -126,6 +126,14 @@
         },
         "can_execute_query": {
           "name": "can_execute_query",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_owner": {
+          "name": "is_owner",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -372,6 +380,13 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
@@ -408,6 +423,19 @@
           "tableTo": "database_role",
           "columnsFrom": [
             "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "database_user_role_created_by_user_id_fk": {
+          "name": "database_user_role_created_by_user_id_fk",
+          "tableFrom": "database_user_role",
+          "tableTo": "user",
+          "columnsFrom": [
+            "created_by"
           ],
           "columnsTo": [
             "id"
