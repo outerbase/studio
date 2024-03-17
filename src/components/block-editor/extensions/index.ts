@@ -9,3 +9,5 @@ export const schema = BlockNoteSchema.create({
     codeBlock: CodeBlock
   },
 })
+
+export type Block = typeof schema.Block;

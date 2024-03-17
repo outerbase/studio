@@ -1,25 +1,15 @@
-"use client";
+export { BlockEditor, type BlockEditorProps } from "./editor";
+export {
+  useBlockEditorSheet,
+  BlockEditorSheet,
+  type BlockEditorSheetProps,
+} from "./sheet";
 
-import "@blocknote/react/style.css";
-import "./style.css";
+export const CONTENT_FORMAT = {
+  BLOCK_NOTE: "BLOCK_NOTE",
+} as const;
 
-import { BlockNoteView, useCreateBlockNote } from "@blocknote/react";
-import { schema, uploadFile } from "./extensions";
-import { SuggestionMenu } from "./suggestions";
-
-export function BlockEditor() {
-  const editor = useCreateBlockNote({
-    uploadFile,
-    schema,
-  });
-
-  return (
-    <BlockNoteView
-      aria-labelledby="block-editor"
-      editor={editor}
-      slashMenu={false}
-    >
-      <SuggestionMenu editor={editor} />
-    </BlockNoteView>
-  );
+export interface BlockContent<TContent = any> {
+  format: "BLOCK_NOTE";
+  content: TContent[];
 }
