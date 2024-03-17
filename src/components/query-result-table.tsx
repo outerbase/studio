@@ -250,7 +250,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback],
+    [data, tableName, copyCallback, pasteCallback, handlers],
   );
 
   const onKeyDown = useCallback(
