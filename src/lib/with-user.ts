@@ -13,13 +13,7 @@ export default function withUser<ParamsType = unknown>(
   handler: WithUserHandler<ParamsType>
 ) {
   return async function (req: NextRequest, params: ParamsType) {
-    let session = await getSession();
-    console.log(session);
-
-    if (!session) {
-      session = await getSessionFromCookie();
-      console.log(session);
-    }
+    const session = await getSession();
 
     if (!session) {
       return new Response("Unauthorized", { status: 401 });
