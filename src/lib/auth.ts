@@ -33,6 +33,24 @@ export const lucia = new Lucia(adapter, {
   },
 });
 
+export const getSession = cache(async function () {
+  const authorizationHeader = headers().get("authorization");
+  let sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+
+  if (!sessionId) {
+    sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+  }
+
+  if (!sessionId) {
+    return {
+      user: null,
+      session: null,
+    };
+  }
+
+  return await lucia.validateSession(sessionId);
+});
+
 export const getSessionFromBearer = cache(async function () {
   const authorizationHeader = headers().get("authorization");
   const sessionId = lucia.readBearerToken(authorizationHeader ?? "");

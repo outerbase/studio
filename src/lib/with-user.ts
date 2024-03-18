@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionFromBearer } from "./auth";
+import { getSession, getSessionFromCookie } from "./auth";
 import { Session, User } from "lucia";
 
 type WithUserHandler<T = unknown> = (props: {
@@ -13,7 +13,14 @@ export default function withUser<ParamsType = unknown>(
   handler: WithUserHandler<ParamsType>
 ) {
   return async function (req: NextRequest, params: ParamsType) {
-    const session = await getSessionFromBearer();
+    let session = await getSession();
+    console.log(session);
+
+    if (!session) {
+      session = await getSessionFromCookie();
+      console.log(session);
+    }
+
     if (!session) {
       return new Response("Unauthorized", { status: 401 });
     }

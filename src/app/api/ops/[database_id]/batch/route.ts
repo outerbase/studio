@@ -5,8 +5,10 @@ import { createClient } from "@libsql/client/web";
 import { NextResponse } from "next/server";
 
 export const POST = withDatabaseOperation<{
-  sql: string;
-  args: (string | number)[];
+  batch: {
+    sql: string;
+    args: (string | number)[];
+  }[];
 }>(async function ({ permission, database, body }) {
   if (!permission.canExecuteQuery) {
     return NextResponse.json(
@@ -27,9 +29,7 @@ export const POST = withDatabaseOperation<{
   });
 
   try {
-    return NextResponse.json({
-      data: await client.execute({ sql: body.sql, args: body.args ?? [] }),
-    });
+    return NextResponse.json({ data: await client.batch(body.batch) });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });
   }

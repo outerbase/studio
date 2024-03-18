@@ -9,6 +9,7 @@ import {
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
 import ConnectionItemCard from "./saved-connection-card";
+import fetchDatabases from "@/lib/api/fetch-databases";
 
 export default function ConnectionList() {
   const [showAddConnection, setShowAddConnection] = useState(false);
@@ -19,9 +20,14 @@ export default function ConnectionList() {
     []
   );
 
+  const [remoteSavedConns, setRemoteSavedConns] = useState<
+    SavedConnectionItem[]
+  >([]);
+
   useEffect(() => {
     setLocalSavedConns(SavedConnectionLocalStorage.getList());
-  }, [setLocalSavedConns]);
+    fetchDatabases().then((r) => setRemoteSavedConns(r.databases));
+  }, [setLocalSavedConns, setRemoteSavedConns]);
 
   // ---------------------------------------------
   // Remove the connection handlers
@@ -103,6 +109,23 @@ export default function ConnectionList() {
           onRemove={onRemoveConnectionComplete}
         />
       )}
+
+      <div className="flex flex-wrap gap-4 p-4">
+        {remoteSavedConns.map((conn) => {
+          return (
+            <ConnectionItemCard
+              key={conn.id}
+              conn={conn}
+              onRemove={() => {
+                setRemoveConnection(conn);
+              }}
+              onEdit={() => {
+                setEditConnection(conn);
+              }}
+            />
+          );
+        })}
+      </div>
 
       <div className="flex flex-wrap gap-4 p-4">
         {localSavedConns.map((conn) => {

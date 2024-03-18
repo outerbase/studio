@@ -1,7 +1,6 @@
 import OptimizeTableState, {
   OptimizeTableRowValue,
 } from "@/components/table-optimized/OptimizeTableState";
-import DatabaseDriver from "@/drivers/DatabaseDriver";
 import { validateOperation } from "@/lib/validation";
 import {
   generateDeleteStatement,
@@ -9,7 +8,7 @@ import {
   generateSelectOneWithConditionStatement,
   generateUpdateStatement,
 } from "./sql-helper";
-import { DatabaseTableSchema } from "@/drivers/base-driver";
+import { BaseDriver, DatabaseTableSchema } from "@/drivers/base-driver";
 
 export interface ExecutePlan {
   row: OptimizeTableRowValue;
@@ -82,7 +81,7 @@ function generateTableChangePlan({
 }
 
 export async function executePlans(
-  driver: DatabaseDriver,
+  driver: BaseDriver,
   plans: ExecutePlan[]
 ): Promise<{ success: boolean; plans: ExecutePlan[]; error?: string }> {
   try {
@@ -128,7 +127,7 @@ export async function commitChange({
   tableSchema,
   data,
 }: {
-  driver: DatabaseDriver;
+  driver: BaseDriver;
   tableName: string;
   tableSchema: DatabaseTableSchema;
   data: OptimizeTableState;

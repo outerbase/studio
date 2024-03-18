@@ -1,4 +1,4 @@
-import DatabaseDriver from "@/drivers/DatabaseDriver";
+import { BaseDriver } from "@/drivers/base-driver";
 import { ResultSet } from "@libsql/client/web";
 
 export interface MultipleQueryProgressItem {
@@ -18,7 +18,7 @@ export interface MultipleQueryProgress {
 }
 
 export async function multipleQuery(
-  driver: DatabaseDriver,
+  driver: BaseDriver,
   statements: string[],
   onProgress?: (progress: MultipleQueryProgress) => void
 ) {

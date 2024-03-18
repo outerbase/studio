@@ -34,7 +34,11 @@ export default function ConnectionItemCard({
             open ? "border-black bg-gray-100" : ""
           )}
           target="_blank"
-          href={`/local/${conn.id}`}
+          href={
+            conn.storage === "local"
+              ? `/client/s?p=${conn.id}`
+              : `/client/r?p=${conn.id}`
+          }
         >
           <div
             className={cn(
