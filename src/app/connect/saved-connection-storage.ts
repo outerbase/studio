@@ -54,8 +54,8 @@ function configToRaw(
   return {
     id,
     name: data.name,
-    url: data.config.url,
-    token: data.config.token,
+    url: data.config?.url ?? "",
+    token: data.config?.token ?? "",
     label: data.label,
     last_used: Date.now(),
     description: data.description ?? "",

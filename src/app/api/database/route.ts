@@ -10,7 +10,7 @@ import { encrypt } from "@/lib/encryption";
 const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
   description: zod.string(),
-  color: zod.enum(["gray", "red", "yellow", "green", "blue"]),
+  label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
   driver: zod.enum(["turso"]),
   config: zod.object({
     url: zod.string().min(5),
@@ -44,12 +44,12 @@ export const POST = withUser(async ({ user, req }) => {
       db.insert(database).values({
         id: databaseId,
         userId: user.id,
-        color: data.color,
+        color: data.label,
         createdAt: now,
         description: data.description,
         driver: data.driver,
         name: data.name,
-        host: encrypt(key, data.config.url),
+        host: data.config.url,
         token: encrypt(key, data.config.token),
       }),
 
@@ -91,7 +91,7 @@ export const POST = withUser(async ({ user, req }) => {
       data: {
         id: databaseId,
         name: data.name,
-        color: data.color,
+        color: data.label,
         description: data.description,
         driver: data.driver,
       },

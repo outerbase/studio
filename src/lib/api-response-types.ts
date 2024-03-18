@@ -14,3 +14,7 @@ export interface ApiOpsQueryResponse {
 export interface ApiDatabasesResponse {
   databases: SavedConnectionItem[];
 }
+
+export interface ApiDatabasesResponse {
+  databases: SavedConnectionItem[];
+}

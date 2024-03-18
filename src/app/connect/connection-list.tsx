@@ -9,7 +9,7 @@ import {
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
 import ConnectionItemCard from "./saved-connection-card";
-import fetchDatabases from "@/lib/api/fetch-databases";
+import { getDatabases } from "@/lib/api/fetch-databases";
 
 export default function ConnectionList() {
   const [showAddConnection, setShowAddConnection] = useState(false);
@@ -26,7 +26,7 @@ export default function ConnectionList() {
 
   useEffect(() => {
     setLocalSavedConns(SavedConnectionLocalStorage.getList());
-    fetchDatabases().then((r) => setRemoteSavedConns(r.databases));
+    getDatabases().then((r) => setRemoteSavedConns(r.databases));
   }, [setLocalSavedConns, setRemoteSavedConns]);
 
   // ---------------------------------------------
@@ -57,10 +57,23 @@ export default function ConnectionList() {
   // ---------------------------------------------
   // Edit connection handlers
   // ---------------------------------------------
-  const onEditComplete = useCallback(() => {
-    setLocalSavedConns(SavedConnectionLocalStorage.getList());
-    setEditConnection(undefined);
-  }, [setLocalSavedConns, setEditConnection]);
+  const onEditComplete = useCallback(
+    (savedConn: SavedConnectionItem) => {
+      if (savedConn.storage === "local") {
+        setLocalSavedConns(SavedConnectionLocalStorage.getList());
+      } else {
+        setRemoteSavedConns((prev) =>
+          prev.map((r) => {
+            if (r.id === savedConn.id) return savedConn;
+            return r;
+          })
+        );
+      }
+
+      setEditConnection(undefined);
+    },
+    [setLocalSavedConns, setEditConnection, setRemoteSavedConns]
+  );
 
   // ---------------------------------------------
   // Display Part

@@ -20,7 +20,7 @@ export const POST = withDatabaseOperation<{
   }
 
   const key = Buffer.from(env.ENCRYPTION_KEY, "base64");
-  const url = decrypt(key, database.host ?? "");
+  const url = database.host ?? "";
   const token = decrypt(key, database.token ?? "");
 
   const client = createClient({

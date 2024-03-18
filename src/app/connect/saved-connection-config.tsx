@@ -9,10 +9,13 @@ import {
 } from "@/app/connect/saved-connection-storage";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { LucideLoader } from "lucide-react";
 
 interface Props {
   onSave: (conn: SavedConnectionItemConfig) => void;
   initialData?: SavedConnectionItemConfig;
+  loading?: boolean;
+  showLockedCredential?: boolean;
 }
 
 function ColorItem({
@@ -31,7 +34,9 @@ function ColorItem({
 
 export default function SavedConnectionConfig({
   onSave,
+  showLockedCredential,
   initialData,
+  loading,
 }: Readonly<Props>) {
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
@@ -88,7 +93,7 @@ export default function SavedConnectionConfig({
       <div>
         <div className="text-xs mb-2">URL</div>
         <Input
-          placeholder="Name"
+          placeholder={"URL"}
           value={url}
           onChange={(e) => setURL(e.currentTarget.value)}
         />
@@ -97,14 +102,18 @@ export default function SavedConnectionConfig({
       <div>
         <div className="text-xs mb-2">Token</div>
         <Textarea
-          placeholder="Token"
+          placeholder={showLockedCredential && !token ? "✱✱✱✱✱✱✱✱✱" : "Token"}
           value={token}
+          className={showLockedCredential && !token ? "bg-gray-200" : ""}
           onChange={(e) => setToken(e.currentTarget.value)}
         />
       </div>
 
       <div className="mt-12 flex gap-4">
-        <Button onClick={onSaveClicked}>Save</Button>
+        <Button onClick={onSaveClicked} disabled={loading}>
+          {loading && <LucideLoader className="w-4 h-4 mr-2 animate-spin" />}
+          Save
+        </Button>
       </div>
     </>
   );

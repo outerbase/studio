@@ -6,18 +6,16 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { encrypt } from "@/lib/encryption";
 import { env } from "@/env";
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItemConfig } from "@/app/connect/saved-connection-storage";
 
 const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
   description: zod.string(),
-  color: zod.enum(["gray", "red", "yellow", "green", "blue"]),
-  config: zod
-    .object({
-      url: zod.string().min(5).optional(),
-      token: zod.string().optional(),
-    })
-    .optional(),
+  label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
+  config: zod.object({
+    url: zod.string().min(5),
+    token: zod.string().optional(),
+  }),
 });
 
 export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
@@ -27,7 +25,11 @@ export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
     storage: databaseInfo.driver,
     description: databaseInfo.description,
     label: databaseInfo.color,
-  } as SavedConnectionItem);
+    config: {
+      url: databaseInfo.host,
+      token: "",
+    },
+  } as SavedConnectionItemConfig);
 });
 
 export const DELETE = withDatabaseOperation(
@@ -70,13 +72,11 @@ export const PUT = withDatabaseOperation(
     await db
       .update(database)
       .set({
-        color: data.color,
+        color: data.label,
         description: data.description,
         name: data.name,
-        host: data?.config?.url ? encrypt(key, data.config.url) : undefined,
-        token: data?.config?.token
-          ? encrypt(key, data.config.token)
-          : undefined,
+        host: data.config.url,
+        token: data.config.token ? encrypt(key, data.config.token) : undefined,
       })
       .where(eq(database.id, databaseInfo.id));
 
