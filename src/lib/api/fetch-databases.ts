@@ -27,3 +27,10 @@ export async function getDatabase(
   const result = await fetch(`/api/database/${id}`);
   return await result.json();
 }
+
+export async function deleteDatabase(
+  id: string
+): Promise<SavedConnectionItemConfig> {
+  const result = await fetch(`/api/database/${id}`, { method: "DELETE" });
+  return await result.json();
+}

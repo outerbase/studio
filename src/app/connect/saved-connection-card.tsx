@@ -33,7 +33,6 @@ export default function ConnectionItemCard({
             "border rounded w-[275px] bg-white flex overflow-hidden hover:border-black hover:bg-gray-100",
             open ? "border-black bg-gray-100" : ""
           )}
-          target="_blank"
           href={
             conn.storage === "local"
               ? `/client/s?p=${conn.id}`

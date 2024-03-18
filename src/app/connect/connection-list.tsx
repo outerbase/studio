@@ -40,10 +40,13 @@ export default function ConnectionList() {
     (conn: SavedConnectionItem) => {
       if (conn.storage === "local") {
         setLocalSavedConns(SavedConnectionLocalStorage.getList());
-        onRemoveConnectionClose();
+      } else {
+        setRemoteSavedConns((prev) => prev.filter((r) => r.id !== conn.id));
       }
+
+      onRemoveConnectionClose();
     },
-    [setLocalSavedConns, onRemoveConnectionClose]
+    [setLocalSavedConns, onRemoveConnectionClose, setRemoteSavedConns]
   );
 
   // ---------------------------------------------

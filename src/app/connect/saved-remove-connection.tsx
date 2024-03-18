@@ -11,6 +11,8 @@ import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
 } from "./saved-connection-storage";
+import { deleteDatabase } from "@/lib/api/fetch-databases";
+import { LucideLoader } from "lucide-react";
 
 interface Props {
   conn: SavedConnectionItem;
@@ -24,11 +26,20 @@ export default function RemoveSavedConnection({
   onClose,
 }: Readonly<Props>) {
   const [confirmText, setConfirmText] = useState("");
+  const [loading, setLoading] = useState(false);
   const correctText = useMemo(() => conn.name.trim(), [conn]);
 
   const onRemoveClicked = useCallback(() => {
     if (confirmText === correctText) {
-      SavedConnectionLocalStorage.remove(conn.id);
+      if (conn.storage === "local") {
+        SavedConnectionLocalStorage.remove(conn.id);
+      } else {
+        setLoading(true);
+        deleteDatabase(conn.id)
+          .then()
+          .finally(() => setLoading(false));
+      }
+
       onRemove(conn);
     }
   }, [onRemove, conn, confirmText, correctText]);
@@ -58,7 +69,12 @@ export default function RemoveSavedConnection({
         </div>
 
         <DialogFooter>
-          <Button variant={"destructive"} onClick={onRemoveClicked}>
+          <Button
+            variant={"destructive"}
+            onClick={onRemoveClicked}
+            disabled={loading}
+          >
+            {loading && <LucideLoader className="w-4 h-4 mr-2 animate-spin" />}
             Remove
           </Button>
         </DialogFooter>
