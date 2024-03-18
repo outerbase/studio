@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getSessionFromCookie } from "./auth";
+import { getSession } from "./auth";
 import { Session, User } from "lucia";
 
 type WithUserHandler<T = unknown> = (props: {

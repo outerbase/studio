@@ -75,6 +75,7 @@ export const database = sqliteTable(
     host: text("host"),
     token: text("token"),
     createdAt: int("created_at"),
+    deletedAt: int("deleted_at"),
   },
   (table) => {
     return { databaseUserIdx: index("database_user_idx").on(table.userId) };

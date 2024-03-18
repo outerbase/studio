@@ -10,6 +10,7 @@ import withUser from "./with-user";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { and, eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
 interface DatabasePermission {
   isOwner: boolean;
@@ -53,7 +54,7 @@ export default function withDatabaseOperation<T = unknown>(
         }),
       ]);
 
-      if (!databaseInfo) {
+      if (!databaseInfo || databaseInfo.deletedAt !== null) {
         return NextResponse.json(
           { error: "Database does not exist" },
           { status: 500 }
@@ -85,7 +86,10 @@ export default function withDatabaseOperation<T = unknown>(
 
       return await handler({
         user,
-        body: await req.json(),
+        body:
+          headers().get("Content-Type") === "application/json"
+            ? await req.json()
+            : {},
         database: databaseInfo,
         permission: {
           isOwner: !!permission.isOwner,
