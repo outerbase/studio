@@ -1,6 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import SaveConnection from "./saved-connection";
 import {
   SavedConnectionItem,
@@ -10,8 +17,58 @@ import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
 import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
+import { User } from "lucia";
 
-export default function ConnectionList() {
+function ConnectionListSection({
+  data,
+  name,
+  onRemove,
+  onEdit,
+}: Readonly<{
+  data: SavedConnectionItem[];
+  name?: string;
+  onRemove: Dispatch<SetStateAction<SavedConnectionItem | undefined>>;
+  onEdit: Dispatch<SetStateAction<SavedConnectionItem | undefined>>;
+}>) {
+  const body = useMemo(() => {
+    if (data.length === 0)
+      return (
+        <div className="p-4">
+          There is no connection. Please add new connection
+        </div>
+      );
+
+    return (
+      <div className="flex flex-wrap gap-4 p-4">
+        {data.map((conn) => {
+          return (
+            <ConnectionItemCard
+              key={conn.id}
+              conn={conn}
+              onRemove={() => {
+                onRemove(conn);
+              }}
+              onEdit={() => {
+                onEdit(conn);
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }, [data, onRemove, onEdit]);
+
+  return (
+    <>
+      {name && <h2 className="mt-4 ml-4 font-bold">{name}</h2>}
+      {body}
+    </>
+  );
+}
+
+export default function ConnectionList({
+  user,
+}: Readonly<{ user: User | null }>) {
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [removeConnection, setRemoveConnection] =
     useState<SavedConnectionItem>();
@@ -26,8 +83,8 @@ export default function ConnectionList() {
 
   useEffect(() => {
     setLocalSavedConns(SavedConnectionLocalStorage.getList());
-    getDatabases().then((r) => setRemoteSavedConns(r.databases));
-  }, [setLocalSavedConns, setRemoteSavedConns]);
+    if (user) getDatabases().then((r) => setRemoteSavedConns(r.databases));
+  }, [setLocalSavedConns, setRemoteSavedConns, user]);
 
   // ---------------------------------------------
   // Remove the connection handlers
@@ -134,39 +191,21 @@ export default function ConnectionList() {
         />
       )}
 
-      <div className="flex flex-wrap gap-4 p-4">
-        {remoteSavedConns.map((conn) => {
-          return (
-            <ConnectionItemCard
-              key={conn.id}
-              conn={conn}
-              onRemove={() => {
-                setRemoveConnection(conn);
-              }}
-              onEdit={() => {
-                setEditConnection(conn);
-              }}
-            />
-          );
-        })}
-      </div>
+      {user && (
+        <ConnectionListSection
+          name="Remote"
+          data={remoteSavedConns}
+          onRemove={setRemoveConnection}
+          onEdit={setEditConnection}
+        />
+      )}
 
-      <div className="flex flex-wrap gap-4 p-4">
-        {localSavedConns.map((conn) => {
-          return (
-            <ConnectionItemCard
-              key={conn.id}
-              conn={conn}
-              onRemove={() => {
-                setRemoveConnection(conn);
-              }}
-              onEdit={() => {
-                setEditConnection(conn);
-              }}
-            />
-          );
-        })}
-      </div>
+      <ConnectionListSection
+        name="Local"
+        data={localSavedConns}
+        onRemove={setRemoveConnection}
+        onEdit={setEditConnection}
+      />
     </>
   );
 }
