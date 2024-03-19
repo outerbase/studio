@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { database } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { encrypt } from "@/lib/encryption";
+import { encrypt } from "@/lib/encryption-edge";
 import { env } from "@/env";
 import { SavedConnectionItemConfig } from "@/app/connect/saved-connection-storage";
 
@@ -65,7 +65,6 @@ export const PUT = withDatabaseOperation(
     }
 
     const data = parsed.data;
-    const key = Buffer.from(env.ENCRYPTION_KEY, "base64");
 
     if (!permission.isOwner) {
       return NextResponse.json({ error: "Unauthorization" }, { status: 500 });
@@ -78,7 +77,9 @@ export const PUT = withDatabaseOperation(
         description: data.description,
         name: data.name,
         host: data.config.url,
-        token: data.config.token ? encrypt(key, data.config.token) : undefined,
+        token: data.config.token
+          ? await encrypt(env.ENCRYPTION_KEY, data.config.token)
+          : undefined,
       })
       .where(eq(database.id, databaseInfo.id));
 

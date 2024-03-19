@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { decrypt } from "@/lib/encryption";
+import { decrypt } from "@/lib/encryption-edge";
 import withDatabaseOperation from "@/lib/with-database-ops";
 import { createClient } from "@libsql/client/web";
 import { NextResponse } from "next/server";
@@ -19,9 +19,8 @@ export const POST = withDatabaseOperation<{
     );
   }
 
-  const key = Buffer.from(env.ENCRYPTION_KEY, "base64");
   const url = database.host ?? "";
-  const token = decrypt(key, database.token ?? "");
+  const token = await decrypt(env.ENCRYPTION_KEY, database.token ?? "");
 
   const client = createClient({
     url,
