@@ -52,25 +52,33 @@ export default function ConnectionList() {
   // ---------------------------------------------
   // Add new connection handlers
   // ---------------------------------------------
-  const onSaveComplete = useCallback(() => {
-    setLocalSavedConns(SavedConnectionLocalStorage.getList());
-    setShowAddConnection(false);
-  }, [setLocalSavedConns, setShowAddConnection]);
+  const onSaveComplete = useCallback(
+    (savedConn: SavedConnectionItem) => {
+      console.log(savedConn);
+      if (savedConn.storage === "remote") {
+        setRemoteSavedConns((prev) => [savedConn, ...prev]);
+      } else {
+        setLocalSavedConns(SavedConnectionLocalStorage.getList());
+      }
+      setShowAddConnection(false);
+    },
+    [setLocalSavedConns, setRemoteSavedConns, setShowAddConnection]
+  );
 
   // ---------------------------------------------
   // Edit connection handlers
   // ---------------------------------------------
   const onEditComplete = useCallback(
     (savedConn: SavedConnectionItem) => {
-      if (savedConn.storage === "local") {
-        setLocalSavedConns(SavedConnectionLocalStorage.getList());
-      } else {
+      if (savedConn.storage === "remote") {
         setRemoteSavedConns((prev) =>
           prev.map((r) => {
             if (r.id === savedConn.id) return savedConn;
             return r;
           })
         );
+      } else {
+        setLocalSavedConns(SavedConnectionLocalStorage.getList());
       }
 
       setEditConnection(undefined);

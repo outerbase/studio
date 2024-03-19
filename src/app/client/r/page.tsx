@@ -1,16 +1,32 @@
+import { db } from "@/db";
+import { database } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";
+import { and, eq, isNotNull } from "drizzle-orm";
 import dynamic from "next/dynamic";
 
 const ClientPageBody = dynamic(() => import("./page-client"), {
   ssr: false,
 });
 
-export default async function SessionPage() {
+export default async function SessionPage({
+  searchParams,
+}: {
+  searchParams: { p: string };
+}) {
   const { session } = await getSessionFromCookie();
 
   if (!session) {
     return <div>Something wrong</div>;
   }
 
-  return <ClientPageBody token={session.id} name="Hello" />;
+  const databaseId = searchParams?.p;
+  const databaseInfo = await db.query.database.findFirst({
+    where: and(eq(database.id, databaseId), isNotNull(database.id)),
+  });
+
+  if (!databaseInfo) {
+    return <div>Not found</div>;
+  }
+
+  return <ClientPageBody token={session.id} name={databaseInfo.name ?? ""} />;
 }

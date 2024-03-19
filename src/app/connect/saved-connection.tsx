@@ -10,6 +10,7 @@ import {
   SavedConnectionStorage,
 } from "@/app/connect/saved-connection-storage";
 import SavedConnectionConfig from "./saved-connection-config";
+import { createDatabase } from "@/lib/api/fetch-databases";
 
 type SaveConnectionStep = "storage" | "config";
 
@@ -22,6 +23,7 @@ export default function SaveConnection({
 }>) {
   const [storage, setStorage] = useState<SavedConnectionStorage>();
   const [step, setStep] = useState<SaveConnectionStep>("storage");
+  const [loading, setLoading] = useState(false);
 
   const onConnectionTypeSelected = useCallback(
     (type: SavedConnectionStorage) => {
@@ -33,20 +35,27 @@ export default function SaveConnection({
 
   const onSaveConnection = useCallback(
     (data: SavedConnectionItemConfig) => {
-      if (storage) {
-        const finalConfig: SavedConnectionItemWithoutId = { ...data, storage };
-
-        if (!finalConfig.storage || finalConfig.storage === "local") {
-          const conn = SavedConnectionLocalStorage.save(finalConfig);
-
-          onSaveComplete({
-            id: conn.id,
-            name: finalConfig.name,
-            storage,
-            description: finalConfig.description,
-            label: finalConfig.label,
+      if (storage === "remote") {
+        setLoading(true);
+        createDatabase({ ...data, driver: "turso" })
+          .then((r) => onSaveComplete(r.data))
+          .finally(() => {
+            setLoading(false);
           });
-        }
+      } else {
+        const finalConfig: SavedConnectionItemWithoutId = {
+          ...data,
+          storage: storage ?? "local",
+        };
+        const conn = SavedConnectionLocalStorage.save(finalConfig);
+
+        onSaveComplete({
+          id: conn.id,
+          name: finalConfig.name,
+          storage: "local",
+          description: finalConfig.description,
+          label: finalConfig.label,
+        });
       }
     },
     [storage, onSaveComplete]
@@ -57,7 +66,9 @@ export default function SaveConnection({
       {step === "storage" && (
         <SaveConnectionType onContinue={onConnectionTypeSelected} />
       )}
-      {step === "config" && <SavedConnectionConfig onSave={onSaveConnection} />}
+      {step === "config" && (
+        <SavedConnectionConfig onSave={onSaveConnection} loading={loading} />
+      )}
     </ConnectionDialogContent>
   );
 }

@@ -6,6 +6,7 @@ import { database, database_role, database_user_role } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
 import { encrypt } from "@/lib/encryption";
+import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
 
 const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
@@ -91,10 +92,10 @@ export const POST = withUser(async ({ user, req }) => {
       data: {
         id: databaseId,
         name: data.name,
-        color: data.label,
+        label: data.label,
         description: data.description,
-        driver: data.driver,
-      },
+        storage: "remote",
+      } as SavedConnectionItem,
     });
   } catch (e) {
     return NextResponse.json({

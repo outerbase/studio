@@ -1,9 +1,26 @@
-import { SavedConnectionItemConfig } from "@/app/connect/saved-connection-storage";
+import {
+  SavedConnectionItem,
+  SavedConnectionItemConfig,
+} from "@/app/connect/saved-connection-storage";
 import { ApiDatabasesResponse } from "../api-response-types";
 
 export async function getDatabases(): Promise<ApiDatabasesResponse> {
   const result = await fetch("/api/databases");
   return await result.json();
+}
+
+export async function createDatabase(
+  data: SavedConnectionItemConfig & { driver: "turso" }
+): Promise<{ data: SavedConnectionItem }> {
+  const r = await fetch(`/api/database`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return await r.json();
 }
 
 export async function updateDatabase(
