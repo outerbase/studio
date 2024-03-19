@@ -1,42 +1,31 @@
 "use client";
-import DatabaseDriver from "@/drivers/DatabaseDriver";
-import { useMemo, useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import DatabaseGui from "./database-gui";
 import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./context-menu-handler";
 import InternalPubSub from "@/lib/internal-pubsub";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { SchemaProvider } from "@/context/SchemaProvider";
 import ThemeProvider from "@/context/theme-provider";
+import { BaseDriver } from "@/drivers/base-driver";
 
 export interface ConnectionCredential {
   url: string;
   token: string;
 }
 
-function MainConnection({
-  credential,
-}: {
-  credential: {
-    url: string;
-    token: string;
-  };
-}) {
-  const database = useMemo(() => {
-    return new DatabaseDriver(credential.url, credential.token);
-  }, [credential]);
-
+function MainConnection({ driver }: { driver: BaseDriver }) {
   useEffect(() => {
     return () => {
-      database.close();
+      driver.close();
     };
-  }, [database]);
+  }, [driver]);
 
   return (
     <ThemeProvider>
-      <DatabaseDriverProvider driver={database}>
+      <DatabaseDriverProvider driver={driver}>
         <SchemaProvider>
           <DatabaseGui />
         </SchemaProvider>
@@ -55,9 +44,7 @@ function InvalidSession() {
   return <div></div>;
 }
 
-function MainConnectionContainer({
-  credential,
-}: Readonly<{ credential: ConnectionCredential }>) {
+function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
   const router = useRouter();
 
   /**
@@ -69,19 +56,19 @@ function MainConnectionContainer({
   useLayoutEffect(() => {
     console.info("Injecting message into window object");
     window.internalPubSub = new InternalPubSub();
-  }, [credential, router]);
+  }, [driver, router]);
 
   useEffect(() => {
-    if (credential.url) {
-      document.title = credential.url + " - LibSQL Studio";
+    if (driver.getEndpoint()) {
+      document.title = driver.getEndpoint() + " - LibSQL Studio";
     }
-  }, [credential]);
+  }, [driver]);
 
-  return credential?.url ? (
+  return driver ? (
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
-          <MainConnection credential={credential} />
+          <MainConnection driver={driver} />
         </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
@@ -91,25 +78,6 @@ function MainConnectionContainer({
   );
 }
 
-export default function MainScreen() {
-  const params = useSearchParams();
-
-  const finalCredential = useMemo(() => {
-    const connectionParams = params.get("c");
-    if (connectionParams) {
-      const [port, token] = connectionParams.split(":");
-      return {
-        url: "ws://localhost:" + port,
-        token,
-      };
-    }
-
-    const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
-    return {
-      url: config.url,
-      token: config.token as string,
-    };
-  }, [params]);
-
-  return <MainConnectionContainer credential={finalCredential} />;
+export default function MainScreen({ driver }: { driver: BaseDriver }) {
+  return <MainConnectionContainer driver={driver} />;
 }

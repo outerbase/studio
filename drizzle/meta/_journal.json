@@ -15,6 +15,27 @@
       "when": 1710401496821,
       "tag": "0001_crazy_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1710657831363,
+      "tag": "0002_aspiring_shotgun",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1710679360281,
+      "tag": "0003_dashing_marauders",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1710766406033,
+      "tag": "0004_misty_the_professor",
+      "breakpoints": true
     }
   ]
 }

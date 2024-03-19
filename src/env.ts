@@ -13,11 +13,14 @@ export const env = createEnv({
 
     GITHUB_CLIENT_ID: z.string().min(1),
     GITHUB_CLIENT_SECRET: z.string().min(1),
+
+    ENCRYPTION_KEY: z.string().min(30),
   },
   experimental__runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     DATABASE_AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+    ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
   },
 });

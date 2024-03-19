@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "db:generate": "drizzle-kit generate:sqlite",
-    "db:migrate": "tsx src/db/migrate.ts"
+    "db:migrate": "tsx src/db/migrate.ts",
+    "generate-random-key": "tsx src/cli/generate-aes-key.ts"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
