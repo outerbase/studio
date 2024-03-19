@@ -18,6 +18,7 @@ import RemoveSavedConnection from "./saved-remove-connection";
 import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
+import QuickConnect from "./quick-connect";
 
 function ConnectionListSection({
   data,
@@ -69,6 +70,7 @@ function ConnectionListSection({
 export default function ConnectionList({
   user,
 }: Readonly<{ user: User | null }>) {
+  const [quickConnect, setQuickConnect] = useState(false);
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [removeConnection, setRemoveConnection] =
     useState<SavedConnectionItem>();
@@ -168,6 +170,10 @@ export default function ConnectionList({
     );
   }
 
+  if (quickConnect) {
+    return <QuickConnect onClose={() => setQuickConnect(false)} />;
+  }
+
   return (
     <>
       <div className="px-8 py-2 border-b">
@@ -180,7 +186,14 @@ export default function ConnectionList({
           New Connection
         </Button>
 
-        <Button variant={"ghost"}>Quick Connect</Button>
+        <Button
+          variant={"ghost"}
+          onClick={() => {
+            setQuickConnect(true);
+          }}
+        >
+          Quick Connect
+        </Button>
       </div>
 
       {removeConnection && (
