@@ -4,6 +4,8 @@ import withDatabaseOperation from "@/lib/with-database-ops";
 import { createClient } from "@libsql/client/web";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export const POST = withDatabaseOperation<{
   sql: string;
   args: (string | number)[];

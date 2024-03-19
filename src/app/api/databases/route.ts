@@ -5,6 +5,8 @@ import withUser from "@/lib/with-user";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export const GET = withUser(async ({ user }) => {
   const dbs = await db
     .select()
