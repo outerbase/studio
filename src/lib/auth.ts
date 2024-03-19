@@ -4,7 +4,7 @@ import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
 import { connection } from "@/db";
 import { env } from "@/env";
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 export const github = new GitHub(
   env.GITHUB_CLIENT_ID,
@@ -31,6 +31,38 @@ export const lucia = new Lucia(adapter, {
       picture: attr.picture,
     };
   },
+});
+
+export const getSession = cache(async function () {
+  const authorizationHeader = headers().get("authorization");
+  let sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+
+  if (!sessionId) {
+    sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+  }
+
+  if (!sessionId) {
+    return {
+      user: null,
+      session: null,
+    };
+  }
+
+  return await lucia.validateSession(sessionId);
+});
+
+export const getSessionFromBearer = cache(async function () {
+  const authorizationHeader = headers().get("authorization");
+  const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
+
+  if (!sessionId) {
+    return {
+      user: null,
+      session: null,
+    };
+  }
+
+  return await lucia.validateSession(sessionId);
 });
 
 export const getSessionFromCookie = cache(async function () {

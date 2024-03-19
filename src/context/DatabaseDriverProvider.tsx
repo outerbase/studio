@@ -1,11 +1,9 @@
-import DatabaseDriver from "@/drivers/DatabaseDriver";
+import { BaseDriver } from "@/drivers/base-driver";
 import { PropsWithChildren, createContext, useContext } from "react";
 
-const DatabaseDriverContext = createContext<{ databaseDriver: DatabaseDriver }>(
-  {
-    databaseDriver: {} as DatabaseDriver,
-  }
-);
+const DatabaseDriverContext = createContext<{ databaseDriver: BaseDriver }>({
+  databaseDriver: {} as unknown as BaseDriver,
+});
 
 export function useDatabaseDriver() {
   return useContext(DatabaseDriverContext);
@@ -14,7 +12,7 @@ export function useDatabaseDriver() {
 export function DatabaseDriverProvider({
   children,
   driver,
-}: PropsWithChildren<{ driver: DatabaseDriver }>) {
+}: PropsWithChildren<{ driver: BaseDriver }>) {
   return (
     <DatabaseDriverContext.Provider value={{ databaseDriver: driver }}>
       {children}

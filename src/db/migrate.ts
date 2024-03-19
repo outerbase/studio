@@ -9,6 +9,8 @@ import { db, connection } from ".";
 
   // Don't forget to close the connection, otherwise the script will hang
   connection.close();
-})().finally(() => {
-  process.exit();
-});
+})()
+  .catch(console.error)
+  .finally(() => {
+    process.exit();
+  });
