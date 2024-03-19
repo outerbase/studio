@@ -11,18 +11,25 @@ import {
 } from "@/app/connect/saved-connection-storage";
 import SavedConnectionConfig from "./saved-connection-config";
 import { createDatabase } from "@/lib/api/fetch-databases";
+import { User } from "lucia";
 
 type SaveConnectionStep = "storage" | "config";
 
 export default function SaveConnection({
+  user,
   onSaveComplete,
   onClose,
 }: Readonly<{
+  user: User | null;
   onSaveComplete: (storageType: SavedConnectionItem) => void;
   onClose: () => void;
 }>) {
-  const [storage, setStorage] = useState<SavedConnectionStorage>();
-  const [step, setStep] = useState<SaveConnectionStep>("storage");
+  const [storage, setStorage] = useState<SavedConnectionStorage | undefined>(
+    user ? undefined : "local"
+  );
+  const [step, setStep] = useState<SaveConnectionStep>(
+    user ? "storage" : "config"
+  );
   const [loading, setLoading] = useState(false);
 
   const onConnectionTypeSelected = useCallback(
