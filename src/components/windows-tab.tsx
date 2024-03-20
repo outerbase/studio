@@ -1,6 +1,3 @@
-// windows-tab.tsx
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import openNewQuery from "@/messages/openNewQuery";
 import { LucidePlus } from "lucide-react";
 import {
@@ -25,7 +22,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { SortableTab } from "./sortable-tab";
+import { SortableTab, WindowTabItemButton } from "./sortable-tab";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -58,7 +55,7 @@ export default function WindowTabs({
   onSelectChange,
   onTabsChange,
 }: WindowTabsProps) {
-  const [activeTab, setActiveTab] = useState<WindowTabItemProps | null>(null);
+  const [dragTab, setDragTag] = useState<WindowTabItemProps | null>(null);
 
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
@@ -83,25 +80,34 @@ export default function WindowTabs({
     [replaceCurrentTab]
   );
 
-  function handleDragStart(event: DragStartEvent) {
-    const { active } = event;
-    const activeIndex = tabs.findIndex((tab) => tab.key === active.id);
-    setActiveTab(tabs[activeIndex]);
-  }
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const { active } = event;
+      const activeIndex = tabs.findIndex((tab) => tab.key === active.id);
+      setDragTag(tabs[activeIndex]);
+    },
+    [tabs, setDragTag]
+  );
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-      const oldIndex = tabs.findIndex((tab) => tab.key === active.id);
-      const newIndex = tabs.findIndex((tab) => tab.key === over?.id);
-      const newTabs = arrayMove(tabs, oldIndex, newIndex);
-      onTabsChange(newTabs);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (active.id !== over?.id) {
+        const selectedTab = tabs[selected];
+        const oldIndex = tabs.findIndex((tab) => tab.key === active.id);
+        const newIndex = tabs.findIndex((tab) => tab.key === over?.id);
+        const newTabs = arrayMove(tabs, oldIndex, newIndex);
+        onTabsChange(newTabs);
 
-      const activeIndex = newTabs.findIndex((tab) => tab.key === active.id);
-      onSelectChange(activeIndex);
-    }
-    setActiveTab(null);
-  }
+        const selectedIndex = newTabs.findIndex(
+          (tab) => tab.key === selectedTab.key
+        );
+        onSelectChange(selectedIndex);
+      }
+      setDragTag(null);
+    },
+    [setDragTag, onTabsChange, tabs, onSelectChange, selected]
+  );
 
   return (
     <WindowTabsContext.Provider value={contextValue}>
@@ -112,17 +118,16 @@ export default function WindowTabs({
         onDragEnd={handleDragEnd}
       >
         <div className="flex flex-col w-full h-full">
-          <div className="flex-grow-0 flex-shrink-0">
-            <div className="flex p-2 gap-2">
-              <Button
-                size={"sm"}
-                variant={"outline"}
+          <div className="flex-grow-0 flex-shrink-0 pt-1 bg-secondary">
+            <div className="flex">
+              <button
+                className="px-3 py-2 border-b"
                 onClick={() => {
                   openNewQuery();
                 }}
               >
                 <LucidePlus className="w-4 h-4" />
-              </Button>
+              </button>
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
                 strategy={verticalListSortingStrategy}
@@ -131,10 +136,7 @@ export default function WindowTabs({
                   <SortableTab
                     key={tab.key}
                     tab={tab}
-                    selected={
-                      activeTab?.key === tab.key ||
-                      (idx === selected && !activeTab)
-                    }
+                    selected={idx === selected}
                     onSelectChange={() => onSelectChange(idx)}
                     onClose={() =>
                       onTabsChange(tabs.filter((t) => t.key !== tab.key))
@@ -142,10 +144,10 @@ export default function WindowTabs({
                   />
                 ))}
               </SortableContext>
+              <div className="border-b grow" />
             </div>
-            <Separator />
           </div>
-          <div className="flex-grow relative">
+          <div className="flex-grow relative mt-1">
             {tabs.map((tab, tabIndex) => (
               <div
                 className="absolute left-0 right-0 top-0 bottom-0"
@@ -160,11 +162,9 @@ export default function WindowTabs({
           </div>
         </div>
         <DragOverlay>
-          {activeTab ? (
+          {dragTab ? (
             <div className="fixed top-0 left-0 w-auto h-auto">
-              <Button size={"sm"} variant={"default"}>
-                {activeTab.title}
-              </Button>
+              <WindowTabItemButton title={dragTab.title} />
             </div>
           ) : null}
         </DragOverlay>
