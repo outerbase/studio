@@ -1,15 +1,12 @@
-import { github, lucia } from "@/lib/auth";
-import { cookies, headers } from "next/headers";
+import { PROVIDER, github } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { OAuth2RequestError } from "arctic";
-import { generateId } from "lucia";
-import { db } from "@/db";
-import { user, user_oauth } from "@/db/schema";
+import * as AuthController from "@/controllers/auth";
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const headerStore = headers();
   const GITHUB_API_URL = "https://api.github.com";
 
   const storedState = cookies().get("github_oauth_state")?.value ?? null;
@@ -39,61 +36,13 @@ export async function GET(request: Request): Promise<Response> {
         githubEmails.find((email) => email.primary)?.email || null;
     }
 
-    // Replace this with your own DB client.
-    const existingUser = await db.query.user_oauth.findFirst({
-      where: (field, op) =>
-        op.and(
-          op.eq(field.provider, "GITHUB"),
-          op.eq(field.providerId, githubUser.id)
-        ),
-    });
-
-    if (existingUser?.userId) {
-      const session = await lucia.createSession(existingUser.userId, {
-        auth_id: existingUser.id,
-        user_agent: headerStore.get("user-agent"),
-      });
-
-      const sessionCookie = lucia.createSessionCookie(session.id);
-
-      cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes
-      );
-
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: "/connect",
-        },
-      });
-    }
-
-    const userId = generateId(15);
-    const authId = generateId(15);
-
-    await db
-      .insert(user)
-      .values({ id: userId, name: githubUser.login, email: githubUser.email });
-    await db.insert(user_oauth).values({
-      id: authId,
-      provider: "GITHUB",
-      providerId: githubUser.id,
-      userId: userId,
-    });
-
-    const session = await lucia.createSession(userId, {
-      auth_id: userId,
-      user_agent: headerStore.get("user-agent"),
-    });
-
-    const sessionCookie = lucia.createSessionCookie(session.id);
-
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
+    await AuthController.save(
+      {
+        id: githubUser.id,
+        name: githubUser.login,
+        email: githubUser.email || "",
+      },
+      PROVIDER.GITHUB
     );
 
     return new Response(null, {
