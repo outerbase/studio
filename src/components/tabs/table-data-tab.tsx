@@ -153,9 +153,9 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         </AlertDialog>
       )}
       <div className="flex-shrink-0 flex-grow-0">
-        <div className="flex p-1 gap-1">
+        <div className="flex p-1 gap-1 pb-2">
           <Button
-            variant={"outline"}
+            variant={"ghost"}
             size={"sm"}
             disabled={!changeNumber || isExecuting}
             onClick={onCommit}
@@ -177,7 +177,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           </Button>
 
           <Button
-            variant={"outline"}
+            variant={"ghost"}
             size={"sm"}
             disabled={!changeNumber}
             onClick={onDiscard}
@@ -189,16 +189,16 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             <Separator orientation="vertical" />
           </div>
 
-          <Button variant={"outline"} size={"sm"} onClick={onNewRow}>
+          <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
             <LucidePlus className="w-4 h-4 text-green-600" />
           </Button>
 
-          <Button variant={"outline"} size={"sm"} onClick={onRemoveRow}>
+          <Button variant={"ghost"} size={"sm"} onClick={onRemoveRow}>
             <LucideDelete className="w-4 h-4 text-red-600" />
           </Button>
 
           <Button
-            variant={"outline"}
+            variant={"ghost"}
             size={"sm"}
             onClick={() => setRevision((prev) => prev + 1)}
             disabled={loading}

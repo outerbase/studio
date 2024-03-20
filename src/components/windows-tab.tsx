@@ -1,11 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import openNewQuery from "@/messages/openNewQuery";
-import { LucidePlus, LucideX } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import { LucideIcon, LucidePlus } from "lucide-react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableTab, WindowTabItemButton } from "./sortable-tab";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
+  icon: LucideIcon;
   title: string;
   key: string;
 }
@@ -35,6 +56,16 @@ export default function WindowTabs({
   onSelectChange,
   onTabsChange,
 }: WindowTabsProps) {
+  const [dragTab, setDragTag] = useState<WindowTabItemProps | null>(null);
+
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+    },
+  });
+
+  const sensors = useSensors(pointerSensor);
+
   const replaceCurrentTab = useCallback(
     (tab: WindowTabItemProps) => {
       if (tabs[selected]) {
@@ -50,46 +81,75 @@ export default function WindowTabs({
     [replaceCurrentTab]
   );
 
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const { active } = event;
+      const activeIndex = tabs.findIndex((tab) => tab.key === active.id);
+      setDragTag(tabs[activeIndex]);
+    },
+    [tabs, setDragTag]
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (active.id !== over?.id) {
+        const selectedTab = tabs[selected];
+        const oldIndex = tabs.findIndex((tab) => tab.key === active.id);
+        const newIndex = tabs.findIndex((tab) => tab.key === over?.id);
+        const newTabs = arrayMove(tabs, oldIndex, newIndex);
+        onTabsChange(newTabs);
+
+        const selectedIndex = newTabs.findIndex(
+          (tab) => tab.key === selectedTab.key
+        );
+        onSelectChange(selectedIndex);
+      }
+      setDragTag(null);
+    },
+    [setDragTag, onTabsChange, tabs, onSelectChange, selected]
+  );
+
   return (
     <WindowTabsContext.Provider value={contextValue}>
-      <div className="flex flex-col w-full h-full">
-        <div className="flex-grow-0 flex-shrink-0">
-          <div className="flex p-2 gap-2">
-            <Button
-              size={"sm"}
-              variant={"outline"}
-              onClick={() => {
-                openNewQuery();
-              }}
-            >
-              <LucidePlus className="w-4 h-4" />
-            </Button>
-            {tabs.map((tab, idx) => {
-              return (
-                <Button
-                  size={"sm"}
-                  key={tab.key}
-                  variant={idx === selected ? "default" : "secondary"}
-                  onClick={() => onSelectChange(idx)}
-                >
-                  {tab.title}
-                  <LucideX
-                    className="w-4 h-4 ml-2"
-                    onClick={() => {
-                      onTabsChange(
-                        tabs.filter((nextTab) => nextTab.key !== tab.key)
-                      );
-                    }}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex flex-col w-full h-full">
+          <div className="flex-grow-0 flex-shrink-0 pt-1 bg-secondary">
+            <div className="flex">
+              <button
+                className="px-3 py-2 border-b"
+                onClick={() => {
+                  openNewQuery();
+                }}
+              >
+                <LucidePlus className="w-4 h-4" />
+              </button>
+              <SortableContext
+                items={tabs.map((tab) => tab.key)}
+                strategy={verticalListSortingStrategy}
+              >
+                {tabs.map((tab, idx) => (
+                  <SortableTab
+                    key={tab.key}
+                    tab={tab}
+                    selected={idx === selected}
+                    onSelectChange={() => onSelectChange(idx)}
+                    onClose={() =>
+                      onTabsChange(tabs.filter((t) => t.key !== tab.key))
+                    }
                   />
-                </Button>
-              );
-            })}
+                ))}
+              </SortableContext>
+              <div className="border-b grow" />
+            </div>
           </div>
-          <Separator />
-        </div>
-        <div className="flex-grow relative">
-          {tabs.map((tab, tabIndex) => {
-            return (
+          <div className="flex-grow relative mt-1">
+            {tabs.map((tab, tabIndex) => (
               <div
                 className="absolute left-0 right-0 top-0 bottom-0"
                 style={{
@@ -99,10 +159,17 @@ export default function WindowTabs({
               >
                 {tab.component}
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
+        <DragOverlay>
+          {dragTab ? (
+            <div className="fixed top-0 left-0 w-auto h-auto">
+              <WindowTabItemButton title={dragTab.title} icon={dragTab.icon} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </WindowTabsContext.Provider>
   );
 }
