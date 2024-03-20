@@ -13,7 +13,6 @@ import {
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -24,7 +23,6 @@ import {
 import {
   arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableTab } from "./sortable-tab";
@@ -68,12 +66,7 @@ export default function WindowTabs({
     },
   });
 
-  const sensors = useSensors(
-    pointerSensor,
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const sensors = useSensors(pointerSensor);
 
   const replaceCurrentTab = useCallback(
     (tab: WindowTabItemProps) => {
