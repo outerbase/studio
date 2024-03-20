@@ -1,5 +1,5 @@
 import openNewQuery from "@/messages/openNewQuery";
-import { LucidePlus } from "lucide-react";
+import { LucideIcon, LucidePlus } from "lucide-react";
 import {
   createContext,
   useCallback,
@@ -26,6 +26,7 @@ import { SortableTab, WindowTabItemButton } from "./sortable-tab";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
+  icon: LucideIcon;
   title: string;
   key: string;
 }
@@ -164,7 +165,7 @@ export default function WindowTabs({
         <DragOverlay>
           {dragTab ? (
             <div className="fixed top-0 left-0 w-auto h-auto">
-              <WindowTabItemButton title={dragTab.title} />
+              <WindowTabItemButton title={dragTab.title} icon={dragTab.icon} />
             </div>
           ) : null}
         </DragOverlay>

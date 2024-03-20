@@ -1,4 +1,4 @@
-import { LucideCode, LucideX } from "lucide-react";
+import { LucideIcon, LucideX } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import styles from "./sortable-tab.module.css";
 import { WindowTabItemProps } from "./windows-tab";
@@ -16,6 +16,7 @@ interface SortableTabProps {
 type WindowTabItemButtonProps = ButtonProps & {
   selected?: boolean;
   title: string;
+  icon: LucideIcon;
   onClose?: () => void;
 };
 
@@ -23,7 +24,7 @@ export const WindowTabItemButton = forwardRef<
   HTMLButtonElement,
   WindowTabItemButtonProps
 >(function WindowTabItemButton(props: WindowTabItemButtonProps, ref) {
-  const { selected, title, onClose, ...rest } = props;
+  const { icon: Icon, selected, title, onClose, ...rest } = props;
 
   const className = cn(
     "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px]",
@@ -35,7 +36,7 @@ export const WindowTabItemButton = forwardRef<
 
   return (
     <button className={className} ref={ref} {...rest}>
-      <LucideCode className="w-4 h-4 ml-2 grow-0 shrink-0" />
+      <Icon className="w-4 h-4 ml-2 grow-0 shrink-0" />
       <div className="line-clamp-1 grow px-2">{title}</div>
       <div
         className={cn(
@@ -63,6 +64,7 @@ export function SortableTab({
   return (
     <WindowTabItemButton
       ref={setNodeRef}
+      icon={tab.icon}
       title={tab.title}
       onClick={onSelectChange}
       selected={selected}
