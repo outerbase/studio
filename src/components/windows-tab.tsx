@@ -1,8 +1,16 @@
+// WindowTabs.tsx
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import openNewQuery from "@/messages/openNewQuery";
 import { LucidePlus, LucideX } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -35,6 +43,8 @@ export default function WindowTabs({
   onSelectChange,
   onTabsChange,
 }: WindowTabsProps) {
+  const [draggedTab, setDraggedTab] = useState<WindowTabItemProps | null>(null);
+
   const replaceCurrentTab = useCallback(
     (tab: WindowTabItemProps) => {
       if (tabs[selected]) {
@@ -49,6 +59,30 @@ export default function WindowTabs({
     () => ({ replaceCurrentTab }),
     [replaceCurrentTab]
   );
+
+  const handleDragStart = (tab: WindowTabItemProps) => {
+    setDraggedTab(tab);
+  };
+
+  const handleDragOver = (
+    e: React.DragEvent<HTMLButtonElement>,
+    targetIndex: number
+  ) => {
+    e.preventDefault();
+    if (draggedTab) {
+      const draggedIndex = tabs.findIndex((tab) => tab.key === draggedTab.key);
+      if (draggedIndex !== targetIndex) {
+        const newTabs = [...tabs];
+        newTabs.splice(draggedIndex, 1);
+        newTabs.splice(targetIndex, 0, draggedTab);
+        onTabsChange(newTabs);
+      }
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTab(null);
+  };
 
   return (
     <WindowTabsContext.Provider value={contextValue}>
@@ -71,6 +105,10 @@ export default function WindowTabs({
                   key={tab.key}
                   variant={idx === selected ? "default" : "secondary"}
                   onClick={() => onSelectChange(idx)}
+                  draggable
+                  onDragStart={() => handleDragStart(tab)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragEnd={handleDragEnd}
                 >
                   {tab.title}
                   <LucideX
