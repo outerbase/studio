@@ -153,8 +153,10 @@ export default function WindowTabs({
         </div>
         <DragOverlay>
           {activeTab ? (
-            <div className="bg-white shadow-lg rounded-md p-4">
-              {activeTab.title}
+            <div className="fixed top-0 left-0 w-auto h-auto">
+              <Button size={"sm"} variant={"default"}>
+                {activeTab.title}
+              </Button>
             </div>
           ) : null}
         </DragOverlay>
