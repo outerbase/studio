@@ -1,7 +1,8 @@
+// windows-tab.tsx
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import openNewQuery from "@/messages/openNewQuery";
-import { LucidePlus, LucideX } from "lucide-react";
+import { LucidePlus } from "lucide-react";
 import {
   createContext,
   useCallback,
@@ -60,8 +61,15 @@ export default function WindowTabs({
   onTabsChange,
 }: WindowTabsProps) {
   const [activeTab, setActiveTab] = useState<WindowTabItemProps | null>(null);
+
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+    },
+  });
+
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    pointerSensor,
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -93,7 +101,11 @@ export default function WindowTabs({
     if (active.id !== over?.id) {
       const oldIndex = tabs.findIndex((tab) => tab.key === active.id);
       const newIndex = tabs.findIndex((tab) => tab.key === over?.id);
-      onTabsChange(arrayMove(tabs, oldIndex, newIndex));
+      const newTabs = arrayMove(tabs, oldIndex, newIndex);
+      onTabsChange(newTabs);
+
+      const activeIndex = newTabs.findIndex((tab) => tab.key === active.id);
+      onSelectChange(activeIndex);
     }
     setActiveTab(null);
   }
@@ -126,7 +138,10 @@ export default function WindowTabs({
                   <SortableTab
                     key={tab.key}
                     tab={tab}
-                    selected={idx === selected}
+                    selected={
+                      activeTab?.key === tab.key ||
+                      (idx === selected && !activeTab)
+                    }
                     onSelectChange={() => onSelectChange(idx)}
                     onClose={() =>
                       onTabsChange(tabs.filter((t) => t.key !== tab.key))
