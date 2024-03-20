@@ -11,12 +11,12 @@ export default function LoginPage() {
             <h2 className="text-xl font-bold">Sign In</h2>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Link href="/login/github">
-              <Button>Continue with Github</Button>
-            </Link>
-            <Link href="/login/google">
-              <Button>Continue with Google</Button>
-            </Link>
+            <Button asChild>
+              <Link href="/login/github">Continue with Github</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/login/google">Continue with Google</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
