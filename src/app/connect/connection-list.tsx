@@ -164,6 +164,7 @@ export default function ConnectionList({
   if (showAddConnection) {
     return (
       <SaveConnection
+        user={user}
         onClose={() => setShowAddConnection(false)}
         onSaveComplete={onSaveComplete}
       />
