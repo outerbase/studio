@@ -1,24 +1,15 @@
-import withDatabaseOperation from "@/lib/with-database-ops";
+import { DatabaseOperationHandler } from "@/lib/with-database-ops";
 import { NextResponse } from "next/server";
-import createTursoEdgeClient from "../turso-edge-client";
+import { createTursoEdgeDriver } from "./turso-edge-client";
 
-export const runtime = "edge";
-
-export const GET = withDatabaseOperation(async function ({
+const handleSchemasRequest: DatabaseOperationHandler = async ({
   permission,
   database,
-}) {
-  const client = await createTursoEdgeClient(database);
+}) => {
+  const client = await createTursoEdgeDriver(database);
 
   try {
-    const result = await client.execute("SELECT * FROM sqlite_schema;");
-    let tables = result.rows
-      .filter((row) => row.type === "table")
-      .map((row) => {
-        return {
-          name: row.name as string,
-        };
-      });
+    let tables = await client.schemas();
 
     // If you don't have permssion to execute query
     // We will only allow you to see tables that
@@ -34,4 +25,6 @@ export const GET = withDatabaseOperation(async function ({
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });
   }
-});
+};
+
+export default handleSchemasRequest;

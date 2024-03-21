@@ -19,7 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import generateSqlSchemaChange from "@/lib/sql-generate.schema";
-import { LucideLoader, LucideSave } from "lucide-react";
+import { LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSchema } from "../../context/SchemaProvider";
 import CodePreview from "../code-preview";
@@ -51,7 +51,7 @@ export default function SchemaEditorTab({
   const fetchTable = useCallback(
     async (name: string) => {
       databaseDriver
-        .getTableSchema(name)
+        .tableSchema(name)
         .then((schema) => {
           setSchema({
             name: {
@@ -97,6 +97,7 @@ export default function SchemaEditorTab({
             component: <SchemaEditorTab tableName={schema.name.new} />,
             key: "_schema_" + schema.name.new,
             title: "Edit " + schema.name.new,
+            icon: LucideTableProperties,
           });
         } else if (schema.name.old) {
           fetchTable(schema.name?.new || schema.name?.old || "").then(() =>

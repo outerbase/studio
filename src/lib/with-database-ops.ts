@@ -12,7 +12,7 @@ import { db } from "@/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-interface DatabasePermission {
+export interface DatabasePermission {
   isOwner: boolean;
   canExecuteQuery: boolean;
   roles: {
@@ -23,7 +23,7 @@ interface DatabasePermission {
   }[];
 }
 
-type DatabaseOperationHandler<BodyType = unknown> = (props: {
+export type DatabaseOperationHandler<BodyType = unknown> = (props: {
   user: User;
   body: BodyType;
   database: typeof database.$inferSelect;

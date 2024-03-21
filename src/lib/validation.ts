@@ -1,16 +1,18 @@
-export function validateOperation({
-  operation,
-  primaryKey,
-  originalValue,
-  changeValue,
-  autoIncrement,
-}: {
-  operation: "INSERT" | "UPDATE" | "DELETE";
-  autoIncrement: boolean;
-  primaryKey: string[];
-  originalValue: Record<string, unknown>;
-  changeValue: Record<string, unknown>;
-}): { valid: boolean; reason?: string } {
+import {
+  DatabaseTableOperation,
+  DatabaseTableSchema,
+} from "@/drivers/base-driver";
+
+export function validateOperation(
+  op: DatabaseTableOperation,
+  validateSchema: DatabaseTableSchema
+): { valid: boolean; reason?: string } {
+  const operation = op.operation;
+  const primaryKey = validateSchema.pk;
+  const originalValue = op.operation !== "INSERT" ? op.where : {};
+  const changeValue = op.operation !== "DELETE" ? op.values : {};
+  const autoIncrement = validateSchema.autoIncrement;
+
   const hasAnyPrimaryKeyNull = primaryKey
     .map((pkColumnName) => originalValue[pkColumnName])
     .some((value) => value === null || value === undefined);

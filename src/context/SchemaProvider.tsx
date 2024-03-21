@@ -40,7 +40,7 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
       }
 
       databaseDriver
-        .getTableList()
+        .schemas()
         .then((tableList) => {
           const sortedTableList = [...tableList];
           sortedTableList.sort((a, b) => {

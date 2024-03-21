@@ -64,15 +64,14 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       setLoading(true);
 
       try {
-        const dataResult = await databaseDriver.selectFromTable(tableName, {
-          whereRaw: where,
-          limit: finalLimit,
-          offset: finalOffset,
-        });
+        const { data: dataResult, schema: schemaResult } =
+          await databaseDriver.selectTable(tableName, {
+            whereRaw: where,
+            limit: finalLimit,
+            offset: finalOffset,
+          });
 
-        const schemaResult = await databaseDriver.getTableSchema(tableName);
         setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
-
         setTableSchema(schemaResult);
         updateTableSchema(tableName, schemaResult.columns);
         setLastQueryTimestamp(Date.now());

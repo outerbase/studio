@@ -78,6 +78,32 @@ export interface DatabaseTableSchema {
   createScript?: string;
 }
 
+interface DatabaseTableOperationInsert {
+  operation: "INSERT";
+  values: Record<string, DatabaseValue>;
+}
+
+interface DatabaseTableOperationUpdate {
+  operation: "UPDATE" | "DELETE";
+  values: Record<string, DatabaseValue>;
+  where: Record<string, DatabaseValue>;
+}
+
+interface DatabaseTableOperationDelete {
+  operation: "DELETE";
+  where: Record<string, DatabaseValue>;
+}
+
+export type DatabaseTableOperation =
+  | DatabaseTableOperationInsert
+  | DatabaseTableOperationUpdate
+  | DatabaseTableOperationDelete;
+
+export interface DatabaseTableOperationReslt {
+  lastId?: bigint;
+  record?: Record<string, DatabaseValue>;
+}
+
 export abstract class BaseDriver {
   abstract getEndpoint(): string;
   abstract close(): void;
@@ -85,11 +111,20 @@ export abstract class BaseDriver {
   abstract query(stmt: InStatement): Promise<ResultSet>;
   abstract transaction(stmts: InStatement[]): Promise<ResultSet[]>;
 
-  abstract getTableList(): Promise<DatabaseSchemaItem[]>;
-  abstract getTableSchema(tableName: string): Promise<DatabaseTableSchema>;
+  abstract schemas(): Promise<DatabaseSchemaItem[]>;
+  abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
 
-  abstract selectFromTable(
+  abstract selectTable(
     tableName: string,
     options: SelectFromTableOptions
-  ): Promise<ResultSet>;
+  ): Promise<{ data: ResultSet; schema: DatabaseTableSchema }>;
+
+  abstract updateTableData(
+    tableName: string,
+    ops: DatabaseTableOperation[],
+
+    // Using table scheam to determine and throw error
+    // if the operation is unsafe
+    validateSchema?: DatabaseTableSchema
+  ): Promise<DatabaseTableOperationReslt[]>;
 }

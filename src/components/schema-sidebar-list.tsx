@@ -69,8 +69,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
 
   const prepareContextMenu = useCallback(
     (tableName?: string) => {
-      console.log(tableName);
-
       return [
         {
           title: "Copy Name",
