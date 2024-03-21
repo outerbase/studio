@@ -11,11 +11,11 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1),
     DATABASE_AUTH_TOKEN: z.string().min(1),
 
-    GITHUB_CLIENT_ID: z.string().min(1),
-    GITHUB_CLIENT_SECRET: z.string().min(1),
+    GITHUB_CLIENT_ID: z.string().optional(),
+    GITHUB_CLIENT_SECRET: z.string().optional(),
 
-    GOOGLE_CLIENT_ID: z.string().min(1),
-    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
 
     ENCRYPTION_KEY: z.string().min(30),
   },

@@ -16,13 +16,13 @@ type ObjectValues<T> = T[keyof T];
 export type Provider = ObjectValues<typeof PROVIDER>;
 
 export const github = new GitHub(
-  env.GITHUB_CLIENT_ID,
-  env.GITHUB_CLIENT_SECRET
+  env.GITHUB_CLIENT_ID ?? "",
+  env.GITHUB_CLIENT_SECRET ?? ""
 );
 
 export const google = new Google(
-  env.GOOGLE_CLIENT_ID,
-  env.GOOGLE_CLIENT_SECRET,
+  env.GOOGLE_CLIENT_ID ?? "",
+  env.GOOGLE_CLIENT_SECRET ?? "",
   `${env.BASE_URL}/login/google/callback`
 );
 
