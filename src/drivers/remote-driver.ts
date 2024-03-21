@@ -11,6 +11,7 @@ import {
 import {
   ApiOpsBatchResponse,
   ApiOpsQueryResponse,
+  ApiSchemaListResponse,
 } from "@/lib/api-response-types";
 
 export default class RemoteDriver implements BaseDriver {
@@ -87,15 +88,20 @@ export default class RemoteDriver implements BaseDriver {
   close() {}
 
   async getTableList(): Promise<DatabaseSchemaItem[]> {
-    const result = await this.query("SELECT * FROM sqlite_schema;");
+    const r = await fetch(`/api/ops/${this.id}/schema`, {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + this.authToken,
+      },
+    });
 
-    return result.rows
-      .filter((row) => row.type === "table")
-      .map((row) => {
-        return {
-          name: row.name as string,
-        };
-      });
+    const json: ApiSchemaListResponse = await r.json();
+
+    if (json.error) {
+      throw new Error(json.error);
+    }
+
+    return json.data;
   }
 
   protected async legacyTableSchema(
