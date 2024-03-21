@@ -1,14 +1,29 @@
 import { Lucia } from "lucia";
-import { GitHub } from "arctic";
+import { GitHub, Google } from "arctic";
 import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
 import { connection } from "@/db";
 import { env } from "@/env";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 
+export const PROVIDER = {
+  GITHUB: "GITHUB",
+  GOOGLE: "GOOGLE",
+} as const;
+
+type ObjectValues<T> = T[keyof T];
+
+export type Provider = ObjectValues<typeof PROVIDER>;
+
 export const github = new GitHub(
   env.GITHUB_CLIENT_ID,
   env.GITHUB_CLIENT_SECRET
+);
+
+export const google = new Google(
+  env.GOOGLE_CLIENT_ID,
+  env.GOOGLE_CLIENT_SECRET,
+  `${env.BASE_URL}/login/google/callback`
 );
 
 const adapter = new LibSQLAdapter(connection, {
