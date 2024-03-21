@@ -63,10 +63,7 @@ export default class DatabaseDriver implements BaseDriver {
 
   async query(stmt: InStatement) {
     const stream = this.client;
-
-    console.info("Querying", stmt);
     const r = await stream.execute(stmt);
-    console.info("Result", r);
     return transformRawResult(r);
   }
 
