@@ -1,8 +1,6 @@
-import { env } from "@/env";
-import { decrypt } from "@/lib/encryption-edge";
 import withDatabaseOperation from "@/lib/with-database-ops";
-import { createClient } from "@libsql/client/web";
 import { NextResponse } from "next/server";
+import createTursoEdgeClient from "../turso-edge-client";
 
 export const runtime = "edge";
 
@@ -19,13 +17,7 @@ export const POST = withDatabaseOperation<{
     );
   }
 
-  const url = database.host ?? "";
-  const token = await decrypt(env.ENCRYPTION_KEY, database.token ?? "");
-
-  const client = createClient({
-    url,
-    authToken: token,
-  });
+  const client = await createTursoEdgeClient(database);
 
   try {
     return NextResponse.json({
