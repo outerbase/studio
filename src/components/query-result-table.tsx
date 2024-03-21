@@ -12,7 +12,6 @@ import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
-import BigNumberCell from "./table-cell/BigNumberCell";
 import { DatabaseValue } from "@/drivers/base-driver";
 
 interface ResultTableProps {
@@ -39,19 +38,10 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
             }}
           />
         );
-      } else if (header.dataType === TableColumnDataType.INTEGER) {
-        return (
-          <BigNumberCell
-            readOnly={!tableName}
-            value={state.getValue(y, x) as DatabaseValue<bigint>}
-            focus={isFocus}
-            isChanged={state.hasCellChange(y, x)}
-            onChange={(newValue) => {
-              state.changeValue(y, x, newValue);
-            }}
-          />
-        );
-      } else if (header.dataType === TableColumnDataType.REAL) {
+      } else if (
+        header.dataType === TableColumnDataType.REAL ||
+        header.dataType === TableColumnDataType.INTEGER
+      ) {
         return (
           <NumberCell
             readOnly={!tableName}

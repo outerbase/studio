@@ -13,6 +13,7 @@ import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
 import QueryWindow from "@/components/tabs/query-tab";
 import SchemaEditorTab from "@/components/tabs/schema-editor-tab";
+import { LucideCode, LucideTable, LucideTableProperties } from "lucide-react";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -25,7 +26,12 @@ export default function DatabaseGui() {
 
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
-    { title: "Query", key: "query", component: <QueryWindow /> },
+    {
+      title: "Query",
+      key: "query",
+      component: <QueryWindow />,
+      icon: LucideCode,
+    },
   ]);
 
   useMessageListener<OpenTabsProps>(
@@ -45,6 +51,7 @@ export default function DatabaseGui() {
               return [
                 ...prev,
                 {
+                  icon: LucideTable,
                   title: newTab.name,
                   key: newTab.key,
                   component: <TableDataContent tableName={newTab.tableName} />,
@@ -57,6 +64,7 @@ export default function DatabaseGui() {
             return [
               ...prev,
               {
+                icon: LucideCode,
                 title: newTab.name,
                 key: newTab.key,
                 component: <QueryWindow />,
@@ -74,6 +82,7 @@ export default function DatabaseGui() {
               return [
                 ...prev,
                 {
+                  icon: LucideTableProperties,
                   title: newTab.name,
                   key: newTab.key,
                   component: <SchemaEditorTab tableName={newTab.tableName} />,

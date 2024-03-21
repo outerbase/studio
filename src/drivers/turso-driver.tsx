@@ -1,18 +1,42 @@
-import { escapeSqlValue } from "@/lib/sql-helper";
+import {
+  escapeSqlValue,
+  generateDeleteStatement,
+  generateInsertStatement,
+  generateSelectOneWithConditionStatement,
+  generateUpdateStatement,
+} from "@/lib/sql-helper";
 import { parseCreateTableScript } from "@/lib/sql-parse-table";
 import {
   createClient,
   Client,
   InStatement,
   ResultSet,
+  Row,
 } from "@libsql/client/web";
 import {
   BaseDriver,
   DatabaseSchemaItem,
   DatabaseTableColumn,
+  DatabaseTableOperation,
+  DatabaseTableOperationReslt,
   DatabaseTableSchema,
   SelectFromTableOptions,
 } from "./base-driver";
+import { validateOperation } from "@/lib/validation";
+
+export function transformRawResult(raw: ResultSet): ResultSet {
+  const r = {
+    ...raw,
+    rows: raw.rows.map((r) =>
+      raw.columns.reduce((a, b, idx) => {
+        a[b] = r[idx];
+        return a;
+      }, {} as Row)
+    ),
+  };
+
+  return r;
+}
 
 export default class DatabaseDriver implements BaseDriver {
   protected client: Client;
@@ -26,7 +50,6 @@ export default class DatabaseDriver implements BaseDriver {
     this.client = createClient({
       url: this.endpoint,
       authToken: this.authToken,
-      intMode: "bigint",
     });
   }
 
@@ -40,23 +63,19 @@ export default class DatabaseDriver implements BaseDriver {
 
   async query(stmt: InStatement) {
     const stream = this.client;
-
-    console.info("Querying", stmt);
     const r = await stream.execute(stmt);
-    console.info("Result", r);
-
-    return r;
+    return transformRawResult(r);
   }
 
-  transaction(stmt: InStatement[]) {
-    return this.client.batch(stmt, "write");
+  async transaction(stmt: InStatement[]) {
+    return (await this.client.batch(stmt, "write")).map(transformRawResult);
   }
 
   close() {
     this.client.close();
   }
 
-  async getTableList(): Promise<DatabaseSchemaItem[]> {
+  async schemas(): Promise<DatabaseSchemaItem[]> {
     const result = await this.query("SELECT * FROM sqlite_schema;");
 
     return result.rows
@@ -106,7 +125,7 @@ export default class DatabaseDriver implements BaseDriver {
     };
   }
 
-  async getTableSchema(tableName: string): Promise<DatabaseTableSchema> {
+  async tableSchema(tableName: string): Promise<DatabaseTableSchema> {
     const sql = `SELECT * FROM sqlite_schema WHERE tbl_name = ${escapeSqlValue(
       tableName
     )};`;
@@ -125,10 +144,10 @@ export default class DatabaseDriver implements BaseDriver {
     return await this.legacyTableSchema(tableName);
   }
 
-  async selectFromTable(
+  async selectTable(
     tableName: string,
     options: SelectFromTableOptions
-  ): Promise<ResultSet> {
+  ): Promise<{ data: ResultSet; schema: DatabaseTableSchema }> {
     const whereRaw = options.whereRaw?.trim();
 
     const sql = `SELECT * FROM ${this.escapeId(tableName)}${
@@ -136,6 +155,71 @@ export default class DatabaseDriver implements BaseDriver {
     } LIMIT ? OFFSET ?;`;
 
     const binding = [options.limit, options.offset];
-    return await this.query({ sql, args: binding });
+    return {
+      data: await this.query({ sql, args: binding }),
+      schema: await this.tableSchema(tableName),
+    };
+  }
+
+  protected validateUpdateOperation(
+    ops: DatabaseTableOperation[],
+    validateSchema: DatabaseTableSchema
+  ) {
+    for (const op of ops) {
+      const { valid, reason } = validateOperation(op, validateSchema);
+      if (!valid) {
+        throw new Error(reason);
+      }
+    }
+  }
+
+  async updateTableData(
+    tableName: string,
+    ops: DatabaseTableOperation[],
+    validateSchema?: DatabaseTableSchema
+  ): Promise<DatabaseTableOperationReslt[]> {
+    if (validateSchema) {
+      this.validateUpdateOperation(ops, validateSchema);
+    }
+
+    const sqls = ops.map((op) => {
+      if (op.operation === "INSERT")
+        return generateInsertStatement(tableName, op.values);
+      if (op.operation === "DELETE")
+        return generateDeleteStatement(tableName, op.where);
+      if (op.operation === "UPDATE")
+        return generateUpdateStatement(tableName, op.where, op.values);
+      return "";
+    });
+
+    const result = await this.transaction(sqls);
+
+    const tmp: DatabaseTableOperationReslt[] = [];
+
+    for (let i = 0; i < result.length; i++) {
+      const r = result[i];
+      const op = ops[i];
+
+      if (op.operation === "UPDATE") {
+        const selectStatement = generateSelectOneWithConditionStatement(
+          tableName,
+          op.where
+        );
+
+        // This transform to make it friendly for sending via HTTP
+        const selectResult = await this.query(selectStatement);
+
+        tmp.push({
+          lastId: r.lastInsertRowid,
+          record: selectResult.rows[0],
+        });
+      } else {
+        tmp.push({
+          lastId: r.lastInsertRowid,
+        });
+      }
+    }
+
+    return tmp;
   }
 }

@@ -32,7 +32,7 @@ export default function TableColumnCombobox({
   useEffect(() => {
     if (tableName) {
       databaseDriver
-        .getTableSchema(tableName)
+        .tableSchema(tableName)
         .then(setSchema)
         .catch(() => {
           setSchema({

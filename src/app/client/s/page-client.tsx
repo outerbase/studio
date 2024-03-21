@@ -2,7 +2,7 @@
 
 import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
 import MainScreen from "@/components/main-connection";
-import DatabaseDriver from "@/drivers/DatabaseDriver";
+import DatabaseDriver from "@/drivers/turso-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
