@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import withDatabaseOperation, {
   DatabasePermission,
 } from "@/lib/with-database-ops";
-import { database_user_role, database_role, user } from "@/db/schema";
+import { database_user_role, database_role } from "@/db/schema";
 import { db } from "@/db";
 import zod from "zod";
 
@@ -30,28 +30,27 @@ function checkOwnerPermission(permission: DatabasePermission) {
   }
 }
 
-export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
-  const users = await db
-    .select({
-      id: user.id,
-      name: user.name,
-      role: {
-        id: database_role.id,
-        name: database_role.name,
-      },
-      createdAt: database_user_role.createdAt,
-      assignedBy: {
-        id: user.id,
-        name: user.name,
-      },
-    })
-    .from(database_user_role)
-    .innerJoin(user, eq(database_user_role.userId, user.id))
-    .innerJoin(database_role, eq(database_user_role.roleId, database_role.id))
-    .where(eq(database_user_role.databaseId, databaseInfo.id));
+async function getUserRoleInfo(userId: string, databaseId: string) {
+  return db.query.database_user_role.findFirst({
+    where: and(
+      eq(database_user_role.databaseId, databaseId),
+      eq(database_user_role.userId, userId)
+    ),
+    columns: {
+      roleId: true,
+    },
+  });
+}
 
-  return NextResponse.json({ users });
-});
+async function checkUserHasOwnerRole(roleId: string) {
+  const roleInfo = await db.query.database_role.findFirst({
+    where: eq(database_role.id, roleId),
+    columns: {
+      isOwner: true,
+    },
+  });
+  return roleInfo?.isOwner;
+}
 
 export const POST = withDatabaseOperation(
   async ({ user, body, database, permission }) => {
@@ -100,17 +99,9 @@ export const POST = withDatabaseOperation(
       );
     }
 
-    const existingUserRole = await db.query.database_user_role.findFirst({
-      where: and(
-        eq(database_user_role.databaseId, database.id),
-        eq(database_user_role.userId, userId)
-      ),
-      columns: {
-        roleId: true,
-      },
-    });
+    const userRole = await getUserRoleInfo(userId, database.id);
 
-    if (existingUserRole) {
+    if (userRole) {
       // Update the role if it exists
       await db
         .update(database_user_role)
@@ -156,15 +147,7 @@ export const DELETE = withDatabaseOperation(
 
     const { user: userId } = parsed.data;
 
-    const userRole = await db.query.database_user_role.findFirst({
-      where: and(
-        eq(database_user_role.databaseId, database.id),
-        eq(database_user_role.userId, userId)
-      ),
-      columns: {
-        roleId: true,
-      },
-    });
+    const userRole = await getUserRoleInfo(userId, database.id);
 
     if (!userRole || !userRole.roleId) {
       return NextResponse.json(
@@ -172,15 +155,10 @@ export const DELETE = withDatabaseOperation(
         { status: 404 }
       );
     }
-    // Check if the user being removed have an owner role
-    const roleInfo = await db.query.database_role.findFirst({
-      where: eq(database_role.id, userRole.roleId),
-      columns: {
-        isOwner: true,
-      },
-    });
-    // Only allow removal of owner if the current user is the database creator
-    if (roleInfo?.isOwner && database.userId !== user.id) {
+
+    const userHasOwnerRole = await checkUserHasOwnerRole(userRole.roleId);
+
+    if (userHasOwnerRole && database.userId !== user.id) {
       return NextResponse.json(
         {
           success: false,
