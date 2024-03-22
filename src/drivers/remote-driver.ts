@@ -1,4 +1,4 @@
-import { InStatement, ResultSet } from "@libsql/client/web";
+import { InStatement, ResultSet, Row } from "@libsql/client/web";
 import {
   BaseDriver,
   DatabaseSchemaItem,
@@ -14,6 +14,20 @@ import {
   ApiSchemaResponse,
 } from "@/lib/api-response-types";
 import { RequestOperationBody } from "@/lib/api/api-request-types";
+
+export function transformRawResult(raw: ResultSet): ResultSet {
+  const r = {
+    ...raw,
+    rows: raw.rows.map((r) =>
+      raw.columns.reduce((a, b, idx) => {
+        a[b] = r[idx];
+        return a;
+      }, {} as Row)
+    ),
+  };
+
+  return r;
+}
 
 export default class RemoteDriver implements BaseDriver {
   protected id: string = "";
@@ -52,7 +66,7 @@ export default class RemoteDriver implements BaseDriver {
       statement: stmt,
     });
 
-    return r.data;
+    return transformRawResult(r.data);
   }
 
   async transaction(stmt: InStatement[]) {
@@ -61,7 +75,7 @@ export default class RemoteDriver implements BaseDriver {
       statements: stmt,
     });
 
-    return r.data;
+    return r.data.map(transformRawResult);
   }
 
   close() {}

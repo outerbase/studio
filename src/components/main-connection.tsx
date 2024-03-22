@@ -10,13 +10,20 @@ import { useRouter } from "next/navigation";
 import { SchemaProvider } from "@/context/SchemaProvider";
 import ThemeProvider from "@/context/theme-provider";
 import { BaseDriver } from "@/drivers/base-driver";
+import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 
 export interface ConnectionCredential {
   url: string;
   token: string;
 }
 
-function MainConnection({ driver }: { driver: BaseDriver }) {
+function MainConnection({
+  driver,
+  color,
+}: {
+  driver: BaseDriver;
+  color: SavedConnectionLabel;
+}) {
   useEffect(() => {
     return () => {
       driver.close();
@@ -27,7 +34,7 @@ function MainConnection({ driver }: { driver: BaseDriver }) {
     <ThemeProvider>
       <DatabaseDriverProvider driver={driver}>
         <SchemaProvider>
-          <DatabaseGui />
+          <DatabaseGui color={color} />
         </SchemaProvider>
       </DatabaseDriverProvider>
     </ThemeProvider>
@@ -44,7 +51,10 @@ function InvalidSession() {
   return <div></div>;
 }
 
-function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
+function MainConnectionContainer({
+  driver,
+  color,
+}: Readonly<{ driver: BaseDriver; color: SavedConnectionLabel }>) {
   const router = useRouter();
 
   /**
@@ -68,7 +78,7 @@ function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
-          <MainConnection driver={driver} />
+          <MainConnection driver={driver} color={color} />
         </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
@@ -78,6 +88,12 @@ function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
   );
 }
 
-export default function MainScreen({ driver }: { driver: BaseDriver }) {
-  return <MainConnectionContainer driver={driver} />;
+export default function MainScreen({
+  driver,
+  color,
+}: {
+  driver: BaseDriver;
+  color: SavedConnectionLabel;
+}) {
+  return <MainConnectionContainer driver={driver} color={color} />;
 }
