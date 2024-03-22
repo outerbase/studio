@@ -1,8 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import withDatabaseOperation, {
-  DatabasePermission,
-} from "@/lib/with-database-ops";
+import withDatabaseOperation from "@/lib/with-database-ops";
 import { database_user_role, database_role } from "@/db/schema";
 import { db } from "@/db";
 import zod from "zod";
@@ -18,36 +16,18 @@ const deleteUserSchema = zod.object({
   user: zod.string(),
 });
 
-function checkOwnerPermission(permission: DatabasePermission) {
-  if (!permission.isOwner) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "You do not have permission",
-      },
-      { status: 403 }
-    );
-  }
-}
-
 async function getUserRoleInfo(userId: string, databaseId: string) {
   return db.query.database_user_role.findFirst({
     where: and(
       eq(database_user_role.databaseId, databaseId),
       eq(database_user_role.userId, userId)
     ),
-    columns: {
-      roleId: true,
-    },
   });
 }
 
 async function checkUserHasOwnerRole(roleId: string) {
   const roleInfo = await db.query.database_role.findFirst({
     where: eq(database_role.id, roleId),
-    columns: {
-      isOwner: true,
-    },
   });
   return roleInfo?.isOwner;
 }
@@ -66,9 +46,14 @@ export const POST = withDatabaseOperation(
       );
     }
 
-    const permissionError = checkOwnerPermission(permission);
-    if (permissionError) {
-      return permissionError;
+    if (!permission.isOwner) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "You do not have permission",
+        },
+        { status: 403 }
+      );
     }
 
     const { user: userId, role: roleId } = parsed.data;
@@ -86,10 +71,6 @@ export const POST = withDatabaseOperation(
 
     const roleInfo = await db.query.database_role.findFirst({
       where: (fields) => eq(fields.id, roleId),
-      columns: {
-        isOwner: true,
-        createdBy: true,
-      },
     });
 
     if (roleInfo?.isOwner && database.userId !== user.id) {
@@ -140,9 +121,14 @@ export const DELETE = withDatabaseOperation(
       );
     }
 
-    const permissionError = checkOwnerPermission(permission);
-    if (permissionError) {
-      return permissionError;
+    if (!permission.isOwner) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "You do not have permission",
+        },
+        { status: 403 }
+      );
     }
 
     const { user: userId } = parsed.data;
