@@ -123,7 +123,7 @@ export default function DatabaseGui({
               {
                 key: "setting",
                 name: "Setting",
-                content: <div className="p-2">Setting</div>,
+                content: <div className="p-2">Coming Soon</div>,
                 icon: LucideSettings,
               },
             ]}
