@@ -1,3 +1,4 @@
+import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 import { db } from "@/db";
 import { database } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";
@@ -28,5 +29,11 @@ export default async function SessionPage({
     return <div>Not found</div>;
   }
 
-  return <ClientPageBody token={session.id} name={databaseInfo.name ?? ""} />;
+  return (
+    <ClientPageBody
+      token={session.id}
+      name={databaseInfo.name ?? ""}
+      color={(databaseInfo?.color as SavedConnectionLabel) ?? "blue"}
+    />
+  );
 }

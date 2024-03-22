@@ -10,5 +10,5 @@ export default function ClientPageBody() {
     return new DatabaseDriver(config.url, config.token as string);
   }, []);
 
-  return <MainScreen driver={driver} />;
+  return <MainScreen driver={driver} color="blue" />;
 }

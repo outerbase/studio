@@ -5,7 +5,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useEffect, useState } from "react";
-import SchemaView from "./schema-sidebar";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 import TableDataContent from "./tabs/table-data-tab";
 import useMessageListener from "@/hooks/useMessageListener";
@@ -13,9 +12,20 @@ import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps } from "@/messages/openTabs";
 import QueryWindow from "@/components/tabs/query-tab";
 import SchemaEditorTab from "@/components/tabs/schema-editor-tab";
-import { LucideCode, LucideTable, LucideTableProperties } from "lucide-react";
+import {
+  LucideCode,
+  LucideDatabase,
+  LucideSettings,
+  LucideTable,
+  LucideTableProperties,
+} from "lucide-react";
+import SidebarTab from "./sidebar-tab";
+import SchemaView from "./schema-sidebar";
+import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 
-export default function DatabaseGui() {
+export default function DatabaseGui({
+  color,
+}: Readonly<{ color: SavedConnectionLabel }>) {
   const DEFAULT_WIDTH = 300;
 
   const [defaultWidthPercentage, setDefaultWidthPercentage] = useState(20);
@@ -101,9 +111,25 @@ export default function DatabaseGui() {
     <div className="h-screen w-screen flex flex-col">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
-          <SchemaView />
+          <SidebarTab
+            color={color}
+            tabs={[
+              {
+                key: "database",
+                name: "Database",
+                content: <SchemaView />,
+                icon: LucideDatabase,
+              },
+              {
+                key: "setting",
+                name: "Setting",
+                content: <div className="p-2">Setting</div>,
+                icon: LucideSettings,
+              },
+            ]}
+          />
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle />
         <ResizablePanel defaultSize={100 - defaultWidthPercentage}>
           <WindowTabs
             tabs={tabs}

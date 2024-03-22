@@ -8,20 +8,22 @@ import { useMemo } from "react";
 
 export default function ClientPageBody() {
   const params = useSearchParams();
-
-  const driver = useMemo(() => {
+  const conn = useMemo(() => {
     const connectionParams = params.get("p");
     if (!connectionParams) return null;
 
     const conn = SavedConnectionLocalStorage.get(connectionParams);
-    if (!conn) return null;
-
-    return new DatabaseDriver(conn.config.url, conn.config.token);
+    return conn;
   }, [params]);
+
+  const driver = useMemo(() => {
+    if (!conn) return null;
+    return new DatabaseDriver(conn.config.url, conn.config.token);
+  }, [conn]);
 
   if (!driver) {
     return <div>Something wrong</div>;
   }
 
-  return <MainScreen driver={driver} />;
+  return <MainScreen driver={driver} color={conn?.label ?? "blue"} />;
 }
