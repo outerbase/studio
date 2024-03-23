@@ -17,13 +17,13 @@ export type Provider = ObjectValues<typeof PROVIDER>;
 
 export const github = new GitHub(
   env.GITHUB_CLIENT_ID ?? "",
-  env.GITHUB_CLIENT_SECRET ?? ""
+  env.GITHUB_CLIENT_SECRET ?? "",
 );
 
 export const google = new Google(
   env.GOOGLE_CLIENT_ID ?? "",
   env.GOOGLE_CLIENT_SECRET ?? "",
-  `${env.BASE_URL}/login/google/callback`
+  `${env.BASE_URL}/login/google/callback`,
 );
 
 const adapter = new LibSQLAdapter(connection, {
@@ -41,9 +41,11 @@ export const lucia = new Lucia(adapter, {
   },
 
   getUserAttributes(attr) {
+    console.log(attr);
     return {
       name: attr.name,
       picture: attr.picture,
+      storageUsage: attr.storage_usage,
     };
   },
 });
@@ -97,7 +99,7 @@ export const getSessionFromCookie = cache(async function () {
       cookies().set(
         sessionCookie.name,
         sessionCookie.value,
-        sessionCookie.attributes
+        sessionCookie.attributes,
       );
     }
     if (!result.session) {
@@ -105,7 +107,7 @@ export const getSessionFromCookie = cache(async function () {
       cookies().set(
         sessionCookie.name,
         sessionCookie.value,
-        sessionCookie.attributes
+        sessionCookie.attributes,
       );
     }
     // eslint-disable-next-line no-empty
@@ -123,4 +125,5 @@ declare module "lucia" {
 interface DatabaseUserAttributes {
   name: string;
   picture: string;
+  storage_usage: number;
 }
