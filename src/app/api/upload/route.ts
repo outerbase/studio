@@ -1,5 +1,5 @@
 import { md5 } from "@/lib/md5";
-import { apiError, concat } from "@/lib/utils";
+import { concat } from "@/lib/utils";
 import withUser from "@/lib/with-user";
 import { NextResponse } from "next/server";
 import { ok, err } from "@justmiracle/result";
@@ -8,36 +8,39 @@ import { db } from "@/db";
 import { user as userTable, user_file } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generateId } from "lucia";
+import { ApiError } from "@/lib/api-error";
+import { HttpStatus } from "@/constants/http-status";
 
 // 500MB
-const STORAGE_LIMIT = 500 * 1024 * 1024;
+const STORAGE_LIMIT = 500 * 1000 * 1000;
 
 export const POST = withUser(async ({ req, user }) => {
   const formData = await req.formData().then(ok).catch(err);
 
   if (formData.error) {
-    return apiError({
+    throw new ApiError({
+      status: HttpStatus.BAD_REQUEST,
       message: "Something went wrong, please try again later",
       detailedMessage: formData.error.message,
-      status: 500,
     });
   }
 
   const file = formData.value.get("file");
 
   if (!(file instanceof File)) {
-    return apiError({
+    throw new ApiError({
+      status: HttpStatus.BAD_REQUEST,
       message: "Invalid file",
-      status: 400,
     });
   }
 
   const newStorageUsage = user.storageUsage + file.size;
+  console.log(user);
 
   if (newStorageUsage > STORAGE_LIMIT) {
-    return apiError({
+    throw new ApiError({
+      status: HttpStatus.INSUFFICIENT_STORAGE,
       message: "Storage limit exceeded",
-      status: 400,
     });
   }
 
@@ -60,10 +63,10 @@ export const POST = withUser(async ({ req, user }) => {
     .catch(err);
 
   if (uploadToR2.error)
-    return apiError({
+    throw new ApiError({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: "Failed to upload your image",
       detailedMessage: uploadToR2.error.message,
-      status: 500,
     });
 
   const updateUserStorageUsageQuery = db
@@ -87,10 +90,10 @@ export const POST = withUser(async ({ req, user }) => {
     .catch(err);
 
   if (batch.error) {
-    return apiError({
+    throw new ApiError({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: "Failed to upload your image",
       detailedMessage: batch.error.message,
-      status: 500,
     });
   }
 

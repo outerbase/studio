@@ -1,10 +1,9 @@
 import { env } from "@/env";
 import { type ClassValue, clsx } from "clsx";
-import { NextResponse } from "next/server";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -42,33 +41,10 @@ export function getFileUrl(filename: string) {
   return url.toString();
 }
 
-/**
- * Return error that is useful for the client
- *
- * @param message - A human readable error message
- * @param detailedMessage - A detailed error message for debugging
- * @param status - The HTTP status code
- *
- * @returns NextResponse
- *
- * @example
- * return apiError("Failed to upload", 500)
- */
-export function apiError({
-  message,
-  detailedMessage = "",
-  status,
-}: {
+
+export interface ApiErrorResponse {
   message: string;
   detailedMessage?: string;
-  status: number;
-}) {
-  return NextResponse.json({ error: { message, detailedMessage } }, { status });
-}
-
-export interface ApiError {
-  message: string;
-  detailedMessage: string;
 }
 
 /**
@@ -94,7 +70,7 @@ export async function safeFetch<Success>(
     }
   | {
       data: null;
-      error: ApiError;
+      error: ApiErrorResponse;
       response: Response;
     }
 > {
