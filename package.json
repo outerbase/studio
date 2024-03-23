@@ -20,9 +20,11 @@
     "@libsql/client": "^0.5.3"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.540.0",
     "@codemirror/lang-sql": "^6.5.5",
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/sortable": "^8.0.0",
+    "@justmiracle/result": "^1.2.0",
     "@lezer/common": "^1.2.1",
     "@lezer/lr": "^1.4.0",
     "@libsql/client": "^0.5.3",
