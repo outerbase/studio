@@ -18,6 +18,14 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string().optional(),
 
     ENCRYPTION_KEY: z.string().min(30),
+
+    // R2
+    // Don't include the bucket name in the URL
+    R2_URL: z.string().min(1),
+    R2_PUBLIC_URL: z.string().min(1),
+    R2_BUCKET: z.string().min(1),
+    R2_ACCESS_KEY: z.string().min(1),
+    R2_SECRET_ACCESS_KEY: z.string().min(1),
   },
   experimental__runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -27,5 +35,12 @@ export const env = createEnv({
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+
+    // R2
+    R2_URL: process.env.R2_URL,
+    R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
+    R2_BUCKET: process.env.R2_BUCKET,
+    R2_ACCESS_KEY: process.env.R2_ACCESS_KEY,
+    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
   },
 });
