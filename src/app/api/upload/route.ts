@@ -1,4 +1,4 @@
-import { md5 } from "@/lib/md5";
+import { hash } from "@/lib/hash-edge";
 import { concat } from "@/lib/utils";
 import withUser from "@/lib/with-user";
 import { NextResponse } from "next/server";
@@ -10,6 +10,8 @@ import { eq, sql } from "drizzle-orm";
 import { generateId } from "lucia";
 import { ApiError } from "@/lib/api-error";
 import { HttpStatus } from "@/constants/http-status";
+
+export const runtime = "edge";
 
 // 500MB
 const STORAGE_LIMIT = 500 * 1000 * 1000;
@@ -27,7 +29,7 @@ export const POST = withUser(async ({ req, user }) => {
 
   const file = formData.value.get("file");
 
-  if (!(file instanceof File)) {
+  if (!file || !(file instanceof Blob)) {
     throw new ApiError({
       status: HttpStatus.BAD_REQUEST,
       message: "Invalid file",
@@ -50,7 +52,7 @@ export const POST = withUser(async ({ req, user }) => {
   const buffer = Buffer.from(await file.arrayBuffer());
 
   // hash the content and append the file extension
-  const hashedFilename = concat(md5(buffer), ".", fileExtenstion);
+  const hashedFilename = concat(await hash(buffer), ".", fileExtenstion);
 
   const uploadToR2 = await R2.upload({
     buffer,
