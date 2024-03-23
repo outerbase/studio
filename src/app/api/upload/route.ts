@@ -80,7 +80,7 @@ export const POST = withUser(async ({ req, user }) => {
     user_id: user.id,
     filename: file.name,
     hashed: hashedFilename,
-    path: uploadToR2.value,
+    path: uploadToR2.value.path,
     size_in_byte: file.size,
     created_at: Date.now(),
   });
@@ -98,5 +98,5 @@ export const POST = withUser(async ({ req, user }) => {
     });
   }
 
-  return NextResponse.json({ url: uploadToR2.value });
+  return NextResponse.json({ url: uploadToR2.value.url });
 });
