@@ -13,7 +13,8 @@
     "test:watch": "jest --watch",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:migrate": "tsx src/db/migrate.ts",
-    "generate-random-key": "tsx src/cli/generate-aes-key.ts"
+    "generate-random-key": "tsx src/cli/generate-aes-key.ts",
+    "staged": "npm run tsc && npm run lint && jest"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
