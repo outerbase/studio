@@ -37,7 +37,8 @@ export function concat(...inputs: string[]) {
  * // make sure to set the R2_PUBLIC_URL in the .env
  */
 export function getFileUrl(filename: string) {
-  const url = new URL(filename, env.R2_PUBLIC_URL);
+  // If the R2_PUBLIC_URL is not set fallback to a dummy url
+  const url = new URL(filename, env.R2_PUBLIC_URL ?? "no-public-url.com");
   return url.toString();
 }
 

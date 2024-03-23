@@ -10,6 +10,7 @@ import { eq, sql } from "drizzle-orm";
 import { generateId } from "lucia";
 import { ApiError } from "@/lib/api-error";
 import { HttpStatus } from "@/constants/http-status";
+import { env } from "@/env";
 
 export const runtime = "edge";
 
@@ -17,6 +18,21 @@ export const runtime = "edge";
 const STORAGE_LIMIT = 500 * 1000 * 1000;
 
 export const POST = withUser(async ({ req, user }) => {
+  const envs = [
+    env.R2_URL,
+    env.R2_PUBLIC_URL,
+    env.R2_BUCKET,
+    env.R2_ACCESS_KEY,
+    env.R2_SECRET_ACCESS_KEY,
+  ];
+
+  if (envs.some((env) => !env)) {
+    throw new ApiError({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: "R2 is not configured!",
+    });
+  }
+
   const formData = await req.formData().then(ok).catch(err);
 
   if (formData.error) {

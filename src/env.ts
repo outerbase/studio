@@ -21,11 +21,11 @@ export const env = createEnv({
 
     // R2
     // Don't include the bucket name in the URL
-    R2_URL: z.string().min(1),
-    R2_PUBLIC_URL: z.string().min(1),
-    R2_BUCKET: z.string().min(1),
-    R2_ACCESS_KEY: z.string().min(1),
-    R2_SECRET_ACCESS_KEY: z.string().min(1),
+    R2_URL: z.string().optional(),
+    R2_PUBLIC_URL: z.string().optional(),
+    R2_BUCKET: z.string().optional(),
+    R2_ACCESS_KEY: z.string().optional(),
+    R2_SECRET_ACCESS_KEY: z.string().optional(),
   },
   experimental__runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
