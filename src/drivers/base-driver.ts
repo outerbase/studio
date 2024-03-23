@@ -1,4 +1,19 @@
-import { InStatement, ResultSet } from "@libsql/client/web";
+import { TableColumnDataType } from "@/components/table-optimized";
+import { InStatement } from "@libsql/client/web";
+
+export type DatabaseRow = Record<string, unknown>;
+
+export interface DatabaseHeader {
+  name: string;
+  originalType: string | null;
+  type: TableColumnDataType;
+}
+export interface DatabaseResultSet {
+  rows: DatabaseRow[];
+  headers: DatabaseHeader[];
+  rowsAffected: number;
+  lastInsertRowid?: number;
+}
 
 export interface SelectFromTableOptions {
   whereRaw?: string;
@@ -100,7 +115,7 @@ export type DatabaseTableOperation =
   | DatabaseTableOperationDelete;
 
 export interface DatabaseTableOperationReslt {
-  lastId?: bigint;
+  lastId?: number;
   record?: Record<string, DatabaseValue>;
 }
 
@@ -108,8 +123,8 @@ export abstract class BaseDriver {
   abstract getEndpoint(): string;
   abstract close(): void;
 
-  abstract query(stmt: InStatement): Promise<ResultSet>;
-  abstract transaction(stmts: InStatement[]): Promise<ResultSet[]>;
+  abstract query(stmt: InStatement): Promise<DatabaseResultSet>;
+  abstract transaction(stmts: InStatement[]): Promise<DatabaseResultSet[]>;
 
   abstract schemas(): Promise<DatabaseSchemaItem[]>;
   abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
@@ -117,7 +132,7 @@ export abstract class BaseDriver {
   abstract selectTable(
     tableName: string,
     options: SelectFromTableOptions
-  ): Promise<{ data: ResultSet; schema: DatabaseTableSchema }>;
+  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }>;
 
   abstract updateTableData(
     tableName: string,

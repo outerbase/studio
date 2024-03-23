@@ -2,7 +2,7 @@
 
 import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
 import MainScreen from "@/components/main-connection";
-import DatabaseDriver from "@/drivers/turso-driver";
+import TursoDriver from "@/drivers/turso-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -18,7 +18,7 @@ export default function ClientPageBody() {
 
   const driver = useMemo(() => {
     if (!conn) return null;
-    return new DatabaseDriver(conn.config.url, conn.config.token);
+    return new TursoDriver(conn.config.url, conn.config.token);
   }, [conn]);
 
   if (!driver) {
