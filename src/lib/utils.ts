@@ -41,7 +41,6 @@ export function getFileUrl(filename: string) {
   return url.toString();
 }
 
-
 export interface ApiErrorResponse {
   message: string;
   detailedMessage?: string;

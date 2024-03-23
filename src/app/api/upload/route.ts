@@ -6,7 +6,7 @@ import { ok, err } from "@justmiracle/result";
 import { R2 } from "@/lib/r2";
 import { db } from "@/db";
 import { user as userTable, user_file } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { generateId } from "lucia";
 import { ApiError } from "@/lib/api-error";
 import { HttpStatus } from "@/constants/http-status";
@@ -35,7 +35,6 @@ export const POST = withUser(async ({ req, user }) => {
   }
 
   const newStorageUsage = user.storageUsage + file.size;
-  console.log(user);
 
   if (newStorageUsage > STORAGE_LIMIT) {
     throw new ApiError({
@@ -71,7 +70,7 @@ export const POST = withUser(async ({ req, user }) => {
 
   const updateUserStorageUsageQuery = db
     .update(userTable)
-    .set({ storageUsage: newStorageUsage })
+    .set({ storageUsage: sql`${userTable.storageUsage} + ${file.size}` })
     .where(eq(userTable.id, user.id));
 
   const insertFileQuery = db.insert(user_file).values({

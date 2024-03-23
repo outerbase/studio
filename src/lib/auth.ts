@@ -41,7 +41,6 @@ export const lucia = new Lucia(adapter, {
   },
 
   getUserAttributes(attr) {
-    console.log(attr);
     return {
       name: attr.name,
       picture: attr.picture,
