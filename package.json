@@ -13,15 +13,18 @@
     "test:watch": "jest --watch",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:migrate": "tsx src/db/migrate.ts",
-    "generate-random-key": "tsx src/cli/generate-aes-key.ts"
+    "generate-random-key": "tsx src/cli/generate-aes-key.ts",
+    "staged": "npm run tsc && npm run lint && jest"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.540.0",
     "@codemirror/lang-sql": "^6.5.5",
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/sortable": "^8.0.0",
+    "@justmiracle/result": "^1.2.0",
     "@lezer/common": "^1.2.1",
     "@lezer/lr": "^1.4.0",
     "@libsql/client": "^0.5.3",
