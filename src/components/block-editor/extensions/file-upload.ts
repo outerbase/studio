@@ -1,14 +1,14 @@
-// Uploads a file to tmpfiles.org and returns the URL to the uploaded file.
-export async function uploadFile(file: File) {
-  const body = new FormData();
-  body.append("file", file);
+import { uploadFile as uploadUserFile } from "@/lib/utils";
 
-  const ret = await fetch("https://tmpfiles.org/api/v1/upload", {
-    method: "POST",
-    body: body,
-  });
-  return (await ret.json()).data.url.replace(
-    "tmpfiles.org/",
-    "tmpfiles.org/dl/",
-  );
+export async function uploadFile(file: File) {
+  const { data, error } = await uploadUserFile(file);
+
+  if (error) {
+    // handle error here, throwing is okay here, it will be caught by the block editor
+    // TODO: we should toast the error message
+    console.error(error);
+    throw new Error(error.message);
+  }
+
+  return data.url;
 }
