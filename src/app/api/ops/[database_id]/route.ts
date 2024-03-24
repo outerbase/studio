@@ -8,6 +8,8 @@ import handleUpdateTableDataRequest from "./handle-update-table-data";
 import handleSchemaRequest from "./handle-schema";
 import { RequestOperationBody } from "@/lib/api/api-request-types";
 
+export const runtime = "edge";
+
 export const POST = withDatabaseOperation<RequestOperationBody>(async function (
   props
 ) {
