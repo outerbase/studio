@@ -11,9 +11,9 @@ import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
-import React, { Fragment, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { DatabaseValue } from "@/drivers/base-driver";
-import { BlockEditorSheet, useBlockEditorSheet } from "./block-editor";
+import { useBlockEditor } from "@/context/block-editor-provider";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -22,7 +22,7 @@ interface ResultTableProps {
 
 export default function ResultTable({ data, tableName }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
-  const { handlers, blockEditorSheetProps } = useBlockEditorSheet();
+  const { openBlockEditor } = useBlockEditor();
 
   const renderCell = useCallback(
     ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
@@ -173,11 +173,10 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         {
           title: "Edit with Block Editor",
           onClick: () => {
-            handlers.initialBlocks(getFocusValue() as string);
-            handlers.onSave((json) => {
-              setFocusValue(json);
+            openBlockEditor({
+              initialContent: getFocusValue() as string,
+              onSave: setFocusValue,
             });
-            handlers.open();
           },
         },
         {
@@ -250,7 +249,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, handlers],
+    [data, tableName, copyCallback, pasteCallback, openBlockEditor],
   );
 
   const onKeyDown = useCallback(
@@ -267,19 +266,15 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
   );
 
   return (
-    <Fragment>
-      <BlockEditorSheet {...blockEditorSheetProps} />
-
-      <OptimizeTable
-        internalState={data}
-        onContextMenu={onCellContextMenu}
-        onHeaderContextMenu={onHeaderContextMenu}
-        stickyHeaderIndex={stickyHeaderIndex}
-        renderAhead={20}
-        renderCell={renderCell}
-        rowHeight={35}
-        onKeyDown={onKeyDown}
-      />
-    </Fragment>
+    <OptimizeTable
+      internalState={data}
+      onContextMenu={onCellContextMenu}
+      onHeaderContextMenu={onHeaderContextMenu}
+      stickyHeaderIndex={stickyHeaderIndex}
+      renderAhead={20}
+      renderCell={renderCell}
+      rowHeight={35}
+      onKeyDown={onKeyDown}
+    />
   );
 }

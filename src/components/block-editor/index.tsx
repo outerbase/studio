@@ -1,9 +1,6 @@
 export { BlockEditor, type BlockEditorProps } from "./editor";
-export {
-  useBlockEditorSheet,
-  BlockEditorSheet,
-  type BlockEditorSheetProps,
-} from "./sheet";
+export { BlockEditorSheet, type BlockEditorSheetProps } from "./sheet";
+export { type Block } from "./extensions";
 
 export const CONTENT_FORMAT = {
   BLOCK_NOTE: "BLOCK_NOTE",
@@ -11,5 +8,5 @@ export const CONTENT_FORMAT = {
 
 export interface BlockContent<TContent = any> {
   format: "BLOCK_NOTE";
-  content: TContent[];
+  content: TContent[] | undefined;
 }
