@@ -19,6 +19,14 @@ import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
 import QuickConnect from "./quick-connect";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { LucideChevronDown } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 function ConnectionListSection({
   data,
@@ -178,14 +186,60 @@ export default function ConnectionList({
   return (
     <>
       <div className="px-8 py-2 border-b">
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            setShowAddConnection(true);
-          }}
-        >
-          New Connection
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={"ghost"}
+              // onClick={() => {
+              //   setShowAddConnection(true);
+              // }}
+            >
+              New Connection
+              <LucideChevronDown className="ml-2 w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[300px]">
+            <DropdownMenuItem>
+              <div className="flex gap-4 px-2 items-center h-12">
+                <img src="/turso.png" alt="turso" className="w-8 h-8" />
+                <div>
+                  <div className="font-bold">Turso</div>
+                  <div className="text-xs opacity-50">SQLite for Product</div>
+                </div>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <div className="flex gap-4 px-2 items-center h-12">
+                <img src="/rqlite.png" alt="turso" className="w-8 h-8" />
+                <div>
+                  <div className="font-bold">Rqlite</div>
+                  <div className="text-xs opacity-50">
+                    Distributed database built on SQLite
+                  </div>
+                </div>
+              </div>
+            </DropdownMenuItem>
+            <Separator />
+            <DropdownMenuItem disabled>
+              <div className="flex gap-4 px-2 items-center h-12 grayscale">
+                <img src="/rqlite.png" alt="turso" className="w-8 h-8" />
+                <div>
+                  <div className="font-bold">PlanetScale</div>
+                  <div className="text-xs">Coming Soon on v0.4.0</div>
+                </div>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              <div className="flex gap-4 px-2 items-center h-12 grayscale">
+                <img src="/rqlite.png" alt="turso" className="w-8 h-8" />
+                <div>
+                  <div className="font-bold">Neon</div>
+                  <div className="text-xs">Coming Soon on v0.4.0</div>
+                </div>
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button
           variant={"ghost"}
@@ -205,6 +259,13 @@ export default function ConnectionList({
         />
       )}
 
+      <ConnectionListSection
+        name="Local"
+        data={localSavedConns}
+        onRemove={setRemoveConnection}
+        onEdit={setEditConnection}
+      />
+
       {user && (
         <ConnectionListSection
           name="Remote"
@@ -213,13 +274,6 @@ export default function ConnectionList({
           onEdit={setEditConnection}
         />
       )}
-
-      <ConnectionListSection
-        name="Local"
-        data={localSavedConns}
-        onRemove={setRemoveConnection}
-        onEdit={setEditConnection}
-      />
     </>
   );
 }

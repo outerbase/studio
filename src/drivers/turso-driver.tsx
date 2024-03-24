@@ -4,9 +4,8 @@ import {
   Client,
   InStatement,
   ResultSet,
-  Row,
 } from "@libsql/client/web";
-import { DatabaseHeader, DatabaseResultSet } from "./base-driver";
+import { DatabaseHeader, DatabaseResultSet, DatabaseRow } from "./base-driver";
 import SqliteLikeBaseDriver from "./sqlite-base-driver";
 
 export function transformRawResult(raw: ResultSet): DatabaseResultSet {
@@ -14,7 +13,7 @@ export function transformRawResult(raw: ResultSet): DatabaseResultSet {
     raw.columns.reduce((a, b, idx) => {
       a[b] = r[idx];
       return a;
-    }, {} as Row)
+    }, {} as DatabaseRow)
   );
 
   const headers: DatabaseHeader[] = raw.columns.map((colName, colIdx) => {

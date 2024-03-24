@@ -1,10 +1,11 @@
 import parseSafeJson from "../../lib/json-safe";
 
+export type SupportedDriver = "turso" | "rqlite";
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 
 export const CONNECTION_LABEL_COLORS: Record<SavedConnectionLabel, string> = {
-  gray: "bg-gray-200",
+  gray: "bg-gray-200 dark:bg-gray-500",
   red: "bg-red-500",
   yellow: "bg-yellow-500",
   green: "bg-green-800",
@@ -13,6 +14,7 @@ export const CONNECTION_LABEL_COLORS: Record<SavedConnectionLabel, string> = {
 
 export interface SavedConnectionItem {
   id: string;
+  driver?: SupportedDriver;
   storage: SavedConnectionStorage;
   name: string;
   description?: string;

@@ -30,8 +30,8 @@ export default function ConnectionItemCard({
       <ContextMenuTrigger>
         <Link
           className={cn(
-            "border rounded w-[275px] bg-white flex overflow-hidden hover:border-black hover:bg-gray-100",
-            open ? "border-black bg-gray-100" : ""
+            "border rounded w-[275px] flex overflow-hidden hover:border-secondary hover:bg-secondary",
+            open ? "border-secondary bg-secondary" : ""
           )}
           href={
             conn.storage === "local"
@@ -51,7 +51,7 @@ export default function ConnectionItemCard({
           <div className="p-2">
             <h2 className="line-clamp-1">{conn.name}</h2>
             <p className="text-gray-600 text-xs line-clamp-2 h-8">
-              {conn.description ?? ""}
+              {conn.description || <i>No description</i>}
             </p>
           </div>
         </Link>

@@ -104,7 +104,7 @@ export default function SavedConnectionConfig({
         <Textarea
           placeholder={showLockedCredential && !token ? "✱✱✱✱✱✱✱✱✱" : "Token"}
           value={token}
-          className={showLockedCredential && !token ? "bg-gray-200" : ""}
+          className={showLockedCredential && !token ? "bg-secondary" : ""}
           onChange={(e) => setToken(e.currentTarget.value)}
         />
       </div>

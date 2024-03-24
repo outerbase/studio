@@ -12,7 +12,7 @@ const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
   description: zod.string(),
   label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
-  driver: zod.enum(["turso"]),
+  driver: zod.enum(["turso", "rqlite"]),
   config: zod.object({
     url: zod.string().min(5),
     token: zod.string(),
