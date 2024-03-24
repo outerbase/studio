@@ -122,15 +122,3 @@ export async function uploadFile(file: File) {
     body: formData,
   });
 }
-
-/**
- * Funny workaround to make a scoped feature
- */
-export function scoped<T>(fn: () => T): T {
-  return fn();
-}
-
-/**
- * Doesn't do anything :)
- */
-export function noop() {}

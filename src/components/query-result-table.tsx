@@ -11,7 +11,7 @@ import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import React, { Fragment, useCallback, useState } from "react";
 import { DatabaseValue } from "@/drivers/base-driver";
 import { BlockEditorSheet, useBlockEditorSheet } from "./block-editor";
 

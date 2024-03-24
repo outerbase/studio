@@ -25,7 +25,6 @@ export function BlockEditorSheet({
   initialContent,
 }: BlockEditorSheetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  console.log("initialContent", initialContent);
 
   const editor = useCreateBlockNote(
     {
@@ -47,6 +46,7 @@ export function BlockEditorSheet({
   return (
     <Sheet open={open}>
       <SheetContent
+        hideCloseButton
         onInteractOutside={() => {
           // shake the container to indicate the user that the sheet is not closable
           containerRef.current?.classList.add("animate-shake");
@@ -54,11 +54,11 @@ export function BlockEditorSheet({
             containerRef.current?.classList.remove("animate-shake");
           }, 500);
         }}
-        className="p-5 py-8 border-none sm:max-w-3xl bg-transparent flex"
+        className="p-5 border-none sm:max-w-[70vw] bg-transparent flex"
       >
         <div
           ref={containerRef}
-          className="bg-background flex flex-col rounded-3xl py-6 px-7 flex-1"
+          className="bg-background flex flex-col rounded-md py-6 px-7 flex-1 border"
         >
           <div className="flex items-center justify-between">
             <div className="text-xl font-semibold">Block Editor</div>
@@ -66,14 +66,14 @@ export function BlockEditorSheet({
               <Button variant="secondary" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>Save</Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
 
           <Separator className="my-5" />
 
           <ScrollArea className="flex-1">
-            <div>
+            <div className="max-w-prose mx-auto">
               <BlockEditor editor={editor} />
             </div>
           </ScrollArea>
@@ -86,9 +86,9 @@ export function BlockEditorSheet({
 export function useBlockEditorSheet() {
   const [open, setOpen] = useState(false);
 
-  const [initialContent, setInitialContent] = useState<BlockContent | undefined>(
-    undefined,
-  );
+  const [initialContent, setInitialContent] = useState<
+    BlockContent | undefined
+  >(undefined);
 
   const [callbacks, setCallbacks] = useState<{
     onSave: (json: string) => void;
