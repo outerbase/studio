@@ -169,10 +169,25 @@ export default abstract class SqliteLikeBaseDriver extends BaseDriver {
           lastId: r.lastInsertRowid,
           record: selectResult.rows[0],
         });
+      } else if (op.operation === "INSERT") {
+        if (op.autoIncrementPkColumn) {
+          const selectStatement = generateSelectOneWithConditionStatement(
+            tableName,
+            { [op.autoIncrementPkColumn]: r.lastInsertRowid }
+          );
+
+          // This transform to make it friendly for sending via HTTP
+          const selectResult = await this.query(selectStatement);
+
+          tmp.push({
+            record: selectResult.rows[0],
+            lastId: r.lastInsertRowid,
+          });
+        }
+
+        tmp.push({});
       } else {
-        tmp.push({
-          lastId: r.lastInsertRowid,
-        });
+        tmp.push({});
       }
     }
 
