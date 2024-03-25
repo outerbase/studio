@@ -1,0 +1,87 @@
+.bn-container {
+  --be-foreground: #3f3f3f;
+  --be-background: #ffffff;
+  --bn-font-family: inherit;
+
+  --bn-colors-editor-text: var(--be-foreground);
+  --bn-colors-editor-background: var(--be-background);
+  --bn-colors-menu-text: var(--be-foreground);
+  --bn-colors-menu-background: var(--be-background);
+  --bn-colors-tooltip-text: var(--be-foreground);
+  --bn-colors-tooltip-background: #efefef;
+  --bn-colors-hovered-text: var(--be-foreground);
+  --bn-colors-hovered-background: #efefef;
+  --bn-colors-selected-text: var(--be-background);
+  --bn-colors-selected-background: var(--be-foreground);
+  --bn-colors-disabled-text: #afafaf;
+  --bn-colors-disabled-background: #efefef;
+
+  --bn-colors-shadow: #cfcfcf;
+  --bn-colors-border: var(--border);
+  --bn-colors-side-menu: #cfcfcf;
+
+  --bn-colors-highlights-gray-text: #9b9a97;
+  --bn-colors-highlights-gray-background: #ebeced;
+  --bn-colors-highlights-brown-text: #64473a;
+  --bn-colors-highlights-brown-background: #e9e5e3;
+  --bn-colors-highlights-red-text: #e03e3e;
+  --bn-colors-highlights-red-background: #fbe4e4;
+  --bn-colors-highlights-orange-text: #d9730d;
+  --bn-colors-highlights-orange-background: #f6e9d9;
+  --bn-colors-highlights-yellow-text: #dfab01;
+  --bn-colors-highlights-yellow-background: #fbf3db;
+  --bn-colors-highlights-green-text: #4d6461;
+  --bn-colors-highlights-green-background: #ddedea;
+  --bn-colors-highlights-blue-text: #0b6e99;
+  --bn-colors-highlights-blue-background: #ddebf1;
+  --bn-colors-highlights-purple-text: #6940a5;
+  --bn-colors-highlights-purple-background: #eae4f2;
+  --bn-colors-highlights-pink-text: #ad1a72;
+  --bn-colors-highlights-pink-background: #f4dfeb;
+
+  --bn-border-radius: 6px;
+}
+
+.dark .bn-container {
+  --be-foreground: #f8fafc;
+  --be-background: #050a17;
+  --bn-font-family: inherit;
+
+  --bn-colors-editor-text: var(--be-foreground);
+  --bn-colors-editor-background: var(--be-background);
+  /* --bn-colors-menu-text: var(--be-foreground); */
+  /* --bn-colors-menu-background: var(--be-background); */
+  /* --bn-colors-tooltip-text: var(--be-foreground); */
+  /* --bn-colors-tooltip-background: #efefef; */
+  /* --bn-colors-hovered-text: var(--be-foreground); */
+  /* --bn-colors-hovered-background: #efefef; */
+  /* --bn-colors-selected-text: var(--be-background); */
+  /* --bn-colors-selected-background: var(--be-foreground); */
+  /* --bn-colors-disabled-text: #afafaf; */
+  /* --bn-colors-disabled-background: #efefef; */
+
+  /* --bn-colors-shadow: #cfcfcf; */
+  /* --bn-colors-border: var(--border); */
+  /* --bn-colors-side-menu: #cfcfcf; */
+
+  /* --bn-colors-highlights-gray-text: #9b9a97; */
+  /* --bn-colors-highlights-gray-background: #ebeced; */
+  /* --bn-colors-highlights-brown-text: #64473a; */
+  /* --bn-colors-highlights-brown-background: #e9e5e3; */
+  /* --bn-colors-highlights-red-text: #e03e3e; */
+  /* --bn-colors-highlights-red-background: #fbe4e4; */
+  /* --bn-colors-highlights-orange-text: #d9730d; */
+  /* --bn-colors-highlights-orange-background: #f6e9d9; */
+  /* --bn-colors-highlights-yellow-text: #dfab01; */
+  /* --bn-colors-highlights-yellow-background: #fbf3db; */
+  /* --bn-colors-highlights-green-text: #4d6461; */
+  /* --bn-colors-highlights-green-background: #ddedea; */
+  /* --bn-colors-highlights-blue-text: #0b6e99; */
+  /* --bn-colors-highlights-blue-background: #ddebf1; */
+  /* --bn-colors-highlights-purple-text: #6940a5; */
+  /* --bn-colors-highlights-purple-background: #eae4f2; */
+  /* --bn-colors-highlights-pink-text: #ad1a72; */
+  /* --bn-colors-highlights-pink-background: #f4dfeb; */
+
+  --bn-border-radius: 6px;
+}
