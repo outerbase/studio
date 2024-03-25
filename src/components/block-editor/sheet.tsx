@@ -25,7 +25,7 @@ export function BlockEditorSheet({ configs, open }: BlockEditorSheetProps) {
       schema,
       initialContent: configs?.initialContent?.content,
     },
-    [configs?.initialContent?.content],
+    [configs?.initialContent?.content]
   );
 
   const handleSave = useCallback(() => {
@@ -47,7 +47,7 @@ export function BlockEditorSheet({ configs, open }: BlockEditorSheetProps) {
             containerRef.current?.classList.remove("animate-shake");
           }, 500);
         }}
-        className="border-none sm:max-w-[70vw] bg-transparent flex p-0"
+        className="border-none sm:max-w-[1000px] sm:w-[70vw] bg-transparent flex p-0"
       >
         <div
           ref={containerRef}
@@ -66,7 +66,7 @@ export function BlockEditorSheet({ configs, open }: BlockEditorSheetProps) {
           <Separator className="my-5" />
 
           <ScrollArea className="flex-1">
-            <div className="max-w-prose mx-auto">
+            <div className="w-full">
               <BlockEditor editor={editor} />
             </div>
           </ScrollArea>
