@@ -13,6 +13,7 @@ import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { DatabaseValue } from "@/drivers/base-driver";
+import { useBlockEditor } from "@/context/block-editor-provider";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -21,6 +22,7 @@ interface ResultTableProps {
 
 export default function ResultTable({ data, tableName }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
+  const { openBlockEditor } = useBlockEditor();
 
   const renderCell = useCallback(
     ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
@@ -57,7 +59,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
 
       return <GenericCell value={state.getValue(y, x) as string} />;
     },
-    [tableName]
+    [tableName],
   );
 
   const onHeaderContextMenu = useCallback(
@@ -69,13 +71,13 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
           checked: stickyHeaderIndex === header.index,
           onClick: () => {
             setStickHeaderIndex(
-              header.index === stickyHeaderIndex ? undefined : header.index
+              header.index === stickyHeaderIndex ? undefined : header.index,
             );
           },
         },
       ])(e);
     },
-    [stickyHeaderIndex]
+    [stickyHeaderIndex],
   );
 
   const copyCallback = useCallback((state: OptimizeTableState) => {
@@ -114,6 +116,13 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         const focusCell = state.getFocus();
         if (focusCell) {
           state.changeValue(focusCell.y, focusCell.x, newValue);
+        }
+      }
+
+      function getFocusValue() {
+        const focusCell = state.getFocus();
+        if (focusCell) {
+          return state.getValue(focusCell.y, focusCell.x);
         }
       }
 
@@ -162,6 +171,15 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
           ],
         },
         {
+          title: "Edit with Block Editor",
+          onClick: () => {
+            openBlockEditor({
+              initialContent: getFocusValue() as string,
+              onSave: setFocusValue,
+            });
+          },
+        },
+        {
           separator: true,
         },
         {
@@ -189,7 +207,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
               onClick: () => {
                 if (state.getSelectedRowCount() > 0) {
                   window.navigator.clipboard.writeText(
-                    exportRowsToExcel(state.getSelectedRowsArray())
+                    exportRowsToExcel(state.getSelectedRowsArray()),
                   );
                 }
               },
@@ -206,8 +224,8 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
                     exportRowsToSqlInsert(
                       tableName ?? "UnknownTable",
                       headers,
-                      state.getSelectedRowsArray()
-                    )
+                      state.getSelectedRowsArray(),
+                    ),
                   );
                 }
               },
@@ -231,7 +249,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback]
+    [data, tableName, copyCallback, pasteCallback, openBlockEditor],
   );
 
   const onKeyDown = useCallback(
@@ -244,7 +262,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         pasteCallback(state);
       }
     },
-    [copyCallback, pasteCallback]
+    [copyCallback, pasteCallback],
   );
 
   return (
