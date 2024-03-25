@@ -35,7 +35,13 @@ function generateTableChangePlan({
       if (row.isNewRow) {
         plans.push({
           row,
-          plan: { operation: "INSERT", values: rowChange },
+          plan: {
+            operation: "INSERT",
+            values: rowChange,
+            autoIncrementPkColumn: tableSchema.autoIncrement
+              ? tableSchema.pk[0]
+              : undefined,
+          },
         });
       } else if (row.isRemoved) {
         plans.push({
