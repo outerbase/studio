@@ -81,6 +81,7 @@ export interface DatabaseTableSchema {
 interface DatabaseTableOperationInsert {
   operation: "INSERT";
   values: Record<string, DatabaseValue>;
+  autoIncrementPkColumn?: string;
 }
 
 interface DatabaseTableOperationUpdate {

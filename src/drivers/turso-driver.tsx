@@ -27,6 +27,9 @@ import { validateOperation } from "@/lib/validation";
 export function transformRawResult(raw: ResultSet): ResultSet {
   const r = {
     ...raw,
+    lastInsertRowid: raw.lastInsertRowid
+      ? Number(raw.lastInsertRowid)
+      : undefined,
     rows: raw.rows.map((r) =>
       raw.columns.reduce((a, b, idx) => {
         a[b] = r[idx];
@@ -35,7 +38,7 @@ export function transformRawResult(raw: ResultSet): ResultSet {
     ),
   };
 
-  return r;
+  return r as ResultSet;
 }
 
 export default class DatabaseDriver implements BaseDriver {
@@ -213,10 +216,25 @@ export default class DatabaseDriver implements BaseDriver {
           lastId: r.lastInsertRowid,
           record: selectResult.rows[0],
         });
+      } else if (op.operation === "INSERT") {
+        if (op.autoIncrementPkColumn) {
+          const selectStatement = generateSelectOneWithConditionStatement(
+            tableName,
+            { [op.autoIncrementPkColumn]: r.lastInsertRowid }
+          );
+
+          // This transform to make it friendly for sending via HTTP
+          const selectResult = await this.query(selectStatement);
+
+          tmp.push({
+            record: selectResult.rows[0],
+            lastId: r.lastInsertRowid,
+          });
+        }
+
+        tmp.push({});
       } else {
-        tmp.push({
-          lastId: r.lastInsertRowid,
-        });
+        tmp.push({});
       }
     }
 
