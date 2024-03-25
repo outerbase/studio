@@ -35,7 +35,7 @@ async function upload({
   const url = new URL(key, env.R2_PUBLIC_URL);
 
   return {
-    path: key,
+    key,
     url: url.toString(),
   };
 }

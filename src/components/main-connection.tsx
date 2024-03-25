@@ -11,6 +11,7 @@ import { SchemaProvider } from "@/context/SchemaProvider";
 import ThemeProvider from "@/context/theme-provider";
 import { BaseDriver } from "@/drivers/base-driver";
 import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
+import { BlockEditorProvider } from "@/context/block-editor-provider";
 
 export interface ConnectionCredential {
   url: string;
@@ -34,7 +35,9 @@ function MainConnection({
     <ThemeProvider>
       <DatabaseDriverProvider driver={driver}>
         <SchemaProvider>
-          <DatabaseGui color={color} />
+          <BlockEditorProvider>
+            <DatabaseGui color={color} />
+          </BlockEditorProvider>
         </SchemaProvider>
       </DatabaseDriverProvider>
     </ThemeProvider>

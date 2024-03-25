@@ -13,22 +13,43 @@ import { openContextMenuFromEvent } from "@/messages/openContextMenu";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { DatabaseValue } from "@/drivers/base-driver";
+import { useBlockEditor } from "@/context/block-editor-provider";
+import parseSafeJson from "@/lib/json-safe";
 
 interface ResultTableProps {
   data: OptimizeTableState;
   tableName?: string;
 }
 
+function isBlockNoteString(value: DatabaseValue<string>): boolean {
+  if (typeof value !== "string") return false;
+  if (!(value.startsWith("{") && value.endsWith("}"))) return false;
+
+  const parsedJson = parseSafeJson<any>(value, null);
+  if (!parsedJson) return false;
+
+  return parsedJson?.format === "BLOCK_NOTE";
+}
+
 export default function ResultTable({ data, tableName }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
+  const { openBlockEditor } = useBlockEditor();
 
   const renderCell = useCallback(
     ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
       const isFocus = state.hasFocus(y, x);
 
       if (header.dataType === TableColumnDataType.TEXT) {
+        const value = state.getValue(y, x) as DatabaseValue<string>;
+        let editor: "input" | "blocknote" = "input"; // this is default editor
+
+        if (isBlockNoteString(value)) {
+          editor = "blocknote";
+        }
+
         return (
           <TextCell
+            editor={editor}
             readOnly={!tableName}
             value={state.getValue(y, x) as DatabaseValue<string>}
             focus={isFocus}
@@ -117,6 +138,13 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         }
       }
 
+      function getFocusValue() {
+        const focusCell = state.getFocus();
+        if (focusCell) {
+          return state.getValue(focusCell.y, focusCell.x);
+        }
+      }
+
       openContextMenuFromEvent([
         {
           title: "Insert Value",
@@ -160,6 +188,15 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
               },
             },
           ],
+        },
+        {
+          title: "Edit with Block Editor",
+          onClick: () => {
+            openBlockEditor({
+              initialContent: getFocusValue() as string,
+              onSave: setFocusValue,
+            });
+          },
         },
         {
           separator: true,
@@ -231,7 +268,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback]
+    [data, tableName, copyCallback, pasteCallback, openBlockEditor]
   );
 
   const onKeyDown = useCallback(
