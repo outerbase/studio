@@ -36,7 +36,7 @@ function InputCellEditor({
     <input
       autoFocus
       onBlur={() => {
-        discardChange();
+        applyChange(value);
       }}
       onChange={(e) => {
         onChange(e.currentTarget.value);
