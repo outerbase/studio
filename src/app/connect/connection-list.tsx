@@ -12,6 +12,7 @@ import SaveConnection from "./saved-connection";
 import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
+  SupportedDriver,
 } from "@/app/connect/saved-connection-storage";
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
@@ -79,7 +80,8 @@ export default function ConnectionList({
   user,
 }: Readonly<{ user: User | null }>) {
   const [quickConnect, setQuickConnect] = useState(false);
-  const [showAddConnection, setShowAddConnection] = useState(false);
+  const [showAddConnection, setShowAddConnection] =
+    useState<SupportedDriver | null>(null);
   const [removeConnection, setRemoveConnection] =
     useState<SavedConnectionItem>();
   const [editConnection, setEditConnection] = useState<SavedConnectionItem>();
@@ -121,13 +123,12 @@ export default function ConnectionList({
   // ---------------------------------------------
   const onSaveComplete = useCallback(
     (savedConn: SavedConnectionItem) => {
-      console.log(savedConn);
       if (savedConn.storage === "remote") {
         setRemoteSavedConns((prev) => [savedConn, ...prev]);
       } else {
         setLocalSavedConns(SavedConnectionLocalStorage.getList());
       }
-      setShowAddConnection(false);
+      setShowAddConnection(null);
     },
     [setLocalSavedConns, setRemoteSavedConns, setShowAddConnection]
   );
@@ -172,8 +173,9 @@ export default function ConnectionList({
   if (showAddConnection) {
     return (
       <SaveConnection
+        driver={showAddConnection}
         user={user}
-        onClose={() => setShowAddConnection(false)}
+        onClose={() => setShowAddConnection(null)}
         onSaveComplete={onSaveComplete}
       />
     );
@@ -188,18 +190,17 @@ export default function ConnectionList({
       <div className="px-8 py-2 border-b">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant={"ghost"}
-              // onClick={() => {
-              //   setShowAddConnection(true);
-              // }}
-            >
+            <Button variant={"ghost"}>
               New Connection
               <LucideChevronDown className="ml-2 w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[300px]">
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setShowAddConnection("turso");
+              }}
+            >
               <div className="flex gap-4 px-2 items-center h-12">
                 <img
                   src="/turso.jpeg"
@@ -212,7 +213,11 @@ export default function ConnectionList({
                 </div>
               </div>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setShowAddConnection("rqlite");
+              }}
+            >
               <div className="flex gap-4 px-2 items-center h-12">
                 <img src="/rqlite.png" alt="turso" className="w-9 h-9" />
                 <div>

@@ -11,6 +11,7 @@ import { useState } from "react";
 import {
   SavedConnectionItem,
   CONNECTION_LABEL_COLORS,
+  DRIVER_DETAIL,
 } from "./saved-connection-storage";
 import Link from "next/link";
 
@@ -46,7 +47,11 @@ export default function ConnectionItemCard({
             )}
           />
           <div className="pt-4 shrink-0 ml-3 mr-2">
-            <img src="/turso.jpeg" alt="Turso" className="w-9 h-9 rounded-lg" />
+            <img
+              src={DRIVER_DETAIL[conn.driver ?? "turso"].icon}
+              alt={DRIVER_DETAIL[conn.driver ?? "turso"].name}
+              className="w-9 h-9 rounded-lg"
+            />
           </div>
           <div className="p-2">
             <h2 className="line-clamp-1">{conn.name}</h2>
