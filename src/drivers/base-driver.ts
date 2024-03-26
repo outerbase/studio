@@ -121,7 +121,6 @@ export interface DatabaseTableOperationReslt {
 }
 
 export abstract class BaseDriver {
-  abstract getEndpoint(): string;
   abstract close(): void;
 
   abstract query(stmt: InStatement): Promise<DatabaseResultSet>;

@@ -9,21 +9,15 @@ import InternalPubSub from "@/lib/internal-pubsub";
 import { useRouter } from "next/navigation";
 import { SchemaProvider } from "@/context/SchemaProvider";
 import { BaseDriver } from "@/drivers/base-driver";
-import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 import { BlockEditorProvider } from "@/context/block-editor-provider";
+import { useConnectionConfig } from "@/context/connection-config-provider";
 
 export interface ConnectionCredential {
   url: string;
   token: string;
 }
 
-function MainConnection({
-  driver,
-  color,
-}: {
-  driver: BaseDriver;
-  color: SavedConnectionLabel;
-}) {
+function MainConnection({ driver }: { driver: BaseDriver }) {
   useEffect(() => {
     return () => {
       driver.close();
@@ -34,7 +28,7 @@ function MainConnection({
     <DatabaseDriverProvider driver={driver}>
       <SchemaProvider>
         <BlockEditorProvider>
-          <DatabaseGui color={color} />
+          <DatabaseGui />
         </BlockEditorProvider>
       </SchemaProvider>
     </DatabaseDriverProvider>
@@ -51,11 +45,9 @@ function InvalidSession() {
   return <div></div>;
 }
 
-function MainConnectionContainer({
-  driver,
-  color,
-}: Readonly<{ driver: BaseDriver; color: SavedConnectionLabel }>) {
+function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
   const router = useRouter();
+  const { config } = useConnectionConfig();
 
   /**
    * We use useLayoutEffect because it executes before
@@ -69,16 +61,14 @@ function MainConnectionContainer({
   }, [driver, router]);
 
   useEffect(() => {
-    if (driver.getEndpoint()) {
-      document.title = driver.getEndpoint() + " - LibSQL Studio";
-    }
-  }, [driver]);
+    document.title = config.name + " - LibSQL Studio";
+  }, [config]);
 
   return driver ? (
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
-          <MainConnection driver={driver} color={color} />
+          <MainConnection driver={driver} />
         </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
@@ -88,12 +78,6 @@ function MainConnectionContainer({
   );
 }
 
-export default function MainScreen({
-  driver,
-  color,
-}: {
-  driver: BaseDriver;
-  color: SavedConnectionLabel;
-}) {
-  return <MainConnectionContainer driver={driver} color={color} />;
+export default function MainScreen({ driver }: { driver: BaseDriver }) {
+  return <MainConnectionContainer driver={driver} />;
 }

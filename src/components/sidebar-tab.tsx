@@ -1,4 +1,4 @@
-import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
+import { useConnectionConfig } from "@/context/connection-config-provider";
 import { useTheme } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
 import {
@@ -18,11 +18,10 @@ export interface SidebarTabItem {
 }
 
 interface SidebarTabProps {
-  color: SavedConnectionLabel;
   tabs: SidebarTabItem[];
 }
 
-export default function SidebarTab({ tabs, color }: Readonly<SidebarTabProps>) {
+export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const [loadedIndex, setLoadedIndex] = useState(() => {
@@ -30,6 +29,9 @@ export default function SidebarTab({ tabs, color }: Readonly<SidebarTabProps>) {
     a[0] = true;
     return a;
   });
+
+  const { config } = useConnectionConfig();
+  const color = config.label;
 
   let bgColor = "bg-blue-500 dark:bg-blue-700";
   let textColor = "text-white";

@@ -53,10 +53,6 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
     });
   }
 
-  getEndpoint() {
-    return this.endpoint;
-  }
-
   async query(stmt: InStatement) {
     const stream = this.client;
     const r = await stream.execute(stmt);

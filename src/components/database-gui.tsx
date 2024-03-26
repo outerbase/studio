@@ -21,11 +21,8 @@ import {
 } from "lucide-react";
 import SidebarTab from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
-import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 
-export default function DatabaseGui({
-  color,
-}: Readonly<{ color: SavedConnectionLabel }>) {
+export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
 
   const [defaultWidthPercentage, setDefaultWidthPercentage] = useState(20);
@@ -112,7 +109,6 @@ export default function DatabaseGui({
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
           <SidebarTab
-            color={color}
             tabs={[
               {
                 key: "database",

@@ -19,16 +19,10 @@ import { RequestOperationBody } from "@/lib/api/api-request-types";
 export default class RemoteDriver implements BaseDriver {
   protected id: string = "";
   protected authToken = "";
-  protected name = "";
 
-  constructor(id: string, authToken: string, name: string) {
+  constructor(id: string, authToken: string) {
     this.id = id;
     this.authToken = authToken;
-    this.name = name;
-  }
-
-  getEndpoint() {
-    return this.name;
   }
 
   protected async request<T = unknown>(body: RequestOperationBody) {

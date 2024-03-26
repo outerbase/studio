@@ -99,10 +99,6 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
     return (await this.transaction([stmt]))[0];
   }
 
-  getEndpoint() {
-    return this.endpoint;
-  }
-
   close(): void {
     // do nothing
   }

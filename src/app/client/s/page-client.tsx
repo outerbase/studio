@@ -2,6 +2,7 @@
 
 import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
 import MainScreen from "@/components/main-connection";
+import { ConnectionConfigProvider } from "@/context/connection-config-provider";
 import TursoDriver from "@/drivers/turso-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -21,9 +22,13 @@ export default function ClientPageBody() {
     return new TursoDriver(conn.config.url, conn.config.token);
   }, [conn]);
 
-  if (!driver) {
+  if (!driver || !conn) {
     return <div>Something wrong</div>;
   }
 
-  return <MainScreen driver={driver} color={conn?.label ?? "blue"} />;
+  return (
+    <ConnectionConfigProvider config={conn}>
+      <MainScreen driver={driver} />
+    </ConnectionConfigProvider>
+  );
 }

@@ -8,6 +8,8 @@ import { env } from "@/env";
 import { encrypt } from "@/lib/encryption";
 import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
 
+export const runtime = "edge";
+
 const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
   description: zod.string(),
