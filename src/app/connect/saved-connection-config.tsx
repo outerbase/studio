@@ -58,14 +58,6 @@ export default function SavedConnectionConfig({
   const authType: AuthType = driver === "turso" ? "token" : "username";
 
   const onSaveClicked = () => {
-    console.log({
-      label: color,
-      name,
-      description,
-      driver,
-      config: { url, token, username, password },
-    });
-
     onSave({
       label: color,
       name,

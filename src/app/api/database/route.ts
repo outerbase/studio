@@ -5,7 +5,7 @@ import { generateId } from "lucia";
 import { database, database_role, database_user_role } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
-import { encrypt } from "@/lib/encryption";
+import { encrypt } from "@/lib/encryption-edge";
 import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
 
 export const runtime = "edge";
@@ -17,7 +17,9 @@ const databaseSchema = zod.object({
   driver: zod.enum(["turso", "rqlite"]),
   config: zod.object({
     url: zod.string().min(5),
-    token: zod.string(),
+    token: zod.string().optional(),
+    username: zod.string().optional(),
+    password: zod.string().optional(),
   }),
 });
 
@@ -40,8 +42,6 @@ export const POST = withUser(async ({ user, req }) => {
   const editorRole = generateId(15);
   const now = Date.now();
 
-  const key = Buffer.from(env.ENCRYPTION_KEY, "base64");
-
   try {
     await db.batch([
       db.insert(database).values({
@@ -53,7 +53,15 @@ export const POST = withUser(async ({ user, req }) => {
         driver: data.driver,
         name: data.name,
         host: data.config.url,
-        token: encrypt(key, data.config.token),
+        token: data.config.token
+          ? await encrypt(env.ENCRYPTION_KEY, data.config.token)
+          : undefined,
+        username: data.config.username
+          ? await encrypt(env.ENCRYPTION_KEY, data.config.username)
+          : undefined,
+        password: data.config.password
+          ? await encrypt(env.ENCRYPTION_KEY, data.config.password)
+          : undefined,
       }),
 
       db.insert(database_role).values({
