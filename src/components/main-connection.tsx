@@ -8,7 +8,6 @@ import ContextMenuHandler from "./context-menu-handler";
 import InternalPubSub from "@/lib/internal-pubsub";
 import { useRouter } from "next/navigation";
 import { SchemaProvider } from "@/context/SchemaProvider";
-import ThemeProvider from "@/context/theme-provider";
 import { BaseDriver } from "@/drivers/base-driver";
 import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 import { BlockEditorProvider } from "@/context/block-editor-provider";
@@ -32,15 +31,13 @@ function MainConnection({
   }, [driver]);
 
   return (
-    <ThemeProvider>
-      <DatabaseDriverProvider driver={driver}>
-        <SchemaProvider>
-          <BlockEditorProvider>
-            <DatabaseGui color={color} />
-          </BlockEditorProvider>
-        </SchemaProvider>
-      </DatabaseDriverProvider>
-    </ThemeProvider>
+    <DatabaseDriverProvider driver={driver}>
+      <SchemaProvider>
+        <BlockEditorProvider>
+          <DatabaseGui color={color} />
+        </BlockEditorProvider>
+      </SchemaProvider>
+    </DatabaseDriverProvider>
   );
 }
 

@@ -201,7 +201,11 @@ export default function ConnectionList({
           <DropdownMenuContent className="w-[300px]">
             <DropdownMenuItem>
               <div className="flex gap-4 px-2 items-center h-12">
-                <img src="/turso.png" alt="turso" className="w-8 h-8" />
+                <img
+                  src="/turso.jpeg"
+                  alt="turso"
+                  className="w-9 h-9 rounded-lg"
+                />
                 <div>
                   <div className="font-bold">Turso</div>
                   <div className="text-xs opacity-50">SQLite for Product</div>
@@ -210,7 +214,7 @@ export default function ConnectionList({
             </DropdownMenuItem>
             <DropdownMenuItem>
               <div className="flex gap-4 px-2 items-center h-12">
-                <img src="/rqlite.png" alt="turso" className="w-8 h-8" />
+                <img src="/rqlite.png" alt="turso" className="w-9 h-9" />
                 <div>
                   <div className="font-bold">Rqlite</div>
                   <div className="text-xs opacity-50">

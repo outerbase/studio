@@ -30,7 +30,7 @@ export default function ConnectionItemCard({
       <ContextMenuTrigger>
         <Link
           className={cn(
-            "border rounded w-[275px] flex overflow-hidden hover:border-secondary hover:bg-secondary",
+            "border rounded w-[285px] flex overflow-hidden hover:border-secondary hover:bg-secondary",
             open ? "border-secondary bg-secondary" : ""
           )}
           href={
@@ -46,7 +46,7 @@ export default function ConnectionItemCard({
             )}
           />
           <div className="pt-4 shrink-0 ml-3 mr-2">
-            <img src="/turso.png" alt="Turso" className="w-6 h-6" />
+            <img src="/turso.jpeg" alt="Turso" className="w-9 h-9 rounded-lg" />
           </div>
           <div className="p-2">
             <h2 className="line-clamp-1">{conn.name}</h2>

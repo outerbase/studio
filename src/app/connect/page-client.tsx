@@ -6,7 +6,7 @@ import ConnectionList from "./connection-list";
 import Link from "next/link";
 import { LucideMoon, LucideSun } from "lucide-react";
 import { User } from "lucia";
-import ThemeProvider, { useTheme } from "@/context/theme-provider";
+import { useTheme } from "@/context/theme-provider";
 
 function TabContainer({ children }: Readonly<PropsWithChildren>) {
   return (
@@ -68,14 +68,12 @@ export default function ConnectBody({ user }: Readonly<{ user: User | null }>) {
   "use client";
   return (
     <div className="flex flex-col h-screen">
-      <ThemeProvider>
-        <Header user={user} />
-        <TabContainer>
-          <TabItem text="Connections" active />
-        </TabContainer>
+      <Header user={user} />
+      <TabContainer>
+        <TabItem text="Connections" active />
+      </TabContainer>
 
-        <ConnectionList user={user} />
-      </ThemeProvider>
+      <ConnectionList user={user} />
     </div>
   );
 }
