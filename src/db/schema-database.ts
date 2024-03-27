@@ -30,6 +30,8 @@ export const database = sqliteTable(
     driver: text("driver").default("turso"),
     host: text("host"),
     token: text("token"),
+    username: text("username"),
+    password: text("password"),
     createdAt: int("created_at"),
     deletedAt: int("deleted_at"),
   },

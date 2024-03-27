@@ -34,6 +34,7 @@ function EditRemote({
           name: r.name,
           description: r.description,
           label: r.label,
+          driver: r.driver,
           config: {
             url: r.config.url,
             token: r.config.token,
@@ -58,6 +59,7 @@ function EditRemote({
 
   return (
     <SavedConnectionConfig
+      driver={initialData.driver ?? "turso"}
       initialData={initialData}
       showLockedCredential
       loading={saveLoading}
@@ -65,6 +67,7 @@ function EditRemote({
         setSaveLoading(true);
         updateDatabase(id, {
           name: conn.name,
+          driver: conn.driver,
           description: conn.description,
           label: conn.label,
           config: {
@@ -75,6 +78,7 @@ function EditRemote({
           .then(() => {
             onSaveComplete({
               id: id,
+              driver: conn.driver,
               name: conn.name,
               storage: "remote",
               description: conn.description,
@@ -107,12 +111,14 @@ function EditLocal({
 
   return (
     <SavedConnectionConfig
+      driver={initialData.driver ?? "turso"}
       initialData={initialData}
       onSave={(conn) => {
         SavedConnectionLocalStorage.update(id, conn);
         onSaveComplete({
           id: id,
           name: conn.name,
+          driver: conn.driver,
           storage: "local",
           description: conn.description,
           label: conn.label,

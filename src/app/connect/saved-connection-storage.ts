@@ -1,10 +1,22 @@
 import parseSafeJson from "../../lib/json-safe";
 
+export const DRIVER_DETAIL = Object.freeze({
+  turso: {
+    name: "turso",
+    icon: "/turso.jpeg",
+  },
+  rqlite: {
+    name: "rqlite",
+    icon: "/rqlite.png",
+  },
+});
+
+export type SupportedDriver = keyof typeof DRIVER_DETAIL;
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 
 export const CONNECTION_LABEL_COLORS: Record<SavedConnectionLabel, string> = {
-  gray: "bg-gray-200",
+  gray: "bg-gray-200 dark:bg-gray-500",
   red: "bg-red-500",
   yellow: "bg-yellow-500",
   green: "bg-green-800",
@@ -13,6 +25,7 @@ export const CONNECTION_LABEL_COLORS: Record<SavedConnectionLabel, string> = {
 
 export interface SavedConnectionItem {
   id: string;
+  driver?: SupportedDriver;
   storage: SavedConnectionStorage;
   name: string;
   description?: string;
@@ -21,11 +34,14 @@ export interface SavedConnectionItem {
 
 export interface SavedConnectionItemConfig {
   name: string;
+  driver?: SupportedDriver;
   label?: SavedConnectionLabel;
   description?: string;
   config: {
     token: string;
     url: string;
+    username?: string;
+    password?: string;
   };
 }
 
@@ -42,6 +58,7 @@ interface SavedConnectionRawLocalStorage {
   name: string;
   url: string;
   token: string;
+  driver?: SupportedDriver;
   label?: SavedConnectionLabel;
   description?: string;
   last_used: number;
@@ -54,6 +71,7 @@ function configToRaw(
   return {
     id,
     name: data.name,
+    driver: data.driver ?? "turso",
     url: data.config?.url ?? "",
     token: data.config?.token ?? "",
     label: data.label,
@@ -66,6 +84,7 @@ function mapRaw(data: SavedConnectionRawLocalStorage): SavedConnectionItem {
   return {
     storage: "local",
     label: data.label,
+    driver: data.driver ?? "turso",
     id: data.id,
     name: data.name,
     description: data.description ?? "",
@@ -78,6 +97,7 @@ function mapDetailRaw(
   return {
     storage: "local",
     id: data.id,
+    driver: data.driver,
     name: data.name,
     description: data.description,
     label: data.label,
@@ -146,6 +166,7 @@ export class SavedConnectionLocalStorage {
     return {
       id: uuid,
       name: conn.name,
+      driver: conn.driver,
       storage: "local",
       description: conn.description,
       label: conn.label,

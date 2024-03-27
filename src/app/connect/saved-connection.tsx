@@ -8,6 +8,7 @@ import {
   SavedConnectionItemWithoutId,
   SavedConnectionLocalStorage,
   SavedConnectionStorage,
+  SupportedDriver,
 } from "@/app/connect/saved-connection-storage";
 import SavedConnectionConfig from "./saved-connection-config";
 import { createDatabase } from "@/lib/api/fetch-databases";
@@ -17,10 +18,12 @@ type SaveConnectionStep = "storage" | "config";
 
 export default function SaveConnection({
   user,
+  driver,
   onSaveComplete,
   onClose,
 }: Readonly<{
   user: User | null;
+  driver: SupportedDriver;
   onSaveComplete: (storageType: SavedConnectionItem) => void;
   onClose: () => void;
 }>) {
@@ -44,7 +47,7 @@ export default function SaveConnection({
     (data: SavedConnectionItemConfig) => {
       if (storage === "remote") {
         setLoading(true);
-        createDatabase({ ...data, driver: "turso" })
+        createDatabase({ ...data, driver: data.driver ?? "turso" })
           .then((r) => onSaveComplete(r.data))
           .finally(() => {
             setLoading(false);
@@ -59,6 +62,7 @@ export default function SaveConnection({
         onSaveComplete({
           id: conn.id,
           name: finalConfig.name,
+          driver: finalConfig.driver ?? "turso",
           storage: "local",
           description: finalConfig.description,
           label: finalConfig.label,
@@ -74,7 +78,11 @@ export default function SaveConnection({
         <SaveConnectionType onContinue={onConnectionTypeSelected} />
       )}
       {step === "config" && (
-        <SavedConnectionConfig onSave={onSaveConnection} loading={loading} />
+        <SavedConnectionConfig
+          driver={driver}
+          onSave={onSaveConnection}
+          loading={loading}
+        />
       )}
     </ConnectionDialogContent>
   );

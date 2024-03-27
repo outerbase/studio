@@ -1,6 +1,7 @@
-import { InStatement, ResultSet, Row } from "@libsql/client/web";
+import { InStatement } from "@libsql/client/web";
 import {
   BaseDriver,
+  DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseTableOperation,
   DatabaseTableOperationReslt,
@@ -15,33 +16,13 @@ import {
 } from "@/lib/api-response-types";
 import { RequestOperationBody } from "@/lib/api/api-request-types";
 
-export function transformRawResult(raw: ResultSet): ResultSet {
-  const r = {
-    ...raw,
-    rows: raw.rows.map((r) =>
-      raw.columns.reduce((a, b, idx) => {
-        a[b] = r[idx];
-        return a;
-      }, {} as Row)
-    ),
-  };
-
-  return r;
-}
-
 export default class RemoteDriver implements BaseDriver {
   protected id: string = "";
   protected authToken = "";
-  protected name = "";
 
-  constructor(id: string, authToken: string, name: string) {
+  constructor(id: string, authToken: string) {
     this.id = id;
     this.authToken = authToken;
-    this.name = name;
-  }
-
-  getEndpoint() {
-    return this.name;
   }
 
   protected async request<T = unknown>(body: RequestOperationBody) {
@@ -66,7 +47,7 @@ export default class RemoteDriver implements BaseDriver {
       statement: stmt,
     });
 
-    return transformRawResult(r.data);
+    return r.data;
   }
 
   async transaction(stmt: InStatement[]) {
@@ -75,7 +56,7 @@ export default class RemoteDriver implements BaseDriver {
       statements: stmt,
     });
 
-    return r.data.map(transformRawResult);
+    return r.data;
   }
 
   close() {}
@@ -105,7 +86,7 @@ export default class RemoteDriver implements BaseDriver {
   async selectTable(
     tableName: string,
     options: SelectFromTableOptions
-  ): Promise<{ data: ResultSet; schema: DatabaseTableSchema }> {
+  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
     return await this.request({
       type: "select-table",
       tableName,

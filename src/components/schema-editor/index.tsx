@@ -84,7 +84,7 @@ export default function SchemaEditor({
             Add Column
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               <Button variant="ghost" disabled>
                 <LucideShieldPlus className="w-4 h-4 mr-1" />
                 Add Constraint (coming soon)

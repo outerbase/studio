@@ -70,13 +70,7 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
   }, [schemaItems, fetchSchema]);
 
   if (error || loading) {
-    return (
-      <ConnectingDialog
-        message={error}
-        loading={loading}
-        url={databaseDriver.getEndpoint()}
-      />
-    );
+    return <ConnectingDialog message={error} loading={loading} />;
   }
 
   return (
