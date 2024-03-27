@@ -1,24 +1,25 @@
 import { Button } from "@/components/ui/button";
+import { useConnectionConfig } from "@/context/connection-config-provider";
 import { LucideLoader } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ConnectingDialog({
   message,
-  url,
   onRetry,
 }: Readonly<{
   loading?: boolean;
-  url?: string;
   message?: string;
   onRetry?: () => void;
 }>) {
+  const { config } = useConnectionConfig();
+
   const router = useRouter();
 
   let body = (
     <div>
       <p className="mt-4 flex gap-4">
         <LucideLoader className="animate-spin" />
-        Connecting to <strong>{url}</strong>
+        Connecting to <strong>{config.name}</strong>
       </p>
     </div>
   );

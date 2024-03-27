@@ -32,8 +32,13 @@ export default async function SessionPage({
   return (
     <ClientPageBody
       token={session.id}
-      name={databaseInfo.name ?? ""}
-      color={(databaseInfo?.color as SavedConnectionLabel) ?? "blue"}
+      config={{
+        id: databaseId,
+        name: databaseInfo.name ?? "",
+        storage: "remote",
+        description: databaseInfo.description ?? "",
+        label: (databaseInfo.color ?? "blue") as SavedConnectionLabel,
+      }}
     />
   );
 }

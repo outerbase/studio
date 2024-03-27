@@ -11,7 +11,7 @@ export default function ConnectionDialogContent({
       <div className="flex">
         <h2 className="text-xl font-semibold mb-4 grow">{title}</h2>
         <button
-          className="bg-gray-200 w-8 h-8 flex justify-center items-center rounded-full"
+          className="bg-secondary w-8 h-8 flex justify-center items-center rounded-full"
           onClick={onClose}
         >
           <LucideX className="w-5 h-5" />

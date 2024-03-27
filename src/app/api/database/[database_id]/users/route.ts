@@ -5,6 +5,8 @@ import withDatabaseOperation from "@/lib/with-database-ops";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
   const users = await db
     .select({

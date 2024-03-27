@@ -1,15 +1,18 @@
 import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
-import { DatabaseSchemaItem, DatabaseTableSchema } from "@/drivers/base-driver";
-import { ResultSet } from "@libsql/client/web";
+import {
+  DatabaseResultSet,
+  DatabaseSchemaItem,
+  DatabaseTableSchema,
+} from "@/drivers/base-driver";
 
 export interface ApiOpsBatchResponse {
   error?: string;
-  data: ResultSet[];
+  data: DatabaseResultSet[];
 }
 
 export interface ApiOpsQueryResponse {
   error?: string;
-  data: ResultSet;
+  data: DatabaseResultSet;
 }
 
 export interface ApiDatabasesResponse {

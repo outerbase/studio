@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import ThemeProvider from "@/context/theme-provider";
+import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -10,21 +12,21 @@ export const metadata: Metadata = {
   description: "",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = cookies();
+  const theme = cookieStore.get("theme")?.value === "dark" ? "dark" : "light";
+
   return (
     <html lang="en">
-      <head>
-        <link rel="prefetch" href="/client" />
-      </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         {process.env.ENABLE_ANALYTIC && (
           <Script async defer src="https://scripts.withcabin.com/hello.js" />
         )}
-        {children}
+        <ThemeProvider defaultTheme={theme}>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -2,7 +2,9 @@
 
 import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
 import MainScreen from "@/components/main-connection";
-import DatabaseDriver from "@/drivers/turso-driver";
+import { ConnectionConfigProvider } from "@/context/connection-config-provider";
+import RqliteDriver from "@/drivers/rqlite-driver";
+import TursoDriver from "@/drivers/turso-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -18,12 +20,24 @@ export default function ClientPageBody() {
 
   const driver = useMemo(() => {
     if (!conn) return null;
-    return new DatabaseDriver(conn.config.url, conn.config.token);
+    if (conn.driver === "rqlite") {
+      return new RqliteDriver(
+        conn.config.url,
+        conn.config.username,
+        conn.config.password
+      );
+    }
+
+    return new TursoDriver(conn.config.url, conn.config.token);
   }, [conn]);
 
-  if (!driver) {
+  if (!driver || !conn) {
     return <div>Something wrong</div>;
   }
 
-  return <MainScreen driver={driver} color={conn?.label ?? "blue"} />;
+  return (
+    <ConnectionConfigProvider config={conn}>
+      <MainScreen driver={driver} />
+    </ConnectionConfigProvider>
+  );
 }

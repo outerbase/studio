@@ -17,12 +17,15 @@ const databaseSchema = zod.object({
   config: zod.object({
     url: zod.string().min(5),
     token: zod.string().optional(),
+    username: zod.string().optional(),
+    password: zod.string().optional(),
   }),
 });
 
 export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
   return NextResponse.json({
     id: databaseInfo.id,
+    driver: databaseInfo.driver ?? "turso",
     name: databaseInfo.name,
     storage: databaseInfo.driver,
     description: databaseInfo.description,
@@ -79,6 +82,12 @@ export const PUT = withDatabaseOperation(
         host: data.config.url,
         token: data.config.token
           ? await encrypt(env.ENCRYPTION_KEY, data.config.token)
+          : undefined,
+        username: data.config.username
+          ? await encrypt(env.ENCRYPTION_KEY, data.config.username)
+          : undefined,
+        password: data.config.password
+          ? await encrypt(env.ENCRYPTION_KEY, data.config.password)
           : undefined,
       })
       .where(eq(database.id, databaseInfo.id));

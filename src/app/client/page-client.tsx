@@ -1,14 +1,30 @@
 "use client";
 
 import MainScreen from "@/components/main-connection";
-import DatabaseDriver from "@/drivers/turso-driver";
+import { ConnectionConfigProvider } from "@/context/connection-config-provider";
+import TursoDriver from "@/drivers/turso-driver";
 import { useMemo } from "react";
+import { SavedConnectionItem } from "../connect/saved-connection-storage";
 
 export default function ClientPageBody() {
   const driver = useMemo(() => {
     const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
-    return new DatabaseDriver(config.url, config.token as string);
+    return new TursoDriver(config.url, config.token as string);
   }, []);
 
-  return <MainScreen driver={driver} color="blue" />;
+  const config = useMemo(() => {
+    const config = JSON.parse(sessionStorage.getItem("connection") ?? "{}");
+
+    return {
+      id: "quick-connect",
+      name: (config?.url ?? "") as string,
+      label: "blue",
+    } as SavedConnectionItem;
+  }, []);
+
+  return (
+    <ConnectionConfigProvider config={config}>
+      <MainScreen driver={driver} />
+    </ConnectionConfigProvider>
+  );
 }
