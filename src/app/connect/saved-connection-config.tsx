@@ -14,6 +14,7 @@ import { LucideLoader } from "lucide-react";
 
 interface Props {
   onSave: (conn: SavedConnectionItemConfig) => void;
+  onClose: () => void;
   driver: SupportedDriver;
   initialData?: SavedConnectionItemConfig;
   loading?: boolean;
@@ -38,6 +39,7 @@ function ColorItem({
 
 export default function SavedConnectionConfig({
   onSave,
+  onClose,
   driver,
   showLockedCredential,
   initialData,
@@ -159,10 +161,14 @@ export default function SavedConnectionConfig({
         </>
       )}
 
-      <div className="mt-12 flex gap-4">
+      <div className="mt-12 flex gap-2">
         <Button onClick={onSaveClicked} disabled={loading}>
           {loading && <LucideLoader className="w-4 h-4 mr-2 animate-spin" />}
           Save
+        </Button>
+
+        <Button onClick={onClose} variant={"secondary"}>
+          Close
         </Button>
       </div>
     </>

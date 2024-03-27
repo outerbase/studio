@@ -84,6 +84,7 @@ export default function SaveConnection({
       {step === "config" && (
         <SavedConnectionConfig
           driver={driver}
+          onClose={onClose}
           onSave={onSaveConnection}
           loading={loading}
         />
