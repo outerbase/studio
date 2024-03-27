@@ -20,14 +20,8 @@ import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
 import QuickConnect from "./quick-connect";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { LucideChevronDown } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import DriverDropdown from "./driver-dropdown";
 
 function ConnectionListSection({
   data,
@@ -79,7 +73,9 @@ function ConnectionListSection({
 export default function ConnectionList({
   user,
 }: Readonly<{ user: User | null }>) {
-  const [quickConnect, setQuickConnect] = useState(false);
+  const [quickConnect, setQuickConnect] = useState<SupportedDriver | null>(
+    null
+  );
   const [showAddConnection, setShowAddConnection] =
     useState<SupportedDriver | null>(null);
   const [removeConnection, setRemoveConnection] =
@@ -163,7 +159,7 @@ export default function ConnectionList({
         onClose={() => {
           setEditConnection(undefined);
         }}
-        id={editConnection.id}
+        conn={editConnection}
         storage={editConnection.storage}
         onSaveComplete={onEditComplete}
       />
@@ -182,82 +178,27 @@ export default function ConnectionList({
   }
 
   if (quickConnect) {
-    return <QuickConnect onClose={() => setQuickConnect(false)} />;
+    return (
+      <QuickConnect
+        driver={quickConnect}
+        onClose={() => setQuickConnect(null)}
+      />
+    );
   }
 
   return (
     <>
       <div className="px-8 py-2 border-b">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"}>
-              New Connection
-              <LucideChevronDown className="ml-2 w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[300px]">
-            <DropdownMenuItem
-              onClick={() => {
-                setShowAddConnection("turso");
-              }}
-            >
-              <div className="flex gap-4 px-2 items-center h-12">
-                <img
-                  src="/turso.jpeg"
-                  alt="turso"
-                  className="w-9 h-9 rounded-lg"
-                />
-                <div>
-                  <div className="font-bold">Turso</div>
-                  <div className="text-xs opacity-50">SQLite for Product</div>
-                </div>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setShowAddConnection("rqlite");
-              }}
-            >
-              <div className="flex gap-4 px-2 items-center h-12">
-                <img src="/rqlite.png" alt="turso" className="w-9 h-9" />
-                <div>
-                  <div className="font-bold">Rqlite</div>
-                  <div className="text-xs opacity-50">
-                    Distributed database built on SQLite
-                  </div>
-                </div>
-              </div>
-            </DropdownMenuItem>
-            <Separator />
-            <DropdownMenuItem disabled>
-              <div className="flex gap-4 px-2 items-center h-12 grayscale">
-                <img src="/rqlite.png" alt="turso" className="w-8 h-8" />
-                <div>
-                  <div className="font-bold">PlanetScale</div>
-                  <div className="text-xs">Coming Soon on v0.4.0</div>
-                </div>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <div className="flex gap-4 px-2 items-center h-12 grayscale">
-                <img src="/rqlite.png" alt="turso" className="w-8 h-8" />
-                <div>
-                  <div className="font-bold">Neon</div>
-                  <div className="text-xs">Coming Soon on v0.4.0</div>
-                </div>
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <DriverDropdown onSelect={setShowAddConnection}>
+          <Button variant={"ghost"}>
+            New Connection
+            <LucideChevronDown className="ml-2 w-4 h-4" />
+          </Button>
+        </DriverDropdown>
 
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            setQuickConnect(true);
-          }}
-        >
-          Quick Connect
-        </Button>
+        <DriverDropdown onSelect={setQuickConnect}>
+          <Button variant={"ghost"}>Quick Connect</Button>
+        </DriverDropdown>
       </div>
 
       {removeConnection && (

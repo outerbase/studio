@@ -13,7 +13,7 @@ import { LucideLoader2 } from "lucide-react";
 type SaveCompleteHandler = (v: SavedConnectionItem) => void;
 
 interface Props {
-  id: string;
+  conn: SavedConnectionItem;
   storage: SavedConnectionStorage;
   onSaveComplete: SaveCompleteHandler;
   onClose: () => void;
@@ -129,17 +129,21 @@ function EditLocal({
 }
 
 export default function EditSavedConnection({
-  id,
+  conn,
   storage,
   onSaveComplete,
   onClose,
 }: Readonly<Props>) {
   return (
-    <ConnectionDialogContent title="Edit Connection" onClose={onClose}>
+    <ConnectionDialogContent
+      driver={conn.driver ?? "turso"}
+      title="Edit Connection"
+      onClose={onClose}
+    >
       {storage === "local" ? (
-        <EditLocal id={id} onSaveComplete={onSaveComplete} />
+        <EditLocal id={conn.id} onSaveComplete={onSaveComplete} />
       ) : (
-        <EditRemote id={id} onSaveComplete={onSaveComplete} />
+        <EditRemote id={conn.id} onSaveComplete={onSaveComplete} />
       )}
     </ConnectionDialogContent>
   );
