@@ -90,9 +90,7 @@ export default class RemoteDriver implements BaseDriver {
     return await this.request({
       type: "select-table",
       tableName,
-      limit: options.limit,
-      offset: options.offset,
-      whereRaw: options.whereRaw,
+      options,
     });
   }
 }

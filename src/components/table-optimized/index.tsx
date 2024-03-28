@@ -13,13 +13,7 @@ import TableFakeBodyPadding from "./TableFakeBodyPadding";
 import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
 import OptimizeTableState from "./OptimizeTableState";
-
-export enum TableColumnDataType {
-  TEXT = 1,
-  INTEGER = 2,
-  REAL = 3,
-  BLOB = 4,
-}
+import { TableColumnDataType } from "@/drivers/base-driver";
 
 export interface OptimizeTableHeaderProps {
   name: string;
@@ -47,6 +41,10 @@ export interface OptimizeTableCellRenderProps {
 
 interface TableCellListCommonProps {
   internalState: OptimizeTableState;
+  renderHeader: (
+    props: OptimizeTableHeaderWithIndexProps,
+    idx: number
+  ) => ReactElement;
   renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
   onHeaderContextMenu?: (
@@ -126,6 +124,7 @@ function renderCellList({
   colStart,
   rowHeight,
   onHeaderResize,
+  renderHeader,
   internalState,
   onHeaderContextMenu,
 }: RenderCellListProps) {
@@ -232,6 +231,7 @@ function renderCellList({
   return (
     <table style={{ ...customStyles, gridTemplateColumns: templateSizes }}>
       <TableHeaderList
+        renderHeader={renderHeader}
         sticky={hasSticky}
         headers={headersWithIndex}
         onHeaderResize={onHeaderSizeWithRemap}
@@ -255,6 +255,7 @@ export default function OptimizeTable({
   stickyHeaderIndex,
   internalState,
   renderCell,
+  renderHeader,
   rowHeight,
   renderAhead,
   onContextMenu,
@@ -332,6 +333,7 @@ export default function OptimizeTable({
       revision,
       onContextMenu,
       onHeaderContextMenu,
+      renderHeader,
     };
 
     return (
@@ -376,5 +378,6 @@ export default function OptimizeTable({
     onHeaderContextMenu,
     onKeyDown,
     revision,
+    renderHeader,
   ]);
 }

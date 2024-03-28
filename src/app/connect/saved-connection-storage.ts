@@ -32,17 +32,19 @@ export interface SavedConnectionItem {
   label?: SavedConnectionLabel;
 }
 
+export interface SavedConnectionItemConfigConfig {
+  token: string;
+  url: string;
+  username?: string;
+  password?: string;
+}
+
 export interface SavedConnectionItemConfig {
   name: string;
   driver?: SupportedDriver;
   label?: SavedConnectionLabel;
   description?: string;
-  config: {
-    token: string;
-    url: string;
-    username?: string;
-    password?: string;
-  };
+  config: SavedConnectionItemConfigConfig;
 }
 
 export type SavedConnectionItemWithoutId = {

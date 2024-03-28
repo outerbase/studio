@@ -73,13 +73,18 @@ export default function SaveConnection({
   );
 
   return (
-    <ConnectionDialogContent title="New Connection" onClose={onClose}>
+    <ConnectionDialogContent
+      driver={driver}
+      title="New Connection"
+      onClose={onClose}
+    >
       {step === "storage" && (
         <SaveConnectionType onContinue={onConnectionTypeSelected} />
       )}
       {step === "config" && (
         <SavedConnectionConfig
           driver={driver}
+          onClose={onClose}
           onSave={onSaveConnection}
           loading={loading}
         />

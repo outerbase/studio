@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/components/table-optimized";
+import { TableColumnDataType } from "@/drivers/base-driver";
 import { exportRowsToSqlInsert } from "./export-helper";
 import {
   convertSqliteType,
