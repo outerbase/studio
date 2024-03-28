@@ -8,7 +8,7 @@ import {
   SavedConnectionItem,
   SavedConnectionItemConfigConfig,
   SupportedDriver,
-} from "../connect/saved-connection-storage";
+} from "../../connect/saved-connection-storage";
 import RqliteDriver from "@/drivers/rqlite-driver";
 
 export default function ClientPageBody() {
@@ -34,7 +34,6 @@ export default function ClientPageBody() {
       label: "blue",
     } as SavedConnectionItem;
   }, []);
-
 
   return (
     <ConnectionConfigProvider config={config}>

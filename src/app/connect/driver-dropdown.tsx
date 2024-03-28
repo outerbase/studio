@@ -27,7 +27,7 @@ export default function DriverDropdown({
           <div className="flex gap-4 px-2 items-center h-12">
             <img src="/turso.jpeg" alt="turso" className="w-9 h-9 rounded-lg" />
             <div>
-              <div className="font-bold">Turso</div>
+              <div className="font-bold">Turso / LibSQL</div>
               <div className="text-xs opacity-50">SQLite for Product</div>
             </div>
           </div>
