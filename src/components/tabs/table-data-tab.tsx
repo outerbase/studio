@@ -29,7 +29,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "../ui/alert-dialog";
-import { DatabaseTableSchema } from "@/drivers/base-driver";
+import { ColumnSortOption, DatabaseTableSchema } from "@/drivers/base-driver";
 
 interface TableDataContentProps {
   tableName: string;
@@ -44,6 +44,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OptimizeTableState>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
+  const [sortColumns, setSortColumns] = useState<ColumnSortOption[]>([]);
   const [changeNumber, setChangeNumber] = useState(0);
 
   const [where, setWhere] = useState("");
@@ -69,6 +70,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             whereRaw: where,
             limit: finalLimit,
             offset: finalOffset,
+            orderBy: sortColumns,
           });
 
         setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
@@ -88,6 +90,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   }, [
     databaseDriver,
     tableName,
+    sortColumns,
     updateTableSchema,
     where,
     finalOffset,
@@ -313,6 +316,8 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             data={data}
             tableName={tableName}
             key={lastQueryTimestamp}
+            sortColumns={sortColumns}
+            onSortColumnChange={setSortColumns}
           />
         ) : null}
       </div>

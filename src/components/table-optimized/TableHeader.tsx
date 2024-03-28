@@ -1,7 +1,8 @@
-import React from "react";
-import { OptimizeTableHeaderProps } from ".";
+import React, { ReactElement } from "react";
+import { OptimizeTableHeaderWithIndexProps } from ".";
 import TableHeaderResizeHandler from "./TableHeaderResizeHandler";
 import styles from "./styles.module.css";
+import { cn } from "@/lib/utils";
 
 export default function TableHeader({
   idx,
@@ -9,19 +10,22 @@ export default function TableHeader({
   onHeaderResize,
   onContextMenu,
   sticky,
+  renderHeader,
 }: {
   idx: number;
   sticky: boolean;
-  header: OptimizeTableHeaderProps;
+  header: OptimizeTableHeaderWithIndexProps;
   onHeaderResize: (idx: number, newWidth: number) => void;
   onContextMenu?: React.MouseEventHandler;
+  renderHeader: (
+    props: OptimizeTableHeaderWithIndexProps,
+    idx: number
+  ) => ReactElement;
 }) {
-  const className = [
+  const className = cn(
     sticky ? styles.stickyColumn : undefined,
-    "dark:bg-gray-900 bg-gray-100",
-  ]
-    .filter(Boolean)
-    .join();
+    "dark:bg-gray-900 bg-gray-100"
+  );
 
   return (
     <th
@@ -30,16 +34,7 @@ export default function TableHeader({
       className={className}
       onContextMenu={onContextMenu}
     >
-      {header.icon && (
-        <div className={styles.tableHeaderIcon}>{header.icon}</div>
-      )}
-
-      <div className={styles.tableCellContent}>{header.name}</div>
-
-      {header.rightIcon && (
-        <div className={styles.tableHeaderIcon}>{header.rightIcon}</div>
-      )}
-
+      {renderHeader(header, idx)}
       {header.resizable && (
         <TableHeaderResizeHandler idx={idx} onResize={onHeaderResize} />
       )}

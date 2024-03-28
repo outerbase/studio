@@ -39,7 +39,7 @@
   position: sticky;
   top: 0;
   user-select: none;
-  padding: 0px 10px;
+  padding: 0px;
   height: 35px;
   line-height: 35px;
   text-align: left;
@@ -93,7 +93,6 @@
 .stickyColumn {
   position: sticky;
   left: 0;
-  background: var(--color-surface);
   border-right: 5px solid var(--color-table-grid) !important;
   z-index: 1;
 }

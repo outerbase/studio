@@ -1,5 +1,13 @@
-import { TableColumnDataType } from "@/components/table-optimized";
 import { InStatement } from "@libsql/client/web";
+
+export enum TableColumnDataType {
+  TEXT = 1,
+  INTEGER = 2,
+  REAL = 3,
+  BLOB = 4,
+}
+
+export type SqlOrder = "ASC" | "DESC";
 
 export type DatabaseRow = Record<string, unknown>;
 
@@ -15,10 +23,16 @@ export interface DatabaseResultSet {
   lastInsertRowid?: number;
 }
 
+export interface ColumnSortOption {
+  columnName: string;
+  by: SqlOrder;
+}
+
 export interface SelectFromTableOptions {
   whereRaw?: string;
   limit: number;
   offset: number;
+  orderBy?: ColumnSortOption[];
 }
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
@@ -61,7 +75,7 @@ export interface DatabaseTableColumnConstraint {
 
   primaryKey?: boolean;
   primaryColumns?: string[];
-  primaryKeyOrder?: "ASC" | "DESC";
+  primaryKeyOrder?: SqlOrder;
   primaryKeyConflict?: DatabaseColumnConflict;
   autoIncrement?: boolean;
 
