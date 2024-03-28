@@ -36,7 +36,7 @@ export default function ConnectionItemCard({
           )}
           href={
             conn.storage === "local"
-              ? `/client/s?p=${conn.id}`
+              ? `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`
               : `/client/r?p=${conn.id}`
           }
         >

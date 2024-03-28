@@ -5,6 +5,7 @@ import ConnectionDialogContent from "./saved-connection-content";
 import { useCallback, useState } from "react";
 import useConnect from "@/hooks/use-connect";
 import { SupportedDriver } from "./saved-connection-storage";
+import { RqliteInstruction } from "./saved-connection";
 
 export default function QuickConnect({
   driver,
@@ -28,7 +29,13 @@ export default function QuickConnect({
   const authType = driver === "turso" ? "token" : "username";
 
   return (
-    <ConnectionDialogContent title="Quick Connect" onClose={onClose}>
+    <ConnectionDialogContent
+      driver={driver}
+      title="Quick Connect"
+      onClose={onClose}
+    >
+      {driver === "rqlite" && <RqliteInstruction />}
+
       <div>
         <div className="text-xs mb-2">URL</div>
         <Input

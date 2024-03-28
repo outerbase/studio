@@ -16,6 +16,18 @@ import { User } from "lucia";
 
 type SaveConnectionStep = "storage" | "config";
 
+export function RqliteInstruction() {
+  return (
+    <div className="bg-secondary p-4 mb-4 text-sm">
+      You should include LibSQL Studio in the list of allowed origins for CORS
+      (Cross-Origin Resource Sharing)
+      <pre className="mt-2">
+        <code>{`rqlited --http-allow-origin="https://libsqlstudio.com"`}</code>
+      </pre>
+    </div>
+  );
+}
+
 export default function SaveConnection({
   user,
   driver,
@@ -82,12 +94,15 @@ export default function SaveConnection({
         <SaveConnectionType onContinue={onConnectionTypeSelected} />
       )}
       {step === "config" && (
-        <SavedConnectionConfig
-          driver={driver}
-          onClose={onClose}
-          onSave={onSaveConnection}
-          loading={loading}
-        />
+        <>
+          {driver === "rqlite" && storage === "local" && <RqliteInstruction />}
+          <SavedConnectionConfig
+            driver={driver}
+            onClose={onClose}
+            onSave={onSaveConnection}
+            loading={loading}
+          />
+        </>
       )}
     </ConnectionDialogContent>
   );

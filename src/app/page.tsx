@@ -1,14 +1,14 @@
 import TopbarProfile from "@/components/topbar-profile";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { getSessionFromCookie } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 
 export const metadata: Metadata = {
-  title: "LibSQL Studio - Fast and powerful LibSQL client on your browser",
-  description:
-    "LibSQL Studio - Fast and powerful LibSQL client on your browser",
+  title: "LibSQL Studio - LibSQL and Rqlite client on your browser",
+  description: "LibSQL Studio - LibSQL and Rqlite client on your browser",
 };
 
 async function Topbar() {
@@ -39,7 +39,10 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   return (
     <Link
       href={url}
-      className="text-lg px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-700 text-center"
+      className={cn(
+        buttonVariants({ variant: "default", size: "lg" }),
+        "text-lg py-4 px-6"
+      )}
     >
       {title}
     </Link>
@@ -85,7 +88,7 @@ function HeroSection() {
       </h2>
 
       <p className="text-center max-w-[500px] mx-auto mt-6 text-lg">
-        LibSQL Studio is powerful and lightweight libSQL and Sqlite client that
+        LibSQL Studio is powerful and lightweight libSQL and Rqlite client that
         run from your browser. Cross platform and no download needed. We are{" "}
         <Link
           href="https://github.com/invisal/libsql-studio"
@@ -97,7 +100,7 @@ function HeroSection() {
       </p>
 
       <div className="flex flex-col gap-4 justify-center mt-8 md:flex-row">
-        <LinkButton title="Connect to LibSQL" url="/connect" />
+        <LinkButton title="Open LibSQL Studio" url="/connect" />
       </div>
     </div>
   );

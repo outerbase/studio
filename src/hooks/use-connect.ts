@@ -22,7 +22,7 @@ export default function useConnect() {
         })
       );
 
-      router.push(`/client`);
+      router.push(`/client/${driver ?? "turso"}`);
     },
     [router]
   );
