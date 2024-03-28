@@ -8,7 +8,6 @@ export enum TableColumnDataType {
 }
 
 export type SqlOrder = "ASC" | "DESC";
-
 export type DatabaseRow = Record<string, unknown>;
 
 export interface DatabaseHeader {
