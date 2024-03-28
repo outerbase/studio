@@ -106,9 +106,16 @@ export default abstract class SqliteLikeBaseDriver extends BaseDriver {
   ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
     const whereRaw = options.whereRaw?.trim();
 
+    const orderPart =
+      options.orderBy && options.orderBy.length > 0
+        ? options.orderBy
+            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+            .join(", ")
+        : "";
+
     const sql = `SELECT * FROM ${this.escapeId(tableName)}${
       whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } LIMIT ? OFFSET ?;`;
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ? OFFSET ?;`;
 
     const binding = [options.limit, options.offset];
     return {

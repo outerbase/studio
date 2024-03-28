@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { TableColumnDataType } from "@/components/table-optimized";
 import { convertSqliteType } from "@/lib/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./ColumnDefaultValueInput";
@@ -33,6 +32,8 @@ import {
   DatabaseColumnConflict,
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
+  SqlOrder,
+  TableColumnDataType,
 } from "@/drivers/base-driver";
 
 function changeColumnOnIndex(
@@ -282,7 +283,7 @@ function ColumnItem({
                 onValueChange={(v) => {
                   change({
                     constraint: {
-                      primaryKeyOrder: v as "DESC" | "ASC",
+                      primaryKeyOrder: v as SqlOrder,
                     },
                   });
                 }}

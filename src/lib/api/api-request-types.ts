@@ -1,4 +1,7 @@
-import { DatabaseTableOperation } from "@/drivers/base-driver";
+import {
+  DatabaseTableOperation,
+  SelectFromTableOptions,
+} from "@/drivers/base-driver";
 import { InStatement } from "@libsql/client/web";
 
 export interface RequestOperationBatch {
@@ -23,9 +26,7 @@ export interface RequestOperationSchema {
 export interface RequestOperationSelectTable {
   type: "select-table";
   tableName: string;
-  whereRaw?: string;
-  offset: number;
-  limit: number;
+  options: SelectFromTableOptions;
 }
 
 export interface RequestOperationUpdateTableData {
