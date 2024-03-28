@@ -1,5 +1,4 @@
-import { BaseDriver } from "@/drivers/base-driver";
-import { ResultSet } from "@libsql/client/web";
+import { BaseDriver, DatabaseResultSet } from "@/drivers/base-driver";
 
 export interface MultipleQueryProgressItem {
   order: number;
@@ -23,8 +22,8 @@ export async function multipleQuery(
   onProgress?: (progress: MultipleQueryProgress) => void
 ) {
   const logs: MultipleQueryProgressItem[] = [];
-  const result: ResultSet[] = [];
-  let lastResult: ResultSet | undefined;
+  const result: DatabaseResultSet[] = [];
+  let lastResult: DatabaseResultSet | undefined;
 
   for (let i = 0; i < statements.length; i++) {
     const statement = statements[i];
@@ -46,7 +45,7 @@ export async function multipleQuery(
       log.end = Date.now();
       log.affectedRow = r.rowsAffected;
 
-      if (r.columns.length > 0) {
+      if (r.headers.length > 0) {
         lastResult = r;
         result.push(r);
       }

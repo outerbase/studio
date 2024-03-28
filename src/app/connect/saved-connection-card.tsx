@@ -11,6 +11,7 @@ import { useState } from "react";
 import {
   SavedConnectionItem,
   CONNECTION_LABEL_COLORS,
+  DRIVER_DETAIL,
 } from "./saved-connection-storage";
 import Link from "next/link";
 
@@ -30,12 +31,12 @@ export default function ConnectionItemCard({
       <ContextMenuTrigger>
         <Link
           className={cn(
-            "border rounded w-[275px] bg-white flex overflow-hidden hover:border-black hover:bg-gray-100",
-            open ? "border-black bg-gray-100" : ""
+            "border rounded w-[285px] flex overflow-hidden hover:border-secondary hover:bg-secondary",
+            open ? "border-secondary bg-secondary" : ""
           )}
           href={
             conn.storage === "local"
-              ? `/client/s?p=${conn.id}`
+              ? `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`
               : `/client/r?p=${conn.id}`
           }
         >
@@ -46,12 +47,16 @@ export default function ConnectionItemCard({
             )}
           />
           <div className="pt-4 shrink-0 ml-3 mr-2">
-            <img src="/turso.png" alt="Turso" className="w-6 h-6" />
+            <img
+              src={DRIVER_DETAIL[conn.driver ?? "turso"].icon}
+              alt={DRIVER_DETAIL[conn.driver ?? "turso"].name}
+              className="w-9 h-9 rounded-lg"
+            />
           </div>
           <div className="p-2">
             <h2 className="line-clamp-1">{conn.name}</h2>
             <p className="text-gray-600 text-xs line-clamp-2 h-8">
-              {conn.description ?? ""}
+              {conn.description || <i>No description</i>}
             </p>
           </div>
         </Link>

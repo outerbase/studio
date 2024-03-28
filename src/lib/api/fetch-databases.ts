@@ -1,6 +1,7 @@
 import {
   SavedConnectionItem,
   SavedConnectionItemConfig,
+  SupportedDriver,
 } from "@/app/connect/saved-connection-storage";
 import { ApiDatabasesResponse } from "../api-response-types";
 
@@ -10,7 +11,7 @@ export async function getDatabases(): Promise<ApiDatabasesResponse> {
 }
 
 export async function createDatabase(
-  data: SavedConnectionItemConfig & { driver: "turso" }
+  data: SavedConnectionItemConfig & { driver: SupportedDriver }
 ): Promise<{ data: SavedConnectionItem }> {
   const r = await fetch(`/api/database`, {
     method: "POST",

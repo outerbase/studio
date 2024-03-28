@@ -6,6 +6,7 @@ import {
   DatabaseColumnConflict,
   DatabaseTableColumnConstraint,
   DatabaseTableSchema,
+  SqlOrder,
 } from "@/drivers/base-driver";
 
 class Cursor {
@@ -181,7 +182,7 @@ export function parseColumnConstraint(
       name: constraintName,
     };
   } else if (cursor.matchKeyword("PRIMARY")) {
-    let primaryKeyOrder: "ASC" | "DESC" | undefined;
+    let primaryKeyOrder: SqlOrder | undefined;
     let primaryColumns: string[] | undefined;
     let autoIncrement = false;
 

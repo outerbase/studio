@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/components/table-optimized";
+import { TableColumnDataType } from "@/drivers/base-driver";
 import { hex } from "./bit-operation";
 import { IdentifyResult } from "sql-query-identifier/lib/defines";
 
@@ -49,8 +49,8 @@ export function convertSqliteType(
 
   if (
     type.indexOf("REAL") >= 0 ||
-    type.indexOf("DOUBLE") ||
-    type.indexOf("FLOAT")
+    type.indexOf("DOUBLE") >= 0 ||
+    type.indexOf("FLOAT") >= 0
   )
     return TableColumnDataType.REAL;
 

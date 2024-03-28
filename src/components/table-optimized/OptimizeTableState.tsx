@@ -1,9 +1,11 @@
 import { selectArrayFromIndexList } from "@/lib/export-helper";
-import { OptimizeTableHeaderProps, TableColumnDataType } from ".";
+import { OptimizeTableHeaderProps } from ".";
 import { LucideKey } from "lucide-react";
-import { convertSqliteType } from "@/lib/sql-helper";
-import { ResultSet } from "@libsql/client/web";
-import { DatabaseTableSchema } from "@/drivers/base-driver";
+import {
+  DatabaseResultSet,
+  DatabaseTableSchema,
+  TableColumnDataType,
+} from "@/drivers/base-driver";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -28,13 +30,14 @@ export default class OptimizeTableState {
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
 
   static createFromResult(
-    dataResult: ResultSet,
+    dataResult: DatabaseResultSet,
     schemaResult?: DatabaseTableSchema
   ) {
     return new OptimizeTableState(
-      dataResult.columns.map((headerName, idx) => {
+      dataResult.headers.map((header) => {
         let initialSize = 150;
-        const dataType = convertSqliteType(dataResult.columnTypes[idx]);
+        const headerName = header.name;
+        const dataType = header.type;
 
         if (
           dataType === TableColumnDataType.INTEGER ||

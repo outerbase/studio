@@ -4,31 +4,150 @@ import TextCell from "@/components/table-cell/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
-  TableColumnDataType,
 } from "@/components/table-optimized";
 import OptimizeTableState from "@/components/table-optimized/OptimizeTableState";
 import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { openContextMenuFromEvent } from "@/messages/openContextMenu";
-import { LucidePlus, LucideTrash2 } from "lucide-react";
-import React, { useCallback, useState } from "react";
-import { DatabaseValue } from "@/drivers/base-driver";
+import {
+  LucideChevronDown,
+  LucidePin,
+  LucidePlus,
+  LucideSortAsc,
+  LucideSortDesc,
+  LucideTrash2,
+} from "lucide-react";
+import React, { PropsWithChildren, useCallback, useState } from "react";
+import {
+  ColumnSortOption,
+  DatabaseValue,
+  TableColumnDataType,
+} from "@/drivers/base-driver";
+import { useBlockEditor } from "@/context/block-editor-provider";
+import parseSafeJson from "@/lib/json-safe";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "./ui/dropdown-menu";
 
 interface ResultTableProps {
   data: OptimizeTableState;
   tableName?: string;
+  onSortColumnChange?: (columns: ColumnSortOption[]) => void;
+  sortColumns?: ColumnSortOption[];
 }
 
-export default function ResultTable({ data, tableName }: ResultTableProps) {
+function isBlockNoteString(value: DatabaseValue<string>): boolean {
+  if (typeof value !== "string") return false;
+  if (!(value.startsWith("{") && value.endsWith("}"))) return false;
+
+  const parsedJson = parseSafeJson<any>(value, null);
+  if (!parsedJson) return false;
+
+  return parsedJson?.format === "BLOCK_NOTE";
+}
+
+function Header({
+  children,
+  header,
+}: PropsWithChildren<{ header: OptimizeTableHeaderWithIndexProps }>) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
+      <DropdownMenuTrigger asChild>
+        <div
+          className="flex grow items-center px-2"
+          onContextMenu={() => {
+            setOpen(true);
+          }}
+        >
+          {header.icon ? <div className="mr-2">{header.icon}</div> : null}
+          <div className="grow">{header.name}</div>
+          <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer" />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className={"w-[300px]"}
+        side="bottom"
+        align="start"
+        sideOffset={0}
+      >
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export default function ResultTable({
+  data,
+  tableName,
+  onSortColumnChange,
+}: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
+  const { openBlockEditor } = useBlockEditor();
+
+  const renderHeader = useCallback(
+    (header: OptimizeTableHeaderWithIndexProps) => {
+      return (
+        <Header header={header}>
+          <DropdownMenuItem
+            onClick={() => {
+              setStickHeaderIndex(
+                header.index === stickyHeaderIndex ? undefined : header.index
+              );
+            }}
+          >
+            <LucidePin className="w-4 h-4 mr-2" />
+            Pin Header
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            disabled={!tableName}
+            onClick={() => {
+              if (onSortColumnChange) {
+                onSortColumnChange([{ columnName: header.name, by: "ASC" }]);
+              }
+            }}
+          >
+            <LucideSortAsc className="w-4 h-4 mr-2" />
+            Sort A → Z
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={!tableName}
+            onClick={() => {
+              if (onSortColumnChange) {
+                onSortColumnChange([{ columnName: header.name, by: "DESC" }]);
+              }
+            }}
+          >
+            <LucideSortDesc className="w-4 h-4 mr-2" />
+            Sort Z → A
+          </DropdownMenuItem>
+        </Header>
+      );
+    },
+    [stickyHeaderIndex, tableName, onSortColumnChange]
+  );
 
   const renderCell = useCallback(
     ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
       const isFocus = state.hasFocus(y, x);
 
       if (header.dataType === TableColumnDataType.TEXT) {
+        const value = state.getValue(y, x) as DatabaseValue<string>;
+        let editor: "input" | "blocknote" = "input"; // this is default editor
+
+        if (isBlockNoteString(value)) {
+          editor = "blocknote";
+        }
+
         return (
           <TextCell
+            editor={editor}
             readOnly={!tableName}
             value={state.getValue(y, x) as DatabaseValue<string>}
             focus={isFocus}
@@ -60,23 +179,10 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
     [tableName]
   );
 
-  const onHeaderContextMenu = useCallback(
-    (e: React.MouseEvent, header: OptimizeTableHeaderWithIndexProps) => {
-      openContextMenuFromEvent([
-        {
-          title: "Pin Header",
-          type: "check",
-          checked: stickyHeaderIndex === header.index,
-          onClick: () => {
-            setStickHeaderIndex(
-              header.index === stickyHeaderIndex ? undefined : header.index
-            );
-          },
-        },
-      ])(e);
-    },
-    [stickyHeaderIndex]
-  );
+  const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   const copyCallback = useCallback((state: OptimizeTableState) => {
     const focus = state.getFocus();
@@ -114,6 +220,13 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         const focusCell = state.getFocus();
         if (focusCell) {
           state.changeValue(focusCell.y, focusCell.x, newValue);
+        }
+      }
+
+      function getFocusValue() {
+        const focusCell = state.getFocus();
+        if (focusCell) {
+          return state.getValue(focusCell.y, focusCell.x);
         }
       }
 
@@ -160,6 +273,15 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
               },
             },
           ],
+        },
+        {
+          title: "Edit with Block Editor",
+          onClick: () => {
+            openBlockEditor({
+              initialContent: getFocusValue() as string,
+              onSave: setFocusValue,
+            });
+          },
         },
         {
           separator: true,
@@ -231,7 +353,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback]
+    [data, tableName, copyCallback, pasteCallback, openBlockEditor]
   );
 
   const onKeyDown = useCallback(
@@ -254,6 +376,7 @@ export default function ResultTable({ data, tableName }: ResultTableProps) {
       onHeaderContextMenu={onHeaderContextMenu}
       stickyHeaderIndex={stickyHeaderIndex}
       renderAhead={20}
+      renderHeader={renderHeader}
       renderCell={renderCell}
       rowHeight={35}
       onKeyDown={onKeyDown}

@@ -8,6 +8,7 @@ import {
   SavedConnectionItemWithoutId,
   SavedConnectionLocalStorage,
   SavedConnectionStorage,
+  SupportedDriver,
 } from "@/app/connect/saved-connection-storage";
 import SavedConnectionConfig from "./saved-connection-config";
 import { createDatabase } from "@/lib/api/fetch-databases";
@@ -15,12 +16,26 @@ import { User } from "lucia";
 
 type SaveConnectionStep = "storage" | "config";
 
+export function RqliteInstruction() {
+  return (
+    <div className="bg-secondary p-4 mb-4 text-sm">
+      You should include LibSQL Studio in the list of allowed origins for CORS
+      (Cross-Origin Resource Sharing)
+      <pre className="mt-2">
+        <code>{`rqlited --http-allow-origin="https://libsqlstudio.com"`}</code>
+      </pre>
+    </div>
+  );
+}
+
 export default function SaveConnection({
   user,
+  driver,
   onSaveComplete,
   onClose,
 }: Readonly<{
   user: User | null;
+  driver: SupportedDriver;
   onSaveComplete: (storageType: SavedConnectionItem) => void;
   onClose: () => void;
 }>) {
@@ -44,7 +59,7 @@ export default function SaveConnection({
     (data: SavedConnectionItemConfig) => {
       if (storage === "remote") {
         setLoading(true);
-        createDatabase({ ...data, driver: "turso" })
+        createDatabase({ ...data, driver: data.driver ?? "turso" })
           .then((r) => onSaveComplete(r.data))
           .finally(() => {
             setLoading(false);
@@ -59,6 +74,7 @@ export default function SaveConnection({
         onSaveComplete({
           id: conn.id,
           name: finalConfig.name,
+          driver: finalConfig.driver ?? "turso",
           storage: "local",
           description: finalConfig.description,
           label: finalConfig.label,
@@ -69,12 +85,24 @@ export default function SaveConnection({
   );
 
   return (
-    <ConnectionDialogContent title="New Connection" onClose={onClose}>
+    <ConnectionDialogContent
+      driver={driver}
+      title="New Connection"
+      onClose={onClose}
+    >
       {step === "storage" && (
         <SaveConnectionType onContinue={onConnectionTypeSelected} />
       )}
       {step === "config" && (
-        <SavedConnectionConfig onSave={onSaveConnection} loading={loading} />
+        <>
+          {driver === "rqlite" && storage === "local" && <RqliteInstruction />}
+          <SavedConnectionConfig
+            driver={driver}
+            onClose={onClose}
+            onSave={onSaveConnection}
+            loading={loading}
+          />
+        </>
       )}
     </ConnectionDialogContent>
   );

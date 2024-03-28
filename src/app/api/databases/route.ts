@@ -20,6 +20,7 @@ export const GET = withUser(async ({ user }) => {
         ({
           id: d.id,
           name: d.name,
+          driver: d.driver,
           description: d.description,
           storage: "remote",
           label: d.color,

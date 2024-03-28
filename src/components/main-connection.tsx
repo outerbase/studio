@@ -8,8 +8,9 @@ import ContextMenuHandler from "./context-menu-handler";
 import InternalPubSub from "@/lib/internal-pubsub";
 import { useRouter } from "next/navigation";
 import { SchemaProvider } from "@/context/SchemaProvider";
-import ThemeProvider from "@/context/theme-provider";
 import { BaseDriver } from "@/drivers/base-driver";
+import { BlockEditorProvider } from "@/context/block-editor-provider";
+import { useConnectionConfig } from "@/context/connection-config-provider";
 
 export interface ConnectionCredential {
   url: string;
@@ -24,13 +25,13 @@ function MainConnection({ driver }: { driver: BaseDriver }) {
   }, [driver]);
 
   return (
-    <ThemeProvider>
-      <DatabaseDriverProvider driver={driver}>
-        <SchemaProvider>
+    <DatabaseDriverProvider driver={driver}>
+      <SchemaProvider>
+        <BlockEditorProvider>
           <DatabaseGui />
-        </SchemaProvider>
-      </DatabaseDriverProvider>
-    </ThemeProvider>
+        </BlockEditorProvider>
+      </SchemaProvider>
+    </DatabaseDriverProvider>
   );
 }
 
@@ -46,6 +47,7 @@ function InvalidSession() {
 
 function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
   const router = useRouter();
+  const { config } = useConnectionConfig();
 
   /**
    * We use useLayoutEffect because it executes before
@@ -59,10 +61,8 @@ function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
   }, [driver, router]);
 
   useEffect(() => {
-    if (driver.getEndpoint()) {
-      document.title = driver.getEndpoint() + " - LibSQL Studio";
-    }
-  }, [driver]);
+    document.title = config.name + " - LibSQL Studio";
+  }, [config]);
 
   return driver ? (
     <>

@@ -1,9 +1,37 @@
-import { InStatement, ResultSet } from "@libsql/client/web";
+import { InStatement } from "@libsql/client/web";
+
+export enum TableColumnDataType {
+  TEXT = 1,
+  INTEGER = 2,
+  REAL = 3,
+  BLOB = 4,
+}
+
+export type SqlOrder = "ASC" | "DESC";
+export type DatabaseRow = Record<string, unknown>;
+
+export interface DatabaseHeader {
+  name: string;
+  originalType: string | null;
+  type: TableColumnDataType;
+}
+export interface DatabaseResultSet {
+  rows: DatabaseRow[];
+  headers: DatabaseHeader[];
+  rowsAffected: number;
+  lastInsertRowid?: number;
+}
+
+export interface ColumnSortOption {
+  columnName: string;
+  by: SqlOrder;
+}
 
 export interface SelectFromTableOptions {
   whereRaw?: string;
   limit: number;
   offset: number;
+  orderBy?: ColumnSortOption[];
 }
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
@@ -46,7 +74,7 @@ export interface DatabaseTableColumnConstraint {
 
   primaryKey?: boolean;
   primaryColumns?: string[];
-  primaryKeyOrder?: "ASC" | "DESC";
+  primaryKeyOrder?: SqlOrder;
   primaryKeyConflict?: DatabaseColumnConflict;
   autoIncrement?: boolean;
 
@@ -81,6 +109,7 @@ export interface DatabaseTableSchema {
 interface DatabaseTableOperationInsert {
   operation: "INSERT";
   values: Record<string, DatabaseValue>;
+  autoIncrementPkColumn?: string;
 }
 
 interface DatabaseTableOperationUpdate {
@@ -100,16 +129,15 @@ export type DatabaseTableOperation =
   | DatabaseTableOperationDelete;
 
 export interface DatabaseTableOperationReslt {
-  lastId?: bigint;
+  lastId?: number;
   record?: Record<string, DatabaseValue>;
 }
 
 export abstract class BaseDriver {
-  abstract getEndpoint(): string;
   abstract close(): void;
 
-  abstract query(stmt: InStatement): Promise<ResultSet>;
-  abstract transaction(stmts: InStatement[]): Promise<ResultSet[]>;
+  abstract query(stmt: InStatement): Promise<DatabaseResultSet>;
+  abstract transaction(stmts: InStatement[]): Promise<DatabaseResultSet[]>;
 
   abstract schemas(): Promise<DatabaseSchemaItem[]>;
   abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
@@ -117,7 +145,7 @@ export abstract class BaseDriver {
   abstract selectTable(
     tableName: string,
     options: SelectFromTableOptions
-  ): Promise<{ data: ResultSet; schema: DatabaseTableSchema }>;
+  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }>;
 
   abstract updateTableData(
     tableName: string,

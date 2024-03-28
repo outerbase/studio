@@ -1,6 +1,7 @@
-import { InStatement, ResultSet } from "@libsql/client/web";
+import { InStatement } from "@libsql/client/web";
 import {
   BaseDriver,
+  DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseTableOperation,
   DatabaseTableOperationReslt,
@@ -18,16 +19,10 @@ import { RequestOperationBody } from "@/lib/api/api-request-types";
 export default class RemoteDriver implements BaseDriver {
   protected id: string = "";
   protected authToken = "";
-  protected name = "";
 
-  constructor(id: string, authToken: string, name: string) {
+  constructor(id: string, authToken: string) {
     this.id = id;
     this.authToken = authToken;
-    this.name = name;
-  }
-
-  getEndpoint() {
-    return this.name;
   }
 
   protected async request<T = unknown>(body: RequestOperationBody) {
@@ -91,13 +86,11 @@ export default class RemoteDriver implements BaseDriver {
   async selectTable(
     tableName: string,
     options: SelectFromTableOptions
-  ): Promise<{ data: ResultSet; schema: DatabaseTableSchema }> {
+  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
     return await this.request({
       type: "select-table",
       tableName,
-      limit: options.limit,
-      offset: options.offset,
-      whereRaw: options.whereRaw,
+      options,
     });
   }
 }

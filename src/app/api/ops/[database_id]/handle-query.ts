@@ -1,6 +1,6 @@
 import { DatabaseOperationHandler } from "@/lib/with-database-ops";
 import { NextResponse } from "next/server";
-import createTursoEdgeClient from "./turso-edge-client";
+import { createTursoEdgeDriver } from "./turso-edge-client";
 import { RequestOperationQuery } from "@/lib/api/api-request-types";
 
 const handleQueryRequest: DatabaseOperationHandler<
@@ -15,11 +15,11 @@ const handleQueryRequest: DatabaseOperationHandler<
     );
   }
 
-  const client = await createTursoEdgeClient(database);
+  const client = await createTursoEdgeDriver(database);
 
   try {
     return NextResponse.json({
-      data: await client.execute(body.statement),
+      data: await client.query(body.statement),
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message });

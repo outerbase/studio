@@ -12,6 +12,7 @@ import SaveConnection from "./saved-connection";
 import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
+  SupportedDriver,
 } from "@/app/connect/saved-connection-storage";
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
@@ -19,6 +20,8 @@ import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
 import QuickConnect from "./quick-connect";
+import { LucideChevronDown } from "lucide-react";
+import DriverDropdown from "./driver-dropdown";
 
 function ConnectionListSection({
   data,
@@ -70,8 +73,11 @@ function ConnectionListSection({
 export default function ConnectionList({
   user,
 }: Readonly<{ user: User | null }>) {
-  const [quickConnect, setQuickConnect] = useState(false);
-  const [showAddConnection, setShowAddConnection] = useState(false);
+  const [quickConnect, setQuickConnect] = useState<SupportedDriver | null>(
+    null
+  );
+  const [showAddConnection, setShowAddConnection] =
+    useState<SupportedDriver | null>(null);
   const [removeConnection, setRemoveConnection] =
     useState<SavedConnectionItem>();
   const [editConnection, setEditConnection] = useState<SavedConnectionItem>();
@@ -113,13 +119,12 @@ export default function ConnectionList({
   // ---------------------------------------------
   const onSaveComplete = useCallback(
     (savedConn: SavedConnectionItem) => {
-      console.log(savedConn);
       if (savedConn.storage === "remote") {
         setRemoteSavedConns((prev) => [savedConn, ...prev]);
       } else {
         setLocalSavedConns(SavedConnectionLocalStorage.getList());
       }
-      setShowAddConnection(false);
+      setShowAddConnection(null);
     },
     [setLocalSavedConns, setRemoteSavedConns, setShowAddConnection]
   );
@@ -154,7 +159,7 @@ export default function ConnectionList({
         onClose={() => {
           setEditConnection(undefined);
         }}
-        id={editConnection.id}
+        conn={editConnection}
         storage={editConnection.storage}
         onSaveComplete={onEditComplete}
       />
@@ -164,37 +169,36 @@ export default function ConnectionList({
   if (showAddConnection) {
     return (
       <SaveConnection
+        driver={showAddConnection}
         user={user}
-        onClose={() => setShowAddConnection(false)}
+        onClose={() => setShowAddConnection(null)}
         onSaveComplete={onSaveComplete}
       />
     );
   }
 
   if (quickConnect) {
-    return <QuickConnect onClose={() => setQuickConnect(false)} />;
+    return (
+      <QuickConnect
+        driver={quickConnect}
+        onClose={() => setQuickConnect(null)}
+      />
+    );
   }
 
   return (
     <>
       <div className="px-8 py-2 border-b">
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            setShowAddConnection(true);
-          }}
-        >
-          New Connection
-        </Button>
+        <DriverDropdown onSelect={setShowAddConnection}>
+          <Button variant={"ghost"}>
+            New Connection
+            <LucideChevronDown className="ml-2 w-4 h-4" />
+          </Button>
+        </DriverDropdown>
 
-        <Button
-          variant={"ghost"}
-          onClick={() => {
-            setQuickConnect(true);
-          }}
-        >
-          Quick Connect
-        </Button>
+        <DriverDropdown onSelect={setQuickConnect}>
+          <Button variant={"ghost"}>Quick Connect</Button>
+        </DriverDropdown>
       </div>
 
       {removeConnection && (
@@ -205,6 +209,13 @@ export default function ConnectionList({
         />
       )}
 
+      <ConnectionListSection
+        name="Local"
+        data={localSavedConns}
+        onRemove={setRemoveConnection}
+        onEdit={setEditConnection}
+      />
+
       {user && (
         <ConnectionListSection
           name="Remote"
@@ -213,13 +224,6 @@ export default function ConnectionList({
           onEdit={setEditConnection}
         />
       )}
-
-      <ConnectionListSection
-        name="Local"
-        data={localSavedConns}
-        onRemove={setRemoveConnection}
-        onEdit={setEditConnection}
-      />
     </>
   );
 }

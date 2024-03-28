@@ -13,7 +13,7 @@ import { LucideLoader2 } from "lucide-react";
 type SaveCompleteHandler = (v: SavedConnectionItem) => void;
 
 interface Props {
-  id: string;
+  conn: SavedConnectionItem;
   storage: SavedConnectionStorage;
   onSaveComplete: SaveCompleteHandler;
   onClose: () => void;
@@ -22,7 +22,12 @@ interface Props {
 function EditRemote({
   id,
   onSaveComplete,
-}: Readonly<{ id: string; onSaveComplete: SaveCompleteHandler }>) {
+  onClose,
+}: Readonly<{
+  id: string;
+  onSaveComplete: SaveCompleteHandler;
+  onClose: () => void;
+}>) {
   const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
   const [initialData, setInitialData] = useState<SavedConnectionItemConfig>();
@@ -34,6 +39,7 @@ function EditRemote({
           name: r.name,
           description: r.description,
           label: r.label,
+          driver: r.driver,
           config: {
             url: r.config.url,
             token: r.config.token,
@@ -58,13 +64,16 @@ function EditRemote({
 
   return (
     <SavedConnectionConfig
+      driver={initialData.driver ?? "turso"}
       initialData={initialData}
       showLockedCredential
       loading={saveLoading}
+      onClose={onClose}
       onSave={(conn) => {
         setSaveLoading(true);
         updateDatabase(id, {
           name: conn.name,
+          driver: conn.driver,
           description: conn.description,
           label: conn.label,
           config: {
@@ -75,6 +84,7 @@ function EditRemote({
           .then(() => {
             onSaveComplete({
               id: id,
+              driver: conn.driver,
               name: conn.name,
               storage: "remote",
               description: conn.description,
@@ -92,7 +102,12 @@ function EditRemote({
 function EditLocal({
   id,
   onSaveComplete,
-}: Readonly<{ id: string; onSaveComplete: SaveCompleteHandler }>) {
+  onClose,
+}: Readonly<{
+  id: string;
+  onSaveComplete: SaveCompleteHandler;
+  onClose: () => void;
+}>) {
   useEffect(() => {
     fetch("/");
   }, []);
@@ -107,12 +122,15 @@ function EditLocal({
 
   return (
     <SavedConnectionConfig
+      onClose={onClose}
+      driver={initialData.driver ?? "turso"}
       initialData={initialData}
       onSave={(conn) => {
         SavedConnectionLocalStorage.update(id, conn);
         onSaveComplete({
           id: id,
           name: conn.name,
+          driver: conn.driver,
           storage: "local",
           description: conn.description,
           label: conn.label,
@@ -123,17 +141,29 @@ function EditLocal({
 }
 
 export default function EditSavedConnection({
-  id,
+  conn,
   storage,
   onSaveComplete,
   onClose,
 }: Readonly<Props>) {
   return (
-    <ConnectionDialogContent title="Edit Connection" onClose={onClose}>
+    <ConnectionDialogContent
+      driver={conn.driver ?? "turso"}
+      title="Edit Connection"
+      onClose={onClose}
+    >
       {storage === "local" ? (
-        <EditLocal id={id} onSaveComplete={onSaveComplete} />
+        <EditLocal
+          id={conn.id}
+          onSaveComplete={onSaveComplete}
+          onClose={onClose}
+        />
       ) : (
-        <EditRemote id={id} onSaveComplete={onSaveComplete} />
+        <EditRemote
+          id={conn.id}
+          onSaveComplete={onSaveComplete}
+          onClose={onClose}
+        />
       )}
     </ConnectionDialogContent>
   );
