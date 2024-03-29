@@ -71,7 +71,6 @@ interface RenderCellListProps extends TableCellListCommonProps {
   headers: OptimizeTableHeaderWithIndexProps[];
   rowEnd: number;
   rowStart: number;
-  headerSizes: number[];
   colEnd: number;
   colStart: number;
 }
@@ -115,7 +114,6 @@ function renderCellList({
   hasSticky,
   headerIndex,
   customStyles,
-  headerSizes,
   headers,
   renderCell,
   rowEnd,
@@ -128,6 +126,7 @@ function renderCellList({
   internalState,
   onHeaderContextMenu,
 }: RenderCellListProps) {
+  const headerSizes = internalState.getHeaderWidth();
   const headersWithIndex = headerIndex.map((idx) => headers[idx]);
 
   const templateSizes = headersWithIndex
@@ -272,6 +271,10 @@ export default function OptimizeTable({
   }, [setRevision]);
 
   useEffect(() => {
+    internalState.setContainer(containerRef.current);
+  }, [internalState, containerRef]);
+
+  useEffect(() => {
     const changeCallback = () => {
       rerender();
     };
@@ -284,10 +287,6 @@ export default function OptimizeTable({
     return internalState.getHeaders();
   }, [internalState]);
 
-  const [headerSizes] = useState(() => {
-    return headers.map((header) => header.initialSize);
-  });
-
   const headerWithIndex = useMemo(() => {
     return headers.map((header, idx) => ({
       ...header,
@@ -298,11 +297,11 @@ export default function OptimizeTable({
 
   const { visibileRange, onHeaderResize } = useTableVisibilityRecalculation({
     containerRef,
-    headerSizes,
     headers: headerWithIndex,
     renderAhead,
     rowHeight,
     totalRowCount: internalState.getRowsCount(),
+    state: internalState,
   });
 
   const { rowStart, rowEnd, colEnd, colStart } = visibileRange;
@@ -319,7 +318,6 @@ export default function OptimizeTable({
 
   return useMemo(() => {
     const common = {
-      headerSizes,
       headers: headerWithIndex,
       renderCell,
       rowEnd,
@@ -367,7 +365,6 @@ export default function OptimizeTable({
     colEnd,
     colStart,
     renderCell,
-    headerSizes,
     rowHeight,
     headerWithIndex,
     onHeaderResize,

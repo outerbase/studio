@@ -2,21 +2,22 @@ import { useCallback, useEffect, useState } from "react";
 import { getVisibleCellRange } from "./helper";
 import { OptimizeTableHeaderWithIndexProps } from ".";
 import useElementResize from "@/hooks/useElementResize";
+import OptimizeTableState from "./OptimizeTableState";
 
 export default function useTableVisibilityRecalculation({
   containerRef,
   totalRowCount,
-  headerSizes,
   rowHeight,
   renderAhead,
   headers,
+  state,
 }: {
   containerRef: React.RefObject<HTMLDivElement>;
   totalRowCount: number;
-  headerSizes: number[];
   rowHeight: number;
   renderAhead: number;
   headers: OptimizeTableHeaderWithIndexProps[];
+  state: OptimizeTableState;
 }) {
   const [visibleDebounce, setVisibleDebounce] = useState<{
     rowStart: number;
@@ -32,6 +33,7 @@ export default function useTableVisibilityRecalculation({
 
   const recalculateVisible = useCallback(
     (e: HTMLDivElement) => {
+      const headerSizes = state.getHeaderWidth();
       setVisibleDebounce(
         getVisibleCellRange(
           e,
@@ -42,24 +44,17 @@ export default function useTableVisibilityRecalculation({
         )
       );
     },
-    [
-      setVisibleDebounce,
-      totalRowCount,
-      rowHeight,
-      renderAhead,
-      headerSizes,
-      headers,
-    ]
+    [setVisibleDebounce, totalRowCount, rowHeight, renderAhead, headers, state]
   );
 
   const onHeaderResize = useCallback(
     (idx: number, newWidth: number) => {
       if (containerRef.current) {
-        headerSizes[idx] = newWidth;
+        state.setHeaderWidth(idx, newWidth);
         recalculateVisible(containerRef.current);
       }
     },
-    [headerSizes, recalculateVisible, containerRef]
+    [state, recalculateVisible, containerRef]
   );
 
   // Recalculate the visibility again when we scroll the container

@@ -60,7 +60,9 @@ export default function QueryWindow() {
       })
         .then(({ last }) => {
           if (last) {
-            setData(OptimizeTableState.createFromResult(last));
+            const state = OptimizeTableState.createFromResult(last);
+            state.setReadOnlyMode(true);
+            setData(state);
           }
         })
         .catch(console.error);

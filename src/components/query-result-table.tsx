@@ -136,6 +136,7 @@ export default function ResultTable({
   const renderCell = useCallback(
     ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
       const isFocus = state.hasFocus(y, x);
+      const editMode = isFocus && state.isInEditMode();
 
       if (header.dataType === TableColumnDataType.TEXT) {
         const value = state.getValue(y, x) as DatabaseValue<string>;
@@ -147,8 +148,9 @@ export default function ResultTable({
 
         return (
           <TextCell
+            state={state}
             editor={editor}
-            readOnly={!tableName}
+            editMode={editMode}
             value={state.getValue(y, x) as DatabaseValue<string>}
             focus={isFocus}
             isChanged={state.hasCellChange(y, x)}
@@ -163,7 +165,8 @@ export default function ResultTable({
       ) {
         return (
           <NumberCell
-            readOnly={!tableName}
+            state={state}
+            editMode={editMode}
             value={state.getValue(y, x) as DatabaseValue<number>}
             focus={isFocus}
             isChanged={state.hasCellChange(y, x)}
@@ -176,7 +179,7 @@ export default function ResultTable({
 
       return <GenericCell value={state.getValue(y, x) as string} />;
     },
-    [tableName]
+    []
   );
 
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
@@ -358,13 +361,54 @@ export default function ResultTable({
 
   const onKeyDown = useCallback(
     (state: OptimizeTableState, e: React.KeyboardEvent) => {
+      if (state.isInEditMode()) return;
+
       if (KEY_BINDING.copy.match(e as React.KeyboardEvent<HTMLDivElement>)) {
         copyCallback(state);
       } else if (
         KEY_BINDING.paste.match(e as React.KeyboardEvent<HTMLDivElement>)
       ) {
         pasteCallback(state);
+      } else if (e.key === "ArrowRight") {
+        const focus = state.getFocus();
+        if (focus && focus.x + 1 < state.getHeaderCount()) {
+          state.setFocus(focus.y, focus.x + 1);
+          state.scrollToFocusCell("right", "top");
+        }
+      } else if (e.key === "ArrowLeft") {
+        const focus = state.getFocus();
+        if (focus && focus.x - 1 >= 0) {
+          state.setFocus(focus.y, focus.x - 1);
+          state.scrollToFocusCell("left", "top");
+        }
+      } else if (e.key === "ArrowUp") {
+        const focus = state.getFocus();
+        if (focus && focus.y - 1 >= 0) {
+          state.setFocus(focus.y - 1, focus.x);
+          state.scrollToFocusCell("left", "top");
+        }
+      } else if (e.key === "ArrowDown") {
+        const focus = state.getFocus();
+        if (focus && focus.y + 1 < state.getRowsCount()) {
+          state.setFocus(focus.y + 1, focus.x);
+          state.scrollToFocusCell("left", "bottom");
+        }
+      } else if (e.key === "Tab") {
+        const focus = state.getFocus();
+        if (focus) {
+          const colCount = state.getHeaderCount();
+          const n = focus.y * colCount + focus.x + 1;
+          const x = n % colCount;
+          const y = Math.floor(n / colCount);
+          if (y >= state.getRowsCount()) return;
+          state.setFocus(y, x);
+          state.scrollToFocusCell(x === 0 ? "left" : "right", "bottom");
+        }
+      } else if (e.key === "Enter") {
+        state.enterEditMode();
       }
+
+      e.preventDefault();
     },
     [copyCallback, pasteCallback]
   );
