@@ -22,6 +22,10 @@ export default class OptimizeTableState {
   protected selectedRows = new Set<number>();
   protected data: OptimizeTableRowValue[] = [];
   protected headers: OptimizeTableHeaderProps[] = [];
+  protected headerWidth: number[] = [];
+  protected editMode: boolean = false;
+  protected readOnlyMode: boolean = false;
+  protected container: HTMLDivElement | null = null;
 
   protected changeCallback: TableChangeEventCallback[] = [];
   protected changeDebounceTimerId: NodeJS.Timeout | null = null;
@@ -78,6 +82,15 @@ export default class OptimizeTableState {
     this.data = data.map((row) => ({
       raw: row,
     }));
+    this.headerWidth = headers.map((h) => h.initialSize);
+  }
+
+  setReadOnlyMode(readOnly: boolean) {
+    this.readOnlyMode = readOnly;
+  }
+
+  setContainer(div: HTMLDivElement | null) {
+    this.container = div;
   }
 
   // ------------------------------------------------
@@ -169,6 +182,10 @@ export default class OptimizeTableState {
 
   getRowsCount() {
     return this.data.length;
+  }
+
+  getHeaderCount() {
+    return this.headers.length;
   }
 
   disardAllChange() {
@@ -296,9 +313,80 @@ export default class OptimizeTableState {
     this.broadcastChange();
   }
 
+  isInEditMode() {
+    return this.editMode;
+  }
+
+  enterEditMode() {
+    if (this.readOnlyMode) return;
+    this.editMode = true;
+    this.broadcastChange();
+  }
+
+  exitEditMode() {
+    this.editMode = false;
+
+    if (this.container) {
+      this.container.focus();
+    }
+
+    this.broadcastChange();
+  }
+
   clearFocus() {
     this.focus = null;
     this.broadcastChange();
+  }
+
+  setHeaderWidth(idx: number, newWidth: number) {
+    return (this.headerWidth[idx] = newWidth);
+  }
+
+  getHeaderWidth() {
+    return this.headerWidth;
+  }
+
+  scrollToFocusCell(horizontal: "left" | "right", vertical: "top" | "bottom") {
+    if (this.container && this.focus) {
+      const cellX = this.focus[1];
+      const cellY = this.focus[0];
+      let cellLeft = 0;
+      let cellRight = 0;
+      const cellTop = (cellY + 1) * 38;
+      const cellBottom = cellTop + 38;
+
+      for (let i = 0; i < cellX; i++) {
+        cellLeft += this.headerWidth[i];
+      }
+      cellRight = cellLeft + this.headerWidth[cellX];
+
+      const width = this.container.clientWidth;
+      const height = this.container.clientHeight;
+      const containerLeft = this.container.scrollLeft;
+      const containerRight = containerLeft + this.container.clientWidth;
+      const containerTop = this.container.scrollTop;
+      const containerBottom = containerTop + height;
+
+      if (horizontal === "right") {
+        if (cellRight > containerRight) {
+          this.container.scrollLeft = Math.max(0, cellRight - width);
+        }
+      } else {
+        if (cellLeft < containerLeft) {
+          this.container.scrollLeft = cellLeft;
+        }
+      }
+
+      if (vertical === "bottom") {
+        if (cellBottom > containerBottom) {
+          this.container.scrollTop = Math.max(0, cellBottom - height);
+        }
+      } else {
+        if (cellTop - 38 < containerTop) {
+          this.container.scrollTop = Math.max(0, cellTop - 38);
+        }
+      }
+    }
   }
 
   // ------------------------------------------------
