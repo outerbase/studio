@@ -40,7 +40,7 @@ export default function DriverDropdown({
           <div className="flex gap-4 px-2 items-center h-12">
             <img src="/rqlite.png" alt="turso" className="w-9 h-9" />
             <div>
-              <div className="font-bold">Rqlite</div>
+              <div className="font-bold">rqlite</div>
               <div className="text-xs opacity-50">
                 Distributed database built on SQLite
               </div>

@@ -4,13 +4,16 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
   CONNECTION_LABEL_COLORS,
+  DRIVER_DETAIL,
   SavedConnectionItemConfig,
+  SavedConnectionItemConfigConfig,
   SavedConnectionLabel,
   SupportedDriver,
 } from "@/app/connect/saved-connection-storage";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { LucideLoader } from "lucide-react";
+import ConnectionStringInput from "./connection-string-input";
 
 interface Props {
   onSave: (conn: SavedConnectionItemConfig) => void;
@@ -20,8 +23,6 @@ interface Props {
   loading?: boolean;
   showLockedCredential?: boolean;
 }
-
-type AuthType = "token" | "username";
 
 function ColorItem({
   color,
@@ -45,6 +46,7 @@ export default function SavedConnectionConfig({
   initialData,
   loading,
 }: Readonly<Props>) {
+  const driverDetail = DRIVER_DETAIL[driver ?? "turso"];
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
     initialData?.description ?? ""
@@ -52,12 +54,14 @@ export default function SavedConnectionConfig({
   const [color, setColor] = useState<SavedConnectionLabel>(
     initialData?.label ?? "gray"
   );
-  const [url, setURL] = useState(initialData?.config?.url ?? "");
-  const [token, setToken] = useState(initialData?.config?.token ?? "");
-  const [username, setUsername] = useState(initialData?.config?.username ?? "");
-  const [password, setPassword] = useState(initialData?.config?.password ?? "");
 
-  const authType: AuthType = driver === "turso" ? "token" : "username";
+  const [connectionString, setConnectionString] =
+    useState<SavedConnectionItemConfigConfig>({
+      url: initialData?.config?.url ?? driverDetail.prefill,
+      token: initialData?.config?.token ?? "",
+      username: initialData?.config?.username ?? "",
+      password: initialData?.config?.password ?? "",
+    });
 
   const onSaveClicked = () => {
     onSave({
@@ -65,9 +69,11 @@ export default function SavedConnectionConfig({
       name,
       description,
       driver,
-      config: { url, token, username, password },
+      config: connectionString,
     });
   };
+
+  const valid = !driverDetail.invalidateEndpoint(connectionString.url);
 
   return (
     <>
@@ -107,62 +113,15 @@ export default function SavedConnectionConfig({
 
       <Separator />
 
-      <div>
-        <div className="text-xs mb-2">URL</div>
-        <Input
-          placeholder={"URL"}
-          value={url}
-          onChange={(e) => setURL(e.currentTarget.value)}
-        />
-      </div>
-
-      {authType === "token" && (
-        <div>
-          <div className="text-xs mb-2">Token</div>
-          <Textarea
-            placeholder={showLockedCredential && !token ? "✱✱✱✱✱✱✱✱✱" : "Token"}
-            value={token}
-            className={showLockedCredential && !token ? "bg-secondary" : ""}
-            onChange={(e) => setToken(e.currentTarget.value)}
-          />
-        </div>
-      )}
-
-      {authType === "username" && (
-        <>
-          <div>
-            <div className="text-xs mb-2">Username</div>
-            <Input
-              type="username"
-              placeholder={
-                showLockedCredential && !username ? "✱✱✱✱✱✱✱✱✱" : "Username"
-              }
-              value={username}
-              className={
-                showLockedCredential && !username ? "bg-secondary" : ""
-              }
-              onChange={(e) => setUsername(e.currentTarget.value)}
-            />
-          </div>
-          <div>
-            <div className="text-xs mb-2">Password</div>
-            <Input
-              type="password"
-              placeholder={
-                showLockedCredential && !password ? "✱✱✱✱✱✱✱✱✱" : "Password"
-              }
-              value={password}
-              className={
-                showLockedCredential && !password ? "bg-secondary" : ""
-              }
-              onChange={(e) => setPassword(e.currentTarget.value)}
-            />
-          </div>
-        </>
-      )}
+      <ConnectionStringInput
+        driver={driver}
+        onChange={setConnectionString}
+        value={connectionString}
+        showLockedCredential={showLockedCredential}
+      />
 
       <div className="mt-12 flex gap-2">
-        <Button onClick={onSaveClicked} disabled={loading}>
+        <Button onClick={onSaveClicked} disabled={loading || !valid}>
           {loading && <LucideLoader className="w-4 h-4 mr-2 animate-spin" />}
           Save
         </Button>

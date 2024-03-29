@@ -4,10 +4,40 @@ export const DRIVER_DETAIL = Object.freeze({
   turso: {
     name: "turso",
     icon: "/turso.jpeg",
+    prefill: "",
+    endpointExample: "Example: libsql://example.turso.io",
+    invalidateEndpoint: (url: string): null | string => {
+      const trimmedUrl = url.trim();
+      const valid =
+        trimmedUrl.startsWith("https://") ||
+        trimmedUrl.startsWith("http://") ||
+        trimmedUrl.startsWith("ws://") ||
+        trimmedUrl.startsWith("wss://") ||
+        trimmedUrl.startsWith("libsql://");
+
+      if (!valid) {
+        return "Endpoint must start with libsql://, https://, http://, wss:// or ws://";
+      }
+
+      return null;
+    },
   },
   rqlite: {
     name: "rqlite",
     icon: "/rqlite.png",
+    prefill: "http://localhost:4001",
+    endpointExample: "Example: http://localhost:4001",
+    invalidateEndpoint: (url: string): null | string => {
+      const trimmedUrl = url.trim();
+      const valid =
+        trimmedUrl.startsWith("https://") || trimmedUrl.startsWith("http://");
+
+      if (!valid) {
+        return "Endpoint must start with https://, http://";
+      }
+
+      return null;
+    },
   },
 });
 

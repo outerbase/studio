@@ -7,8 +7,8 @@ import Link from "next/link";
 import { PropsWithChildren } from "react";
 
 export const metadata: Metadata = {
-  title: "LibSQL Studio - LibSQL and Rqlite client on your browser",
-  description: "LibSQL Studio - LibSQL and Rqlite client on your browser",
+  title: "LibSQL Studio - LibSQL and rqlite client on your browser",
+  description: "LibSQL Studio - LibSQL and rqlite client on your browser",
 };
 
 async function Topbar() {
@@ -88,7 +88,7 @@ function HeroSection() {
       </h2>
 
       <p className="text-center max-w-[500px] mx-auto mt-6 text-lg">
-        LibSQL Studio is powerful and lightweight libSQL and Rqlite client that
+        LibSQL Studio is powerful and lightweight libSQL and rqlite client that
         run from your browser. Cross platform and no download needed. We are{" "}
         <Link
           href="https://github.com/invisal/libsql-studio"
