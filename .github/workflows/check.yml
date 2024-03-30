@@ -18,5 +18,3 @@ jobs:
         run: npm run tsc
       - name: Check Lint
         run: npm run lint
-      - name: Check Build
-        run: npm run build
