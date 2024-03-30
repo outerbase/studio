@@ -48,9 +48,6 @@ export const triggerSelectFiles = (
   return new Promise<Result<File[]>>((resolve, reject) => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.style.display = "none";
-    fileInput.setAttribute("aria-hidden", "true");
-    document.body.appendChild(fileInput);
 
     // options
     fileInput.accept = accept;
@@ -80,12 +77,10 @@ export const triggerSelectFiles = (
         );
       }
 
-      // document.body.removeChild(fileInput);
       return resolve(ok(Array.from(files)));
     };
 
     fileInput.click();
-    document.body.removeChild(fileInput);
   });
 };
 

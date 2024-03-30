@@ -1,4 +1,4 @@
-import { uploadFile as uploadUserFile } from "@/lib/utils";
+import { uploadFile as uploadUserFile } from "@/lib/file-upload";
 
 export async function uploadFile(file: File) {
   const { data, error } = await uploadUserFile(file);
