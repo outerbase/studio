@@ -4,6 +4,8 @@ import "./globals.css";
 import Script from "next/script";
 import ThemeProvider from "@/context/theme-provider";
 import { cookies } from "next/headers";
+import { Toaster } from "@/components/ui/sonner";
+import { Fragment } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +28,11 @@ export default async function RootLayout({
         {process.env.ENABLE_ANALYTIC && (
           <Script async defer src="https://scripts.withcabin.com/hello.js" />
         )}
-        <ThemeProvider defaultTheme={theme}>{children}</ThemeProvider>
+        <ThemeProvider defaultTheme={theme}>
+          <Fragment>{children}</Fragment>
+
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
