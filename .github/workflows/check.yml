@@ -1,0 +1,22 @@
+name: Check
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: npm install
+      - name: Check type
+        run: npm run tsc
+      - name: Check Lint
+        run: npm run lint
+      - name: Check Build
+        run: npm run build
