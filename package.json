@@ -72,6 +72,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-resizable-panels": "^1.0.9",
+    "sonner": "^1.4.41",
     "sql-query-identifier": "^2.6.0",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",

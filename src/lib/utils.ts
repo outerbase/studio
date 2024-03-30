@@ -100,25 +100,3 @@ export async function safeFetch<Success>(
     };
   }
 }
-
-/**
- * Upload a file to the server
- *
- * @param file - The file to upload
- * @returns The url of the uploaded file
- *
- * @example
- *
- * const { data } = await uploadFile(file)
- * console.log(data?.url)
- * // https://r2.example.com/filename.jpg
- */
-export async function uploadFile(file: File) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  return safeFetch<{ url: string }>("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
-}

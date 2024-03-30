@@ -15,22 +15,20 @@ export default function withUser<ParamsType = unknown>(
   handler: WithUserHandler<ParamsType>,
 ) {
   return async function (req: NextRequest, params: ParamsType) {
-    const session = await getSession();
-
-    if (!session) {
-      return new Response("Unauthorized", { status: HttpStatus.UNAUTHORIZED });
-    }
-
-    const user = session.user;
-    const sess = session.session;
-
-    if (!user || !sess) {
-      return new Response("Unauthorized", { status: HttpStatus.UNAUTHORIZED });
-    }
-
     try {
-      return await handler({ req, user, session: sess, params });
+      const { session, user } = await getSession();
+
+      if (!session || !user) {
+        throw new ApiError({
+          message: "You are not authenticated. Please login to continue.",
+          detailedMessage: "Unauthorized",
+          status: HttpStatus.UNAUTHORIZED,
+        });
+      }
+
+      return await handler({ req, user, session, params });
     } catch (e) {
+      // TODO: can extract this to a separate function
       if (e instanceof ApiError) {
         return new Response(
           JSON.stringify({
