@@ -32,6 +32,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
+import { triggerSelectFiles, uploadFile } from "@/lib/file-upload";
+import { toast } from "sonner";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -97,7 +99,7 @@ export default function ResultTable({
           <DropdownMenuItem
             onClick={() => {
               setStickHeaderIndex(
-                header.index === stickyHeaderIndex ? undefined : header.index
+                header.index === stickyHeaderIndex ? undefined : header.index,
               );
             }}
           >
@@ -130,7 +132,7 @@ export default function ResultTable({
         </Header>
       );
     },
-    [stickyHeaderIndex, tableName, onSortColumnChange]
+    [stickyHeaderIndex, tableName, onSortColumnChange],
   );
 
   const renderCell = useCallback(
@@ -179,7 +181,7 @@ export default function ResultTable({
 
       return <GenericCell value={state.getValue(y, x) as string} />;
     },
-    []
+    [],
   );
 
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
@@ -286,6 +288,26 @@ export default function ResultTable({
             });
           },
         },
+
+        {
+          title: "Upload File",
+          onClick: async () => {
+            const files = await triggerSelectFiles();
+
+            if (files.error) return toast.error(files.error.message);
+
+            const file = files.value[0];
+
+            const toastId = toast.loading("Uploading file...");
+            const { data, error } = await uploadFile(file);
+            if (error)
+              return toast.error(error.message, { id: toastId });
+
+            setFocusValue(data.url);
+            return toast.success("File uploaded!", { id: toastId });
+          },
+        },
+
         {
           separator: true,
         },
@@ -314,7 +336,7 @@ export default function ResultTable({
               onClick: () => {
                 if (state.getSelectedRowCount() > 0) {
                   window.navigator.clipboard.writeText(
-                    exportRowsToExcel(state.getSelectedRowsArray())
+                    exportRowsToExcel(state.getSelectedRowsArray()),
                   );
                 }
               },
@@ -331,8 +353,8 @@ export default function ResultTable({
                     exportRowsToSqlInsert(
                       tableName ?? "UnknownTable",
                       headers,
-                      state.getSelectedRowsArray()
-                    )
+                      state.getSelectedRowsArray(),
+                    ),
                   );
                 }
               },
@@ -356,7 +378,7 @@ export default function ResultTable({
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, openBlockEditor]
+    [data, tableName, copyCallback, pasteCallback, openBlockEditor],
   );
 
   const onKeyDown = useCallback(
@@ -410,7 +432,7 @@ export default function ResultTable({
 
       e.preventDefault();
     },
-    [copyCallback, pasteCallback]
+    [copyCallback, pasteCallback],
   );
 
   return (
