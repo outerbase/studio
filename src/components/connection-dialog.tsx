@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useConnectionConfig } from "@/context/connection-config-provider";
-import { LucideLoader } from "lucide-react";
 import { useRouter } from "next/navigation";
+import LogoLoading from "./logo-loading";
 
 export default function ConnectingDialog({
   message,
@@ -18,7 +18,6 @@ export default function ConnectingDialog({
   let body = (
     <div>
       <p className="mt-4 flex gap-4">
-        <LucideLoader className="animate-spin" />
         Connecting to <strong>{config.name}</strong>
       </p>
     </div>
@@ -45,16 +44,7 @@ export default function ConnectingDialog({
 
   return (
     <div className="p-8">
-      <div
-        className="mb-4 flex gap-2 items-center pl-8 pt-4 pb-4 rounded-lg select-none text-white"
-        style={{ background: "#2C5FC3", maxWidth: 300 }}
-      >
-        <img src="/libsql-logo.png" alt="LibSQL Studio" className="w-12 h-12" />
-        <div>
-          <h1 className="text-2xl font-semibold">LibSQL Studio</h1>
-        </div>
-      </div>
-
+      <LogoLoading />
       {body}
     </div>
   );

@@ -5,8 +5,8 @@ on:
       - develop
   pull_request:
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -18,3 +18,5 @@ jobs:
         run: npm run tsc
       - name: Check Lint
         run: npm run lint
+      - name: Check Test
+        run: npm run test
