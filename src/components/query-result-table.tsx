@@ -301,7 +301,10 @@ export default function ResultTable({
             const toastId = toast.loading("Uploading file...");
             const { data, error } = await uploadFile(file);
             if (error)
-              return toast.error(error.message, { id: toastId });
+              return toast.error("Upload failed!", {
+                id: toastId,
+                description: error.message,
+              });
 
             setFocusValue(data.url);
             return toast.success("File uploaded!", { id: toastId });
