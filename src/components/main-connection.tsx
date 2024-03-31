@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useLayoutEffect } from "react";
 import DatabaseGui from "./database-gui";
-import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
+import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AutoCompleteProvider } from "@/context/AutoCompleteProvider";
 import ContextMenuHandler from "./context-menu-handler";
 import InternalPubSub from "@/lib/internal-pubsub";
 import { useRouter } from "next/navigation";
 import { SchemaProvider } from "@/context/SchemaProvider";
-import { BaseDriver } from "@/drivers/base-driver";
 import { BlockEditorProvider } from "@/context/block-editor-provider";
 import { useConnectionConfig } from "@/context/connection-config-provider";
 
@@ -17,7 +16,9 @@ export interface ConnectionCredential {
   token: string;
 }
 
-function MainConnection({ driver }: { driver: BaseDriver }) {
+function MainConnection() {
+  const { databaseDriver: driver } = useDatabaseDriver();
+
   useEffect(() => {
     return () => {
       driver.close();
@@ -25,28 +26,17 @@ function MainConnection({ driver }: { driver: BaseDriver }) {
   }, [driver]);
 
   return (
-    <DatabaseDriverProvider driver={driver}>
-      <SchemaProvider>
-        <BlockEditorProvider>
-          <DatabaseGui />
-        </BlockEditorProvider>
-      </SchemaProvider>
-    </DatabaseDriverProvider>
+    <SchemaProvider>
+      <BlockEditorProvider>
+        <DatabaseGui />
+      </BlockEditorProvider>
+    </SchemaProvider>
   );
 }
 
-function InvalidSession() {
+function MainConnectionContainer() {
   const router = useRouter();
-
-  useEffect(() => {
-    router.push("/");
-  }, [router]);
-
-  return <div></div>;
-}
-
-function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
-  const router = useRouter();
+  const { databaseDriver: driver } = useDatabaseDriver();
   const { config } = useConnectionConfig();
 
   /**
@@ -64,20 +54,18 @@ function MainConnectionContainer({ driver }: Readonly<{ driver: BaseDriver }>) {
     document.title = config.name + " - LibSQL Studio";
   }, [config]);
 
-  return driver ? (
+  return (
     <>
       <AutoCompleteProvider>
         <TooltipProvider>
-          <MainConnection driver={driver} />
+          <MainConnection />
         </TooltipProvider>
       </AutoCompleteProvider>
       <ContextMenuHandler />
     </>
-  ) : (
-    <InvalidSession />
   );
 }
 
-export default function MainScreen({ driver }: { driver: BaseDriver }) {
-  return <MainConnectionContainer driver={driver} />;
+export default function MainScreen() {
+  return <MainConnectionContainer />;
 }

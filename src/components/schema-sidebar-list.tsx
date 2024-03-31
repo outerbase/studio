@@ -1,5 +1,4 @@
 import { ScrollArea } from "./ui/scroll-area";
-import { openTabs } from "@/messages/openTabs";
 import { buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { LucideIcon, Table2 } from "lucide-react";
@@ -9,6 +8,7 @@ import {
 } from "@/messages/openContextMenu";
 import { useSchema } from "@/context/SchemaProvider";
 import { useCallback, useEffect, useState } from "react";
+import { openTab } from "@/messages/open-tab";
 
 interface SchemaListProps {
   search: string;
@@ -37,9 +37,7 @@ function SchemaViewItem({
         onClick();
       }}
       onDoubleClick={() => {
-        openTabs({
-          key: "table_" + title,
-          name: title,
+        openTab({
           type: "table",
           tableName: title,
         });
@@ -81,9 +79,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         {
           title: "Create New Table",
           onClick: () => {
-            openTabs({
-              key: "_create_schema",
-              name: "Create Table",
+            openTab({
               type: "schema",
             });
           },
@@ -92,9 +88,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           title: "Edit Table",
           disabled: !tableName,
           onClick: () => {
-            openTabs({
-              key: "_schema_" + tableName,
-              name: "Edit " + tableName,
+            openTab({
               tableName,
               type: "schema",
             });

@@ -1,18 +1,16 @@
 import { LucidePlus, LucideSearch } from "lucide-react";
 import { useCallback, useState } from "react";
 import SchemaList from "./schema-sidebar-list";
-import { openTabs } from "@/messages/openTabs";
 import ListButtonItem from "./list-button-item";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
+import { openTab } from "@/messages/open-tab";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
 
   const onNewTable = useCallback(() => {
-    openTabs({
-      key: "_create_schema",
-      name: "Create Table",
+    openTab({
       type: "schema",
     });
   }, []);

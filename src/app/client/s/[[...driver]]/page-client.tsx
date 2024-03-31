@@ -2,6 +2,7 @@
 
 import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
 import MainScreen from "@/components/main-connection";
+import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 import { ConnectionConfigProvider } from "@/context/connection-config-provider";
 import RqliteDriver from "@/drivers/rqlite-driver";
 import TursoDriver from "@/drivers/turso-driver";
@@ -36,8 +37,10 @@ export default function ClientPageBody() {
   }
 
   return (
-    <ConnectionConfigProvider config={conn}>
-      <MainScreen driver={driver} />
-    </ConnectionConfigProvider>
+    <DatabaseDriverProvider driver={driver}>
+      <ConnectionConfigProvider config={conn}>
+        <MainScreen />
+      </ConnectionConfigProvider>
+    </DatabaseDriverProvider>
   );
 }
