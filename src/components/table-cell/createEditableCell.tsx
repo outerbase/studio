@@ -73,6 +73,8 @@ function InputCellEditor({
             if (y >= state.getRowsCount()) return;
 
             shouldExit.current = false;
+            applyChange(value, false);
+
             state.setFocus(y, x);
             state.scrollToFocusCell(x === 0 ? "left" : "right", "bottom");
             e.preventDefault();

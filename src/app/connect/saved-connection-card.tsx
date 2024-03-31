@@ -6,7 +6,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { LucidePencil, LucideTrash } from "lucide-react";
+import { LucidePencil, LucideTrash, LucideUsers } from "lucide-react";
 import { useState } from "react";
 import {
   SavedConnectionItem,
@@ -28,7 +28,14 @@ export default function ConnectionItemCard({
 
   return (
     <ContextMenu onOpenChange={setOpen}>
-      <ContextMenuTrigger>
+      <ContextMenuTrigger
+        disabled={!!conn.shared}
+        onContextMenu={(e) => {
+          if (conn.shared) {
+            e.preventDefault();
+          }
+        }}
+      >
         <Link
           className={cn(
             "border rounded w-[285px] flex overflow-hidden hover:border-secondary hover:bg-secondary",
@@ -55,9 +62,16 @@ export default function ConnectionItemCard({
           </div>
           <div className="p-2">
             <h2 className="line-clamp-1">{conn.name}</h2>
-            <p className="text-gray-600 text-xs line-clamp-2 h-8">
-              {conn.description || <i>No description</i>}
-            </p>
+            {conn.shared ? (
+              <p className="text-gray-600 text-xs line-clamp-2 h-8 mt-1">
+                <LucideUsers className="w-4 h-4 mr-1 inline" />
+                Shared by <strong>{conn.shared.sharedBy.name}</strong>
+              </p>
+            ) : (
+              <p className="text-gray-600 text-xs line-clamp-2 h-8">
+                {conn.description || <i>No description</i>}
+              </p>
+            )}
           </div>
         </Link>
       </ContextMenuTrigger>

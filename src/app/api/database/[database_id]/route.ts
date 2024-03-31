@@ -38,8 +38,10 @@ export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
 });
 
 export const DELETE = withDatabaseOperation(
-  async ({ database: databaseInfo, permission }) => {
-    if (!permission.isOwner) {
+  async ({ database: databaseInfo, user }) => {
+    const isOriginalOwner = databaseInfo.userId === user.id;
+
+    if (!isOriginalOwner) {
       return NextResponse.json({ error: "Unauthorization" }, { status: 500 });
     }
 
@@ -55,7 +57,7 @@ export const DELETE = withDatabaseOperation(
 );
 
 export const PUT = withDatabaseOperation(
-  async ({ database: databaseInfo, permission, body }) => {
+  async ({ database: databaseInfo, body, user }) => {
     const parsed = databaseSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -69,7 +71,8 @@ export const PUT = withDatabaseOperation(
 
     const data = parsed.data;
 
-    if (!permission.isOwner) {
+    const isOriginalOwner = databaseInfo.userId === user.id;
+    if (!isOriginalOwner) {
       return NextResponse.json({ error: "Unauthorization" }, { status: 500 });
     }
 

@@ -1,3 +1,4 @@
+import { ApiUser } from "@/lib/api/api-database-response";
 import parseSafeJson from "../../lib/json-safe";
 
 export const DRIVER_DETAIL = Object.freeze({
@@ -60,6 +61,9 @@ export interface SavedConnectionItem {
   name: string;
   description?: string;
   label?: SavedConnectionLabel;
+  shared?: {
+    sharedBy: ApiUser;
+  };
 }
 
 export interface SavedConnectionItemConfigConfig {
