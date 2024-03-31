@@ -16,7 +16,7 @@ async function upload({
   filename,
   contentType,
 }: {
-  buffer: Buffer;
+  buffer: Buffer | Uint8Array;
   userId: string;
   filename: string;
   contentType: string;

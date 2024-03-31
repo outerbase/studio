@@ -11,6 +11,7 @@ import { generateId } from "lucia";
 import { ApiError } from "@/lib/api-error";
 import { HttpStatus } from "@/constants/http-status";
 import { env } from "@/env";
+import { filetypeinfo } from "magic-bytes.js";
 
 export const runtime = "edge";
 
@@ -61,20 +62,24 @@ export const POST = withUser(async ({ req, user }) => {
     });
   }
 
-  // e.g. image/png -> png
-  const fileExtenstion = file.type.split("/")[1] || "";
-
   // we can do compression or resizing here and return a new buffer
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const buffer = new Uint8Array(await file.arrayBuffer());
+
+  // e.g. image/png -> png
+  const fallbackFileType = file.type.split("/")[1] || "";
+  const fallbackExtension = file.name.split(".").pop() || fallbackFileType;
+
+  const { extension = fallbackExtension, mime = file.type } =
+    filetypeinfo(buffer)[0];
 
   // hash the content and append the file extension
-  const hashedFilename = concat(await hash(buffer), ".", fileExtenstion);
+  const hashedFilename = concat(await hash(buffer), ".", extension);
 
   const uploadToR2 = await R2.upload({
     buffer,
     userId: user.id,
     filename: hashedFilename,
-    contentType: file.type,
+    contentType: mime,
   })
     .then(ok)
     .catch(err);
