@@ -1,7 +1,11 @@
 import { BaseDriver } from "@/drivers/base-driver";
+import CollaborationDriver from "@/drivers/collaboration-driver";
 import { PropsWithChildren, createContext, useContext } from "react";
 
-const DatabaseDriverContext = createContext<{ databaseDriver: BaseDriver }>({
+const DatabaseDriverContext = createContext<{
+  databaseDriver: BaseDriver;
+  collaborationDriver?: CollaborationDriver;
+}>({
   databaseDriver: {} as unknown as BaseDriver,
 });
 
@@ -12,9 +16,15 @@ export function useDatabaseDriver() {
 export function DatabaseDriverProvider({
   children,
   driver,
-}: PropsWithChildren<{ driver: BaseDriver }>) {
+  collaborationDriver,
+}: PropsWithChildren<{
+  driver: BaseDriver;
+  collaborationDriver?: CollaborationDriver;
+}>) {
   return (
-    <DatabaseDriverContext.Provider value={{ databaseDriver: driver }}>
+    <DatabaseDriverContext.Provider
+      value={{ databaseDriver: driver, collaborationDriver }}
+    >
       {children}
     </DatabaseDriverContext.Provider>
   );

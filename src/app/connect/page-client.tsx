@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { PropsWithChildren } from "react";
 import ConnectionList from "./connection-list";
 import Link from "next/link";
-import { LucideMoon, LucideSun } from "lucide-react";
+import { LucideCopy, LucideMoon, LucideSun } from "lucide-react";
 import { User } from "lucia";
 import { useTheme } from "@/context/theme-provider";
 
@@ -38,7 +38,21 @@ function Header({ user }: Readonly<{ user: User | null }>) {
   return (
     <div className="px-8 py-4 bg-secondary flex">
       <h2 className="text-xl font-semibold mb-2">
-        Welcome, {user ? user.name : "Guest"}
+        <div>Welcome, {user ? user.name : "Guest"}</div>
+        {user?.id && (
+          <div
+            className="mt-1 cursor-pointer"
+            onClick={() => {
+              window.navigator.clipboard.writeText(user.id);
+            }}
+          >
+            <span className="text-sm font-normal px-3 py-1 rounded-lg bg-background flex items-center">
+              <strong className="mr-2">ID: </strong>
+              {user.id} &nbsp;
+              <LucideCopy className="ml-1 w-4 h-4" />
+            </span>
+          </div>
+        )}
       </h2>
       <div className="grow" />
       <div className="flex gap-2">

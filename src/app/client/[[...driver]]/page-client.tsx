@@ -10,6 +10,7 @@ import {
   SupportedDriver,
 } from "../../connect/saved-connection-storage";
 import RqliteDriver from "@/drivers/rqlite-driver";
+import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 
 export default function ClientPageBody() {
   const driver = useMemo(() => {
@@ -36,8 +37,10 @@ export default function ClientPageBody() {
   }, []);
 
   return (
-    <ConnectionConfigProvider config={config}>
-      <MainScreen driver={driver} />
-    </ConnectionConfigProvider>
+    <DatabaseDriverProvider driver={driver}>
+      <ConnectionConfigProvider config={config}>
+        <MainScreen />
+      </ConnectionConfigProvider>
+    </DatabaseDriverProvider>
   );
 }

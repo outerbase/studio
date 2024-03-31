@@ -4,23 +4,17 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
-import TableDataContent from "./tabs/table-data-tab";
 import useMessageListener from "@/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
-import { OpenTabsProps } from "@/messages/openTabs";
+import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/tabs/query-tab";
-import SchemaEditorTab from "@/components/tabs/schema-editor-tab";
-import {
-  LucideCode,
-  LucideDatabase,
-  LucideSettings,
-  LucideTable,
-  LucideTableProperties,
-} from "lucide-react";
-import SidebarTab from "./sidebar-tab";
+import { LucideCode, LucideDatabase, LucideSettings } from "lucide-react";
+import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
+import SettingSidebar from "./sidebar/setting-sidebar";
+import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -31,6 +25,7 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
+  const { collaborationDriver } = useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
     {
@@ -44,86 +39,36 @@ export default function DatabaseGui() {
   useMessageListener<OpenTabsProps>(
     MessageChannelName.OPEN_NEW_TAB,
     (newTab) => {
-      setTabs((prev) => {
-        if (newTab) {
-          if (newTab.type === "table" && newTab.tableName) {
-            // Check if there is duplicated
-            const foundIndex = prev.findIndex((tab) => tab.key === newTab.key);
-
-            if (foundIndex >= 0) {
-              setSelectedTabIndex(foundIndex);
-            } else {
-              setSelectedTabIndex(prev.length);
-
-              return [
-                ...prev,
-                {
-                  icon: LucideTable,
-                  title: newTab.name,
-                  key: newTab.key,
-                  component: <TableDataContent tableName={newTab.tableName} />,
-                },
-              ];
-            }
-          } else if (newTab.type === "query") {
-            setSelectedTabIndex(prev.length);
-
-            return [
-              ...prev,
-              {
-                icon: LucideCode,
-                title: newTab.name,
-                key: newTab.key,
-                component: <QueryWindow />,
-              },
-            ];
-          } else if (newTab.type === "schema") {
-            // Check if there is duplicated
-            const foundIndex = prev.findIndex((tab) => tab.key === newTab.key);
-
-            if (foundIndex >= 0) {
-              setSelectedTabIndex(foundIndex);
-            } else {
-              setSelectedTabIndex(prev.length);
-
-              return [
-                ...prev,
-                {
-                  icon: LucideTableProperties,
-                  title: newTab.name,
-                  key: newTab.key,
-                  component: <SchemaEditorTab tableName={newTab.tableName} />,
-                },
-              ];
-            }
-          }
-        }
-
-        return prev;
-      });
+      if (newTab) {
+        receiveOpenTabMessage({ newTab, setSelectedTabIndex, setTabs });
+      }
     }
   );
+
+  const sidebarTabs = useMemo(() => {
+    return [
+      {
+        key: "database",
+        name: "Database",
+        content: <SchemaView />,
+        icon: LucideDatabase,
+      },
+      collaborationDriver
+        ? {
+            key: "setting",
+            name: "Setting",
+            content: <SettingSidebar />,
+            icon: LucideSettings,
+          }
+        : undefined,
+    ].filter(Boolean) as SidebarTabItem[];
+  }, [collaborationDriver]);
 
   return (
     <div className="h-screen w-screen flex flex-col">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
-          <SidebarTab
-            tabs={[
-              {
-                key: "database",
-                name: "Database",
-                content: <SchemaView />,
-                icon: LucideDatabase,
-              },
-              {
-                key: "setting",
-                name: "Setting",
-                content: <div className="p-2">Coming Soon</div>,
-                icon: LucideSettings,
-              },
-            ]}
-          />
+          <SidebarTab tabs={sidebarTabs} />
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={100 - defaultWidthPercentage}>

@@ -1,4 +1,3 @@
-import openNewQuery from "@/messages/openNewQuery";
 import { LucideIcon, LucidePlus } from "lucide-react";
 import {
   createContext,
@@ -23,6 +22,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableTab, WindowTabItemButton } from "./sortable-tab";
+import { openTab } from "@/messages/open-tab";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -124,7 +124,7 @@ export default function WindowTabs({
               <button
                 className="px-3 py-2 border-b"
                 onClick={() => {
-                  openNewQuery();
+                  openTab({ type: "query" });
                 }}
               >
                 <LucidePlus className="w-4 h-4" />
