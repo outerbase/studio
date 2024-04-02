@@ -21,7 +21,7 @@ const handleSelectTableRequest: DatabaseOperationHandler<
 
   if (body.options.orderBy) {
     for (const orderOption of body.options.orderBy) {
-      if (orderOption.by !== "DESC" && orderOption.by === "ASC") {
+      if (orderOption.by !== "DESC" && orderOption.by !== "ASC") {
         throw new ApiError({
           message: "Order by must be DESC or ASC",
           status: HttpStatus.FORBIDDEN,
