@@ -28,7 +28,7 @@ export default function ColumnDefaultValueInput({
     } else if (constraint?.defaultExpression !== undefined) {
       return constraint?.defaultExpression;
     } else if (constraint?.autoIncrement) {
-      return <span className="font-bold">Auto Increment</span>;
+      return <span>Auto Increment</span>;
     }
 
     return <span className="text-gray-500">No Default</span>;
@@ -115,9 +115,11 @@ export default function ColumnDefaultValueInput({
 
   return (
     <Popover>
-      <PopoverTrigger>
-        <div className="flex text-left shadow-sm py-2 px-3 rounded-md border w-[180px] h-full bg-background">
-          <div className="flex-grow">{display || "EMPTY STRING"}</div>
+      <PopoverTrigger className="h-full flex w-full">
+        <div className="flex text-left px-2 py-2 text-sm h-full bg-background">
+          <div className="flex-grow w-[150px] overflow-hidden mr-2">
+            {display || "EMPTY STRING"}
+          </div>
           <div className="text-gray-400 flex items-center">
             <ChevronsUpDown size={14} />
           </div>

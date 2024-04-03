@@ -8,10 +8,13 @@ import {
 import { Separator } from "../ui/separator";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import { Button } from "../ui/button";
-import SchemaEditorColumnList from "./SchemaEditorColumnList";
+import SchemaEditorColumnList from "./schema-editor-column-list";
 import { Input } from "../ui/input";
 import { checkSchemaChange } from "@/lib/sql-generate.schema";
-import { DatabaseTableColumn } from "@/drivers/base-driver";
+import {
+  DatabaseTableColumn,
+  DatabaseTableColumnConstraint,
+} from "@/drivers/base-driver";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;
@@ -24,6 +27,7 @@ export interface DatabaseTableSchemaChange {
     new?: string;
   };
   columns: DatabaseTableColumnChange[];
+  constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
 }
 
@@ -41,17 +45,28 @@ export default function SchemaEditor({
   onDiscard,
 }: Readonly<Props>) {
   const onAddColumn = useCallback(() => {
+    const newColumn =
+      value.columns.length === 0
+        ? {
+            name: "id",
+            type: "INTEGER",
+            constraint: {
+              primaryKey: true,
+            },
+          }
+        : {
+            name: "column",
+            type: "TEXT",
+            constraint: {},
+          };
+
     onChange({
       ...value,
       columns: [
         ...value.columns,
         {
           old: null,
-          new: {
-            name: "column",
-            type: "TEXT",
-            constraint: {},
-          },
+          new: newColumn,
         },
       ],
     });

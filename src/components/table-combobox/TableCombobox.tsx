@@ -28,12 +28,12 @@ export default function TableCombobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
-        <Button variant="outline" className="justify-between w-[200px]">
+        <Button variant="outline" className="justify-between flex w-full">
           {value ?? "No table selected"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="p-0 w-[250px]">
         <Command>
           <CommandInput placeholder="Search table name..." />
 

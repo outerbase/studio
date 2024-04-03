@@ -62,6 +62,7 @@ export default function SchemaEditorTab({
               old: col,
               new: structuredClone(col),
             })),
+            constraints: schema.constraints,
             createScript: schema.createScript,
           });
         })

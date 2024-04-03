@@ -49,12 +49,12 @@ export default function TableColumnCombobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger disabled={disabled}>
-        <Button variant="outline" className="justify-between w-[200px]">
+        <Button variant="outline" className="justify-between w-full">
           {value ?? "No column selected"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[250px] p-0">
         <Command>
           <CommandInput placeholder="Search column name..." />
 
