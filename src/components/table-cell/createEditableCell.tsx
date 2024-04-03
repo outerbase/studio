@@ -211,6 +211,7 @@ export default function createEditableCell<T = unknown>({
         value={toValue(editValue)}
         focus={focus}
         isChanged={isChanged}
+        align={align}
         onDoubleClick={() => {
           state.enterEditMode();
         }}

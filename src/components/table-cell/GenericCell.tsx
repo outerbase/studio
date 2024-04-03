@@ -2,8 +2,10 @@ import { useMemo } from "react";
 import styles from "./styles.module.css";
 import { isLinkString } from "@/lib/validation";
 import DisplayLinkCell from "./display-link-cell";
+import { cn } from "@/lib/utils";
 
 interface TableCellProps<T = unknown> {
+  align?: "left" | "right";
   value: T;
   focus?: boolean;
   isChanged?: boolean;
@@ -16,6 +18,7 @@ export default function GenericCell({
   onFocus,
   isChanged,
   focus,
+  align,
   onDoubleClick,
 }: TableCellProps<unknown>) {
   const className = [
@@ -27,13 +30,17 @@ export default function GenericCell({
     .filter(Boolean)
     .join(" ");
 
+  const isAlignRight = align === "right";
+
+  const textBaseStyle = cn("text-gray-500", isAlignRight ? "float-right" : "");
+
   const content = useMemo(() => {
     if (value === null) {
-      return <span className="text-gray-500">NULL</span>;
+      return <span className={textBaseStyle}>NULL</span>;
     }
 
     if (value === undefined) {
-      return <span className="text-gray-500">DEFAULT</span>;
+      return <span className={textBaseStyle}>DEFAULT</span>;
     }
 
     if (typeof value === "string") {
@@ -88,7 +95,7 @@ export default function GenericCell({
     }
 
     return <span>{value.toString()}</span>;
-  }, [value, isChanged]);
+  }, [value, textBaseStyle, isChanged]);
 
   return (
     <div
