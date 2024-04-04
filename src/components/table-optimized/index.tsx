@@ -14,6 +14,7 @@ import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
 import OptimizeTableState from "./OptimizeTableState";
 import { TableColumnDataType } from "@/drivers/base-driver";
+import { cn } from "@/lib/utils";
 
 export interface OptimizeTableHeaderProps {
   name: string;
@@ -175,7 +176,7 @@ function renderCellList({
       >
         {hasSticky && (
           <td
-            className={styles.stickyColumn}
+            className={cn(styles.stickyColumn, "bg-background")}
             onMouseDown={handleCellClicked(
               absoluteRowIndex,
               headersWithIndex[0].index
