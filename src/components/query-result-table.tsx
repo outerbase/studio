@@ -34,6 +34,8 @@ import {
 } from "./ui/dropdown-menu";
 import { triggerSelectFiles, uploadFile } from "@/lib/file-upload";
 import { toast } from "sonner";
+import { useDatabaseDriver } from "@/context/DatabaseDriverProvider";
+import BigNumberCell from "./table-cell/BigNumberCell";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -91,6 +93,7 @@ export default function ResultTable({
 }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
   const { openBlockEditor } = useBlockEditor();
+  const { databaseDriver } = useDatabaseDriver();
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
@@ -99,7 +102,7 @@ export default function ResultTable({
           <DropdownMenuItem
             onClick={() => {
               setStickHeaderIndex(
-                header.index === stickyHeaderIndex ? undefined : header.index,
+                header.index === stickyHeaderIndex ? undefined : header.index
               );
             }}
           >
@@ -132,7 +135,7 @@ export default function ResultTable({
         </Header>
       );
     },
-    [stickyHeaderIndex, tableName, onSortColumnChange],
+    [stickyHeaderIndex, tableName, onSortColumnChange]
   );
 
   const renderCell = useCallback(
@@ -161,10 +164,7 @@ export default function ResultTable({
             }}
           />
         );
-      } else if (
-        header.dataType === TableColumnDataType.REAL ||
-        header.dataType === TableColumnDataType.INTEGER
-      ) {
+      } else if (header.dataType === TableColumnDataType.REAL) {
         return (
           <NumberCell
             state={state}
@@ -177,11 +177,39 @@ export default function ResultTable({
             }}
           />
         );
+      } else if (header.dataType === TableColumnDataType.INTEGER) {
+        if (databaseDriver.supportBigInt()) {
+          return (
+            <BigNumberCell
+              state={state}
+              editMode={editMode}
+              value={state.getValue(y, x) as DatabaseValue<bigint>}
+              focus={isFocus}
+              isChanged={state.hasCellChange(y, x)}
+              onChange={(newValue) => {
+                state.changeValue(y, x, newValue);
+              }}
+            />
+          );
+        } else {
+          return (
+            <NumberCell
+              state={state}
+              editMode={editMode}
+              value={state.getValue(y, x) as DatabaseValue<number>}
+              focus={isFocus}
+              isChanged={state.hasCellChange(y, x)}
+              onChange={(newValue) => {
+                state.changeValue(y, x, newValue);
+              }}
+            />
+          );
+        }
       }
 
       return <GenericCell value={state.getValue(y, x) as string} />;
     },
-    [],
+    [databaseDriver]
   );
 
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
@@ -339,7 +367,7 @@ export default function ResultTable({
               onClick: () => {
                 if (state.getSelectedRowCount() > 0) {
                   window.navigator.clipboard.writeText(
-                    exportRowsToExcel(state.getSelectedRowsArray()),
+                    exportRowsToExcel(state.getSelectedRowsArray())
                   );
                 }
               },
@@ -356,8 +384,8 @@ export default function ResultTable({
                     exportRowsToSqlInsert(
                       tableName ?? "UnknownTable",
                       headers,
-                      state.getSelectedRowsArray(),
-                    ),
+                      state.getSelectedRowsArray()
+                    )
                   );
                 }
               },
@@ -381,7 +409,7 @@ export default function ResultTable({
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, openBlockEditor],
+    [data, tableName, copyCallback, pasteCallback, openBlockEditor]
   );
 
   const onKeyDown = useCallback(
@@ -435,7 +463,7 @@ export default function ResultTable({
 
       e.preventDefault();
     },
-    [copyCallback, pasteCallback],
+    [copyCallback, pasteCallback]
   );
 
   return (

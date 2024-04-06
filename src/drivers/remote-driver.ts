@@ -25,6 +25,10 @@ export default class RemoteDriver implements BaseDriver {
     this.authToken = authToken;
   }
 
+  supportBigInt(): boolean {
+    return false;
+  }
+
   protected async request<T = unknown>(body: RequestOperationBody) {
     const r = await fetch(`/api/ops/${this.id}`, {
       method: "POST",

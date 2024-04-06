@@ -21,7 +21,7 @@ export default function ClientPageBody() {
     if (config.driver === "rqlite") {
       return new RqliteDriver(config.url, config.username, config.password);
     }
-    return new TursoDriver(config.url, config.token as string);
+    return new TursoDriver(config.url, config.token as string, true);
   }, []);
 
   const config = useMemo(() => {

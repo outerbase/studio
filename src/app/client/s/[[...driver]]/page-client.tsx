@@ -29,7 +29,7 @@ export default function ClientPageBody() {
       );
     }
 
-    return new TursoDriver(conn.config.url, conn.config.token);
+    return new TursoDriver(conn.config.url, conn.config.token, true);
   }, [conn]);
 
   if (!driver || !conn) {
