@@ -41,16 +41,23 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
   protected client: Client;
   protected endpoint: string = "";
   protected authToken = "";
+  protected bigInt = false;
 
-  constructor(url: string, authToken: string) {
+  constructor(url: string, authToken: string, bigInt: boolean = false) {
     super();
     this.endpoint = url;
     this.authToken = authToken;
+    this.bigInt = bigInt;
 
     this.client = createClient({
       url: this.endpoint,
       authToken: this.authToken,
+      intMode: bigInt ? "bigint" : "number",
     });
+  }
+
+  supportBigInt(): boolean {
+    return this.bigInt;
   }
 
   async query(stmt: InStatement) {

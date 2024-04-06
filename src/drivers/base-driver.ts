@@ -134,6 +134,10 @@ export interface DatabaseTableOperationReslt {
 }
 
 export abstract class BaseDriver {
+  // Flags
+  abstract supportBigInt(): boolean;
+
+  // Methods
   abstract close(): void;
 
   abstract query(stmt: InStatement): Promise<DatabaseResultSet>;

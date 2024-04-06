@@ -95,6 +95,10 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
     return json.results.map(transformRawResult);
   }
 
+  supportBigInt(): boolean {
+    return false;
+  }
+
   async query(stmt: InStatement): Promise<DatabaseResultSet> {
     return (await this.transaction([stmt]))[0];
   }
