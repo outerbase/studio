@@ -21,7 +21,7 @@ import { validateOperation } from "@/lib/validation";
 
 export default abstract class SqliteLikeBaseDriver extends BaseDriver {
   protected escapeId(id: string) {
-    return id.replace(/"/g, '""');
+    return `"${id.replace(/"/g, '""')}"`;
   }
 
   abstract query(stmt: InStatement): Promise<DatabaseResultSet>;
