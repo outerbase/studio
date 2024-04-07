@@ -124,11 +124,19 @@ export default function generateSqlSchemaChange(
 
   for (const col of change.columns) {
     if (col.new === null) lines.push(`DROP COLUMN ${col.old?.name}`);
-    else if (col.old == null) {
+    else if (col.old === null) {
       if (isCreateScript) {
         lines.push(geneateCreateColumn(col.new));
       } else {
         lines.push("ADD " + geneateCreateColumn(col.new));
+      }
+    } else {
+      if (col.new.name !== col.old.name) {
+        lines.push(
+          `RENAME COLUMN ${escapeIdentity(col.old.name)} TO ${escapeIdentity(
+            col.new.name
+          )}`
+        );
       }
     }
   }

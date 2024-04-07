@@ -233,11 +233,22 @@ export function parseColumnConstraint(
       ...parseColumnConstraint(cursor),
     };
   } else if (cursor.matchKeyword("UNIQUE")) {
+    let uniqueColumns: string[] | undefined;
+
     cursor.next();
+
+    const parens = cursor.enterParens();
+    if (parens) {
+      uniqueColumns = parseColumnList(parens);
+      cursor.next();
+    }
+
     const conflict = parseConstraintConflict(cursor);
+
     return {
       unique: true,
       uniqueConflict: conflict,
+      uniqueColumns,
       ...parseColumnConstraint(cursor),
     };
   } else if (cursor.matchKeyword("DEFAULT")) {

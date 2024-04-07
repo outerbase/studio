@@ -51,10 +51,12 @@ function changeColumnOnIndex(
             : {
                 ...(columns[idx].new as DatabaseTableColumn),
                 ...value,
-                constraint: {
-                  ...columns[idx].new?.constraint,
-                  ...value?.constraint,
-                },
+                constraint: value?.constraint
+                  ? {
+                      ...columns[idx].new?.constraint,
+                      ...value?.constraint,
+                    }
+                  : columns[idx].new?.constraint,
               };
 
         if (!columns[idx].new && !columns[idx].old) {
@@ -114,8 +116,8 @@ function ColumnItem({
 
   return (
     <tr>
-      <td className={cn("border", highlightClassName)}></td>
-      <td className="border">
+      <td className={cn("border-l border-t border-b", highlightClassName)}></td>
+      <td className="border-r border-t border-b">
         <input
           value={column.name}
           onChange={(e) => change({ name: e.currentTarget.value })}

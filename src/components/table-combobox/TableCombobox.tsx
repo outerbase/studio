@@ -17,10 +17,12 @@ export default function TableCombobox({
   value,
   onChange,
   disabled,
+  borderless,
 }: Readonly<{
   value?: string;
   onChange: (v: string) => void;
   disabled?: boolean;
+  borderless?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
   const { schema, refresh } = useSchema();
@@ -28,10 +30,17 @@ export default function TableCombobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
-        <Button variant="outline" className="justify-between flex w-full">
-          {value ?? "No table selected"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        {borderless ? (
+          <div className="justify-between flex w-full px-2 items-center">
+            {value ?? "No table selected"}
+            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+          </div>
+        ) : (
+          <Button variant="outline" className="justify-between flex w-full">
+            {value ?? "No table selected"}
+            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[250px]">
         <Command>

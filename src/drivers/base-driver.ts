@@ -82,6 +82,7 @@ export interface DatabaseTableColumnConstraint {
   notNullConflict?: DatabaseColumnConflict;
 
   unique?: boolean;
+  uniqueColumns?: string[];
   uniqueConflict?: DatabaseColumnConflict;
 
   checkExpression?: string;

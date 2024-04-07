@@ -15,10 +15,16 @@ import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
 } from "@/drivers/base-driver";
+import SchemaEditorConstraintList from "./schema-editor-constraint-list";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;
   new: DatabaseTableColumn | null;
+}
+
+export interface DatabaseTableConstraintChange {
+  old: DatabaseTableColumnConstraint | null;
+  new: DatabaseTableColumnConstraint | null;
 }
 
 export interface DatabaseTableSchemaChange {
@@ -27,7 +33,7 @@ export interface DatabaseTableSchemaChange {
     new?: string;
   };
   columns: DatabaseTableColumnChange[];
-  constraints?: DatabaseTableColumnConstraint[];
+  constraints?: DatabaseTableConstraintChange[];
   createScript?: string;
 }
 
@@ -135,6 +141,9 @@ export default function SchemaEditor({
       </div>
       <div className="flex-grow overflow-y-auto">
         <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
+        {value.constraints && value.constraints.length > 0 && (
+          <SchemaEditorConstraintList constraints={value.constraints} />
+        )}
       </div>
     </div>
   );

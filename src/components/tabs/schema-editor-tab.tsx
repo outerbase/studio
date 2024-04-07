@@ -62,7 +62,10 @@ export default function SchemaEditorTab({
               old: col,
               new: structuredClone(col),
             })),
-            constraints: schema.constraints,
+            constraints: (schema.constraints ?? []).map((con) => ({
+              old: con,
+              new: structuredClone(con),
+            })),
             createScript: schema.createScript,
           });
         })
