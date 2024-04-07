@@ -1,48 +1,154 @@
 import { ApiUser } from "@/lib/api/api-database-response";
 import parseSafeJson from "../../lib/json-safe";
 
-export const DRIVER_DETAIL = Object.freeze({
-  turso: {
-    name: "turso",
-    icon: "/turso.jpeg",
-    prefill: "",
-    endpointExample: "Example: libsql://example.turso.io",
-    invalidateEndpoint: (url: string): null | string => {
-      const trimmedUrl = url.trim();
-      const valid =
-        trimmedUrl.startsWith("https://") ||
-        trimmedUrl.startsWith("http://") ||
-        trimmedUrl.startsWith("ws://") ||
-        trimmedUrl.startsWith("wss://") ||
-        trimmedUrl.startsWith("libsql://");
+export interface DriverDetailField {
+  name: keyof SavedConnectionItemConfigConfig;
+  type: "text" | "textarea" | "password";
+  secret?: boolean;
+  required?: boolean;
+  title?: string;
+  placeholder?: string;
+  description?: string;
+  prefill?: string;
+  invalidate?: (value: string) => string | null;
+}
 
-      if (!valid) {
-        return "Endpoint must start with libsql://, https://, http://, wss:// or ws://";
-      }
+export interface DriverDetail {
+  name: string;
+  icon: string;
+  fields: DriverDetailField[];
+}
 
-      return null;
+export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
+  Object.freeze({
+    turso: {
+      name: "turso",
+      icon: "/turso.jpeg",
+      fields: [
+        {
+          name: "url",
+          required: true,
+          type: "text",
+          title: "URL",
+          description: "Example: libsql://example.turso.io",
+          invalidate: (url: string): null | string => {
+            const trimmedUrl = url.trim();
+            const valid =
+              trimmedUrl.startsWith("https://") ||
+              trimmedUrl.startsWith("http://") ||
+              trimmedUrl.startsWith("ws://") ||
+              trimmedUrl.startsWith("wss://") ||
+              trimmedUrl.startsWith("libsql://");
+
+            if (!valid) {
+              return "Endpoint must start with libsql://, https://, http://, wss:// or ws://";
+            }
+
+            return null;
+          },
+        },
+        { name: "token", title: "Token", type: "textarea", secret: true },
+      ],
     },
-  },
-  rqlite: {
-    name: "rqlite",
-    icon: "/rqlite.png",
-    prefill: "http://localhost:4001",
-    endpointExample: "Example: http://localhost:4001",
-    invalidateEndpoint: (url: string): null | string => {
-      const trimmedUrl = url.trim();
-      const valid =
-        trimmedUrl.startsWith("https://") || trimmedUrl.startsWith("http://");
-
-      if (!valid) {
-        return "Endpoint must start with https://, http://";
-      }
-
-      return null;
+    valtown: {
+      name: "valtown",
+      icon: "/valtown.svg",
+      prefill: "",
+      fields: [
+        {
+          name: "token",
+          title: "API Token",
+          required: true,
+          type: "text",
+          secret: true,
+        },
+      ],
     },
-  },
-});
+    rqlite: {
+      name: "rqlite",
+      icon: "/rqlite.png",
+      fields: [
+        {
+          name: "url",
+          required: true,
+          type: "text",
+          title: "URL",
+          prefill: "http://localhost:4001",
+          description: "Example: http://localhost:4001",
+          invalidate: (url: string): null | string => {
+            const trimmedUrl = url.trim();
+            const valid =
+              trimmedUrl.startsWith("https://") ||
+              trimmedUrl.startsWith("http://");
 
-export type SupportedDriver = keyof typeof DRIVER_DETAIL;
+            if (!valid) {
+              return "Endpoint must start with https://, http://";
+            }
+
+            return null;
+          },
+        },
+        {
+          name: "username",
+          type: "text",
+          title: "Username",
+          secret: true,
+          placeholder: "Username",
+        },
+        {
+          name: "password",
+          type: "password",
+          title: "Password",
+          secret: true,
+          placeholder: "Password",
+        },
+      ],
+    },
+  });
+
+export function validateConnectionString(
+  driver: DriverDetail,
+  connectionString?: SavedConnectionItemConfigConfig
+) {
+  if (!connectionString) return false;
+
+  for (const field of driver.fields) {
+    if (
+      field.invalidate &&
+      field.invalidate(connectionString[field.name] ?? "")
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function prefillConnectionString(
+  driver: DriverDetail,
+  defaultValue?: SavedConnectionItemConfigConfig
+): SavedConnectionItemConfigConfig {
+  return {
+    url:
+      defaultValue?.url ??
+      driver.fields.find((f) => f.name === "url")?.prefill ??
+      "",
+    token:
+      defaultValue?.token ??
+      driver.fields.find((f) => f.name === "token")?.prefill ??
+      "",
+    username:
+      defaultValue?.username ??
+      driver.fields.find((f) => f.name === "username")?.prefill ??
+      "",
+    password:
+      defaultValue?.token ??
+      driver.fields.find((f) => f.name === "password")?.prefill ??
+      "",
+  };
+}
+
+export type SupportedDriver = "turso" | "rqlite" | "valtown";
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 

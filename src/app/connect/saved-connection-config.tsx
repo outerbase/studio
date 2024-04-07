@@ -9,9 +9,11 @@ import {
   SavedConnectionItemConfigConfig,
   SavedConnectionLabel,
   SupportedDriver,
+  prefillConnectionString,
+  validateConnectionString,
 } from "@/app/connect/saved-connection-storage";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LucideLoader } from "lucide-react";
 import ConnectionStringInput from "./connection-string-input";
 
@@ -56,12 +58,9 @@ export default function SavedConnectionConfig({
   );
 
   const [connectionString, setConnectionString] =
-    useState<SavedConnectionItemConfigConfig>({
-      url: initialData?.config?.url ?? driverDetail.prefill,
-      token: initialData?.config?.token ?? "",
-      username: initialData?.config?.username ?? "",
-      password: initialData?.config?.password ?? "",
-    });
+    useState<SavedConnectionItemConfigConfig>(() =>
+      prefillConnectionString(driverDetail, initialData?.config)
+    );
 
   const onSaveClicked = () => {
     onSave({
@@ -73,7 +72,9 @@ export default function SavedConnectionConfig({
     });
   };
 
-  const valid = !driverDetail.invalidateEndpoint(connectionString.url);
+  const valid = useMemo(() => {
+    return validateConnectionString(driverDetail, connectionString);
+  }, [connectionString, driverDetail]);
 
   return (
     <>

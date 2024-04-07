@@ -6,6 +6,7 @@ import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 import { ConnectionConfigProvider } from "@/context/connection-config-provider";
 import RqliteDriver from "@/drivers/rqlite-driver";
 import TursoDriver from "@/drivers/turso-driver";
+import ValtownDriver from "@/drivers/valtown-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -27,6 +28,8 @@ export default function ClientPageBody() {
         conn.config.username,
         conn.config.password
       );
+    } else if (conn.driver === "valtown") {
+      return new ValtownDriver(conn.config.token);
     }
 
     return new TursoDriver(conn.config.url, conn.config.token, true);

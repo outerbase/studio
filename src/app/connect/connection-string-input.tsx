@@ -20,85 +20,66 @@ export default function ConnectionStringInput({
   autoFocus?: boolean;
 }>) {
   const driverDetail = DRIVER_DETAIL[driver];
-  const authType = driver === "turso" ? "token" : "username";
-  const endpointError = driverDetail.invalidateEndpoint(value.url);
 
   return (
     <>
-      <div>
-        <div className="text-xs mb-2 font-semibold">URL (*)</div>
-        <Input
-          autoFocus={autoFocus}
-          placeholder={"URL"}
-          value={value.url}
-          onChange={(e) => {
-            onChange({ ...value, url: e.currentTarget.value });
-          }}
-        />
-        {endpointError && (
-          <div className="text-xs mt-2 text-red-400">{endpointError}</div>
-        )}
-        <div className="text-xs mt-2">{driverDetail.endpointExample}</div>
-      </div>
+      {driverDetail.fields.map((field, idx) => {
+        let inputDom = <div></div>;
+        const error = field.invalidate
+          ? field.invalidate(value[field.name] ?? "")
+          : null;
 
-      {authType === "token" && (
-        <div>
-          <div className="text-xs mb-2 font-semibold">Token</div>
-          <Textarea
-            placeholder={
-              showLockedCredential && !value.token ? "✱✱✱✱✱✱✱✱✱" : "Token"
-            }
-            className={
-              showLockedCredential && !value.token ? "bg-secondary" : ""
-            }
-            value={value.token}
-            onChange={(e) => {
-              onChange({ ...value, token: e.currentTarget.value });
-            }}
-          />
-        </div>
-      )}
-
-      {authType === "username" && (
-        <>
-          <div>
-            <div className="text-xs mb-2 font-semibold">Username</div>
+        if (field.type === "text" || field.type === "password") {
+          inputDom = (
             <Input
-              type="username"
+              type={field.type}
               placeholder={
-                showLockedCredential && !value.username
+                showLockedCredential && !value[field.name]
                   ? "✱✱✱✱✱✱✱✱✱"
-                  : "Username"
+                  : field.placeholder
               }
               className={
-                showLockedCredential && !value.username ? "bg-secondary" : ""
+                showLockedCredential && !value[field.name] ? "bg-secondary" : ""
               }
-              value={value.username}
+              autoFocus={autoFocus && idx === 0}
+              value={value[field.name]}
               onChange={(e) => {
-                onChange({ ...value, username: e.currentTarget.value });
+                onChange({ ...value, [field.name]: e.currentTarget.value });
               }}
             />
-          </div>
-          <div>
-            <div className="text-xs mb-2 font-semibold">Password</div>
-            <Input
-              type="password"
+          );
+        } else if (field.type === "textarea") {
+          inputDom = (
+            <Textarea
               placeholder={
-                showLockedCredential && !value.password
+                showLockedCredential && !value[field.name]
                   ? "✱✱✱✱✱✱✱✱✱"
-                  : "Password"
+                  : "Token"
               }
               className={
-                showLockedCredential && !value.password ? "bg-secondary" : ""
+                showLockedCredential && !value[field.name] ? "bg-secondary" : ""
               }
-              value={value.password}
+              value={value[field.name]}
               onChange={(e) => {
-                onChange({ ...value, password: e.currentTarget.value });
+                onChange({ ...value, [field.name]: e.currentTarget.value });
               }}
             />
+          );
+        }
+
+        return (
+          <div key={driverDetail.name}>
+            <div className="text-xs mb-2 font-semibold">
+              {field.title} {field.required && <span>(*)</span>}
+            </div>
+            {inputDom}
+            {error && <div className="text-xs mt-2 text-red-400">{error}</div>}
+            {field.description && (
+              <div className="text-xs mt-2">{field.description}</div>
+            )}
           </div>
-        </>
-      )}
+        );
+      })}
     </>
   );
 }
