@@ -20,25 +20,34 @@ export function transformRawResult(raw: RqliteResult): DatabaseResultSet {
   const columns = raw.columns ?? [];
   const types = raw.types ?? [];
   const values = raw.values;
-
-  const rows = values
-    ? values.map((r) =>
-        columns.reduce((a, b, idx) => {
-          a[b] = r[idx];
-          return a;
-        }, {} as DatabaseRow)
-      )
-    : [];
+  const headerSet = new Set();
 
   const headers: DatabaseHeader[] = columns.map((colName, colIdx) => {
     const colType = types[colIdx];
 
+    let renameColName = colName;
+
+    for (let i = 0; i < 20; i++) {
+      if (!headerSet.has(renameColName)) break;
+      renameColName = `__${colName}_${i}`;
+    }
+
     return {
-      name: colName,
+      name: renameColName,
+      displayName: colName,
       originalType: colType,
       type: convertSqliteType(colType),
     };
   });
+
+  const rows = values
+    ? values.map((r) =>
+        headers.reduce((a, b, idx) => {
+          a[b.name] = r[idx];
+          return a;
+        }, {} as DatabaseRow)
+      )
+    : [];
 
   return {
     rows,

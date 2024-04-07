@@ -63,6 +63,7 @@ export default class OptimizeTableState {
         return {
           initialSize,
           name: headerName ?? "",
+          displayName: header.displayName,
           resizable: true,
           dataType,
           icon: schemaResult?.pk.includes(headerName ?? "") ? (

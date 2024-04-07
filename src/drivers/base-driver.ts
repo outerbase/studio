@@ -12,6 +12,7 @@ export type DatabaseRow = Record<string, unknown>;
 
 export interface DatabaseHeader {
   name: string;
+  displayName: string;
   originalType: string | null;
   type: TableColumnDataType;
 }

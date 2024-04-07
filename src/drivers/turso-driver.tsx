@@ -9,22 +9,33 @@ import { DatabaseHeader, DatabaseResultSet, DatabaseRow } from "./base-driver";
 import SqliteLikeBaseDriver from "./sqlite-base-driver";
 
 export function transformRawResult(raw: ResultSet): DatabaseResultSet {
-  const rows = raw.rows.map((r) =>
-    raw.columns.reduce((a, b, idx) => {
-      a[b] = r[idx];
-      return a;
-    }, {} as DatabaseRow)
-  );
+  const headerSet = new Set();
 
   const headers: DatabaseHeader[] = raw.columns.map((colName, colIdx) => {
     const colType = raw.columnTypes[colIdx];
+    let renameColName = colName;
+
+    for (let i = 0; i < 20; i++) {
+      if (!headerSet.has(renameColName)) break;
+      renameColName = `__${colName}_${i}`;
+    }
+
+    headerSet.add(renameColName);
 
     return {
-      name: colName,
+      name: renameColName,
+      displayName: colName,
       originalType: colType,
       type: convertSqliteType(colType),
     };
   });
+
+  const rows = raw.rows.map((r) =>
+    headers.reduce((a, b, idx) => {
+      a[b.name] = r[idx];
+      return a;
+    }, {} as DatabaseRow)
+  );
 
   return {
     rows,

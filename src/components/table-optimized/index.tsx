@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 export interface OptimizeTableHeaderProps {
   name: string;
+  displayName: string;
   initialSize: number;
   resizable?: boolean;
   dataType?: TableColumnDataType;
