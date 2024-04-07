@@ -136,7 +136,9 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
   const onRemoveRow = useCallback(() => {
     if (data) {
-      data.removeRow();
+      data.getSelectedRowIndex().forEach((index) => {
+        data.removeRow(index);
+      });
     }
   }, [data]);
 

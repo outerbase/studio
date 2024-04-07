@@ -404,7 +404,9 @@ export default function ResultTable({
           title: "Delete selected row(s)",
           icon: LucideTrash2,
           onClick: () => {
-            data.removeRow();
+           data.getSelectedRowIndex().forEach((index) => {
+             data.removeRow(index);
+           });
           },
         },
       ])(event);
