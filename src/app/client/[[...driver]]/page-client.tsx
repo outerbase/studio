@@ -11,6 +11,7 @@ import {
 } from "../../connect/saved-connection-storage";
 import RqliteDriver from "@/drivers/rqlite-driver";
 import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
+import ValtownDriver from "@/drivers/valtown-driver";
 
 export default function ClientPageBody() {
   const driver = useMemo(() => {
@@ -20,6 +21,8 @@ export default function ClientPageBody() {
 
     if (config.driver === "rqlite") {
       return new RqliteDriver(config.url, config.username, config.password);
+    } else if (config.driver === "valtown") {
+      return new ValtownDriver(config.token);
     }
     return new TursoDriver(config.url, config.token as string, true);
   }, []);

@@ -14,9 +14,9 @@ const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
   description: zod.string(),
   label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
-  driver: zod.enum(["turso", "rqlite"]),
+  driver: zod.enum(["turso", "rqlite", "valtown"]),
   config: zod.object({
-    url: zod.string().min(5),
+    url: zod.string().optional(),
     token: zod.string().optional(),
     username: zod.string().optional(),
     password: zod.string().optional(),
@@ -101,6 +101,7 @@ export const POST = withUser(async ({ user, req }) => {
       success: true,
       data: {
         id: databaseId,
+        driver: data.driver,
         name: data.name,
         label: data.label,
         description: data.description,

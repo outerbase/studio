@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import ConnectionDialogContent from "./saved-connection-content";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import useConnect from "@/hooks/use-connect";
 import {
   DRIVER_DETAIL,
   SavedConnectionItemConfigConfig,
   SupportedDriver,
+  prefillConnectionString,
+  validateConnectionString,
 } from "./saved-connection-storage";
 import { RqliteInstruction } from "./saved-connection";
 import ConnectionStringInput from "./connection-string-input";
@@ -16,15 +18,15 @@ export default function QuickConnect({
 }: Readonly<{ onClose: () => void; driver: SupportedDriver }>) {
   const driverDetail = DRIVER_DETAIL[driver ?? "turso"];
   const [connectionConfig, setConnectionConfig] =
-    useState<SavedConnectionItemConfigConfig>({
-      url: DRIVER_DETAIL[driver ?? "turso"].prefill,
-      token: "",
-      username: "",
-      password: "",
-    });
+    useState<SavedConnectionItemConfigConfig>(() =>
+      prefillConnectionString(driverDetail)
+    );
 
   const connect = useConnect();
-  const valid = !driverDetail.invalidateEndpoint(connectionConfig.url);
+
+  const valid = useMemo(() => {
+    return validateConnectionString(driverDetail, connectionConfig);
+  }, [connectionConfig, driverDetail]);
 
   const onConnect = useCallback(() => {
     connect(driver, {
