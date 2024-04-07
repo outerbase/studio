@@ -9,7 +9,7 @@ import {
   SqlOrder,
 } from "@/drivers/base-driver";
 
-class Cursor {
+export class Cursor {
   protected ptr: SyntaxNode | null;
   protected sql: string = "";
 
@@ -88,6 +88,10 @@ class Cursor {
       return this.sql.substring(this.ptr.node.from, this.ptr.node.to);
     }
     return "";
+  }
+
+  node(): SyntaxNode | undefined {
+    return this.ptr?.node;
   }
 
   type(): string | undefined {
