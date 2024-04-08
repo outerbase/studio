@@ -59,7 +59,6 @@ export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
     }
   }
 
-  // console.log(cursor.read());
   cursor.expectKeyword("ON");
   const tableName = cursor.consumeIdentifier();
   cursor.expectKeywordsOptional(["FOR", "EACH", "ROW"]);
@@ -75,7 +74,6 @@ export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
     while (!cursor.end()) {
       toExpression = cursor.node()?.to;
       if (cursor.matchKeyword("BEGIN")) break;
-      // whenExpressionArray.push(cursor.read());
       cursor.next();
     }
   }
