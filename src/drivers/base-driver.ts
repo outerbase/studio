@@ -38,7 +38,9 @@ export interface SelectFromTableOptions {
 export type DatabaseValue<T = unknown> = T | undefined | null;
 
 export interface DatabaseSchemaItem {
+  type: "table" | "trigger" | "view";
   name: string;
+  tableName?: string;
 }
 
 export interface DatabaseTableColumn {
@@ -108,6 +110,20 @@ export interface DatabaseTableSchema {
   createScript?: string;
 }
 
+export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
+
+export type TriggerOperation = "INSERT" | "UPDATE" | "DELETE";
+
+export interface DatabaseTriggerSchema {
+  name: string;
+  operation: TriggerOperation;
+  when: TriggerWhen;
+  tableName: string;
+  columnNames?: string[];
+  whenExpression: string;
+  statement: string;
+}
+
 interface DatabaseTableOperationInsert {
   operation: "INSERT";
   values: Record<string, DatabaseValue>;
@@ -147,6 +163,7 @@ export abstract class BaseDriver {
 
   abstract schemas(): Promise<DatabaseSchemaItem[]>;
   abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
+  abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
 
   abstract selectTable(
     tableName: string,

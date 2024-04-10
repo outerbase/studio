@@ -7,6 +7,7 @@ import {
   DatabaseTableOperation,
   DatabaseTableOperationReslt,
   DatabaseTableSchema,
+  DatabaseTriggerSchema,
   SelectFromTableOptions,
 } from "./base-driver";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/lib/sql-helper";
 import { parseCreateTableScript } from "@/lib/sql-parse-table";
 import { validateOperation } from "@/lib/validation";
+import { parseCreateTriggerScript } from "@/lib/sql-parse-trigger";
 
 export default abstract class SqliteLikeBaseDriver extends BaseDriver {
   protected escapeId(id: string) {
@@ -30,13 +32,38 @@ export default abstract class SqliteLikeBaseDriver extends BaseDriver {
   async schemas(): Promise<DatabaseSchemaItem[]> {
     const result = await this.query("SELECT * FROM sqlite_schema;");
 
-    return result.rows
-      .filter((row) => row.type === "table")
-      .map((row) => {
-        return {
-          name: row.name as string,
-        };
-      });
+    const tmp: DatabaseSchemaItem[] = [];
+    const rows = result.rows as {
+      type: string;
+      name: string;
+      tbl_name: string;
+      sql: string;
+    }[];
+
+    for (const row of rows) {
+      if (row.type === "table") {
+        tmp.push({ type: "table", name: row.name });
+      } else if (row.type === "trigger") {
+        tmp.push({ type: "trigger", name: row.name, tableName: row.tbl_name });
+      } else if (row.type === "view") {
+        tmp.push({ type: "view", name: row.name });
+      }
+    }
+
+    return tmp;
+  }
+
+  async trigger(name: string): Promise<DatabaseTriggerSchema> {
+    const result = await this.query(
+      `SELECT * FROM sqlite_schema WHERE "type"='trigger' AND name=${escapeSqlValue(
+        name
+      )};`
+    );
+
+    const triggerRow = result.rows[0];
+    if (!triggerRow) throw new Error("Trigger does not exist");
+
+    return parseCreateTriggerScript(triggerRow.sql as string);
   }
 
   close(): void {

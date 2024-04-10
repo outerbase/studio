@@ -7,11 +7,13 @@ import {
   LucideTable,
   LucideTableProperties,
   LucideUser,
+  LucideCog,
 } from "lucide-react";
 import QueryWindow from "@/components/tabs/query-tab";
 import SchemaEditorTab from "@/components/tabs/schema-editor-tab";
 import TableDataWindow from "@/components/tabs/table-data-tab";
 import UsersTab from "@/components/tabs/users-tabs";
+import TriggerTab from "@/components/tabs/trigger-tab";
 
 interface OpenTableTab {
   type: "table";
@@ -32,11 +34,18 @@ interface OpenUserTab {
   type: "user";
 }
 
+interface OpenTriggerTab {
+  type: "trigger";
+  tableName?: string;
+  name?: string;
+}
+
 export type OpenTabsProps =
   | OpenTableTab
   | OpenQueryTab
   | OpenTableSchemaTab
-  | OpenUserTab;
+  | OpenUserTab
+  | OpenTriggerTab;
 
 export function openTab(props: OpenTabsProps) {
   return window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
@@ -48,6 +57,7 @@ function generateKeyFromTab(tab: OpenTabsProps) {
   if (tab.type === "schema")
     return !tab.tableName ? "create-schema" : "schema-" + tab.tableName;
   if (tab.type === "user") return "user";
+  if (tab.type === "trigger") return "trigger-" + tab.name;
   return "";
 }
 
@@ -56,6 +66,7 @@ function generateIconFromTab(tab: OpenTabsProps) {
   if (tab.type === "table") return LucideTable;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
+  if (tab.type === "trigger") return LucideCog;
   return LucideActivity;
 }
 
@@ -65,6 +76,7 @@ function generateTitle(tab: OpenTabsProps) {
   if (tab.type === "table") return tab.tableName;
   if (tab.type === "schema") return tab.tableName ? tab.tableName : "New Table";
   if (tab.type === "user") return "User & Permission";
+  if (tab.type === "trigger") return tab.name ?? "";
   return "";
 }
 
@@ -75,6 +87,7 @@ function generateComponent(tab: OpenTabsProps) {
   if (tab.type === "schema")
     return <SchemaEditorTab tableName={tab.tableName} />;
   if (tab.type === "user") return <UsersTab />;
+  if (tab.type === "trigger") return <TriggerTab name={tab.name ?? ""} />;
   return <div></div>;
 }
 

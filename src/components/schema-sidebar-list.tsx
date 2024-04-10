@@ -1,34 +1,55 @@
 import { ScrollArea } from "./ui/scroll-area";
 import { buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { LucideIcon, Table2 } from "lucide-react";
+import { LucideCog, LucideIcon, LucideView, Table2 } from "lucide-react";
 import {
   OpenContextMenuList,
   openContextMenuFromEvent,
 } from "@/messages/openContextMenu";
 import { useSchema } from "@/context/SchemaProvider";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { openTab } from "@/messages/open-tab";
+import { DatabaseSchemaItem } from "@/drivers/base-driver";
 
 interface SchemaListProps {
   search: string;
 }
 
+type DatabaseSchemaTreeNode = {
+  node: DatabaseSchemaItem;
+  sub: DatabaseSchemaItem[];
+};
+
 interface SchemaViewItemProps {
+  item: DatabaseSchemaItem;
+  highlight?: string;
   icon: LucideIcon;
+  iconClassName?: string;
   title: string;
   selected: boolean;
   onClick: () => void;
   onContextMenu: React.MouseEventHandler;
+  indentation?: boolean;
 }
 
 function SchemaViewItem({
   icon: Icon,
+  iconClassName,
   title,
   onClick,
+  highlight,
   selected,
   onContextMenu,
+  indentation,
+  item,
 }: Readonly<SchemaViewItemProps>) {
+  const regex = new RegExp(
+    "(" + (highlight ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
+    "i"
+  );
+
+  const splitedText = title.split(regex);
+
   return (
     <div
       onMouseDown={onClick}
@@ -37,10 +58,17 @@ function SchemaViewItem({
         onClick();
       }}
       onDoubleClick={() => {
-        openTab({
-          type: "table",
-          tableName: title,
-        });
+        if (item.type === "table" || item.type === "view") {
+          openTab({
+            type: "table",
+            tableName: title,
+          });
+        } else if (item.type === "trigger") {
+          openTab({
+            type: "trigger",
+            name: item.name,
+          });
+        }
       }}
       className={cn(
         buttonVariants({
@@ -51,8 +79,21 @@ function SchemaViewItem({
         "cursor-pointer"
       )}
     >
-      <Icon className="mr-2 h-4 w-4" />
-      {title}
+      {indentation && (
+        <div className="w-2 border-l ml-2  2 h-full border-dashed"></div>
+      )}
+      <Icon className={cn("mr-2 h-4 w-4", selected ? "" : iconClassName)} />
+      <span>
+        {splitedText.map((text, idx) => {
+          return text.toLowerCase() === (highlight ?? "").toLowerCase() ? (
+            <span key={idx} className="bg-yellow-300 text-black">
+              {text}
+            </span>
+          ) : (
+            <span key={idx}>{text}</span>
+          );
+        })}
+      </span>
     </div>
   );
 }
@@ -66,13 +107,16 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   }, [setSelectedIndex, search]);
 
   const prepareContextMenu = useCallback(
-    (tableName?: string) => {
+    (item?: DatabaseSchemaItem) => {
+      const selectedName = item?.name;
+      const isTable = item?.type === "table";
+
       return [
         {
           title: "Copy Name",
-          disabled: !tableName,
+          disabled: !selectedName,
           onClick: () => {
-            window.navigator.clipboard.writeText(tableName ?? "");
+            window.navigator.clipboard.writeText(selectedName ?? "");
           },
         },
         { separator: true },
@@ -84,26 +128,57 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             });
           },
         },
-        {
-          title: "Edit Table",
-          disabled: !tableName,
-          onClick: () => {
-            openTab({
-              tableName,
-              type: "schema",
-            });
-          },
-        },
+        isTable
+          ? {
+              title: "Edit Table",
+              onClick: () => {
+                openTab({
+                  tableName: item?.name,
+                  type: "schema",
+                });
+              },
+            }
+          : undefined,
         { separator: true },
         { title: "Refresh", onClick: () => refresh() },
-      ] as OpenContextMenuList;
+      ].filter(Boolean) as OpenContextMenuList;
     },
     [refresh]
   );
 
-  const filteredSchema = schema.filter((s) => {
-    return s.name.toLowerCase().indexOf(search.toLowerCase()) >= 0;
-  });
+  const filteredSchema = useMemo(() => {
+    // Build the tree first then we can flat it
+    let tree: DatabaseSchemaTreeNode[] = [];
+    const treeHash: Record<string, DatabaseSchemaTreeNode> = {};
+
+    for (const item of schema) {
+      if (item.type === "table" || item.type === "view") {
+        const node = { node: item, sub: [] };
+        treeHash[item.name] = node;
+        tree.push(node);
+      }
+    }
+
+    for (const item of schema) {
+      if (item.type === "trigger" && item.tableName) {
+        if (treeHash[item.tableName]) {
+          treeHash[item.tableName].sub.push(item);
+        }
+      }
+    }
+
+    tree = tree.filter((s) => {
+      const foundName =
+        s.node.name.toLowerCase().indexOf(search.toLowerCase()) >= 0;
+      const foundInChildren =
+        s.sub.filter(
+          (c) => c.name.toLowerCase().indexOf(search.toLowerCase()) >= 0
+        ).length > 0;
+      return foundName || foundInChildren;
+    });
+
+    return tree.map((r) => [r.node, ...r.sub]).flat();
+  }, [schema, search]);
 
   return (
     <ScrollArea
@@ -112,7 +187,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         openContextMenuFromEvent(
           prepareContextMenu(
             selectedIndex && schema[selectedIndex]
-              ? schema[selectedIndex].name
+              ? schema[selectedIndex]
               : undefined
           )
         )(e)
@@ -120,15 +195,29 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     >
       <div className="flex flex-col p-2 pr-4">
         {filteredSchema.map((item, schemaIndex) => {
+          let icon = Table2;
+          let iconClassName = "text-blue-600 dark:text-blue-300";
+          if (item.type === "trigger") {
+            icon = LucideCog;
+            iconClassName = "text-purple-500";
+          } else if (item.type === "view") {
+            icon = LucideView;
+            iconClassName = "text-green-600 dark:text-green-300";
+          }
+
           return (
             <SchemaViewItem
+              highlight={search}
+              item={item}
               onContextMenu={(e) => {
-                openContextMenuFromEvent(prepareContextMenu(item.name))(e);
+                openContextMenuFromEvent(prepareContextMenu(item))(e);
                 e.stopPropagation();
               }}
               key={item.name}
               title={item.name}
-              icon={Table2}
+              iconClassName={iconClassName}
+              icon={icon}
+              indentation={item.type === "trigger"}
               selected={schemaIndex === selectedIndex}
               onClick={() => setSelectedIndex(schemaIndex)}
             />

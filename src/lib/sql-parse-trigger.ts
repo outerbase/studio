@@ -1,19 +1,10 @@
 import { SQLite } from "@codemirror/lang-sql";
 import { Cursor, parseColumnList } from "./sql-parse-table";
-
-type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
-
-type TriggerOperation = "INSERT" | "UPDATE" | "DELETE";
-
-export interface DatabaseTriggerSchema {
-  name: string;
-  operation: TriggerOperation;
-  when: TriggerWhen;
-  tableName: string;
-  columnNames?: string[];
-  whenExpression: string;
-  statement: string;
-}
+import {
+  DatabaseTriggerSchema,
+  TriggerWhen,
+  TriggerOperation,
+} from "@/drivers/base-driver";
 
 export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
   const tree = SQLite.language.parser.parse(sql);
