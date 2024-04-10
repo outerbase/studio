@@ -23,6 +23,16 @@ export interface RequestOperationSchema {
   tableName: string;
 }
 
+export interface RequestTriggerSchema {
+  type: "trigger";
+  name: string;
+}
+
+export interface RequestOperationTrigger {
+  type: "trigger";
+  name: string;
+}
+
 export interface RequestOperationSelectTable {
   type: "select-table";
   tableName: string;
@@ -41,4 +51,6 @@ export type RequestOperationBody =
   | RequestOperationSchemas
   | RequestOperationSelectTable
   | RequestOperationUpdateTableData
-  | RequestOperationSchema;
+  | RequestOperationSchema
+  | RequestOperationTrigger
+  | RequestTriggerSchema;

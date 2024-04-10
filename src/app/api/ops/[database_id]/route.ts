@@ -7,6 +7,7 @@ import handleSelectTableRequest from "./handle-select-table";
 import handleUpdateTableDataRequest from "./handle-update-table-data";
 import handleSchemaRequest from "./handle-schema";
 import { RequestOperationBody } from "@/lib/api/api-request-types";
+import handleTriggerRequest from "./handle-trigger";
 
 export const runtime = "edge";
 
@@ -27,6 +28,8 @@ export const POST = withDatabaseOperation<RequestOperationBody>(async function (
     return await handleUpdateTableDataRequest({ ...props, body });
   } else if (body.type === "schema") {
     return await handleSchemaRequest({ ...props, body });
+  } else if (body.type === "trigger") {
+    return await handleTriggerRequest({ ...props, body });
   }
 
   return NextResponse.json({ error: "Unknown command" }, { status: 500 });

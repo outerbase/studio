@@ -3,6 +3,7 @@ import {
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseTableSchema,
+  DatabaseTriggerSchema,
 } from "@/drivers/base-driver";
 
 export interface ApiOpsBatchResponse {
@@ -30,5 +31,10 @@ export interface ApiSchemaListResponse {
 
 export interface ApiSchemaResponse {
   data: DatabaseTableSchema;
+  error?: string;
+}
+
+export interface ApiTriggerResponse {
+  data: DatabaseTriggerSchema;
   error?: string;
 }

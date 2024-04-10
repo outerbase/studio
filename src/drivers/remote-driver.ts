@@ -6,6 +6,7 @@ import {
   DatabaseTableOperation,
   DatabaseTableOperationReslt,
   DatabaseTableSchema,
+  DatabaseTriggerSchema,
   SelectFromTableOptions,
 } from "./base-driver";
 import {
@@ -13,6 +14,7 @@ import {
   ApiOpsQueryResponse,
   ApiSchemaListResponse,
   ApiSchemaResponse,
+  ApiTriggerResponse,
 } from "@/lib/api-response-types";
 import { RequestOperationBody } from "@/lib/api/api-request-types";
 
@@ -74,6 +76,11 @@ export default class RemoteDriver implements BaseDriver {
     return (
       await this.request<ApiSchemaResponse>({ type: "schema", tableName })
     ).data;
+  }
+
+  async trigger(name: string): Promise<DatabaseTriggerSchema> {
+    return (await this.request<ApiTriggerResponse>({ type: "trigger", name }))
+      .data;
   }
 
   async updateTableData(
