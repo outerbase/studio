@@ -42,6 +42,7 @@ export function convertSqliteType(
   if (type.indexOf("CHAR") >= 0) return TableColumnDataType.TEXT;
   if (type.indexOf("TEXT") >= 0) return TableColumnDataType.TEXT;
   if (type.indexOf("CLOB") >= 0) return TableColumnDataType.TEXT;
+  if (type.indexOf("STRING") >= 0) return TableColumnDataType.TEXT;
 
   if (type.indexOf("INT") >= 0) return TableColumnDataType.INTEGER;
 
@@ -54,7 +55,7 @@ export function convertSqliteType(
   )
     return TableColumnDataType.REAL;
 
-  return TableColumnDataType.BLOB;
+  return TableColumnDataType.TEXT;
 }
 
 export function generateSelectOneWithConditionStatement(
