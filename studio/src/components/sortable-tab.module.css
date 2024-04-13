@@ -1,0 +1,7 @@
+.tab .close {
+  visibility: hidden;
+}
+
+.tab:hover .close {
+  visibility: visible;
+}

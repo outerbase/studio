@@ -1,0 +1,17 @@
+.cell {
+  line-height: 34px;
+  height: 35px;
+  border: 1px solid transparent;
+}
+
+.focus {
+  border: 1px solid #e00;
+}
+
+:global(.dark) .change {
+  @apply bg-yellow-500;
+}
+
+.change {
+  @apply bg-yellow-200;
+}

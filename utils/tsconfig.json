@@ -1,0 +1,10 @@
+{
+  "extends": ["@libsqlstudio/tsconfig/base"],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", ".eslintrc.cjs"]
+}

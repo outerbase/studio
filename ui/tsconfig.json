@@ -1,0 +1,12 @@
+{
+  "extends": ["@libsqlstudio/tsconfig/react"],
+  "compilerOptions": {
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".eslintrc.cjs", "*.js", "*.ts"],
+  "exclude": ["dist", "node_modules"]
+}
