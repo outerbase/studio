@@ -1,8 +1,7 @@
 "use client";
 
 import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
-import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
-import { ConnectionConfigProvider } from "@/context/connection-config-provider";
+import { useTheme } from "@/context/theme-provider";
 import CollaborationDriver from "@/drivers/collaboration-driver";
 import RemoteDriver from "@/drivers/remote-driver";
 import { Studio } from "@libsqlstudio/gui";
@@ -16,6 +15,7 @@ export default function ClientPageBody({
   token: string;
   config: SavedConnectionItem;
 }>) {
+  const { theme } = useTheme();
   const params = useSearchParams();
   const router = useRouter();
 
@@ -38,15 +38,13 @@ export default function ClientPageBody({
   }
 
   return (
-    <DatabaseDriverProvider driver={driver} collaborationDriver={collaborator}>
-      <ConnectionConfigProvider config={config}>
-        <Studio
-          driver={driver}
-          name="Quick Connect"
-          color="blue"
-          onBack={goBack}
-        />
-      </ConnectionConfigProvider>
-    </DatabaseDriverProvider>
+    <Studio
+      defaultTheme={theme}
+      driver={driver}
+      name={config.name}
+      color={config.label ?? "blue"}
+      collaboration={collaborator}
+      onBack={goBack}
+    />
   );
 }

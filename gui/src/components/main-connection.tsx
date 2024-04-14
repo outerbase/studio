@@ -8,7 +8,7 @@ import DatabaseGui from "./database-gui";
 import { useConfig } from "@/contexts/config-provider";
 import { AutoCompleteProvider } from "@/contexts/auto-complete-provider";
 import { BlockEditorProvider } from "@/contexts/block-editor-provider";
-import InternalPubSub from "../../../studio/src/lib/internal-pubsub";
+import InternalPubSub from "@/lib/internal-pubsub";
 import { SchemaProvider } from "@/contexts/schema-provider";
 
 function MainConnection() {

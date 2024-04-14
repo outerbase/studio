@@ -1,5 +1,5 @@
 import type { BaseDriver } from "@/drivers/base-driver";
-import type CollaborationDriver from "@/drivers/collaboration-driver";
+import type { CollaborationDriver } from "@/drivers/collaboration-driver";
 import { type PropsWithChildren, createContext, useContext } from "react";
 
 const DriverContext = createContext<{

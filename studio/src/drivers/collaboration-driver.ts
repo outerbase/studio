@@ -5,8 +5,9 @@ import {
   ApiUserListResponse,
   ApiUserRole,
 } from "@/lib/api/api-database-response";
+import { CollaborationDriver } from "@libsqlstudio/gui";
 
-export default class CollaborationDriver {
+export default class Collaborator implements CollaborationDriver {
   protected id: string = "";
   protected authToken = "";
 
@@ -40,10 +41,10 @@ export default class CollaborationDriver {
   }
 
   async assignUser(userId: string, roleId: string) {
-    return await this.request({ type: "assign-user", roleId, userId });
+    await this.request({ type: "assign-user", roleId, userId });
   }
 
   async deleteUser(userId: string) {
-    return await this.request({ type: "delete-user", userId });
+    await this.request({ type: "delete-user", userId });
   }
 }

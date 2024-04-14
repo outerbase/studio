@@ -1,4 +1,4 @@
-import type InternalPubSub from "../studio/src/lib/internal-pubsub";
+import type InternalPubSub from "@/lib/internal-pubsub";
 
 export {};
 

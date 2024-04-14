@@ -5,13 +5,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../studio/src/components/ui/select";
-import {
-  Avatar,
-  AvatarFallback,
-} from "../../../../studio/src/components/ui/avatar";
-import { Input } from "../../../../studio/src/components/ui/input";
-import { Button } from "../../../../studio/src/components/ui/button";
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { LucideTrash } from "lucide-react";
 import { useDatabaseDriver } from "@/contexts/driver-provider";
 import { ApiRole, ApiUserRole } from "@/libs/api-database-response";

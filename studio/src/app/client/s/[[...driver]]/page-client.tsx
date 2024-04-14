@@ -10,8 +10,10 @@ import { useCallback, useMemo } from "react";
 
 // TODO: might have a way to include this in the Studio component
 import "@libsqlstudio/gui/css";
+import { useTheme } from "@/context/theme-provider";
 
 export default function ClientPageBody() {
+  const { theme } = useTheme();
   const router = useRouter();
   const params = useSearchParams();
   const conn = useMemo(() => {
@@ -50,6 +52,7 @@ export default function ClientPageBody() {
       driver={driver}
       name={conn.name}
       color={conn.label ?? "blue"}
+      defaultTheme={theme}
       onBack={goBack}
     />
   );

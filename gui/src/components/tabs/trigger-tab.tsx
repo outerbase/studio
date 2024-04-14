@@ -1,13 +1,13 @@
 import { DatabaseTriggerSchema } from "@/drivers/base-driver";
 import { useEffect, useState } from "react";
-import { Input } from "../../../../studio/src/components/ui/input";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../studio/src/components/ui/select";
+} from "@/components/ui/select";
 import { useDatabaseDriver } from "@/contexts/driver-provider";
 import SqlEditor from "../sql-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
