@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GenericCell from "./GenericCell";
-import styles from "./styles.module.css";
 import { DatabaseValue } from "@/drivers/base-driver";
 import { useBlockEditor } from "@/contexts/block-editor-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
@@ -155,7 +154,7 @@ export default function createEditableCell<T = unknown>({
     }, [value]);
 
     const applyChange = useCallback(
-      (v: DatabaseValue<string>, shouldExitEdit: boolean = true) => {
+      (v: DatabaseValue<string>, shouldExitEdit = true) => {
         if (onChange) onChange(toValue(v));
         if (shouldExitEdit) {
           state.exitEditMode();
@@ -170,9 +169,9 @@ export default function createEditableCell<T = unknown>({
     }, [setEditValue, state, value]);
 
     const className = [
-      styles.cell,
-      focus ? styles.focus : null,
-      isChanged ? styles.change : null,
+      "libsql-cell",
+      focus ? "libsql-focus" : null,
+      isChanged ? "libsql-change" : null,
     ]
       .filter(Boolean)
       .join(" ");

@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import styles from "./styles.module.css";
 import { isLinkString } from "@/lib/validation";
 import DisplayLinkCell from "./display-link-cell";
 import { cn } from "@/lib/utils";
@@ -20,12 +19,12 @@ export default function GenericCell({
   focus,
   align,
   onDoubleClick,
-}: TableCellProps<unknown>) {
+}: TableCellProps) {
   const className = [
-    styles.cell,
-    focus ? styles.focus : null,
+    "libsql-cell",
+    focus ? "libsql-focus" : null,
     "pl-2 pr-2",
-    isChanged ? styles.change : null,
+    isChanged ? "libsql-change" : null,
   ]
     .filter(Boolean)
     .join(" ");

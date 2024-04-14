@@ -8,7 +8,6 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import styles from "./styles.module.css";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
 import TableFakeBodyPadding from "./TableFakeBodyPadding";
 import TableFakeRowPadding from "./TableFakeRowPadding";
@@ -163,11 +162,11 @@ function renderCellList({
     let rowClass = undefined;
 
     if (internalState.isRemovedRow(absoluteRowIndex)) {
-      rowClass = styles.removedRow;
+      rowClass = "libsql-removed-row";
     } else if (internalState.isNewRow(absoluteRowIndex)) {
-      rowClass = styles.newRow;
+      rowClass = "libsql-new-row";
     } else if (internalState.isRowSelected(absoluteRowIndex)) {
-      rowClass = styles.selectedRow;
+      rowClass = "libsql-selected-row";
     }
 
     return (
@@ -178,13 +177,13 @@ function renderCellList({
       >
         {hasSticky && (
           <td
-            className={cn(styles.stickyColumn, "bg-background")}
+            className={cn("sticky left-0 z-1", "bg-background")}
             onMouseDown={handleCellClicked(
               absoluteRowIndex,
               headersWithIndex[0].index
             )}
           >
-            <div className={styles.tableCellContent}>
+            <div className={"libsql-table-cell"}>
               {renderCell({
                 y: absoluteRowIndex,
                 x: headersWithIndex[0].index,
@@ -211,7 +210,7 @@ function renderCellList({
               key={actualIndex}
               onMouseDown={handleCellClicked(absoluteRowIndex, header.index)}
             >
-              <div className={styles.tableCellContent}>
+              <div className={"libsql-table-cell"}>
                 {renderCell({
                   y: absoluteRowIndex,
                   x: header.index,
@@ -347,7 +346,7 @@ export default function OptimizeTable({
         style={{
           outline: "none",
         }}
-        className={styles.tableContainer}
+        className={"libsql-table"}
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
           e.preventDefault();

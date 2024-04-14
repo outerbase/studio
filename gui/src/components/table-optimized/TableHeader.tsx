@@ -1,7 +1,6 @@
 import React, { type ReactElement } from "react";
 import type { OptimizeTableHeaderWithIndexProps } from ".";
 import TableHeaderResizeHandler from "./TableHeaderResizeHandler";
-import styles from "./styles.module.css";
 import { cn } from "./../../libs/utils";
 
 export default function TableHeader({
@@ -23,7 +22,7 @@ export default function TableHeader({
   ) => ReactElement;
 }) {
   const className = cn(
-    sticky ? styles.stickyColumn : undefined,
+    sticky ? "sticky left-0 z-20" : undefined,
     "dark:bg-gray-900 bg-gray-100"
   );
 

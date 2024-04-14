@@ -1,6 +1,5 @@
 import { LucideIcon, LucideX } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
-import styles from "./sortable-tab.module.css";
 import { WindowTabItemProps } from "./windows-tab";
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
@@ -28,7 +27,7 @@ export const WindowTabItemButton = forwardRef<
 
   const className = cn(
     "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px]",
-    styles.tab,
+    "libsql-window-tab",
     selected
       ? "border-x border-t bg-background border-b-background rounded-t"
       : "border-b border-t border-t-secondary border-x-secondary opacity-65 hover:opacity-100"
@@ -41,11 +40,11 @@ export const WindowTabItemButton = forwardRef<
       <div
         className={cn(
           "rounded-full hover:bg-red-600 hover:text-white w-4 h-4 ml-2 flex justify-center items-center",
-          styles.close
+          "libsql-window-close"
         )}
       >
         <LucideX
-          className={cn("w-3 h-3 grow-0 shrink-0", styles.close)}
+          className={cn("w-3 h-3 grow-0 shrink-0", "libsql-window-close")}
           onClick={onClose}
         />
       </div>

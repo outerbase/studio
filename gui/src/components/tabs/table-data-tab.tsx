@@ -24,7 +24,7 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
-} from "../../../../studio/src/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { ColumnSortOption, DatabaseTableSchema } from "@/drivers/base-driver";
 import { useAutoComplete } from "@/contexts/auto-complete-provider";
 import OpacityLoading from "../loading-opacity";

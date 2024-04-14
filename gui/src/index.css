@@ -3,3 +3,115 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.libsql-window-tab .libsql-window-close {
+  visibility: hidden;
+}
+
+.libsql-window-tab:hover .libsql-window-close {
+  visibility: visible;
+}
+
+.libsql-cell {
+  line-height: 34px;
+  height: 35px;
+  border: 1px solid transparent;
+}
+
+.libsql-focus {
+  border: 1px solid #e00;
+}
+
+.dark .libsql-change {
+  @apply bg-yellow-500;
+}
+
+.libsql-change {
+  @apply bg-yellow-200;
+}
+
+.libsql-table {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  position: relative;
+  font-size: 12px;
+  user-select: none;
+}
+
+.libsql-table table {
+  position: absolute;
+  display: grid;
+  border-collapse: collapse;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  table-layout: fixed;
+}
+
+.libsql-table tr,
+.libsql-table thead,
+.libsql-table tbody {
+  display: contents;
+}
+
+.libsql-table td,
+.libsql-table th {
+  @apply border-b border-r;
+  overflow: hidden;
+}
+
+.libsql-table-cell {
+  overflow: hidden;
+  flex-grow: 1;
+  white-space: nowrap;
+}
+
+.libsql-table th {
+  position: sticky;
+  top: 0;
+  user-select: none;
+  padding: 0px;
+  height: 35px;
+  line-height: 35px;
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  z-index: 10;
+}
+
+.libsql-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: col-resize;
+  background: var(--color-critical);
+  opacity: 0;
+}
+
+.libsql-resizer:hover {
+  opacity: 0.5;
+}
+
+.dark .libsql-selected-row td {
+  @apply bg-gray-800;
+}
+
+.libsql-selected-row td {
+  @apply bg-gray-100;
+}
+
+.libsql-new-row td {
+  background-color: var(--color-table-row-new);
+  color: var(--color-text);
+}
+
+.dark .libsql-removed-row td {
+  @apply bg-red-800;
+}
+
+.libsql-removed-row td {
+  @apply bg-red-200;
+}

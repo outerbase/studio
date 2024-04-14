@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from "react";
-import styles from "./styles.module.css";
 
 export default function TableHeaderResizeHandler({
   idx,
@@ -89,7 +88,7 @@ export default function TableHeaderResizeHandler({
 
   return (
     <div
-      className={styles.resizer}
+      className={"libsql-resizer"}
       ref={handlerRef}
       onMouseDown={() => setResizing(true)}
     ></div>
