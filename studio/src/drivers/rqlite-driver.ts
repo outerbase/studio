@@ -1,7 +1,11 @@
 import { InStatement } from "@libsql/client";
-import { DatabaseHeader, DatabaseResultSet, DatabaseRow } from "./base-driver";
-import SqliteLikeBaseDriver from "./sqlite-base-driver";
-import { convertSqliteType } from "@/lib/sql-helper";
+import {
+  SqliteLikeBaseDriver,
+  DatabaseHeader,
+  DatabaseResultSet,
+  DatabaseRow,
+  convertSqliteType,
+} from "@libsqlstudio/gui";
 
 interface RqliteResult {
   columns?: string[];

@@ -8,7 +8,7 @@ import {
   DatabaseTableSchema,
   DatabaseTriggerSchema,
   SelectFromTableOptions,
-} from "./base-driver";
+} from "@libsqlstudio/gui";
 import {
   ApiOpsBatchResponse,
   ApiOpsQueryResponse,

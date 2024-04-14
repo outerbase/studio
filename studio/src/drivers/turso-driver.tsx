@@ -1,12 +1,16 @@
-import { convertSqliteType } from "@/lib/sql-helper";
 import {
   createClient,
   Client,
   InStatement,
   ResultSet,
 } from "@libsql/client/web";
-import { DatabaseHeader, DatabaseResultSet, DatabaseRow } from "./base-driver";
-import SqliteLikeBaseDriver from "./sqlite-base-driver";
+import {
+  SqliteLikeBaseDriver,
+  DatabaseHeader,
+  DatabaseResultSet,
+  DatabaseRow,
+  convertSqliteType,
+} from "@libsqlstudio/gui";
 
 export function transformRawResult(raw: ResultSet): DatabaseResultSet {
   const headerSet = new Set();

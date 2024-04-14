@@ -35,6 +35,7 @@
     "@lezer/lr": "^1.4.0",
     "@libsql/client": "^0.5.3",
     "@libsqlstudio/ui": "*",
+    "@libsqlstudio/gui": "*",
     "@libsqlstudio/utils": "*",
     "@lucia-auth/adapter-sqlite": "^3.0.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",

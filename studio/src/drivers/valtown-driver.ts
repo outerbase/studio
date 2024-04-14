@@ -1,7 +1,6 @@
 import { InStatement, ResultSet } from "@libsql/client";
-import { DatabaseResultSet } from "./base-driver";
-import SqliteLikeBaseDriver from "./sqlite-base-driver";
 import { transformRawResult } from "./turso-driver";
+import { DatabaseResultSet, SqliteLikeBaseDriver } from "@libsqlstudio/gui";
 
 export default class ValtownDriver extends SqliteLikeBaseDriver {
   protected token: string;

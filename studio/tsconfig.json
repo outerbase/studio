@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../gui/src/drivers/sqlite-base-driver.ts", "../gui/src/sqlite/sql-parse-table.test.ts", "../gui/src/sqlite/sql-parse-table.ts", "../gui/src/sqlite/sql-parse-trigger.test.ts", "../gui/src/sqlite/sql-parse-trigger.ts", "../gui/src/libs/validation.test.ts", "../gui/src/components/connection-dialog.tsx", "../gui/window.d.ts", "../gui/src/libs/json-safe.ts", "../gui/src/contexts/AutoCompleteProvider.tsx", "../gui/src/contexts/block-editor-provider.tsx", "../gui/src/hooks/useElementResize.ts", "../gui/src/hooks/useMessageListener.ts", "../gui/src/messages/openContextMenu.tsx", "../gui/src/libs/export-helper.ts"],
   "exclude": ["node_modules"]
 }

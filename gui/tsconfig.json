@@ -4,7 +4,8 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/lib/*": ["./src/libs/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".eslintrc.cjs", "*.js", "*.ts"],

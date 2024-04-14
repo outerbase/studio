@@ -1,5 +1,5 @@
 import { ApiUser } from "@/lib/api/api-database-response";
-import parseSafeJson from "../../lib/json-safe";
+import parseSafeJson from "../../../../gui/src/libs/json-safe";
 
 export interface DriverDetailField {
   name: keyof SavedConnectionItemConfigConfig;
