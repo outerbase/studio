@@ -17,6 +17,7 @@ import QueryProgressLog from "../query-progress-log";
 import { useAutoComplete } from "@/contexts/auto-complete-provider";
 import { useDatabaseDriver } from "@/contexts/driver-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import { MultipleQueryProgress } from "@/libs/multiple-query";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
@@ -72,7 +73,7 @@ export default function QueryWindow() {
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
-          <div className="flex-grow overflow-hidden">
+          <div className="grow overflow-hidden">
             <SqlEditor
               ref={editorRef}
               value={code}
@@ -90,7 +91,7 @@ export default function QueryWindow() {
               }}
             />
           </div>
-          <div className="flex-grow-0 flex-shrink-0">
+          <div className="grow-0 shrink-0">
             <Separator />
             <div className="flex gap-1 p-1">
               <Button variant={"ghost"} onClick={() => onRunClicked()}>

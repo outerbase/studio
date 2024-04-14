@@ -1,4 +1,5 @@
 "use client";
+import "./index.css";
 
 export { Studio } from "./studio";
 export * from "./drivers/base-driver";

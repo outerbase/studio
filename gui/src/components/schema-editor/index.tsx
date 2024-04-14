@@ -82,7 +82,7 @@ export default function SchemaEditor({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex-grow-0 flex-shrink-0">
+      <div className="grow-0 shrink-0">
         <div className="p-1 flex gap-2">
           <Button variant="ghost" onClick={onSave} disabled={!hasChange}>
             Save
@@ -139,7 +139,7 @@ export default function SchemaEditor({
         </div>
         <Separator />
       </div>
-      <div className="flex-grow overflow-y-auto">
+      <div className="grow overflow-y-auto">
         <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
         {value.constraints && value.constraints.length > 0 && (
           <SchemaEditorConstraintList constraints={value.constraints} />

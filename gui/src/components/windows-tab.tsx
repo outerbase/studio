@@ -119,7 +119,7 @@ export default function WindowTabs({
         onDragEnd={handleDragEnd}
       >
         <div className="flex flex-col w-full h-full">
-          <div className="flex-grow-0 flex-shrink-0 pt-1 bg-secondary">
+          <div className="grow-0 shrink-0 pt-1 bg-secondary">
             <div className="flex">
               <button
                 className="px-3 py-2 border-b"
@@ -150,7 +150,7 @@ export default function WindowTabs({
               <div className="border-b grow" />
             </div>
           </div>
-          <div className="flex-1 relative mt-1">
+          <div className="grow relative mt-1">
             {tabs.map((tab, tabIndex) => (
               <div
                 className="absolute left-0 right-0 top-0 bottom-0"

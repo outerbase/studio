@@ -156,7 +156,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <div className="flex-shrink-0 flex-grow-0">
+      <div className="shrink-0 grow-0">
         <div className="flex p-1 gap-1 pb-2">
           <Button
             variant={"ghost"}
@@ -210,7 +210,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             <LucideRefreshCcw className="w-4 h-4 text-green-600" />
           </Button>
 
-          <div className="flex flex-grow mx-2">
+          <div className="flex grow mx-2">
             <div className="bg-secondary rounded overflow-hidden flex items-center w-full">
               <div className="text-sm px-2 text-gray-500 bg-gray-200 dark:bg-gray-700 h-full flex items-center">
                 <LucideFilter className="h-4 w-4 text-black dark:text-white" />
@@ -225,7 +225,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
                     setWhere(e.currentTarget.value);
                   }
                 }}
-                className="bg-inherit p-1 pl-2 pr-2 outline-none text-sm font-mono h-full flex-grow"
+                className="bg-inherit p-1 pl-2 pr-2 outline-none text-sm font-mono h-full grow"
               />
             </div>
           </div>
@@ -306,7 +306,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         </div>
         <Separator />
       </div>
-      <div className="flex-grow overflow-hidden relative">
+      <div className="grow overflow-hidden relative">
         {loading && <OpacityLoading />}
         {error && (
           <div className="text-red-500 p-5">

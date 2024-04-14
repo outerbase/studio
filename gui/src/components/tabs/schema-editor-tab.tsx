@@ -178,7 +178,7 @@ export default function SchemaEditorTab({
           <div className="flex flex-col h-full">
             <div className="px-3 py-2 text-xs font-semibold">Preview</div>
             <Separator />
-            <div className="flex-grow overflow-hidden">
+            <div className="grow overflow-hidden">
               <SqlEditor value={previewScript.join(";\n")} readOnly />
             </div>
           </div>

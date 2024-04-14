@@ -10,8 +10,6 @@ export default defineConfig((opts) => ({
   external: ["react", "react-dom", "next"],
   platform: "browser",
   dts: true,
-  loader: {
-    ".css": "local-css",
-  },
   outDir: "dist",
+  treeshake: true,
 }));

@@ -6,7 +6,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./css": "./dist/index.css"
   },
@@ -26,11 +27,11 @@
   "devDependencies": {
     "@libsqlstudio/tailwind": "*",
     "@libsqlstudio/tsconfig": "*",
-    "eslint-config-libsqlstudio": "*",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
+    "eslint-config-libsqlstudio": "*",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "tsup": "^8.0.2",

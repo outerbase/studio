@@ -4,4 +4,7 @@ import { LibSqlStudoTailwindPreset } from "@libsqlstudio/tailwind";
 export default {
   content: ["./src/**/*.tsx"],
   presets: [LibSqlStudoTailwindPreset],
+  corePlugins: {
+    preflight: false,
+  },
 };

@@ -117,7 +117,7 @@ export default function ColumnDefaultValueInput({
     <Popover>
       <PopoverTrigger className="h-full flex w-full">
         <div className="flex text-left px-2 py-2 text-sm h-full bg-background">
-          <div className="flex-grow w-[150px] overflow-hidden mr-2">
+          <div className="grow w-[150px] overflow-hidden mr-2">
             {display || "EMPTY STRING"}
           </div>
           <div className="text-gray-400 flex items-center">

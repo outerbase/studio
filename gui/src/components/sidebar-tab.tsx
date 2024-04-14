@@ -49,7 +49,7 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
 
   return (
     <div className="flex h-full">
-      <div className={cn("flex-shrink-0 flex flex-col gap-2 pt-6", bgColor)}>
+      <div className={cn("shrink-0 flex flex-col gap-2 pt-6", bgColor)}>
         {tabs.map(({ key, name, icon: Icon }, idx) => {
           return (
             <button

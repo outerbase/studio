@@ -182,7 +182,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
 
   return (
     <ScrollArea
-      className="flex-grow select-none"
+      className="grow select-none"
       onContextMenu={(e) =>
         openContextMenuFromEvent(
           prepareContextMenu(
