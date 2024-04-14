@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": false,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "npm run db:migrate && next build",
     "start": "next start",
     "tsc": "tsc --noEmit --skipLibCheck",
@@ -75,7 +75,7 @@
     "lucia": "^3.1.1",
     "lucide-react": "^0.309.0",
     "magic-bytes.js": "^1.10.0",
-    "next": "14.0.4",
+    "next": "14.2.1",
     "oslo": "^1.1.3",
     "react": "^18",
     "react-dom": "^18",
