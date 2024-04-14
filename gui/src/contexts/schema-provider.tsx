@@ -10,6 +10,7 @@ import {
 import ConnectingDialog from "../components/connection-dialog";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "./driver-provider";
+import { useAutoComplete } from "./auto-complete-provider";
 
 const SchemaContext = createContext<{
   schema: DatabaseSchemaItem[];
@@ -76,6 +77,7 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
     <SchemaContext.Provider value={props}>{children}</SchemaContext.Provider>
   );
 }
-function useAutoComplete(): { updateTableList: any } {
-  throw new Error("Function not implemented.");
-}
+
+// function useAutoComplete(): { updateTableList: any } {
+//   return { updateTableList: () => console.log("Not implemented") };
+// }

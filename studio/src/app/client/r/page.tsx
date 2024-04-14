@@ -1,4 +1,6 @@
-import { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
+import "@libsqlstudio/gui/css";
+
+import type { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 import { db } from "@/db";
 import { database } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";

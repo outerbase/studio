@@ -95,6 +95,8 @@ export default function ResultTable({
   const { openBlockEditor } = useBlockEditor();
   const { databaseDriver } = useDatabaseDriver();
 
+  console.log("henlooooo");
+
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
       return (
@@ -467,6 +469,8 @@ export default function ResultTable({
     },
     [copyCallback, pasteCallback]
   );
+
+  console.log("Herer");
 
   return (
     <OptimizeTable

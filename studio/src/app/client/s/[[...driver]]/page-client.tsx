@@ -1,13 +1,15 @@
 "use client";
+
 import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
-import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
-import { ConnectionConfigProvider } from "@/context/connection-config-provider";
 import RqliteDriver from "@/drivers/rqlite-driver";
 import TursoDriver from "@/drivers/turso-driver";
 import ValtownDriver from "@/drivers/valtown-driver";
 import { Studio } from "@libsqlstudio/gui";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
+
+// TODO: might have a way to include this in the Studio component
+import "@libsqlstudio/gui/css";
 
 export default function ClientPageBody() {
   const router = useRouter();

@@ -7,7 +7,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./css": "./dist/index.css"
   },
   "scripts": {
     "dev": "tsup --watch",

@@ -150,7 +150,7 @@ export default function WindowTabs({
               <div className="border-b grow" />
             </div>
           </div>
-          <div className="flex-grow relative mt-1">
+          <div className="flex-1 relative mt-1">
             {tabs.map((tab, tabIndex) => (
               <div
                 className="absolute left-0 right-0 top-0 bottom-0"

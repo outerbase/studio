@@ -8,7 +8,7 @@
       "types": "./index.ts",
       "default": "./index.ts"
     },
-    "./css": "./tailwind/style.css"
+    "./css": "./style.css"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.3",

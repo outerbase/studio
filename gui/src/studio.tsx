@@ -1,3 +1,5 @@
+"use client";
+
 import MainScreen from "./components/main-connection";
 import { ConfigProvider } from "./contexts/config-provider";
 import { DriverProvider } from "./contexts/driver-provider";

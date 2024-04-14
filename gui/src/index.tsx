@@ -1,3 +1,5 @@
+"use client";
+
 export { Studio } from "./studio";
 export * from "./drivers/base-driver";
 export { SqliteLikeBaseDriver } from "./drivers/sqlite-base-driver";

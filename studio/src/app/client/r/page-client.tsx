@@ -1,13 +1,13 @@
 "use client";
 
 import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
-import MainScreen from "@/components/main-connection";
 import { DatabaseDriverProvider } from "@/context/DatabaseDriverProvider";
 import { ConnectionConfigProvider } from "@/context/connection-config-provider";
 import CollaborationDriver from "@/drivers/collaboration-driver";
 import RemoteDriver from "@/drivers/remote-driver";
-import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { Studio } from "@libsqlstudio/gui";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
 export default function ClientPageBody({
   token,
@@ -17,6 +17,7 @@ export default function ClientPageBody({
   config: SavedConnectionItem;
 }>) {
   const params = useSearchParams();
+  const router = useRouter();
 
   const { driver, collaborator } = useMemo(() => {
     const databaseId = params.get("p");
@@ -28,6 +29,10 @@ export default function ClientPageBody({
     };
   }, [params, token]);
 
+  const goBack = useCallback(() => {
+    router.push("/connect");
+  }, [router]);
+
   if (!driver) {
     return <div>Something wrong</div>;
   }
@@ -35,7 +40,12 @@ export default function ClientPageBody({
   return (
     <DatabaseDriverProvider driver={driver} collaborationDriver={collaborator}>
       <ConnectionConfigProvider config={config}>
-        <MainScreen />
+        <Studio
+          driver={driver}
+          name="Quick Connect"
+          color="blue"
+          onBack={goBack}
+        />
       </ConnectionConfigProvider>
     </DatabaseDriverProvider>
   );
