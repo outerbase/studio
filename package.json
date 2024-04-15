@@ -22,6 +22,7 @@
     "test:watch": "turbo run test:watch",
     "staged": "turbo run staged --cache-dir=.turbo"
   },
+  "packageManager": "pnpm@8.15.7",
   "devDependencies": {
     "@types/eslint": "^8.56.9",
     "@types/node": "^20.12.7",
