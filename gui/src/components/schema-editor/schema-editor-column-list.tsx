@@ -44,22 +44,24 @@ function changeColumnOnIndex(
   onChange((prev) => {
     if (prev) {
       const columns = [...(prev?.columns ?? [])];
-      if (columns[idx]?.new) {
-        columns[idx].new =
+      const currentCell = columns[idx] as DatabaseTableColumnChange;
+
+      if (currentCell.new) {
+        currentCell.new =
           value === null
             ? null
             : {
-                ...(columns[idx].new as DatabaseTableColumn),
+                ...currentCell.new,
                 ...value,
                 constraint: value?.constraint
                   ? {
-                      ...columns[idx].new?.constraint,
+                      ...currentCell.new?.constraint,
                       ...value?.constraint,
                     }
-                  : columns[idx].new?.constraint,
+                  : currentCell.new?.constraint,
               };
 
-        if (!columns[idx].new && !columns[idx].old) {
+        if (!currentCell.new && !currentCell.old) {
           // remove the column
           return {
             ...prev,

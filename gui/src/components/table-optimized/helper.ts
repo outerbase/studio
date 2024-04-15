@@ -38,7 +38,7 @@ export function getVisibleCellRange(
       currentColStart = i - 1;
     }
 
-    currentColAccumulateSize += headerSizes[i];
+    currentColAccumulateSize += headerSizes[i] ?? 0;
 
     if (currentColAccumulateSize >= visibleXEnd && currentColEnd < 0) {
       currentColEnd = i;

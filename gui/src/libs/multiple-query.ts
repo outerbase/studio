@@ -26,7 +26,7 @@ export async function multipleQuery(
   let lastResult: DatabaseResultSet | undefined;
 
   for (let i = 0; i < statements.length; i++) {
-    const statement = statements[i];
+    const statement = statements[i] as string;
 
     const log: MultipleQueryProgressItem = {
       order: i,

@@ -37,7 +37,7 @@ export default function useTableVisibilityRecalculation({
       setVisibleDebounce(
         getVisibleCellRange(
           e,
-          headers.map((header) => headerSizes[header.index]),
+          headers.map((header) => headerSizes[header.index]) as number[],
           totalRowCount,
           rowHeight,
           renderAhead

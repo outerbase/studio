@@ -78,7 +78,7 @@ export function BlockContentWrapper<
       // Sets blockContent class
       className={mergeCSSClasses(
         "bn-block-content",
-        props.domAttributes?.class || ""
+        props.domAttributes!["class"] || ""
       )}
       // Sets content type attribute
       data-content-type={props.blockType}
@@ -91,7 +91,7 @@ export function BlockContentWrapper<
           .filter(
             ([prop, value]) =>
               !inheritedProps.includes(prop) &&
-              value !== props.propSchema[prop].default
+              value !== props.propSchema[prop]!.default
           )
           .map(([prop, value]) => {
             return [camelToDataKebab(prop), value];
@@ -214,7 +214,10 @@ export function createReactBlockSpec<
       );
       output.contentDOM?.setAttribute("data-editable", "");
 
-      return output;
+      return output as {
+        dom: HTMLElement;
+        contentDOM: HTMLElement | undefined;
+      };
     },
     toExternalHTML: (block, editor) => {
       const blockContentDOMAttributes =
@@ -240,7 +243,10 @@ export function createReactBlockSpec<
       }, editor);
       output.contentDOM?.setAttribute("data-editable", "");
 
-      return output;
+      return output as {
+        dom: HTMLElement;
+        contentDOM: HTMLElement | undefined;
+      };
     },
   });
 }

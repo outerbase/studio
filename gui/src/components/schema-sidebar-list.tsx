@@ -162,7 +162,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     for (const item of schema) {
       if (item.type === "trigger" && item.tableName) {
         if (treeHash[item.tableName]) {
-          treeHash[item.tableName].sub.push(item);
+          treeHash[item.tableName]?.sub.push(item);
         }
       }
     }

@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/lib/*": ["./src/libs/*"]
-    }
+    },
+    "noImplicitReturns": false,
   },
   "include": ["**/*.ts", "**/*.tsx", ".eslintrc.cjs", "*.js", "*.ts"],
   "exclude": ["node_modules", "dist"]
