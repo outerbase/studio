@@ -1,5 +1,6 @@
 "use client";
-import ConnectingDialog from "@studio/components/connection-dialog";
+
+import { ConnectingDialog } from "@libsqlstudio/gui";
 
 export default function ConnectionErrorMessageStory() {
   return (

@@ -1,7 +1,7 @@
 import {
   DatabaseTableOperation,
   SelectFromTableOptions,
-} from "@studio/drivers/base-driver";
+} from "@libsqlstudio/gui";
 import { InStatement } from "@libsql/client/web";
 
 export interface RequestOperationBatch {

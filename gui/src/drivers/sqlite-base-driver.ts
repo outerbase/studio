@@ -21,7 +21,7 @@ import {
 
 import { parseCreateTableScript } from "./../sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "./../sqlite/sql-parse-trigger";
-import { validateOperation } from "./../libs/validation";
+import { validateOperation } from "./../lib/validation";
 
 export abstract class SqliteLikeBaseDriver extends BaseDriver {
   protected escapeId(id: string) {

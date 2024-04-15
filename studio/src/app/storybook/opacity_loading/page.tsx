@@ -1,4 +1,4 @@
-import OpacityLoading from "@studio/components/loading-opacity";
+import { OpacityLoading } from "@libsqlstudio/gui";
 
 export default function OpacityLoadingStorybook() {
   return (

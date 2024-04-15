@@ -1,4 +1,4 @@
-import { ApiRole, ApiUserRole } from "@gui/libs/api-database-response";
+import { ApiRole, ApiUserRole } from "@gui/lib/api-database-response";
 
 export abstract class CollaborationDriver {
   abstract getRoles(): Promise<ApiRole[]>;

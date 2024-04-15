@@ -1,5 +1,5 @@
 import { ApiUser } from "@studio/lib/api/api-database-response";
-import parseSafeJson from "../../../../gui/src/libs/json-safe";
+import { parseSafeJson } from "@libsqlstudio/gui";
 
 export interface DriverDetailField {
   name: keyof SavedConnectionItemConfigConfig;

@@ -10,7 +10,7 @@ import {
   CommandInput,
   CommandItem,
 } from "../ui/command";
-import { cn } from "./../../libs/utils";
+import { cn } from "./../../lib/utils";
 import type { DatabaseTableSchema } from "@gui/drivers/base-driver";
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 

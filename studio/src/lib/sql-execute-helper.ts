@@ -1,11 +1,12 @@
-import OptimizeTableState, {
+import  {
+  OptimizeTableState,
   OptimizeTableRowValue,
-} from "@studio/components/table-optimized/OptimizeTableState";
+} from "@libsqlstudio/gui";
 import {
   BaseDriver,
   DatabaseTableOperation,
   DatabaseTableSchema,
-} from "@studio/drivers/base-driver";
+} from "@libsqlstudio/gui";
 
 export interface ExecutePlan {
   row: OptimizeTableRowValue;

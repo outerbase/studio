@@ -11,7 +11,7 @@ import { Input } from "@gui/components/ui/input";
 import { Button } from "@gui/components/ui/button";
 import { LucideTrash } from "lucide-react";
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
-import { ApiRole, ApiUserRole } from "@gui/libs/api-database-response";
+import { ApiRole, ApiUserRole } from "@gui/lib/api-database-response";
 
 function RoleSelect({
   roles,

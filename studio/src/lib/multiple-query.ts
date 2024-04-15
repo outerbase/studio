@@ -1,4 +1,4 @@
-import { BaseDriver, DatabaseResultSet } from "@studio/drivers/base-driver";
+import { BaseDriver, DatabaseResultSet } from "@libsqlstudio/gui";
 
 export interface MultipleQueryProgressItem {
   order: number;

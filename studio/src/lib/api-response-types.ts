@@ -1,10 +1,11 @@
 import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
+
 import {
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
-} from "@studio/drivers/base-driver";
+} from "@libsqlstudio/gui";
 
 export interface ApiOpsBatchResponse {
   error?: string;

@@ -1,5 +1,5 @@
 import { TableColumnDataType } from "@gui/drivers/base-driver";
-import { hex } from "./../libs/bit-operation";
+import { hex } from "./../lib/bit-operation";
 import type { IdentifyResult } from "sql-query-identifier/lib/defines";
 
 export function escapeIdentity(str: string) {

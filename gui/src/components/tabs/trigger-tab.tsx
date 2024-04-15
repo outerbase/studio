@@ -11,7 +11,7 @@ import {
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import SqlEditor from "../sql-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
-import { noop } from "@gui/libs/utils";
+import { noop } from "@gui/lib/utils";
 
 export default function TriggerTab({ name }: { name: string }) {
   const { databaseDriver } = useDatabaseDriver();

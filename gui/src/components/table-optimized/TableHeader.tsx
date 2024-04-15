@@ -1,7 +1,7 @@
 import React, { type ReactElement } from "react";
 import type { OptimizeTableHeaderWithIndexProps } from ".";
 import TableHeaderResizeHandler from "./TableHeaderResizeHandler";
-import { cn } from "./../../libs/utils";
+import { cn } from "./../../lib/utils";
 
 export default function TableHeader({
   idx,

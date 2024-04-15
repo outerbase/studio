@@ -17,7 +17,7 @@ import QueryProgressLog from "../query-progress-log";
 import { useAutoComplete } from "@gui/contexts/auto-complete-provider";
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { MultipleQueryProgress, multipleQuery } from "@gui/libs/multiple-query";
+import { MultipleQueryProgress, multipleQuery } from "@gui/lib/multiple-query";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
