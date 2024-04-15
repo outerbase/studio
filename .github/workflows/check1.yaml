@@ -1,0 +1,51 @@
+name: Check1
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.13.1
+          run_install: false
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.deps
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Cache turbo tasks
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Check
+        run: pnpm run staged
+
+      - name: Log success
+        run: echo "✅ Success!"
