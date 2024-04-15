@@ -4,10 +4,9 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/lib/*": ["./src/libs/*"]
+      "@/*": ["./src/*"]
     },
-    "noImplicitReturns": false,
+    "noImplicitReturns": false
   },
   "include": ["**/*.ts", "**/*.tsx", ".eslintrc.cjs", "*.js", "*.ts"],
   "exclude": ["node_modules", "dist"]

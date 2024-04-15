@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@libsqlstudio/tsconfig": "*",
-    "eslint-config-libsqlstudio": "*"
+    "@libsqlstudio/tsconfig": "workspace:*",
+    "eslint-config-libsqlstudio": "workspace:*"
   }
 }
