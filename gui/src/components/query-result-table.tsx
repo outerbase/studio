@@ -48,6 +48,7 @@ function isBlockNoteString(value: DatabaseValue<string>): boolean {
   if (typeof value !== "string") return false;
   if (!(value.startsWith("{") && value.endsWith("}"))) return false;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parsedJson = parseSafeJson<any>(value, null);
   if (!parsedJson) return false;
 
@@ -263,6 +264,8 @@ export default function ResultTable({
         if (focusCell) {
           return state.getValue(focusCell.y, focusCell.x);
         }
+
+        return undefined;
       }
 
       openContextMenuFromEvent([
@@ -327,6 +330,7 @@ export default function ResultTable({
             if (files.error) return toast.error(files.error.message);
 
             const file = files.value[0];
+            if (!file) return;
 
             const toastId = toast.loading("Uploading file...");
             const { data, error } = await uploadFile(file);

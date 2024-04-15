@@ -18,6 +18,7 @@ const GROUP_ORDER = {
 const CUSTOM_SUGGESTIONS = [insertCodeBlock];
 
 // utility function to get all custom suggestions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getCustomSlashMenuItems(editor: BlockNoteEditor<any>) {
   return CUSTOM_SUGGESTIONS.map((item) => item(editor));
 }
@@ -25,6 +26,7 @@ function getCustomSlashMenuItems(editor: BlockNoteEditor<any>) {
 export const SuggestionMenu = ({
   editor,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   editor: BlockNoteEditor<any>;
 }) => {
   return (
@@ -38,7 +40,7 @@ export const SuggestionMenu = ({
         ];
 
         // sort the suggestions by group
-        const sortedItems = allItem.toSorted((a, b) => {
+        const sortedItems = allItem.sort((a, b) => {
           const aOrder = GROUP_ORDER[a.group || ""] || 5;
           const bOrder = GROUP_ORDER[b.group || ""] || 5;
           return aOrder - bOrder;

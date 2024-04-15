@@ -23,8 +23,8 @@ export default class OptimizeTableState {
   protected data: OptimizeTableRowValue[] = [];
   protected headers: OptimizeTableHeaderProps[] = [];
   protected headerWidth: number[] = [];
-  protected editMode: boolean = false;
-  protected readOnlyMode: boolean = false;
+  protected editMode = false;
+  protected readOnlyMode = false;
   protected container: HTMLDivElement | null = null;
 
   protected changeCallback: TableChangeEventCallback[] = [];
@@ -52,9 +52,12 @@ export default class OptimizeTableState {
           // Use 100 first rows to determine the good initial size
           let maxSize = 0;
           for (let i = 0; i < Math.min(dataResult.rows.length, 100); i++) {
-            maxSize = Math.max(
-              (dataResult.rows[i][headerName ?? ""]?.toString() ?? "").length
-            );
+            const currentCell = dataResult.rows[i];
+            if (currentCell) {
+              maxSize = Math.max(
+                (currentCell[headerName ?? ""]?.toString() ?? "").length
+              );
+            }
           }
 
           initialSize = Math.max(150, Math.min(500, maxSize * 8));
@@ -116,6 +119,8 @@ export default class OptimizeTableState {
       this.changeDebounceTimerId = null;
       this.changeCallback.reverse().forEach((cb) => cb(this));
     }, 5);
+
+    return true;
   }
 
   // ------------------------------------------------
@@ -128,9 +133,12 @@ export default class OptimizeTableState {
   getValue(y: number, x: number): unknown {
     const rowChange = this.data[y]?.change;
     if (rowChange) {
-      return this.headers[x].name in rowChange
-        ? rowChange[this.headers[x].name]
-        : this.getOriginalValue(y, x);
+      const currentHeaderName = this.headers[x]?.name ?? "";
+      if (currentHeaderName in rowChange) {
+        return rowChange[currentHeaderName];
+      }
+
+      return this.getOriginalValue(y, x);
     }
     return this.getOriginalValue(y, x);
   }
@@ -138,18 +146,23 @@ export default class OptimizeTableState {
   hasCellChange(y: number, x: number) {
     const changeLog = this.data[y]?.change;
     if (!changeLog) return false;
-    return this.headers[x].name in changeLog;
+
+    const currentHeaderName = this.headers[x]?.name ?? "";
+    return currentHeaderName in changeLog;
   }
 
   getOriginalValue(y: number, x: number): unknown {
-    return this.data[y]?.raw[this.headers[x].name];
+    const currentHeaderName = this.headers[x]?.name ?? "";
+    return this.data[y]?.raw[currentHeaderName];
   }
 
   changeValue(y: number, x: number, newValue: unknown) {
     const oldValue = this.getOriginalValue(y, x);
 
     const row = this.data[y];
-    const headerName = this.headers[x].name;
+    const headerName = this.headers[x]?.name ?? "";
+
+    if (!row) return;
 
     if (oldValue === newValue) {
       const rowChange = row.change;
@@ -158,9 +171,9 @@ export default class OptimizeTableState {
         if (Object.entries(rowChange).length === 0) {
           if (row.changeKey) {
             delete this.changeLogs[row.changeKey];
-            delete row["changeKey"];
+            delete row.changeKey;
           }
-          delete row["change"];
+          delete row.change;
         }
       }
     } else {
@@ -238,7 +251,7 @@ export default class OptimizeTableState {
     this.broadcastChange();
   }
 
-  insertNewRow(index: number = -1) {
+  insertNewRow(index = -1) {
     if (index === -1) {
       const focus = this.getFocus();
       if (focus) index = focus.y;
@@ -262,7 +275,7 @@ export default class OptimizeTableState {
     return !!this.data[index]?.isNewRow;
   }
 
-  removeRow(index: number = -1) {
+  removeRow(index = -1) {
     if (index === -1) {
       // Remove the row at focus
       const focus = this.getFocus();
@@ -357,9 +370,9 @@ export default class OptimizeTableState {
       const cellBottom = cellTop + 38;
 
       for (let i = 0; i < cellX; i++) {
-        cellLeft += this.headerWidth[i];
+        cellLeft += this.headerWidth[i] ?? 0;
       }
-      cellRight = cellLeft + this.headerWidth[cellX];
+      cellRight = cellLeft + (this.headerWidth[cellX] ?? 0);
 
       const width = this.container.clientWidth;
       const height = this.container.clientHeight;

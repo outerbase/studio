@@ -11,6 +11,7 @@ import {
 import { useDatabaseDriver } from "@/contexts/driver-provider";
 import SqlEditor from "../sql-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
+import { noop } from "@/libs/utils";
 
 export default function TriggerTab({ name }: { name: string }) {
   const { databaseDriver } = useDatabaseDriver();
@@ -61,7 +62,7 @@ export default function TriggerTab({ name }: { name: string }) {
               </SelectContent>
             </Select>
           </div>
-          <TableCombobox value={trigger?.tableName} onChange={() => {}} />
+          <TableCombobox value={trigger?.tableName} onChange={noop} />
         </div>
       </div>
       <div className="grow overflow-hidden">

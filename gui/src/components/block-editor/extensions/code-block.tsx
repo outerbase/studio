@@ -43,6 +43,7 @@ export const CodeBlock = createReactBlockSpec(
             : "plaintext";
           const code = "";
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (chain() as any).BNUpdateBlock(state.selection.from, {
             type: "codeBlock",
             props: { language, code },

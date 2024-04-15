@@ -27,13 +27,12 @@ function generateTableChangePlan({
     if (rowChange) {
       const pk = tableSchema.pk;
 
-      const wherePrimaryKey = pk.reduce(
+      const wherePrimaryKey = pk.reduce<Record<string, unknown>>(
         (condition, pkColumnName) => {
-          //typescript-eslint.io/rules/prefer-reduce-type-parameter
-          https: condition[pkColumnName] = row.raw[pkColumnName];
+          condition[pkColumnName] = row.raw[pkColumnName];
           return condition;
         },
-        {} as Record<string, unknown>
+        {}
       );
 
       if (row.isNewRow) {
@@ -95,7 +94,7 @@ export async function commitChange({
       plans.map((p, idx) => {
         return {
           row: p.row,
-          updated: result[idx].record ?? {},
+          updated: result[idx]?.record ?? {},
         };
       })
     );

@@ -1,10 +1,10 @@
 import { escapeIdentity, escapeSqlValue } from "@/sqlite/sql-helper";
 
 export function selectArrayFromIndexList<T = unknown>(
-  data: Array<T>,
+  data: T[],
   indexList: number[]
-): Array<T> {
-  return indexList.map((index) => data[index]);
+): T[] {
+  return indexList.map((index) => data[index]) as T[];
 }
 
 export function exportRowsToSqlInsert(

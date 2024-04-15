@@ -19,5 +19,11 @@ module.exports = {
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/no-base-to-string": "off",
     "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
+    "@typescript-eslint/require-await": "off",
+    "@typescript-eslint/no-dynamic-delete": "off",
+    "@typescript-eslint/non-nullable-type-assertion-style": "off",
+    "@typescript-eslint/array-type": "off",
+    "eslint-comments/no-unlimited-disable": "off",
+    "eslint-comments/disable-enable-pair": "off",
   },
 };

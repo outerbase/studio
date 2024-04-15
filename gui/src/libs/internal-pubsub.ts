@@ -1,19 +1,21 @@
 export default class InternalPubSub {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected listeners: Record<string, ((obj: any) => void)[]> = {};
+  protected listeners: Record<string, Array<(obj: any) => void>> = {};
 
   addListener<T = unknown>(channel: string, callback: (obj: T) => void) {
-    if (this.listeners[channel]) {
-      this.listeners[channel].push(callback);
+    const c = this.listeners[channel];
+    if (c) {
+      c.push(callback);
     } else {
       this.listeners[channel] = [callback];
     }
   }
 
   removeListener<T = unknown>(channel: string, callback: (obj: T) => void) {
-    if (this.listeners[channel]) {
-      this.listeners[channel].filter((c) => c !== callback);
-      if (this.listeners[channel].length) {
+    const c = this.listeners[channel];
+    if (c) {
+      c.filter((c) => c !== callback);
+      if (c.length) {
         delete this.listeners[channel];
       }
     }

@@ -49,25 +49,22 @@ export function AutoCompleteProvider({ children }: PropsWithChildren) {
   const updateTableList = useCallback(
     (tableName: string[]) => {
       setInternalSchema(
-        tableName.reduce(
-          (acc, name) => {
-            acc[name] = [];
-            return acc;
-          },
-          {} as Record<string, DatabaseTableColumn[]>
-        )
+        tableName.reduce<Record<string, DatabaseTableColumn[]>>((acc, name) => {
+          acc[name] = [];
+          return acc;
+        }, {})
       );
     },
     [setInternalSchema]
   );
 
   const schema = useMemo(() => {
-    return Object.entries(internalSchema).reduce(
+    return Object.entries(internalSchema).reduce<Record<string, string[]>>(
       (acc, [key, columns]) => {
         acc[key] = columns.map((col) => col.name);
         return acc;
       },
-      {} as Record<string, string[]>
+      {}
     );
   }, [internalSchema]);
 

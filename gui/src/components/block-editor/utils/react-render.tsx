@@ -4,6 +4,7 @@ import { Root, createRoot } from "react-dom/client";
 
 export function renderToDOMSpec(
   fc: (refCB: (ref: HTMLElement | null) => void) => React.ReactNode,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   editor: BlockNoteEditor<any, any, any> | undefined
 ) {
   let contentDOM: HTMLElement | undefined;
@@ -15,7 +16,7 @@ export function renderToDOMSpec(
     // This is currently only used for Styles. In this case, react context etc. won't be available inside `fc`
     root = createRoot(div);
     flushSync(() => {
-      root!.render(fc((el) => (contentDOM = el || undefined)));
+      root?.render(fc((el) => (contentDOM = el || undefined)));
     });
   } else {
     // Render temporarily using `EditorContent` (which is stored somewhat hacky on `editor._tiptapEditor.contentComponent`)
@@ -37,10 +38,8 @@ export function renderToDOMSpec(
   // clone so we can unmount the react root
   contentDOM?.setAttribute("data-tmp-find", "true");
   const cloneRoot = div.cloneNode(true) as HTMLElement;
-  const dom = cloneRoot.firstElementChild! as HTMLElement;
-  const contentDOMClone = cloneRoot.querySelector(
-    "[data-tmp-find]"
-  ) as HTMLElement | null;
+  const dom = cloneRoot.firstElementChild as HTMLElement;
+  const contentDOMClone = cloneRoot.querySelector("[data-tmp-find]");
   contentDOMClone?.removeAttribute("data-tmp-find");
 
   root?.unmount();

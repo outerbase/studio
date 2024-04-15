@@ -1,5 +1,5 @@
 import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
-import { cn } from "@/lib/utils";
+import { cn, noop } from "@/lib/utils";
 import {
   LucideArrowUpRight,
   LucideCheck,
@@ -42,7 +42,7 @@ function ColumnForeignKey({
         <TableCombobox
           borderless
           disabled
-          onChange={() => {}}
+          onChange={noop}
           value={constraint.foreignKey?.foreignTableName}
         />
       </td>

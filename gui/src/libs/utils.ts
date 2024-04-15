@@ -15,6 +15,7 @@ export function scoped<T>(fn: () => T): T {
 /**
  * Doesn't do anything :)
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export function noop() {}
 
 /**

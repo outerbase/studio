@@ -25,7 +25,7 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const [loadedIndex, setLoadedIndex] = useState(() => {
-    const a = new Array(tabs.length).fill(false);
+    const a: boolean[] = new Array(tabs.length).fill(false);
     a[0] = true;
     return a;
   });

@@ -17,7 +17,7 @@ import QueryProgressLog from "../query-progress-log";
 import { useAutoComplete } from "@/contexts/auto-complete-provider";
 import { useDatabaseDriver } from "@/contexts/driver-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { MultipleQueryProgress } from "@/libs/multiple-query";
+import { MultipleQueryProgress, multipleQuery } from "@/libs/multiple-query";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
@@ -41,7 +41,7 @@ export default function QueryWindow() {
 
     if (all) {
       finalStatements = statements.map((s) => s.text);
-    } else if (editor && editor.view) {
+    } else if (editor?.view) {
       const position = editor.view.state.selection.main.head;
       const statement = selectStatementFromPosition(statements, position);
 
@@ -126,11 +126,4 @@ export default function QueryWindow() {
       </ResizablePanel>
     </ResizablePanelGroup>
   );
-}
-function multipleQuery(
-  databaseDriver: any,
-  finalStatements: string[],
-  arg2: (currentProgrss: any) => void
-) {
-  throw new Error("Function not implemented.");
 }

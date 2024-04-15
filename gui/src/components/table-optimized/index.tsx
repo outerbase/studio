@@ -129,14 +129,19 @@ function renderCellList({
   onHeaderContextMenu,
 }: RenderCellListProps) {
   const headerSizes = internalState.getHeaderWidth();
-  const headersWithIndex = headerIndex.map((idx) => headers[idx]);
+  const headersWithIndex = headerIndex.map(
+    (idx) => headers[idx]
+  ) as OptimizeTableHeaderWithIndexProps[];
 
   const templateSizes = headersWithIndex
     .map((header) => headerSizes[header.index] + "px")
     .join(" ");
 
   const onHeaderSizeWithRemap = (idx: number, newWidth: number) => {
-    onHeaderResize(headerSizes[headersWithIndex[idx].index], newWidth);
+    onHeaderResize(
+      headerSizes[headersWithIndex[idx]?.index ?? 0] ?? 150,
+      newWidth
+    );
   };
 
   const handleCellClicked = (y: number, x: number) => {
@@ -154,6 +159,7 @@ function renderCellList({
 
   const windowArray = new Array(rowEnd - rowStart)
     .fill(false)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     .map(() => new Array(headers.length).fill(false));
 
   const cells = windowArray.map((row, rowIndex) => {
@@ -180,16 +186,19 @@ function renderCellList({
             className={cn("sticky left-0 z-1", "bg-background")}
             onMouseDown={handleCellClicked(
               absoluteRowIndex,
-              headersWithIndex[0].index
+              headersWithIndex[0]?.index ?? -1
             )}
           >
             <div className={"libsql-table-cell"}>
-              {renderCell({
-                y: absoluteRowIndex,
-                x: headersWithIndex[0].index,
-                state: internalState,
-                header: headers[headersWithIndex[0].index],
-              })}
+              {headersWithIndex[0] &&
+                renderCell({
+                  y: absoluteRowIndex,
+                  x: headersWithIndex[0].index,
+                  state: internalState,
+                  header: headers[
+                    headersWithIndex[0].index
+                  ] as OptimizeTableHeaderWithIndexProps,
+                })}
             </div>
           </td>
         )}
@@ -203,6 +212,7 @@ function renderCellList({
           const actualIndex = cellIndex + colStart;
           const header = headersWithIndex[actualIndex];
 
+          if (!header) return null;
           if (header.sticky) return null;
 
           return (
@@ -215,7 +225,9 @@ function renderCellList({
                   y: absoluteRowIndex,
                   x: header.index,
                   state: internalState,
-                  header: headers[header.index],
+                  header: headers[
+                    header.index
+                  ] as OptimizeTableHeaderWithIndexProps,
                 })}
               </div>
             </td>

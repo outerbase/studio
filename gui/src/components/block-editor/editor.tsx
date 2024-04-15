@@ -9,6 +9,7 @@ import { BlockNoteEditor } from "@blocknote/core";
 import { useTheme } from "@/contexts/theme-provider";
 
 export interface BlockEditorProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   editor: BlockNoteEditor<any>;
 }
 
