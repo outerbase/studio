@@ -9,7 +9,7 @@ import { Separator } from "../ui/separator";
 import { ScrollArea } from "../ui/scroll-area";
 import { BlockEditor } from "./editor";
 import { BlockContent, CONTENT_FORMAT } from ".";
-import { BlockEditorConfigs } from "@/contexts/block-editor-provider";
+import { BlockEditorConfigs } from "@gui/contexts/block-editor-provider";
 
 export interface BlockEditorSheetProps {
   configs: BlockEditorConfigs | null;

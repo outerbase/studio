@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import SchemaList from "./schema-sidebar-list";
 import ListButtonItem from "./list-button-item";
 import { Separator } from "./ui/separator";
-import { openTab } from "@/messages/open-tab";
+import { openTab } from "@gui/messages/open-tab";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");

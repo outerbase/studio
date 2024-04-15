@@ -22,7 +22,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableTab, WindowTabItemButton } from "./sortable-tab";
-import { openTab } from "@/messages/open-tab";
+import { openTab } from "@gui/messages/open-tab";
 
 export interface WindowTabItemProps {
   component: JSX.Element;

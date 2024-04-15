@@ -4,7 +4,7 @@ import {
   DatabaseTriggerSchema,
   TriggerWhen,
   TriggerOperation,
-} from "@/drivers/base-driver";
+} from "@gui/drivers/base-driver";
 
 export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
   const tree = SQLite.language.parser.parse(sql);

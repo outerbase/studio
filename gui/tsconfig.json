@@ -4,7 +4,7 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@gui/*": ["./src/*"]
     },
     "noImplicitReturns": false
   },

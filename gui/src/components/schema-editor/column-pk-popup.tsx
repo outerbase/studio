@@ -1,4 +1,7 @@
-import { DatabaseTableColumnConstraint, SqlOrder } from "@/drivers/base-driver";
+import {
+  DatabaseTableColumnConstraint,
+  SqlOrder,
+} from "@gui/drivers/base-driver";
 import { LucideKeyRound } from "lucide-react";
 import { Button } from "../ui/button";
 import ConflictClauseOptions from "./column-conflict-clause";

@@ -1,4 +1,4 @@
-import { escapeIdentity, escapeSqlValue } from "@/sqlite/sql-helper";
+import { escapeIdentity, escapeSqlValue } from "@gui/sqlite/sql-helper";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],

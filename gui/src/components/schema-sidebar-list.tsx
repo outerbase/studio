@@ -1,15 +1,15 @@
 import { ScrollArea } from "./ui/scroll-area";
 import { buttonVariants } from "./ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@gui/lib/utils";
 import { LucideCog, LucideIcon, LucideView, Table2 } from "lucide-react";
 import {
   OpenContextMenuList,
   openContextMenuFromEvent,
-} from "@/messages/open-context-menu";
+} from "@gui/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { openTab } from "@/messages/open-tab";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
-import { useSchema } from "@/contexts/schema-provider";
+import { openTab } from "@gui/messages/open-tab";
+import { DatabaseSchemaItem } from "@gui/drivers/base-driver";
+import { useSchema } from "@gui/contexts/schema-provider";
 
 interface SchemaListProps {
   search: string;

@@ -3,18 +3,18 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
+} from "@gui/components/ui/resizable";
 import { useEffect, useMemo, useState } from "react";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
-import useMessageListener from "@/hooks/useMessageListener";
-import { MessageChannelName } from "@/messages/const";
-import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
-import QueryWindow from "@/components/tabs/query-tab";
+import useMessageListener from "@gui/hooks/useMessageListener";
+import { MessageChannelName } from "@gui/messages/const";
+import { OpenTabsProps, receiveOpenTabMessage } from "@gui/messages/open-tab";
+import QueryWindow from "@gui/components/tabs/query-tab";
 import { LucideCode, LucideDatabase, LucideSettings } from "lucide-react";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
 import SettingSidebar from "./sidebar/setting-sidebar";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;

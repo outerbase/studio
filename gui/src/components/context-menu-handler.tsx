@@ -1,9 +1,9 @@
-import useMessageListener from "@/hooks/useMessageListener";
-import { MessageChannelName } from "@/messages/const";
+import useMessageListener from "@gui/hooks/useMessageListener";
+import { MessageChannelName } from "@gui/messages/const";
 import type {
   OpenContextMenuList,
   OpenContextMenuOptions,
-} from "@/messages/open-context-menu";
+} from "@gui/messages/open-context-menu";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -15,7 +15,7 @@ import {
   ContextMenuSub,
   ContextMenuSubTrigger,
   ContextMenuSubContent,
-} from "@/components/ui/context-menu";
+} from "@gui/components/ui/context-menu";
 import { useEffect, useRef, useState } from "react";
 
 function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {

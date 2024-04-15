@@ -1,7 +1,7 @@
 import type {
   DatabaseTableOperation,
   DatabaseTableSchema,
-} from "@/drivers/base-driver";
+} from "@gui/drivers/base-driver";
 
 export function validateOperation(
   op: DatabaseTableOperation,

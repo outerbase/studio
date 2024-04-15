@@ -1,23 +1,23 @@
 import { useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import { LucidePlay } from "lucide-react";
-import SqlEditor from "@/components/sql-editor";
+import SqlEditor from "@gui/components/sql-editor";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
-} from "@/components/ui/resizable";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import ResultTable from "@/components/query-result-table";
-import { KEY_BINDING } from "@/lib/key-matcher";
+} from "@gui/components/ui/resizable";
+import { Separator } from "@gui/components/ui/separator";
+import { Button } from "@gui/components/ui/button";
+import ResultTable from "@gui/components/query-result-table";
+import { KEY_BINDING } from "@gui/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { selectStatementFromPosition } from "@/sqlite/sql-helper";
+import { selectStatementFromPosition } from "@gui/sqlite/sql-helper";
 import QueryProgressLog from "../query-progress-log";
-import { useAutoComplete } from "@/contexts/auto-complete-provider";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import { useAutoComplete } from "@gui/contexts/auto-complete-provider";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { MultipleQueryProgress, multipleQuery } from "@/libs/multiple-query";
+import { MultipleQueryProgress, multipleQuery } from "@gui/libs/multiple-query";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();

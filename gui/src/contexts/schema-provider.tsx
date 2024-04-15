@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import ConnectingDialog from "../components/connection-dialog";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
+import { DatabaseSchemaItem } from "@gui/drivers/base-driver";
 import { useDatabaseDriver } from "./driver-provider";
 import { useAutoComplete } from "./auto-complete-provider";
 

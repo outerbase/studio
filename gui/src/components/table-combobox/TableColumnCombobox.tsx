@@ -11,8 +11,8 @@ import {
   CommandItem,
 } from "../ui/command";
 import { cn } from "./../../libs/utils";
-import type { DatabaseTableSchema } from "@/drivers/base-driver";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import type { DatabaseTableSchema } from "@gui/drivers/base-driver";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 
 export default function TableColumnCombobox({
   value,

@@ -1,5 +1,5 @@
-import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
-import { cn, noop } from "@/lib/utils";
+import { DatabaseTableColumnConstraint } from "@gui/drivers/base-driver";
+import { cn, noop } from "@gui/lib/utils";
 import {
   LucideArrowUpRight,
   LucideCheck,

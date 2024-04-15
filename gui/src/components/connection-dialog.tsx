@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@gui/components/ui/button";
 import LogoLoading from "./logo-loading";
-import { useConfig } from "@/contexts/config-provider";
+import { useConfig } from "@gui/contexts/config-provider";
 
 export default function ConnectingDialog({
   message,

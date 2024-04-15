@@ -6,7 +6,7 @@ import type {
   DatabaseTableColumnConstraint,
   DatabaseTableSchema,
   SqlOrder,
-} from "@/drivers/base-driver";
+} from "@gui/drivers/base-driver";
 import { unescapeIdentity } from "./sql-helper";
 
 export class Cursor {

@@ -1,6 +1,6 @@
-import { useConfig } from "@/contexts/config-provider";
-import { useTheme } from "@/contexts/theme-provider";
-import { cn } from "@/lib/utils";
+import { useConfig } from "@gui/contexts/config-provider";
+import { useTheme } from "@gui/contexts/theme-provider";
+import { cn } from "@gui/lib/utils";
 import {
   LucideArrowLeft,
   LucideIcon,

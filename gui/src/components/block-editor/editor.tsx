@@ -6,7 +6,7 @@ import "./style.css";
 import { BlockNoteView } from "@blocknote/react";
 import { SuggestionMenu } from "./suggestions";
 import { BlockNoteEditor } from "@blocknote/core";
-import { useTheme } from "@/contexts/theme-provider";
+import { useTheme } from "@gui/contexts/theme-provider";
 
 export interface BlockEditorProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

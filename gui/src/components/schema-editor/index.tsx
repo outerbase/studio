@@ -10,11 +10,11 @@ import { Dispatch, SetStateAction, useCallback } from "react";
 import { Button } from "../ui/button";
 import SchemaEditorColumnList from "./schema-editor-column-list";
 import { Input } from "../ui/input";
-import { checkSchemaChange } from "@/lib/sql-generate.schema";
+import { checkSchemaChange } from "@gui/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
-} from "@/drivers/base-driver";
+} from "@gui/drivers/base-driver";
 import SchemaEditorConstraintList from "./schema-editor-constraint-list";
 
 export interface DatabaseTableColumnChange {

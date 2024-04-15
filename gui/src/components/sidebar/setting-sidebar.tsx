@@ -1,7 +1,7 @@
 "use client";
 import { LucideUser } from "lucide-react";
 import ListButtonItem from "../list-button-item";
-import { openTab } from "@/messages/open-tab";
+import { openTab } from "@gui/messages/open-tab";
 
 export default function SettingSidebar() {
   return (

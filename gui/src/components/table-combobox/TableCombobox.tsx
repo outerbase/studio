@@ -8,10 +8,10 @@ import {
   CommandInput,
   CommandItem,
 } from "../ui/command";
-import { cn } from "@/lib/utils";
+import { cn } from "@gui/lib/utils";
 import { useState } from "react";
 import { Separator } from "../ui/separator";
-import { useSchema } from "@/contexts/schema-provider";
+import { useSchema } from "@gui/contexts/schema-provider";
 
 export default function TableCombobox({
   value,

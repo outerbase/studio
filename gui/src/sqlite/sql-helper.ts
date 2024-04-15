@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/drivers/base-driver";
+import { TableColumnDataType } from "@gui/drivers/base-driver";
 import { hex } from "./../libs/bit-operation";
 import type { IdentifyResult } from "sql-query-identifier/lib/defines";
 

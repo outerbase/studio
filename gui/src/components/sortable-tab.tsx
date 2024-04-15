@@ -1,7 +1,7 @@
 import { LucideIcon, LucideX } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { WindowTabItemProps } from "./windows-tab";
-import { cn } from "@/lib/utils";
+import { cn } from "@gui/lib/utils";
 import { forwardRef } from "react";
 import { ButtonProps } from "./ui/button";
 

@@ -16,16 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { convertSqliteType } from "@/sqlite/sql-helper";
-import { Checkbox } from "@/components/ui/checkbox";
+import { convertSqliteType } from "@gui/sqlite/sql-helper";
+import { Checkbox } from "@gui/components/ui/checkbox";
 import ColumnDefaultValueInput from "./column-default-value-input";
-import { checkSchemaColumnChange } from "@/lib/sql-generate.schema";
+import { checkSchemaColumnChange } from "@gui/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
   TableColumnDataType,
-} from "@/drivers/base-driver";
-import { cn } from "@/lib/utils";
+} from "@gui/drivers/base-driver";
+import { cn } from "@gui/lib/utils";
 import ColumnPrimaryKeyPopup from "./column-pk-popup";
 import ColumnUniquePopup from "./column-unique-popup";
 import ColumnForeignKeyPopup from "./column-fk-popup";

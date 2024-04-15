@@ -13,8 +13,8 @@ import TableFakeBodyPadding from "./TableFakeBodyPadding";
 import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
 import OptimizeTableState from "./OptimizeTableState";
-import { TableColumnDataType } from "@/drivers/base-driver";
-import { cn } from "@/lib/utils";
+import { TableColumnDataType } from "@gui/drivers/base-driver";
+import { cn } from "@gui/lib/utils";
 
 export interface OptimizeTableHeaderProps {
   name: string;

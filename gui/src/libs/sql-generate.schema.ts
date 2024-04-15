@@ -1,10 +1,10 @@
 import {
   DatabaseTableColumnChange,
   DatabaseTableSchemaChange,
-} from "@/components/schema-editor";
-import { escapeIdentity, escapeSqlValue } from "@/sqlite/sql-helper";
+} from "@gui/components/schema-editor";
+import { escapeIdentity, escapeSqlValue } from "@gui/sqlite/sql-helper";
 import deepEqual from "deep-equal";
-import { DatabaseTableColumn } from "@/drivers/base-driver";
+import { DatabaseTableColumn } from "@gui/drivers/base-driver";
 
 export function checkSchemaColumnChange(change: DatabaseTableColumnChange) {
   return !deepEqual(change.old, change.new);

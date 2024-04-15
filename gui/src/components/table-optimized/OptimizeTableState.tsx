@@ -1,11 +1,11 @@
-import { selectArrayFromIndexList } from "@/lib/export-helper";
+import { selectArrayFromIndexList } from "@gui/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
 import { LucideKey } from "lucide-react";
 import {
   DatabaseResultSet,
   DatabaseTableSchema,
   TableColumnDataType,
-} from "@/drivers/base-driver";
+} from "@gui/drivers/base-driver";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;

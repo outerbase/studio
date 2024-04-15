@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import ResultTable from "@/components/query-result-table";
-import { Button } from "@/components/ui/button";
+import ResultTable from "@gui/components/query-result-table";
+import { Button } from "@gui/components/ui/button";
 import {
   LucideArrowLeft,
   LucideArrowRight,
@@ -11,25 +11,28 @@ import {
   LucideRefreshCcw,
   LucideSaveAll,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@gui/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { commitChange } from "@/lib/sql-execute-helper";
+} from "@gui/components/ui/tooltip";
+import { commitChange } from "@gui/lib/sql-execute-helper";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import { ColumnSortOption, DatabaseTableSchema } from "@/drivers/base-driver";
-import { useAutoComplete } from "@/contexts/auto-complete-provider";
+} from "@gui/components/ui/alert-dialog";
+import {
+  ColumnSortOption,
+  DatabaseTableSchema,
+} from "@gui/drivers/base-driver";
+import { useAutoComplete } from "@gui/contexts/auto-complete-provider";
 import OpacityLoading from "../loading-opacity";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 
 interface TableDataContentProps {
   tableName: string;

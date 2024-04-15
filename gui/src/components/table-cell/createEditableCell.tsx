@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GenericCell from "./GenericCell";
-import { DatabaseValue } from "@/drivers/base-driver";
-import { useBlockEditor } from "@/contexts/block-editor-provider";
+import { DatabaseValue } from "@gui/drivers/base-driver";
+import { useBlockEditor } from "@gui/contexts/block-editor-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 
 export interface TableEditableCell<T = unknown> {

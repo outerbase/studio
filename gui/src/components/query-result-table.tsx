@@ -1,14 +1,17 @@
-import GenericCell from "@/components/table-cell/GenericCell";
-import NumberCell from "@/components/table-cell/NumberCell";
-import TextCell from "@/components/table-cell/TextCell";
+import GenericCell from "@gui/components/table-cell/GenericCell";
+import NumberCell from "@gui/components/table-cell/NumberCell";
+import TextCell from "@gui/components/table-cell/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
-} from "@/components/table-optimized";
-import OptimizeTableState from "@/components/table-optimized/OptimizeTableState";
-import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
-import { KEY_BINDING } from "@/lib/key-matcher";
-import { openContextMenuFromEvent } from "@/messages/open-context-menu";
+} from "@gui/components/table-optimized";
+import OptimizeTableState from "@gui/components/table-optimized/OptimizeTableState";
+import {
+  exportRowsToExcel,
+  exportRowsToSqlInsert,
+} from "@gui/lib/export-helper";
+import { KEY_BINDING } from "@gui/lib/key-matcher";
+import { openContextMenuFromEvent } from "@gui/messages/open-context-menu";
 import {
   LucideChevronDown,
   LucidePin,
@@ -22,9 +25,9 @@ import {
   ColumnSortOption,
   DatabaseValue,
   TableColumnDataType,
-} from "@/drivers/base-driver";
-import { useBlockEditor } from "@/contexts/block-editor-provider";
-import parseSafeJson from "@/lib/json-safe";
+} from "@gui/drivers/base-driver";
+import { useBlockEditor } from "@gui/contexts/block-editor-provider";
+import parseSafeJson from "@gui/lib/json-safe";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,10 +35,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { triggerSelectFiles, uploadFile } from "@/lib/file-upload";
+import { triggerSelectFiles, uploadFile } from "@gui/lib/file-upload";
 import { toast } from "sonner";
 import BigNumberCell from "./table-cell/BigNumberCell";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 
 interface ResultTableProps {
   data: OptimizeTableState;

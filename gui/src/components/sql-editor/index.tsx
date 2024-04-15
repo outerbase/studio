@@ -7,7 +7,7 @@ import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
 import { defaultKeymap } from "@codemirror/commands";
 import { keymap } from "@codemirror/view";
-import { KEY_BINDING } from "@/lib/key-matcher";
+import { KEY_BINDING } from "@gui/lib/key-matcher";
 import useCodeEditorTheme from "./use-editor-theme";
 
 interface SqlEditorProps {

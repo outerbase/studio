@@ -1,11 +1,11 @@
 import OptimizeTableState, {
   OptimizeTableRowValue,
-} from "@/components/table-optimized/OptimizeTableState";
+} from "@gui/components/table-optimized/OptimizeTableState";
 import {
   BaseDriver,
   DatabaseTableOperation,
   DatabaseTableSchema,
-} from "@/drivers/base-driver";
+} from "@gui/drivers/base-driver";
 
 export interface ExecutePlan {
   row: OptimizeTableRowValue;

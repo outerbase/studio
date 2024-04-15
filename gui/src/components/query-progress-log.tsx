@@ -1,4 +1,4 @@
-import { MultipleQueryProgress } from "@/lib/multiple-query";
+import { MultipleQueryProgress } from "@gui/lib/multiple-query";
 import { useEffect, useState } from "react";
 import CodePreview from "./code-preview";
 

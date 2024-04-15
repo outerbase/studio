@@ -1,4 +1,4 @@
-import { BaseDriver, DatabaseResultSet } from "@/drivers/base-driver";
+import { BaseDriver, DatabaseResultSet } from "@gui/drivers/base-driver";
 
 export interface MultipleQueryProgressItem {
   order: number;

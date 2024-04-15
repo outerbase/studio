@@ -1,17 +1,17 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@gui/components/ui/button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
+} from "@gui/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn, scoped } from "@/lib/utils";
+} from "@gui/components/ui/popover";
+import { cn, scoped } from "@gui/lib/utils";
 import { createReactBlockSpec } from "../utils/create-block-spec";
 import ReactCodeMirror from "@uiw/react-codemirror";
 import { Check, ChevronsUpDown } from "lucide-react";

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { isLinkString } from "@/lib/validation";
+import { isLinkString } from "@gui/lib/validation";
 import DisplayLinkCell from "./display-link-cell";
-import { cn } from "@/lib/utils";
+import { cn } from "@gui/lib/utils";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";

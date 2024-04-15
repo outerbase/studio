@@ -1,5 +1,5 @@
 import { buttonVariants } from "./ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@gui/lib/utils";
 import { LucideIcon } from "lucide-react";
 
 export default function ListButtonItem({

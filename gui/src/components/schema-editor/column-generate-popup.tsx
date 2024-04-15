@@ -1,4 +1,4 @@
-import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
+import { DatabaseTableColumnConstraint } from "@gui/drivers/base-driver";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { LucideSigma } from "lucide-react";
 import { Button } from "../ui/button";

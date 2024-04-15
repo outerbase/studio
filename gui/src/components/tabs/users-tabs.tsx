@@ -5,13 +5,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@gui/components/ui/select";
+import { Avatar, AvatarFallback } from "@gui/components/ui/avatar";
+import { Input } from "@gui/components/ui/input";
+import { Button } from "@gui/components/ui/button";
 import { LucideTrash } from "lucide-react";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
-import { ApiRole, ApiUserRole } from "@/libs/api-database-response";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
+import { ApiRole, ApiUserRole } from "@gui/libs/api-database-response";
 
 function RoleSelect({
   roles,

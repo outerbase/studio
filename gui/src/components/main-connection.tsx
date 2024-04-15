@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useLayoutEffect } from "react";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@gui/components/ui/tooltip";
 import ContextMenuHandler from "./context-menu-handler";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import DatabaseGui from "./database-gui";
-import { useConfig } from "@/contexts/config-provider";
-import { AutoCompleteProvider } from "@/contexts/auto-complete-provider";
-import { BlockEditorProvider } from "@/contexts/block-editor-provider";
-import InternalPubSub from "@/lib/internal-pubsub";
-import { SchemaProvider } from "@/contexts/schema-provider";
+import { useConfig } from "@gui/contexts/config-provider";
+import { AutoCompleteProvider } from "@gui/contexts/auto-complete-provider";
+import { BlockEditorProvider } from "@gui/contexts/block-editor-provider";
+import InternalPubSub from "@gui/lib/internal-pubsub";
+import { SchemaProvider } from "@gui/contexts/schema-provider";
 
 function MainConnection() {
   const { databaseDriver: driver } = useDatabaseDriver();

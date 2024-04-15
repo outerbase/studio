@@ -1,4 +1,4 @@
-import { uploadFile as uploadUserFile } from "@/lib/file-upload";
+import { uploadFile as uploadUserFile } from "@gui/lib/file-upload";
 import { toast } from "sonner";
 
 export async function uploadFile(file: File) {

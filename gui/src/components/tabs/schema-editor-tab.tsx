@@ -1,28 +1,28 @@
-import OpacityLoading from "@/components/loading-opacity";
-import { useTabsContext } from "@/components/windows-tab";
-import SqlEditor from "@/components/sql-editor";
+import OpacityLoading from "@gui/components/loading-opacity";
+import { useTabsContext } from "@gui/components/windows-tab";
+import SqlEditor from "@gui/components/sql-editor";
 import SchemaEditor, {
   DatabaseTableSchemaChange,
-} from "@/components/schema-editor";
+} from "@gui/components/schema-editor";
 import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@gui/components/ui/alert-dialog";
+import { Button } from "@gui/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { Separator } from "@/components/ui/separator";
-import generateSqlSchemaChange from "@/lib/sql-generate.schema";
+} from "@gui/components/ui/resizable";
+import { Separator } from "@gui/components/ui/separator";
+import generateSqlSchemaChange from "@gui/lib/sql-generate.schema";
 import { LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import CodePreview from "../code-preview";
-import { useSchema } from "@/contexts/schema-provider";
+import { useSchema } from "@gui/contexts/schema-provider";
 
 interface SchemaEditorTabProps {
   tableName?: string;

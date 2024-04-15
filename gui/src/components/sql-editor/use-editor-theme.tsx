@@ -1,4 +1,4 @@
-import { useTheme } from "@/contexts/theme-provider";
+import { useTheme } from "@gui/contexts/theme-provider";
 import { tags as t } from "@lezer/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
 import { useMemo } from "react";

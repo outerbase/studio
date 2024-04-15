@@ -1,17 +1,17 @@
-import { DatabaseTriggerSchema } from "@/drivers/base-driver";
+import { DatabaseTriggerSchema } from "@gui/drivers/base-driver";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@gui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useDatabaseDriver } from "@/contexts/driver-provider";
+} from "@gui/components/ui/select";
+import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import SqlEditor from "../sql-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
-import { noop } from "@/libs/utils";
+import { noop } from "@gui/libs/utils";
 
 export default function TriggerTab({ name }: { name: string }) {
   const { databaseDriver } = useDatabaseDriver();

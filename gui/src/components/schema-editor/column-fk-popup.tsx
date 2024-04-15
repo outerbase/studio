@@ -1,4 +1,4 @@
-import { DatabaseForeignKeyClause } from "@/drivers/base-driver";
+import { DatabaseForeignKeyClause } from "@gui/drivers/base-driver";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { LucideArrowUpRight } from "lucide-react";
 import { Button } from "../ui/button";
