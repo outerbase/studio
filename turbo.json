@@ -19,7 +19,13 @@
     "test": { "cache": true },
     "test:watch": { "persistent": true, "cache": false },
     "staged": {
-      "dependsOn": ["^format", "^lint", "^typecheck", "^test"]
+      "dependsOn": [
+        "@libsqlstudio/gui#build",
+        "^format",
+        "^lint",
+        "^typecheck",
+        "^test"
+      ]
     }
   }
 }

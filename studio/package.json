@@ -4,7 +4,7 @@
   "private": false,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "npm run db:migrate && next build",
+    "build": "pnpm run db:migrate && next build",
     "start": "next start",
     "tsc": "tsc --noEmit --skipLibCheck",
     "test": "jest",
@@ -13,7 +13,7 @@
     "db:generate": "drizzle-kit generate:sqlite",
     "db:migrate": "tsx src/db/migrate.ts",
     "generate-random-key": "tsx src/cli/generate-aes-key.ts",
-    "staged": "npm run tsc && npm run lint && jest",
+    "staged": "pnpm run typecheck && pnpm run lint && jest",
     "typecheck": "tsc --noEmit --skipLibCheck",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",

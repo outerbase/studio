@@ -5,6 +5,7 @@ on:
     branches:
       - develop
   pull_request:
+  workflow_dispatch:
 
 jobs:
   quality-check:
@@ -24,17 +25,21 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - name: Cache deps
-        uses: actions/cache@v3
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Cache pnpm
+        uses: actions/cache@v4
         with:
-          path: |
-            ${{ github.workspace }}/.deps
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-store-
 
       - name: Cache turbo tasks
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
