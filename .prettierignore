@@ -1,0 +1,11 @@
+package-lock.json
+.next
+dist
+drizzle/*
+**/*/drizzle
+.prettierignore
+.gitignore
+
+.changeset/
+
+

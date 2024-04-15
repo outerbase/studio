@@ -1,0 +1,17 @@
+{
+  "name": "@libsqlstudio/tailwind",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.ts"
+    },
+    "./css": "./style.css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.3",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

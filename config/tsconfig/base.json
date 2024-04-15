@@ -1,0 +1,35 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"display": "Strictest",
+	"compilerOptions": {
+		"strict": true,
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+
+		"isolatedModules": true,
+
+		"allowJs": true,
+		"checkJs": true,
+
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+
+		"lib": ["es2023"],
+		"module": "esnext",
+		"target": "es2022",
+		"moduleResolution": "bundler",
+		"moduleDetection": "force",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"noEmit": true,
+		"incremental": true
+	}
+}
