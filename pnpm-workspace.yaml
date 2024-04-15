@@ -1,6 +1,4 @@
 packages:
-  - "./ui"
   - "./gui"
-  - "./utils"
   - "./studio"
   - "./config/*"
