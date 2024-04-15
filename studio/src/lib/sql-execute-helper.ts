@@ -1,7 +1,4 @@
-import  {
-  OptimizeTableState,
-  OptimizeTableRowValue,
-} from "@libsqlstudio/gui";
+import { OptimizeTableState, OptimizeTableRowValue } from "@libsqlstudio/gui";
 import {
   BaseDriver,
   DatabaseTableOperation,
