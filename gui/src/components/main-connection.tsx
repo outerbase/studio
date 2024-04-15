@@ -2,7 +2,6 @@
 import { useEffect, useLayoutEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ContextMenuHandler from "./context-menu-handler";
-import { useRouter } from "next/navigation";
 import { useDatabaseDriver } from "@/contexts/driver-provider";
 import DatabaseGui from "./database-gui";
 import { useConfig } from "@/contexts/config-provider";
@@ -30,7 +29,6 @@ function MainConnection() {
 }
 
 function MainConnectionContainer() {
-  const router = useRouter();
   const { databaseDriver: driver } = useDatabaseDriver();
   const { name } = useConfig();
 
@@ -43,7 +41,7 @@ function MainConnectionContainer() {
   useLayoutEffect(() => {
     console.info("Injecting message into window object");
     window.internalPubSub = new InternalPubSub();
-  }, [driver, router]);
+  }, [driver]);
 
   useEffect(() => {
     document.title = name + " - LibSQL Studio";

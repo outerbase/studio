@@ -7,7 +7,6 @@ import {
   LucideMoon,
   LucideSun,
 } from "lucide-react";
-import Link from "next/link";
 import { ReactElement, useState } from "react";
 
 export interface SidebarTabItem {
@@ -22,6 +21,7 @@ interface SidebarTabProps {
 }
 
 export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
+  const { onBack } = useConfig();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const [loadedIndex, setLoadedIndex] = useState(() => {
@@ -78,11 +78,9 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
 
         <div className="grow" />
 
-        <Link href="/connect">
-          <button className={cn("p-2 cursor-pointer", bgColor)}>
-            <LucideArrowLeft className={cn("w-7 h-7", textColor)} />
-          </button>
-        </Link>
+        <button className={cn("p-2 cursor-pointer", bgColor)} onClick={onBack}>
+          <LucideArrowLeft className={cn("w-7 h-7", textColor)} />
+        </button>
 
         <button
           className="p-2 rounded-lg mb-2 cursor-pointer"

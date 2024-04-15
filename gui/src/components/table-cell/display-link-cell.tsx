@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   HoverCard,
   HoverCardContent,
@@ -38,9 +37,14 @@ export default function DisplayLinkCell({ link }: { link: string }) {
             </div>
 
             <div>
-              <Link target="_blank" className="inline-block" href={link}>
+              <a
+                target="_blank"
+                className="inline-block"
+                href={link}
+                rel="noreferrer"
+              >
                 <Button>Open Link</Button>
-              </Link>
+              </a>
             </div>
           </div>
         </HoverCardContent>

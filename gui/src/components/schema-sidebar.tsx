@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 import SchemaList from "./schema-sidebar-list";
 import ListButtonItem from "./list-button-item";
 import { Separator } from "./ui/separator";
-import Link from "next/link";
 import { openTab } from "@/messages/open-tab";
 
 export default function SchemaView() {
@@ -52,22 +51,24 @@ export default function SchemaView() {
           database. We are new and need your feedback
           <ul className="list-disc ml-6 mt-2">
             <li className="mb-1">
-              <Link
+              <a
                 className="text-blue-700 underline dark:text-blue-400"
                 href={"https://github.com/invisal/libsql-studio/issues"}
                 target="_blank"
+                rel="noreferrer"
               >
                 Request New Features
-              </Link>
+              </a>
             </li>
             <li>
-              <Link
+              <a
                 className="text-blue-700 underline dark:text-blue-400"
                 href={"https://github.com/invisal/libsql-studio/issues"}
                 target="_blank"
+                rel="noreferrer"
               >
                 Report Bugs
-              </Link>
+              </a>
             </li>
           </ul>
         </div>
