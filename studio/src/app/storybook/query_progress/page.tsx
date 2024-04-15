@@ -1,5 +1,5 @@
 "use client";
-import QueryProgressLog from "@/components/query-progress-log";
+import QueryProgressLog from "@studio/components/query-progress-log";
 import { useMemo } from "react";
 
 export default function QueryProgressStorybook() {

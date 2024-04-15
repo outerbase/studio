@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "./auth";
 import { Session, User } from "lucia";
 import { ApiError } from "./api-error";
-import { HttpStatus } from "@/constants/http-status";
+import { HttpStatus } from "@studio/constants/http-status";
 
 type WithUserHandler<T = unknown> = (props: {
   req: NextRequest;

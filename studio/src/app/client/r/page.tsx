@@ -1,9 +1,9 @@
 import "@libsqlstudio/gui/css";
 
-import type { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
-import { db } from "@/db";
-import { database } from "@/db/schema";
-import { getSessionFromCookie } from "@/lib/auth";
+import type { SavedConnectionLabel } from "@studio/app/connect/saved-connection-storage";
+import { db } from "@studio/db";
+import { database } from "@studio/db/schema";
+import { getSessionFromCookie } from "@studio/lib/auth";
 import { and, eq, isNotNull } from "drizzle-orm";
 import dynamic from "next/dynamic";
 

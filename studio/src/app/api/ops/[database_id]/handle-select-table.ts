@@ -1,9 +1,9 @@
-import { DatabaseOperationHandler } from "@/lib/with-database-ops";
+import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
 import { NextResponse } from "next/server";
 import { createTursoEdgeDriver } from "./turso-edge-client";
-import { RequestOperationSelectTable } from "@/lib/api/api-request-types";
-import { ApiError } from "@/lib/api-error";
-import { HttpStatus } from "@/constants/http-status";
+import { RequestOperationSelectTable } from "@studio/lib/api/api-request-types";
+import { ApiError } from "@studio/lib/api-error";
+import { HttpStatus } from "@studio/constants/http-status";
 
 const handleSelectTableRequest: DatabaseOperationHandler<
   RequestOperationSelectTable

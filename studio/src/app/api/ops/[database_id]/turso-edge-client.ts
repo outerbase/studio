@@ -1,9 +1,9 @@
-import { database } from "@/db/schema";
-import RqliteDriver from "@/drivers/rqlite-driver";
-import TursoDriver from "@/drivers/turso-driver";
-import ValtownDriver from "@/drivers/valtown-driver";
-import { env } from "@/env";
-import { decrypt } from "@/lib/encryption-edge";
+import { database } from "@studio/db/schema";
+import RqliteDriver from "@studio/drivers/rqlite-driver";
+import TursoDriver from "@studio/drivers/turso-driver";
+import ValtownDriver from "@studio/drivers/valtown-driver";
+import { env } from "@studio/env";
+import { decrypt } from "@studio/lib/encryption-edge";
 
 export async function createTursoEdgeDriver(db: typeof database.$inferSelect) {
   const url = db.host ?? "";

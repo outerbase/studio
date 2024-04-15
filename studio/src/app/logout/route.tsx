@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getSessionFromCookie, lucia } from "@/lib/auth";
+import { getSessionFromCookie, lucia } from "@studio/lib/auth";
 
 export async function GET() {
   const { session } = await getSessionFromCookie();

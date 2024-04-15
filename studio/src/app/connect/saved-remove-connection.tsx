@@ -1,17 +1,17 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@studio/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "@studio/components/ui/dialog";
+import { Input } from "@studio/components/ui/input";
 import { useCallback, useMemo, useState } from "react";
 import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
 } from "./saved-connection-storage";
-import { deleteDatabase } from "@/lib/api/fetch-databases";
+import { deleteDatabase } from "@studio/lib/api/fetch-databases";
 import { LucideLoader } from "lucide-react";
 
 interface Props {

@@ -15,8 +15,8 @@ import {
   ApiSchemaListResponse,
   ApiSchemaResponse,
   ApiTriggerResponse,
-} from "@/lib/api-response-types";
-import { RequestOperationBody } from "@/lib/api/api-request-types";
+} from "@studio/lib/api-response-types";
+import { RequestOperationBody } from "@studio/lib/api/api-request-types";
 
 export default class RemoteDriver implements BaseDriver {
   protected id: string = "";

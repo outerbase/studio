@@ -1,4 +1,4 @@
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
 import { createContext, PropsWithChildren, useContext, useMemo } from "react";
 
 const ConnectionConfigContext = createContext<{

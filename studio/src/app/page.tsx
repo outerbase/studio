@@ -1,7 +1,7 @@
-import TopbarProfile from "@/components/topbar-profile";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { getSessionFromCookie } from "@/lib/auth";
-import { cn } from "@/lib/utils";
+import TopbarProfile from "@studio/components/topbar-profile";
+import { Button, buttonVariants } from "@studio/components/ui/button";
+import { getSessionFromCookie } from "@studio/lib/auth";
+import { cn } from "@studio/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";

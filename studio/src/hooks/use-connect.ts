@@ -2,7 +2,7 @@
 import {
   SavedConnectionItemConfigConfig,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@studio/app/connect/saved-connection-storage";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 

@@ -1,10 +1,10 @@
-import { RequestDatabaseBody } from "@/lib/api/api-database-request";
+import { RequestDatabaseBody } from "@studio/lib/api/api-database-request";
 import {
   ApiRole,
   ApiRolesResponse,
   ApiUserListResponse,
   ApiUserRole,
-} from "@/lib/api/api-database-response";
+} from "@studio/lib/api/api-database-response";
 import { CollaborationDriver } from "@libsqlstudio/gui";
 
 export default class Collaborator implements CollaborationDriver {

@@ -1,7 +1,7 @@
 "use server";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { env } from "@/env";
+import { Button } from "@studio/components/ui/button";
+import { Card, CardContent, CardHeader } from "@studio/components/ui/card";
+import { env } from "@studio/env";
 import Link from "next/link";
 
 export default async function LoginPage() {

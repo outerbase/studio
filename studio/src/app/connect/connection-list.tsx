@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@studio/components/ui/button";
 import {
   Dispatch,
   SetStateAction,
@@ -13,11 +13,11 @@ import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@studio/app/connect/saved-connection-storage";
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
 import ConnectionItemCard from "./saved-connection-card";
-import { getDatabases } from "@/lib/api/fetch-databases";
+import { getDatabases } from "@studio/lib/api/fetch-databases";
 import { User } from "lucia";
 import QuickConnect from "./quick-connect";
 import { LucideChevronDown } from "lucide-react";

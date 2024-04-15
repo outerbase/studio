@@ -1,7 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { SavedConnectionStorage } from "@/app/connect/saved-connection-storage";
-import { cn } from "@/lib/utils";
+import { Button } from "@studio/components/ui/button";
+import { SavedConnectionStorage } from "@studio/app/connect/saved-connection-storage";
+import { cn } from "@studio/lib/utils";
 import { useState } from "react";
 
 function SaveConnectionTypeItem({

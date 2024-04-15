@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import withDatabaseOperation from "@/lib/with-database-ops";
+import withDatabaseOperation from "@studio/lib/with-database-ops";
 import handleBatchRequest from "./handle-batch";
 import handleQueryRequest from "./handle-query";
 import handleSchemasRequest from "./handle-schemas";
 import handleSelectTableRequest from "./handle-select-table";
 import handleUpdateTableDataRequest from "./handle-update-table-data";
 import handleSchemaRequest from "./handle-schema";
-import { RequestOperationBody } from "@/lib/api/api-request-types";
+import { RequestOperationBody } from "@studio/lib/api/api-request-types";
 import handleTriggerRequest from "./handle-trigger";
 
 export const runtime = "edge";

@@ -1,9 +1,9 @@
 "use client";
 
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
-import { useTheme } from "@/context/theme-provider";
-import CollaborationDriver from "@/drivers/collaboration-driver";
-import RemoteDriver from "@/drivers/remote-driver";
+import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
+import { useTheme } from "@studio/context/theme-provider";
+import CollaborationDriver from "@studio/drivers/collaboration-driver";
+import RemoteDriver from "@studio/drivers/remote-driver";
 import { Studio } from "@libsqlstudio/gui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";

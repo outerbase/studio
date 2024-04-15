@@ -1,7 +1,11 @@
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
-import { db } from "@/db";
-import { database, database_user_role, user as userTable } from "@/db/schema";
-import withUser from "@/lib/with-user";
+import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
+import { db } from "@studio/db";
+import {
+  database,
+  database_user_role,
+  user as userTable,
+} from "@studio/db/schema";
+import withUser from "@studio/lib/with-user";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
 

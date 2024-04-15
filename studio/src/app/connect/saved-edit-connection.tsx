@@ -7,7 +7,7 @@ import {
 } from "./saved-connection-storage";
 import ConnectionDialogContent from "./saved-connection-content";
 import SavedConnectionConfig from "./saved-connection-config";
-import { getDatabase, updateDatabase } from "@/lib/api/fetch-databases";
+import { getDatabase, updateDatabase } from "@studio/lib/api/fetch-databases";
 import { LucideLoader2 } from "lucide-react";
 
 type SaveCompleteHandler = (v: SavedConnectionItem) => void;

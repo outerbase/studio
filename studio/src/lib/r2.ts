@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@studio/env";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 export const R2Client = new S3Client({

@@ -1,12 +1,12 @@
 "use client";
-import TursoDriver from "@/drivers/turso-driver";
+import TursoDriver from "@studio/drivers/turso-driver";
 import { useCallback, useMemo } from "react";
 import {
   SavedConnectionItemConfigConfig,
   SupportedDriver,
 } from "../../connect/saved-connection-storage";
-import RqliteDriver from "@/drivers/rqlite-driver";
-import ValtownDriver from "@/drivers/valtown-driver";
+import RqliteDriver from "@studio/drivers/rqlite-driver";
+import ValtownDriver from "@studio/drivers/valtown-driver";
 import { Studio } from "@libsqlstudio/gui";
 import { useRouter } from "next/navigation";
 

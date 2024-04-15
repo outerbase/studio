@@ -1,10 +1,10 @@
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@studio/components/ui/textarea";
 import {
   DRIVER_DETAIL,
   SavedConnectionItemConfigConfig,
   SupportedDriver,
 } from "./saved-connection-storage";
-import { Input } from "@/components/ui/input";
+import { Input } from "@studio/components/ui/input";
 
 export default function ConnectionStringInput({
   value,

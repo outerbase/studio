@@ -1,13 +1,13 @@
 "use client";
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@studio/lib/utils";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from "@studio/components/ui/navigation-menu";
 import { useRouter } from "next/navigation";
 
 export default function TopNavigation() {

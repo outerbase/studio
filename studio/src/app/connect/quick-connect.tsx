@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@studio/components/ui/button";
 import ConnectionDialogContent from "./saved-connection-content";
 import { useCallback, useMemo, useState } from "react";
-import useConnect from "@/hooks/use-connect";
+import useConnect from "@studio/hooks/use-connect";
 import {
   DRIVER_DETAIL,
   SavedConnectionItemConfigConfig,

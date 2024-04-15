@@ -1,6 +1,6 @@
-import { db } from "@/db";
-import { database_role } from "@/db/schema-database";
-import { DatabaseOperationHandler } from "@/lib/with-database-ops";
+import { db } from "@studio/db";
+import { database_role } from "@studio/db/schema-database";
+import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 

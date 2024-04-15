@@ -2,7 +2,7 @@ import {
   SavedConnectionItem,
   SavedConnectionItemConfig,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@studio/app/connect/saved-connection-storage";
 import { ApiDatabasesResponse } from "../api-response-types";
 
 export async function getDatabases(): Promise<ApiDatabasesResponse> {

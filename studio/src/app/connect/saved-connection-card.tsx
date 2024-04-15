@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@studio/lib/utils";
 import {
   ContextMenu,
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
-} from "@/components/ui/context-menu";
+} from "@studio/components/ui/context-menu";
 import { LucidePencil, LucideTrash, LucideUsers } from "lucide-react";
 import { useState } from "react";
 import {

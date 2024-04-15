@@ -1,7 +1,7 @@
-import { PROVIDER, google } from "@/lib/auth";
+import { PROVIDER, google } from "@studio/lib/auth";
 import { cookies } from "next/headers";
 import { OAuth2RequestError } from "arctic";
-import * as AuthController from "@/controllers/auth";
+import * as AuthController from "@studio/controllers/auth";
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);

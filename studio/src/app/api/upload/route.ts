@@ -1,16 +1,16 @@
-import { hash } from "@/lib/hash-edge";
-import { concat } from "@/lib/utils";
-import withUser from "@/lib/with-user";
+import { hash } from "@studio/lib/hash-edge";
+import { concat } from "@studio/lib/utils";
+import withUser from "@studio/lib/with-user";
 import { NextResponse } from "next/server";
 import { ok, err } from "@justmiracle/result";
-import { R2 } from "@/lib/r2";
-import { db } from "@/db";
-import { user as userTable, user_file } from "@/db/schema";
+import { R2 } from "@studio/lib/r2";
+import { db } from "@studio/db";
+import { user as userTable, user_file } from "@studio/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { generateId } from "lucia";
-import { ApiError } from "@/lib/api-error";
-import { HttpStatus } from "@/constants/http-status";
-import { env } from "@/env";
+import { ApiError } from "@studio/lib/api-error";
+import { HttpStatus } from "@studio/constants/http-status";
+import { env } from "@studio/env";
 import { filetypeinfo } from "magic-bytes.js";
 
 export const runtime = "edge";

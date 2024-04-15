@@ -1,6 +1,6 @@
-import { db } from "@/db";
-import { user, user_oauth } from "@/db/schema";
-import { Provider, lucia } from "@/lib/auth";
+import { db } from "@studio/db";
+import { user, user_oauth } from "@studio/db/schema";
+import { Provider, lucia } from "@studio/lib/auth";
 import { generateId } from "lucia";
 import { cookies, headers } from "next/headers";
 

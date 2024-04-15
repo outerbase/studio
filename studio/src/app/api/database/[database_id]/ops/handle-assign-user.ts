@@ -1,10 +1,10 @@
-import { HttpStatus } from "@/constants/http-status";
-import { db } from "@/db";
-import { database_role, database_user_role } from "@/db/schema-database";
-import { user as userTable } from "@/db/schema-user";
-import { ApiError } from "@/lib/api-error";
-import { RequestDatabaseAssignUser } from "@/lib/api/api-database-request";
-import { DatabaseOperationHandler } from "@/lib/with-database-ops";
+import { HttpStatus } from "@studio/constants/http-status";
+import { db } from "@studio/db";
+import { database_role, database_user_role } from "@studio/db/schema-database";
+import { user as userTable } from "@studio/db/schema-user";
+import { ApiError } from "@studio/lib/api-error";
+import { RequestDatabaseAssignUser } from "@studio/lib/api/api-database-request";
+import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 

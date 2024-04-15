@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@studio/components/ui/dropdown-menu";
 
 interface Props {
   onSelect: (driver: SupportedDriver) => void;

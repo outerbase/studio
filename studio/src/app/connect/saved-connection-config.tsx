@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@studio/components/ui/button";
+import { Input } from "@studio/components/ui/input";
+import { Separator } from "@studio/components/ui/separator";
+import { Textarea } from "@studio/components/ui/textarea";
 import {
   CONNECTION_LABEL_COLORS,
   DRIVER_DETAIL,
@@ -11,8 +11,8 @@ import {
   SupportedDriver,
   prefillConnectionString,
   validateConnectionString,
-} from "@/app/connect/saved-connection-storage";
-import { cn } from "@/lib/utils";
+} from "@studio/app/connect/saved-connection-storage";
+import { cn } from "@studio/lib/utils";
 import { useMemo, useState } from "react";
 import { LucideLoader } from "lucide-react";
 import ConnectionStringInput from "./connection-string-input";

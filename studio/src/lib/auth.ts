@@ -1,8 +1,8 @@
 import { Lucia } from "lucia";
 import { GitHub, Google } from "arctic";
 import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
-import { connection } from "@/db";
-import { env } from "@/env";
+import { connection } from "@studio/db";
+import { env } from "@studio/env";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 

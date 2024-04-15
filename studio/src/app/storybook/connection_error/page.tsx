@@ -1,5 +1,5 @@
 "use client";
-import ConnectingDialog from "@/components/connection-dialog";
+import ConnectingDialog from "@studio/components/connection-dialog";
 
 export default function ConnectionErrorMessageStory() {
   return (

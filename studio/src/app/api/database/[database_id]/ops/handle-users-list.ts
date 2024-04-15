@@ -1,7 +1,7 @@
-import { db } from "@/db";
-import { user } from "@/db/schema";
-import { database_role, database_user_role } from "@/db/schema-database";
-import { DatabaseOperationHandler } from "@/lib/with-database-ops";
+import { db } from "@studio/db";
+import { user } from "@studio/db/schema";
+import { database_role, database_user_role } from "@studio/db/schema-database";
+import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
 import { eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { NextResponse } from "next/server";

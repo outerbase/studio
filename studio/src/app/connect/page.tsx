@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getSessionFromCookie } from "@/lib/auth";
+import { getSessionFromCookie } from "@studio/lib/auth";
 import ConnectBody from "./page-client";
 
 export const metadata: Metadata = {

@@ -1,7 +1,7 @@
-import { DatabaseOperationHandler } from "@/lib/with-database-ops";
+import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
 import { NextResponse } from "next/server";
 import { createTursoEdgeDriver } from "./turso-edge-client";
-import { RequestOperationTrigger } from "@/lib/api/api-request-types";
+import { RequestOperationTrigger } from "@studio/lib/api/api-request-types";
 
 const handleTriggerRequest: DatabaseOperationHandler<
   RequestOperationTrigger

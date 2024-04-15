@@ -4,11 +4,11 @@ import {
   database,
   database_role,
   database_user_role,
-} from "@/db/schema";
+} from "@studio/db/schema";
 import { User } from "lucia";
 import withUser from "./with-user";
 import { NextResponse } from "next/server";
-import { db } from "@/db";
+import { db } from "@studio/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 

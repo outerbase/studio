@@ -1,12 +1,12 @@
 import zod from "zod";
-import withUser from "@/lib/with-user";
-import { db } from "@/db";
+import withUser from "@studio/lib/with-user";
+import { db } from "@studio/db";
 import { generateId } from "lucia";
-import { database, database_role, database_user_role } from "@/db/schema";
+import { database, database_role, database_user_role } from "@studio/db/schema";
 import { NextResponse } from "next/server";
-import { env } from "@/env";
-import { encrypt } from "@/lib/encryption-edge";
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { env } from "@studio/env";
+import { encrypt } from "@studio/lib/encryption-edge";
+import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
 
 export const runtime = "edge";
 

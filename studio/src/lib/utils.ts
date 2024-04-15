@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@studio/env";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 

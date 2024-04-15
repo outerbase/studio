@@ -1,4 +1,4 @@
-import OpacityLoading from "@/components/loading-opacity";
+import OpacityLoading from "@studio/components/loading-opacity";
 
 export default function OpacityLoadingStorybook() {
   return (

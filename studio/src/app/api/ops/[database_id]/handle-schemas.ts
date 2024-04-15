@@ -1,4 +1,4 @@
-import { DatabaseOperationHandler } from "@/lib/with-database-ops";
+import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
 import { NextResponse } from "next/server";
 import { createTursoEdgeDriver } from "./turso-edge-client";
 

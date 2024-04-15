@@ -1,12 +1,12 @@
 import zod from "zod";
-import withDatabaseOperation from "@/lib/with-database-ops";
+import withDatabaseOperation from "@studio/lib/with-database-ops";
 import { NextResponse } from "next/server";
-import { database } from "@/db/schema";
+import { database } from "@studio/db/schema";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { encrypt } from "@/lib/encryption-edge";
-import { env } from "@/env";
-import { SavedConnectionItemConfig } from "@/app/connect/saved-connection-storage";
+import { db } from "@studio/db";
+import { encrypt } from "@studio/lib/encryption-edge";
+import { env } from "@studio/env";
+import { SavedConnectionItemConfig } from "@studio/app/connect/saved-connection-storage";
 
 export const runtime = "edge";
 

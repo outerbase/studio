@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import withDatabaseOperation from "@/lib/with-database-ops";
-import { RequestDatabaseBody } from "@/lib/api/api-database-request";
+import withDatabaseOperation from "@studio/lib/with-database-ops";
+import { RequestDatabaseBody } from "@studio/lib/api/api-database-request";
 import handleRoleList from "./handle-role-list";
 import handleUserList from "./handle-users-list";
 import handleAssignUser from "./handle-assign-user";
