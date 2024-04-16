@@ -9,6 +9,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./driver": {
+      "types": "./dist/driver.d.ts",
+      "import": "./dist/driver.js",
+      "require": "./dist/driver.cjs"
+    },
     "./css": "./dist/index.css"
   },
   "scripts": {

@@ -5,6 +5,7 @@ const nextConfig = {
   experimental: {
     turbo: {
       resolveAlias: {
+        "@libsqlstudio/gui/driver": "../gui/src/driver.ts",
         "@libsqlstudio/gui": "../gui/src/index.tsx",
       },
     },

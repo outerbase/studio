@@ -5,7 +5,7 @@ import {
   ApiUserListResponse,
   ApiUserRole,
 } from "@studio/lib/api/api-database-response";
-import { CollaborationDriver } from "@libsqlstudio/gui";
+import { CollaborationDriver } from "@libsqlstudio/gui/driver";
 
 export default class Collaborator implements CollaborationDriver {
   protected id: string = "";

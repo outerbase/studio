@@ -5,7 +5,7 @@ import {
   DatabaseSchemaItem,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
-} from "@libsqlstudio/gui";
+} from "@libsqlstudio/gui/driver";
 
 export interface ApiOpsBatchResponse {
   error?: string;

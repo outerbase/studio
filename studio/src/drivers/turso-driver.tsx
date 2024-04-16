@@ -10,7 +10,7 @@ import {
   DatabaseResultSet,
   DatabaseRow,
   convertSqliteType,
-} from "@libsqlstudio/gui";
+} from "@libsqlstudio/gui/driver";
 
 export function transformRawResult(raw: ResultSet): DatabaseResultSet {
   const headerSet = new Set();

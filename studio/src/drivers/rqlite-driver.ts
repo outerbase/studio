@@ -5,7 +5,7 @@ import {
   DatabaseResultSet,
   DatabaseRow,
   convertSqliteType,
-} from "@libsqlstudio/gui";
+} from "@libsqlstudio/gui/driver";
 
 interface RqliteResult {
   columns?: string[];
