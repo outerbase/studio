@@ -9,7 +9,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", "!.eslintrc.cjs"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".vercel/**"]
     },
     "typecheck": { "cache": true },
     "lint": { "cache": true },
