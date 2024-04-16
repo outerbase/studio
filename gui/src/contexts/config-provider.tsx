@@ -5,7 +5,7 @@ import { createContext, useContext, useMemo } from "react";
 interface ConfigContextProps {
   color: string;
   name: string;
-  onBack: () => void;
+  onBack?: () => void;
   sideBarFooterComponent?: ReactElement;
   extensions?: StudioExtension[];
 }

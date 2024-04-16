@@ -15,7 +15,7 @@ interface StudioProps {
   name: string;
   color: string;
 
-  onBack: () => void;
+  onBack?: () => void;
   sideBarFooterComponent?: ReactElement;
 
   theme?: "dark" | "light";
