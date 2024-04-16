@@ -17,7 +17,10 @@ export type Provider = ObjectValues<typeof PROVIDER>;
 
 export const github = new GitHub(
   env.GITHUB_CLIENT_ID ?? "",
-  env.GITHUB_CLIENT_SECRET ?? ""
+  env.GITHUB_CLIENT_SECRET ?? "",
+  {
+    redirectURI: `${env.BASE_URL}/login/github/callback`,
+  }
 );
 
 export const google = new Google(
