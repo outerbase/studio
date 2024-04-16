@@ -11,7 +11,10 @@ import {
   exportRowsToSqlInsert,
 } from "@gui/lib/export-helper";
 import { KEY_BINDING } from "@gui/lib/key-matcher";
-import { openContextMenuFromEvent } from "@gui/messages/open-context-menu";
+import {
+  StudioContextMenuItem,
+  openContextMenuFromEvent,
+} from "@gui/messages/open-context-menu";
 import {
   LucideChevronDown,
   LucidePin,
@@ -26,7 +29,6 @@ import {
   DatabaseValue,
   TableColumnDataType,
 } from "@gui/drivers/base-driver";
-import { useBlockEditor } from "@gui/contexts/block-editor-provider";
 import parseSafeJson from "@gui/lib/json-safe";
 import {
   DropdownMenu,
@@ -35,10 +37,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { triggerSelectFiles, uploadFile } from "@gui/lib/file-upload";
-import { toast } from "sonner";
 import BigNumberCell from "./table-cell/BigNumberCell";
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
+import { useConfig } from "@gui/contexts/config-provider";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -96,8 +97,8 @@ export default function ResultTable({
   onSortColumnChange,
 }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
-  const { openBlockEditor } = useBlockEditor();
   const { databaseDriver } = useDatabaseDriver();
+  const { extensions } = useConfig();
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
@@ -260,14 +261,15 @@ export default function ResultTable({
         }
       }
 
-      function getFocusValue() {
-        const focusCell = state.getFocus();
-        if (focusCell) {
-          return state.getValue(focusCell.y, focusCell.x);
-        }
-
-        return undefined;
-      }
+      const extensionMenu = (extensions ?? []).reduce<StudioContextMenuItem[]>(
+        (menu, ext) => {
+          if (ext.contextMenu) {
+            return [...menu, ...ext.contextMenu(state)];
+          }
+          return menu;
+        },
+        []
+      );
 
       openContextMenuFromEvent([
         {
@@ -313,39 +315,7 @@ export default function ResultTable({
             },
           ],
         },
-        {
-          title: "Edit with Block Editor",
-          onClick: () => {
-            openBlockEditor({
-              initialContent: getFocusValue() as string,
-              onSave: setFocusValue,
-            });
-          },
-        },
-
-        {
-          title: "Upload File",
-          onClick: async () => {
-            const files = await triggerSelectFiles();
-
-            if (files.error) return toast.error(files.error.message);
-
-            const file = files.value[0];
-            if (!file) return;
-
-            const toastId = toast.loading("Uploading file...");
-            const { data, error } = await uploadFile(file);
-            if (error)
-              return toast.error("Upload failed!", {
-                id: toastId,
-                description: error.message,
-              });
-
-            setFocusValue(data.url);
-            return toast.success("File uploaded!", { id: toastId });
-          },
-        },
-
+        ...extensionMenu,
         {
           separator: true,
         },
@@ -418,7 +388,7 @@ export default function ResultTable({
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, openBlockEditor]
+    [data, tableName, copyCallback, pasteCallback, extensions]
   );
 
   const onKeyDown = useCallback(

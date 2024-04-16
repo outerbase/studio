@@ -15,6 +15,6 @@
     "*.js",
     "*.ts",
     "jest.config.cjs"
-  ],
+, "../studio/src/components/file-upload.ts"  ],
   "exclude": ["node_modules", "dist"]
 }

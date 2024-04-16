@@ -317,6 +317,22 @@ export default class OptimizeTableState {
       : null;
   }
 
+  getFocusValue(): unknown {
+    const focusCell = this.getFocus();
+    if (focusCell) {
+      return this.getValue(focusCell.y, focusCell.x);
+    }
+
+    return undefined;
+  }
+
+  setFocusValue(newValue: unknown) {
+    const focusCell = this.getFocus();
+    if (focusCell) {
+      this.changeValue(focusCell.y, focusCell.x, newValue);
+    }
+  }
+
   hasFocus(y: number, x: number): boolean {
     if (!this.focus) return false;
     return this.focus[0] === y && this.focus[1] === x;

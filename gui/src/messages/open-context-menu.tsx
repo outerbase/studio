@@ -1,7 +1,7 @@
 import { MessageChannelName } from "./const";
 import type { LucideIcon } from "lucide-react";
 
-export type OpenContextMenuList = Array<{
+export interface StudioContextMenuItem {
   type?: "check";
   checked?: boolean;
   title?: string | JSX.Element;
@@ -13,7 +13,9 @@ export type OpenContextMenuList = Array<{
   sub?: OpenContextMenuList;
   subWidth?: number;
   icon?: LucideIcon;
-}>;
+}
+
+export type OpenContextMenuList = Array<StudioContextMenuItem>;
 
 export interface OpenContextMenuOptions {
   contextMenu: OpenContextMenuList;

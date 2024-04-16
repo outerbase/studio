@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GenericCell from "./GenericCell";
 import { DatabaseValue } from "@gui/drivers/base-driver";
-import { useBlockEditor } from "@gui/contexts/block-editor-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 
 export interface TableEditableCell<T = unknown> {
@@ -92,45 +91,6 @@ function InputCellEditor({
   );
 }
 
-function BlockEditCellEditor({
-  value,
-  discardChange,
-  applyChange,
-  onChange,
-}: Readonly<{
-  align?: "left" | "right";
-  applyChange: (v: DatabaseValue<string>) => void;
-  discardChange: () => void;
-  value: DatabaseValue<string>;
-  onChange: (v: string) => void;
-}>) {
-  const { openBlockEditor, closeBlockEditor } = useBlockEditor();
-
-  useEffect(() => {
-    openBlockEditor({
-      initialContent: value ?? "",
-      onSave: (v) => {
-        onChange(v);
-        applyChange(v);
-      },
-      onCancel: discardChange,
-    });
-
-    return () => {
-      closeBlockEditor();
-    };
-  }, [
-    value,
-    openBlockEditor,
-    closeBlockEditor,
-    applyChange,
-    discardChange,
-    onChange,
-  ]);
-
-  return null;
-}
-
 export default function createEditableCell<T = unknown>({
   toString,
   toValue,
@@ -143,7 +103,6 @@ export default function createEditableCell<T = unknown>({
     onChange,
     state,
     editMode,
-    editor,
   }: TableEditableCell<T>) {
     const [editValue, setEditValue] = useState<DatabaseValue<string>>(
       toString(value)
@@ -177,32 +136,18 @@ export default function createEditableCell<T = unknown>({
       .join(" ");
 
     if (editMode) {
-      if (editor === "blocknote") {
-        return (
-          <div className={className}>
-            <BlockEditCellEditor
-              align={align}
-              applyChange={applyChange}
-              discardChange={discardChange}
-              onChange={setEditValue}
-              value={editValue}
-            />
-          </div>
-        );
-      } else {
-        return (
-          <div className={className}>
-            <InputCellEditor
-              state={state}
-              align={align}
-              applyChange={applyChange}
-              discardChange={discardChange}
-              onChange={setEditValue}
-              value={editValue}
-            />
-          </div>
-        );
-      }
+      return (
+        <div className={className}>
+          <InputCellEditor
+            state={state}
+            align={align}
+            applyChange={applyChange}
+            discardChange={discardChange}
+            onChange={setEditValue}
+            value={editValue}
+          />
+        </div>
+      );
     }
 
     return (

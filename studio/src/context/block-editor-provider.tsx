@@ -3,8 +3,8 @@ import {
   type BlockContent,
   BlockEditorSheet,
 } from "../components/block-editor";
-import parseSafeJson from "@gui/lib/json-safe";
-import { noop } from "@gui/lib/utils";
+import parseSafeJson from "@studio/lib/json-safe";
+import { noop } from "@studio/lib/utils";
 import {
   Fragment,
   type PropsWithChildren,

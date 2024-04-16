@@ -1,5 +1,5 @@
 import { Result, err, ok } from "@justmiracle/result";
-import { safeFetch } from "./utils";
+import { safeFetch } from "../../../gui/src/lib/utils";
 
 export interface TriggerFileUploadOptions {
   /**

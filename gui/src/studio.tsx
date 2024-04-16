@@ -7,6 +7,7 @@ import ThemeProvider from "./contexts/theme-provider";
 import type { BaseDriver } from "./drivers/base-driver";
 import { CollaborationDriver } from "./drivers/collaboration-driver";
 import { ReactElement } from "react";
+import { StudioExtension } from "./extension";
 
 interface StudioProps {
   driver: BaseDriver;
@@ -19,6 +20,8 @@ interface StudioProps {
 
   theme?: "dark" | "light";
   onThemeChange?: (theme: "dark" | "light") => void;
+
+  extensions?: StudioExtension[];
 }
 
 export function Studio({
@@ -28,6 +31,7 @@ export function Studio({
   collaboration,
   name,
   color,
+  extensions,
   sideBarFooterComponent,
   onBack,
 }: Readonly<StudioProps>) {
@@ -35,6 +39,7 @@ export function Studio({
     <ThemeProvider theme={theme ?? "light"} onChange={onThemeChange}>
       <DriverProvider driver={driver} collaborationDriver={collaboration}>
         <ConfigProvider
+          extensions={extensions}
           name={name}
           color={color}
           onBack={onBack}

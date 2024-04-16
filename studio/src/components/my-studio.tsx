@@ -1,8 +1,14 @@
 import { BaseDriver, CollaborationDriver } from "@libsqlstudio/gui/driver";
-import { Studio } from "@libsqlstudio/gui";
+import { Studio, StudioExtension } from "@libsqlstudio/gui";
 import { useTheme } from "@studio/context/theme-provider";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { toast } from "sonner";
+import { triggerSelectFiles, uploadFile } from "./file-upload";
+import {
+  BlockEditorProvider,
+  useBlockEditor,
+} from "@studio/context/block-editor-provider";
 
 interface MyStudioProps {
   name: string;
@@ -11,18 +17,67 @@ interface MyStudioProps {
   collabarator?: CollaborationDriver;
 }
 
-export default function MyStudio({
+function MyStudioInternal({
   name,
   color,
   driver,
   collabarator,
 }: MyStudioProps) {
   const router = useRouter();
+  const { openBlockEditor } = useBlockEditor();
   const { theme, toggleTheme } = useTheme();
 
   const goBack = useCallback(() => {
     router.push("/connect");
   }, [router]);
+
+  const extensions = useMemo<StudioExtension[]>(() => {
+    return [
+      {
+        contextMenu: (state) => {
+          return [
+            {
+              title: "Upload File",
+              onClick: async () => {
+                const files = await triggerSelectFiles();
+
+                if (files.error) return toast.error(files.error.message);
+
+                const file = files.value[0];
+                if (!file) return;
+
+                const toastId = toast.loading("Uploading file...");
+                const { data, error } = await uploadFile(file);
+                if (error)
+                  return toast.error("Upload failed!", {
+                    id: toastId,
+                    description: error.message,
+                  });
+
+                state.setFocusValue(data.url);
+                return toast.success("File uploaded!", { id: toastId });
+              },
+            },
+          ];
+        },
+      },
+      {
+        contextMenu: (state) => {
+          return [
+            {
+              title: "Edit with Block Editor",
+              onClick: () => {
+                openBlockEditor({
+                  initialContent: state.getFocusValue() as string,
+                  onSave: (newValue) => state.setFocusValue(newValue),
+                });
+              },
+            },
+          ];
+        },
+      },
+    ];
+  }, [openBlockEditor]);
 
   const sideBanner = useMemo(() => {
     return (
@@ -64,6 +119,15 @@ export default function MyStudio({
       onBack={goBack}
       collaboration={collabarator}
       sideBarFooterComponent={sideBanner}
+      extensions={extensions}
     />
+  );
+}
+
+export default function MyStudio(props: MyStudioProps) {
+  return (
+    <BlockEditorProvider>
+      <MyStudioInternal {...props} />
+    </BlockEditorProvider>
   );
 }

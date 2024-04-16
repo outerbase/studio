@@ -64,12 +64,6 @@ importers:
 
   gui:
     dependencies:
-      '@blocknote/core':
-        specifier: ^0.12.1
-        version: 0.12.4
-      '@blocknote/react':
-        specifier: ^0.12.2
-        version: 0.12.4(@tiptap/pm@2.3.0)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
       '@codemirror/commands':
         specifier: ^6.3.3
         version: 6.3.3
@@ -160,12 +154,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
-      '@tiptap/core':
-        specifier: ^2.3.0
-        version: 2.3.0(@tiptap/pm@2.3.0)
-      '@tiptap/react':
-        specifier: ^2.3.0
-        version: 2.3.0(@tiptap/core@2.3.0)(@tiptap/pm@2.3.0)(react-dom@18.2.0)(react@18.2.0)
       '@uiw/codemirror-extensions-langs':
         specifier: ^4.21.24
         version: 4.21.25(@codemirror/autocomplete@6.16.0)(@codemirror/language-data@6.5.0)(@codemirror/language@6.10.1)(@codemirror/legacy-modes@6.4.0)(@codemirror/state@6.4.1)(@codemirror/view@6.26.3)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@lezer/javascript@1.4.14)(@lezer/lr@1.4.0)
@@ -365,6 +353,12 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.9.2
         version: 0.9.2(typescript@5.4.5)(zod@3.22.4)
+      '@tiptap/core':
+        specifier: ^2.3.0
+        version: 2.3.0(@tiptap/pm@2.3.0)
+      '@tiptap/react':
+        specifier: ^2.3.0
+        version: 2.3.0(@tiptap/core@2.3.0)(@tiptap/pm@2.3.0)(react-dom@18.2.0)(react@18.2.0)
       '@uiw/codemirror-extensions-langs':
         specifier: ^4.21.24
         version: 4.21.25(@codemirror/autocomplete@6.16.0)(@codemirror/language-data@6.5.0)(@codemirror/language@6.10.1)(@codemirror/legacy-modes@6.4.0)(@codemirror/state@6.4.1)(@codemirror/view@6.26.3)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@lezer/javascript@1.4.14)(@lezer/lr@1.4.0)

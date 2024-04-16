@@ -33,8 +33,6 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "@blocknote/core": "^0.12.1",
-    "@blocknote/react": "^0.12.2",
     "@codemirror/commands": "^6.3.3",
     "@codemirror/lang-sql": "^6.5.5",
     "@codemirror/view": "^6.26.3",
@@ -65,8 +63,6 @@
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@tiptap/core": "^2.3.0",
-    "@tiptap/react": "^2.3.0",
     "@uiw/codemirror-extensions-langs": "^4.21.24",
     "@uiw/codemirror-themes": "^4.21.21",
     "@uiw/react-codemirror": "^4.21.21",

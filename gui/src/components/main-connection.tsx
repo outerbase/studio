@@ -6,7 +6,6 @@ import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import DatabaseGui from "./database-gui";
 import { useConfig } from "@gui/contexts/config-provider";
 import { AutoCompleteProvider } from "@gui/contexts/auto-complete-provider";
-import { BlockEditorProvider } from "@gui/contexts/block-editor-provider";
 import InternalPubSub from "@gui/lib/internal-pubsub";
 import { SchemaProvider } from "@gui/contexts/schema-provider";
 
@@ -21,9 +20,7 @@ function MainConnection() {
 
   return (
     <SchemaProvider>
-      <BlockEditorProvider>
-        <DatabaseGui />
-      </BlockEditorProvider>
+      <DatabaseGui />
     </SchemaProvider>
   );
 }

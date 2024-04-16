@@ -1,3 +1,4 @@
+import { StudioExtension } from "@gui/extension";
 import type { PropsWithChildren, ReactElement } from "react";
 import { createContext, useContext, useMemo } from "react";
 
@@ -6,6 +7,7 @@ interface ConfigContextProps {
   name: string;
   onBack: () => void;
   sideBarFooterComponent?: ReactElement;
+  extensions?: StudioExtension[];
 }
 
 const ConfigContext = createContext<ConfigContextProps>({
@@ -25,11 +27,12 @@ export function ConfigProvider({
   color,
   name,
   onBack,
+  extensions,
   sideBarFooterComponent,
 }: PropsWithChildren<ConfigContextProps>) {
   const memo = useMemo(
-    () => ({ color, name, onBack, sideBarFooterComponent }),
-    [name, color, onBack, sideBarFooterComponent]
+    () => ({ color, name, onBack, sideBarFooterComponent, extensions }),
+    [name, color, onBack, sideBarFooterComponent, extensions]
   );
 
   return (
