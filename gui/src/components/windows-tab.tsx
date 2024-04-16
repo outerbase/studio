@@ -142,7 +142,13 @@ export default function WindowTabs({
                       onSelectChange(idx);
                     }}
                     onClose={() => {
-                      onTabsChange(tabs.filter((t) => t.key !== tab.key));
+                      const newTabs = tabs.filter((t) => t.key !== tab.key);
+
+                      if (selected >= idx) {
+                        onSelectChange(newTabs.length - 1);
+                      }
+
+                      onTabsChange(newTabs);
                     }}
                   />
                 ))}
