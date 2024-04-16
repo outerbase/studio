@@ -4,9 +4,11 @@ import SchemaList from "./schema-sidebar-list";
 import ListButtonItem from "./list-button-item";
 import { Separator } from "./ui/separator";
 import { openTab } from "@gui/messages/open-tab";
+import { useConfig } from "@gui/contexts/config-provider";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
+  const { sideBarFooterComponent } = useConfig();
 
   const onNewTable = useCallback(() => {
     openTab({
@@ -46,31 +48,17 @@ export default function SchemaView() {
         </div>
 
         <Separator />
-        <div className="text-sm p-4">
-          <strong>LibStudio Studio</strong> is open-source GUI for serverless
-          database. We are new and need your feedback
-          <ul className="list-disc ml-6 mt-2">
-            <li className="mb-1">
-              <a
-                className="text-blue-700 underline dark:text-blue-400"
-                href={"https://github.com/invisal/libsql-studio/issues"}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Request New Features
-              </a>
-            </li>
-            <li>
-              <a
-                className="text-blue-700 underline dark:text-blue-400"
-                href={"https://github.com/invisal/libsql-studio/issues"}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Report Bugs
-              </a>
-            </li>
-          </ul>
+        {sideBarFooterComponent}
+        <div className="p-2 px-3 text-xs">
+          Powered by{" "}
+          <a
+            href="https://libsqlstudio.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-700 underline"
+          >
+            LibSQL Studio
+          </a>
         </div>
       </div>
     </div>

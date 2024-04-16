@@ -1,12 +1,10 @@
 "use client";
-
 import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
-import { useTheme } from "@studio/context/theme-provider";
 import CollaborationDriver from "@studio/drivers/collaboration-driver";
 import RemoteDriver from "@studio/drivers/remote-driver";
-import { Studio } from "@libsqlstudio/gui";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import MyStudio from "@studio/components/my-studio";
 
 export default function ClientPageBody({
   token,
@@ -15,9 +13,7 @@ export default function ClientPageBody({
   token: string;
   config: SavedConnectionItem;
 }>) {
-  const { theme } = useTheme();
   const params = useSearchParams();
-  const router = useRouter();
 
   const { driver, collaborator } = useMemo(() => {
     const databaseId = params.get("p");
@@ -29,22 +25,16 @@ export default function ClientPageBody({
     };
   }, [params, token]);
 
-  const goBack = useCallback(() => {
-    router.push("/connect");
-  }, [router]);
-
   if (!driver) {
     return <div>Something wrong</div>;
   }
 
   return (
-    <Studio
-      defaultTheme={theme}
+    <MyStudio
       driver={driver}
       name={config.name}
       color={config.label ?? "blue"}
-      collaboration={collaborator}
-      onBack={goBack}
+      collabarator={collaborator}
     />
   );
 }
