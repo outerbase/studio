@@ -73,7 +73,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.0",
-    "cookies-next": "^4.1.1",
     "deep-equal": "^2.2.3",
     "lucide-react": "^0.309.0",
     "react-resizable-panels": "^1.0.9",

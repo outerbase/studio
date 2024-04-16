@@ -1,6 +1,5 @@
 "use client";
 
-import { setCookie } from "cookies-next";
 import {
   PropsWithChildren,
   createContext,
@@ -8,7 +7,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from "react";
 
 type ThemeType = "dark" | "light";
@@ -29,15 +27,18 @@ export function useTheme() {
 
 export default function ThemeProvider({
   children,
-  defaultTheme,
-}: PropsWithChildren<{ defaultTheme: ThemeType }>) {
-  const [theme, setTheme] = useState<ThemeType>(defaultTheme);
-
+  theme,
+  onChange,
+}: PropsWithChildren<{
+  theme: ThemeType;
+  onChange?: (theme: ThemeType) => void;
+}>) {
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setCookie("theme", newTheme);
-    setTheme(newTheme);
-  }, [setTheme, theme]);
+    if (onChange) {
+      const newTheme = theme === "dark" ? "light" : "dark";
+      onChange(newTheme);
+    }
+  }, [onChange, theme]);
 
   useEffect(() => {
     if (theme === "light") {

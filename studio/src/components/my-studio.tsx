@@ -18,7 +18,7 @@ export default function MyStudio({
   collabarator,
 }: MyStudioProps) {
   const router = useRouter();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
   const goBack = useCallback(() => {
     router.push("/connect");
@@ -59,7 +59,8 @@ export default function MyStudio({
       driver={driver}
       name={name}
       color={color ?? "blue"}
-      defaultTheme={theme}
+      theme={theme}
+      onThemeChange={toggleTheme}
       onBack={goBack}
       collaboration={collabarator}
       sideBarFooterComponent={sideBanner}

@@ -13,15 +13,18 @@ interface StudioProps {
   collaboration?: CollaborationDriver;
   name: string;
   color: string;
-  defaultTheme?: "dark" | "light";
-  onBack: () => void;
 
+  onBack: () => void;
   sideBarFooterComponent?: ReactElement;
+
+  theme?: "dark" | "light";
+  onThemeChange?: (theme: "dark" | "light") => void;
 }
 
 export function Studio({
   driver,
-  defaultTheme,
+  theme,
+  onThemeChange,
   collaboration,
   name,
   color,
@@ -29,7 +32,7 @@ export function Studio({
   onBack,
 }: Readonly<StudioProps>) {
   return (
-    <ThemeProvider defaultTheme={defaultTheme ?? "light"}>
+    <ThemeProvider theme={theme ?? "light"} onChange={onThemeChange}>
       <DriverProvider driver={driver} collaborationDriver={collaboration}>
         <ConfigProvider
           name={name}
