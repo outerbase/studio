@@ -42,7 +42,6 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
   protected client: Client;
   protected endpoint: string = "";
   protected authToken = "";
-  protected bigInt = false;
 
   constructor(url: string, authToken: string) {
     super();
