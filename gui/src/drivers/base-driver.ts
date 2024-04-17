@@ -56,6 +56,7 @@ export interface DatabaseSchemaItem {
   type: "table" | "trigger" | "view";
   name: string;
   tableName?: string;
+  tableSchema?: DatabaseTableSchema;
 }
 
 export interface DatabaseTableColumn {

@@ -99,6 +99,14 @@
 }
 
 /* ------------------------------- */
+.cm-table-name {
+  color: #e84393;
+}
+
+.dark .cm-table-name {
+  color: #fd79a8;
+}
+/* ------------------------------- */
 
 .libsql-window-tab .libsql-window-close {
   visibility: hidden;

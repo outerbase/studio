@@ -46,7 +46,15 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
 
     for (const row of rows) {
       if (row.type === "table") {
-        tmp.push({ type: "table", name: row.name });
+        try {
+          tmp.push({
+            type: "table",
+            name: row.name,
+            tableSchema: parseCreateTableScript(row.sql),
+          });
+        } catch {
+          tmp.push({ type: "table", name: row.name });
+        }
       } else if (row.type === "trigger") {
         tmp.push({ type: "trigger", name: row.name, tableName: row.tbl_name });
       } else if (row.type === "view") {

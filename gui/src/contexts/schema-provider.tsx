@@ -27,7 +27,7 @@ export function useSchema() {
 }
 
 export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
-  const { updateTableList } = useAutoComplete();
+  const { updateTableList, updateTableSchema } = useAutoComplete();
   const [error, setError] = useState<string>();
   const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +49,11 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
 
           setSchemaItems(sortedTableList);
           updateTableList(tableList.map((table) => table.name));
+          for (const table of tableList) {
+            if (table.tableSchema) {
+              updateTableSchema(table.name, table.tableSchema.columns);
+            }
+          }
 
           setError(undefined);
           setLoading(false);

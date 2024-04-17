@@ -2,13 +2,19 @@ import CodeMirror, {
   EditorView,
   ReactCodeMirrorRef,
 } from "@uiw/react-codemirror";
+import {
+  acceptCompletion,
+  completionStatus,
+  startCompletion,
+} from "@codemirror/autocomplete";
 import { sql, SQLite } from "@codemirror/lang-sql";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
-import { defaultKeymap } from "@codemirror/commands";
+import { defaultKeymap, insertTab } from "@codemirror/commands";
 import { keymap } from "@codemirror/view";
 import { KEY_BINDING } from "@gui/lib/key-matcher";
 import useCodeEditorTheme from "./use-editor-theme";
+import createSQLTableNameHighlightPlugin from "./sql-tablename-highlight";
 
 interface SqlEditorProps {
   value: string;
@@ -37,12 +43,37 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
   ) {
     const theme = useCodeEditorTheme();
 
+    const tableNameHighlightPlugin = useMemo(() => {
+      if (schema) {
+        return createSQLTableNameHighlightPlugin(Object.keys(schema));
+      }
+      return createSQLTableNameHighlightPlugin([]);
+    }, [schema]);
+
     const keyExtensions = useMemo(() => {
       return keymap.of([
         {
           key: KEY_BINDING.run.toCodeMirrorKey(),
           preventDefault: true,
           run: () => true,
+        },
+        {
+          key: "Tab",
+          preventDefault: true,
+          run: (target) => {
+            if (completionStatus(target.state) === "active") {
+              acceptCompletion(target);
+            } else {
+              insertTab(target);
+            }
+            return true;
+          },
+        },
+        {
+          key: "Ctrl-Space",
+          mac: "Cmd-i",
+          preventDefault: true,
+          run: startCompletion,
         },
         ...defaultKeymap,
       ]);
@@ -72,6 +103,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
             dialect: SQLite,
             schema,
           }),
+          tableNameHighlightPlugin,
           EditorView.updateListener.of((state) => {
             const pos = state.state.selection.main.head;
             const line = state.state.doc.lineAt(pos);
