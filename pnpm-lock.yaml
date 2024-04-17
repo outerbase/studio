@@ -94,6 +94,9 @@ importers:
       '@libsql/client':
         specifier: ^0.5.3
         version: 0.5.6
+      '@libsqlstudio/gui':
+        specifier: ^0.0.1
+        version: 0.0.1(@babel/runtime@7.24.4)(@codemirror/autocomplete@6.16.0)(@codemirror/language-data@6.5.0)(@codemirror/language@6.10.1)(@codemirror/legacy-modes@6.4.0)(@codemirror/lint@6.5.0)(@codemirror/search@6.5.6)(@codemirror/state@6.4.1)(@codemirror/theme-one-dark@6.1.2)(@lezer/javascript@1.4.14)(@types/react-dom@18.2.25)(@types/react@18.2.78)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-alert-dialog':
         specifier: ^1.0.5
         version: 1.0.5(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
@@ -3178,6 +3181,75 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@libsqlstudio/gui@0.0.1(@babel/runtime@7.24.4)(@codemirror/autocomplete@6.16.0)(@codemirror/language-data@6.5.0)(@codemirror/language@6.10.1)(@codemirror/legacy-modes@6.4.0)(@codemirror/lint@6.5.0)(@codemirror/search@6.5.6)(@codemirror/state@6.4.1)(@codemirror/theme-one-dark@6.1.2)(@lezer/javascript@1.4.14)(@types/react-dom@18.2.25)(@types/react@18.2.78)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-DkNPKO8+bV1odWkhLBMLSEXPHH2CS3xkX3fz7qSg+uRgWYBVF3+/vNcfkb+DnaHuxte3+t5d7UlLzinaXkZnPw==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@codemirror/commands': 6.3.3
+      '@codemirror/lang-sql': 6.6.3(@codemirror/view@6.26.3)
+      '@codemirror/view': 6.26.3
+      '@dnd-kit/core': 6.1.0(react-dom@18.2.0)(react@18.2.0)
+      '@dnd-kit/sortable': 8.0.0(@dnd-kit/core@6.1.0)(react@18.2.0)
+      '@justmiracle/result': 1.2.0
+      '@lezer/common': 1.2.1
+      '@lezer/highlight': 1.2.0
+      '@lezer/lr': 1.4.0
+      '@libsql/client': 0.5.6
+      '@radix-ui/react-alert-dialog': 1.0.5(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-avatar': 1.0.4(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-checkbox': 1.0.4(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-context-menu': 2.1.5(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-dialog': 1.0.5(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-dropdown-menu': 2.0.6(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-hover-card': 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-icons': 1.3.0(react@18.2.0)
+      '@radix-ui/react-label': 2.0.2(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-menubar': 1.0.4(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-navigation-menu': 1.1.4(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-popover': 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-radio-group': 1.1.3(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-scroll-area': 1.0.5(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-select': 2.0.0(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-separator': 1.0.3(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.2.78)(react@18.2.0)
+      '@radix-ui/react-toggle': 1.0.3(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-toggle-group': 1.0.4(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-tooltip': 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      '@uiw/codemirror-extensions-langs': 4.21.25(@codemirror/autocomplete@6.16.0)(@codemirror/language-data@6.5.0)(@codemirror/language@6.10.1)(@codemirror/legacy-modes@6.4.0)(@codemirror/state@6.4.1)(@codemirror/view@6.26.3)(@lezer/common@1.2.1)(@lezer/highlight@1.2.0)(@lezer/javascript@1.4.14)(@lezer/lr@1.4.0)
+      '@uiw/codemirror-themes': 4.21.25(@codemirror/language@6.10.1)(@codemirror/state@6.4.1)(@codemirror/view@6.26.3)
+      '@uiw/react-codemirror': 4.21.25(@babel/runtime@7.24.4)(@codemirror/autocomplete@6.16.0)(@codemirror/language@6.10.1)(@codemirror/lint@6.5.0)(@codemirror/search@6.5.6)(@codemirror/state@6.4.1)(@codemirror/theme-one-dark@6.1.2)(@codemirror/view@6.26.3)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0)
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      cmdk: 0.2.1(@types/react@18.2.78)(react-dom@18.2.0)(react@18.2.0)
+      deep-equal: 2.2.3
+      lucide-react: 0.309.0(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-resizable-panels: 1.0.10(react-dom@18.2.0)(react@18.2.0)
+      sonner: 1.4.41(react-dom@18.2.0)(react@18.2.0)
+      sql-query-identifier: 2.7.0
+      tailwind-merge: 2.2.2
+    transitivePeerDependencies:
+      - '@babel/runtime'
+      - '@codemirror/autocomplete'
+      - '@codemirror/language'
+      - '@codemirror/language-data'
+      - '@codemirror/legacy-modes'
+      - '@codemirror/lint'
+      - '@codemirror/search'
+      - '@codemirror/state'
+      - '@codemirror/theme-one-dark'
+      - '@lezer/javascript'
+      - '@types/react'
+      - '@types/react-dom'
+      - bufferutil
+      - codemirror
+      - encoding
+      - utf-8-validate
+    dev: false
 
   /@lucia-auth/adapter-sqlite@3.0.1(@libsql/client@0.5.6)(lucia@3.1.1):
     resolution: {integrity: sha512-bzr8+HALrbiYMb/+oL1SAnjbgFqlPs/Kj4lO57t/VvbXzmbpQEKk5Nv6hMpvWSkGAR9LbxYeQAtecikpKZVB0w==}
