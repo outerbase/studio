@@ -4,6 +4,7 @@ import {
   InStatement,
   ResultSet,
 } from "@libsql/client/web";
+import { createClient as createClientStateless } from "libsql-stateless-easy";
 import {
   SqliteLikeBaseDriver,
   DatabaseHeader,
@@ -64,11 +65,23 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
     this.authToken = authToken;
     this.bigInt = bigInt;
 
-    this.client = createClient({
-      url: this.endpoint,
-      authToken: this.authToken,
-      intMode: bigInt ? "bigint" : "number",
-    });
+    if (
+      url.startsWith("libsql://") ||
+      url.startsWith("http://") ||
+      url.startsWith("https://")
+    ) {
+      this.client = createClientStateless({
+        url: this.endpoint.replace(/^libsql:\/\//, "https://"),
+        authToken: this.authToken,
+        intMode: bigInt ? "bigint" : "number",
+      });
+    } else {
+      this.client = createClient({
+        url: this.endpoint,
+        authToken: this.authToken,
+        intMode: bigInt ? "bigint" : "number",
+      });
+    }
   }
 
   supportBigInt(): boolean {
