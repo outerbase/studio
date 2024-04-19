@@ -33,7 +33,7 @@ export interface DatabaseTableSchemaChange {
     new?: string;
   };
   columns: DatabaseTableColumnChange[];
-  constraints?: DatabaseTableConstraintChange[];
+  constraints: DatabaseTableConstraintChange[];
   createScript?: string;
 }
 
@@ -84,10 +84,16 @@ export default function SchemaEditor({
     <div className="w-full h-full flex flex-col">
       <div className="grow-0 shrink-0">
         <div className="p-1 flex gap-2">
-          <Button variant="ghost" onClick={onSave} disabled={!hasChange}>
+          <Button
+            variant="ghost"
+            onClick={onSave}
+            disabled={!hasChange}
+            size={"sm"}
+          >
             Save
           </Button>
           <Button
+            size={"sm"}
             variant="ghost"
             onClick={onDiscard}
             disabled={!hasChange}
@@ -100,13 +106,13 @@ export default function SchemaEditor({
             <Separator orientation="vertical" />
           </div>
 
-          <Button variant="ghost" onClick={onAddColumn}>
+          <Button variant="ghost" onClick={onAddColumn} size={"sm"}>
             <LucidePlus className="w-4 h-4 mr-1" />
             Add Column
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" disabled>
+              <Button variant="ghost" disabled size={"sm"}>
                 <LucideShieldPlus className="w-4 h-4 mr-1" />
                 Add Constraint (coming soon)
               </Button>
@@ -141,9 +147,10 @@ export default function SchemaEditor({
       </div>
       <div className="grow overflow-y-auto">
         <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
-        {value.constraints && value.constraints.length > 0 && (
-          <SchemaEditorConstraintList constraints={value.constraints} />
-        )}
+        <SchemaEditorConstraintList
+          constraints={value.constraints}
+          onChange={onChange}
+        />
       </div>
     </div>
   );

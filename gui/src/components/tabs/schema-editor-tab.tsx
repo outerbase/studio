@@ -34,6 +34,7 @@ const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
     new: "",
   },
   columns: [],
+  constraints: [],
   createScript: "",
 };
 
@@ -132,6 +133,10 @@ export default function SchemaEditorTab({
             new: structuredClone(col.old),
           }))
           .filter((col) => col.old),
+        constraints: prev.constraints.map((con) => ({
+          old: con.old,
+          new: structuredClone(con.old),
+        })),
       };
     });
   }, [setSchema]);
@@ -164,26 +169,12 @@ export default function SchemaEditorTab({
         </AlertDialogContent>
       </AlertDialog>
 
-      <ResizablePanelGroup direction="vertical">
-        <ResizablePanel>
-          <SchemaEditor
-            value={schema}
-            onChange={setSchema}
-            onSave={onSaveToggle}
-            onDiscard={onDiscard}
-          />
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel collapsible>
-          <div className="flex flex-col h-full">
-            <div className="px-3 py-2 text-xs font-semibold">Preview</div>
-            <Separator />
-            <div className="grow overflow-hidden">
-              <SqlEditor value={previewScript.join(";\n")} readOnly />
-            </div>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <SchemaEditor
+        value={schema}
+        onChange={setSchema}
+        onSave={onSaveToggle}
+        onDiscard={onDiscard}
+      />
     </>
   );
 }
