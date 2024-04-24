@@ -446,6 +446,13 @@ function parseTableDefinition(cursor: Cursor): {
     }
   }
 
+  for (const column of columns) {
+    const fk = column.constraint?.foreignKey;
+    if (fk?.foreignColumns && fk.foreignColumns.length === 0) {
+      fk.foreignColumns = [column.name];
+    }
+  }
+
   return { columns, constraints };
 }
 
