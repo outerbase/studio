@@ -17,7 +17,7 @@ function SaveConnectionTypeItem({
 }>) {
   const className = cn(
     "p-4 border max-w-[350px] border-2 rounded flex gap-4 cursor-pointer",
-    active ? "border-black" : undefined
+    active ? "border-black dark:border-white" : undefined
   );
 
   return (
