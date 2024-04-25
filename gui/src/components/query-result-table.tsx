@@ -102,8 +102,35 @@ export default function ResultTable({
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
+      const foreignKeyInfo = header.foreignKey ? (
+        <div className="p-2">
+          <div className="text-xs p-2 bg-yellow-200 text-black rounded">
+            <h2 className="font-semibold">Foreign Key</h2>
+            <p className="mt-1 font-mono">
+              {header.foreignKey.foreignTableName}.
+              {(header.foreignKey.foreignColumns ?? [])[0]}
+            </p>
+          </div>
+        </div>
+      ) : undefined;
+
+      const generatedExpression =
+        header.headerData?.constraint?.generatedExpression;
+      const generatedInfo = generatedExpression ? (
+        <div className="p-2">
+          <div className="text-xs p-2 bg-blue-200 text-black rounded">
+            <h2 className="font-semibold">Generated Expression</h2>
+            <pre className="text-sm">
+              <code>{generatedExpression}</code>
+            </pre>
+          </div>
+        </div>
+      ) : undefined;
+
       return (
         <Header header={header}>
+          {foreignKeyInfo}
+          {generatedInfo}
           <DropdownMenuItem
             onClick={() => {
               setStickHeaderIndex(

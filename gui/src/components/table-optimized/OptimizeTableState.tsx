@@ -1,11 +1,12 @@
 import { selectArrayFromIndexList } from "@gui/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
-import { LucideKey } from "lucide-react";
+import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 import {
   DatabaseResultSet,
   DatabaseTableSchema,
   TableColumnDataType,
 } from "@gui/drivers/base-driver";
+import { ReactElement } from "react";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -63,15 +64,44 @@ export default class OptimizeTableState {
           initialSize = Math.max(150, Math.min(500, maxSize * 8));
         }
 
+        const headerData = schemaResult
+          ? schemaResult.columns.find((c) => c.name === header.name)
+          : undefined;
+
+        // --------------------------------------
+        // Matching foreign key
+        // --------------------------------------
+        let foreignKey = headerData?.constraint?.foreignKey;
+        if (!foreignKey && schemaResult?.constraints) {
+          for (const c of schemaResult.constraints) {
+            if (
+              c.foreignKey &&
+              c.foreignKey.foreignColumns?.length === 1 &&
+              c.foreignKey.foreignColumns[0] === header.name
+            ) {
+              foreignKey = c.foreignKey;
+            }
+          }
+        }
+
+        let icon: ReactElement | undefined = undefined;
+        if (schemaResult?.pk.includes(headerName ?? "")) {
+          icon = <LucideKey className="w-4 h-4 text-red-500" />;
+        } else if (foreignKey) {
+          icon = <LucideKeySquare className="w-4 h-4 text-yellow-500" />;
+        } else if (headerData?.constraint?.generatedExpression) {
+          icon = <LucideSigma className="w-4 h-4 text-blue-500" />;
+        }
+
         return {
           initialSize,
           name: headerName ?? "",
           displayName: header.displayName,
           resizable: true,
+          headerData,
+          foreignKey,
           dataType,
-          icon: schemaResult?.pk.includes(headerName ?? "") ? (
-            <LucideKey className="w-4 h-4 text-red-500" />
-          ) : undefined,
+          icon,
         };
       }),
       dataResult.rows.map((r) => ({ ...r }))

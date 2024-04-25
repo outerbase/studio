@@ -13,7 +13,11 @@ import TableFakeBodyPadding from "./TableFakeBodyPadding";
 import TableFakeRowPadding from "./TableFakeRowPadding";
 import TableHeaderList from "./TableHeaderList";
 import OptimizeTableState from "./OptimizeTableState";
-import { TableColumnDataType } from "@gui/drivers/base-driver";
+import {
+  DatabaseForeignKeyClause,
+  DatabaseTableColumn,
+  TableColumnDataType,
+} from "@gui/drivers/base-driver";
 import { cn } from "@gui/lib/utils";
 
 export interface OptimizeTableHeaderProps {
@@ -22,6 +26,8 @@ export interface OptimizeTableHeaderProps {
   initialSize: number;
   resizable?: boolean;
   dataType?: TableColumnDataType;
+  headerData?: DatabaseTableColumn;
+  foreignKey?: DatabaseForeignKeyClause;
   icon?: ReactElement;
   rightIcon?: ReactElement;
   tooltip?: string;
