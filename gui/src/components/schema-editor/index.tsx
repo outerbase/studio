@@ -1,10 +1,4 @@
-import { LucidePlus, LucideShieldPlus } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import { LucidePlus } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import { Button } from "../ui/button";
@@ -16,6 +10,7 @@ import {
   DatabaseTableColumnConstraint,
 } from "@gui/drivers/base-driver";
 import SchemaEditorConstraintList from "./schema-editor-constraint-list";
+import { ColumnsProvider } from "./column-provider";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;
@@ -23,6 +18,7 @@ export interface DatabaseTableColumnChange {
 }
 
 export interface DatabaseTableConstraintChange {
+  id: string;
   old: DatabaseTableColumnConstraint | null;
   new: DatabaseTableColumnConstraint | null;
 }
@@ -110,20 +106,6 @@ export default function SchemaEditor({
             <LucidePlus className="w-4 h-4 mr-1" />
             Add Column
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" disabled size={"sm"}>
-                <LucideShieldPlus className="w-4 h-4 mr-1" />
-                Add Constraint (coming soon)
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem inset>Primary Key</DropdownMenuItem>
-              <DropdownMenuItem inset>Unique</DropdownMenuItem>
-              <DropdownMenuItem inset>Check Constraint</DropdownMenuItem>
-              <DropdownMenuItem inset>Foreign Key</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         <div className="flex items-center mx-3 mt-1 mb-2 ml-5 gap-2">
@@ -147,10 +129,12 @@ export default function SchemaEditor({
       </div>
       <div className="grow overflow-y-auto">
         <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
-        <SchemaEditorConstraintList
-          constraints={value.constraints}
-          onChange={onChange}
-        />
+        <ColumnsProvider value={value.columns}>
+          <SchemaEditorConstraintList
+            constraints={value.constraints}
+            onChange={onChange}
+          />
+        </ColumnsProvider>
       </div>
     </div>
   );

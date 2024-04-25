@@ -23,7 +23,14 @@ import {
   PropsWithChildren,
   SetStateAction,
   useCallback,
+  useMemo,
 } from "react";
+import ColumnListEditor from "../column-list-editor";
+import { useColumnList } from "./column-provider";
+
+type ConstraintChangeHandler = (
+  constraint: DatabaseTableColumnConstraint
+) => void;
 
 function ColumnCheck({
   constraint,
@@ -89,7 +96,24 @@ function ColumnForeignKey({
 
 function ColumnPrimaryKey({
   constraint,
-}: Readonly<{ constraint: DatabaseTableColumnConstraint }>) {
+  onChange,
+}: Readonly<{
+  constraint: DatabaseTableColumnConstraint;
+  onChange: ConstraintChangeHandler;
+}>) {
+  const { columns } = useColumnList();
+
+  const columnMemo = useMemo(() => {
+    return [...new Set(columns.map((c) => c.new?.name ?? c.old?.name ?? ""))];
+  }, [columns]);
+
+  const onConstraintChange = useCallback(
+    (newColumn: string[]) => {
+      onChange({ ...constraint, primaryColumns: newColumn });
+    },
+    [onChange, constraint]
+  );
+
   return (
     <>
       <td className="border p-2">
@@ -98,13 +122,11 @@ function ColumnPrimaryKey({
       </td>
       <td className="border" colSpan={2}>
         <div className="px-2 p-1 flex gap-2">
-          {(constraint.primaryColumns ?? []).map((columnName, idx) => {
-            return (
-              <div key={idx} className="p-1 px-2 bg-secondary rounded">
-                {columnName}
-              </div>
-            );
-          })}
+          <ColumnListEditor
+            value={constraint.primaryColumns ?? []}
+            columns={columnMemo}
+            onChange={onConstraintChange}
+          />
         </div>
       </td>
     </>
@@ -143,11 +165,29 @@ function RemovableConstraintItem({
   idx: number;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }>) {
+  const onRemoveClicked = useCallback(() => {
+    onChange((prev) => {
+      let newConstraint = [...prev.constraints];
+      const currentConstraint = newConstraint[idx];
+
+      if (!currentConstraint?.old) {
+        newConstraint = prev.constraints.filter((_, cIndex) => cIndex !== idx);
+      } else if (currentConstraint) {
+        currentConstraint.new = null;
+      }
+
+      return {
+        ...prev,
+        constraints: newConstraint,
+      };
+    });
+  }, [onChange, idx]);
+
   return (
     <tr className="text-sm">
       {children}
       <td className="border">
-        <button className="p-1">
+        <button className="p-1" onClick={onRemoveClicked}>
           <LucideTrash2 className="w-4 h-4 text-red-500" />
         </button>
       </td>
@@ -162,22 +202,47 @@ function ColumnItemBody({
 }: PropsWithChildren<{
   idx: number;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
-  constraint: DatabaseTableColumnConstraint;
+  constraint: DatabaseTableConstraintChange;
 }>) {
-  if (constraint.foreignKey) {
-    return <ColumnForeignKey constraint={constraint} />;
+  const onChangeConstraint = useCallback(
+    (newConstraint: DatabaseTableColumnConstraint) => {
+      onChange((prev) => {
+        return {
+          ...prev,
+          constraints: prev.constraints.map((c) => {
+            if (c === constraint) {
+              return { ...c, new: newConstraint };
+            }
+            return c;
+          }),
+        };
+      });
+    },
+    [onChange, constraint]
+  );
+
+  const currentConstraint = constraint.new ?? constraint.old;
+  if (!currentConstraint) return null;
+
+  if (currentConstraint.foreignKey) {
+    return <ColumnForeignKey constraint={currentConstraint} />;
   }
 
-  if (constraint.primaryKey) {
-    return <ColumnPrimaryKey constraint={constraint} />;
+  if (currentConstraint.primaryKey) {
+    return (
+      <ColumnPrimaryKey
+        constraint={currentConstraint}
+        onChange={onChangeConstraint}
+      />
+    );
   }
 
-  if (constraint.unique) {
-    return <ColumnUnique constraint={constraint} />;
+  if (currentConstraint.unique) {
+    return <ColumnUnique constraint={currentConstraint} />;
   }
 
-  if (constraint.checkExpression !== undefined) {
-    return <ColumnCheck constraint={constraint} />;
+  if (currentConstraint.checkExpression !== undefined) {
+    return <ColumnCheck constraint={currentConstraint} />;
   }
 
   return <td colSpan={4}></td>;
@@ -192,17 +257,9 @@ function ColumnItem({
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   idx: number;
 }>) {
-  const currentConstraint = constraint.new ?? constraint.old;
-
-  if (!currentConstraint) return null;
-
   return (
     <RemovableConstraintItem idx={idx} onChange={onChange}>
-      <ColumnItemBody
-        constraint={currentConstraint}
-        onChange={onChange}
-        idx={idx}
-      />
+      <ColumnItemBody constraint={constraint} onChange={onChange} idx={idx} />
     </RemovableConstraintItem>
   );
 }
@@ -223,6 +280,7 @@ export default function SchemaEditorConstraintList({
         constraints: [
           ...prev.constraints,
           {
+            id: window.crypto.randomUUID(),
             new: con,
             old: null,
           },
