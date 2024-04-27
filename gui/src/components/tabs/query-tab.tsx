@@ -20,6 +20,7 @@ import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { MultipleQueryProgress, multipleQuery } from "@gui/lib/multiple-query";
 import { DatabaseResultStat } from "@gui/driver";
 import ResultStats from "../result-stat";
+import isEmptyResultStats from "@gui/lib/empty-stats";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
@@ -126,7 +127,7 @@ export default function QueryWindow() {
             <div className="grow overflow-hidden">
               <ResultTable data={data} />
             </div>
-            {stats && (
+            {stats && !isEmptyResultStats(stats) && (
               <div className="shrink-0">
                 <Separator />
                 <ResultStats stats={stats} />
