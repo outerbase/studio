@@ -27,12 +27,15 @@ import {
 } from "@gui/components/ui/alert-dialog";
 import {
   ColumnSortOption,
+  DatabaseResultStat,
   DatabaseTableSchema,
 } from "@gui/drivers/base-driver";
 import { useAutoComplete } from "@gui/contexts/auto-complete-provider";
 import OpacityLoading from "../loading-opacity";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
+import ResultStats from "../result-stat";
+import isEmptyResultStats from "@gui/lib/empty-stats";
 
 interface TableDataContentProps {
   tableName: string;
@@ -47,6 +50,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OptimizeTableState>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
+  const [stat, setStat] = useState<DatabaseResultStat>();
   const [sortColumns, setSortColumns] = useState<ColumnSortOption[]>([]);
   const [changeNumber, setChangeNumber] = useState(0);
 
@@ -77,6 +81,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           });
 
         setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
+        setStat(dataResult.stat);
         setTableSchema(schemaResult);
         updateTableSchema(tableName, schemaResult.columns);
         setLastQueryTimestamp(Date.now());
@@ -95,6 +100,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     tableName,
     sortColumns,
     updateTableSchema,
+    setStat,
     where,
     finalOffset,
     finalLimit,
@@ -326,6 +332,12 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
           />
         ) : null}
       </div>
+      {stat && !isEmptyResultStats(stat) && (
+        <div className="shrink-0 grow-0">
+          <Separator />
+          <ResultStats stats={stat} />
+        </div>
+      )}
     </div>
   );
 }

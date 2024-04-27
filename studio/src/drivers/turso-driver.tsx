@@ -44,7 +44,15 @@ export function transformRawResult(raw: ResultSet): DatabaseResultSet {
 
   return {
     rows,
-    rowsAffected: raw.rowsAffected,
+    stat: {
+      rowsAffected: raw.rowsAffected,
+
+      // This is unique for stateless driver
+      rowsRead: (raw as any).rowsRead ?? null,
+      rowsWritten: (raw as any).rowsWritten ?? null,
+      queryDurationMs: (raw as any).queryDurationMS ?? null,
+    },
+
     headers,
     lastInsertRowid:
       raw.lastInsertRowid === undefined
