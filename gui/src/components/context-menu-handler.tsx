@@ -89,7 +89,7 @@ export default function ContextMenuHandler() {
     if (menu && contextRef.current) {
       const ev = new MouseEvent("contextmenu", {
         bubbles: true,
-        cancelable: false,
+        cancelable: true,
         view: window,
         button: 2,
         buttons: 2,
