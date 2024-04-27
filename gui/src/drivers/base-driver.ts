@@ -31,10 +31,18 @@ export interface DatabaseHeader {
   originalType: string | null;
   type: TableColumnDataType;
 }
+
+export interface DatabaseResultStat {
+  rowsAffected: number;
+  rowsRead: number | null;
+  rowsWritten: number | null;
+  queryDurationMs: number | null;
+}
+
 export interface DatabaseResultSet {
   rows: DatabaseRow[];
   headers: DatabaseHeader[];
-  rowsAffected: number;
+  stat: DatabaseResultStat;
   lastInsertRowid?: number;
 }
 

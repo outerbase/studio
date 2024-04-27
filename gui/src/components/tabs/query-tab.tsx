@@ -18,12 +18,15 @@ import { useAutoComplete } from "@gui/contexts/auto-complete-provider";
 import { useDatabaseDriver } from "@gui/contexts/driver-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { MultipleQueryProgress, multipleQuery } from "@gui/lib/multiple-query";
+import { DatabaseResultStat } from "@gui/driver";
+import ResultStats from "../result-stat";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [code, setCode] = useState("");
   const [data, setData] = useState<OptimizeTableState>();
+  const [stats, setStats] = useState<DatabaseResultStat>();
   const [progress, setProgress] = useState<MultipleQueryProgress>();
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [lineNumber, setLineNumber] = useState(0);
@@ -63,6 +66,7 @@ export default function QueryWindow() {
             const state = OptimizeTableState.createFromResult(last);
             state.setReadOnlyMode(true);
             setData(state);
+            setStats(last.stat);
           }
         })
         .catch(console.error);
@@ -117,7 +121,19 @@ export default function QueryWindow() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
-        {data && <ResultTable data={data} />}
+        {data && (
+          <div className="flex flex-col h-full w-full">
+            <div className="grow overflow-hidden">
+              <ResultTable data={data} />
+            </div>
+            {stats && (
+              <div className="shrink-0">
+                <Separator />
+                <ResultStats stats={stats} />
+              </div>
+            )}
+          </div>
+        )}
         {!data && progress && (
           <div className="w-full h-full overflow-y-auto overflow-x-hidden">
             <QueryProgressLog progress={progress} />

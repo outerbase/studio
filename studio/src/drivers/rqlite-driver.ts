@@ -13,6 +13,7 @@ interface RqliteResult {
   values?: unknown[][];
   last_insert_id?: number;
   rows_affected?: number;
+  time?: number;
   error?: string;
 }
 
@@ -55,7 +56,12 @@ export function transformRawResult(raw: RqliteResult): DatabaseResultSet {
 
   return {
     rows,
-    rowsAffected: raw?.rows_affected ?? 0,
+    stat: {
+      rowsAffected: raw?.rows_affected ?? 0,
+      rowsRead: null,
+      rowsWritten: null,
+      queryDurationMs: raw?.time ?? 0,
+    },
     headers,
     lastInsertRowid:
       raw.last_insert_id === undefined ? undefined : raw.last_insert_id,
@@ -87,7 +93,7 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
     }
 
     // https://rqlite.io/docs/api/api/#unified-endpoint
-    const result = await fetch(this.endpoint + "/db/request", {
+    const result = await fetch(this.endpoint + "/db/request?timings", {
       method: "POST",
       headers,
       body: JSON.stringify(

@@ -1,11 +1,15 @@
-import { BaseDriver, DatabaseResultSet } from "@gui/drivers/base-driver";
+import {
+  BaseDriver,
+  DatabaseResultSet,
+  DatabaseResultStat,
+} from "@gui/drivers/base-driver";
 
 export interface MultipleQueryProgressItem {
   order: number;
   sql: string;
   start: number;
   end?: number;
-  affectedRow?: number;
+  stats?: DatabaseResultStat;
   error?: string;
 }
 
@@ -43,7 +47,7 @@ export async function multipleQuery(
       const r = await driver.query(statement);
 
       log.end = Date.now();
-      log.affectedRow = r.rowsAffected;
+      log.stats = r.stat;
 
       if (r.headers.length > 0) {
         lastResult = r;

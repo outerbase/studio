@@ -1,6 +1,8 @@
 import { MultipleQueryProgress } from "@gui/lib/multiple-query";
 import { useEffect, useState } from "react";
 import CodePreview from "./code-preview";
+import ResultStats from "./result-stat";
+import isEmptyResultStats from "@gui/lib/empty-stats";
 
 function formatTimeAgo(ms: number) {
   if (ms < 1000) {
@@ -50,14 +52,6 @@ export default function QueryProgressLog({
         {last3.map((detail) => {
           return (
             <div key={detail.order}>
-              {detail.end && !detail.error && (
-                <div className="text-sm">
-                  <strong>[Query #{detail.order + 1}]</strong> This query took{" "}
-                  {formatTimeAgo(detail.end - detail.start)} and affected{" "}
-                  {detail.affectedRow} row(s).
-                </div>
-              )}
-
               {!!detail.error && (
                 <div className="mt-2 mb-2 text-red-500">
                   <pre>{detail.error}</pre>
@@ -76,6 +70,15 @@ export default function QueryProgressLog({
 
               <div className="mt-3" />
               <CodePreview code={detail.sql} />
+
+              {detail.end &&
+                !detail.error &&
+                detail.stats &&
+                !isEmptyResultStats(detail.stats) && (
+                  <div className="-ml-4">
+                    <ResultStats stats={detail.stats} />
+                  </div>
+                )}
             </div>
           );
         })}
