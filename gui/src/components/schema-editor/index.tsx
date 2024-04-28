@@ -1,16 +1,20 @@
-import { LucidePlus } from "lucide-react";
+import { LucideCode, LucidePlus } from "lucide-react";
 import { Separator } from "../ui/separator";
-import { Dispatch, SetStateAction, useCallback } from "react";
-import { Button } from "../ui/button";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
+import { Button, buttonVariants } from "../ui/button";
 import SchemaEditorColumnList from "./schema-editor-column-list";
 import { Input } from "../ui/input";
-import { checkSchemaChange } from "@gui/lib/sql-generate.schema";
+import generateSqlSchemaChange, {
+  checkSchemaChange,
+} from "@gui/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
 } from "@gui/drivers/base-driver";
 import SchemaEditorConstraintList from "./schema-editor-constraint-list";
 import { ColumnsProvider } from "./column-provider";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import CodePreview from "../code-preview";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;
@@ -76,6 +80,10 @@ export default function SchemaEditor({
 
   const hasChange = checkSchemaChange(value);
 
+  const previewScript = useMemo(() => {
+    return generateSqlSchemaChange(value).join("\n");
+  }, [value]);
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="grow-0 shrink-0">
@@ -106,6 +114,25 @@ export default function SchemaEditor({
             <LucidePlus className="w-4 h-4 mr-1" />
             Add Column
           </Button>
+
+          <div>
+            <Separator orientation="vertical" />
+          </div>
+
+          <Popover>
+            <PopoverTrigger>
+              <div className={buttonVariants({ size: "sm", variant: "ghost" })}>
+                <LucideCode className="w-4 h-4 mr-1" />
+                SQL Preview
+              </div>
+            </PopoverTrigger>
+            <PopoverContent style={{ width: 500 }}>
+              <div className="text-xs font-semibold mb-1">SQL Preview</div>
+              <div style={{ maxHeight: 400 }} className="overflow-y-auto">
+                <CodePreview code={previewScript} />
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex items-center mx-3 mt-1 mb-2 ml-5 gap-2">
