@@ -44,6 +44,7 @@ function generateTableChangePlan({
             autoIncrementPkColumn: tableSchema.autoIncrement
               ? tableSchema.pk[0]
               : undefined,
+            pk: tableSchema.pk,
           },
         });
       } else if (row.isRemoved) {

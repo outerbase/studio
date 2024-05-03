@@ -240,9 +240,25 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
             record: selectResult.rows[0],
             lastId: r.lastInsertRowid,
           });
-        }
+        } else if (op.pk && op.pk.length > 0) {
+          const selectStatement = generateSelectOneWithConditionStatement(
+            tableName,
+            op.pk.reduce<Record<string, unknown>>((a, b) => {
+              a[b] = op.values[b];
+              return a;
+            }, {})
+          );
 
-        tmp.push({});
+          // This transform to make it friendly for sending via HTTP
+          const selectResult = await this.query(selectStatement);
+
+          tmp.push({
+            record: selectResult.rows[0],
+            lastId: r.lastInsertRowid,
+          });
+        } else {
+          tmp.push({});
+        }
       }
 
       tmp.push({});
