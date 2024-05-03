@@ -152,6 +152,7 @@ interface DatabaseTableOperationInsert {
   operation: "INSERT";
   values: Record<string, DatabaseValue>;
   autoIncrementPkColumn?: string;
+  pk?: string[];
 }
 
 interface DatabaseTableOperationUpdate {
