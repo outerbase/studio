@@ -1,4 +1,4 @@
-import { LucidePlus } from "lucide-react";
+import { LucidePlus, LucideX } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
   Command,
@@ -22,8 +22,19 @@ export default function ColumnListEditor({ value, columns, onChange }: Props) {
     <div className="flex gap-2">
       {value.map((columnName, idx) => {
         return (
-          <div key={idx} className="p-1 px-2 bg-secondary rounded">
-            {columnName}
+          <div
+            key={idx}
+            className="px-2 bg-secondary rounded flex items-center"
+          >
+            <span className="p-1">{columnName}</span>
+            <span
+              className="p-1 rounded-full ml-1 cursor-pointer hover:bg-red-400"
+              onClick={() => {
+                onChange(value.filter((c) => c !== columnName));
+              }}
+            >
+              <LucideX className="w-3 h-3" />
+            </span>
           </div>
         );
       })}
@@ -40,18 +51,20 @@ export default function ColumnListEditor({ value, columns, onChange }: Props) {
 
             <CommandEmpty>No column found.</CommandEmpty>
             <CommandGroup className="max-h-[250px] overflow-y-auto">
-              {columns.map((column) => (
-                <CommandItem
-                  key={column}
-                  value={column}
-                  onSelect={() => {
-                    setOpen(false);
-                    onChange([...value, column]);
-                  }}
-                >
-                  {column}
-                </CommandItem>
-              ))}
+              {columns
+                .filter((c) => !value.includes(c))
+                .map((column) => (
+                  <CommandItem
+                    key={column}
+                    value={column}
+                    onSelect={() => {
+                      setOpen(false);
+                      onChange([...value, column]);
+                    }}
+                  >
+                    {column}
+                  </CommandItem>
+                ))}
             </CommandGroup>
           </Command>
         </PopoverContent>

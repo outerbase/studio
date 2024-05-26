@@ -1,11 +1,10 @@
 import { DatabaseTableColumnConstraint } from "@gui/drivers/base-driver";
-import { cn, noop } from "@gui/lib/utils";
+import { cn } from "@gui/lib/utils";
 import {
   LucideArrowUpRight,
   LucideCheck,
   LucideFingerprint,
   LucideKeySquare,
-  LucideMoveHorizontal,
   LucideShieldPlus,
   LucideTrash2,
 } from "lucide-react";
@@ -27,6 +26,7 @@ import {
 } from "react";
 import ColumnListEditor from "../column-list-editor";
 import { useColumnList } from "./column-provider";
+import { useSchema } from "@gui/contexts/schema-provider";
 
 type ConstraintChangeHandler = (
   constraint: DatabaseTableColumnConstraint
@@ -34,7 +34,11 @@ type ConstraintChangeHandler = (
 
 function ColumnCheck({
   constraint,
-}: Readonly<{ constraint: DatabaseTableColumnConstraint }>) {
+  onChange,
+}: Readonly<{
+  constraint: DatabaseTableColumnConstraint;
+  onChange: ConstraintChangeHandler;
+}>) {
   return (
     <>
       <td className="border p-2">
@@ -42,8 +46,13 @@ function ColumnCheck({
       </td>
       <td className="border" colSpan={2}>
         <input
+          onChange={(e) => {
+            onChange({
+              ...constraint,
+              checkExpression: e.currentTarget.value,
+            });
+          }}
           value={constraint.checkExpression}
-          readOnly
           className="font-mono p-2 w-full outline-none"
         />
       </td>
@@ -53,7 +62,66 @@ function ColumnCheck({
 
 function ColumnForeignKey({
   constraint,
-}: Readonly<{ constraint: DatabaseTableColumnConstraint }>) {
+  onChange,
+}: Readonly<{
+  constraint: DatabaseTableColumnConstraint;
+  onChange: ConstraintChangeHandler;
+}>) {
+  const { columns } = useColumnList();
+  const { schema } = useSchema();
+
+  const columnMemo = useMemo(() => {
+    return [...new Set(columns.map((c) => c.new?.name ?? c.old?.name ?? ""))];
+  }, [columns]);
+
+  const fkColumnMemo = useMemo(() => {
+    const fkTableName = constraint.foreignKey?.foreignTableName;
+
+    if (fkTableName) {
+      const fkTableSchema = schema.find(
+        (s) => s.type === "table" && s.name === fkTableName
+      );
+
+      console.log(fkTableSchema, "table schema");
+
+      if (fkTableSchema) {
+        return (fkTableSchema.tableSchema?.columns ?? []).map((c) => c.name);
+      }
+    }
+
+    return [];
+  }, [constraint, schema]);
+
+  const onConstraintChange = useCallback(
+    (newColumn: string[]) => {
+      onChange({
+        ...constraint,
+        foreignKey: { ...constraint.foreignKey, columns: newColumn },
+      });
+    },
+    [onChange, constraint]
+  );
+
+  const onFkConstraintChange = useCallback(
+    (newColumn: string[]) => {
+      onChange({
+        ...constraint,
+        foreignKey: { ...constraint.foreignKey, foreignColumns: newColumn },
+      });
+    },
+    [onChange, constraint]
+  );
+
+  const onFkTableNameChange = useCallback(
+    (fkTableName: string) => {
+      onChange({
+        ...constraint,
+        foreignKey: { ...constraint.foreignKey, foreignTableName: fkTableName },
+      });
+    },
+    [onChange, constraint]
+  );
+
   return (
     <>
       <td className="border p-2">
@@ -64,30 +132,23 @@ function ColumnForeignKey({
         <TableCombobox
           borderless
           disabled
-          onChange={noop}
+          onChange={onFkTableNameChange}
           value={constraint.foreignKey?.foreignTableName}
         />
       </td>
       <td className="border">
-        <div className="p-1 px-2 flex gap-2">
-          {(constraint.foreignKey?.foreignColumns ?? []).map(
-            (columnName, idx) => {
-              const thisColumnName = (constraint.foreignKey?.columns ?? [])[
-                idx
-              ];
-
-              return (
-                <div
-                  key={idx}
-                  className="p-1 px-2 bg-secondary flex items-center rounded"
-                >
-                  {thisColumnName}{" "}
-                  <LucideMoveHorizontal className="mx-2 w-4 h-4" />
-                  {columnName}
-                </div>
-              );
-            }
-          )}
+        <div className="p-1 px-2 flex gap-2 items-center">
+          <ColumnListEditor
+            value={constraint.foreignKey?.columns ?? []}
+            columns={columnMemo}
+            onChange={onConstraintChange}
+          />
+          |
+          <ColumnListEditor
+            value={constraint.foreignKey?.foreignColumns ?? []}
+            columns={fkColumnMemo}
+            onChange={onFkConstraintChange}
+          />
         </div>
       </td>
     </>
@@ -135,7 +196,24 @@ function ColumnPrimaryKey({
 
 function ColumnUnique({
   constraint,
-}: Readonly<{ constraint: DatabaseTableColumnConstraint }>) {
+  onChange,
+}: Readonly<{
+  constraint: DatabaseTableColumnConstraint;
+  onChange: ConstraintChangeHandler;
+}>) {
+  const { columns } = useColumnList();
+
+  const columnMemo = useMemo(() => {
+    return [...new Set(columns.map((c) => c.new?.name ?? c.old?.name ?? ""))];
+  }, [columns]);
+
+  const onConstraintChange = useCallback(
+    (newColumn: string[]) => {
+      onChange({ ...constraint, uniqueColumns: newColumn });
+    },
+    [onChange, constraint]
+  );
+
   return (
     <>
       <td className="border p-2">
@@ -144,13 +222,11 @@ function ColumnUnique({
       </td>
       <td className="border" colSpan={2}>
         <div className="px-2 p-1 flex gap-2">
-          {(constraint.uniqueColumns ?? []).map((columnName, idx) => {
-            return (
-              <div key={idx} className="p-1 px-2 bg-secondary rounded">
-                {columnName}
-              </div>
-            );
-          })}
+          <ColumnListEditor
+            value={constraint.uniqueColumns ?? []}
+            columns={columnMemo}
+            onChange={onConstraintChange}
+          />
         </div>
       </td>
     </>
@@ -196,7 +272,6 @@ function RemovableConstraintItem({
 }
 
 function ColumnItemBody({
-  idx,
   onChange,
   constraint,
 }: PropsWithChildren<{
@@ -225,7 +300,12 @@ function ColumnItemBody({
   if (!currentConstraint) return null;
 
   if (currentConstraint.foreignKey) {
-    return <ColumnForeignKey constraint={currentConstraint} />;
+    return (
+      <ColumnForeignKey
+        constraint={currentConstraint}
+        onChange={onChangeConstraint}
+      />
+    );
   }
 
   if (currentConstraint.primaryKey) {
@@ -238,11 +318,21 @@ function ColumnItemBody({
   }
 
   if (currentConstraint.unique) {
-    return <ColumnUnique constraint={currentConstraint} />;
+    return (
+      <ColumnUnique
+        constraint={currentConstraint}
+        onChange={onChangeConstraint}
+      />
+    );
   }
 
   if (currentConstraint.checkExpression !== undefined) {
-    return <ColumnCheck constraint={currentConstraint} />;
+    return (
+      <ColumnCheck
+        constraint={currentConstraint}
+        onChange={onChangeConstraint}
+      />
+    );
   }
 
   return <td colSpan={4}></td>;
@@ -267,9 +357,11 @@ function ColumnItem({
 export default function SchemaEditorConstraintList({
   constraints,
   onChange,
+  disabled,
 }: Readonly<{
   constraints: DatabaseTableConstraintChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  disabled?: boolean;
 }>) {
   const headerClassName = "text-xs p-2 text-left bg-secondary border";
 
@@ -296,7 +388,7 @@ export default function SchemaEditorConstraintList({
         <thead>
           <tr>
             <th className={cn(headerClassName, "w-[175px]")}>Constraints</th>
-            <th className={cn(headerClassName, "w-[150px]")}></th>
+            <th className={cn(headerClassName, "w-[200px]")}></th>
             <th className={headerClassName}></th>
             <th className={cn(headerClassName, "w-[30px]")}></th>
           </tr>
@@ -312,56 +404,58 @@ export default function SchemaEditorConstraintList({
               />
             );
           })}
-          <tr>
-            <td colSpan={4} className="px-4 py-2 border">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size={"sm"}>
-                    <LucideShieldPlus className="w-4 h-4 mr-1" />
-                    Add Constraint
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    inset
-                    onClick={() => {
-                      newConstraint({ primaryKey: true });
-                    }}
-                  >
-                    Primary Key
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    inset
-                    onClick={() => {
-                      newConstraint({ unique: true });
-                    }}
-                  >
-                    Unique
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    inset
-                    onClick={() => {
-                      newConstraint({ checkExpression: "" });
-                    }}
-                  >
-                    Check Constraint
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    inset
-                    onClick={() => {
-                      newConstraint({
-                        foreignKey: {
-                          columns: [],
-                        },
-                      });
-                    }}
-                  >
-                    Foreign Key
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </td>
-          </tr>
+          {!disabled && (
+            <tr>
+              <td colSpan={4} className="px-4 py-2 border">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size={"sm"}>
+                      <LucideShieldPlus className="w-4 h-4 mr-1" />
+                      Add Constraint
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      inset
+                      onClick={() => {
+                        newConstraint({ primaryKey: true });
+                      }}
+                    >
+                      Primary Key
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      inset
+                      onClick={() => {
+                        newConstraint({ unique: true });
+                      }}
+                    >
+                      Unique
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      inset
+                      onClick={() => {
+                        newConstraint({ checkExpression: "" });
+                      }}
+                    >
+                      Check Constraint
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      inset
+                      onClick={() => {
+                        newConstraint({
+                          foreignKey: {
+                            columns: [],
+                          },
+                        });
+                      }}
+                    >
+                      Foreign Key
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
