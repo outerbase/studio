@@ -4,7 +4,10 @@ import {
 } from "@gui/components/schema-editor";
 import { escapeIdentity, escapeSqlValue } from "@gui/sqlite/sql-helper";
 import deepEqual from "deep-equal";
-import { DatabaseTableColumn } from "@gui/drivers/base-driver";
+import {
+  DatabaseTableColumn,
+  DatabaseTableColumnConstraint,
+} from "@gui/drivers/base-driver";
 
 export function checkSchemaColumnChange(change: DatabaseTableColumnChange) {
   return !deepEqual(change.old, change.new);
@@ -115,6 +118,22 @@ function geneateCreateColumn(col: DatabaseTableColumn): string {
   return tokens.join(" ");
 }
 
+function generateConstraintScript(con: DatabaseTableColumnConstraint) {
+  if (con.primaryKey) {
+    return `PRIMARY KEY (${con.primaryColumns?.map(escapeIdentity).join(", ")})`;
+  } else if (con.unique) {
+    return `UNIQUE (${con.uniqueColumns?.map(escapeIdentity).join(", ")})`;
+  } else if (con.checkExpression !== undefined) {
+    return `CHECK (${con.checkExpression})`;
+  } else if (con.foreignKey) {
+    return (
+      `FOREIGN KEY (${con.foreignKey.columns?.map(escapeIdentity).join(", ")}) ` +
+      `REFERENCES ${escapeIdentity(con.foreignKey.foreignTableName ?? "")} ` +
+      `(${con.foreignKey.foreignColumns?.map(escapeIdentity).join(", ")})`
+    );
+  }
+}
+
 export default function generateSqlSchemaChange(
   change: DatabaseTableSchemaChange
 ): string[] {
@@ -137,6 +156,14 @@ export default function generateSqlSchemaChange(
             col.new.name
           )}`
         );
+      }
+    }
+  }
+
+  for (const con of change.constraints) {
+    if (con.new) {
+      if (isCreateScript) {
+        lines.push(generateConstraintScript(con.new));
       }
     }
   }

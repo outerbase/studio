@@ -1,6 +1,5 @@
 import OpacityLoading from "@gui/components/loading-opacity";
 import { useTabsContext } from "@gui/components/windows-tab";
-import SqlEditor from "@gui/components/sql-editor";
 import SchemaEditor, {
   DatabaseTableSchemaChange,
 } from "@gui/components/schema-editor";
@@ -11,12 +10,6 @@ import {
   AlertDialogFooter,
 } from "@gui/components/ui/alert-dialog";
 import { Button } from "@gui/components/ui/button";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@gui/components/ui/resizable";
-import { Separator } from "@gui/components/ui/separator";
 import generateSqlSchemaChange from "@gui/lib/sql-generate.schema";
 import { LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -34,6 +27,7 @@ const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
     new: "",
   },
   columns: [],
+  constraints: [],
   createScript: "",
 };
 
@@ -63,6 +57,7 @@ export default function SchemaEditorTab({
               new: structuredClone(col),
             })),
             constraints: (schema.constraints ?? []).map((con) => ({
+              id: window.crypto.randomUUID(),
               old: con,
               new: structuredClone(con),
             })),
@@ -132,6 +127,11 @@ export default function SchemaEditorTab({
             new: structuredClone(col.old),
           }))
           .filter((col) => col.old),
+        constraints: prev.constraints.map((con) => ({
+          id: window.crypto.randomUUID(),
+          old: con.old,
+          new: structuredClone(con.old),
+        })),
       };
     });
   }, [setSchema]);
@@ -164,26 +164,12 @@ export default function SchemaEditorTab({
         </AlertDialogContent>
       </AlertDialog>
 
-      <ResizablePanelGroup direction="vertical">
-        <ResizablePanel>
-          <SchemaEditor
-            value={schema}
-            onChange={setSchema}
-            onSave={onSaveToggle}
-            onDiscard={onDiscard}
-          />
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel collapsible>
-          <div className="flex flex-col h-full">
-            <div className="px-3 py-2 text-xs font-semibold">Preview</div>
-            <Separator />
-            <div className="grow overflow-hidden">
-              <SqlEditor value={previewScript.join(";\n")} readOnly />
-            </div>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <SchemaEditor
+        value={schema}
+        onChange={setSchema}
+        onSave={onSaveToggle}
+        onDiscard={onDiscard}
+      />
     </>
   );
 }

@@ -63,7 +63,7 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
           setLoading(false);
         });
     },
-    [databaseDriver, updateTableList, setError]
+    [databaseDriver, updateTableList, setError, updateTableSchema]
   );
 
   useEffect(() => {

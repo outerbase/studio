@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@studio/components/ui/button";
 import { SavedConnectionStorage } from "@studio/app/connect/saved-connection-storage";
 import { cn } from "@studio/lib/utils";
