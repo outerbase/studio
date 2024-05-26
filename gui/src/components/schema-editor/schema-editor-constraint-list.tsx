@@ -35,9 +35,11 @@ type ConstraintChangeHandler = (
 function ColumnCheck({
   constraint,
   onChange,
+  disabled,
 }: Readonly<{
   constraint: DatabaseTableColumnConstraint;
   onChange: ConstraintChangeHandler;
+  disabled?: boolean;
 }>) {
   return (
     <>
@@ -52,6 +54,7 @@ function ColumnCheck({
               checkExpression: e.currentTarget.value,
             });
           }}
+          readOnly={disabled}
           value={constraint.checkExpression}
           className="font-mono p-2 w-full outline-none"
         />
@@ -63,9 +66,11 @@ function ColumnCheck({
 function ColumnForeignKey({
   constraint,
   onChange,
+  disabled,
 }: Readonly<{
   constraint: DatabaseTableColumnConstraint;
   onChange: ConstraintChangeHandler;
+  disabled?: boolean;
 }>) {
   const { columns } = useColumnList();
   const { schema } = useSchema();
@@ -131,7 +136,7 @@ function ColumnForeignKey({
       <td className="border">
         <TableCombobox
           borderless
-          disabled
+          disabled={disabled}
           onChange={onFkTableNameChange}
           value={constraint.foreignKey?.foreignTableName}
         />
@@ -139,12 +144,14 @@ function ColumnForeignKey({
       <td className="border">
         <div className="p-1 px-2 flex gap-2 items-center">
           <ColumnListEditor
+            disabled={disabled}
             value={constraint.foreignKey?.columns ?? []}
             columns={columnMemo}
             onChange={onConstraintChange}
           />
           |
           <ColumnListEditor
+            disabled={disabled}
             value={constraint.foreignKey?.foreignColumns ?? []}
             columns={fkColumnMemo}
             onChange={onFkConstraintChange}
@@ -158,9 +165,11 @@ function ColumnForeignKey({
 function ColumnPrimaryKey({
   constraint,
   onChange,
+  disabled,
 }: Readonly<{
   constraint: DatabaseTableColumnConstraint;
   onChange: ConstraintChangeHandler;
+  disabled?: boolean;
 }>) {
   const { columns } = useColumnList();
 
@@ -184,6 +193,7 @@ function ColumnPrimaryKey({
       <td className="border" colSpan={2}>
         <div className="px-2 p-1 flex gap-2">
           <ColumnListEditor
+            disabled={disabled}
             value={constraint.primaryColumns ?? []}
             columns={columnMemo}
             onChange={onConstraintChange}
@@ -197,9 +207,11 @@ function ColumnPrimaryKey({
 function ColumnUnique({
   constraint,
   onChange,
+  disabled,
 }: Readonly<{
   constraint: DatabaseTableColumnConstraint;
   onChange: ConstraintChangeHandler;
+  disabled?: boolean;
 }>) {
   const { columns } = useColumnList();
 
@@ -223,6 +235,7 @@ function ColumnUnique({
       <td className="border" colSpan={2}>
         <div className="px-2 p-1 flex gap-2">
           <ColumnListEditor
+            disabled={disabled}
             value={constraint.uniqueColumns ?? []}
             columns={columnMemo}
             onChange={onConstraintChange}
@@ -274,10 +287,12 @@ function RemovableConstraintItem({
 function ColumnItemBody({
   onChange,
   constraint,
+  disabled,
 }: PropsWithChildren<{
   idx: number;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   constraint: DatabaseTableConstraintChange;
+  disabled?: boolean;
 }>) {
   const onChangeConstraint = useCallback(
     (newConstraint: DatabaseTableColumnConstraint) => {
@@ -302,6 +317,7 @@ function ColumnItemBody({
   if (currentConstraint.foreignKey) {
     return (
       <ColumnForeignKey
+        disabled={disabled}
         constraint={currentConstraint}
         onChange={onChangeConstraint}
       />
@@ -311,6 +327,7 @@ function ColumnItemBody({
   if (currentConstraint.primaryKey) {
     return (
       <ColumnPrimaryKey
+        disabled={disabled}
         constraint={currentConstraint}
         onChange={onChangeConstraint}
       />
@@ -320,6 +337,7 @@ function ColumnItemBody({
   if (currentConstraint.unique) {
     return (
       <ColumnUnique
+        disabled={disabled}
         constraint={currentConstraint}
         onChange={onChangeConstraint}
       />
@@ -329,6 +347,7 @@ function ColumnItemBody({
   if (currentConstraint.checkExpression !== undefined) {
     return (
       <ColumnCheck
+        disabled={disabled}
         constraint={currentConstraint}
         onChange={onChangeConstraint}
       />
@@ -342,14 +361,21 @@ function ColumnItem({
   constraint,
   onChange,
   idx,
+  disabled,
 }: Readonly<{
   constraint: DatabaseTableConstraintChange;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   idx: number;
+  disabled?: boolean;
 }>) {
   return (
     <RemovableConstraintItem idx={idx} onChange={onChange}>
-      <ColumnItemBody constraint={constraint} onChange={onChange} idx={idx} />
+      <ColumnItemBody
+        constraint={constraint}
+        onChange={onChange}
+        idx={idx}
+        disabled={disabled}
+      />
     </RemovableConstraintItem>
   );
 }
@@ -401,6 +427,7 @@ export default function SchemaEditorConstraintList({
                 idx={idx}
                 constraint={constraint}
                 onChange={onChange}
+                disabled={disabled}
               />
             );
           })}
