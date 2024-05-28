@@ -1,4 +1,3 @@
-"use client";
 import { useCallback, useState } from "react";
 import ConnectionDialogContent from "./saved-connection-content";
 import SaveConnectionType from "./saved-connection-type";
