@@ -1,14 +1,13 @@
 import "dotenv/config";
 
 import { migrate } from "drizzle-orm/libsql/migrator";
-import { db, connection } from ".";
+import { get_database } from ".";
 
 (async function () {
+  const db = get_database();
+
   // This will run migrations on the database, skipping the ones already applied
   await migrate(db, { migrationsFolder: "./drizzle" });
-
-  // Don't forget to close the connection, otherwise the script will hang
-  connection.close();
 })()
   .catch(console.error)
   .finally(() => {

@@ -3,10 +3,10 @@ import withDatabaseOperation from "@studio/lib/with-database-ops";
 import { NextResponse } from "next/server";
 import { database } from "@studio/db/schema";
 import { eq } from "drizzle-orm";
-import { db } from "@studio/db";
 import { encrypt } from "@studio/lib/encryption-edge";
 import { env } from "@studio/env";
 import { SavedConnectionItemConfig } from "@studio/app/connect/saved-connection-storage";
+import { get_database } from "@studio/db";
 
 export const runtime = "edge";
 
@@ -40,6 +40,7 @@ export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
 export const DELETE = withDatabaseOperation(
   async ({ database: databaseInfo, user }) => {
     const isOriginalOwner = databaseInfo.userId === user.id;
+    const db = get_database();
 
     if (!isOriginalOwner) {
       return NextResponse.json({ error: "Unauthorization" }, { status: 500 });
@@ -59,6 +60,7 @@ export const DELETE = withDatabaseOperation(
 export const PUT = withDatabaseOperation(
   async ({ database: databaseInfo, body, user }) => {
     const parsed = databaseSchema.safeParse(body);
+    const db = get_database();
 
     if (!parsed.success) {
       return NextResponse.json(

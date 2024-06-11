@@ -1,4 +1,4 @@
-import { db } from "@studio/db";
+import { get_database } from "@studio/db";
 import { user } from "@studio/db/schema";
 import { database_role, database_user_role } from "@studio/db/schema-database";
 import { DatabaseOperationHandler } from "@studio/lib/with-database-ops";
@@ -11,6 +11,7 @@ const handleUserList: DatabaseOperationHandler = async ({
 }) => {
   const assigned_user = alias(user, "assigned_user");
 
+  const db = get_database();
   const users = await db
     .select({
       id: user.id,
