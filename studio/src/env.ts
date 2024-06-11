@@ -7,9 +7,9 @@ export const appVersion = pkg.version;
 
 export const env = createEnv({
   server: {
-    BASE_URL: z.string().min(1),
-    DATABASE_URL: z.string().min(1),
-    DATABASE_AUTH_TOKEN: z.string().min(1),
+    BASE_URL: z.string().min(1).optional(),
+    DATABASE_URL: z.string().min(1).optional(),
+    DATABASE_AUTH_TOKEN: z.string().min(1).optional(),
 
     GITHUB_CLIENT_ID: z.string().optional(),
     GITHUB_CLIENT_SECRET: z.string().optional(),

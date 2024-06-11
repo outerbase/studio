@@ -8,9 +8,9 @@ import {
 import { User } from "lucia";
 import withUser from "./with-user";
 import { NextResponse } from "next/server";
-import { db } from "@studio/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import { get_database } from "@studio/db";
 
 export interface DatabasePermission {
   isOwner: boolean;
@@ -36,6 +36,7 @@ export default function withDatabaseOperation<T = unknown>(
   return withUser<{ params: { database_id: string } }>(
     async ({ user, req, params }) => {
       const databaseId = params.params.database_id;
+      const db = get_database();
 
       if (!databaseId) {
         return NextResponse.json(

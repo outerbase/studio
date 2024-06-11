@@ -1,7 +1,7 @@
 import "@libsqlstudio/gui/css";
 
 import type { SavedConnectionLabel } from "@studio/app/connect/saved-connection-storage";
-import { db } from "@studio/db";
+import { get_database } from "@studio/db";
 import { database } from "@studio/db/schema";
 import { getSessionFromCookie } from "@studio/lib/auth";
 import { and, eq, isNotNull } from "drizzle-orm";
@@ -22,6 +22,7 @@ export default async function SessionPage({
     return <div>Something wrong</div>;
   }
 
+  const db = get_database();
   const databaseId = searchParams?.p;
   const databaseInfo = await db.query.database.findFirst({
     where: and(eq(database.id, databaseId), isNotNull(database.id)),
