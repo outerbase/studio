@@ -1,4 +1,4 @@
-import { db } from "@studio/db";
+import { get_database } from "@studio/db";
 import { user, user_oauth } from "@studio/db/schema";
 import { Provider, lucia } from "@studio/lib/auth";
 import { generateId } from "lucia";
@@ -13,6 +13,7 @@ interface UserAuth {
 export const save = async (data: UserAuth, provider: Provider) => {
   const { id, name, email } = data;
   const headerStore = headers();
+  const db = get_database();
 
   const existingUser = await db.query.user_oauth.findFirst({
     where: (field, op) =>

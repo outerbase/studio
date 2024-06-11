@@ -3,9 +3,17 @@ import * as schema from "./schema";
 import { createClient } from "@libsql/client/web";
 import { env } from "@studio/env";
 
-export const connection = createClient({
-  url: env.DATABASE_URL,
-  authToken: env.DATABASE_AUTH_TOKEN,
-});
+export function get_connection() {
+  if (env.DATABASE_URL) {
+    return createClient({
+      url: env.DATABASE_URL,
+      authToken: env.DATABASE_AUTH_TOKEN,
+    });
+  }
 
-export const db = drizzle(connection, { schema });
+  throw new Error("Database is not setup");
+}
+
+export function get_database() {
+  return drizzle(get_connection(), { schema });
+}

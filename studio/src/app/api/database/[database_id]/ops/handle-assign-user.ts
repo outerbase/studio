@@ -1,5 +1,5 @@
 import { HttpStatus } from "@studio/constants/http-status";
-import { db } from "@studio/db";
+import { get_database } from "@studio/db";
 import { database_role, database_user_role } from "@studio/db/schema-database";
 import { user as userTable } from "@studio/db/schema-user";
 import { ApiError } from "@studio/lib/api-error";
@@ -12,6 +12,7 @@ const handleAssignUser: DatabaseOperationHandler<
   RequestDatabaseAssignUser
 > = async ({ database: databaseInfo, body, user, permission }) => {
   const { roleId, userId } = body;
+  const db = get_database();
 
   // Validate if user input all fields
   if (!userId || !roleId)

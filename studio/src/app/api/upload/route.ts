@@ -4,7 +4,6 @@ import withUser from "@studio/lib/with-user";
 import { NextResponse } from "next/server";
 import { ok, err } from "@justmiracle/result";
 import { R2 } from "@studio/lib/r2";
-import { db } from "@studio/db";
 import { user as userTable, user_file } from "@studio/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { generateId } from "lucia";
@@ -12,6 +11,7 @@ import { ApiError } from "@studio/lib/api-error";
 import { HttpStatus } from "@studio/constants/http-status";
 import { env } from "@studio/env";
 import { filetypeinfo } from "magic-bytes.js";
+import { get_database } from "@studio/db";
 
 export const runtime = "edge";
 
@@ -34,6 +34,7 @@ export const POST = withUser(async ({ req, user }) => {
     });
   }
 
+  const db = get_database();
   const formData = await req.formData().then(ok).catch(err);
 
   if (formData.error) {

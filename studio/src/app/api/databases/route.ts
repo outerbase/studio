@@ -1,5 +1,5 @@
 import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
-import { db } from "@studio/db";
+import { get_database } from "@studio/db";
 import {
   database,
   database_user_role,
@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 export const runtime = "edge";
 
 export const GET = withUser(async ({ user }) => {
+  const db = get_database();
   const dbs = await db
     .select()
     .from(database_user_role)

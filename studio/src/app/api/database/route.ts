@@ -1,12 +1,12 @@
 import zod from "zod";
 import withUser from "@studio/lib/with-user";
-import { db } from "@studio/db";
 import { generateId } from "lucia";
 import { database, database_role, database_user_role } from "@studio/db/schema";
 import { NextResponse } from "next/server";
 import { env } from "@studio/env";
 import { encrypt } from "@studio/lib/encryption-edge";
 import { SavedConnectionItem } from "@studio/app/connect/saved-connection-storage";
+import { get_database } from "@studio/db";
 
 export const runtime = "edge";
 
@@ -43,6 +43,7 @@ export const POST = withUser(async ({ user, req }) => {
   const now = Date.now();
 
   try {
+    const db = get_database();
     await db.batch([
       db.insert(database).values({
         id: databaseId,

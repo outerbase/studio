@@ -1,7 +1,7 @@
 import { Lucia } from "lucia";
 import { GitHub, Google } from "arctic";
 import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
-import { connection } from "@studio/db";
+import { get_connection } from "@studio/db";
 import { env } from "@studio/env";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
@@ -29,7 +29,7 @@ export const google = new Google(
   `${env.BASE_URL}/login/google/callback`
 );
 
-const adapter = new LibSQLAdapter(connection, {
+const adapter = new LibSQLAdapter(get_connection(), {
   user: "user",
   session: "user_session",
 });
