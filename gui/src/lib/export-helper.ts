@@ -44,3 +44,38 @@ export function exportRowsToExcel(records: unknown[][]) {
 
   return result.join("\r\n");
 }
+
+export function exportRowsToJson(
+  headers: string[],
+  records: unknown[][]
+): string {
+  const recordsWithBigIntAsString = records.map((record) =>
+    record.map((value) =>
+      typeof value === "bigint" ? value.toString() : value
+    )
+  );
+
+  const recordsAsObjects = recordsWithBigIntAsString.map((record) =>
+    record.reduce<Record<string, unknown>>((obj, value, index) => {
+      const header = headers[index];
+      if (header !== undefined) {
+        obj[header] = value;
+      }
+      return obj;
+    }, {})
+  );
+
+  return JSON.stringify(recordsAsObjects, null, 2);
+}
+
+export function getFormatHandlers(
+  records: unknown[][],
+  headers: string[],
+  tableName: string
+): Record<string, (() => string) | undefined> {
+  return {
+    csv: () => exportRowsToExcel(records),
+    json: () => exportRowsToJson(headers, records),
+    sql: () => exportRowsToSqlInsert(tableName, headers, records),
+  };
+}

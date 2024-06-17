@@ -8,17 +8,42 @@ import {
   SelectValue,
 } from "../ui/select";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { getFormatHandlers } from "@gui/lib/export-helper";
 
 export default function ExportResultButton({
   data,
 }: {
   data: OptimizeTableState;
 }) {
+  const [format, setFormat] = useState<string | null>(null);
+
   const onExportClicked = useCallback(() => {
-    // do something here
-    // data has all the information you need to do.
-  }, []);
+    if (!format) return;
+
+    let content = "";
+    const headers = data.getHeaders().map((header) => header.name);
+    const records = data
+      .getAllRows()
+      .map((row) => headers.map((header) => row.raw[header]));
+
+    const tableName = ""; //How do i get Table name
+
+    const formatHandlers = getFormatHandlers(records, headers, tableName);
+
+    const handler = formatHandlers[format];
+    if (handler) {
+      content = handler();
+    }
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `export.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [format, data]);
 
   return (
     <Popover>
@@ -30,7 +55,7 @@ export default function ExportResultButton({
       <PopoverContent className="p-0">
         <div className="p-4">
           <div className="mb-2 font-bold">Export</div>
-          <Select>
+          <Select onValueChange={setFormat}>
             <SelectTrigger>
               <SelectValue placeholder="Select export format" />
             </SelectTrigger>

@@ -335,6 +335,10 @@ export default class OptimizeTableState {
     return !!this.data[index]?.isRemoved;
   }
 
+  getAllRows() {
+    return this.data;
+  }
+
   // ------------------------------------------------
   // Handle focus logic
   // ------------------------------------------------
