@@ -1,4 +1,8 @@
-import { escapeIdentity, escapeSqlValue } from "@gui/sqlite/sql-helper";
+import {
+  escapeCsvValue,
+  escapeIdentity,
+  escapeSqlValue,
+} from "@gui/sqlite/sql-helper";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],
@@ -68,13 +72,34 @@ export function exportRowsToJson(
   return JSON.stringify(recordsAsObjects, null, 2);
 }
 
+export function exportRowsToCsv(
+  headers: string[],
+  records: unknown[][]
+): string {
+  const result: string[] = [];
+
+  // Add headers
+  const escapedHeaders = headers.map(escapeCsvValue);
+  const headerLine = escapedHeaders.join(",");
+  result.push(headerLine);
+
+  // Add records
+  for (const record of records) {
+    const escapedRecord = record.map(escapeCsvValue);
+    const recordLine = escapedRecord.join(",");
+    result.push(recordLine);
+  }
+
+  return result.join("\n");
+}
+
 export function getFormatHandlers(
   records: unknown[][],
   headers: string[],
   tableName: string
 ): Record<string, (() => string) | undefined> {
   return {
-    csv: () => exportRowsToExcel(records),
+    csv: () => exportRowsToCsv(headers, records),
     json: () => exportRowsToJson(headers, records),
     sql: () => exportRowsToSqlInsert(tableName, headers, records),
   };

@@ -27,7 +27,7 @@ export default function ExportResultButton({
       .getAllRows()
       .map((row) => headers.map((header) => row.raw[header]));
 
-    const tableName = ""; //How do i get Table name
+    const tableName = "UnknownTable"; //TODO: replace with actual table name
 
     const formatHandlers = getFormatHandlers(records, headers, tableName);
 
