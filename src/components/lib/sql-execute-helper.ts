@@ -1,6 +1,6 @@
 import OptimizeTableState, {
   OptimizeTableRowValue,
-} from "@/components/table-optimized/OptimizeTableState";
+} from "@/components/gui/table-optimized/OptimizeTableState";
 import {
   BaseDriver,
   DatabaseTableOperation,

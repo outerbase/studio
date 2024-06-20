@@ -16,10 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { convertSqliteType } from "@/sqlite/sql-helper";
+import { convertSqliteType } from "@/drivers/sqlite/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./column-default-value-input";
-import { checkSchemaColumnChange } from "@/lib/sql-generate.schema";
+import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,

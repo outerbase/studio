@@ -2,7 +2,7 @@ import {
   escapeCsvValue,
   escapeIdentity,
   escapeSqlValue,
-} from "@/sqlite/sql-helper";
+} from "@/drivers/sqlite/sql-helper";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],

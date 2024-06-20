@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import ResultTable from "@/components/query-result-table";
+import ResultTable from "@/components/gui/query-result-table";
 import { Button } from "@/components/ui/button";
 import {
   LucideArrowLeft,
@@ -17,7 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { commitChange } from "@/lib/sql-execute-helper";
+import { commitChange } from "@/components/lib/sql-execute-helper";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +35,7 @@ import OpacityLoading from "../loading-opacity";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import ResultStats from "../result-stat";
-import isEmptyResultStats from "@/lib/empty-stats";
+import isEmptyResultStats from "@/components/lib/empty-stats";
 
 interface TableDataContentProps {
   tableName: string;

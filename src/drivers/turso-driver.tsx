@@ -6,12 +6,12 @@ import {
 } from "@libsql/client/web";
 import { createClient as createClientStateless } from "libsql-stateless-easy";
 import {
-  SqliteLikeBaseDriver,
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
-  convertSqliteType,
-} from "@/driver";
+} from "@/drivers/base-driver";
+import { convertSqliteType } from "./sqlite/sql-helper";
+import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
 export function transformRawResult(raw: ResultSet): DatabaseResultSet {
   const headerSet = new Set();

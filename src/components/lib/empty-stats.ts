@@ -1,4 +1,4 @@
-import { DatabaseResultStat } from "@/driver";
+import { DatabaseResultStat } from "@/drivers/base-driver";
 
 export default function isEmptyResultStats(stats: DatabaseResultStat) {
   return (

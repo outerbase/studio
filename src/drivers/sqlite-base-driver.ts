@@ -1,3 +1,4 @@
+import { validateOperation } from "@/components/lib/validation";
 import type {
   Statement,
   DatabaseResultSet,
@@ -17,11 +18,10 @@ import {
   generateDeleteStatement,
   generateUpdateStatement,
   generateSelectOneWithConditionStatement,
-} from "./../sqlite/sql-helper";
+} from "@/drivers/sqlite/sql-helper";
 
-import { parseCreateTableScript } from "./../sqlite/sql-parse-table";
-import { parseCreateTriggerScript } from "./../sqlite/sql-parse-trigger";
-import { validateOperation } from "./../lib/validation";
+import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
+import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
 
 export abstract class SqliteLikeBaseDriver extends BaseDriver {
   protected escapeId(id: string) {

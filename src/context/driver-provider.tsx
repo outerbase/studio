@@ -1,10 +1,10 @@
 import type { BaseDriver } from "@/drivers/base-driver";
-import type { CollaborationDriver } from "@/drivers/collaboration-driver";
+import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { type PropsWithChildren, createContext, useContext } from "react";
 
 const DriverContext = createContext<{
   databaseDriver: BaseDriver;
-  collaborationDriver?: CollaborationDriver;
+  collaborationDriver?: CollaborationBaseDriver;
 }>({
   databaseDriver: {} as unknown as BaseDriver,
 });
@@ -19,7 +19,7 @@ export function DriverProvider({
   collaborationDriver,
 }: PropsWithChildren<{
   driver: BaseDriver;
-  collaborationDriver?: CollaborationDriver;
+  collaborationDriver?: CollaborationBaseDriver;
 }>) {
   return (
     <DriverContext.Provider

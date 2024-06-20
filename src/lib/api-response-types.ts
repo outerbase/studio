@@ -1,11 +1,10 @@
 import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
-
 import {
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
-} from "@/driver";
+} from "@/drivers/base-driver";
 
 export interface ApiOpsBatchResponse {
   error?: string;

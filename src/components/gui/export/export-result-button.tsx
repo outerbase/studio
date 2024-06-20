@@ -9,7 +9,7 @@ import {
 } from "../../ui/select";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useCallback, useState } from "react";
-import { getFormatHandlers } from "@/lib/export-helper";
+import { getFormatHandlers } from "@/components/lib/export-helper";
 
 export default function ExportResultButton({
   data,

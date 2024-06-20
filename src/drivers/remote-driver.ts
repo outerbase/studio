@@ -8,7 +8,7 @@ import {
   DatabaseTableSchema,
   DatabaseTriggerSchema,
   SelectFromTableOptions,
-} from "@/driver";
+} from "@/drivers/base-driver";
 import {
   ApiOpsBatchResponse,
   ApiOpsQueryResponse,

@@ -1,8 +1,8 @@
-import { MultipleQueryProgress } from "@/lib/multiple-query";
+import { MultipleQueryProgress } from "@/components/lib/multiple-query";
 import { useEffect, useState } from "react";
 import CodePreview from "./code-preview";
 import ResultStats from "./result-stat";
-import isEmptyResultStats from "@/lib/empty-stats";
+import isEmptyResultStats from "@/components/lib/empty-stats";
 
 function formatTimeAgo(ms: number) {
   if (ms < 1000) {

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import { LucidePlay } from "lucide-react";
-import SqlEditor from "@/components/sql-editor";
+import SqlEditor from "@/components/gui/sql-editor";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -9,18 +9,21 @@ import {
 } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import ResultTable from "@/components/query-result-table";
+import ResultTable from "@/components/gui/query-result-table";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { selectStatementFromPosition } from "@/sqlite/sql-helper";
+import { selectStatementFromPosition } from "@/drivers/sqlite/sql-helper";
 import QueryProgressLog from "../query-progress-log";
 import { useAutoComplete } from "@/context/auto-complete-provider";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { MultipleQueryProgress, multipleQuery } from "@/lib/multiple-query";
-import { DatabaseResultStat } from "@/driver";
+import {
+  MultipleQueryProgress,
+  multipleQuery,
+} from "@/components/lib/multiple-query";
+import { DatabaseResultStat } from "@/drivers/base-driver";
 import ResultStats from "../result-stat";
-import isEmptyResultStats from "@/lib/empty-stats";
+import isEmptyResultStats from "@/components/lib/empty-stats";
 import ExportResultButton from "../export/export-result-button";
 
 export default function QueryWindow() {

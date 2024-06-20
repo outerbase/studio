@@ -1,12 +1,15 @@
-import GenericCell from "@/components/table-cell/GenericCell";
-import NumberCell from "@/components/table-cell/NumberCell";
-import TextCell from "@/components/table-cell/TextCell";
+import GenericCell from "@/components/gui/table-cell/GenericCell";
+import NumberCell from "@/components/gui/table-cell/NumberCell";
+import TextCell from "@/components/gui/table-cell/TextCell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
-} from "@/components/table-optimized";
-import OptimizeTableState from "@/components/table-optimized/OptimizeTableState";
-import { exportRowsToExcel, exportRowsToSqlInsert } from "@/lib/export-helper";
+} from "@/components/gui/table-optimized";
+import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import {
+  exportRowsToExcel,
+  exportRowsToSqlInsert,
+} from "@/components/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import {
   StudioContextMenuItem,

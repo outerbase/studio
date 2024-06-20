@@ -1,8 +1,8 @@
 import {
   DatabaseTableColumnChange,
   DatabaseTableSchemaChange,
-} from "@/components/schema-editor";
-import { escapeIdentity, escapeSqlValue } from "@/sqlite/sql-helper";
+} from "@/components/gui/schema-editor";
+import { escapeIdentity, escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 import deepEqual from "deep-equal";
 import {
   DatabaseTableColumn,

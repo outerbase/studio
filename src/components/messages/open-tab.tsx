@@ -1,4 +1,4 @@
-import type { WindowTabItemProps } from "@/components/windows-tab";
+import type { WindowTabItemProps } from "@/components/gui/windows-tab";
 import { MessageChannelName } from "./const";
 import type { Dispatch, SetStateAction } from "react";
 import {
@@ -8,11 +8,11 @@ import {
   LucideUser,
   LucideCog,
 } from "lucide-react";
-import QueryWindow from "@/components/tabs/query-tab";
-import SchemaEditorTab from "@/components/tabs/schema-editor-tab";
-import TableDataWindow from "@/components/tabs/table-data-tab";
-import UsersTab from "@/components/tabs/users-tabs";
-import TriggerTab from "@/components/tabs/trigger-tab";
+import QueryWindow from "@/components/gui/tabs/query-tab";
+import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
+import TableDataWindow from "@/components/gui/tabs/table-data-tab";
+import UsersTab from "@/components/gui/tabs/users-tabs";
+import TriggerTab from "@/components/gui/tabs/trigger-tab";
 
 interface OpenTableTab {
   type: "table";

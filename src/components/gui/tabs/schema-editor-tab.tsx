@@ -1,8 +1,8 @@
-import OpacityLoading from "@/components/loading-opacity";
-import { useTabsContext } from "@/components/windows-tab";
+import OpacityLoading from "@/components/gui/loading-opacity";
+import { useTabsContext } from "@/components/gui/windows-tab";
 import SchemaEditor, {
   DatabaseTableSchemaChange,
-} from "@/components/schema-editor";
+} from "@/components/gui/schema-editor";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import generateSqlSchemaChange from "@/lib/sql-generate.schema";
+import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
 import { LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";

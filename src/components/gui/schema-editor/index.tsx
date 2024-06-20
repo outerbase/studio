@@ -6,7 +6,7 @@ import SchemaEditorColumnList from "./schema-editor-column-list";
 import { Input } from "../../ui/input";
 import generateSqlSchemaChange, {
   checkSchemaChange,
-} from "@/lib/sql-generate.schema";
+} from "@/components/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,

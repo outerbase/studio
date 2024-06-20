@@ -1,4 +1,4 @@
-import { StudioExtension } from "@/extension";
+import { StudioExtension } from "@/components/gui/studio";
 import type { PropsWithChildren, ReactElement } from "react";
 import { createContext, useContext, useMemo } from "react";
 

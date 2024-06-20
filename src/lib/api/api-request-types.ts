@@ -1,4 +1,7 @@
-import { DatabaseTableOperation, SelectFromTableOptions } from "@/driver";
+import {
+  DatabaseTableOperation,
+  SelectFromTableOptions,
+} from "@/drivers/base-driver";
 import { InStatement } from "@libsql/client/web";
 
 export interface RequestOperationBatch {

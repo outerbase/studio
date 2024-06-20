@@ -6,10 +6,10 @@ import {
 } from "@/components/ui/resizable";
 import { useEffect, useMemo, useState } from "react";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
-import useMessageListener from "@/hooks/useMessageListener";
+import useMessageListener from "@/components/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
-import QueryWindow from "@/components/tabs/query-tab";
+import QueryWindow from "@/components/gui/tabs/query-tab";
 import { LucideCode, LucideDatabase, LucideSettings } from "lucide-react";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";

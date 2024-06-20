@@ -1,4 +1,4 @@
-import { selectArrayFromIndexList } from "@/lib/export-helper";
+import { selectArrayFromIndexList } from "@/components/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
 import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 import {
