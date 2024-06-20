@@ -137,3 +137,21 @@ export function selectStatementFromPosition(
   }
   return undefined;
 }
+
+export function escapeCsvValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  const stringValue = value.toString();
+  const needsEscaping =
+    stringValue.includes(",") ||
+    stringValue.includes('"') ||
+    stringValue.includes("\n");
+
+  if (needsEscaping) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+
+  return stringValue;
+}

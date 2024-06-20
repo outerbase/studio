@@ -21,6 +21,7 @@ import { MultipleQueryProgress, multipleQuery } from "@gui/lib/multiple-query";
 import { DatabaseResultStat } from "@gui/driver";
 import ResultStats from "../result-stat";
 import isEmptyResultStats from "@gui/lib/empty-stats";
+import ExportResultButton from "../export/export-result-button";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
@@ -130,7 +131,12 @@ export default function QueryWindow() {
             {stats && !isEmptyResultStats(stats) && (
               <div className="shrink-0">
                 <Separator />
-                <ResultStats stats={stats} />
+                <div className="flex p-1">
+                  <ResultStats stats={stats} />
+                  <div>
+                    <ExportResultButton data={data} />
+                  </div>
+                </div>
               </div>
             )}
           </div>
