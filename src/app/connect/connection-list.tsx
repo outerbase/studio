@@ -150,11 +150,13 @@ export default function ConnectionList({
     [setLocalSavedConns, setEditConnection, setRemoteSavedConns]
   );
 
+  let dialogComponent: JSX.Element | null = null;
+
   // ---------------------------------------------
   // Display Part
   // ---------------------------------------------
   if (editConnection) {
-    return (
+    dialogComponent = (
       <EditSavedConnection
         onClose={() => {
           setEditConnection(undefined);
@@ -167,7 +169,7 @@ export default function ConnectionList({
   }
 
   if (showAddConnection) {
-    return (
+    dialogComponent = (
       <SaveConnection
         driver={showAddConnection}
         user={user}
@@ -178,10 +180,20 @@ export default function ConnectionList({
   }
 
   if (quickConnect) {
-    return (
+    dialogComponent = (
       <QuickConnect
         driver={quickConnect}
         onClose={() => setQuickConnect(null)}
+      />
+    );
+  }
+
+  if (removeConnection) {
+    dialogComponent = (
+      <RemoveSavedConnection
+        conn={removeConnection}
+        onClose={onRemoveConnectionClose}
+        onRemove={onRemoveConnectionComplete}
       />
     );
   }
@@ -201,13 +213,7 @@ export default function ConnectionList({
         </DriverDropdown>
       </div>
 
-      {removeConnection && (
-        <RemoveSavedConnection
-          conn={removeConnection}
-          onClose={onRemoveConnectionClose}
-          onRemove={onRemoveConnectionComplete}
-        />
-      )}
+      {dialogComponent}
 
       <ConnectionListSection
         name="Local"

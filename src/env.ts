@@ -17,7 +17,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
 
-    ENCRYPTION_KEY: z.string().min(30),
+    ENCRYPTION_KEY: z.string().min(30).optional(),
 
     // R2
     // Don't include the bucket name in the URL

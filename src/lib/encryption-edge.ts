@@ -20,7 +20,9 @@ function arrayBufferToBase64(buffer: Uint8Array) {
   return btoa(binary);
 }
 
-export async function encrypt(keyInBase64: string, text: string) {
+export async function encrypt(keyInBase64: string | undefined, text: string) {
+  if (!keyInBase64) throw new Error("Encryption key is not provided");
+
   const iv = crypto.getRandomValues(new Uint8Array(RANDOM_IV_LENGTH));
   const encoded = new TextEncoder().encode(text);
   const keyBuffer = base64ToArrayBuffer(keyInBase64);
@@ -42,7 +44,9 @@ export async function encrypt(keyInBase64: string, text: string) {
   return arrayBufferToBase64(new Uint8Array([...iv, ...new Uint8Array(c)]));
 }
 
-export async function decrypt(keyInBase64: string, base64: string) {
+export async function decrypt(keyInBase64: string | undefined, base64: string) {
+  if (!keyInBase64) throw new Error("Encryption key is not provided");
+
   const key = await crypto.subtle.importKey(
     "raw",
     base64ToArrayBuffer(keyInBase64),

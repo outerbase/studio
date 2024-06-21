@@ -1,6 +1,11 @@
-import { LucideX } from "lucide-react";
 import { PropsWithChildren } from "react";
 import { DRIVER_DETAIL, SupportedDriver } from "./saved-connection-storage";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ConnectionDialogContent({
   children,
@@ -15,23 +20,27 @@ export default function ConnectionDialogContent({
   }>
 >) {
   return (
-    <div className="flex flex-col gap-4 p-8">
-      <div className="flex items-center mb-4">
-        <img
-          src={DRIVER_DETAIL[driver ?? "turso"].icon}
-          alt=""
-          className="w-8 h-8 rounded mr-2"
-        />
-        <h2 className="text-xl font-semibold grow">{title}</h2>
-        <button
-          className="bg-secondary w-8 h-8 flex justify-center items-center rounded-full"
-          onClick={onClose}
-        >
-          <LucideX className="w-5 h-5" />
-        </button>
-      </div>
-
-      {children}
-    </div>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) return onClose();
+      }}
+    >
+      <DialogContent className="lg:min-w-[600px] xl:min-w-[600px]">
+        <DialogTitle>
+          <div className="flex gap-2 items-center">
+            <img
+              src={DRIVER_DETAIL[driver ?? "turso"].icon}
+              alt=""
+              className="w-8 h-8 rounded mr-2"
+            />
+            <span>{title}</span>
+          </div>
+        </DialogTitle>
+        <DialogDescription>
+          <div className="flex flex-col gap-4 text-foreground">{children}</div>
+        </DialogDescription>
+      </DialogContent>
+    </Dialog>
   );
 }
