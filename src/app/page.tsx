@@ -1,6 +1,5 @@
-import TopbarProfile from "@/components/topbar-profile";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { getSessionFromCookie } from "@/lib/auth";
+import { buttonVariants } from "@/components/ui/button";
+import WebsiteLayout from "@/components/website-layout";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -11,32 +10,6 @@ export const metadata: Metadata = {
   title: "LibSQL Studio - LibSQL and rqlite client on your browser",
   description: "LibSQL Studio - LibSQL and rqlite client on your browser",
 };
-
-async function Topbar() {
-  const { user } = await getSessionFromCookie();
-
-  // console.log(foo);
-
-  return (
-    <header className="border-b">
-      <div className="mx-auto container flex">
-        <h1 className="text-lg p-2">
-          LibSQL <strong>Studio</strong>
-        </h1>
-        <div className="grow" />
-        {user ? (
-          <TopbarProfile user={user} />
-        ) : (
-          <div className="flex items-center">
-            <Link href="/login">
-              <Button>Sign In</Button>
-            </Link>
-          </div>
-        )}
-      </div>
-    </header>
-  );
-}
 
 function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   return (
@@ -49,16 +22,6 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
     >
       {title}
     </Link>
-  );
-}
-
-function Footer() {
-  return (
-    <div className="border-t py-4 text-sm">
-      <div className="mx-auto container">
-        © 2024 Visal .In. | LibSQL Studio
-      </div>
-    </div>
   );
 }
 
@@ -144,8 +107,7 @@ function FeatureItem({
 
 export default async function MainPage() {
   return (
-    <main>
-      <Topbar />
+    <WebsiteLayout>
       <HeroSection />
       <Screenshot />
       <div className="bg-zinc-800 py-12 mt-12">
@@ -224,8 +186,6 @@ export default async function MainPage() {
           </FeatureItem>
         </div>
       </div>
-
-      <Footer />
-    </main>
+    </WebsiteLayout>
   );
 }
