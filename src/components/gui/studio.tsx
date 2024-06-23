@@ -1,5 +1,4 @@
 "use client";
-import "./index.css";
 import MainScreen from "@/components/gui/main-connection";
 import { ConfigProvider } from "@/context/config-provider";
 import { DriverProvider } from "@/context/driver-provider";

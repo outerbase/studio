@@ -1,5 +1,3 @@
-import "@/css";
-
 import type { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
 import { get_database } from "@/db";
 import { database } from "@/db/schema";

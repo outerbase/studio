@@ -1,4 +1,3 @@
-import "@/css";
 import { Fragment } from "react";
 
 export default async function RootLayout({
