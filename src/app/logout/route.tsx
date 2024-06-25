@@ -1,10 +1,15 @@
 import { cookies } from "next/headers";
-import { getSessionFromCookie, lucia } from "@/lib/auth";
+import { getSessionFromCookie, LuciaAuth } from "@/lib/auth";
 
 export async function GET() {
   const { session } = await getSessionFromCookie();
 
   if (!session) {
+    return Response.json({});
+  }
+
+  const lucia = LuciaAuth.get();
+  if (!lucia) {
     return Response.json({});
   }
 

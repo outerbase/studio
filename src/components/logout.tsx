@@ -1,12 +1,18 @@
 "use server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getSessionFromCookie, lucia } from "@/lib/auth";
+import { getSessionFromCookie, LuciaAuth } from "@/lib/auth";
 
 export default async function logout() {
   const { session } = await getSessionFromCookie();
 
   if (!session) {
+    return {};
+  }
+
+  const lucia = LuciaAuth.get();
+
+  if (!lucia) {
     return {};
   }
 
