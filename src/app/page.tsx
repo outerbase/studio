@@ -126,7 +126,7 @@ export default async function MainPage() {
       <HeroSection />
       <Screenshot />
       <SupportDriver />
-      <div className="bg-zinc-800 py-12 mt-12">
+      <div className="bg-zinc-800 py-12">
         <div className="max-w-[900px] px-4 mx-auto flex flex-col gap-12">
           <FeatureItem reverse image="/data-editor.png">
             <h2 className="text-xl mb-4 font-semibold text-white">
