@@ -50,6 +50,13 @@
       "when": 1711462162993,
       "tag": "0006_whole_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1719458125825,
+      "tag": "0008_supreme_whistler",
+      "breakpoints": true
     }
   ]
 }
