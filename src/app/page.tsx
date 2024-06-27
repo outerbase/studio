@@ -16,7 +16,7 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
       href={url}
       className={cn(
         buttonVariants({ variant: "default", size: "lg" }),
-        "text-lg py-4 px-6"
+        "text-2xl p-6"
       )}
     >
       {title}
@@ -50,25 +50,19 @@ function Screenshot() {
 function HeroSection() {
   return (
     <div className="mx-auto container py-16">
-      <h2 className="text-center text-4xl font-bold">
-        Manage database from browser
-      </h2>
-
-      <p className="text-center max-w-[500px] mx-auto mt-6 text-lg">
-        LibSQL Studio is powerful and lightweight libSQL and rqlite client that
-        run from your browser. Cross platform and no download needed. We are{" "}
-        <Link
-          href="https://github.com/invisal/libsql-studio"
-          className="underline font-bold text-blue-600"
-          target="_blank"
-        >
-          open source
-        </Link>
-      </p>
-
-      <div className="flex flex-col gap-4 justify-center mt-8 md:flex-row">
+      <div className="flex flex-col gap-4 justify-center mb-8 md:flex-row">
         <LinkButton title="Open LibSQL Studio" url="/connect" />
       </div>
+
+      <h2 className="text-center text-4xl font-bold">
+        Powerful SQLite-based Database Client
+      </h2>
+
+      <p className="text-center max-w-[700px] mx-auto mt-6 text-lg">
+        LibSQL Studio is a fully-featured, lightweight GUI client for managing
+        SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely
+        in your browser, so there&apos;s no need to download anything.
+      </p>
     </div>
   );
 }
@@ -104,11 +98,34 @@ function FeatureItem({
   );
 }
 
+function SupportDriver() {
+  return (
+    <div className="bg-zinc-100 mt-12">
+      <div className="container mx-auto py-12">
+        <h2 className="text-center font-semibold text-2xl">
+          Supports a wide range of{" "}
+          <strong className="border-b-4 border-red-400 inline-block py-1 mx-1">
+            SQLite-based
+          </strong>{" "}
+          databases
+        </h2>
+
+        <div className="flex justify-center gap-4 mt-8">
+          <img src="/turso.jpeg" className="h-16 rounded-xl" alt="rqlite" />
+          <img src="/rqlite.png" className="h-16 rounded-xl" alt="rqlite" />
+          <img src="/valtown.svg" className="h-16 rounded-xl" alt="rqlite" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function MainPage() {
   return (
     <WebsiteLayout>
       <HeroSection />
       <Screenshot />
+      <SupportDriver />
       <div className="bg-zinc-800 py-12 mt-12">
         <div className="max-w-[900px] px-4 mx-auto flex flex-col gap-12">
           <FeatureItem reverse image="/data-editor.png">
