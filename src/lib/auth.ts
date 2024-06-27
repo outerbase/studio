@@ -29,30 +29,57 @@ export const google = new Google(
   `${env.BASE_URL}/login/google/callback`
 );
 
-const adapter = new LibSQLAdapter(get_connection(), {
-  user: "user",
-  session: "user_session",
-});
+export class LuciaAuth {
+  static app?: Lucia<
+    Record<never, never>,
+    {
+      name: string;
+      picture: string;
+      storageUsage: number;
+    }
+  >;
 
-export const lucia = new Lucia(adapter, {
-  sessionCookie: {
-    expires: false,
-    attributes: {
-      // set to `true` when using HTTPS
-      secure: process.env.NODE_ENV === "production",
-    },
-  },
+  static get() {
+    if (!env.DATABASE_URL) return null;
+    if (LuciaAuth.app) return LuciaAuth.app;
 
-  getUserAttributes(attr) {
-    return {
-      name: attr.name,
-      picture: attr.picture,
-      storageUsage: attr.storage_usage,
-    };
-  },
-});
+    const adapter = new LibSQLAdapter(get_connection(), {
+      user: "user",
+      session: "user_session",
+    });
+
+    const lucia = new Lucia(adapter, {
+      sessionCookie: {
+        expires: false,
+        attributes: {
+          // set to `true` when using HTTPS
+          secure: process.env.NODE_ENV === "production",
+        },
+      },
+
+      getUserAttributes(attr) {
+        return {
+          name: attr.name,
+          picture: attr.picture,
+          storageUsage: attr.storage_usage,
+        };
+      },
+    });
+
+    LuciaAuth.app = lucia;
+    return lucia;
+  }
+}
 
 export const getSession = cache(async function () {
+  const lucia = LuciaAuth.get();
+  if (!lucia) {
+    return {
+      user: null,
+      session: null,
+    };
+  }
+
   const authorizationHeader = headers().get("authorization");
   let sessionId = lucia.readBearerToken(authorizationHeader ?? "");
 
@@ -71,6 +98,14 @@ export const getSession = cache(async function () {
 });
 
 export const getSessionFromBearer = cache(async function () {
+  const lucia = LuciaAuth.get();
+  if (!lucia) {
+    return {
+      user: null,
+      session: null,
+    };
+  }
+
   const authorizationHeader = headers().get("authorization");
   const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
 
@@ -85,6 +120,14 @@ export const getSessionFromBearer = cache(async function () {
 });
 
 export const getSessionFromCookie = cache(async function () {
+  const lucia = LuciaAuth.get();
+  if (!lucia) {
+    return {
+      user: null,
+      session: null,
+    };
+  }
+
   const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
   if (!sessionId) {
     return {
@@ -119,7 +162,14 @@ export const getSessionFromCookie = cache(async function () {
 
 declare module "lucia" {
   interface Register {
-    Lucia: typeof lucia;
+    Lucia: Lucia<
+      Record<never, never>,
+      {
+        name: string;
+        picture: string;
+        storageUsage: number;
+      }
+    >;
     DatabaseUserAttributes: DatabaseUserAttributes;
   }
 }

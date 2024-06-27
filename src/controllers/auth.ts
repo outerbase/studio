@@ -1,6 +1,6 @@
 import { get_database } from "@/db";
 import { user, user_oauth } from "@/db/schema";
-import { Provider, lucia } from "@/lib/auth";
+import { Provider, LuciaAuth } from "@/lib/auth";
 import { generateId } from "lucia";
 import { cookies, headers } from "next/headers";
 
@@ -11,6 +11,9 @@ interface UserAuth {
 }
 
 export const save = async (data: UserAuth, provider: Provider) => {
+  const lucia = LuciaAuth.get();
+  if (!lucia) return;
+
   const { id, name, email } = data;
   const headerStore = headers();
   const db = get_database();

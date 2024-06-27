@@ -22,7 +22,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableTab, WindowTabItemButton } from "./sortable-tab";
-import { openTab } from "@/messages/open-tab";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -32,10 +37,12 @@ export interface WindowTabItemProps {
 }
 
 interface WindowTabsProps {
+  menu?: { text: string; onClick: () => void }[];
   tabs: WindowTabItemProps[];
   selected: number;
+  hideCloseButton?: boolean;
   onSelectChange: (selectedIndex: number) => void;
-  onTabsChange: (value: WindowTabItemProps[]) => void;
+  onTabsChange?: (value: WindowTabItemProps[]) => void;
 }
 
 const WindowTabsContext = createContext<{
@@ -51,8 +58,10 @@ export function useTabsContext() {
 }
 
 export default function WindowTabs({
+  menu,
   tabs,
   selected,
+  hideCloseButton,
   onSelectChange,
   onTabsChange,
 }: WindowTabsProps) {
@@ -70,7 +79,9 @@ export default function WindowTabs({
     (tab: WindowTabItemProps) => {
       if (tabs[selected]) {
         tabs[selected] = tab;
-        onTabsChange([...tabs]);
+        if (onTabsChange) {
+          onTabsChange([...tabs]);
+        }
       }
     },
     [tabs, selected, onTabsChange]
@@ -98,7 +109,10 @@ export default function WindowTabs({
         const oldIndex = tabs.findIndex((tab) => tab.key === active.id);
         const newIndex = tabs.findIndex((tab) => tab.key === over?.id);
         const newTabs = arrayMove(tabs, oldIndex, newIndex);
-        onTabsChange(newTabs);
+
+        if (onTabsChange) {
+          onTabsChange(newTabs);
+        }
 
         const selectedIndex = newTabs.findIndex(
           (tab) => tab.key === selectedTab?.key
@@ -121,14 +135,29 @@ export default function WindowTabs({
         <div className="flex flex-col w-full h-full">
           <div className="grow-0 shrink-0 pt-1 bg-secondary">
             <div className="flex">
-              <button
-                className="px-3 py-2 border-b"
-                onClick={() => {
-                  openTab({ type: "query" });
-                }}
-              >
-                <LucidePlus className="w-4 h-4" />
-              </button>
+              {menu ? (
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger>
+                    <div className="px-3 py-2 border-b">
+                      <LucidePlus className="w-4 h-4" />
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {menu.map((menuItem, menuIdx) => {
+                      return (
+                        <DropdownMenuItem
+                          key={menuIdx}
+                          onClick={menuItem.onClick}
+                        >
+                          {menuItem.text}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="w-2 border-b"></div>
+              )}
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
                 strategy={verticalListSortingStrategy}
@@ -141,27 +170,35 @@ export default function WindowTabs({
                     onSelectChange={() => {
                       onSelectChange(idx);
                     }}
-                    onClose={() => {
-                      const newTabs = tabs.filter((t) => t.key !== tab.key);
+                    onClose={
+                      hideCloseButton
+                        ? undefined
+                        : () => {
+                            const newTabs = tabs.filter(
+                              (t) => t.key !== tab.key
+                            );
 
-                      if (selected >= idx) {
-                        onSelectChange(newTabs.length - 1);
-                      }
+                            if (selected >= idx) {
+                              onSelectChange(newTabs.length - 1);
+                            }
 
-                      onTabsChange(newTabs);
-                    }}
+                            if (onTabsChange) {
+                              onTabsChange(newTabs);
+                            }
+                          }
+                    }
                   />
                 ))}
               </SortableContext>
               <div className="border-b grow" />
             </div>
           </div>
-          <div className="grow relative mt-1">
+          <div className="grow relative">
             {tabs.map((tab, tabIndex) => (
               <div
                 className="absolute left-0 right-0 top-0 bottom-0"
                 style={{
-                  visibility: tabIndex === selected ? "visible" : "hidden",
+                  visibility: tabIndex === selected ? "inherit" : "hidden",
                 }}
                 key={tab.key}
               >

@@ -1,6 +1,10 @@
 import { useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
-import { LucidePlay } from "lucide-react";
+import {
+  LucideGrid,
+  LucideMessageSquareWarning,
+  LucidePlay,
+} from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
 import {
   ResizablePanelGroup,
@@ -9,33 +13,31 @@ import {
 } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import ResultTable from "@/components/gui/query-result-table";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { selectStatementFromPosition } from "@/drivers/sqlite/sql-helper";
 import QueryProgressLog from "../query-progress-log";
 import { useAutoComplete } from "@/context/auto-complete-provider";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import {
   MultipleQueryProgress,
+  MultipleQueryResult,
   multipleQuery,
 } from "@/components/lib/multiple-query";
-import { DatabaseResultStat } from "@/drivers/base-driver";
-import ResultStats from "../result-stat";
-import isEmptyResultStats from "@/components/lib/empty-stats";
-import ExportResultButton from "../export/export-result-button";
+import WindowTabs from "../windows-tab";
+import QueryResult from "../query-result";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [code, setCode] = useState("");
-  const [data, setData] = useState<OptimizeTableState>();
-  const [stats, setStats] = useState<DatabaseResultStat>();
-  const [progress, setProgress] = useState<MultipleQueryProgress>();
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [lineNumber, setLineNumber] = useState(0);
   const [columnNumber, setColumnNumber] = useState(0);
+
+  const [queryTabIndex, setQueryTabIndex] = useState(0);
+  const [progress, setProgress] = useState<MultipleQueryProgress>();
+  const [data, setData] = useState<MultipleQueryResult[]>();
 
   const onRunClicked = (all = false) => {
     const statements = identify(code, {
@@ -62,21 +64,17 @@ export default function QueryWindow() {
       // Reset the result and make a new query
       setData(undefined);
       setProgress(undefined);
+      setQueryTabIndex(0);
 
       multipleQuery(databaseDriver, finalStatements, (currentProgrss) => {
         setProgress(currentProgrss);
       })
-        .then(({ last }) => {
-          if (last) {
-            const state = OptimizeTableState.createFromResult(last);
-            state.setReadOnlyMode(true);
-            setData(state);
-            setStats(last.stat);
-          }
-        })
+        .then(setData)
         .catch(console.error);
     }
   };
+
+  console.log(data);
 
   return (
     <ResizablePanelGroup direction="vertical">
@@ -126,29 +124,36 @@ export default function QueryWindow() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
-        {data && (
-          <div className="flex flex-col h-full w-full">
-            <div className="grow overflow-hidden">
-              <ResultTable data={data} />
-            </div>
-            {stats && !isEmptyResultStats(stats) && (
-              <div className="shrink-0">
-                <Separator />
-                <div className="flex p-1">
-                  <ResultStats stats={stats} />
-                  <div>
-                    <ExportResultButton data={data} />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        {!data && progress && (
-          <div className="w-full h-full overflow-y-auto overflow-x-hidden">
-            <QueryProgressLog progress={progress} />
-          </div>
-        )}
+        <WindowTabs
+          onSelectChange={setQueryTabIndex}
+          onTabsChange={() => {}}
+          hideCloseButton
+          selected={queryTabIndex}
+          tabs={[
+            ...(data ?? []).map((queryResult, queryIdx) => ({
+              component: (
+                <QueryResult result={queryResult} key={queryResult.order} />
+              ),
+              key: "query_" + queryResult.order,
+              title: "Query " + (queryIdx + 1),
+              icon: LucideGrid,
+            })),
+            ...(progress
+              ? [
+                  {
+                    key: "summary",
+                    title: "Summary",
+                    icon: LucideMessageSquareWarning,
+                    component: (
+                      <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+                        <QueryProgressLog progress={progress} />
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

@@ -5,6 +5,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useEffect, useMemo, useState } from "react";
+import { openTab } from "@/messages/open-tab";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 import useMessageListener from "@/components/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
@@ -64,6 +65,23 @@ export default function DatabaseGui() {
     ].filter(Boolean) as SidebarTabItem[];
   }, [collaborationDriver]);
 
+  const tabSideMenu = useMemo(() => {
+    return [
+      {
+        text: "New Query",
+        onClick: () => {
+          openTab({ type: "query" });
+        },
+      },
+      {
+        text: "New Table",
+        onClick: () => {
+          openTab({ type: "schema" });
+        },
+      },
+    ];
+  }, []);
+
   return (
     <div className="h-screen w-screen flex flex-col">
       <ResizablePanelGroup direction="horizontal">
@@ -73,6 +91,7 @@ export default function DatabaseGui() {
         <ResizableHandle />
         <ResizablePanel defaultSize={100 - defaultWidthPercentage}>
           <WindowTabs
+            menu={tabSideMenu}
             tabs={tabs}
             selected={selectedTabIndex}
             onSelectChange={setSelectedTabIndex}

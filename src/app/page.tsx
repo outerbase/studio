@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-// import { foo } from "@libsqlstudio/utils";
 
 export const metadata: Metadata = {
   title: "LibSQL Studio - LibSQL and rqlite client on your browser",

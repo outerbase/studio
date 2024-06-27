@@ -4,7 +4,8 @@
   "private": false,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "npm run db:migrate && next build",
+    "build": "next build",
+    "build-with-migrate": "npm run db:migrate && next build",
     "start": "next start",
     "tsc": "tsc --noEmit --skipLibCheck",
     "test": "jest",
