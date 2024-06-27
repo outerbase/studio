@@ -23,6 +23,7 @@ export default async function SessionPage({
     return <div>Something wrong</div>;
   }
 
+  const now = Math.floor(Date.now() / 1000);
   const db = get_database();
   const sessionId = searchParams?.sid;
 
@@ -31,7 +32,11 @@ export default async function SessionPage({
   });
 
   if (!sessionInfo) {
-    return <div>Not found</div>;
+    return <div className="p-4">Session Not Found</div>;
+  }
+
+  if (now > (sessionInfo.expiredAt ?? 0)) {
+    return <div className="p-4">Session Expired</div>;
   }
 
   const credential: SavedConnectionItemConfigConfig = JSON.parse(
