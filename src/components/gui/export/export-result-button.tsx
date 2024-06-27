@@ -1,4 +1,4 @@
-import { Button } from "../../ui/button";
+import { Button, buttonVariants } from "../../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import {
   Select,
@@ -48,9 +48,9 @@ export default function ExportResultButton({
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="ghost" size={"sm"}>
+        <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
           Export
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent className="p-0">
         <div className="p-4">

@@ -20,14 +20,19 @@ export interface MultipleQueryProgress {
   error?: boolean;
 }
 
+export interface MultipleQueryResult {
+  result: DatabaseResultSet;
+  sql: string;
+  order: number;
+}
+
 export async function multipleQuery(
   driver: BaseDriver,
   statements: string[],
   onProgress?: (progress: MultipleQueryProgress) => void
-) {
+): Promise<MultipleQueryResult[]> {
   const logs: MultipleQueryProgressItem[] = [];
-  const result: DatabaseResultSet[] = [];
-  let lastResult: DatabaseResultSet | undefined;
+  const result: MultipleQueryResult[] = [];
 
   for (let i = 0; i < statements.length; i++) {
     const statement = statements[i] as string;
@@ -50,8 +55,11 @@ export async function multipleQuery(
       log.stats = r.stat;
 
       if (r.headers.length > 0) {
-        lastResult = r;
-        result.push(r);
+        result.push({
+          sql: statement,
+          order: i,
+          result: r,
+        });
       }
 
       if (onProgress) {
@@ -74,8 +82,5 @@ export async function multipleQuery(
     }
   }
 
-  return {
-    result,
-    last: lastResult,
-  };
+  return result;
 }
