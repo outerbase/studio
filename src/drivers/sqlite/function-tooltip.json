@@ -1,0 +1,118 @@
+{
+  "abs": {
+    "syntax": "abs(X)",
+    "description": "<p>Returns the absolute value of X. If X is a string or blob, it returns 0.</p>\n<pre><code>SELECT abs(-5);  --&gt; 5\nSELECT abs(\"-3\");  --&gt; 3\nSELECT abs(\"libsql\");  --&gt; 0\n</code></pre>"
+  },
+  "changes": {
+    "syntax": "changes()",
+    "description": "<p>The changes() function returns the number of rows altered by the latest INSERT, DELETE, or UPDATE statement, excluding changes from lower-level triggers.</p>"
+  },
+  "char": {
+    "syntax": "char(X1,X2,...,XN)",
+    "description": "<p>The char(X1,X2,…,XN) function returns a string composed of characters having the unicode code point values of integers X1 through XN, respectively.</p>\n<pre><code>SELECT CHAR(65, 66, 67);\n-&gt; 'ABC'\n</code></pre>"
+  },
+  "coalesce": {
+    "syntax": "coalesce(X,Y,...)",
+    "description": "<p>The coalesce() function returns a copy of its first non-NULL argument, or NULL if all arguments are NULL. Coalesce() must have at least 2 arguments.</p>\n<pre><code>select coalesce(null, 50);\n-&gt; 50\n</code></pre>"
+  },
+  "concat": {
+    "syntax": "concat(X,...)",
+    "description": "<p>The concat function returns a string formed by concatenating all its non-NULL arguments. If all arguments are NULL, it returns an empty string.</p>\n<pre><code>select concat('hello', ' ', 'world')\n-&gt; 'hello world'\n</code></pre>"
+  },
+  "concat_ws": {
+    "syntax": "concat_ws(SEP,X,...)",
+    "description": "<p>The concat_ws concatenates all non-null arguments beyond the first, using the first argument as a separator. If the first argument is NULL, it returns NULL. If all other arguments are NULL, it returns an empty string.</p>\n<pre><code>select concat_ws(', ', 'hello', 'world')\n-&gt; 'hello world'\n</code></pre>"
+  },
+  "format": {
+    "syntax": "format(FORMAT,...)",
+    "description": "<p>The FORMAT() function, similar to C's printf(), uses a format string (first argument) to construct the output with values from subsequent arguments.</p>\n<pre><code>select format('i am %d years old', 50);\n-&gt; 'i am 50 years old'\n</code></pre>"
+  },
+  "glob": {
+    "syntax": "glob(X,Y)",
+    "description": "<p>The GLOB operator is like LIKE but uses Unix file globbing syntax and is case-sensitive.</p>\n<pre><code>select glob('*hello*', 'hello world');\n-&gt; 1\n</code></pre>"
+  },
+  "hex": {
+    "syntax": "hex(X)",
+    "description": "<p>The hex() function converts its BLOB argument into an upper-case hexadecimal string.</p>\n<pre><code>select hex(x'ffeeaa');\n-&gt; FFEEAA\n</code></pre>"
+  },
+  "ifnull": {
+    "syntax": "ifnull(X,Y)",
+    "description": "<p>The ifnull() function returns the first non-NULL argument, or NULL if both are NULL. It requires exactly 2 arguments and is equivalent to coalesce() with two arguments.</p>\n<pre><code>select ifnull(null, 5);\n-&gt; 5\n</code></pre>"
+  },
+  "iif": {
+    "syntax": "iif(X,Y,Z)",
+    "description": "<p>The iif(X,Y,Z) function returns the value Y if X is true, and Z otherwise</p>\n<pre><code>select iif(age &gt;= 18, 'adult', 'underage');\n-&gt; 'underage'\n</code></pre>"
+  },
+  "instr": {
+    "syntax": "instr(X, Y)",
+    "description": "<p>The instr(X, Y) function returns the position of the first occurrence of string Y within string X plus 1, or 0 if Y is not found in X.</p>\n<pre><code>select instr('hello world', 'wo');\n-&gt; 7\n</code></pre>"
+  },
+  "last_insert_rowid": {
+    "syntax": "last_insert_rowid()",
+    "description": "<p>The last<em>insert</em>rowid() function returns the ROWID of the last row insert from the database connection which invoked the function.</p>"
+  },
+  "length": {
+    "syntax": "length(X)",
+    "description": "<p>The length(X) function returns the character count of string X, excluding any NUL characters for strings (which SQLite typically lacks), or the byte count for blobs. If X is NULL, length(X) is also NULL. For numeric X, it returns the length of its string representation.</p>\n<pre><code>select length('hello');\n-&gt; 5\n\nselect length(x'ff00ee');\n-&gt; 3\n\nselect length(NULL);\n-&gt; NULL\n</code></pre>"
+  },
+  "like": {
+    "syntax": "like(X,Y), like(X,Y,Z)",
+    "description": "<p>The like() function checks if the string Y matches the pattern X in the \"Y LIKE X [ESCAPE Z]\" expression.</p>\n<pre><code>select like('hel%', 'hello')\n-&gt; 1\n\nselect like('wor%', 'hello')\n-&gt; 0\n</code></pre>"
+  },
+  "lower": {
+    "syntax": "lower(X)",
+    "description": "<p>The lower(X) function converts all ASCII characters in string X to lowercase.</p>\n<pre><code>select lower('Hello World');\n-&gt; 'hello world'\n</code></pre>"
+  },
+  "ltrim": {
+    "syntax": "ltrim(X,Y)",
+    "description": "<p>The ltrim(X, Y) function removes characters specified in Y from the left side of string X. Omitting Y removes spaces from the left side of X.</p>\n<pre><code>select ltrim(' hello');\n-&gt; 'hello'\n\nselect ltrim('0.005', '0.');\n-&gt; '5'\n</code></pre>"
+  },
+  "max": {
+    "syntax": "max(X,Y,...)",
+    "description": "<p>The multi-argument max() function returns the maximum value among its arguments, or NULL if any argument is NULL. It uses the collating function of the first argument for string comparisons, defaulting to the BINARY collating function if none is specified. When given a single argument, max() acts as an aggregate function.</p>\n<pre><code>select max(5, 6, 1);\n-&gt; 6\n\nselect max(age) from users;\n</code></pre>"
+  },
+  "min": {
+    "syntax": "max(X,Y,...)",
+    "description": "<p>The multi-argument min() function returns the minimum value among its arguments, utilizing the collating function of the first argument for string comparisons or defaulting to BINARY. When given a single argument, min() acts as an aggregate function.</p>\n<pre><code>select min(5, 6, 1);\n-&gt; 1\n\nselect min(age) from users;\n</code></pre>"
+  },
+  "nullif": {
+    "syntax": "nullif(X,Y)",
+    "description": "<p>The nullif(X, Y) function returns X if X and Y are different, and NULL if they are the same.</p>\n<pre><code>select nullif(6, 6)\n-&gt; NULL\n\nselect nullif(7, 6)\n-&gt; 7\n</code></pre>"
+  },
+  "octet_length": {
+    "syntax": "octet_length(X)",
+    "description": "<p>The octet_length(X) function returns the number of bytes in the encoding of text string X. If X is NULL, it returns NULL. For BLOBs, it returns the same as length(X). For numeric values, it returns the byte count of the text representation.</p>\n<pre><code>select octet_length('វិសាល'); -&gt; 15\nselect octet_length('visal'); -&gt; 5\nselect octet_length(x'ff11ee');  -&gt; 3\n</code></pre>"
+  },
+  "printf": {
+    "syntax": "printf(FORMAT,...)",
+    "description": "<p>The printf() function, similar to C's printf(), uses a format string (first argument) to construct the output with values from subsequent arguments.</p>\n<pre><code>select printf('i am %d years old', 50);\n-&gt; 'i am 50 years old'\n</code></pre>"
+  },
+  "quote": {
+    "syntax": "quote(X)",
+    "description": "<p>The quote(X) function returns the SQL literal for X, suitable for inclusion in an SQL statement. Strings are single-quoted with escaped interior quotes. BLOBs are encoded as hex literals.</p>\n<pre><code>select quote('hello '' world')\n-&gt; 'hello '' world'\n\nselect quote(x'ffee00')\n-&gt; X'FFEE00'\n</code></pre>"
+  },
+  "random": {
+    "syntax": "random()",
+    "description": "<p>The random() function returns a pseudo-random integer between -9223372036854775808 and +9223372036854775807.</p>"
+  },
+  "randomblob": {
+    "syntax": "randomblob(N)",
+    "description": "<p>The randomblob(N) function returns an N-byte blob of pseudo-random bytes. If N is less than 1, it returns a 1-byte random blob.</p>\n<pre><code>select hex(randomblob(3))\n-&gt; 35DD3E\n</code></pre>"
+  },
+  "replace": {
+    "syntax": "replace(X,Y,Z)",
+    "description": "<p>The replace(X, Y, Z) function returns X with every occurrence of Y replaced by Z.</p>\n<pre><code>select replace('hello world', 'world', 'planet')\n-&gt; 'hello planet'\n</code></pre>"
+  },
+  "round": {
+    "syntax": "round(X,Y)",
+    "description": "<p>The round(X, Y) function returns X rounded to Y decimal places. If Y is omitted or negative, it defaults to 0.</p>\n<pre><code>select round(1.6);\n-&gt; 2\n\nselect round(1.665, 2);\n-&gt; 1.67\n</code></pre>"
+  },
+  "rtrim": {
+    "syntax": "rtrim(X,Y)",
+    "description": "<p>The rtrim(X, Y) function removes all characters in Y from the right side of X. If Y is omitted, it removes spaces.</p>\n<pre><code>select rtrim('hello ');\n-&gt; 'hello'\n\nselect rtrim('5,000', '0,');\n-&gt; '5'\n</code></pre>"
+  },
+  "sign": {
+    "syntax": "sign(X)",
+    "description": "<p>The sign(X) function returns -1, 0, or 1 if X is negative, zero, or positive, respectively. If X is NULL or not a number, it returns NULL.</p>\n<pre><code>select sign(-5);  -&gt; -1\nselect sign(0);   -&gt; 0\nselect sign(5);   -&gt; 1\n</code></pre>"
+  }
+}

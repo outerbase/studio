@@ -1,4 +1,3 @@
-import { SQLite } from "@codemirror/lang-sql";
 import type { SyntaxNode, TreeCursor } from "@lezer/common";
 import type {
   DatabaseTableColumn,
@@ -8,6 +7,7 @@ import type {
   SqlOrder,
 } from "@/drivers/base-driver";
 import { unescapeIdentity } from "./sql-helper";
+import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
 
 export class Cursor {
   protected ptr: SyntaxNode | null;
@@ -114,7 +114,7 @@ export class Cursor {
 }
 
 export function buildSyntaxCursor(sql: string): Cursor {
-  const r = SQLite.language.parser.parse(sql).cursor();
+  const r = sqliteDialect.language.parser.parse(sql).cursor();
   r.firstChild();
   r.firstChild();
 
@@ -459,7 +459,7 @@ function parseTableDefinition(cursor: Cursor): {
 // Our parser follows this spec
 // https://www.sqlite.org/lang_createtable.html
 export function parseCreateTableScript(sql: string): DatabaseTableSchema {
-  const tree = SQLite.language.parser.parse(sql);
+  const tree = sqliteDialect.language.parser.parse(sql);
   const ptr = tree.cursor();
 
   ptr.firstChild();
