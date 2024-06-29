@@ -20,7 +20,7 @@ function getCursorTooltips(
   if (parent.type.name !== "Parens") return [];
 
   if (!parent.prevSibling) return [];
-  if (parent.prevSibling.type.name !== "Keyword") return [];
+  if (!["Keyword", "Type"].includes(parent.prevSibling.type.name)) return [];
 
   const keywordString = state.doc
     .slice(parent.prevSibling.from, parent.prevSibling.to)
