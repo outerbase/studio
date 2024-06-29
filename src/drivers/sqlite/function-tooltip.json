@@ -74,5 +74,45 @@
   "min": {
     "syntax": "max(X,Y,...)",
     "description": "<p>The multi-argument min() function returns the minimum value among its arguments, utilizing the collating function of the first argument for string comparisons or defaulting to BINARY. When given a single argument, min() acts as an aggregate function.</p>\n<pre><code>select min(5, 6, 1);\n-&gt; 1\n\nselect min(age) from users;\n</code></pre>"
+  },
+  "nullif": {
+    "syntax": "nullif(X,Y)",
+    "description": "<p>The nullif(X, Y) function returns X if X and Y are different, and NULL if they are the same.</p>\n<pre><code>select nullif(6, 6)\n-&gt; NULL\n\nselect nullif(7, 6)\n-&gt; 7\n</code></pre>"
+  },
+  "octet_length": {
+    "syntax": "octet_length(X)",
+    "description": "<p>The octet_length(X) function returns the number of bytes in the encoding of text string X. If X is NULL, it returns NULL. For BLOBs, it returns the same as length(X). For numeric values, it returns the byte count of the text representation.</p>\n<pre><code>select octet_length('វិសាល'); -&gt; 15\nselect octet_length('visal'); -&gt; 5\nselect octet_length(x'ff11ee');  -&gt; 3\n</code></pre>"
+  },
+  "printf": {
+    "syntax": "printf(FORMAT,...)",
+    "description": "<p>The printf() function, similar to C's printf(), uses a format string (first argument) to construct the output with values from subsequent arguments.</p>\n<pre><code>select printf('i am %d years old', 50);\n-&gt; 'i am 50 years old'\n</code></pre>"
+  },
+  "quote": {
+    "syntax": "quote(X)",
+    "description": "<p>The quote(X) function returns the SQL literal for X, suitable for inclusion in an SQL statement. Strings are single-quoted with escaped interior quotes. BLOBs are encoded as hex literals.</p>\n<pre><code>select quote('hello '' world')\n-&gt; 'hello '' world'\n\nselect quote(x'ffee00')\n-&gt; X'FFEE00'\n</code></pre>"
+  },
+  "random": {
+    "syntax": "random()",
+    "description": "<p>The random() function returns a pseudo-random integer between -9223372036854775808 and +9223372036854775807.</p>"
+  },
+  "randomblob": {
+    "syntax": "randomblob(N)",
+    "description": "<p>The randomblob(N) function returns an N-byte blob of pseudo-random bytes. If N is less than 1, it returns a 1-byte random blob.</p>\n<pre><code>select hex(randomblob(3))\n-&gt; 35DD3E\n</code></pre>"
+  },
+  "replace": {
+    "syntax": "replace(X,Y,Z)",
+    "description": "<p>The replace(X, Y, Z) function returns X with every occurrence of Y replaced by Z.</p>\n<pre><code>select replace('hello world', 'world', 'planet')\n-&gt; 'hello planet'\n</code></pre>"
+  },
+  "round": {
+    "syntax": "round(X,Y)",
+    "description": "<p>The round(X, Y) function returns X rounded to Y decimal places. If Y is omitted or negative, it defaults to 0.</p>\n<pre><code>select round(1.6);\n-&gt; 2\n\nselect round(1.665, 2);\n-&gt; 1.67\n</code></pre>"
+  },
+  "rtrim": {
+    "syntax": "rtrim(X,Y)",
+    "description": "<p>The rtrim(X, Y) function removes all characters in Y from the right side of X. If Y is omitted, it removes spaces.</p>\n<pre><code>select rtrim('hello ');\n-&gt; 'hello'\n\nselect rtrim('5,000', '0,');\n-&gt; '5'\n</code></pre>"
+  },
+  "sign": {
+    "syntax": "sign(X)",
+    "description": "<p>The sign(X) function returns -1, 0, or 1 if X is negative, zero, or positive, respectively. If X is NULL or not a number, it returns NULL.</p>\n<pre><code>select sign(-5);  -&gt; -1\nselect sign(0);   -&gt; 0\nselect sign(5);   -&gt; 1\n</code></pre>"
   }
 }
