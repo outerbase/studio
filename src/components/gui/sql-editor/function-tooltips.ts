@@ -37,17 +37,10 @@ function getCursorTooltips(
         arrow: true,
         create: () => {
           const dom = document.createElement("div");
-          dom.addEventListener("click", (e) => {
-            const target = e.target as HTMLElement;
-            const link = target.closest("a");
-            if (link) {
-              e.preventDefault();
-            }
-          });
           dom.className = "cm-tooltip-cursor";
           dom.innerHTML = `
-            <div style="max-width:700px;">
-              <p><strong>${dictItem.syntax}</strong></p>
+            <div style="max-width:700px; padding:5px; font-size:14px;">
+              <p style='font-size:16px;'><strong>${dictItem.syntax}</strong></p>
               <div class="code-tooltip">${dictItem.description}</div>
             </div>
             `;

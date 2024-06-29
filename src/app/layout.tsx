@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+
 import "./globals.css";
+import "./codemirror-override.css";
+
 import Script from "next/script";
 import ThemeProvider from "@/context/theme-provider";
 import { cookies } from "next/headers";

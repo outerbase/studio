@@ -1,0 +1,40 @@
+/* ------------------------------
+  CodeMirror Tooltip
+--------------------------------- */
+.code-tooltip {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.code-tooltip hr {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.code-tooltip p {
+  margin-bottom: 10px;
+}
+
+.code-tooltip pre {
+  padding: 10px;
+  background: #333;
+  border-radius: 5px;
+}
+
+.code-tooltip table {
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+.code-tooltip td,
+.code-tooltip th {
+  padding: 5px;
+  text-align: left;
+  border: 2px solid #ccc;
+}
+
+.cm-tooltip-cursor {
+  overflow-y: auto;
+  max-height: 600px;
+  user-select: text;
+}
