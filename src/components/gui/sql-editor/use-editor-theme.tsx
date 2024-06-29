@@ -25,7 +25,7 @@ export default function useCodeEditorTheme() {
         },
         styles: [
           { tag: [t.meta, t.comment], color: "#804000" },
-          { tag: [t.keyword, t.strong], color: "#0000FF" },
+          { tag: [t.keyword, t.strong, t.standard(t.name)], color: "#0000FF" },
           { tag: [t.number], color: "#FF0080" },
           { tag: [t.string], color: "#e17055" },
           { tag: [t.variableName], color: "#006600" },
@@ -57,7 +57,7 @@ export default function useCodeEditorTheme() {
         },
         styles: [
           { tag: [t.number], color: "#fbc531" },
-          { tag: t.keyword, color: "#3498db" },
+          { tag: [t.keyword, t.strong, t.standard(t.name)], color: "#3498db" },
           { tag: t.comment, color: "#27ae60" },
           { tag: t.definition(t.typeName), color: "#27ae60" },
           { tag: t.typeName, color: "#194a7b" },

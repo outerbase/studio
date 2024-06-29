@@ -1,0 +1,6 @@
+{
+  "abs": {
+    "syntax": "abs(X)",
+    "description": "<p>Returns the absolute value of X. If X is a string or blob, it returns 0.</p>\n<pre><code>SELECT abs(-5);  --&gt; 5\nSELECT abs(\"-3\");  --&gt; 3\nSELECT abs(\"libsql\");  --&gt; 0\n</code></pre>"
+  }
+}
