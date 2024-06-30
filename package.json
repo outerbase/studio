@@ -4,6 +4,7 @@
   "private": false,
   "scripts": {
     "dev": "next dev --turbo",
+    "dev-https": "next dev --experimental-https",
     "build": "next build",
     "build-with-migrate": "npm run db:migrate && next build",
     "start": "next start",
@@ -98,6 +99,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/showdown": "^2.0.6",
+    "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.19",
