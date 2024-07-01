@@ -7,7 +7,7 @@ import {
   completionStatus,
   startCompletion,
 } from "@codemirror/autocomplete";
-import { sql, SQLite } from "@codemirror/lang-sql";
+import { sql } from "@codemirror/lang-sql";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
 import { defaultKeymap, insertTab } from "@codemirror/commands";
@@ -15,6 +15,9 @@ import { keymap } from "@codemirror/view";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import useCodeEditorTheme from "./use-editor-theme";
 import createSQLTableNameHighlightPlugin from "./sql-tablename-highlight";
+import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
+import { functionTooltip } from "./function-tooltips";
+import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 
 interface SqlEditorProps {
   value: string;
@@ -100,9 +103,10 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
         extensions={[
           keyExtensions,
           sql({
-            dialect: SQLite,
+            dialect: sqliteDialect,
             schema,
           }),
+          functionTooltip(sqliteFunctionList),
           tableNameHighlightPlugin,
           EditorView.updateListener.of((state) => {
             const pos = state.state.selection.main.head;
