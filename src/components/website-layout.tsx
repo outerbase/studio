@@ -3,6 +3,12 @@ import { PropsWithChildren } from "react";
 import TopbarProfile from "./topbar-profile";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from "./ui/navigation-menu";
 
 async function Topbar() {
   const { user } = await getSessionFromCookie();
@@ -15,7 +21,21 @@ async function Topbar() {
             LibSQL <strong>Studio</strong>
           </h1>
         </Link>
-        <div className="grow" />
+        <div className="grow flex items-center ml-3">
+          <NavigationMenu className="hidden md:block">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link
+                  href="/playground"
+                  passHref
+                  className={navigationMenuTriggerStyle()}
+                >
+                  Playground
+                </Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
         {user ? (
           <TopbarProfile user={user} />
         ) : (

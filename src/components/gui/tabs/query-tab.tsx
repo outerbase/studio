@@ -74,8 +74,6 @@ export default function QueryWindow() {
     }
   };
 
-  console.log(data);
-
   return (
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
