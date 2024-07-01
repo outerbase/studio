@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
@@ -28,14 +29,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className} suppressHydrationWarning>
-        {process.env.ENABLE_ANALYTIC && (
-          <Script async defer src="https://scripts.withcabin.com/hello.js" />
-        )}
         <ThemeProvider defaultTheme={theme}>
           <Fragment>{children}</Fragment>
-
           <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
