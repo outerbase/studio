@@ -6,7 +6,7 @@ import {
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
-import { BindParams, Database, QueryExecResult, Statement } from "sql.js";
+import { BindParams, Database } from "sql.js";
 
 export default class SqljsDriver extends SqliteLikeBaseDriver {
   protected db: Database;
