@@ -100,7 +100,7 @@ function FeatureItem({
 
 function SupportDriver() {
   return (
-    <div className="bg-zinc-100 mt-12">
+    <div className="bg-secondary mt-12">
       <div className="container mx-auto py-12">
         <h2 className="text-center font-semibold text-2xl">
           Supports a wide range of{" "}
