@@ -27,6 +27,10 @@
     "syntax": "format(FORMAT,...)",
     "description": "<p>The FORMAT() function, similar to C's printf(), uses a format string (first argument) to construct the output with values from subsequent arguments.</p>\n<pre><code>select format('i am %d years old', 50);\n-&gt; 'i am 50 years old'\n</code></pre>"
   },
+  "fts5": {
+    "syntax": "fts5(...col)",
+    "description": "<p>FTS5 is an SQLite virtual table module that provides full-text search functionality to database applications.</p>\n<pre><code>CREATE VIRTUAL TABLE movie_fts USING fts5(title, summary);\nCREATE VIRTUAL TABLE name_fts USING fts5(name, tokenize='trigram');\n</code></pre>\n<p><strong>External Content Tables</strong></p>\n<pre><code>CREATE VIRTUAL TABLE student_fts USING fts5(\n    name,\n    tokenize='trigram',\n    content='student',\n    content_rowid='id'\n);\n</code></pre>"
+  },
   "glob": {
     "syntax": "glob(X,Y)",
     "description": "<p>The GLOB operator is like LIKE but uses Unix file globbing syntax and is case-sensitive.</p>\n<pre><code>select glob('*hello*', 'hello world');\n-&gt; 1\n</code></pre>"

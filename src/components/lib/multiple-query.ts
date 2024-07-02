@@ -30,7 +30,10 @@ export async function multipleQuery(
   driver: BaseDriver,
   statements: string[],
   onProgress?: (progress: MultipleQueryProgress) => void
-): Promise<MultipleQueryResult[]> {
+): Promise<{
+  result: MultipleQueryResult[];
+  logs: MultipleQueryProgressItem[];
+}> {
   const logs: MultipleQueryProgressItem[] = [];
   const result: MultipleQueryResult[] = [];
 
@@ -82,5 +85,5 @@ export async function multipleQuery(
     }
   }
 
-  return result;
+  return { result, logs };
 }

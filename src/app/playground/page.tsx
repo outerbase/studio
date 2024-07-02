@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import WebsiteLayout from "@/components/website-layout";
 import { get_database } from "@/db";
 import { dbDataset } from "@/db/schema-dataset";
@@ -35,7 +36,9 @@ export default async function PlaygroundPage() {
         </Link>
       </div>
 
-      <div className="border-t py-4 mx-auto container">
+      <Separator />
+
+      <div className="py-4 mx-auto container">
         <h2 className="text-2xl font-bold mb-2">Existing Dataset</h2>
         <p className="mb-4">Preload the database with existing dataset.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
