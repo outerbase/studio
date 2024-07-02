@@ -125,6 +125,11 @@ export interface DatabaseTableColumnConstraint {
   foreignKey?: DatabaseForeignKeyClause;
 }
 
+export interface DatabaseTableFts5 {
+  content?: string;
+  contentRowId?: string;
+}
+
 export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
@@ -132,6 +137,7 @@ export interface DatabaseTableSchema {
   tableName?: string;
   constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
+  fts5?: DatabaseTableFts5;
 }
 
 export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";

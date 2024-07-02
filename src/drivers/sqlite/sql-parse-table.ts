@@ -5,6 +5,7 @@ import type {
   DatabaseTableColumnConstraint,
   DatabaseTableSchema,
   SqlOrder,
+  DatabaseTableFts5,
 } from "@/drivers/base-driver";
 import { unescapeIdentity } from "./sql-helper";
 import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
@@ -456,6 +457,43 @@ function parseTableDefinition(cursor: Cursor): {
   return { columns, constraints };
 }
 
+function parseFTS5(cursor: Cursor | null): DatabaseTableFts5 {
+  if (!cursor) return {};
+
+  let content: string | undefined;
+  let contentRowId: string | undefined;
+
+  const ptr = cursor;
+  while (!ptr.end()) {
+    if (ptr.match("content")) {
+      ptr.next();
+      if (ptr.match("=")) {
+        ptr.next();
+        if (!ptr.end()) {
+          content = unescapeIdentity(ptr.read());
+          ptr.next();
+        }
+      }
+    } else if (ptr.match("content_rowid")) {
+      ptr.next();
+      if (ptr.match("=")) {
+        ptr.next();
+        if (!ptr.end()) {
+          contentRowId = unescapeIdentity(ptr.read());
+          ptr.next();
+        }
+      }
+    }
+
+    ptr.next();
+  }
+
+  return {
+    content,
+    contentRowId,
+  };
+}
+
 // Our parser follows this spec
 // https://www.sqlite.org/lang_createtable.html
 export function parseCreateTableScript(sql: string): DatabaseTableSchema {
@@ -469,9 +507,22 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
   cursor.expectKeyword("CREATE");
   cursor.expectKeywordOptional("TEMP");
   cursor.expectKeywordOptional("TEMPORARY");
+  cursor.expectKeywordOptional("VIRTUAL");
   cursor.expectKeyword("TABLE");
   cursor.expectKeywordsOptional(["IF", "NOT", "EXIST"]);
   const tableName = cursor.consumeIdentifier();
+
+  // Check for FTS5
+  let fts5: DatabaseTableFts5 | undefined;
+
+  if (cursor.match("USING")) {
+    cursor.next();
+    if (cursor.match("FTS5")) {
+      cursor.next();
+      fts5 = parseFTS5(cursor.enterParens());
+      cursor.next();
+    }
+  }
 
   const defCursor = cursor.enterParens();
   const defs = defCursor
@@ -489,5 +540,6 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
     ...defs,
     pk,
     autoIncrement,
+    fts5,
   };
 }

@@ -15,9 +15,13 @@ interface SchemaListProps {
   search: string;
 }
 
+type DatabaseSchemaItemWithIndentation = DatabaseSchemaItem & {
+  indentation?: number;
+};
+
 type DatabaseSchemaTreeNode = {
-  node: DatabaseSchemaItem;
-  sub: DatabaseSchemaItem[];
+  node: DatabaseSchemaItemWithIndentation;
+  sub: DatabaseSchemaItemWithIndentation[];
 };
 
 interface SchemaViewItemProps {
@@ -30,6 +34,7 @@ interface SchemaViewItemProps {
   onClick: () => void;
   onContextMenu: React.MouseEventHandler;
   indentation?: boolean;
+  badge?: string;
 }
 
 function SchemaViewItem({
@@ -42,6 +47,7 @@ function SchemaViewItem({
   onContextMenu,
   indentation,
   item,
+  badge,
 }: Readonly<SchemaViewItemProps>) {
   const regex = new RegExp(
     "(" + (highlight ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
@@ -83,6 +89,7 @@ function SchemaViewItem({
         <div className="w-2 border-l ml-2  2 h-full border-dashed"></div>
       )}
       <Icon className={cn("mr-2 h-4 w-4", selected ? "" : iconClassName)} />
+
       <span>
         {splitedText.map((text, idx) => {
           return text.toLowerCase() === (highlight ?? "").toLowerCase() ? (
@@ -93,6 +100,12 @@ function SchemaViewItem({
             <span key={idx}>{text}</span>
           );
         })}
+
+        {badge && (
+          <span className="bg-red-500 text-white rounded p-0.5 px-1 ml-1 text-xs font-mono font-normal">
+            {badge}
+          </span>
+        )}
       </span>
     </div>
   );
@@ -151,11 +164,42 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     let tree: DatabaseSchemaTreeNode[] = [];
     const treeHash: Record<string, DatabaseSchemaTreeNode> = {};
 
+    const excludeTables = new Set();
+    const ftsTables: string[] = [];
+    const ftsSuffix = ["_config", "_content", "_data", "_docsize", "_idx"];
+
+    // Scan for FTS5
+    for (const item of schema) {
+      if (item.name && item.tableSchema?.fts5) {
+        const tableName = item.name;
+        ftsTables.push(tableName);
+        for (const suffix of ftsSuffix) {
+          excludeTables.add(tableName + suffix);
+        }
+      }
+    }
+
     for (const item of schema) {
       if (item.type === "table" || item.type === "view") {
         const node = { node: item, sub: [] };
         treeHash[item.name] = node;
-        tree.push(node);
+
+        if (item.name && !excludeTables.has(item.name)) {
+          tree.push(node);
+        }
+      }
+    }
+
+    // Grouping FTS5 table
+    for (const ftsTableName of ftsTables) {
+      const ftsSubgroup = treeHash[ftsTableName].sub;
+      if (ftsSubgroup) {
+        for (const suffix of ftsSuffix) {
+          const ftsSubTable = treeHash[ftsTableName + suffix];
+          if (ftsSubTable) {
+            treeHash[ftsTableName].sub.push(ftsSubTable.node);
+          }
+        }
       }
     }
 
@@ -177,7 +221,9 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       return foundName || foundInChildren;
     });
 
-    return tree.map((r) => [r.node, ...r.sub]).flat();
+    return tree
+      .map((r) => [r.node, ...r.sub.map((d) => ({ ...d, indentation: 1 }))])
+      .flat();
   }, [schema, search]);
 
   return (
@@ -217,9 +263,10 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               title={item.name}
               iconClassName={iconClassName}
               icon={icon}
-              indentation={item.type === "trigger"}
+              indentation={!!item.indentation}
               selected={schemaIndex === selectedIndex}
               onClick={() => setSelectedIndex(schemaIndex)}
+              badge={item.tableSchema?.fts5 ? "fts5" : undefined}
             />
           );
         })}

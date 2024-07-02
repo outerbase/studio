@@ -39,6 +39,7 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
 
     const startTime = Date.now();
     const s = this.db.prepare(sql, bind);
+    const endTime = Date.now();
 
     // Do the transform result here
     const headerName = s.getColumnNames();
@@ -70,8 +71,6 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
         }, {} as DatabaseRow)
       );
     }
-
-    const endTime = Date.now();
 
     return {
       headers,
