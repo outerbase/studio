@@ -23,7 +23,7 @@ export default function QueryProgressLog({
   const [, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!progress.error) {
+    if (progress.progress < progress.total) {
       const intervalId = setInterval(() => setCurrentTime(Date.now()), 200);
       return () => clearInterval(intervalId);
     }

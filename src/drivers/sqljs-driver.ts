@@ -77,7 +77,7 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       headers,
       rows,
       stat: {
-        rowsAffected: this.db.getRowsModified(),
+        rowsAffected: headers.length === 0 ? this.db.getRowsModified() : 0,
         rowsRead: null,
         rowsWritten: null,
         queryDurationMs: endTime - startTime,

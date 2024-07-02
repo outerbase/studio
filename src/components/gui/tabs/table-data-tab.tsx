@@ -80,8 +80,6 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             orderBy: sortColumns,
           });
 
-        console.log(dataResult);
-
         setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
         setStat(dataResult.stat);
         setTableSchema(schemaResult);

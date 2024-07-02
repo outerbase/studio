@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import {
   LucideGrid,
@@ -77,7 +77,6 @@ export default function QueryWindow() {
           // Check if sql contain any CREATE/DROP
           let hasAlterSchema = false;
           for (const log of completeLogs) {
-            console.log(log.sql);
             if (
               log.sql.trim().substring(0, "create ".length).toLowerCase() ===
               "create "
@@ -100,6 +99,42 @@ export default function QueryWindow() {
         .catch(console.error);
     }
   };
+
+  const windowTab = useMemo(() => {
+    return (
+      <WindowTabs
+        key="main-window-tab"
+        onSelectChange={setQueryTabIndex}
+        onTabsChange={() => {}}
+        hideCloseButton
+        selected={queryTabIndex}
+        tabs={[
+          ...(data ?? []).map((queryResult, queryIdx) => ({
+            component: (
+              <QueryResult result={queryResult} key={queryResult.order} />
+            ),
+            key: "query_" + queryResult.order,
+            title: "Query " + (queryIdx + 1),
+            icon: LucideGrid,
+          })),
+          ...(progress
+            ? [
+                {
+                  key: "summary",
+                  title: "Summary",
+                  icon: LucideMessageSquareWarning,
+                  component: (
+                    <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+                      <QueryProgressLog progress={progress} />
+                    </div>
+                  ),
+                },
+              ]
+            : []),
+        ]}
+      />
+    );
+  }, [progress, queryTabIndex, data]);
 
   return (
     <ResizablePanelGroup direction="vertical">
@@ -149,36 +184,7 @@ export default function QueryWindow() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
-        <WindowTabs
-          onSelectChange={setQueryTabIndex}
-          onTabsChange={() => {}}
-          hideCloseButton
-          selected={queryTabIndex}
-          tabs={[
-            ...(data ?? []).map((queryResult, queryIdx) => ({
-              component: (
-                <QueryResult result={queryResult} key={queryResult.order} />
-              ),
-              key: "query_" + queryResult.order,
-              title: "Query " + (queryIdx + 1),
-              icon: LucideGrid,
-            })),
-            ...(progress
-              ? [
-                  {
-                    key: "summary",
-                    title: "Summary",
-                    icon: LucideMessageSquareWarning,
-                    component: (
-                      <div className="w-full h-full overflow-y-auto overflow-x-hidden">
-                        <QueryProgressLog progress={progress} />
-                      </div>
-                    ),
-                  },
-                ]
-              : []),
-          ]}
-        />
+        {windowTab}
       </ResizablePanel>
     </ResizablePanelGroup>
   );
