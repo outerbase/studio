@@ -26,10 +26,12 @@ import {
 } from "@/components/lib/multiple-query";
 import WindowTabs from "../windows-tab";
 import QueryResult from "../query-result";
+import { useSchema } from "@/context/schema-provider";
 
 export default function QueryWindow() {
   const { schema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
+  const { refresh: refreshSchema } = useSchema();
   const [code, setCode] = useState("");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [lineNumber, setLineNumber] = useState(0);
@@ -69,7 +71,32 @@ export default function QueryWindow() {
       multipleQuery(databaseDriver, finalStatements, (currentProgrss) => {
         setProgress(currentProgrss);
       })
-        .then(setData)
+        .then(({ result: completeQueryResult, logs: completeLogs }) => {
+          setData(completeQueryResult);
+
+          // Check if sql contain any CREATE/DROP
+          let hasAlterSchema = false;
+          for (const log of completeLogs) {
+            console.log(log.sql);
+            if (
+              log.sql.trim().substring(0, "create ".length).toLowerCase() ===
+              "create "
+            ) {
+              hasAlterSchema = true;
+              break;
+            } else if (
+              log.sql.trim().substring(0, "drop ".length).toLowerCase() ===
+              "drop "
+            ) {
+              hasAlterSchema = true;
+              break;
+            }
+          }
+
+          if (hasAlterSchema) {
+            refreshSchema();
+          }
+        })
         .catch(console.error);
     }
   };

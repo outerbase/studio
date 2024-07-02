@@ -37,6 +37,7 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
     const bind =
       typeof stmt === "string" ? undefined : (stmt.args as BindParams);
 
+    const startTime = Date.now();
     const s = this.db.prepare(sql, bind);
 
     // Do the transform result here
@@ -70,6 +71,8 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       );
     }
 
+    const endTime = Date.now();
+
     return {
       headers,
       rows,
@@ -77,10 +80,14 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
         rowsAffected: this.db.getRowsModified(),
         rowsRead: null,
         rowsWritten: null,
-        queryDurationMs: null,
+        queryDurationMs: endTime - startTime,
       },
-      lastInsertRowid: this.db.exec("select last_insert_rowid();")[0]
-        .values[0][0] as number | undefined,
+      lastInsertRowid:
+        headers.length > 0
+          ? undefined
+          : (this.db.exec("select last_insert_rowid();")[0].values[0][0] as
+              | number
+              | undefined),
     };
   }
 
