@@ -21,7 +21,7 @@ export default function TopbarProfile({ user }: Readonly<{ user: User }>) {
               {user.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <span>{user.name}</span>
+          <span className="hidden md:block">{user.name}</span>
         </div>
       </DropdownMenuTrigger>
 

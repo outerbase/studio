@@ -36,6 +36,16 @@ async function Topbar() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
+        <div className="pr-4 flex items-center pt-1">
+          <a
+            className="github-button"
+            href="https://github.com/invisal/libsql-studio"
+            data-color-scheme="no-preference: dark; light: light; dark: dark;"
+            data-size="large"
+            data-show-count="true"
+            aria-label="Star invisal/libsql-studio on GitHub"
+          ></a>
+        </div>
         {user ? (
           <TopbarProfile user={user} />
         ) : (

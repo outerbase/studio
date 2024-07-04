@@ -9,6 +9,7 @@ import ThemeProvider from "@/context/theme-provider";
 import { cookies } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
 import { Fragment } from "react";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ export default async function RootLayout({
           <Toaster />
         </ThemeProvider>
         <Analytics />
+        <Script async defer src="https://buttons.github.io/buttons.js" />
       </body>
     </html>
   );
