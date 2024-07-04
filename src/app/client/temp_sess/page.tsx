@@ -1,7 +1,3 @@
-import type {
-  SavedConnectionItemConfigConfig,
-  SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
 import { get_database } from "@/db";
 import { dbTempSession } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";
@@ -39,18 +35,11 @@ export default async function SessionPage({
     return <div className="p-4">Session Expired</div>;
   }
 
-  const credential: SavedConnectionItemConfigConfig = JSON.parse(
-    sessionInfo.credential ?? ""
-  );
-
   return (
     <ClientPageBody
       name={sessionInfo.name ?? "Temporary Session"}
       expired={sessionInfo.expiredAt ?? 0}
-      config={{
-        driver: sessionInfo.driver as SupportedDriver,
-        ...credential,
-      }}
+      sessionId={sessionId}
     />
   );
 }

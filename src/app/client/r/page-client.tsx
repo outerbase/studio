@@ -20,7 +20,7 @@ export default function ClientPageBody({
     if (!databaseId) return { driver: null };
 
     return {
-      driver: new RemoteDriver(databaseId, token),
+      driver: new RemoteDriver("remote", databaseId, token),
       collaborator: new CollaborationDriver(databaseId, token),
     };
   }, [params, token]);

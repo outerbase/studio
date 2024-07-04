@@ -2,10 +2,12 @@ import { HttpStatus } from "@/constants/http-status";
 import { get_database } from "@/db";
 import { dbTempSession } from "@/db/schema";
 import { ApiError } from "@/lib/api-error";
+import { encrypt } from "@/lib/encryption-edge";
 import withErrorHandler from "@/lib/with-error-handler";
 import { generateId } from "lucia";
 import { NextResponse } from "next/server";
 import zod from "zod";
+import { env } from "@/env";
 
 export const runtime = "edge";
 
@@ -52,7 +54,10 @@ export const POST = withErrorHandler(async ({ req }) => {
       id: tempSessionId,
       name: body.name ?? "Temp Session",
       driver: body.driver,
-      credential: JSON.stringify({ url: body.url, token: body.token }),
+      credential: JSON.stringify({
+        url: body.url,
+        token: await encrypt(env.ENCRYPTION_KEY, body.token ?? ""),
+      }),
       createdAt: now,
       expiredAt: now + (body.duration ?? 60 * 60), // default to expire in one hour
     });
