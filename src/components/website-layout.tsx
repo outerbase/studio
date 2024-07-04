@@ -65,7 +65,20 @@ function Footer() {
     <div className="border-t py-4 text-sm">
       <div className="mx-auto container flex">
         <div className="flex-grow">
-          <ul className="flex gap-4 mb-2">
+          <ul className="flex flex-wrap gap-4 mb-2">
+            <li>
+              <Link
+                href="/Playground"
+                className="font-semibold hover:underline"
+              >
+                Playground
+              </Link>
+            </li>
+            <li>
+              <Link href="/docs" className="font-semibold hover:underline">
+                Document
+              </Link>
+            </li>
             <li>
               <Link href="/terms" className="font-semibold hover:underline">
                 Terms and Condition

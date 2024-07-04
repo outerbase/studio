@@ -22,7 +22,19 @@ export function DocNavigation({
       {content.map((contentGroup) => {
         return (
           <div key={contentGroup.title}>
-            <div>{contentGroup.title}</div>
+            {contentGroup.href ? (
+              <div>
+                <Link
+                  href={contentGroup.href ?? ""}
+                  className={pathname === contentGroup.href ? "font-bold" : ""}
+                >
+                  {contentGroup.title}
+                </Link>
+              </div>
+            ) : (
+              <div>{contentGroup.title}</div>
+            )}
+
             {contentGroup.sub && (
               <ul className="my-1">
                 {contentGroup.sub.map((content) => {

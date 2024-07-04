@@ -3,6 +3,7 @@ import { DocLayout } from "@/components/mdx/docs";
 const TableContent = [
   {
     title: "LibSQL Studio",
+    href: "/docs",
   },
   {
     title: "Connecting",
@@ -12,22 +13,14 @@ const TableContent = [
         href: "/docs/connect-turso",
       },
       {
-        title: "Connect to rqlite",
-        href: "/learn/sqlite/introduction",
-      },
-      {
         title: "Connect to Valtown",
-        href: "/learn/sqlite/introduction",
+        href: "/docs/connect-valtown",
       },
     ],
   },
   {
     title: "Other",
     sub: [
-      {
-        title: "Self Hosting",
-        href: "/learn/sqlite/indexing",
-      },
       {
         title: "Temporary Session",
         href: "/docs/temporary-session",

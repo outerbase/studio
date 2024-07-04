@@ -1,9 +1,4 @@
-import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { PropsWithChildren } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { LucideAlignJustify } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { DocNavigation } from "./docs-navigation";
 
 interface DocTableContentGroup {

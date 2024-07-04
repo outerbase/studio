@@ -240,8 +240,21 @@ For Markdown Side
 }
 
 .mdx-content ul {
+  @apply list-disc pl-8 my-4;
 }
 
 .mdx-content ol {
   @apply list-decimal pl-8 my-4;
+}
+
+.mdx-content pre {
+  @apply bg-gray-100 dark:bg-gray-700 p-4 leading-5 rounded overflow-x-auto;
+}
+
+.mdx-content p {
+  @apply my-2;
+}
+
+.mdx-content a {
+  @apply text-blue-500 underline;
 }
