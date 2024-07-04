@@ -219,3 +219,29 @@
 .libsql-removed-row td {
   @apply bg-red-200;
 }
+
+/*
+For Markdown Side
+*/
+.mdx-content {
+  @apply leading-7;
+}
+
+.mdx-content h1 {
+  @apply text-3xl;
+}
+
+.mdx-content h2 {
+  @apply text-2xl my-4 pb-2 border-b font-bold;
+}
+
+.mdx-content h3 {
+  @apply text-xl my-4 pb-2 border-b font-bold;
+}
+
+.mdx-content ul {
+}
+
+.mdx-content ol {
+  @apply list-decimal pl-8 my-4;
+}
