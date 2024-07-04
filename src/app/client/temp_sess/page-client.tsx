@@ -8,6 +8,8 @@ import MyStudio from "@/components/my-studio";
 import RqliteDriver from "@/drivers/rqlite-driver";
 import TursoDriver from "@/drivers/turso-driver";
 import ValtownDriver from "@/drivers/valtown-driver";
+import TemporarySession from "@/components/sidebar/temp-session-countdown";
+import FeatureRequestSidebar from "@/components/sidebar/feature-request.tsx";
 
 export default function ClientPageBody({
   config,
@@ -29,12 +31,22 @@ export default function ClientPageBody({
     return new TursoDriver(config.url, config.token as string, true);
   }, [config]);
 
+  const sidebar = useMemo(() => {
+    return (
+      <>
+        <TemporarySession expiredAt={expired} />
+        <FeatureRequestSidebar />
+      </>
+    );
+  }, [expired]);
+
   return (
     <MyStudio
       driver={driver}
       name={name ?? "Temporary Session"}
       color="gray"
       expiredAt={expired}
+      sideBarFooterComponent={sidebar}
     />
   );
 }

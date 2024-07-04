@@ -1,16 +1,22 @@
 "use client";
+import { saveAs } from "file-saver";
 import MyStudio from "@/components/my-studio";
+import { Button } from "@/components/ui/button";
 import SqljsDriver from "@/drivers/sqljs-driver";
 import { LucideLoader } from "lucide-react";
 import Script from "next/script";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Database, SqlJsStatic } from "sql.js";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
 }: {
   preloadDatabase?: string | null;
 }) {
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [sqlInit, setSqlInit] = useState<SqlJsStatic>();
   const [databaseLoading, setDatabaseLoading] = useState(!!preloadDatabase);
+  const [rawDb, setRawDb] = useState<Database>();
   const [db, setDb] = useState<SqljsDriver>();
 
   const onReady = useCallback(() => {
@@ -18,19 +24,76 @@ export default function PlaygroundEditorBody({
       .initSqlJs({
         locateFile: (file) => `/sqljs/${file}`,
       })
-      .then((SQL) => {
-        if (preloadDatabase) {
-          fetch(preloadDatabase)
-            .then((r) => r.arrayBuffer())
-            .then((r) =>
-              setDb(new SqljsDriver(new SQL.Database(new Uint8Array(r))))
-            )
-            .finally(() => setDatabaseLoading(false));
-        } else {
-          setDb(new SqljsDriver(new SQL.Database()));
+      .then(setSqlInit);
+  }, []);
+
+  useEffect(() => {
+    if (sqlInit) {
+      if (preloadDatabase) {
+        fetch(preloadDatabase)
+          .then((r) => r.arrayBuffer())
+          .then((r) => {
+            const sqljsDatabase = new sqlInit.Database(new Uint8Array(r));
+            setRawDb(sqljsDatabase);
+            setDb(new SqljsDriver(sqljsDatabase));
+          })
+          .finally(() => setDatabaseLoading(false));
+      } else {
+        const sqljsDatabase = new sqlInit.Database();
+        setRawDb(sqljsDatabase);
+        setDb(new SqljsDriver(sqljsDatabase));
+      }
+    }
+  }, [sqlInit, preloadDatabase]);
+
+  const onFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.currentTarget.files && sqlInit) {
+        const file = e.currentTarget.files[0];
+        if (file) {
+          file.arrayBuffer().then((buffer) => {
+            const sqljsDatabase = new sqlInit.Database(new Uint8Array(buffer));
+            setRawDb(sqljsDatabase);
+            setDb(new SqljsDriver(sqljsDatabase));
+          });
         }
-      });
-  }, [preloadDatabase]);
+      }
+    },
+    [sqlInit]
+  );
+
+  const sidebarMenu = useMemo(() => {
+    return (
+      <div className="flex flex-col gap-2">
+        <Button
+          size="sm"
+          onClick={() => {
+            if (rawDb) {
+              console.log("hello world");
+              saveAs(
+                new Blob([rawDb.export()], {
+                  type: "application/x-sqlite3",
+                }),
+                "sqlite-dump.db"
+              );
+            }
+          }}
+        >
+          Download as .db file
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            if (fileInput.current) {
+              fileInput.current.click();
+            }
+          }}
+        >
+          Open SQLite File
+        </Button>
+      </div>
+    );
+  }, [rawDb, fileInput]);
 
   const dom = useMemo(() => {
     if (databaseLoading) {
@@ -48,15 +111,29 @@ export default function PlaygroundEditorBody({
     }
 
     if (db) {
-      return <MyStudio color="gray" name="Playground" driver={db} />;
+      return (
+        <MyStudio
+          color="gray"
+          name="Playground"
+          driver={db}
+          sideBarFooterComponent={sidebarMenu}
+        />
+      );
     }
 
     return <div></div>;
-  }, [databaseLoading, preloadDatabase, db]);
+  }, [databaseLoading, preloadDatabase, db, sidebarMenu]);
 
   return (
     <>
       <Script src="/sqljs/sql-wasm.js" onReady={onReady} />
+      <input
+        type="file"
+        ref={fileInput}
+        className="hidden"
+        onChange={onFileChange}
+        multiple={false}
+      />
       {dom}
     </>
   );

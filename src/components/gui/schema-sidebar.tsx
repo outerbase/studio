@@ -49,17 +49,6 @@ export default function SchemaView() {
 
         <Separator />
         {sideBarFooterComponent}
-        <div className="p-2 px-3 text-xs">
-          Powered by{" "}
-          <a
-            href="https://libsqlstudio.com"
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-700 underline"
-          >
-            LibSQL Studio
-          </a>
-        </div>
       </div>
     </div>
   );
