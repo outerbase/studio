@@ -68,7 +68,7 @@ function Footer() {
           <ul className="flex flex-wrap gap-4 mb-2">
             <li>
               <Link
-                href="/Playground"
+                href="/playground"
                 className="font-semibold hover:underline"
               >
                 Playground
