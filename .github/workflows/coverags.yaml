@@ -4,8 +4,6 @@ on:
     branches:
       - develop
 jobs:
-  with:
-    test-script: npm test:coverage
   coverage:
     runs-on: ubuntu-latest
     permissions:
