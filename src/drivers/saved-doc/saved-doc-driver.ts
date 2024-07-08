@@ -11,18 +11,18 @@ export interface SavedDocNamespace extends SavedDocNamespaceInput {
 }
 
 export interface SavedDocInput {
-  id: string;
   name: string;
   content: string;
 }
 
 export interface SavedDocData extends SavedDocInput {
+  id: string;
   type: SavedDocType;
   createdAt: number;
   updatedAt: number;
 }
 
-export abstract class SavedQueryDriver {
+export abstract class SavedDocDriver {
   abstract getNamespaces(): Promise<SavedDocNamespace[]>;
   abstract createNamespace(name: string): Promise<SavedDocNamespace>;
   abstract updateNamespace(
@@ -31,12 +31,12 @@ export abstract class SavedQueryDriver {
   ): Promise<SavedDocNamespace>;
   abstract removeNamespapce(id: string): Promise<void>;
 
-  abstract getQueries(namespaceId: string): Promise<SavedDocData[]>;
-  abstract createQuery(
+  abstract getDocs(namespaceId: string): Promise<SavedDocData[]>;
+  abstract createDoc(
     type: SavedDocType,
     namespace: string,
     data: SavedDocInput
   ): Promise<SavedDocData>;
-  abstract updateQuery(id: string, data: SavedDocInput): Promise<SavedDocData>;
-  abstract removeQuery(id: string): Promise<void>;
+  abstract updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData>;
+  abstract removeDoc(id: string): Promise<void>;
 }
