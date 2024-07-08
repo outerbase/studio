@@ -1,0 +1,11 @@
+name: "Compute Coverage"
+on:
+  pull_request:
+    branches:
+      - develop
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ArtiomTr/jest-coverage-report-action@v2
