@@ -4,6 +4,8 @@ on:
     branches:
       - develop
 jobs:
+  with:
+    test-script: npm test:coverage
   coverage:
     runs-on: ubuntu-latest
     permissions:
@@ -12,4 +14,9 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
       - uses: ArtiomTr/jest-coverage-report-action@v2
