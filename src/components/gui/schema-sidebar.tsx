@@ -4,12 +4,9 @@ import SchemaList from "./schema-sidebar-list";
 import ListButtonItem from "./list-button-item";
 import { Separator } from "../ui/separator";
 import { openTab } from "@/messages/open-tab";
-import { useConfig } from "@/context/config-provider";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
-  const { sideBarFooterComponent } = useConfig();
-
   const onNewTable = useCallback(() => {
     openTab({
       type: "schema",
@@ -46,9 +43,6 @@ export default function SchemaView() {
             onClick={onNewTable}
           />
         </div>
-
-        <Separator />
-        {sideBarFooterComponent}
       </div>
     </div>
   );

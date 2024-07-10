@@ -25,6 +25,7 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   });
 
   const config = useConfig();
+
   const color = config.color;
   let bgPrimary = "border-l-gray-500 dark:border-l-gray-600";
 
@@ -43,8 +44,9 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
       <div className={cn("shrink-0 bg-secondary")}>
         <div className="text-sm my-2 px-3 font-semibold flex">
           <div className="flex-grow flex items-center">
-            <div className="line-clamp-1 text-ellipsis">Testing Dev</div>
+            <div className="line-clamp-1 text-ellipsis">{config.name}</div>
           </div>
+
           <div className="flex justify-center items-center">
             <button
               onClick={() => toggleTheme()}
@@ -64,6 +66,11 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
             </button>
           </div>
         </div>
+
+        {config.sideBarFooterComponent && (
+          <div>{config.sideBarFooterComponent}</div>
+        )}
+
         <div className="flex flex-row">
           <div className="w-2 border-b" />
           {tabs.map(({ key, name, icon: Icon }, idx) => {

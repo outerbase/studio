@@ -10,7 +10,6 @@ import {
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio, StudioExtension } from "./gui/studio";
-import FeatureRequestSidebar from "./sidebar/feature-request.tsx";
 
 interface MyStudioProps {
   name: string;
@@ -100,24 +99,9 @@ function MyStudioInternal({
 }
 
 export default function MyStudio(props: MyStudioProps) {
-  const defaultSidebar = useMemo(() => {
-    return (
-      <div className="text-sm p-3 px-4">
-        {props.sideBarFooterComponent ?? (
-          <>
-            <p>
-              <strong>LibStudio Studio</strong> is open-source database GUI.
-            </p>
-            <FeatureRequestSidebar />
-          </>
-        )}
-      </div>
-    );
-  }, [props.sideBarFooterComponent]);
-
   return (
     <BlockEditorProvider>
-      <MyStudioInternal {...props} sideBarFooterComponent={defaultSidebar} />
+      <MyStudioInternal {...props} />
     </BlockEditorProvider>
   );
 }
