@@ -1,12 +1,7 @@
 import { useConfig } from "@/context/config-provider";
 import { useTheme } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
-import {
-  LucideArrowLeft,
-  LucideIcon,
-  LucideMoon,
-  LucideSun,
-} from "lucide-react";
+import { LucideIcon, LucideMoon, LucideSun } from "lucide-react";
 import { ReactElement, useState } from "react";
 
 export interface SidebarTabItem {
@@ -21,7 +16,6 @@ interface SidebarTabProps {
 }
 
 export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
-  const { onBack } = useConfig();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const [loadedIndex, setLoadedIndex] = useState(() => {
@@ -32,66 +26,76 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
 
   const config = useConfig();
   const color = config.color;
-
-  let bgColor = "bg-blue-500 dark:bg-blue-700";
-  let textColor = "text-white";
+  let bgPrimary = "border-l-gray-500 dark:border-l-gray-600";
 
   if (color === "red") {
-    bgColor = "bg-red-500 dark:bg-red-700";
+    bgPrimary = "border-l-red-500 dark:border-l-red-600";
   } else if (color === "yellow") {
-    bgColor = "bg-yellow-400 dark:bg-yellow-500";
-    textColor = "text-black";
+    bgPrimary = "border-l-yellow-500 dark:border-l-yellow-600";
   } else if (color === "green") {
-    bgColor = "bg-green-500 dark:bg-green-600";
+    bgPrimary = "border-l-green-500 dark:border-l-green-600";
   } else if (color === "gray") {
-    bgColor = "bg-gray-500 dark:bg-gray-800";
+    bgPrimary = "border-l-gray-500 dark:border-l-gray-600";
   }
 
   return (
-    <div className="flex h-full">
-      <div className={cn("shrink-0 flex flex-col gap-2 pt-6", bgColor)}>
-        {tabs.map(({ key, name, icon: Icon }, idx) => {
-          return (
+    <div className={cn("flex flex-col h-full border-l-8", bgPrimary)}>
+      <div className={cn("shrink-0 bg-secondary")}>
+        <div className="text-sm my-2 px-3 font-semibold flex">
+          <div className="flex-grow flex items-center">
+            <div className="line-clamp-1 text-ellipsis">Testing Dev</div>
+          </div>
+          <div className="flex justify-center items-center">
             <button
-              title={name}
-              key={key}
-              onClick={() => {
-                if (!loadedIndex[idx]) {
-                  loadedIndex[idx] = true;
-                  setLoadedIndex([...loadedIndex]);
-                }
-
-                if (idx !== selectedIndex) {
-                  setSelectedIndex(idx);
-                }
-              }}
-              className={
-                idx === selectedIndex
-                  ? "p-2 bg-background cursor-pointer"
-                  : cn("p-2 cursor cursor-pointer", textColor)
-              }
+              onClick={() => toggleTheme()}
+              className="text-xs font-normal flex gap-0.5 border rounded px-2 py-1 bg-background"
             >
-              <Icon className="w-7 h-7" />
+              {theme === "dark" ? (
+                <>
+                  <LucideMoon className={cn("w-4 h-4")} />
+                  Dark
+                </>
+              ) : (
+                <>
+                  <LucideSun className={cn("w-4 h-4")} />
+                  Light
+                </>
+              )}
             </button>
-          );
-        })}
+          </div>
+        </div>
+        <div className="flex flex-row">
+          <div className="w-2 border-b" />
+          {tabs.map(({ key, name, icon: Icon }, idx) => {
+            return (
+              <button
+                title={name}
+                key={key}
+                onClick={() => {
+                  if (!loadedIndex[idx]) {
+                    loadedIndex[idx] = true;
+                    setLoadedIndex([...loadedIndex]);
+                  }
 
-        <div className="grow" />
-
-        <button className={cn("p-2 cursor-pointer", bgColor)} onClick={onBack}>
-          <LucideArrowLeft className={cn("w-7 h-7", textColor)} />
-        </button>
-
-        <button
-          className="p-2 rounded-lg mb-2 cursor-pointer"
-          onClick={() => toggleTheme()}
-        >
-          {theme === "dark" ? (
-            <LucideMoon className={cn("w-7 h-7", textColor)} />
-          ) : (
-            <LucideSun className={cn("w-7 h-7", textColor)} />
-          )}
-        </button>
+                  if (idx !== selectedIndex) {
+                    setSelectedIndex(idx);
+                  }
+                }}
+                className={cn(
+                  "cursor cursor-pointer w-[58px] h-[50px] flex flex-col gap-0.5 justify-center items-center rounded-t",
+                  selectedIndex !== idx ? "border-b" : undefined,
+                  selectedIndex === idx
+                    ? "bg-background border-l border-r border-t"
+                    : undefined
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                <span style={{ fontSize: 10 }}>{name}</span>
+              </button>
+            );
+          })}
+          <div className="flex-grow border-b" />
+        </div>
       </div>
       <div className="relative flex h-full grow overflow-hidden">
         {tabs.map((tab, tabIndex) => {
