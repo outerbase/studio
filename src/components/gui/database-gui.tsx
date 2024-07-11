@@ -11,11 +11,17 @@ import useMessageListener from "@/components/hooks/useMessageListener";
 import { MessageChannelName } from "@/messages/const";
 import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
-import { LucideCode, LucideDatabase, LucideSettings } from "lucide-react";
+import {
+  LucideBookmark,
+  LucideCode,
+  LucideDatabase,
+  LucideSettings,
+} from "lucide-react";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
 import SettingSidebar from "./sidebar/setting-sidebar";
 import { useDatabaseDriver } from "@/context/driver-provider";
+import SavedDocTab from "./tabs/saved-doc-tab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -26,13 +32,13 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
-  const { collaborationDriver } = useDatabaseDriver();
+  const { collaborationDriver, docDriver } = useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
     {
       title: "Query",
       key: "query",
-      component: <QueryWindow />,
+      component: <QueryWindow initialName="Query" />,
       icon: LucideCode,
     },
   ]);
@@ -50,10 +56,18 @@ export default function DatabaseGui() {
     return [
       {
         key: "database",
-        name: "Database",
+        name: "Schema",
         content: <SchemaView />,
         icon: LucideDatabase,
       },
+      docDriver
+        ? {
+            key: "saved",
+            name: "Saved",
+            content: <SavedDocTab />,
+            icon: LucideBookmark,
+          }
+        : undefined,
       collaborationDriver
         ? {
             key: "setting",
@@ -63,7 +77,7 @@ export default function DatabaseGui() {
           }
         : undefined,
     ].filter(Boolean) as SidebarTabItem[];
-  }, [collaborationDriver]);
+  }, [collaborationDriver, docDriver]);
 
   const tabSideMenu = useMemo(() => {
     return [

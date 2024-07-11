@@ -22,6 +22,10 @@ interface OpenTableTab {
 interface OpenQueryTab {
   type: "query";
   name?: string;
+  saved?: {
+    key: string;
+    sql: string;
+  };
 }
 
 interface OpenTableSchemaTab {
@@ -51,7 +55,13 @@ export function openTab(props: OpenTabsProps) {
 }
 
 function generateKeyFromTab(tab: OpenTabsProps) {
-  if (tab.type === "query") return "query-" + window.crypto.randomUUID();
+  if (tab.type === "query") {
+    if (tab.saved) {
+      return "saved-query-" + tab.saved.key;
+    }
+    return "query-" + window.crypto.randomUUID();
+  }
+
   if (tab.type === "table") return "table-" + tab.tableName;
   if (tab.type === "schema")
     return !tab.tableName ? "create-schema" : "schema-" + tab.tableName;
@@ -71,7 +81,10 @@ function generateIconFromTab(tab: OpenTabsProps) {
 
 let QUERY_COUNTER = 2;
 function generateTitle(tab: OpenTabsProps) {
-  if (tab.type === "query") return "Query " + (QUERY_COUNTER++).toString();
+  if (tab.type === "query") {
+    if (tab.saved) return tab.name ?? "Query";
+    return "Query " + (QUERY_COUNTER++).toString();
+  }
   if (tab.type === "table") return tab.tableName;
   if (tab.type === "schema") return tab.tableName ? tab.tableName : "New Table";
   if (tab.type === "user") return "User & Permission";
@@ -79,7 +92,14 @@ function generateTitle(tab: OpenTabsProps) {
 }
 
 function generateComponent(tab: OpenTabsProps) {
-  if (tab.type === "query") return <QueryWindow />;
+  if (tab.type === "query") {
+    if (tab.saved) {
+      return (
+        <QueryWindow initialName={tab.name ?? ""} initialCode={tab.saved.sql} />
+      );
+    }
+    return <QueryWindow initialName={tab.name ?? ""} />;
+  }
   if (tab.type === "table")
     return <TableDataWindow tableName={tab.tableName} />;
   if (tab.type === "schema")

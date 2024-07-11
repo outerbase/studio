@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import {
   LucideGrid,
   LucideMessageSquareWarning,
   LucidePlay,
+  LucideSave,
 } from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
 import {
@@ -24,15 +25,23 @@ import {
   MultipleQueryResult,
   multipleQuery,
 } from "@/components/lib/multiple-query";
-import WindowTabs from "../windows-tab";
+import WindowTabs, { useTabsContext } from "../windows-tab";
 import QueryResult from "../query-result";
 import { useSchema } from "@/context/schema-provider";
 
-export default function QueryWindow() {
+interface QueryWindowProps {
+  initialCode?: string;
+  initialName: string;
+}
+
+export default function QueryWindow({
+  initialCode,
+  initialName,
+}: QueryWindowProps) {
   const { schema } = useAutoComplete();
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver, docDriver } = useDatabaseDriver();
   const { refresh: refreshSchema } = useSchema();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [lineNumber, setLineNumber] = useState(0);
   const [columnNumber, setColumnNumber] = useState(0);
@@ -40,6 +49,8 @@ export default function QueryWindow() {
   const [queryTabIndex, setQueryTabIndex] = useState(0);
   const [progress, setProgress] = useState<MultipleQueryProgress>();
   const [data, setData] = useState<MultipleQueryResult[]>();
+  const [name, setName] = useState(initialName);
+  const { renameCurrentTab } = useTabsContext();
 
   const onRunClicked = (all = false) => {
     const statements = identify(code, {
@@ -100,6 +111,15 @@ export default function QueryWindow() {
     }
   };
 
+  const onSaveQuery = useCallback(() => {
+    if (docDriver) {
+      docDriver.createDoc("sql", docDriver.getCurrentNamespace(), {
+        content: code,
+        name: name || "Unnamed Query",
+      });
+    }
+  }, [docDriver, code, name]);
+
   const windowTab = useMemo(() => {
     return (
       <WindowTabs
@@ -140,6 +160,26 @@ export default function QueryWindow() {
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
+          <div className="border-b pl-2 pr-1 py-1 flex">
+            <div className="text-xs shrink-0 items-center flex text-secondary-foreground p-1">
+              Unsaved Query /
+            </div>
+            <div className="inline-block relative">
+              <span className="inline-block text-xs p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0">
+                &nbsp;{name}
+              </span>
+              <input
+                onBlur={(e) => {
+                  renameCurrentTab(e.currentTarget.value || "Unnamed Query");
+                }}
+                placeholder="Please name your query"
+                spellCheck="false"
+                className="absolute top-0 right-0 left-0 bottom-0 text-xs p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded"
+                value={name}
+                onChange={(e) => setName(e.currentTarget.value)}
+              />
+            </div>
+          </div>
           <div className="grow overflow-hidden">
             <SqlEditor
               ref={editorRef}
@@ -161,7 +201,11 @@ export default function QueryWindow() {
           <div className="grow-0 shrink-0">
             <Separator />
             <div className="flex gap-1 p-1">
-              <Button variant={"ghost"} onClick={() => onRunClicked()}>
+              <Button
+                variant={"ghost"}
+                size="sm"
+                onClick={() => onRunClicked()}
+              >
                 <LucidePlay className="w-4 h-4 mr-2" />
                 Run Current{" "}
                 <span className="text-xs ml-2 px-2 bg-secondary py-1 rounded">
@@ -169,15 +213,24 @@ export default function QueryWindow() {
                 </span>
               </Button>
 
-              <Button variant={"ghost"} onClick={() => onRunClicked(true)}>
+              <Button
+                variant={"ghost"}
+                size="sm"
+                onClick={() => onRunClicked(true)}
+              >
                 <LucidePlay className="w-4 h-4 mr-2" />
                 Run All
               </Button>
 
-              <div className="grow justify-end items-center flex text-sm mr-2 gap-2">
+              <div className="grow items-center flex text-xs mr-2 gap-2 border-l pl-4">
                 <div>Ln {lineNumber}</div>
                 <div>Col {columnNumber + 1}</div>
               </div>
+
+              <Button size="sm" onClick={onSaveQuery} className="mr-2">
+                <LucideSave className="w-4 h-4 mr-2" />
+                Save
+              </Button>
             </div>
           </div>
         </div>

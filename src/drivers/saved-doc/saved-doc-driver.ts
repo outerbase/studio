@@ -39,4 +39,8 @@ export abstract class SavedDocDriver {
   ): Promise<SavedDocData>;
   abstract updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData>;
   abstract removeDoc(id: string): Promise<void>;
+
+  // This is helper to make code easier
+  abstract setCurrentNamespace(id: string): void;
+  abstract getCurrentNamespace(): string;
 }

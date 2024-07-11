@@ -18,6 +18,7 @@ import {
 
 export default class RemoteSavedDocDriver implements SavedDocDriver {
   protected databaseId: string;
+  protected currentNamespace: string = "";
 
   constructor(databaseId: string) {
     this.databaseId = databaseId;
@@ -57,5 +58,13 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
 
   removeDoc(id: string): Promise<void> {
     return removeSavedDoc(this.databaseId, id);
+  }
+
+  setCurrentNamespace(id: string) {
+    this.currentNamespace = id;
+  }
+
+  getCurrentNamespace(): string {
+    return this.currentNamespace;
   }
 }

@@ -47,8 +47,12 @@ interface WindowTabsProps {
 
 const WindowTabsContext = createContext<{
   replaceCurrentTab: (tab: WindowTabItemProps) => void;
+  renameCurrentTab: (name: string) => void;
 }>({
   replaceCurrentTab: () => {
+    throw new Error("Not implemented");
+  },
+  renameCurrentTab: () => {
     throw new Error("Not implemented");
   },
 });
@@ -87,9 +91,21 @@ export default function WindowTabs({
     [tabs, selected, onTabsChange]
   );
 
+  const renameCurrentTab = useCallback(
+    (name: string) => {
+      if (tabs[selected]) {
+        tabs[selected].title = name;
+        if (onTabsChange) {
+          onTabsChange([...tabs]);
+        }
+      }
+    },
+    [tabs, selected, onTabsChange]
+  );
+
   const contextValue = useMemo(
-    () => ({ replaceCurrentTab }),
-    [replaceCurrentTab]
+    () => ({ replaceCurrentTab, renameCurrentTab }),
+    [replaceCurrentTab, renameCurrentTab]
   );
 
   const handleDragStart = useCallback(
