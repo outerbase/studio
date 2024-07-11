@@ -7,7 +7,7 @@ import {
   SavedDocType,
 } from "./saved-doc-driver";
 import { getDatabaseWithAuth } from "@/lib/with-database-ops";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { dbDoc, dbDocNamespace } from "@/db/schema-doc";
 import { generateId } from "lucia";
 import { ApiError } from "@/lib/api-error";
@@ -163,10 +163,14 @@ export async function getSavedDocList(
   databaseId: string,
   namespaceId: string
 ): Promise<SavedDocData[]> {
-  const { db } = await getNamespaceWithAuth(databaseId, namespaceId);
+  const { db, namespaceData } = await getNamespaceWithAuth(
+    databaseId,
+    namespaceId
+  );
 
   const docList = await db.query.dbDoc.findMany({
     where: eq(dbDoc.namespaceId, namespaceId),
+    orderBy: desc(dbDoc.createdAt),
   });
 
   return docList.map((item) => {
@@ -177,6 +181,10 @@ export async function getSavedDocList(
       id: item.id ?? "",
       name: item.name ?? "",
       type: (item.type ?? "sql") as SavedDocType,
+      namespace: {
+        id: namespaceData.id,
+        name: namespaceData.name ?? "",
+      },
     };
   });
 }
@@ -214,6 +222,10 @@ export async function createSavedDoc(
     updatedAt: now,
     name: input.name,
     type: type,
+    namespace: {
+      id: namespaceData.id,
+      name: namespaceData.name ?? "",
+    },
   };
 }
 
@@ -230,7 +242,10 @@ export async function updateSavedDoc(
   docId: string,
   input: SavedDocInput
 ): Promise<SavedDocData> {
-  const { db, docData } = await getDocWithAuth(databaseId, docId);
+  const { db, docData, namespaceData } = await getDocWithAuth(
+    databaseId,
+    docId
+  );
   const now = Math.floor(Date.now() / 1000);
 
   await db
@@ -249,5 +264,9 @@ export async function updateSavedDoc(
     updatedAt: now,
     name: input.name,
     type: (docData.type ?? "sql") as SavedDocType,
+    namespace: {
+      id: namespaceData.id,
+      name: namespaceData.name ?? "",
+    },
   };
 }

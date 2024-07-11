@@ -29,18 +29,33 @@ function mapDoc(data: SavedDocData): ListViewItem<SavedDocData> {
   };
 }
 
-function SavedDocNamespaceDocList({ namespaceId }: { namespaceId?: string }) {
+function SavedDocNamespaceDocList({
+  namespaceData,
+}: {
+  namespaceData?: SavedDocNamespace;
+}) {
   const { docDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState<string>();
   const [docList, setDocList] = useState<ListViewItem<SavedDocData>[]>([]);
 
   useEffect(() => {
+    const namespaceId = namespaceData?.id;
+
     if (docDriver && namespaceId) {
-      docDriver?.getDocs(namespaceId).then((r) => {
+      docDriver.getDocs(namespaceId).then((r) => {
         setDocList(r.map(mapDoc));
       });
+
+      const onDocChange = () => {
+        docDriver?.getDocs(namespaceId).then((r) => {
+          setDocList(r.map(mapDoc));
+        });
+      };
+
+      docDriver.addChangeListener(onDocChange);
+      return () => docDriver.removeChangeListener(onDocChange);
     }
-  }, [docDriver, namespaceId]);
+  }, [docDriver, namespaceData]);
 
   return (
     <ListView
@@ -54,6 +69,7 @@ function SavedDocNamespaceDocList({ namespaceId }: { namespaceId?: string }) {
           saved: {
             key: item.key,
             sql: item.data.content,
+            namespaceName: namespaceData?.name,
           },
         });
       }}
@@ -69,12 +85,14 @@ export default function SavedDocTab() {
   >([]);
 
   useEffect(() => {
-    docDriver?.getNamespaces().then((r) => {
-      setNamespaceList(r.map(mapNamespace));
-      const firstNamespaceId = r[0].id;
-      setSelectedNamespace(firstNamespaceId);
-      docDriver.setCurrentNamespace(firstNamespaceId);
-    });
+    if (docDriver) {
+      docDriver.getNamespaces().then((r) => {
+        setNamespaceList(r.map(mapNamespace));
+        const firstNamespaceId = r[0].id;
+        setSelectedNamespace(firstNamespaceId);
+        docDriver.setCurrentNamespace(firstNamespaceId);
+      });
+    }
   }, [docDriver]);
 
   return (
@@ -88,7 +106,11 @@ export default function SavedDocTab() {
       </div>
       <Separator />
       <div className="p-2">
-        <SavedDocNamespaceDocList namespaceId={selectedNamespace} />
+        <SavedDocNamespaceDocList
+          namespaceData={
+            namespaceList.find((n) => n.key === selectedNamespace)?.data
+          }
+        />
       </div>
     </div>
   );

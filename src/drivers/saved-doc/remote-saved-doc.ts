@@ -19,6 +19,7 @@ import {
 export default class RemoteSavedDocDriver implements SavedDocDriver {
   protected databaseId: string;
   protected currentNamespace: string = "";
+  protected cb: (() => void)[] = [];
 
   constructor(databaseId: string) {
     this.databaseId = databaseId;
@@ -40,24 +41,30 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     return removeDocNamespace(this.databaseId, id);
   }
 
-  createDoc(
+  async createDoc(
     type: SavedDocType,
     namespace: string,
     data: SavedDocInput
   ): Promise<SavedDocData> {
-    return createSavedDoc(this.databaseId, namespace, type, data);
+    const r = await createSavedDoc(this.databaseId, namespace, type, data);
+    this.triggerChange();
+    return r;
   }
 
   getDocs(namespaceId: string): Promise<SavedDocData[]> {
     return getSavedDocList(this.databaseId, namespaceId);
   }
 
-  updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData> {
-    return updateSavedDoc(this.databaseId, id, data);
+  async updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData> {
+    const r = updateSavedDoc(this.databaseId, id, data);
+    this.triggerChange();
+    return r;
   }
 
-  removeDoc(id: string): Promise<void> {
-    return removeSavedDoc(this.databaseId, id);
+  async removeDoc(id: string): Promise<void> {
+    const r = await removeSavedDoc(this.databaseId, id);
+    this.triggerChange();
+    return r;
   }
 
   setCurrentNamespace(id: string) {
@@ -66,5 +73,17 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
 
   getCurrentNamespace(): string {
     return this.currentNamespace;
+  }
+
+  addChangeListener(cb: () => void): void {
+    this.cb.push(cb);
+  }
+
+  removeChangeListener(cb: () => void): void {
+    this.cb = this.cb.filter((c) => c !== cb);
+  }
+
+  protected triggerChange() {
+    this.cb.forEach((c) => c());
   }
 }

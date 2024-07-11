@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import {
   LucideGrid,
+  LucideLoader,
   LucideMessageSquareWarning,
   LucidePlay,
   LucideSave,
@@ -32,11 +33,15 @@ import { useSchema } from "@/context/schema-provider";
 interface QueryWindowProps {
   initialCode?: string;
   initialName: string;
+  initialSavedKey?: string;
+  initialNamespace?: string;
 }
 
 export default function QueryWindow({
   initialCode,
   initialName,
+  initialSavedKey,
+  initialNamespace,
 }: QueryWindowProps) {
   const { schema } = useAutoComplete();
   const { databaseDriver, docDriver } = useDatabaseDriver();
@@ -51,6 +56,12 @@ export default function QueryWindow({
   const [data, setData] = useState<MultipleQueryResult[]>();
   const [name, setName] = useState(initialName);
   const { renameCurrentTab } = useTabsContext();
+
+  const [namespaceName, setNamespaceName] = useState(
+    initialNamespace ?? "Unsaved Query"
+  );
+  const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const onRunClicked = (all = false) => {
     const statements = identify(code, {
@@ -113,12 +124,32 @@ export default function QueryWindow({
 
   const onSaveQuery = useCallback(() => {
     if (docDriver) {
-      docDriver.createDoc("sql", docDriver.getCurrentNamespace(), {
-        content: code,
-        name: name || "Unnamed Query",
-      });
+      setSaveLoading(true);
+      if (savedKey) {
+        docDriver
+          .updateDoc(savedKey, {
+            content: code,
+            name: name || "Unnamed Query",
+          })
+          .finally(() => {
+            setSaveLoading(false);
+          });
+      } else {
+        docDriver
+          .createDoc("sql", docDriver.getCurrentNamespace(), {
+            content: code,
+            name: name || "Unnamed Query",
+          })
+          .then((d) => {
+            setSavedKey(d.id);
+            setNamespaceName(d.namespace.name);
+          })
+          .finally(() => {
+            setSaveLoading(false);
+          });
+      }
     }
-  }, [docDriver, code, name]);
+  }, [docDriver, code, name, savedKey]);
 
   const windowTab = useMemo(() => {
     return (
@@ -162,7 +193,7 @@ export default function QueryWindow({
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
           <div className="border-b pl-2 pr-1 py-1 flex">
             <div className="text-xs shrink-0 items-center flex text-secondary-foreground p-1">
-              Unsaved Query /
+              {namespaceName} /
             </div>
             <div className="inline-block relative">
               <span className="inline-block text-xs p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0">
@@ -227,8 +258,17 @@ export default function QueryWindow({
                 <div>Col {columnNumber + 1}</div>
               </div>
 
-              <Button size="sm" onClick={onSaveQuery} className="mr-2">
-                <LucideSave className="w-4 h-4 mr-2" />
+              <Button
+                size="sm"
+                onClick={onSaveQuery}
+                className="mr-2"
+                disabled={saveLoading}
+              >
+                {saveLoading ? (
+                  <LucideLoader className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <LucideSave className="w-4 h-4 mr-2" />
+                )}
                 Save
               </Button>
             </div>

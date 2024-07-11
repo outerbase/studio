@@ -23,6 +23,7 @@ interface OpenQueryTab {
   type: "query";
   name?: string;
   saved?: {
+    namespaceName?: string;
     key: string;
     sql: string;
   };
@@ -91,14 +92,19 @@ function generateTitle(tab: OpenTabsProps) {
   return tab.name ?? "";
 }
 
-function generateComponent(tab: OpenTabsProps) {
+function generateComponent(tab: OpenTabsProps, title: string) {
   if (tab.type === "query") {
     if (tab.saved) {
       return (
-        <QueryWindow initialName={tab.name ?? ""} initialCode={tab.saved.sql} />
+        <QueryWindow
+          initialName={title}
+          initialCode={tab.saved.sql}
+          initialSavedKey={tab.saved.key}
+          initialNamespace={tab.saved.namespaceName}
+        />
       );
     }
-    return <QueryWindow initialName={tab.name ?? ""} />;
+    return <QueryWindow initialName={title} />;
   }
   if (tab.type === "table")
     return <TableDataWindow tableName={tab.tableName} />;
@@ -126,14 +132,15 @@ export function receiveOpenTabMessage({
       return prev;
     }
     setSelectedTabIndex(prev.length);
+    const title = generateTitle(newTab);
 
     return [
       ...prev,
       {
         icon: generateIconFromTab(newTab),
-        title: generateTitle(newTab),
+        title,
         key,
-        component: generateComponent(newTab),
+        component: generateComponent(newTab, title),
       },
     ];
   });

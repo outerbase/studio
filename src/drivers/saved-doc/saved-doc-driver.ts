@@ -18,6 +18,7 @@ export interface SavedDocInput {
 export interface SavedDocData extends SavedDocInput {
   id: string;
   type: SavedDocType;
+  namespace: { id: string; name: string };
   createdAt: number;
   updatedAt: number;
 }
@@ -41,6 +42,8 @@ export abstract class SavedDocDriver {
   abstract removeDoc(id: string): Promise<void>;
 
   // This is helper to make code easier
+  abstract addChangeListener(cb: () => void): void;
+  abstract removeChangeListener(cb: () => void): void;
   abstract setCurrentNamespace(id: string): void;
   abstract getCurrentNamespace(): string;
 }
