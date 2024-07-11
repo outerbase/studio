@@ -6,6 +6,7 @@ export interface ListViewItem<T = unknown> {
   key: string;
   name: string;
   icon: LucideIcon;
+  iconColor?: string;
   data: T;
 }
 
@@ -47,6 +48,9 @@ export function ListView<T = unknown>({
               "cursor-pointer"
             )}
           >
+            {item.icon && (
+              <item.icon className={cn("w-4 h-4 mr-2", item.iconColor)} />
+            )}
             {item.name}
           </div>
         );

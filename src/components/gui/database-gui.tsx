@@ -21,7 +21,7 @@ import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
 import SettingSidebar from "./sidebar/setting-sidebar";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import SavedDocTab from "./tabs/saved-doc-tab";
+import SavedDocTab from "./sidebar/saved-doc-tab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;

@@ -6,8 +6,9 @@ import {
   SavedDocNamespace,
 } from "@/drivers/saved-doc/saved-doc-driver";
 import { ListView, ListViewItem } from "@/listview";
-import { LucideALargeSmall } from "lucide-react";
-import { useEffect, useState } from "react";
+import { LucideCode, LucideFolderGit } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import CreateNamespaceButton from "./create-namespace-button";
 
 function mapNamespace(
   data: SavedDocNamespace
@@ -15,7 +16,7 @@ function mapNamespace(
   return {
     data,
     key: data.id,
-    icon: LucideALargeSmall,
+    icon: LucideFolderGit,
     name: data.name,
   };
 }
@@ -24,7 +25,8 @@ function mapDoc(data: SavedDocData): ListViewItem<SavedDocData> {
   return {
     data,
     key: data.id,
-    icon: LucideALargeSmall,
+    icon: LucideCode,
+    iconColor: "text-orange-500",
     name: data.name,
   };
 }
@@ -95,6 +97,19 @@ export default function SavedDocTab() {
     }
   }, [docDriver]);
 
+  const onNamespaceCreated = useCallback(
+    (createdNamespace: SavedDocNamespace) => {
+      if (docDriver) {
+        docDriver.getNamespaces().then((r) => {
+          setNamespaceList(r.map(mapNamespace));
+          setSelectedNamespace(createdNamespace.id);
+          docDriver.setCurrentNamespace(createdNamespace.id);
+        });
+      }
+    },
+    [docDriver]
+  );
+
   return (
     <div className="grow">
       <div className="p-2">
@@ -103,6 +118,7 @@ export default function SavedDocTab() {
           selectedKey={selectedNamespace}
           onSelectChange={setSelectedNamespace}
         />
+        <CreateNamespaceButton onCreated={onNamespaceCreated} />
       </div>
       <Separator />
       <div className="p-2">
