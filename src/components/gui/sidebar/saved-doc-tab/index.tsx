@@ -9,6 +9,7 @@ import { ListView, ListViewItem } from "@/listview";
 import { LucideCode, LucideFolderGit } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import CreateNamespaceButton from "./create-namespace-button";
+import { openContextMenuFromEvent } from "@/messages/open-context-menu";
 
 function mapNamespace(
   data: SavedDocNamespace
@@ -62,8 +63,12 @@ function SavedDocNamespaceDocList({
   return (
     <ListView
       items={docList}
+      full
       onSelectChange={setSelected}
       selectedKey={selected}
+      onContextMenu={(e) => {
+        openContextMenuFromEvent([{ title: "Hello" }])(e);
+      }}
       onDoubleClick={(item: ListViewItem<SavedDocData>) => {
         openTab({
           type: "query",
@@ -111,8 +116,8 @@ export default function SavedDocTab() {
   );
 
   return (
-    <div className="grow">
-      <div className="p-2">
+    <div className="flex flex-col grow">
+      <div>
         <ListView
           items={namespaceList}
           selectedKey={selectedNamespace}
@@ -121,7 +126,7 @@ export default function SavedDocTab() {
         <CreateNamespaceButton onCreated={onNamespaceCreated} />
       </div>
       <Separator />
-      <div className="p-2">
+      <div className="grow overflow-hidden flex">
         <SavedDocNamespaceDocList
           namespaceData={
             namespaceList.find((n) => n.key === selectedNamespace)?.data

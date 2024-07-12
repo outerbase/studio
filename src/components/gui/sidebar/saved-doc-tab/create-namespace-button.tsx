@@ -57,7 +57,7 @@ export default function CreateNamespaceButton({
           <Button
             size="sm"
             variant="ghost"
-            className="mt-1 w-full justify-start"
+            className=" mx-2 mb-2 -mt-2 w-full justify-start"
           >
             <LucidePlus className="w-4 h-4 mr-2" />
             Create Namespace
