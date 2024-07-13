@@ -6,10 +6,9 @@ import {
   SavedDocNamespace,
 } from "@/drivers/saved-doc/saved-doc-driver";
 import { ListView, ListViewItem } from "@/listview";
-import { LucideCode, LucideFolderGit } from "lucide-react";
+import { LucideCode, LucideFolderGit, LucideTrash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import CreateNamespaceButton from "./create-namespace-button";
-import { openContextMenuFromEvent } from "@/messages/open-context-menu";
 
 function mapNamespace(
   data: SavedDocNamespace
@@ -66,8 +65,15 @@ function SavedDocNamespaceDocList({
       full
       onSelectChange={setSelected}
       selectedKey={selected}
-      onContextMenu={(e) => {
-        openContextMenuFromEvent([{ title: "Hello" }])(e);
+      onContextMenu={(item) => {
+        return [
+          {
+            title: "Remove",
+            icon: LucideTrash,
+            destructive: true,
+            disabled: !item,
+          },
+        ];
       }}
       onDoubleClick={(item: ListViewItem<SavedDocData>) => {
         openTab({
@@ -122,6 +128,17 @@ export default function SavedDocTab() {
           items={namespaceList}
           selectedKey={selectedNamespace}
           onSelectChange={setSelectedNamespace}
+          onContextMenu={(item) => {
+            return [
+              { title: "Rename" },
+              {
+                title: "Remove",
+                icon: LucideTrash,
+                destructive: true,
+                disabled: !item,
+              },
+            ];
+          }}
         />
         <CreateNamespaceButton onCreated={onNamespaceCreated} />
       </div>

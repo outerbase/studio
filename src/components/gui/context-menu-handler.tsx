@@ -17,8 +17,9 @@ import {
   ContextMenuSubContent,
 } from "@/components/ui/context-menu";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
-function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
+export function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
   return menu.map((item, menuIndex) => {
     if (item.separator) {
       return <ContextMenuSeparator key={menuIndex} />;
@@ -58,7 +59,14 @@ function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
         disabled={item.disabled}
         inset={!item.icon}
       >
-        {item.icon && <item.icon className="w-4 h-4 mr-2" />}
+        {item.icon && (
+          <item.icon
+            className={cn(
+              "w-4 h-4 mr-2",
+              item.destructive ? "text-red-500" : undefined
+            )}
+          />
+        )}
         {item.destructive ? (
           <span className="text-red-500">{item.title}</span>
         ) : (
