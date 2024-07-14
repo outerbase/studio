@@ -1,5 +1,5 @@
 import type { WindowTabItemProps } from "@/components/gui/windows-tab";
-import { MessageChannelName } from "./const";
+import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
 import type { Dispatch, SetStateAction } from "react";
 import {
   LucideCode,
@@ -55,10 +55,14 @@ export function openTab(props: OpenTabsProps) {
   window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
 }
 
+export function closeTabs(key: string[]) {
+  window.internalPubSub.send(MessageChannelName.CLOSE_TABS, key);
+}
+
 function generateKeyFromTab(tab: OpenTabsProps) {
   if (tab.type === "query") {
     if (tab.saved) {
-      return "saved-query-" + tab.saved.key;
+      return TAB_PREFIX_SAVED_QUERY + tab.saved.key;
     }
     return "query-" + window.crypto.randomUUID();
   }

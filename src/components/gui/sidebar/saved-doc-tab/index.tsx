@@ -1,15 +1,17 @@
-import { openTab } from "@/messages/open-tab";
+import { closeTabs, openTab } from "@/messages/open-tab";
 import { Separator } from "@/components/ui/separator";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import {
   SavedDocData,
   SavedDocNamespace,
 } from "@/drivers/saved-doc/saved-doc-driver";
-import { ListView, ListViewItem } from "@/listview";
+import { ListView, ListViewItem } from "@/components/listview";
 import { LucideCode, LucideFolderGit, LucideTrash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import CreateNamespaceButton from "./create-namespace-button";
 import RenameNamespaceDialog from "./rename-namespace-dialog";
+import RemoveDocDialog from "./remove-doc-dialog";
+import { TAB_PREFIX_SAVED_QUERY } from "@/const";
 
 function mapNamespace(
   data: SavedDocNamespace
@@ -40,6 +42,7 @@ function SavedDocNamespaceDocList({
   const { docDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState<string>();
   const [docList, setDocList] = useState<ListViewItem<SavedDocData>[]>([]);
+  const [docToRemove, setDocToRemove] = useState<SavedDocData | undefined>();
 
   useEffect(() => {
     const namespaceId = namespaceData?.id;
@@ -60,34 +63,64 @@ function SavedDocNamespaceDocList({
     }
   }, [docDriver, namespaceData]);
 
+  let dialog: JSX.Element | null = null;
+
+  if (docToRemove) {
+    dialog = (
+      <RemoveDocDialog
+        doc={docToRemove}
+        onClose={() => {
+          setDocToRemove(undefined);
+        }}
+        onComplete={() => {
+          const namespaceId = namespaceData?.id;
+          if (docDriver && namespaceId) {
+            docDriver.getDocs(namespaceId).then((r) => {
+              setDocList(r.map(mapDoc));
+            });
+            closeTabs([TAB_PREFIX_SAVED_QUERY + docToRemove.id]);
+          }
+        }}
+      />
+    );
+  }
+
   return (
-    <ListView
-      items={docList}
-      full
-      onSelectChange={setSelected}
-      selectedKey={selected}
-      onContextMenu={(item) => {
-        return [
-          {
-            title: "Remove",
-            icon: LucideTrash,
-            destructive: true,
-            disabled: !item,
-          },
-        ];
-      }}
-      onDoubleClick={(item: ListViewItem<SavedDocData>) => {
-        openTab({
-          type: "query",
-          name: item.name,
-          saved: {
-            key: item.key,
-            sql: item.data.content,
-            namespaceName: namespaceData?.name,
-          },
-        });
-      }}
-    />
+    <>
+      {dialog}
+      <ListView
+        items={docList}
+        full
+        onSelectChange={setSelected}
+        selectedKey={selected}
+        onContextMenu={(item) => {
+          return [
+            {
+              title: "Remove",
+              onClick: () => {
+                if (item) {
+                  setDocToRemove(item.data);
+                }
+              },
+              icon: LucideTrash,
+              destructive: true,
+              disabled: !item,
+            },
+          ];
+        }}
+        onDoubleClick={(item: ListViewItem<SavedDocData>) => {
+          openTab({
+            type: "query",
+            name: item.name,
+            saved: {
+              key: item.key,
+              sql: item.data.content,
+              namespaceName: namespaceData?.name,
+            },
+          });
+        }}
+      />
+    </>
   );
 }
 

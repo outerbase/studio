@@ -48,7 +48,7 @@ export function ListView<T = unknown>({
       <ContextMenuTrigger asChild>
         <div
           tabIndex={0}
-          className={full ? "grow overflow-auto p-2" : "p-2"}
+          className={cn(full ? "grow overflow-auto p-2" : "p-2", "select-none")}
           onContextMenu={() => {
             if (stopParentPropagation.current) {
               stopParentPropagation.current = false;

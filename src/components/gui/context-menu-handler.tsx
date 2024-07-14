@@ -1,5 +1,5 @@
 import useMessageListener from "@/components/hooks/useMessageListener";
-import { MessageChannelName } from "@/messages/const";
+import { MessageChannelName } from "@/const";
 import type {
   OpenContextMenuList,
   OpenContextMenuOptions,

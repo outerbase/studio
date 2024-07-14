@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { openTab } from "@/messages/open-tab";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 import useMessageListener from "@/components/hooks/useMessageListener";
-import { MessageChannelName } from "@/messages/const";
+import { MessageChannelName } from "@/const";
 import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import {
@@ -50,6 +50,34 @@ export default function DatabaseGui() {
         receiveOpenTabMessage({ newTab, setSelectedTabIndex, setTabs });
       }
     }
+  );
+
+  useMessageListener<string[]>(
+    MessageChannelName.CLOSE_TABS,
+    (keys) => {
+      if (keys) {
+        setTabs((currentTabs) => {
+          const selectedTab = currentTabs[selectedTabIndex];
+          const newTabs = currentTabs.filter((t) => !keys?.includes(t.key));
+
+          if (selectedTab) {
+            const selectedTabNewIndex = newTabs.findIndex(
+              (t) => t.key === selectedTab.key
+            );
+            if (selectedTabNewIndex < 0) {
+              setSelectedTabIndex(
+                Math.min(selectedTabIndex, newTabs.length - 1)
+              );
+            } else {
+              setSelectedTabIndex(selectedTabNewIndex);
+            }
+          }
+
+          return newTabs;
+        });
+      }
+    },
+    [selectedTabIndex]
   );
 
   const sidebarTabs = useMemo(() => {
