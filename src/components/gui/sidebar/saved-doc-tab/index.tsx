@@ -9,6 +9,7 @@ import { ListView, ListViewItem } from "@/listview";
 import { LucideCode, LucideFolderGit, LucideTrash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import CreateNamespaceButton from "./create-namespace-button";
+import RenameNamespaceDialog from "./rename-namespace-dialog";
 
 function mapNamespace(
   data: SavedDocNamespace
@@ -93,6 +94,8 @@ function SavedDocNamespaceDocList({
 export default function SavedDocTab() {
   const { docDriver } = useDatabaseDriver();
   const [selectedNamespace, setSelectedNamespace] = useState<string>();
+  const [namespaceToRename, setNamespaceToRename] =
+    useState<SavedDocNamespace>();
   const [namespaceList, setNamespaceList] = useState<
     ListViewItem<SavedDocNamespace>[]
   >([]);
@@ -121,35 +124,62 @@ export default function SavedDocTab() {
     [docDriver]
   );
 
-  return (
-    <div className="flex flex-col grow">
-      <div>
-        <ListView
-          items={namespaceList}
-          selectedKey={selectedNamespace}
-          onSelectChange={setSelectedNamespace}
-          onContextMenu={(item) => {
-            return [
-              { title: "Rename" },
-              {
-                title: "Remove",
-                icon: LucideTrash,
-                destructive: true,
-                disabled: !item,
-              },
-            ];
-          }}
-        />
-        <CreateNamespaceButton onCreated={onNamespaceCreated} />
-      </div>
-      <Separator />
-      <div className="grow overflow-hidden flex">
-        <SavedDocNamespaceDocList
-          namespaceData={
-            namespaceList.find((n) => n.key === selectedNamespace)?.data
+  let dialog: JSX.Element | null = null;
+
+  if (namespaceToRename) {
+    dialog = (
+      <RenameNamespaceDialog
+        onClose={() => setNamespaceToRename(undefined)}
+        onComplete={() => {
+          if (docDriver) {
+            docDriver.getNamespaces().then((r) => {
+              setNamespaceList(r.map(mapNamespace));
+            });
           }
-        />
+        }}
+        value={namespaceToRename}
+      />
+    );
+  }
+
+  return (
+    <>
+      {dialog}
+      <div className="flex flex-col grow">
+        <div>
+          <ListView
+            items={namespaceList}
+            selectedKey={selectedNamespace}
+            onSelectChange={setSelectedNamespace}
+            onContextMenu={(item) => {
+              return [
+                {
+                  title: "Rename",
+                  disabled: !item,
+                  onClick: () => {
+                    if (item) setNamespaceToRename(item.data);
+                  },
+                },
+                {
+                  title: "Remove",
+                  icon: LucideTrash,
+                  destructive: true,
+                  disabled: !item,
+                },
+              ];
+            }}
+          />
+          <CreateNamespaceButton onCreated={onNamespaceCreated} />
+        </div>
+        <Separator />
+        <div className="grow overflow-hidden flex">
+          <SavedDocNamespaceDocList
+            namespaceData={
+              namespaceList.find((n) => n.key === selectedNamespace)?.data
+            }
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
