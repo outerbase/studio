@@ -2,10 +2,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import {
   LucideGrid,
-  LucideLoader,
   LucideMessageSquareWarning,
   LucidePlay,
-  LucideSave,
 } from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
 import {
@@ -29,6 +27,11 @@ import {
 import WindowTabs, { useTabsContext } from "../windows-tab";
 import QueryResult from "../query-result";
 import { useSchema } from "@/context/schema-provider";
+import SaveDocButton from "../save-doc-button";
+import {
+  SavedDocData,
+  SavedDocInput,
+} from "@/drivers/saved-doc/saved-doc-driver";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -61,7 +64,6 @@ export default function QueryWindow({
     initialNamespace ?? "Unsaved Query"
   );
   const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
-  const [saveLoading, setSaveLoading] = useState(false);
 
   const onRunClicked = (all = false) => {
     const statements = identify(code, {
@@ -122,34 +124,14 @@ export default function QueryWindow({
     }
   };
 
-  const onSaveQuery = useCallback(() => {
-    if (docDriver) {
-      setSaveLoading(true);
-      if (savedKey) {
-        docDriver
-          .updateDoc(savedKey, {
-            content: code,
-            name: name || "Unnamed Query",
-          })
-          .finally(() => {
-            setSaveLoading(false);
-          });
-      } else {
-        docDriver
-          .createDoc("sql", docDriver.getCurrentNamespace(), {
-            content: code,
-            name: name || "Unnamed Query",
-          })
-          .then((d) => {
-            setSavedKey(d.id);
-            setNamespaceName(d.namespace.name);
-          })
-          .finally(() => {
-            setSaveLoading(false);
-          });
-      }
-    }
-  }, [docDriver, code, name, savedKey]);
+  const onSaveComplete = useCallback((doc: SavedDocData) => {
+    setNamespaceName(doc.namespace.name);
+    setSavedKey(doc.id);
+  }, []);
+
+  const onPrepareSaveContent = useCallback((): SavedDocInput => {
+    return { content: code, name };
+  }, [code, name]);
 
   const windowTab = useMemo(() => {
     return (
@@ -258,19 +240,13 @@ export default function QueryWindow({
                 <div>Col {columnNumber + 1}</div>
               </div>
 
-              <Button
-                size="sm"
-                onClick={onSaveQuery}
-                className="mr-2"
-                disabled={saveLoading}
-              >
-                {saveLoading ? (
-                  <LucideLoader className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <LucideSave className="w-4 h-4 mr-2" />
-                )}
-                Save
-              </Button>
+              {docDriver && (
+                <SaveDocButton
+                  onComplete={onSaveComplete}
+                  onPrepareContent={onPrepareSaveContent}
+                  docId={savedKey}
+                />
+              )}
             </div>
           </div>
         </div>

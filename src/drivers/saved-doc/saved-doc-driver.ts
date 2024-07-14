@@ -44,6 +44,4 @@ export abstract class SavedDocDriver {
   // This is helper to make code easier
   abstract addChangeListener(cb: () => void): void;
   abstract removeChangeListener(cb: () => void): void;
-  abstract setCurrentNamespace(id: string): void;
-  abstract getCurrentNamespace(): string;
 }

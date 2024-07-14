@@ -12,6 +12,7 @@ import CreateNamespaceButton from "./create-namespace-button";
 import RenameNamespaceDialog from "./rename-namespace-dialog";
 import RemoveDocDialog from "./remove-doc-dialog";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
+import RemoveNamespaceDialog from "./remove-namespace-dialog";
 
 function mapNamespace(
   data: SavedDocNamespace
@@ -127,8 +128,12 @@ function SavedDocNamespaceDocList({
 export default function SavedDocTab() {
   const { docDriver } = useDatabaseDriver();
   const [selectedNamespace, setSelectedNamespace] = useState<string>();
+
   const [namespaceToRename, setNamespaceToRename] =
     useState<SavedDocNamespace>();
+  const [namespaceToRemove, setNamespaceToRemove] =
+    useState<SavedDocNamespace>();
+
   const [namespaceList, setNamespaceList] = useState<
     ListViewItem<SavedDocNamespace>[]
   >([]);
@@ -139,7 +144,6 @@ export default function SavedDocTab() {
         setNamespaceList(r.map(mapNamespace));
         const firstNamespaceId = r[0].id;
         setSelectedNamespace(firstNamespaceId);
-        docDriver.setCurrentNamespace(firstNamespaceId);
       });
     }
   }, [docDriver]);
@@ -150,7 +154,6 @@ export default function SavedDocTab() {
         docDriver.getNamespaces().then((r) => {
           setNamespaceList(r.map(mapNamespace));
           setSelectedNamespace(createdNamespace.id);
-          docDriver.setCurrentNamespace(createdNamespace.id);
         });
       }
     },
@@ -171,6 +174,28 @@ export default function SavedDocTab() {
           }
         }}
         value={namespaceToRename}
+      />
+    );
+  }
+
+  if (namespaceToRemove) {
+    dialog = (
+      <RemoveNamespaceDialog
+        onClose={() => setNamespaceToRemove(undefined)}
+        onComplete={(docs) => {
+          if (docDriver) {
+            closeTabs(docs.map((d) => d.id));
+
+            // Refresh new namespace list
+            docDriver
+              .getNamespaces()
+              .then((r) => {
+                setNamespaceList(r.map(mapNamespace));
+              })
+              .catch(console.error);
+          }
+        }}
+        value={namespaceToRemove}
       />
     );
   }
@@ -198,6 +223,10 @@ export default function SavedDocTab() {
                   icon: LucideTrash,
                   destructive: true,
                   disabled: !item,
+                  onClick: () => {
+                    console.log("here");
+                    if (item) setNamespaceToRemove(item.data);
+                  },
                 },
               ];
             }}

@@ -18,7 +18,6 @@ import {
 
 export default class RemoteSavedDocDriver implements SavedDocDriver {
   protected databaseId: string;
-  protected currentNamespace: string = "";
   protected cb: (() => void)[] = [];
 
   constructor(databaseId: string) {
@@ -65,14 +64,6 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     const r = await removeSavedDoc(this.databaseId, id);
     this.triggerChange();
     return r;
-  }
-
-  setCurrentNamespace(id: string) {
-    this.currentNamespace = id;
-  }
-
-  getCurrentNamespace(): string {
-    return this.currentNamespace;
   }
 
   addChangeListener(cb: () => void): void {
