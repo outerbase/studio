@@ -10,7 +10,7 @@ import {
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio, StudioExtension } from "./gui/studio";
-import FeatureRequestSidebar from "./sidebar/feature-request.tsx";
+import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 
 interface MyStudioProps {
   name: string;
@@ -18,6 +18,7 @@ interface MyStudioProps {
   driver: BaseDriver;
   expiredAt?: number;
   collabarator?: CollaborationBaseDriver;
+  docDriver?: SavedDocDriver;
   sideBarFooterComponent?: ReactElement;
 }
 
@@ -25,6 +26,7 @@ function MyStudioInternal({
   name,
   color,
   driver,
+  docDriver,
   collabarator,
   sideBarFooterComponent,
 }: MyStudioProps) {
@@ -93,6 +95,7 @@ function MyStudioInternal({
       onThemeChange={toggleTheme}
       onBack={goBack}
       collaboration={collabarator}
+      docDriver={docDriver}
       sideBarFooterComponent={sideBarFooterComponent}
       extensions={extensions}
     />
@@ -100,24 +103,9 @@ function MyStudioInternal({
 }
 
 export default function MyStudio(props: MyStudioProps) {
-  const defaultSidebar = useMemo(() => {
-    return (
-      <div className="text-sm p-3 px-4">
-        {props.sideBarFooterComponent ?? (
-          <>
-            <p>
-              <strong>LibStudio Studio</strong> is open-source database GUI.
-            </p>
-            <FeatureRequestSidebar />
-          </>
-        )}
-      </div>
-    );
-  }, [props.sideBarFooterComponent]);
-
   return (
     <BlockEditorProvider>
-      <MyStudioInternal {...props} sideBarFooterComponent={defaultSidebar} />
+      <MyStudioInternal {...props} />
     </BlockEditorProvider>
   );
 }

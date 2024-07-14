@@ -64,8 +64,9 @@ export default function PlaygroundEditorBody({
 
   const sidebarMenu = useMemo(() => {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-row gap-2 px-2 pb-2">
         <Button
+          className="flex-grow"
           size="sm"
           onClick={() => {
             if (rawDb) {
@@ -79,9 +80,10 @@ export default function PlaygroundEditorBody({
             }
           }}
         >
-          Download as .db file
+          Save
         </Button>
         <Button
+          className="flex-grow"
           size="sm"
           onClick={() => {
             if (fileInput.current) {
@@ -89,7 +91,7 @@ export default function PlaygroundEditorBody({
             }
           }}
         >
-          Open SQLite File
+          Open
         </Button>
       </div>
     );

@@ -23,7 +23,7 @@ export default function TemporarySession({ expiredAt }: { expiredAt: number }) {
   const sec = countdownInSec % 60;
 
   return (
-    <div className="border-b pb-1">
+    <div className="pb-2 px-2">
       <div className="flex gap-0.5 mb-1">
         <span className="p-1 px-2 rounded  mono text-center bg-black text-white">
           {Math.floor(min / 10)}

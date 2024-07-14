@@ -1,4 +1,4 @@
-import { MessageChannelName } from "./const";
+import { MessageChannelName } from "../const";
 import type { LucideIcon } from "lucide-react";
 
 export interface StudioContextMenuItem {
