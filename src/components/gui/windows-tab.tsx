@@ -33,6 +33,7 @@ export interface WindowTabItemProps {
   component: JSX.Element;
   icon: LucideIcon;
   title: string;
+  identifier: string;
   key: string;
 }
 
@@ -47,12 +48,12 @@ interface WindowTabsProps {
 
 const WindowTabsContext = createContext<{
   replaceCurrentTab: (tab: WindowTabItemProps) => void;
-  renameCurrentTab: (name: string) => void;
+  changeCurrentTab: (value: { title?: string; identifier?: string }) => void;
 }>({
   replaceCurrentTab: () => {
     throw new Error("Not implemented");
   },
-  renameCurrentTab: () => {
+  changeCurrentTab: () => {
     throw new Error("Not implemented");
   },
 });
@@ -91,10 +92,12 @@ export default function WindowTabs({
     [tabs, selected, onTabsChange]
   );
 
-  const renameCurrentTab = useCallback(
-    (name: string) => {
+  const changeCurrentTab = useCallback(
+    (value: { title?: string; identifier?: string }) => {
       if (tabs[selected]) {
-        tabs[selected].title = name;
+        if (value.title) tabs[selected].title = value.title;
+        if (value.identifier) tabs[selected].identifier = value.identifier;
+
         if (onTabsChange) {
           onTabsChange([...tabs]);
         }
@@ -104,8 +107,8 @@ export default function WindowTabs({
   );
 
   const contextValue = useMemo(
-    () => ({ replaceCurrentTab, renameCurrentTab }),
-    [replaceCurrentTab, renameCurrentTab]
+    () => ({ replaceCurrentTab, changeCurrentTab }),
+    [changeCurrentTab, replaceCurrentTab]
   );
 
   const handleDragStart = useCallback(

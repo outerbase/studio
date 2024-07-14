@@ -20,6 +20,7 @@ import {
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
 import SettingSidebar from "./sidebar/setting-sidebar";
+
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
 
@@ -37,6 +38,7 @@ export default function DatabaseGui() {
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
     {
       title: "Query",
+      identifier: "query",
       key: "query",
       component: <QueryWindow initialName="Query" />,
       icon: LucideCode,
@@ -58,11 +60,13 @@ export default function DatabaseGui() {
       if (keys) {
         setTabs((currentTabs) => {
           const selectedTab = currentTabs[selectedTabIndex];
-          const newTabs = currentTabs.filter((t) => !keys?.includes(t.key));
+          const newTabs = currentTabs.filter(
+            (t) => !keys?.includes(t.identifier)
+          );
 
           if (selectedTab) {
             const selectedTabNewIndex = newTabs.findIndex(
-              (t) => t.key === selectedTab.key
+              (t) => t.identifier === selectedTab.identifier
             );
             if (selectedTabNewIndex < 0) {
               setSelectedTabIndex(

@@ -32,6 +32,7 @@ import {
   SavedDocData,
   SavedDocInput,
 } from "@/drivers/saved-doc/saved-doc-driver";
+import { TAB_PREFIX_SAVED_QUERY } from "@/const";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -58,7 +59,7 @@ export default function QueryWindow({
   const [progress, setProgress] = useState<MultipleQueryProgress>();
   const [data, setData] = useState<MultipleQueryResult[]>();
   const [name, setName] = useState(initialName);
-  const { renameCurrentTab } = useTabsContext();
+  const { changeCurrentTab } = useTabsContext();
 
   const [namespaceName, setNamespaceName] = useState(
     initialNamespace ?? "Unsaved Query"
@@ -124,10 +125,14 @@ export default function QueryWindow({
     }
   };
 
-  const onSaveComplete = useCallback((doc: SavedDocData) => {
-    setNamespaceName(doc.namespace.name);
-    setSavedKey(doc.id);
-  }, []);
+  const onSaveComplete = useCallback(
+    (doc: SavedDocData) => {
+      setNamespaceName(doc.namespace.name);
+      setSavedKey(doc.id);
+      changeCurrentTab({ identifier: TAB_PREFIX_SAVED_QUERY + doc.id });
+    },
+    [changeCurrentTab]
+  );
 
   const onPrepareSaveContent = useCallback((): SavedDocInput => {
     return { content: code, name };
@@ -147,6 +152,7 @@ export default function QueryWindow({
               <QueryResult result={queryResult} key={queryResult.order} />
             ),
             key: "query_" + queryResult.order,
+            identifier: "query_" + queryResult.order,
             title: "Query " + (queryIdx + 1),
             icon: LucideGrid,
           })),
@@ -154,6 +160,7 @@ export default function QueryWindow({
             ? [
                 {
                   key: "summary",
+                  identifier: "summary",
                   title: "Summary",
                   icon: LucideMessageSquareWarning,
                   component: (
@@ -183,7 +190,9 @@ export default function QueryWindow({
               </span>
               <input
                 onBlur={(e) => {
-                  renameCurrentTab(e.currentTarget.value || "Unnamed Query");
+                  changeCurrentTab({
+                    title: e.currentTarget.value || "Unnamed Query",
+                  });
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"

@@ -129,7 +129,7 @@ export function receiveOpenTabMessage({
 }) {
   setTabs((prev) => {
     const key = generateKeyFromTab(newTab);
-    const foundIndex = prev.findIndex((tab) => tab.key === key);
+    const foundIndex = prev.findIndex((tab) => tab.identifier === key);
 
     if (foundIndex >= 0) {
       setSelectedTabIndex(foundIndex);
@@ -144,6 +144,7 @@ export function receiveOpenTabMessage({
         icon: generateIconFromTab(newTab),
         title,
         key,
+        identifier: key,
         component: generateComponent(newTab, title),
       },
     ];

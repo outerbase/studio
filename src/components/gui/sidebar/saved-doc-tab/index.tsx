@@ -184,13 +184,17 @@ export default function SavedDocTab() {
         onClose={() => setNamespaceToRemove(undefined)}
         onComplete={(docs) => {
           if (docDriver) {
-            closeTabs(docs.map((d) => d.id));
+            closeTabs(docs.map((d) => TAB_PREFIX_SAVED_QUERY + d.id));
 
             // Refresh new namespace list
             docDriver
               .getNamespaces()
               .then((r) => {
                 setNamespaceList(r.map(mapNamespace));
+
+                if (selectedNamespace === namespaceToRemove.id) {
+                  setSelectedNamespace(r[0].id);
+                }
               })
               .catch(console.error);
           }
