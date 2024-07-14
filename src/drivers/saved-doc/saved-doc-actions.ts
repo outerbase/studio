@@ -128,7 +128,10 @@ export async function removeDocNamespace(
     });
   }
 
-  await db.delete(dbDocNamespace).where(eq(dbDocNamespace.id, namespaceId));
+  await db.batch([
+    db.delete(dbDoc).where(eq(dbDoc.namespaceId, namespaceId)),
+    db.delete(dbDocNamespace).where(eq(dbDocNamespace.id, namespaceId)),
+  ]);
 }
 
 export async function updateDocNamespace(
