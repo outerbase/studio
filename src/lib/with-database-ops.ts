@@ -11,6 +11,8 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { get_database } from "@/db";
+import { getSession } from "./auth";
+import { ApiError } from "./api-error";
 
 export interface DatabasePermission {
   isOwner: boolean;
@@ -21,6 +23,34 @@ export interface DatabasePermission {
     tableName: string | null;
     columnName: string | null;
   }[];
+}
+
+export async function getDatabaseWithAuth(databaseId: string) {
+  const db = get_database();
+  const { user } = await getSession();
+
+  if (!user)
+    throw new ApiError({ message: "You do not have permission", status: 500 });
+
+  const [info, role] = await db.batch([
+    db.query.database.findFirst({ where: eq(database.id, databaseId) }),
+    db.query.database_user_role.findFirst({
+      where: and(
+        eq(database_user_role.databaseId, databaseId),
+        eq(database_user_role.userId, user.id)
+      ),
+    }),
+  ]);
+
+  if (!info || info.deletedAt !== null) {
+    throw new ApiError({ message: "Database does not exist", status: 500 });
+  }
+
+  if (!role) {
+    throw new ApiError({ message: "You do not have permission", status: 500 });
+  }
+
+  return { info, role, user, db };
 }
 
 export type DatabaseOperationHandler<BodyType = unknown> = (props: {
@@ -45,32 +75,10 @@ export default function withDatabaseOperation<T = unknown>(
         );
       }
 
-      const [databaseInfo, databaseRole] = await db.batch([
-        db.query.database.findFirst({ where: eq(database.id, databaseId) }),
-        db.query.database_user_role.findFirst({
-          where: and(
-            eq(database_user_role.databaseId, databaseId),
-            eq(database_user_role.userId, user.id)
-          ),
-        }),
-      ]);
+      const { info: databaseInfo, role: databaseRole } =
+        await getDatabaseWithAuth(databaseId);
 
-      if (!databaseInfo || databaseInfo.deletedAt !== null) {
-        return NextResponse.json(
-          { error: "Database does not exist" },
-          { status: 500 }
-        );
-      }
-
-      const roleId = databaseRole?.roleId;
-
-      if (!roleId) {
-        return NextResponse.json(
-          { error: "You do not have permission" },
-          { status: 500 }
-        );
-      }
-
+      const roleId = databaseRole.roleId ?? "";
       const permission = await db.query.database_role.findFirst({
         where: eq(database_role.id, roleId),
         with: {
