@@ -23,7 +23,6 @@
     "lint:fix": "next lint --fix .",
     "dialect": "node build-dialect.js"
   },
-  "packageManager": "pnpm@8.15.7",
   "overrides": {
     "@libsql/client": "^0.5.3"
   },
@@ -82,7 +81,7 @@
     "eslint-plugin-jest": "^27.6.3",
     "file-saver": "^2.0.5",
     "libsql-stateless-easy": "^1.6.11",
-    "lucia": "^3.1.1",
+    "lucia": "^3.2.0",
     "lucide-react": "^0.309.0",
     "magic-bytes.js": "^1.10.0",
     "next": "14.2.1",

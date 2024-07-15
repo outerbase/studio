@@ -5,6 +5,7 @@ import RemoteDriver from "@/drivers/remote-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import MyStudio from "@/components/my-studio";
+import RemoteSavedDocDriver from "@/drivers/saved-doc/remote-saved-doc";
 
 export default function ClientPageBody({
   token,
@@ -15,13 +16,14 @@ export default function ClientPageBody({
 }>) {
   const params = useSearchParams();
 
-  const { driver, collaborator } = useMemo(() => {
+  const { driver, collaborator, docDriver } = useMemo(() => {
     const databaseId = params.get("p");
     if (!databaseId) return { driver: null };
 
     return {
       driver: new RemoteDriver("remote", databaseId, token),
       collaborator: new CollaborationDriver(databaseId, token),
+      docDriver: new RemoteSavedDocDriver(databaseId),
     };
   }, [params, token]);
 
@@ -35,6 +37,7 @@ export default function ClientPageBody({
       name={config.name}
       color={config.label ?? "blue"}
       collabarator={collaborator}
+      docDriver={docDriver}
     />
   );
 }

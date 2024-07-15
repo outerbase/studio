@@ -2,7 +2,6 @@
 import { useMemo } from "react";
 import MyStudio from "@/components/my-studio";
 import TemporarySession from "@/components/sidebar/temp-session-countdown";
-import FeatureRequestSidebar from "@/components/sidebar/feature-request.tsx";
 import RemoteDriver from "@/drivers/remote-driver";
 
 export default function ClientPageBody({
@@ -22,7 +21,6 @@ export default function ClientPageBody({
     return (
       <>
         <TemporarySession expiredAt={expired} />
-        <FeatureRequestSidebar />
       </>
     );
   }, [expired]);

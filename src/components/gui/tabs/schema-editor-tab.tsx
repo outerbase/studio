@@ -95,6 +95,7 @@ export default function SchemaEditorTab({
           replaceCurrentTab({
             component: <SchemaEditorTab tableName={schema.name.new} />,
             key: "_schema_" + schema.name.new,
+            identifier: "_schema_" + schema.name.new,
             title: "Edit " + schema.name.new,
             icon: LucideTableProperties,
           });
