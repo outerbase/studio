@@ -185,7 +185,7 @@ export default function QueryWindow({
               {namespaceName} /
             </div>
             <div className="inline-block relative">
-              <span className="inline-block text-xs p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0">
+              <span className="inline-block text-xs p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0 bg-background">
                 &nbsp;{name}
               </span>
               <input
@@ -196,7 +196,7 @@ export default function QueryWindow({
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"
-                className="absolute top-0 right-0 left-0 bottom-0 text-xs p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded"
+                className="absolute top-0 right-0 left-0 bottom-0 text-xs p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded bg-background"
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
               />
