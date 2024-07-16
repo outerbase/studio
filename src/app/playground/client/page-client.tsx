@@ -7,6 +7,7 @@ import { LucideLoader } from "lucide-react";
 import Script from "next/script";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Database, SqlJsStatic } from "sql.js";
+import ScreenDropZone from "@/components/screen-dropzone";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
@@ -57,6 +58,17 @@ export default function PlaygroundEditorBody({
             setDb(new SqljsDriver(sqljsDatabase));
           });
         }
+      }
+    },
+    [sqlInit]
+  );
+
+  const onFileDrop = useCallback(
+    (buffer: ArrayBuffer) => {
+      if (sqlInit) {
+        const sqljsDatabase = new sqlInit.Database(new Uint8Array(buffer));
+        setRawDb(sqljsDatabase);
+        setDb(new SqljsDriver(sqljsDatabase));
       }
     },
     [sqlInit]
@@ -136,6 +148,7 @@ export default function PlaygroundEditorBody({
         onChange={onFileChange}
         multiple={false}
       />
+      <ScreenDropZone onFileDrop={onFileDrop} />
       {dom}
     </>
   );
