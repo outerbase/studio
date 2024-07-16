@@ -26,13 +26,8 @@ export default async function PlaygroundPage() {
           a selection of sample datasets.
         </p>
 
-        <Link
-          passHref
-          href="/playground/client"
-          rel="nofollow"
-          className={buttonVariants()}
-        >
-          Start Blank Database
+        <Link passHref href="/playground/client" className={buttonVariants()}>
+          Open Database Viewer
         </Link>
       </div>
 

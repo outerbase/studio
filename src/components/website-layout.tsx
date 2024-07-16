@@ -95,7 +95,7 @@ function Footer() {
         </div>
 
         <div className="flex gap-4">
-          <Link href="https://x.com/libsqlstudio" target="blank">
+          <Link href="https://x.com/invisal89" target="blank">
             <svg
               className="w-6 h-6"
               width="1200"

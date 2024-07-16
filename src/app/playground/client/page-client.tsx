@@ -145,6 +145,7 @@ export default function PlaygroundEditorBody({
         type="file"
         ref={fileInput}
         className="hidden"
+        accept=".db,.sdb,.sqlite,.db3,.s3db,.sqlite3,.sl3,.db2,.s2db,.sqlite2,.sl2"
         onChange={onFileChange}
         multiple={false}
       />
