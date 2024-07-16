@@ -222,17 +222,14 @@ export default function QueryWindow({
           </div>
           <div className="grow-0 shrink-0">
             <Separator />
-            <div className="flex gap-1 p-1">
+            <div className="flex gap-1 p-2">
               <Button
-                variant={"ghost"}
+                variant={"default"}
                 size="sm"
                 onClick={() => onRunClicked()}
               >
                 <LucidePlay className="w-4 h-4 mr-2" />
-                Run Current{" "}
-                <span className="text-xs ml-2 px-2 bg-secondary py-1 rounded">
-                  {KEY_BINDING.run.toString()}
-                </span>
+                Run Current
               </Button>
 
               <Button

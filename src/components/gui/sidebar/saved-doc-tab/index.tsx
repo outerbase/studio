@@ -228,7 +228,6 @@ export default function SavedDocTab() {
                   destructive: true,
                   disabled: !item,
                   onClick: () => {
-                    console.log("here");
                     if (item) setNamespaceToRemove(item.data);
                   },
                 },
