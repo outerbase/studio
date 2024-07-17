@@ -93,14 +93,81 @@ export function exportRowsToCsv(
   return result.join("\n");
 }
 
+export function exportRowsToMarkdown(
+  headers: string[],
+  records: unknown[][],
+  cellTextLimit: number
+): string {
+  const result: string[] = [];
+
+  // Helper function to truncate text
+  const truncateText = (text: string, limit: number) => {
+    if (text.length <= limit) return text;
+    return text.substring(0, limit - 3) + "...";
+  };
+
+  // Helper function to wrap text
+  const wrapText = (text: string, width: number): string[] => {
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let currentLine = "";
+
+    words.forEach((word) => {
+      if ((currentLine + word).length > width) {
+        lines.push(currentLine.trim());
+        currentLine = "";
+      }
+      currentLine += word + " ";
+    });
+    if (currentLine.trim()) lines.push(currentLine.trim());
+    return lines;
+  };
+
+  // Calculate column widths
+  const columnWidths = headers.map((header, index) => {
+    const maxContentWidth = Math.max(
+      header.length,
+      ...records.map((record) => String(record[index]).length)
+    );
+    return Math.min(maxContentWidth, cellTextLimit);
+  });
+
+  // Add headers
+  const headerRow = `| ${headers.map((h, i) => truncateText(h.padEnd(columnWidths[i]), columnWidths[i])).join(" | ")} |`;
+  result.push(headerRow);
+
+  // Add separator
+  const separator = `| ${columnWidths.map((width) => "-".repeat(width)).join(" | ")} |`;
+  result.push(separator);
+
+  // Add records
+  for (const record of records) {
+    const wrappedCells = record.map((cell, index) =>
+      wrapText(truncateText(String(cell), cellTextLimit), columnWidths[index])
+    );
+    const maxLines = Math.max(...wrappedCells.map((cell) => cell.length));
+
+    for (let i = 0; i < maxLines; i++) {
+      const row = `| ${wrappedCells
+        .map((cell, index) => (cell[i] || "").padEnd(columnWidths[index]))
+        .join(" | ")} |`;
+      result.push(row);
+    }
+  }
+
+  return result.join("\n");
+}
+
 export function getFormatHandlers(
   records: unknown[][],
   headers: string[],
-  tableName: string
+  tableName: string,
+  cellTextLimit: number = 50
 ): Record<string, (() => string) | undefined> {
   return {
     csv: () => exportRowsToCsv(headers, records),
     json: () => exportRowsToJson(headers, records),
     sql: () => exportRowsToSqlInsert(tableName, headers, records),
+    markdown: () => exportRowsToMarkdown(headers, records, cellTextLimit),
   };
 }

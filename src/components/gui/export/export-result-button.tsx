@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "../../ui/select";
 import type OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useCallback, useState } from "react";
+import { ChangeEvent, useCallback, useState } from "react";
 import { getFormatHandlers } from "@/components/lib/export-helper";
 import {
   Dialog,
@@ -55,6 +55,8 @@ export default function ExportResultButton({
 
   const [tableName, setTableName] = useState<string>("UnknownTable");
 
+  const [cellTextLimit, setCellTextLimit] = useState<number>(50);
+
   const onExportClicked = useCallback(() => {
     if (!format) return;
 
@@ -74,7 +76,12 @@ export default function ExportResultButton({
 
     const exportTableName = tableName.trim() || "UnknownTable";
 
-    const formatHandlers = getFormatHandlers(records, headers, exportTableName);
+    const formatHandlers = getFormatHandlers(
+      records,
+      headers,
+      exportTableName,
+      cellTextLimit
+    );
 
     const handler = formatHandlers[format];
     if (handler) {
@@ -106,9 +113,15 @@ export default function ExportResultButton({
     exportSelection,
     ExportSelectionType.Complete,
     tableName,
+    cellTextLimit,
     outputTarget,
     OutputTargetType.File,
   ]);
+
+  const handleCellTextLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    setCellTextLimit(isNaN(value) ? 50 : value);
+  };
 
   return (
     <Dialog open>
@@ -206,7 +219,12 @@ export default function ExportResultButton({
               <div className="flex gap-2 mt-2">
                 <div className="flex flex-col gap-1 flex-grow">
                   <span className="text-xs">Cell Text Limit</span>
-                  <Input value="50" />
+                  <Input
+                    type="number"
+                    value={cellTextLimit}
+                    onChange={handleCellTextLimitChange}
+                    min={1}
+                  />
                 </div>
               </div>
             </div>
