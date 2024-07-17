@@ -50,7 +50,6 @@ export default function SchemaEditor({
   onSave,
   onDiscard,
 }: Readonly<Props>) {
-  console.log(value);
   const isCreateScript = value.name.old === "";
 
   const onAddColumn = useCallback(() => {
@@ -86,8 +85,6 @@ export default function SchemaEditor({
   const previewScript = useMemo(() => {
     return generateSqlSchemaChange(value).join("\n");
   }, [value]);
-
-  console.log(value);
 
   return (
     <div className="w-full h-full flex flex-col">

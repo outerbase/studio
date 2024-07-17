@@ -71,7 +71,7 @@
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 219 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -83,7 +83,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
+    --border: 210 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
@@ -218,4 +218,86 @@
 
 .libsql-removed-row td {
   @apply bg-red-200;
+}
+
+/*
+For Markdown Side
+*/
+.mdx-content {
+  @apply leading-7;
+}
+
+.mdx-content h1 {
+  @apply text-3xl;
+}
+
+.mdx-content h2 {
+  @apply text-2xl my-4 pb-2 border-b font-bold;
+}
+
+.mdx-content h3 {
+  @apply text-xl my-4 pb-2 border-b font-bold;
+}
+
+.mdx-content ul {
+  @apply list-disc pl-8 my-4;
+}
+
+.mdx-content ol {
+  @apply list-decimal pl-8 my-4;
+}
+
+.mdx-content pre {
+  @apply bg-gray-100 dark:bg-gray-700 p-4 leading-5 rounded overflow-x-auto;
+}
+
+.mdx-content p {
+  @apply my-2;
+}
+
+.mdx-content a {
+  @apply text-blue-500 underline;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .fade-view {
+    animation:
+      fadeIn ease-in-out both,
+      fadeOut ease-in forwards;
+    animation-range:
+      cover 30% contain 50%,
+      contain 90% cover 100%;
+    animation-timeline: view();
+  }
+
+  .fade-sticky {
+    position: sticky;
+    bottom: 0;
+    background-image: linear-gradient(
+      to top,
+      var(--background) 40%,
+      transparent
+    );
+  }
 }

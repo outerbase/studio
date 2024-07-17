@@ -6,7 +6,7 @@ export default function ResultStats({ stats }: { stats: DatabaseResultStat }) {
       {stats.queryDurationMs !== null && (
         <div className="px-2 border-r">
           <span className="font-semibold">Query Duration</span>:{" "}
-          {stats.queryDurationMs}s
+          {stats.queryDurationMs}ms
         </div>
       )}
 

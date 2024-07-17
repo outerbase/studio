@@ -205,3 +205,30 @@ it("parse create table with table constraints", () => {
     ],
   } as DatabaseTableSchema);
 });
+
+it("parse fts5 virtual table", () => {
+  const sql = `create virtual table name_fts using fts5(name, tokenize='trigram');`;
+  expect(p(sql)).toEqual({
+    tableName: "name_fts",
+    autoIncrement: false,
+    pk: [],
+    columns: [],
+    constraints: [],
+    fts5: {},
+  } as DatabaseTableSchema);
+});
+
+it("parse fts5 virtual table with external content", () => {
+  const sql = `create virtual table name_fts using fts5(name, tokenize='trigram', content='student', content_rowid='id');`;
+  expect(p(sql)).toEqual({
+    tableName: "name_fts",
+    autoIncrement: false,
+    pk: [],
+    columns: [],
+    constraints: [],
+    fts5: {
+      content: "'student'",
+      contentRowId: "'id'",
+    },
+  } as DatabaseTableSchema);
+});

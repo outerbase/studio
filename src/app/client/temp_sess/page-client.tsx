@@ -1,33 +1,29 @@
 "use client";
-import {
-  SavedConnectionItemConfigConfig,
-  SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
 import { useMemo } from "react";
 import MyStudio from "@/components/my-studio";
-import RqliteDriver from "@/drivers/rqlite-driver";
-import TursoDriver from "@/drivers/turso-driver";
-import ValtownDriver from "@/drivers/valtown-driver";
+import TemporarySession from "@/components/sidebar/temp-session-countdown";
+import RemoteDriver from "@/drivers/remote-driver";
 
 export default function ClientPageBody({
-  config,
+  sessionId,
   name,
   expired,
 }: Readonly<{
-  config: SavedConnectionItemConfigConfig & {
-    driver: SupportedDriver;
-  };
+  sessionId: string;
   name: string;
   expired: number;
 }>) {
   const driver = useMemo(() => {
-    if (config.driver === "rqlite") {
-      return new RqliteDriver(config.url, config.username, config.password);
-    } else if (config.driver === "valtown") {
-      return new ValtownDriver(config.token);
-    }
-    return new TursoDriver(config.url, config.token as string, true);
-  }, [config]);
+    return new RemoteDriver("temporary", sessionId, "");
+  }, [sessionId]);
+
+  const sidebar = useMemo(() => {
+    return (
+      <>
+        <TemporarySession expiredAt={expired} />
+      </>
+    );
+  }, [expired]);
 
   return (
     <MyStudio
@@ -35,6 +31,7 @@ export default function ClientPageBody({
       name={name ?? "Temporary Session"}
       color="gray"
       expiredAt={expired}
+      sideBarFooterComponent={sidebar}
     />
   );
 }

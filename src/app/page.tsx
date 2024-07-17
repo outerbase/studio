@@ -3,12 +3,54 @@ import WebsiteLayout from "@/components/website-layout";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { PropsWithChildren } from "react";
+
+const siteDescription =
+  "LibSQL Studio is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything";
 
 export const metadata: Metadata = {
-  title: "LibSQL Studio - LibSQL and rqlite client on your browser",
-  description: "LibSQL Studio - LibSQL and rqlite client on your browser",
+  title: "LibSQL Studio",
+  keywords: [
+    "libsql",
+    "rqlite",
+    "sqlite",
+    "studio",
+    "browser",
+    "editor",
+    "gui",
+    "online",
+    "client",
+  ],
+  description: siteDescription,
+  openGraph: {
+    siteName: "LibSQL Studio",
+    description: siteDescription,
+  },
 };
+
+interface Review {
+  id: number;
+  name: string;
+  picture?: string;
+  initial?: string;
+  content: string;
+}
+
+const review: Review[] = [
+  {
+    id: 1,
+    name: "Jamie Barton",
+    picture: "https://github.com/notrab.png",
+    content:
+      "libSQL Studio is a fantastic all-in-one tool for editing data and executing SQL queries that comes with a great DX. Its auto-completion feature boosts productivity and reduces errors, while saved queries make managing and reusing SQL a breeze.",
+  },
+  {
+    id: 2,
+    name: "Achille Lacoin",
+    initial: "AL",
+    content:
+      "libSQL Studio is a fantastic all-in-one tool for editing data and executing SQL queries that comes with a great DX. Its auto-completion feature boosts productivity and reduces errors, while saved queries make managing and reusing SQL a breeze.",
+  },
+];
 
 function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   return (
@@ -24,24 +66,44 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   );
 }
 
-function Screenshot() {
+function TestimonyItem({ data }: { data: Review }) {
   return (
-    <div className="my-2 mx-4">
-      <div className="max-w-[800px] mx-auto border-2 border-gray-200 bg-gray-200 rounded-lg overflow-hidden">
-        <div className="h-6 flex items-center">
-          <div className="grow" />
-          <div className="px-2 flex gap-1">
-            <div className="rounded-full h-3 w-3 bg-red-500" />
-            <div className="rounded-full h-3 w-3 bg-yellow-400" />
-            <div className="rounded-full h-3 w-3 bg-green-600" />
+    <div className="bg-secondary p-6 rounded-lg">
+      <div className="flex gap-2 mb-2">
+        {data.picture && (
+          <img
+            src={data.picture}
+            className="w-12 h-12 rounded-full"
+            alt={data.name}
+          />
+        )}
+        {data.initial && (
+          <div className="w-12 h-12 rounded-full bg-yellow-500 text-xl font-bold flex justify-center items-center text-white">
+            {data.initial}
           </div>
+        )}
+        <div>
+          <div className="font-bold">{data.name}</div>
+          <div className="text-red-500 text-xl">★★★★★</div>
         </div>
-        <img
-          src="/screenshot2.png"
-          className="w-full"
-          alt="LibSQL Studio Powerful Browser Database GUI"
-          style={{ aspectRatio: 1134 / 649 }}
-        />
+      </div>
+      <p>{data.content}</p>
+    </div>
+  );
+}
+
+function TestimonyList() {
+  return (
+    <div className="mx-auto max-w-[800px] p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {review.map((r) => (
+          <TestimonyItem data={r} key={r.id} />
+        ))}
+      </div>
+      <div className="text-xl mt-4 pl-4 pr-2">
+        and thousands of{" "}
+        <span className="border-b-4 border-b-yellow-500">happy developers</span>{" "}
+        use our tools.
       </div>
     </div>
   );
@@ -49,12 +111,8 @@ function Screenshot() {
 
 function HeroSection() {
   return (
-    <div className="mx-auto container py-16">
-      <div className="flex flex-col gap-4 justify-center mb-8 md:flex-row">
-        <LinkButton title="Open LibSQL Studio" url="/connect" />
-      </div>
-
-      <h2 className="text-center text-4xl font-bold">
+    <div className="mx-auto max-w-[800px] px-4 pb-8 pt-16">
+      <h2 className="text-center text-4xl lg:text-6xl font-bold">
         Powerful SQLite-based Database Client
       </h2>
 
@@ -63,36 +121,9 @@ function HeroSection() {
         SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely
         in your browser, so there&apos;s no need to download anything.
       </p>
-    </div>
-  );
-}
 
-function FeatureItem({
-  children,
-  image,
-  reverse,
-}: PropsWithChildren<{ reverse?: boolean; image?: string }>) {
-  return (
-    <div className="flex flex-col md:flex-row gap-8">
-      <div
-        className={
-          reverse
-            ? "md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center order-1"
-            : "md:w-1/2 lg:w-1/2 text-gray-300 flex flex-col justify-center order-1 lg:order-3"
-        }
-      >
-        {children}
-      </div>
-      <div className="md:w-1/2 lg:w-1/2 order-2">
-        {image ? (
-          <img
-            src={image}
-            className="w-full rounded shadow-lg"
-            alt="Data Editor"
-          />
-        ) : (
-          <div className="h-[300px] bg-gray-500" />
-        )}
+      <div className="flex gap-4 justify-center mt-12">
+        <LinkButton title="Open LibSQL Studio" url="/connect" />
       </div>
     </div>
   );
@@ -100,7 +131,7 @@ function FeatureItem({
 
 function SupportDriver() {
   return (
-    <div className="bg-zinc-100 mt-12">
+    <div className="mt-12">
       <div className="container mx-auto py-12">
         <h2 className="text-center font-semibold text-2xl">
           Supports a wide range of{" "}
@@ -111,6 +142,11 @@ function SupportDriver() {
         </h2>
 
         <div className="flex justify-center gap-4 mt-8">
+          <img
+            src="/sqlite-icon.svg"
+            className="h-16 rounded-xl"
+            alt="rqlite"
+          />
           <img src="/turso.jpeg" className="h-16 rounded-xl" alt="rqlite" />
           <img src="/rqlite.png" className="h-16 rounded-xl" alt="rqlite" />
           <img src="/valtown.svg" className="h-16 rounded-xl" alt="rqlite" />
@@ -120,88 +156,119 @@ function SupportDriver() {
   );
 }
 
-export default async function MainPage() {
+function FeatureList() {
   return (
-    <WebsiteLayout>
-      <HeroSection />
-      <Screenshot />
-      <SupportDriver />
-      <div className="bg-zinc-800 py-12">
-        <div className="max-w-[900px] px-4 mx-auto flex flex-col gap-12">
-          <FeatureItem reverse image="/data-editor.png">
-            <h2 className="text-xl mb-4 font-semibold text-white">
-              Powerful Data Editor
-            </h2>
+    <div className="mx-auto max-w-[800px] mt-12">
+      <div className="py-12 px-4">
+        <h1 className="text-3xl font-semibold mb-2">Powerful Data Editor</h1>
 
-            <div className="flex flex-col gap-4">
-              <p>
-                The handy data editor allows you to add, delete, and edit
-                information.
-              </p>
+        <p className="text-xl mb-4">
+          The handy data editor allows you to add, delete, and edit information.
+          Any changes you make in the data editor are saved on your device and
+          can be submitted all at once.
+        </p>
+      </div>
 
-              <p>
-                Any changes you make in the data editor are saved on your device
-                and can be submitted all at once.
-              </p>
+      <div>
+        <div className="fade-view">
+          <video muted autoPlay loop className="lg:rounded-lg" playsInline>
+            <source
+              src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
+              type="video/mp4"
+            />
+          </video>
+        </div>
 
-              <p>
-                You can export any table or result set in various formats such
-                as CSV, JSON, and SQL.
-              </p>
-            </div>
-          </FeatureItem>
+        <div className="fade-sticky py-12 px-4">
+          <h1 className="text-3xl font-semibold mb-2">Create and Edit Table</h1>
 
-          <FeatureItem image="/sql-editor.png">
-            <h2 className="text-xl mb-4 font-semibold text-white">
-              Writing and Running SQL
-            </h2>
-
-            <div className="flex flex-col gap-4">
-              <p>
-                LibSQL Studio offers a simple query editor with auto-completion
-                features. You can run multiple queries and view their results
-              </p>
-              <p>Enjoy unlimited query tab.</p>
-            </div>
-          </FeatureItem>
-
-          <FeatureItem reverse image="/edit-table.png">
-            <h2 className="text-xl mb-4 font-semibold text-white">
-              Create and Edit Table
-            </h2>
-            <p>
-              LibSQL Studio allows you to quickly create, modify, and remove
-              table columns with just a few clicks without writing any SQL.
-            </p>
-
-            <p className="mt-4">
-              Before executing, you have the option to preview the SQL script
-              for creating or modifying a table.
-            </p>
-          </FeatureItem>
-
-          <FeatureItem image="/open-source.png">
-            <h2 className="text-xl mb-4 font-semibold text-white">
-              No Download
-            </h2>
-            <p>
-              There is no need to download anything. LibSQL Studio runs directly
-              in your favorite web browser, making it compatible across
-              different platforms.
-            </p>
-
-            <h2 className="text-xl mb-4 font-semibold text-white mt-8">
-              Open Source and Free
-            </h2>
-
-            <p>
-              LibSQL Studio is open source and completely free to use. You have
-              the opportunity to suggest new features or even contribute to
-              adding them yourself.
-            </p>
-          </FeatureItem>
+          <p className="text-xl mb-4">
+            LibSQL Studio allows you to quickly create, modify, and remove table
+            columns with just a few clicks without writing any SQL.
+          </p>
         </div>
       </div>
-    </WebsiteLayout>
+
+      <div>
+        <div className="fade-view">
+          <video muted autoPlay loop className="lg:rounded-lg" playsInline>
+            <source
+              src="https://r2.invisal.com/libsqlstudio-schema-editor.mp4"
+              type="video/mp4"
+            />
+          </video>
+        </div>
+
+        <div className="fade-sticky py-12 px-4">
+          <h1 className="text-3xl font-semibold mb-2">
+            Writing and Running SQL
+          </h1>
+
+          <p className="text-xl mb-4">
+            LibSQL Studio offers a simple query editor with auto-completion
+            features. You can run multiple queries and view their results
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <div className="fade-view">
+          <video muted autoPlay loop className="lg:rounded-lg" playsInline>
+            <source
+              src="https://r2.invisal.com/libsqlstudio-sql-query.mp4"
+              type="video/mp4"
+            />
+          </video>
+        </div>
+
+        <div className="fade-sticky py-12 px-4">
+          <div className="text-3xl font-semibold mb-2">
+            and much much more...
+          </div>
+
+          <p className="text-xl mb-4">
+            LibSQL Studio has many features and is regularly updated. Since it
+            is an open-source project, you can request new features or even
+            extend them yourself.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default async function MainPage() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "DeveloperApplication",
+            name: "LibSQL Studio",
+            description: siteDescription,
+            operatingSystem: "Web",
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: 5,
+              reviewCount: review.length,
+            },
+            offers: {
+              "@type": "Offer",
+              price: 0,
+              priceCurrency: "USD",
+            },
+          }),
+        }}
+      />
+      <WebsiteLayout>
+        <HeroSection />
+        <TestimonyList />
+        <FeatureList />
+        <SupportDriver />
+        <div className="h-32"></div>
+      </WebsiteLayout>
+    </>
   );
 }

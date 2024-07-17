@@ -1,5 +1,5 @@
 import type { WindowTabItemProps } from "@/components/gui/windows-tab";
-import { MessageChannelName } from "./const";
+import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
 import type { Dispatch, SetStateAction } from "react";
 import {
   LucideCode,
@@ -22,6 +22,11 @@ interface OpenTableTab {
 interface OpenQueryTab {
   type: "query";
   name?: string;
+  saved?: {
+    namespaceName?: string;
+    key: string;
+    sql: string;
+  };
 }
 
 interface OpenTableSchemaTab {
@@ -50,8 +55,18 @@ export function openTab(props: OpenTabsProps) {
   window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
 }
 
+export function closeTabs(key: string[]) {
+  window.internalPubSub.send(MessageChannelName.CLOSE_TABS, key);
+}
+
 function generateKeyFromTab(tab: OpenTabsProps) {
-  if (tab.type === "query") return "query-" + window.crypto.randomUUID();
+  if (tab.type === "query") {
+    if (tab.saved) {
+      return TAB_PREFIX_SAVED_QUERY + tab.saved.key;
+    }
+    return "query-" + window.crypto.randomUUID();
+  }
+
   if (tab.type === "table") return "table-" + tab.tableName;
   if (tab.type === "schema")
     return !tab.tableName ? "create-schema" : "schema-" + tab.tableName;
@@ -71,15 +86,30 @@ function generateIconFromTab(tab: OpenTabsProps) {
 
 let QUERY_COUNTER = 2;
 function generateTitle(tab: OpenTabsProps) {
-  if (tab.type === "query") return "Query " + (QUERY_COUNTER++).toString();
+  if (tab.type === "query") {
+    if (tab.saved) return tab.name ?? "Query";
+    return "Query " + (QUERY_COUNTER++).toString();
+  }
   if (tab.type === "table") return tab.tableName;
   if (tab.type === "schema") return tab.tableName ? tab.tableName : "New Table";
   if (tab.type === "user") return "User & Permission";
   return tab.name ?? "";
 }
 
-function generateComponent(tab: OpenTabsProps) {
-  if (tab.type === "query") return <QueryWindow />;
+function generateComponent(tab: OpenTabsProps, title: string) {
+  if (tab.type === "query") {
+    if (tab.saved) {
+      return (
+        <QueryWindow
+          initialName={title}
+          initialCode={tab.saved.sql}
+          initialSavedKey={tab.saved.key}
+          initialNamespace={tab.saved.namespaceName}
+        />
+      );
+    }
+    return <QueryWindow initialName={title} />;
+  }
   if (tab.type === "table")
     return <TableDataWindow tableName={tab.tableName} />;
   if (tab.type === "schema")
@@ -99,21 +129,23 @@ export function receiveOpenTabMessage({
 }) {
   setTabs((prev) => {
     const key = generateKeyFromTab(newTab);
-    const foundIndex = prev.findIndex((tab) => tab.key === key);
+    const foundIndex = prev.findIndex((tab) => tab.identifier === key);
 
     if (foundIndex >= 0) {
       setSelectedTabIndex(foundIndex);
       return prev;
     }
     setSelectedTabIndex(prev.length);
+    const title = generateTitle(newTab);
 
     return [
       ...prev,
       {
         icon: generateIconFromTab(newTab),
-        title: generateTitle(newTab),
+        title,
         key,
-        component: generateComponent(newTab),
+        identifier: key,
+        component: generateComponent(newTab, title),
       },
     ];
   });

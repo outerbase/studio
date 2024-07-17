@@ -7,6 +7,7 @@ import { ReactElement } from "react";
 import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
 import { StudioContextMenuItem } from "@/messages/open-context-menu";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
+import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 
 export interface StudioExtension {
   contextMenu?: (state: OptimizeTableState) => StudioContextMenuItem[];
@@ -15,6 +16,7 @@ export interface StudioExtension {
 interface StudioProps {
   driver: BaseDriver;
   collaboration?: CollaborationBaseDriver;
+  docDriver?: SavedDocDriver;
   name: string;
   color: string;
 
@@ -30,6 +32,7 @@ interface StudioProps {
 export function Studio({
   driver,
   collaboration,
+  docDriver,
   name,
   color,
   extensions,
@@ -37,7 +40,11 @@ export function Studio({
   onBack,
 }: Readonly<StudioProps>) {
   return (
-    <DriverProvider driver={driver} collaborationDriver={collaboration}>
+    <DriverProvider
+      driver={driver}
+      collaborationDriver={collaboration}
+      docDriver={docDriver}
+    >
       <ConfigProvider
         extensions={extensions}
         name={name}

@@ -1,4 +1,4 @@
-import { SQLite } from "@codemirror/lang-sql";
+import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
 import { Cursor, parseColumnList } from "./sql-parse-table";
 import {
   DatabaseTriggerSchema,
@@ -7,7 +7,7 @@ import {
 } from "@/drivers/base-driver";
 
 export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
-  const tree = SQLite.language.parser.parse(sql);
+  const tree = sqliteDialect.language.parser.parse(sql);
   const ptr = tree.cursor();
   ptr.firstChild();
   ptr.firstChild();

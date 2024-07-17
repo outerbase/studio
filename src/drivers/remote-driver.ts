@@ -21,10 +21,12 @@ import { RequestOperationBody } from "@/lib/api/api-request-types";
 export default class RemoteDriver implements BaseDriver {
   protected id: string = "";
   protected authToken = "";
+  protected type: "temporary" | "remote" = "remote";
 
-  constructor(id: string, authToken: string) {
+  constructor(type: "temporary" | "remote", id: string, authToken: string) {
     this.id = id;
     this.authToken = authToken;
+    this.type = type;
   }
 
   supportBigInt(): boolean {
@@ -32,7 +34,12 @@ export default class RemoteDriver implements BaseDriver {
   }
 
   protected async request<T = unknown>(body: RequestOperationBody) {
-    const r = await fetch(`/api/ops/${this.id}`, {
+    const url =
+      this.type === "temporary"
+        ? `/api/temp_ops/${this.id}`
+        : `/api/ops/${this.id}`;
+
+    const r = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: "Bearer " + this.authToken,

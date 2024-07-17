@@ -72,7 +72,7 @@ export default function GenericCell({
       );
     }
 
-    if (value instanceof ArrayBuffer) {
+    if (value instanceof ArrayBuffer || value instanceof Uint8Array) {
       const sliceByte = value.slice(0, 64);
       const base64Text = btoa(
         new Uint8Array(sliceByte).reduce(

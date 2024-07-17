@@ -6,6 +6,7 @@ import ValtownDriver from "@/drivers/valtown-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import MyStudio from "@/components/my-studio";
+import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
 
 export default function ClientPageBody() {
   const params = useSearchParams();
@@ -32,11 +33,22 @@ export default function ClientPageBody() {
     return new TursoDriver(conn.config.url, conn.config.token, true);
   }, [conn]);
 
+  const docDriver = useMemo(() => {
+    if (conn) {
+      return new IndexdbSavedDoc(conn.id);
+    }
+  }, [conn]);
+
   if (!driver || !conn) {
     return <div>Something wrong</div>;
   }
 
   return (
-    <MyStudio driver={driver} name={conn.name} color={conn.label ?? "blue"} />
+    <MyStudio
+      driver={driver}
+      docDriver={docDriver}
+      name={conn.name}
+      color={conn.label ?? "blue"}
+    />
   );
 }

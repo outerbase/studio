@@ -1,6 +1,6 @@
 import { useTheme } from "@/context/theme-provider";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { triggerSelectFiles, uploadFile } from "./file-upload";
 import {
@@ -10,6 +10,7 @@ import {
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio, StudioExtension } from "./gui/studio";
+import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 
 interface MyStudioProps {
   name: string;
@@ -17,57 +18,17 @@ interface MyStudioProps {
   driver: BaseDriver;
   expiredAt?: number;
   collabarator?: CollaborationBaseDriver;
-}
-
-function calcuateFromExpire(expiredAt: number) {
-  const now = Math.floor(Date.now() / 1000);
-  return Math.max(0, expiredAt - now);
-}
-
-function TemporarySession({ expiredAt }: { expiredAt: number }) {
-  const [countdownInSec, setCountdownInSec] = useState(
-    calcuateFromExpire(expiredAt)
-  );
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCountdownInSec(calcuateFromExpire(expiredAt));
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [expiredAt, setCountdownInSec]);
-
-  const min = Math.floor(countdownInSec / 60);
-  const sec = countdownInSec % 60;
-
-  return (
-    <div className="border-b pb-1">
-      <div className="flex gap-0.5 mb-1">
-        <span className="p-1 px-2 rounded  mono text-center bg-black text-white">
-          {Math.floor(min / 10)}
-        </span>
-        <span className="p-1 px-2 rounded  mono text-center bg-black text-white">
-          {min % 10}
-        </span>
-        <span className="p-1 rounded  mono text-center ">:</span>
-        <span className="p-1 px-2 rounded  mono text-center bg-black text-white">
-          {Math.floor(sec / 10)}
-        </span>
-        <span className="p-1 px-2 rounded  mono text-center bg-black text-white">
-          {sec % 10}
-        </span>
-      </div>
-      <p className="text-xs">Remaining of your temporary session</p>
-    </div>
-  );
+  docDriver?: SavedDocDriver;
+  sideBarFooterComponent?: ReactElement;
 }
 
 function MyStudioInternal({
   name,
   color,
   driver,
+  docDriver,
   collabarator,
-  expiredAt,
+  sideBarFooterComponent,
 }: MyStudioProps) {
   const router = useRouter();
   const { openBlockEditor } = useBlockEditor();
@@ -125,43 +86,6 @@ function MyStudioInternal({
     ];
   }, [openBlockEditor]);
 
-  const sideBanner = useMemo(() => {
-    return (
-      <div className="text-sm p-3 px-4">
-        {expiredAt ? (
-          <TemporarySession expiredAt={expiredAt} />
-        ) : (
-          <p>
-            <strong>LibStudio Studio</strong> is open-source database GUI.
-          </p>
-        )}
-
-        <ul className="list-disc ml-6 mt-2">
-          <li className="mb-1">
-            <a
-              className="text-blue-700 underline dark:text-blue-400"
-              href={"https://github.com/invisal/libsql-studio/issues"}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Request New Features
-            </a>
-          </li>
-          <li>
-            <a
-              className="text-blue-700 underline dark:text-blue-400"
-              href={"https://github.com/invisal/libsql-studio/issues"}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Report Bugs
-            </a>
-          </li>
-        </ul>
-      </div>
-    );
-  }, [expiredAt]);
-
   return (
     <Studio
       driver={driver}
@@ -171,7 +95,8 @@ function MyStudioInternal({
       onThemeChange={toggleTheme}
       onBack={goBack}
       collaboration={collabarator}
-      sideBarFooterComponent={sideBanner}
+      docDriver={docDriver}
+      sideBarFooterComponent={sideBarFooterComponent}
       extensions={extensions}
     />
   );
