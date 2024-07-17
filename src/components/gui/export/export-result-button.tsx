@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "../../ui/select";
 import type OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import { getFormatHandlers } from "@/components/lib/export-helper";
 import {
   Dialog,
@@ -55,7 +55,7 @@ export default function ExportResultButton({
 
   const [tableName, setTableName] = useState<string>("UnknownTable");
 
-  const [cellTextLimit, setCellTextLimit] = useState<number>(50);
+  const [cellTextLimit, setCellTextLimit] = useState<number | undefined>(50);
 
   const onExportClicked = useCallback(() => {
     if (!format) return;
@@ -80,7 +80,7 @@ export default function ExportResultButton({
       records,
       headers,
       exportTableName,
-      cellTextLimit
+      cellTextLimit ?? 50
     );
 
     const handler = formatHandlers[format];
@@ -119,8 +119,15 @@ export default function ExportResultButton({
   ]);
 
   const handleCellTextLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    setCellTextLimit(isNaN(value) ? 50 : value);
+    const value = e.target.value;
+
+    if (value === "") {
+      setCellTextLimit(undefined);
+      return;
+    }
+
+    const parsedValue = Number.parseInt(value, 10);
+    setCellTextLimit(Number.isNaN(parsedValue) ? undefined : parsedValue);
   };
 
   return (
@@ -221,9 +228,9 @@ export default function ExportResultButton({
                   <span className="text-xs">Cell Text Limit</span>
                   <Input
                     type="number"
-                    value={cellTextLimit}
+                    placeholder="50"
+                    value={cellTextLimit ?? ""}
                     onChange={handleCellTextLimitChange}
-                    min={1}
                   />
                 </div>
               </div>
@@ -239,9 +246,9 @@ export default function ExportResultButton({
                   <span className="text-xs">Cell Text Limit</span>
                   <Input
                     type="number"
-                    value={cellTextLimit}
+                    placeholder="50"
+                    value={cellTextLimit ?? ""}
                     onChange={handleCellTextLimitChange}
-                    min={1}
                   />
                 </div>
               </div>
