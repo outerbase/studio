@@ -98,6 +98,7 @@ function truncateText(text: string, limit: number): string {
   return `${text.slice(0, limit)}...`;
 }
 
+//i think it cleaner to move this somewhere but i dont know where should i
 function calculateColumnWidths(
   headers: string[],
   records: unknown[][],

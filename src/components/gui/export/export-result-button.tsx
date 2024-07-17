@@ -29,6 +29,9 @@ export default function ExportResultButton({
 }) {
   const [format, setFormat] = useState<string>("sql");
 
+  //do we want to make them something like this or just string?
+  // is we use the as const , where should i move it to?
+
   const OutputTargetType = {
     File: "file",
     Clipboard: "clipboard",
@@ -65,7 +68,8 @@ export default function ExportResultButton({
       exportSelection === ExportSelectionType.Complete
         ? data.getAllRows()
         : data.getSelectedRows()
-    ).map((row) => headers.map((header) => row.raw[header]));
+    ) // i need more instruction on how to do this getSelectedRows
+      .map((row) => headers.map((header) => row.raw[header]));
 
     const exportTableName = tableName.trim() || "UnknownTable";
     const formatHandlers = getFormatHandlers(
@@ -80,6 +84,7 @@ export default function ExportResultButton({
 
     const content = handler();
 
+    //should we move this to a seperate function by now?
     if (outputTarget === OutputTargetType.File) {
       const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
