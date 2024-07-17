@@ -99,6 +99,7 @@ export default function ResultTable({
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
   const { databaseDriver } = useDatabaseDriver();
   const { extensions } = useConfig();
+  const batchSize: number = 1;
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
@@ -388,7 +389,8 @@ export default function ResultTable({
                     exportRowsToSqlInsert(
                       tableName ?? "UnknownTable",
                       headers,
-                      state.getSelectedRowsArray()
+                      state.getSelectedRowsArray(),
+                      batchSize
                     )
                   );
                 }
