@@ -20,6 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function ExportResultButton({
   data,
@@ -27,6 +28,14 @@ export default function ExportResultButton({
   data: OptimizeTableState;
 }) {
   const [format, setFormat] = useState<string>("sql");
+
+  const OutputTargetType = {
+    File: "file",
+    Clipboard: "clipboard",
+  } as const;
+
+  type OutputTargetType =
+    (typeof OutputTargetType)[keyof typeof OutputTargetType];
 
   const ExportSelectionType = {
     Complete: "complete",
@@ -38,6 +47,10 @@ export default function ExportResultButton({
 
   const [exportSelection, setExportSelection] = useState<ExportSelectionType>(
     ExportSelectionType.Complete
+  );
+
+  const [outputTarget, setOutputTarget] = useState<OutputTargetType>(
+    OutputTargetType.File
   );
 
   const [tableName, setTableName] = useState<string>("UnknownTable");
@@ -68,14 +81,34 @@ export default function ExportResultButton({
       content = handler();
     }
 
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `export.${format}`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [format, data, exportSelection, ExportSelectionType.Complete, tableName]);
+    if (outputTarget === OutputTargetType.File) {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `export.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      navigator.clipboard.writeText(content).then(
+        () => {
+          toast.success("Content copied to clipboard");
+        },
+        (err) => {
+          toast.error("Failed to copy content to clipboard");
+          console.error("Failed to copy content: ", err);
+        }
+      );
+    }
+  }, [
+    format,
+    data,
+    exportSelection,
+    ExportSelectionType.Complete,
+    tableName,
+    outputTarget,
+    OutputTargetType.File,
+  ]);
 
   return (
     <Dialog open>
@@ -195,8 +228,24 @@ export default function ExportResultButton({
           <div className="px-4 flex flex-col gap-4 border-t pt-3">
             <Label>Output Target</Label>
             <div className="flex gap-2">
-              <Button>File</Button>
-              <Button variant={"outline"}>Clipboard</Button>
+              <Button
+                variant={
+                  outputTarget === OutputTargetType.File ? "default" : "outline"
+                }
+                onClick={() => setOutputTarget(OutputTargetType.File)}
+              >
+                File
+              </Button>
+              <Button
+                variant={
+                  outputTarget === OutputTargetType.Clipboard
+                    ? "default"
+                    : "outline"
+                }
+                onClick={() => setOutputTarget(OutputTargetType.Clipboard)}
+              >
+                Clipboard
+              </Button>
             </div>
           </div>
         </div>
