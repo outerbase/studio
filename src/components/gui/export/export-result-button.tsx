@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import type OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useCallback, useState } from "react";
 import { getFormatHandlers } from "@/components/lib/export-helper";
 import {
@@ -28,18 +28,40 @@ export default function ExportResultButton({
 }) {
   const [format, setFormat] = useState<string>("sql");
 
+  const ExportSelectionType = {
+    Complete: "complete",
+    Selected: "selected",
+  } as const;
+
+  type ExportSelectionType =
+    (typeof ExportSelectionType)[keyof typeof ExportSelectionType];
+
+  const [exportSelection, setExportSelection] = useState<ExportSelectionType>(
+    ExportSelectionType.Complete
+  );
+
+  const [tableName, setTableName] = useState<string>("UnknownTable");
+
   const onExportClicked = useCallback(() => {
     if (!format) return;
 
     let content = "";
     const headers = data.getHeaders().map((header) => header.name);
-    const records = data
-      .getAllRows()
-      .map((row) => headers.map((header) => row.raw[header]));
 
-    const tableName = "UnknownTable"; //TODO: replace with actual table name
+    let records;
+    if (exportSelection === ExportSelectionType.Complete) {
+      records = data
+        .getAllRows()
+        .map((row) => headers.map((header) => row.raw[header]));
+    } else {
+      records = data
+        .getSelectedRows()
+        .map((row) => headers.map((header) => row.raw[header]));
+    }
 
-    const formatHandlers = getFormatHandlers(records, headers, tableName);
+    const exportTableName = tableName.trim() || "UnknownTable";
+
+    const formatHandlers = getFormatHandlers(records, headers, exportTableName);
 
     const handler = formatHandlers[format];
     if (handler) {
@@ -53,7 +75,7 @@ export default function ExportResultButton({
     a.download = `export.${format}`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [format, data]);
+  }, [format, data, exportSelection, ExportSelectionType.Complete, tableName]);
 
   return (
     <Dialog open>
@@ -85,25 +107,39 @@ export default function ExportResultButton({
             <div className="flex gap-2">
               <div
                 className={cn(
-                  buttonVariants({ variant: "default" }),
+                  buttonVariants({
+                    variant:
+                      exportSelection === ExportSelectionType.Complete
+                        ? "default"
+                        : "outline",
+                  }),
                   "h-auto items-start cursor-pointer"
                 )}
+                onClick={() => setExportSelection(ExportSelectionType.Complete)}
               >
                 <div>
                   <div>Complete</div>
-                  <div className="text-xs">500 rows</div>
+                  <div className="text-xs">{data.getAllRows().length} rows</div>
                 </div>
               </div>
 
               <div
                 className={cn(
-                  buttonVariants({ variant: "outline" }),
+                  buttonVariants({
+                    variant:
+                      exportSelection === ExportSelectionType.Selected
+                        ? "default"
+                        : "outline",
+                  }),
                   "h-auto items-start cursor-pointer"
                 )}
+                onClick={() => setExportSelection(ExportSelectionType.Selected)}
               >
                 <div>
                   <div>Selected</div>
-                  <div className="text-xs">0 row</div>
+                  <div className="text-xs">
+                    {data.getSelectedRows().length} rows
+                  </div>
                 </div>
               </div>
             </div>
@@ -116,7 +152,11 @@ export default function ExportResultButton({
               <div className="flex gap-2 mt-2">
                 <div className="flex flex-col gap-1 flex-grow">
                   <span className="text-xs">Table Name</span>
-                  <Input value="UnknownTable" />
+                  <Input
+                    value={tableName}
+                    onChange={(e) => setTableName(e.target.value)}
+                    placeholder="UnknownTable"
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-xs">Batch Size</span>
