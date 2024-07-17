@@ -152,50 +152,52 @@ export function exportRowsToAsciiTable(
   const columnWidths = calculateColumnWidths(headers, records, cellTextLimit);
 
   // Create top border
-  result.push(
-    "+" + columnWidths.map((width) => "-".repeat(width + 2)).join("+") + "+"
-  );
+  const topBorder =
+    "┌" + columnWidths.map((width) => "─".repeat(width + 2)).join("┬") + "┐";
+  result.push(topBorder);
 
   // Add headers
   const headerRow =
-    "| " +
+    "│ " +
     headers
       .map((h, i) => truncateText(h, columnWidths[i]).padEnd(columnWidths[i]))
-      .join(" | ") +
-    " |";
+      .join(" │ ") +
+    " │";
   result.push(headerRow);
 
   // Add separator
-  result.push(
-    "+" + columnWidths.map((width) => "=".repeat(width + 2)).join("+") + "+"
-  );
+  const headerSeparator =
+    "╞" + columnWidths.map((width) => "═".repeat(width + 2)).join("╪") + "╡";
+  result.push(headerSeparator);
 
   // Add records
   for (const record of records) {
     const row =
-      "| " +
+      "│ " +
       record
         .map((cell, index) =>
           truncateText(String(cell), columnWidths[index]).padEnd(
             columnWidths[index]
           )
         )
-        .join(" | ") +
-      " |";
+        .join(" │ ") +
+      " │";
     result.push(row);
 
     // Add separator between rows, except for the last row
     if (record !== records[records.length - 1]) {
-      result.push(
-        "+" + columnWidths.map((width) => "-".repeat(width + 2)).join("+") + "+"
-      );
+      const rowSeparator =
+        "├" +
+        columnWidths.map((width) => "─".repeat(width + 2)).join("┼") +
+        "┤";
+      result.push(rowSeparator);
     }
   }
 
   // Add bottom border
-  result.push(
-    "+" + columnWidths.map((width) => "-".repeat(width + 2)).join("+") + "+"
-  );
+  const bottomBorder =
+    "└" + columnWidths.map((width) => "─".repeat(width + 2)).join("┴") + "┘";
+  result.push(bottomBorder);
 
   return result.join("\n");
 }
