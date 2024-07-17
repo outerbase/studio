@@ -4,8 +4,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 interface Props {
   onSelect: (driver: SupportedDriver) => void;
@@ -15,6 +17,8 @@ export default function DriverDropdown({
   children,
   onSelect,
 }: PropsWithChildren<Props>) {
+  const router = useRouter();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
@@ -57,6 +61,23 @@ export default function DriverDropdown({
             <div>
               <div className="font-bold">val.town</div>
               <div className="text-xs opacity-50">Private SQLite database</div>
+            </div>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/playground/client");
+          }}
+        >
+          <div className="flex gap-4 px-2 items-center h-16">
+            <img src="/sqlite-icon.svg" alt="rqlite" className="w-9 h-9" />
+            <div>
+              <div className="font-bold">SQLite</div>
+              <div className="text-xs opacity-50">
+                Open an SQLite file or start a new SQLite database directly in
+                your browser.
+              </div>
             </div>
           </div>
         </DropdownMenuItem>
