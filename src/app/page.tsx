@@ -41,8 +41,8 @@ function TestimonyItem() {
 
 function TestimonyList() {
   return (
-    <div className="mx-auto max-w-[800px]">
-      <div className="grid grid-cols-2 gap-4">
+    <div className="mx-auto max-w-[800px] p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TestimonyItem />
         <TestimonyItem />
       </div>
@@ -110,7 +110,7 @@ function FeatureList() {
 
       <div>
         <div className="fade-view">
-          <video muted autoPlay loop className="rounded-lg">
+          <video muted autoPlay loop className="rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
               type="video/mp4"
@@ -130,7 +130,7 @@ function FeatureList() {
 
       <div>
         <div className="fade-view">
-          <video muted autoPlay loop className="rounded-lg">
+          <video muted autoPlay loop className="rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
               type="video/mp4"
@@ -152,7 +152,7 @@ function FeatureList() {
 
       <div>
         <div className="fade-view">
-          <video muted autoPlay loop className="rounded-lg">
+          <video muted autoPlay loop className="rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
               type="video/mp4"
