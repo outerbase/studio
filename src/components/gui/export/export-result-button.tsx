@@ -237,7 +237,12 @@ export default function ExportResultButton({
               <div className="flex gap-2 mt-2">
                 <div className="flex flex-col gap-1 flex-grow">
                   <span className="text-xs">Cell Text Limit</span>
-                  <Input value="50" />
+                  <Input
+                    type="number"
+                    value={cellTextLimit}
+                    onChange={handleCellTextLimitChange}
+                    min={1}
+                  />
                 </div>
               </div>
             </div>

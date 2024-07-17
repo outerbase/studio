@@ -93,47 +93,35 @@ export function exportRowsToCsv(
   return result.join("\n");
 }
 
-export function exportRowsToMarkdown(
+function truncateText(text: string, limit: number): string {
+  if (text.length <= limit) return text;
+  return text.slice(0, limit) + "...";
+}
+
+function calculateColumnWidths(
   headers: string[],
   records: unknown[][],
   cellTextLimit: number
-): string {
-  const result: string[] = [];
-
-  // Helper function to truncate text
-  const truncateText = (text: string, limit: number) => {
-    if (text.length <= limit) return text;
-    return text.substring(0, limit - 3) + "...";
-  };
-
-  // Helper function to wrap text
-  const wrapText = (text: string, width: number): string[] => {
-    const words = text.split(" ");
-    const lines: string[] = [];
-    let currentLine = "";
-
-    words.forEach((word) => {
-      if ((currentLine + word).length > width) {
-        lines.push(currentLine.trim());
-        currentLine = "";
-      }
-      currentLine += word + " ";
-    });
-    if (currentLine.trim()) lines.push(currentLine.trim());
-    return lines;
-  };
-
-  // Calculate column widths
-  const columnWidths = headers.map((header, index) => {
+): number[] {
+  return headers.map((header, index) => {
     const maxContentWidth = Math.max(
       header.length,
       ...records.map((record) => String(record[index]).length)
     );
     return Math.min(maxContentWidth, cellTextLimit);
   });
+}
+
+export function exportRowsToMarkdown(
+  headers: string[],
+  records: unknown[][],
+  cellTextLimit: number
+): string {
+  const result: string[] = [];
+  const columnWidths = calculateColumnWidths(headers, records, cellTextLimit);
 
   // Add headers
-  const headerRow = `| ${headers.map((h, i) => truncateText(h.padEnd(columnWidths[i]), columnWidths[i])).join(" | ")} |`;
+  const headerRow = `| ${headers.map((h, i) => truncateText(h, columnWidths[i]).padEnd(columnWidths[i])).join(" | ")} |`;
   result.push(headerRow);
 
   // Add separator
@@ -142,18 +130,72 @@ export function exportRowsToMarkdown(
 
   // Add records
   for (const record of records) {
-    const wrappedCells = record.map((cell, index) =>
-      wrapText(truncateText(String(cell), cellTextLimit), columnWidths[index])
-    );
-    const maxLines = Math.max(...wrappedCells.map((cell) => cell.length));
+    const row = `| ${record
+      .map((cell, index) =>
+        truncateText(String(cell), columnWidths[index]).padEnd(
+          columnWidths[index]
+        )
+      )
+      .join(" | ")} |`;
+    result.push(row);
+  }
 
-    for (let i = 0; i < maxLines; i++) {
-      const row = `| ${wrappedCells
-        .map((cell, index) => (cell[i] || "").padEnd(columnWidths[index]))
-        .join(" | ")} |`;
-      result.push(row);
+  return result.join("\n");
+}
+
+export function exportRowsToAsciiTable(
+  headers: string[],
+  records: unknown[][],
+  cellTextLimit: number
+): string {
+  const result: string[] = [];
+  const columnWidths = calculateColumnWidths(headers, records, cellTextLimit);
+
+  // Create top border
+  result.push(
+    "+" + columnWidths.map((width) => "-".repeat(width + 2)).join("+") + "+"
+  );
+
+  // Add headers
+  const headerRow =
+    "| " +
+    headers
+      .map((h, i) => truncateText(h, columnWidths[i]).padEnd(columnWidths[i]))
+      .join(" | ") +
+    " |";
+  result.push(headerRow);
+
+  // Add separator
+  result.push(
+    "+" + columnWidths.map((width) => "=".repeat(width + 2)).join("+") + "+"
+  );
+
+  // Add records
+  for (const record of records) {
+    const row =
+      "| " +
+      record
+        .map((cell, index) =>
+          truncateText(String(cell), columnWidths[index]).padEnd(
+            columnWidths[index]
+          )
+        )
+        .join(" | ") +
+      " |";
+    result.push(row);
+
+    // Add separator between rows, except for the last row
+    if (record !== records[records.length - 1]) {
+      result.push(
+        "+" + columnWidths.map((width) => "-".repeat(width + 2)).join("+") + "+"
+      );
     }
   }
+
+  // Add bottom border
+  result.push(
+    "+" + columnWidths.map((width) => "-".repeat(width + 2)).join("+") + "+"
+  );
 
   return result.join("\n");
 }
@@ -169,5 +211,6 @@ export function getFormatHandlers(
     json: () => exportRowsToJson(headers, records),
     sql: () => exportRowsToSqlInsert(tableName, headers, records),
     markdown: () => exportRowsToMarkdown(headers, records, cellTextLimit),
+    ascii: () => exportRowsToAsciiTable(headers, records, cellTextLimit),
   };
 }
