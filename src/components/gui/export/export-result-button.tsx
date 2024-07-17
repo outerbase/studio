@@ -60,22 +60,14 @@ export default function ExportResultButton({
   const onExportClicked = useCallback(() => {
     if (!format) return;
 
-    let content = "";
     const headers = data.getHeaders().map((header) => header.name);
-
-    let records;
-    if (exportSelection === ExportSelectionType.Complete) {
-      records = data
-        .getAllRows()
-        .map((row) => headers.map((header) => row.raw[header]));
-    } else {
-      records = data
-        .getSelectedRows()
-        .map((row) => headers.map((header) => row.raw[header]));
-    }
+    const records = (
+      exportSelection === ExportSelectionType.Complete
+        ? data.getAllRows()
+        : data.getSelectedRows()
+    ).map((row) => headers.map((header) => row.raw[header]));
 
     const exportTableName = tableName.trim() || "UnknownTable";
-
     const formatHandlers = getFormatHandlers(
       records,
       headers,
@@ -84,9 +76,9 @@ export default function ExportResultButton({
     );
 
     const handler = formatHandlers[format];
-    if (handler) {
-      content = handler();
-    }
+    if (!handler) return;
+
+    const content = handler();
 
     if (outputTarget === OutputTargetType.File) {
       const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -97,15 +89,13 @@ export default function ExportResultButton({
       a.click();
       URL.revokeObjectURL(url);
     } else {
-      navigator.clipboard.writeText(content).then(
-        () => {
-          toast.success("Content copied to clipboard");
-        },
-        (err) => {
+      navigator.clipboard
+        .writeText(content)
+        .then(() => toast.success("Content copied to clipboard"))
+        .catch((err) => {
           toast.error("Failed to copy content to clipboard");
           console.error("Failed to copy content: ", err);
-        }
-      );
+        });
     }
   }, [
     format,
