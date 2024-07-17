@@ -57,11 +57,7 @@ function TestimonyList() {
 
 function HeroSection() {
   return (
-    <div className="mx-auto max-w-[800px] px-4 py-16">
-      <div className="flex flex-col gap-4 justify-center mb-12 md:flex-row">
-        <LinkButton title="Open LibSQL Studio" url="/connect" />
-      </div>
-
+    <div className="mx-auto max-w-[800px] px-4 pb-8 pt-16">
       <h2 className="text-center text-4xl lg:text-6xl font-bold">
         Powerful SQLite-based Database Client
       </h2>
@@ -71,6 +67,10 @@ function HeroSection() {
         SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely
         in your browser, so there&apos;s no need to download anything.
       </p>
+
+      <div className="flex gap-4 justify-center mt-12">
+        <LinkButton title="Open LibSQL Studio" url="/connect" />
+      </div>
     </div>
   );
 }
@@ -99,8 +99,8 @@ function SupportDriver() {
 
 function FeatureList() {
   return (
-    <div className="mx-auto max-w-[800px] p-4 mt-12">
-      <div className="py-12">
+    <div className="mx-auto max-w-[800px] mt-12">
+      <div className="py-12 px-4">
         <h1 className="text-3xl font-semibold mb-2">Powerful Data Editor</h1>
 
         <p className="text-xl mb-4">
@@ -112,7 +112,7 @@ function FeatureList() {
 
       <div>
         <div className="fade-view">
-          <video muted autoPlay loop className="rounded-lg" playsInline>
+          <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
               type="video/mp4"
@@ -120,7 +120,7 @@ function FeatureList() {
           </video>
         </div>
 
-        <div className="fade-sticky py-12">
+        <div className="fade-sticky py-12 px-4">
           <h1 className="text-3xl font-semibold mb-2">Create and Edit Table</h1>
 
           <p className="text-xl mb-4">
@@ -132,15 +132,15 @@ function FeatureList() {
 
       <div>
         <div className="fade-view">
-          <video muted autoPlay loop className="rounded-lg" playsInline>
+          <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
-              src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
+              src="https://r2.invisal.com/libsqlstudio-schema-editor.mp4"
               type="video/mp4"
             />
           </video>
         </div>
 
-        <div className="fade-sticky py-12">
+        <div className="fade-sticky py-12 px-4">
           <h1 className="text-3xl font-semibold mb-2">
             Writing and Running SQL
           </h1>
@@ -154,15 +154,15 @@ function FeatureList() {
 
       <div>
         <div className="fade-view">
-          <video muted autoPlay loop className="rounded-lg" playsInline>
+          <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
-              src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
+              src="https://r2.invisal.com/libsqlstudio-sql-query.mp4"
               type="video/mp4"
             />
           </video>
         </div>
 
-        <div className="fade-sticky py-12">
+        <div className="fade-sticky py-12 px-4">
           <div className="text-3xl font-semibold mb-2">
             and much much more...
           </div>

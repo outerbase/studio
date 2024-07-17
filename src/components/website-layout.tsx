@@ -17,7 +17,7 @@ async function Topbar() {
     <header className="border-b">
       <div className="mx-auto container flex">
         <Link href="/">
-          <h1 className="text-lg p-2">
+          <h1 className="text-lg py-2">
             LibSQL <strong>Studio</strong>
           </h1>
         </Link>
@@ -63,38 +63,31 @@ async function Topbar() {
 function Footer() {
   return (
     <div className="border-t py-4 text-sm">
-      <div className="mx-auto container flex">
-        <div className="flex-grow">
-          <ul className="flex flex-wrap gap-4 mb-2">
-            <li>
-              <Link
-                href="/playground"
-                className="font-semibold hover:underline"
-              >
-                Playground
-              </Link>
-            </li>
-            <li>
-              <Link href="/docs" className="font-semibold hover:underline">
-                Document
-              </Link>
-            </li>
-            <li>
-              <Link href="/terms" className="font-semibold hover:underline">
-                Terms and Condition
-              </Link>
-            </li>
-            <li>
-              <Link href="/privacy" className="font-semibold hover:underline">
-                Privacy
-              </Link>
-            </li>
-          </ul>
+      <div className="mx-auto container">
+        <ul className="flex flex-wrap gap-4 mb-2">
+          <li>
+            <Link href="/playground" className="font-semibold hover:underline">
+              Playground
+            </Link>
+          </li>
+          <li>
+            <Link href="/docs" className="font-semibold hover:underline">
+              Document
+            </Link>
+          </li>
+          <li>
+            <Link href="/terms" className="font-semibold hover:underline">
+              Terms and Condition
+            </Link>
+          </li>
+          <li>
+            <Link href="/privacy" className="font-semibold hover:underline">
+              Privacy
+            </Link>
+          </li>
+        </ul>
 
-          <p>© 2024 Visal .In. | LibSQL Studio</p>
-        </div>
-
-        <div className="flex gap-4">
+        <div className="flex gap-4 my-4">
           <Link href="https://x.com/invisal89" target="blank">
             <svg
               className="w-6 h-6"
@@ -128,6 +121,8 @@ function Footer() {
             </svg>
           </Link>
         </div>
+
+        <p>© 2024 Visal .In. | LibSQL Studio</p>
       </div>
     </div>
   );
