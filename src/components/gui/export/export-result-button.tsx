@@ -60,6 +60,8 @@ export default function ExportResultButton({
 
   const [cellTextLimit, setCellTextLimit] = useState<number | undefined>(50);
 
+  const [batchSize, setBatchSize] = useState<number | undefined>(1);
+
   const onExportClicked = useCallback(() => {
     if (!format) return;
 
@@ -76,7 +78,8 @@ export default function ExportResultButton({
       records,
       headers,
       exportTableName,
-      cellTextLimit ?? 50
+      cellTextLimit ?? 50,
+      batchSize ?? 1
     );
 
     const handler = formatHandlers[format];
@@ -109,6 +112,7 @@ export default function ExportResultButton({
     ExportSelectionType.Complete,
     tableName,
     cellTextLimit,
+    batchSize,
     outputTarget,
     OutputTargetType.File,
   ]);
@@ -123,6 +127,20 @@ export default function ExportResultButton({
 
     const parsedValue = Number.parseInt(value, 10);
     setCellTextLimit(Number.isNaN(parsedValue) ? undefined : parsedValue);
+  };
+
+  const handleBatchSizeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      setBatchSize(undefined);
+      return;
+    }
+
+    const parsedValue = Number.parseInt(value, 10);
+    if (!Number.isNaN(parsedValue) && parsedValue > 0) {
+      setBatchSize(parsedValue);
+    }
   };
 
   return (
@@ -208,7 +226,12 @@ export default function ExportResultButton({
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-xs">Batch Size</span>
-                  <Input value="1" />
+                  <Input
+                    type="number"
+                    value={batchSize ?? ""}
+                    onChange={handleBatchSizeChange}
+                    placeholder="1"
+                  />
                 </div>
               </div>
             </div>
