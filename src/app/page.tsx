@@ -4,10 +4,53 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const siteDescription =
+  "LibSQL Studio is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything";
+
 export const metadata: Metadata = {
-  title: "LibSQL Studio - LibSQL and rqlite client on your browser",
-  description: "LibSQL Studio - LibSQL and rqlite client on your browser",
+  title: "LibSQL Studio",
+  keywords: [
+    "libsql",
+    "rqlite",
+    "sqlite",
+    "studio",
+    "browser",
+    "editor",
+    "gui",
+    "online",
+    "client",
+  ],
+  description: siteDescription,
+  openGraph: {
+    siteName: "LibSQL Studio",
+    description: siteDescription,
+  },
 };
+
+interface Review {
+  id: number;
+  name: string;
+  picture?: string;
+  initial?: string;
+  content: string;
+}
+
+const review: Review[] = [
+  {
+    id: 1,
+    name: "Jamie Barton",
+    picture: "https://github.com/notrab.png",
+    content:
+      "libSQL Studio is a fantastic all-in-one tool for editing data and executing SQL queries that comes with a great DX. Its auto-completion feature boosts productivity and reduces errors, while saved queries make managing and reusing SQL a breeze.",
+  },
+  {
+    id: 2,
+    name: "Achille Lacoin",
+    initial: "AL",
+    content:
+      "libSQL Studio is a fantastic all-in-one tool for editing data and executing SQL queries that comes with a great DX. Its auto-completion feature boosts productivity and reduces errors, while saved queries make managing and reusing SQL a breeze.",
+  },
+];
 
 function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   return (
@@ -23,18 +66,28 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
   );
 }
 
-function TestimonyItem() {
+function TestimonyItem({ data }: { data: Review }) {
   return (
-    <div className="bg-secondary p-4 rounded-lg">
-      <div className="font-bold">Review Name</div>
-      <div>Company Name</div>
-      <div className="text-red-500 text-xl">★★★★★</div>
-      <p>
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry standard dummy text ever
-        since the 1500s, when an unknown printer took a galley of type and
-        scrambled it to make a type specimen book
-      </p>
+    <div className="bg-secondary p-6 rounded-lg">
+      <div className="flex gap-2 mb-2">
+        {data.picture && (
+          <img
+            src={data.picture}
+            className="w-12 h-12 rounded-full"
+            alt={data.name}
+          />
+        )}
+        {data.initial && (
+          <div className="w-12 h-12 rounded-full bg-yellow-500 text-xl font-bold flex justify-center items-center text-white">
+            {data.initial}
+          </div>
+        )}
+        <div>
+          <div className="font-bold">{data.name}</div>
+          <div className="text-red-500 text-xl">★★★★★</div>
+        </div>
+      </div>
+      <p>{data.content}</p>
     </div>
   );
 }
@@ -43,8 +96,9 @@ function TestimonyList() {
   return (
     <div className="mx-auto max-w-[800px] p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TestimonyItem />
-        <TestimonyItem />
+        {review.map((r) => (
+          <TestimonyItem data={r} key={r.id} />
+        ))}
       </div>
       <div className="text-xl mt-4 pl-4 pr-2">
         and thousands of{" "}
@@ -88,6 +142,11 @@ function SupportDriver() {
         </h2>
 
         <div className="flex justify-center gap-4 mt-8">
+          <img
+            src="/sqlite-icon.svg"
+            className="h-16 rounded-xl"
+            alt="rqlite"
+          />
           <img src="/turso.jpeg" className="h-16 rounded-xl" alt="rqlite" />
           <img src="/rqlite.png" className="h-16 rounded-xl" alt="rqlite" />
           <img src="/valtown.svg" className="h-16 rounded-xl" alt="rqlite" />
@@ -180,12 +239,36 @@ function FeatureList() {
 
 export default async function MainPage() {
   return (
-    <WebsiteLayout>
-      <HeroSection />
-      <TestimonyList />
-      <FeatureList />
-      <SupportDriver />
-      <div className="h-32"></div>
-    </WebsiteLayout>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "DeveloperApplication",
+            name: "LibSQL Studio",
+            description: siteDescription,
+            operatingSystem: "Web",
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: 5,
+              reviewCount: review.length,
+            },
+            offers: {
+              "@type": "Offer",
+              price: 0,
+              priceCurrency: "USD",
+            },
+          }),
+        }}
+      />
+      <WebsiteLayout>
+        <HeroSection />
+        <TestimonyList />
+        <FeatureList />
+        <SupportDriver />
+        <div className="h-32"></div>
+      </WebsiteLayout>
+    </>
   );
 }
