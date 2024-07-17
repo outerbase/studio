@@ -280,18 +280,24 @@ For Markdown Side
   }
 }
 
-.fade-view {
-  animation:
-    fadeIn ease-in-out both,
-    fadeOut ease-in forwards;
-  animation-range:
-    cover 30% contain 50%,
-    contain 90% cover 100%;
-  animation-timeline: view();
-}
+@supports (animation-timeline: view()) {
+  .fade-view {
+    animation:
+      fadeIn ease-in-out both,
+      fadeOut ease-in forwards;
+    animation-range:
+      cover 30% contain 50%,
+      contain 90% cover 100%;
+    animation-timeline: view();
+  }
 
-.fade-sticky {
-  position: sticky;
-  bottom: 0;
-  background-image: linear-gradient(to top, var(--background) 40%, transparent);
+  .fade-sticky {
+    position: sticky;
+    bottom: 0;
+    background-image: linear-gradient(
+      to top,
+      var(--background) 40%,
+      transparent
+    );
+  }
 }

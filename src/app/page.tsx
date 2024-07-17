@@ -46,8 +46,10 @@ function TestimonyList() {
         <TestimonyItem />
         <TestimonyItem />
       </div>
-      <div className="text-xl mt-4 px-4">
-        and thousands of happy developers use our tools.
+      <div className="text-xl mt-4 pl-4 pr-2">
+        and thousands of{" "}
+        <span className="border-b-4 border-b-yellow-500">happy developers</span>{" "}
+        use our tools.
       </div>
     </div>
   );
@@ -60,7 +62,7 @@ function HeroSection() {
         <LinkButton title="Open LibSQL Studio" url="/connect" />
       </div>
 
-      <h2 className="text-center text-6xl font-bold">
+      <h2 className="text-center text-4xl lg:text-6xl font-bold">
         Powerful SQLite-based Database Client
       </h2>
 
