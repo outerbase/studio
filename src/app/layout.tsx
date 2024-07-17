@@ -46,6 +46,30 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org/",
+              "@type": "DeveloperApplication",
+              name: "LibSQL Studio",
+              description: siteDescription,
+              operatingSystem: "Web",
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: 5,
+                reviewCount: 2,
+              },
+              offers: {
+                "@type": "Offer",
+                price: 0,
+                priceCurrency: "USD",
+              },
+            }),
+          }}
+        ></script>
+      </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider defaultTheme={theme}>
           <Fragment>{children}</Fragment>
