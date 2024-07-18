@@ -45,10 +45,10 @@ const review: Review[] = [
   },
   {
     id: 2,
-    name: "Achille Lacoin",
-    initial: "AL",
+    name: "Kim Thean",
+    initial: "KT",
     content:
-      "libSQL Studio is a fantastic all-in-one tool for editing data and executing SQL queries that comes with a great DX. Its auto-completion feature boosts productivity and reduces errors, while saved queries make managing and reusing SQL a breeze.",
+      "libSQL Studio offers everything I need to work with Turso. The best part is that there's no need to download anything, and it continues to improve with regular updates.",
   },
 ];
 
@@ -205,8 +205,9 @@ function FeatureList() {
           </h1>
 
           <p className="text-xl mb-4">
-            LibSQL Studio offers a simple query editor with auto-completion
-            features. You can run multiple queries and view their results
+            LibSQL Studio features a user-friendly query editor equipped with
+            auto-completion and function hint tooltips. It allows you to execute
+            multiple queries simultaneously and view their results efficiently.
           </p>
         </div>
       </div>
@@ -228,8 +229,21 @@ function FeatureList() {
 
           <p className="text-xl mb-4">
             LibSQL Studio has many features and is regularly updated. Since it
-            is an open-source project, you can request new features or even
-            extend them yourself.
+            is an{" "}
+            <Link
+              href="https://github.com/invisal/libsql-studio"
+              className="border-b-4 inline-block hover:border-yellow-500"
+            >
+              open-source
+            </Link>{" "}
+            project, you can{" "}
+            <Link
+              href="https://github.com/invisal/libsql-studio/issues"
+              className="border-b-4 inline-block hover:border-yellow-500"
+            >
+              request new features
+            </Link>{" "}
+            or even extend them yourself.
           </p>
         </div>
       </div>
