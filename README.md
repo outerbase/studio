@@ -1,31 +1,18 @@
 # LibSQL Studio
 
-LibSQL Studio is a lightweight LibSQL graphical client on your browser written using NextJS.
+LibSQL Studio is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything.
 
-Try [LibSQL Studio](https://libsqlstudio.com/) online here.
+[![LibSQL Studio, sqlite online editor](https://github.com/user-attachments/assets/5d92ce58-9ce6-4cd7-9c65-4763d2d3b231)](https://libsqlstudio.com)
+[![Libsql studio playground](https://github.com/user-attachments/assets/dcf7e246-fe72-4351-ab10-ae2d1658087d)](https://libsqlstudio.com/playground/client?template=chinook)
 
-![LibSQL Studo Screenshot](https://github.com/invisal/libsql-web-viewer/assets/4539653/82014129-2ea3-4619-9287-2dc756baba6c)
 
-**Features**
+## Features
 
-- Optimize table result to view large query result
-- Edit your table data in spreadsheet-like editor
-- Query editor with basic syntax highlighting and basic auto complete
-- Basic connection management
+![libsqlstudio-git-preview (7)](https://github.com/user-attachments/assets/1d7a3d90-61e3-4a77-83a5-4bb096bbfb4b)
 
-## How to contribute
+- **Query Editor**: It features a user-friendly query editor equipped with auto-completion and function hint tooltips. It allows you to execute multiple queries simultaneously and view their results efficiently.
+- **Data Editor**:  It comes with a powerful data editor, allowing you to stage all your changes and preview them before committing. The data table is highly optimized and lightweight, capable of rendering thousands of rows and columns efficiently.
+- **Schema Editor**: It allows you to quickly create, modify, and remove table columns with just a few clicks without writing any SQL.
+- **Connection Manager**: It includes a flexible connection manager, allowing you to store your connections locally in your browser. You can also store them on a server and share your connections across multiple devices.
 
-To run the project
-
-```
-pnpm install
-cd studio
-pnpm run dev
-```
-
-**Folder structure**
-
-| Folder    | Description                                                                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/gui`    | This is standalone database GUI React component. It is not tied to any specific database driver, allowing users to extend and integrate it into their own projects with ease. |
-| `/studio` | It is complete database GUI client as seen in https://libsqlstudio.com. Come with database drivers and many other features                                                    |
+The features mentioned above are just a few of the many we offer. Give it a try to explore everything we have in store.
