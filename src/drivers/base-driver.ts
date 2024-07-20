@@ -8,13 +8,6 @@ export type InValue =
   | Uint8Array
   | Date;
 
-export type Statement =
-  | string
-  | {
-      sql: string;
-      args: InValue[] | Record<string, InValue>;
-    };
-
 export enum TableColumnDataType {
   TEXT = 1,
   INTEGER = 2,
@@ -189,8 +182,8 @@ export abstract class BaseDriver {
   // Methods
   abstract close(): void;
 
-  abstract query(stmt: Statement): Promise<DatabaseResultSet>;
-  abstract transaction(stmts: Statement[]): Promise<DatabaseResultSet[]>;
+  abstract query(stmt: string): Promise<DatabaseResultSet>;
+  abstract transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
   abstract schemas(): Promise<DatabaseSchemaItem[]>;
   abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;

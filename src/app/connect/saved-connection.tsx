@@ -27,6 +27,16 @@ export function RqliteInstruction() {
   );
 }
 
+export function CloudflareWarning() {
+  return (
+    <div className="bg-secondary p-4 mb-4 text-sm">
+      To bypass CORS (Cross-Origin Resource Sharing) restrictions, we will route
+      your request through our server. If you are fine with this, please
+      proceed.
+    </div>
+  );
+}
+
 export default function SaveConnection({
   user,
   driver,
@@ -95,6 +105,9 @@ export default function SaveConnection({
       {step === "config" && (
         <>
           {driver === "rqlite" && storage === "local" && <RqliteInstruction />}
+          {driver === "cloudflare-d1" && storage === "local" && (
+            <CloudflareWarning />
+          )}
           <SavedConnectionConfig
             driver={driver}
             onClose={onClose}

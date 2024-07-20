@@ -1,4 +1,3 @@
-import { InStatement } from "@libsql/client";
 import {
   DatabaseHeader,
   DatabaseResultSet,
@@ -80,7 +79,7 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
     this.password = password;
   }
 
-  async transaction(stmts: InStatement[]): Promise<DatabaseResultSet[]> {
+  async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     let headers: HeadersInit = {
       "Content-Type": "application/json",
     };
@@ -98,9 +97,7 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
       headers,
       body: JSON.stringify(
         stmts.map((s) => {
-          if (typeof s === "string") return [s];
-          else if (Array.isArray(s.args)) return [s.sql, ...s.args];
-          return [s.sql, s.args];
+          return [s];
         })
       ),
     });
@@ -118,7 +115,7 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
     return false;
   }
 
-  async query(stmt: InStatement): Promise<DatabaseResultSet> {
+  async query(stmt: string): Promise<DatabaseResultSet> {
     return (await this.transaction([stmt]))[0];
   }
 

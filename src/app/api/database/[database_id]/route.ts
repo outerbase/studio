@@ -19,6 +19,7 @@ const databaseSchema = zod.object({
     token: zod.string().optional(),
     username: zod.string().optional(),
     password: zod.string().optional(),
+    database: zod.string().optional(),
   }),
 });
 
@@ -32,6 +33,8 @@ export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
     label: databaseInfo.color,
     config: {
       url: databaseInfo.host,
+      username: databaseInfo.username,
+      database: databaseInfo.databaseName,
       token: "",
     },
   } as SavedConnectionItemConfig);
@@ -88,9 +91,8 @@ export const PUT = withDatabaseOperation(
         token: data.config.token
           ? await encrypt(env.ENCRYPTION_KEY, data.config.token)
           : undefined,
-        username: data.config.username
-          ? await encrypt(env.ENCRYPTION_KEY, data.config.username)
-          : undefined,
+        username: data.config.username,
+        databaseName: data.config.database,
         password: data.config.password
           ? await encrypt(env.ENCRYPTION_KEY, data.config.password)
           : undefined,

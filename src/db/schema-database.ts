@@ -32,6 +32,7 @@ export const database = sqliteTable(
     token: text("token"),
     username: text("username"),
     password: text("password"),
+    databaseName: text("database_name"),
     createdAt: int("created_at"),
     deletedAt: int("deleted_at"),
   },

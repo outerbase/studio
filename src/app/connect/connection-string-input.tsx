@@ -68,7 +68,7 @@ export default function ConnectionStringInput({
         }
 
         return (
-          <div key={driverDetail.name}>
+          <div key={field.name}>
             <div className="text-xs mb-2 font-semibold">
               {field.title} {field.required && <span>(*)</span>}
             </div>

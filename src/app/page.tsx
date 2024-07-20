@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     "libsql",
     "rqlite",
     "sqlite",
+    "cloudflare d1",
     "studio",
     "browser",
     "editor",
@@ -45,10 +46,10 @@ const review: Review[] = [
   },
   {
     id: 2,
-    name: "Achille Lacoin",
-    initial: "AL",
+    name: "Kim Thean",
+    initial: "KT",
     content:
-      "libSQL Studio is a fantastic all-in-one tool for editing data and executing SQL queries that comes with a great DX. Its auto-completion feature boosts productivity and reduces errors, while saved queries make managing and reusing SQL a breeze.",
+      "libSQL Studio offers everything I need to work with Turso. The best part is that there's no need to download anything, and it continues to improve with regular updates.",
   },
 ];
 
@@ -118,8 +119,9 @@ function HeroSection() {
 
       <p className="text-center max-w-[700px] mx-auto mt-6 text-lg">
         LibSQL Studio is a fully-featured, lightweight GUI client for managing
-        SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely
-        in your browser, so there&apos;s no need to download anything.
+        SQLite-based databases like Turso, LibSQL, Cloudflare D1 and rqlite. It
+        runs entirely in your browser, so there&apos;s no need to download
+        anything.
       </p>
 
       <div className="flex gap-4 justify-center mt-12">
@@ -147,9 +149,14 @@ function SupportDriver() {
             className="h-16 rounded-xl"
             alt="rqlite"
           />
-          <img src="/turso.jpeg" className="h-16 rounded-xl" alt="rqlite" />
+          <img src="/turso.jpeg" className="h-16 rounded-xl" alt="turso" />
+          <img
+            src="/cloudflare.png"
+            className="h-16 rounded-xl"
+            alt="cloudflare d1"
+          />
           <img src="/rqlite.png" className="h-16 rounded-xl" alt="rqlite" />
-          <img src="/valtown.svg" className="h-16 rounded-xl" alt="rqlite" />
+          <img src="/valtown.svg" className="h-16 rounded-xl" alt="valtown" />
         </div>
       </div>
     </div>
@@ -205,8 +212,9 @@ function FeatureList() {
           </h1>
 
           <p className="text-xl mb-4">
-            LibSQL Studio offers a simple query editor with auto-completion
-            features. You can run multiple queries and view their results
+            LibSQL Studio features a user-friendly query editor equipped with
+            auto-completion and function hint tooltips. It allows you to execute
+            multiple queries simultaneously and view their results efficiently.
           </p>
         </div>
       </div>
@@ -228,8 +236,21 @@ function FeatureList() {
 
           <p className="text-xl mb-4">
             LibSQL Studio has many features and is regularly updated. Since it
-            is an open-source project, you can request new features or even
-            extend them yourself.
+            is an{" "}
+            <Link
+              href="https://github.com/invisal/libsql-studio"
+              className="border-b-4 inline-block hover:border-yellow-500"
+            >
+              open-source
+            </Link>{" "}
+            project, you can{" "}
+            <Link
+              href="https://github.com/invisal/libsql-studio/issues"
+              className="border-b-4 inline-block hover:border-yellow-500"
+            >
+              request new features
+            </Link>{" "}
+            or even extend them yourself.
           </p>
         </div>
       </div>

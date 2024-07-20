@@ -38,6 +38,21 @@ export default function DriverDropdown({
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
+            onSelect("cloudflare-d1");
+          }}
+        >
+          <div className="flex gap-4 px-2 items-center h-12">
+            <img src="/cloudflare.png" alt="rqlite" className="w-9 h-9" />
+            <div>
+              <div className="font-bold">Cloudflare D1</div>
+              <div className="text-xs opacity-50">
+                D1 is Cloudflare’s native serverless database
+              </div>
+            </div>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
             onSelect("rqlite");
           }}
         >

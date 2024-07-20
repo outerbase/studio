@@ -19,6 +19,7 @@ export default function useConnect() {
           token: config.token,
           username: config.username,
           password: config.password,
+          database: config.database,
         })
       );
 

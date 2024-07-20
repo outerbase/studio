@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import MyStudio from "@/components/my-studio";
 import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
+import CloudflareD1Driver from "@/drivers/cloudflare-d1-driver";
 
 export default function ClientPageBody() {
   const params = useSearchParams();
@@ -28,6 +29,12 @@ export default function ClientPageBody() {
       );
     } else if (conn.driver === "valtown") {
       return new ValtownDriver(conn.config.token);
+    } else if (conn.driver === "cloudflare-d1") {
+      return new CloudflareD1Driver("/proxy/d1", {
+        Authorization: "Bearer " + conn.config.token,
+        "x-account-id": conn.config.username ?? "",
+        "x-database-id": conn.config.database ?? "",
+      });
     }
 
     return new TursoDriver(conn.config.url, conn.config.token, true);
