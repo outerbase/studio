@@ -266,7 +266,8 @@ export default async function MainPage() {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org/",
-            "@type": "DeveloperApplication",
+            "@type": "SoftwareApplication",
+            applicationCategory: "DeveloperApplication",
             name: "LibSQL Studio",
             description: siteDescription,
             operatingSystem: "Web",
