@@ -1,4 +1,3 @@
-import { InStatement } from "@libsql/client";
 import {
   DatabaseHeader,
   DatabaseResultSet,

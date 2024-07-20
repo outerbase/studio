@@ -29,7 +29,7 @@ function transformRawResult(raw: CloudflareResult): DatabaseResultSet {
   const values = raw.results.rows;
   const headerSet = new Set();
 
-  const headers: DatabaseHeader[] = columns.map((colName, colIdx) => {
+  const headers: DatabaseHeader[] = columns.map((colName) => {
     let renameColName = colName;
 
     for (let i = 0; i < 20; i++) {

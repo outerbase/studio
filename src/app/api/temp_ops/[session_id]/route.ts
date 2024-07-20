@@ -54,6 +54,7 @@ export const POST = withErrorHandler<{ params: { session_id: string } }>(
       body,
       permission: { canExecuteQuery: true, isOwner: true, roles: [] },
       database: {
+        databaseName: "",
         driver: session.driver,
         host: config.url,
         password: config.password ?? null,
