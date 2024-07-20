@@ -9,7 +9,7 @@ import {
   prefillConnectionString,
   validateConnectionString,
 } from "./saved-connection-storage";
-import { RqliteInstruction } from "./saved-connection";
+import { CloudflareWarning, RqliteInstruction } from "./saved-connection";
 import ConnectionStringInput from "./connection-string-input";
 
 export default function QuickConnect({
@@ -45,6 +45,7 @@ export default function QuickConnect({
       onClose={onClose}
     >
       {driver === "rqlite" && <RqliteInstruction />}
+      {driver === "cloudflare-d1" && <CloudflareWarning />}
 
       <ConnectionStringInput
         autoFocus

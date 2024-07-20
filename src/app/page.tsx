@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     "libsql",
     "rqlite",
     "sqlite",
+    "cloudflare d1",
     "studio",
     "browser",
     "editor",
@@ -118,8 +119,9 @@ function HeroSection() {
 
       <p className="text-center max-w-[700px] mx-auto mt-6 text-lg">
         LibSQL Studio is a fully-featured, lightweight GUI client for managing
-        SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely
-        in your browser, so there&apos;s no need to download anything.
+        SQLite-based databases like Turso, LibSQL, Cloudflare D1 and rqlite. It
+        runs entirely in your browser, so there&apos;s no need to download
+        anything.
       </p>
 
       <div className="flex gap-4 justify-center mt-12">
@@ -147,9 +149,14 @@ function SupportDriver() {
             className="h-16 rounded-xl"
             alt="rqlite"
           />
-          <img src="/turso.jpeg" className="h-16 rounded-xl" alt="rqlite" />
+          <img src="/turso.jpeg" className="h-16 rounded-xl" alt="turso" />
+          <img
+            src="/cloudflare.png"
+            className="h-16 rounded-xl"
+            alt="cloudflare d1"
+          />
           <img src="/rqlite.png" className="h-16 rounded-xl" alt="rqlite" />
-          <img src="/valtown.svg" className="h-16 rounded-xl" alt="rqlite" />
+          <img src="/valtown.svg" className="h-16 rounded-xl" alt="valtown" />
         </div>
       </div>
     </div>
