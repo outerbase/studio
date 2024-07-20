@@ -2,6 +2,8 @@ import { HttpStatus } from "@/constants/http-status";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function POST(req: NextRequest) {
   // Get the account id and database id from header
   const accountId = headers().get("x-account-id");
