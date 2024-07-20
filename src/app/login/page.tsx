@@ -18,13 +18,17 @@ export default async function LoginPage() {
           <CardContent className="grid gap-4">
             {GITHUB_LOGIN_SUPPORT && (
               <Button asChild>
-                <Link href="/login/github">Continue with Github</Link>
+                <Link prefetch={false} href="/login/github">
+                  Continue with Github
+                </Link>
               </Button>
             )}
 
             {GOOGLE_LOGIN_SUPPORT && (
               <Button asChild>
-                <Link href="/login/google">Continue with Google</Link>
+                <Link prefetch={false} href="/login/google">
+                  Continue with Google
+                </Link>
               </Button>
             )}
           </CardContent>

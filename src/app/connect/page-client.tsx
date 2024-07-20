@@ -65,11 +65,11 @@ function Header({ user }: Readonly<{ user: User | null }>) {
         </Button>
 
         {user ? (
-          <Link href="/logout">
+          <Link prefetch={false} href="/logout">
             <Button>Sign Out</Button>
           </Link>
         ) : (
-          <Link href="/login">
+          <Link prefetch={false} href="/login">
             <Button>Sign In</Button>
           </Link>
         )}
