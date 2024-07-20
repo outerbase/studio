@@ -1,6 +1,5 @@
 import { validateOperation } from "@/components/lib/validation";
 import type {
-  Statement,
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseTableColumn,
@@ -28,10 +27,8 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
     return `"${id.replace(/"/g, '""')}"`;
   }
 
-  abstract override query(stmt: Statement): Promise<DatabaseResultSet>;
-  abstract override transaction(
-    stmts: Statement[]
-  ): Promise<DatabaseResultSet[]>;
+  abstract override query(stmt: string): Promise<DatabaseResultSet>;
+  abstract override transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
   async schemas(): Promise<DatabaseSchemaItem[]> {
     const result = await this.query("SELECT * FROM sqlite_schema;");
@@ -85,9 +82,8 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
   protected async legacyTableSchema(
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const sql = "SELECT * FROM pragma_table_info(?);";
-    const binding = [tableName];
-    const result = await this.query({ sql, args: binding });
+    const sql = `SELECT * FROM pragma_table_info(${this.escapeId(tableName)});`;
+    const result = await this.query(sql);
 
     const rows = result.rows as Array<{
       name: string;
@@ -161,11 +157,10 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
 
     const sql = `SELECT * FROM ${this.escapeId(tableName)}${
       whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ? OFFSET ?;`;
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
-    const binding = [options.limit, options.offset];
     return {
-      data: await this.query({ sql, args: binding }),
+      data: await this.query(sql),
       schema: await this.tableSchema(tableName),
     };
   }

@@ -2,16 +2,15 @@ import {
   DatabaseTableOperation,
   SelectFromTableOptions,
 } from "@/drivers/base-driver";
-import { InStatement } from "@libsql/client/web";
 
 export interface RequestOperationBatch {
   type: "batch";
-  statements: InStatement[];
+  statements: string[];
 }
 
 export interface RequestOperationQuery {
   type: "query";
-  statement: InStatement;
+  statement: string;
 }
 
 export interface RequestOperationSchemas {

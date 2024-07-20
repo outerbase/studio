@@ -34,6 +34,7 @@ export default function QuickConnect({
       url: connectionConfig.url,
       password: connectionConfig.password,
       username: connectionConfig.username,
+      database: connectionConfig.database,
     });
   }, [connect, driver, connectionConfig]);
 

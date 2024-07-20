@@ -82,7 +82,6 @@ export default function PlaygroundEditorBody({
           size="sm"
           onClick={() => {
             if (rawDb) {
-              console.log("hello world");
               saveAs(
                 new Blob([rawDb.export()], {
                   type: "application/x-sqlite3",

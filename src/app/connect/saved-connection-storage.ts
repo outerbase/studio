@@ -64,6 +64,33 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
         },
       ],
     },
+    "cloudflare-d1": {
+      name: "cloudflare-d1",
+      icon: "/cloudflare.png",
+      fields: [
+        {
+          name: "username",
+          type: "text",
+          title: "Account ID",
+          required: true,
+          placeholder: "Account ID",
+        },
+        {
+          name: "database",
+          type: "text",
+          title: "Database ID",
+          required: true,
+          placeholder: "Database ID",
+        },
+        {
+          name: "token",
+          title: "API Token",
+          required: true,
+          type: "text",
+          secret: true,
+        },
+      ],
+    },
     rqlite: {
       name: "rqlite",
       icon: "/rqlite.png",
@@ -92,7 +119,6 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
           name: "username",
           type: "text",
           title: "Username",
-          secret: true,
           placeholder: "Username",
         },
         {
@@ -137,6 +163,10 @@ export function prefillConnectionString(
       defaultValue?.token ??
       driver.fields.find((f) => f.name === "token")?.prefill ??
       "",
+    database:
+      defaultValue?.database ??
+      driver.fields.find((f) => f.name === "database")?.prefill ??
+      "",
     username:
       defaultValue?.username ??
       driver.fields.find((f) => f.name === "username")?.prefill ??
@@ -148,7 +178,7 @@ export function prefillConnectionString(
   };
 }
 
-export type SupportedDriver = "turso" | "rqlite" | "valtown";
+export type SupportedDriver = "turso" | "rqlite" | "valtown" | "cloudflare-d1";
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 
@@ -177,6 +207,7 @@ export interface SavedConnectionItemConfigConfig {
   url: string;
   username?: string;
   password?: string;
+  database?: string;
 }
 
 export interface SavedConnectionItemConfig {
@@ -200,6 +231,9 @@ interface SavedConnectionRawLocalStorage {
   name: string;
   url: string;
   token: string;
+  username: string;
+  password: string;
+  database: string;
   driver?: SupportedDriver;
   label?: SavedConnectionLabel;
   description?: string;
@@ -216,6 +250,9 @@ function configToRaw(
     driver: data.driver ?? "turso",
     url: data.config?.url ?? "",
     token: data.config?.token ?? "",
+    username: data.config?.username ?? "",
+    password: data.config?.password ?? "",
+    database: data.config?.database ?? "",
     label: data.label,
     last_used: Date.now(),
     description: data.description ?? "",
@@ -246,6 +283,9 @@ function mapDetailRaw(
     config: {
       token: data.token,
       url: data.url,
+      password: data.password,
+      username: data.username,
+      database: data.database,
     },
   };
 }

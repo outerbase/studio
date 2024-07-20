@@ -111,6 +111,7 @@ export async function makeTestDatabase(
     createdAt: now,
     description: "",
     driver: "turso",
+    databaseName: "",
     host: "http://localhost:8080",
     name: "hello",
     id: id,

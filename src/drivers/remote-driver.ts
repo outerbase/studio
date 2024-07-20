@@ -1,4 +1,3 @@
-import { InStatement } from "@libsql/client/web";
 import {
   BaseDriver,
   DatabaseResultSet,
@@ -54,7 +53,7 @@ export default class RemoteDriver implements BaseDriver {
     return json as T;
   }
 
-  async query(stmt: InStatement) {
+  async query(stmt: string) {
     const r = await this.request<ApiOpsQueryResponse>({
       type: "query",
       statement: stmt,
@@ -63,7 +62,7 @@ export default class RemoteDriver implements BaseDriver {
     return r.data;
   }
 
-  async transaction(stmt: InStatement[]) {
+  async transaction(stmt: string[]) {
     const r = await this.request<ApiOpsBatchResponse>({
       type: "batch",
       statements: stmt,
