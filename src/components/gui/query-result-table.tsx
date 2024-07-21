@@ -40,6 +40,7 @@ import {
 import BigNumberCell from "./table-cell/BigNumberCell";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useConfig } from "@/context/config-provider";
+import { useFullEditor } from "./providers/full-editor-provider";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -96,6 +97,7 @@ export default function ResultTable({
   tableName,
   onSortColumnChange,
 }: ResultTableProps) {
+  const { openEditor } = useFullEditor();
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
   const { databaseDriver } = useDatabaseDriver();
   const { extensions } = useConfig();
@@ -342,6 +344,35 @@ export default function ResultTable({
             },
           ],
         },
+        {
+          title: "Open With",
+          sub: [
+            {
+              title: "Full Text Editor",
+              onClick: () => {
+                const focusValue = state.getFocusValue();
+                if (typeof focusValue === "string") {
+                  openEditor({
+                    initialValue: focusValue,
+                    onCancel: () => {},
+                    onSave: (newValue) => {
+                      state.setFocusValue(newValue);
+                    },
+                  });
+                }
+              },
+            },
+            { title: "Markdown Editor" },
+            { title: "JSON Editor" },
+          ],
+        },
+        ...((extensionMenu ?? []).length > 0
+          ? [
+              {
+                separator: true,
+              },
+            ]
+          : []),
         ...extensionMenu,
         {
           separator: true,
