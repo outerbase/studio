@@ -75,7 +75,7 @@ function Header({
           }}
         >
           {header.icon ? <div className="mr-2">{header.icon}</div> : null}
-          <div className="grow">{header.displayName}</div>
+          <div className="grow line-clamp-1">{header.displayName}</div>
           <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer" />
         </div>
       </DropdownMenuTrigger>
