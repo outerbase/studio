@@ -3,22 +3,24 @@ import { saveAs } from "file-saver";
 import MyStudio from "@/components/my-studio";
 import { Button } from "@/components/ui/button";
 import SqljsDriver from "@/drivers/sqljs-driver";
-import { LucideLoader } from "lucide-react";
+import { LucideFile, LucideLoader } from "lucide-react";
 import Script from "next/script";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Database, SqlJsStatic } from "sql.js";
 import ScreenDropZone from "@/components/screen-dropzone";
+import { toast } from "sonner";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
 }: {
   preloadDatabase?: string | null;
 }) {
-  const fileInput = useRef<HTMLInputElement>(null);
   const [sqlInit, setSqlInit] = useState<SqlJsStatic>();
   const [databaseLoading, setDatabaseLoading] = useState(!!preloadDatabase);
   const [rawDb, setRawDb] = useState<Database>();
   const [db, setDb] = useState<SqljsDriver>();
+  const [handler, setHandler] = useState<FileSystemFileHandle>();
+  const [fileName, setFilename] = useState("");
 
   const onReady = useCallback(() => {
     window
@@ -47,66 +49,118 @@ export default function PlaygroundEditorBody({
     }
   }, [sqlInit, preloadDatabase]);
 
-  const onFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.currentTarget.files && sqlInit) {
-        const file = e.currentTarget.files[0];
-        if (file) {
-          file.arrayBuffer().then((buffer) => {
-            const sqljsDatabase = new sqlInit.Database(new Uint8Array(buffer));
-            setRawDb(sqljsDatabase);
-            setDb(new SqljsDriver(sqljsDatabase));
-          });
-        }
-      }
-    },
-    [sqlInit]
-  );
-
-  const onFileDrop = useCallback(
-    (buffer: ArrayBuffer) => {
-      if (sqlInit) {
-        const sqljsDatabase = new sqlInit.Database(new Uint8Array(buffer));
-        setRawDb(sqljsDatabase);
-        setDb(new SqljsDriver(sqljsDatabase));
-      }
-    },
-    [sqlInit]
-  );
+  useEffect(() => {
+    if (handler && sqlInit) {
+      handler.getFile().then((file) => {
+        setFilename(file.name);
+        file.arrayBuffer().then((buffer) => {
+          const sqljsDatabase = new sqlInit.Database(new Uint8Array(buffer));
+          setRawDb(sqljsDatabase);
+          setDb(new SqljsDriver(sqljsDatabase));
+        });
+      });
+    }
+  }, [handler, sqlInit]);
 
   const sidebarMenu = useMemo(() => {
     return (
-      <div className="flex flex-row gap-2 px-2 pb-2">
-        <Button
-          className="flex-grow"
-          size="sm"
-          onClick={() => {
-            if (rawDb) {
-              saveAs(
-                new Blob([rawDb.export()], {
-                  type: "application/x-sqlite3",
-                }),
-                "sqlite-dump.db"
-              );
-            }
-          }}
-        >
-          Save
-        </Button>
-        <Button
-          className="flex-grow"
-          size="sm"
-          onClick={() => {
-            if (fileInput.current) {
-              fileInput.current.click();
-            }
-          }}
-        >
-          Open
-        </Button>
+      <div>
+        {fileName && (
+          <div className="p-2 text-sm rounded m-2 bg-yellow-300 text-black flex gap-2">
+            <div className="flex justify-center items-center">
+              <LucideFile />
+            </div>
+            <div>
+              <div className="text-xs">Editing File</div>
+              <strong>{fileName}</strong>
+            </div>
+          </div>
+        )}
+        <div className="flex flex-row gap-2 px-2 pb-2">
+          <Button
+            className="flex-grow"
+            size="sm"
+            onClick={() => {
+              if (rawDb) {
+                if (handler) {
+                  handler
+                    .createWritable()
+                    .then((writable) => {
+                      writable.write(rawDb.export());
+                      writable.close();
+                      toast.success(
+                        <div>
+                          Successfully save <strong>{fileName}</strong>
+                        </div>
+                      );
+                      db?.resetChange();
+                    })
+                    .catch(console.error);
+                } else {
+                  saveAs(
+                    new Blob([rawDb.export()], {
+                      type: "application/x-sqlite3",
+                    }),
+                    "sqlite-dump.db"
+                  );
+                }
+              }
+            }}
+          >
+            Save
+          </Button>
+          <Button
+            className="flex-grow"
+            size="sm"
+            onClick={() => {
+              window
+                .showOpenFilePicker({
+                  types: [
+                    {
+                      description: "SQLite Files",
+                      accept: {
+                        "application/x-sqlite3": [
+                          ".db",
+                          ".sdb",
+                          ".sqlite",
+                          ".db3",
+                          ".s3db",
+                          ".sqlite3",
+                          ".sl3",
+                          ".db2",
+                          ".s2db",
+                          ".sqlite2",
+                          ".sl2",
+                        ],
+                      },
+                    },
+                  ],
+                })
+                .then(([fileHandler]) => {
+                  setHandler(fileHandler);
+                });
+            }}
+          >
+            Open
+          </Button>
+        </div>
       </div>
     );
-  }, [rawDb, fileInput]);
+  }, [rawDb, handler, db, fileName]);
+
+  useEffect(() => {
+    if (handler && db) {
+      const onBeforeClose = (e: Event) => {
+        if (db.hasChanged()) {
+          e.preventDefault();
+          return "Are you sure you want to close without change?";
+        }
+      };
+
+      window.addEventListener("beforeunload", onBeforeClose);
+      return () => window.removeEventListener("beforeunload", onBeforeClose);
+    }
+  }, [db, handler]);
 
   const dom = useMemo(() => {
     if (databaseLoading) {
@@ -140,15 +194,7 @@ export default function PlaygroundEditorBody({
   return (
     <>
       <Script src="/sqljs/sql-wasm.js" onReady={onReady} />
-      <input
-        type="file"
-        ref={fileInput}
-        className="hidden"
-        accept=".db,.sdb,.sqlite,.db3,.s3db,.sqlite3,.sl3,.db2,.s2db,.sqlite2,.sl2"
-        onChange={onFileChange}
-        multiple={false}
-      />
-      <ScreenDropZone onFileDrop={onFileDrop} />
+      <ScreenDropZone onFileDrop={setHandler} />
       {dom}
     </>
   );
