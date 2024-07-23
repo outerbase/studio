@@ -17,9 +17,7 @@ export default function ScreenDropZone({ onFileDrop }: Props) {
       if (!fileList) return;
       if (fileList.length === 0) return;
 
-      const handler = (fileList[0] as any)
-        .getAsFileSystemHandle()
-        .then(onFileDrop);
+      (fileList[0] as any).getAsFileSystemHandle().then(onFileDrop);
     };
 
     const dragEventHandler = (e: DragEvent) => {

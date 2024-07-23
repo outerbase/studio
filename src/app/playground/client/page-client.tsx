@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import SqljsDriver from "@/drivers/sqljs-driver";
 import { LucideFile, LucideLoader } from "lucide-react";
 import Script from "next/script";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Database, SqlJsStatic } from "sql.js";
 import ScreenDropZone from "@/components/screen-dropzone";
 import { toast } from "sonner";
@@ -60,7 +60,7 @@ export default function PlaygroundEditorBody({
         });
       });
     }
-  }, [handler]);
+  }, [handler, sqlInit]);
 
   const sidebarMenu = useMemo(() => {
     return (
