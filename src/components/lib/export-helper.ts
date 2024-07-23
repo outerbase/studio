@@ -99,7 +99,6 @@ function truncateText(text: string, limit: number): string {
   return `${text.slice(0, limit)}...`;
 }
 
-//i think it cleaner to move this somewhere but i dont know where should i
 function calculateColumnWidths(
   headers: string[],
   records: unknown[][],
@@ -108,9 +107,14 @@ function calculateColumnWidths(
   return headers.map((header, index) => {
     const maxContentWidth = Math.max(
       header.length,
-      ...records.map((record) => String(record[index]).length)
+      ...records.map((record) => {
+        const cellContent = String(record[index]);
+        return cellContent.length > cellTextLimit
+          ? cellTextLimit + 3
+          : cellContent.length;
+      })
     );
-    return Math.min(maxContentWidth, cellTextLimit);
+    return Math.min(maxContentWidth, cellTextLimit + 3);
   });
 }
 
@@ -123,7 +127,7 @@ export function exportRowsToMarkdown(
   const columnWidths = calculateColumnWidths(headers, records, cellTextLimit);
 
   // Add headers
-  const headerRow = `| ${headers.map((h, i) => truncateText(h, columnWidths[i]).padEnd(columnWidths[i])).join(" | ")} |`;
+  const headerRow = `| ${headers.map((h, i) => truncateText(h, cellTextLimit).padEnd(columnWidths[i])).join(" | ")} |`;
   result.push(headerRow);
 
   // Add separator
@@ -134,9 +138,7 @@ export function exportRowsToMarkdown(
   for (const record of records) {
     const row = `| ${record
       .map((cell, index) =>
-        truncateText(String(cell), columnWidths[index]).padEnd(
-          columnWidths[index]
-        )
+        truncateText(String(cell), cellTextLimit).padEnd(columnWidths[index])
       )
       .join(" | ")} |`;
     result.push(row);
@@ -159,7 +161,7 @@ export function exportRowsToAsciiTable(
 
   // Add headers
   const headerRow = `│ ${headers
-    .map((h, i) => truncateText(h, columnWidths[i]).padEnd(columnWidths[i]))
+    .map((h, i) => truncateText(h, cellTextLimit).padEnd(columnWidths[i]))
     .join(" │ ")} │`;
   result.push(headerRow);
 
@@ -171,9 +173,7 @@ export function exportRowsToAsciiTable(
   for (const record of records) {
     const row = `│ ${record
       .map((cell, index) =>
-        truncateText(String(cell), columnWidths[index]).padEnd(
-          columnWidths[index]
-        )
+        truncateText(String(cell), cellTextLimit).padEnd(columnWidths[index])
       )
       .join(" │ ")} │`;
     result.push(row);
