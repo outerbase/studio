@@ -3,27 +3,36 @@
 import { useEffect } from "react";
 
 interface Props {
-  onFileDrop: (buffer: ArrayBuffer) => void;
+  onFileDrop: (handler: FileSystemFileHandle) => void;
 }
 
 export default function ScreenDropZone({ onFileDrop }: Props) {
   useEffect(() => {
     const dropEventHandler = (e: DragEvent) => {
+      e.preventDefault();
+
       if (!e.dataTransfer) return;
-      const file = e.dataTransfer.files[0];
+      const fileList = e.dataTransfer.items;
 
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        onFileDrop(loadEvent.target?.result as ArrayBuffer);
-      };
+      if (!fileList) return;
+      if (fileList.length === 0) return;
 
-      reader.readAsArrayBuffer(file);
+      const handler = (fileList[0] as any)
+        .getAsFileSystemHandle()
+        .then(onFileDrop);
+    };
+
+    const dragEventHandler = (e: DragEvent) => {
+      e.preventDefault();
     };
 
     window.document.addEventListener("drop", dropEventHandler);
+    window.document.addEventListener("dragover", dragEventHandler);
+    window.document.addEventListener("dragenter", dragEventHandler);
 
     return () => {
+      window.document.removeEventListener("dragenter", dragEventHandler);
+      window.document.removeEventListener("dragover", dragEventHandler);
       window.document.removeEventListener("drop", dropEventHandler);
     };
   }, [onFileDrop]);

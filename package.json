@@ -107,6 +107,7 @@
     "@types/react-dom": "^18",
     "@types/showdown": "^2.0.6",
     "@types/sql.js": "^1.4.9",
+    "@types/wicg-file-system-access": "^2023.10.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.19",
