@@ -12,6 +12,7 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
   protected db: Database;
   protected username?: string;
   protected password?: string;
+  protected hasRowsChanged: boolean = false;
 
   constructor(sqljs: Database) {
     super();
@@ -72,6 +73,10 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       );
     }
 
+    if (this.db.getRowsModified() > 0) {
+      this.hasRowsChanged = true;
+    }
+
     return {
       headers,
       rows,
@@ -88,6 +93,14 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
               | number
               | undefined),
     };
+  }
+
+  resetChange() {
+    this.hasRowsChanged = false;
+  }
+
+  hasChanged() {
+    return this.hasRowsChanged;
   }
 
   close(): void {
