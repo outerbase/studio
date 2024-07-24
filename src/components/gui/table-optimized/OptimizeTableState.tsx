@@ -123,6 +123,10 @@ export default class OptimizeTableState {
     this.readOnlyMode = readOnly;
   }
 
+  getReadOnlyMode() {
+    return this.readOnlyMode;
+  }
+
   setContainer(div: HTMLDivElement | null) {
     this.container = div;
   }
@@ -187,6 +191,8 @@ export default class OptimizeTableState {
   }
 
   changeValue(y: number, x: number, newValue: unknown) {
+    if (this.readOnlyMode) return;
+
     const oldValue = this.getOriginalValue(y, x);
 
     const row = this.data[y];
@@ -382,7 +388,6 @@ export default class OptimizeTableState {
   }
 
   enterEditMode() {
-    if (this.readOnlyMode) return;
     this.editMode = true;
     this.broadcastChange();
   }

@@ -17,6 +17,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import JsonEditor from "../json-editor";
 
 interface FullEditorContextValue {
   openEditor: (option: FullEditorOption) => void;
@@ -25,6 +26,8 @@ interface FullEditorContextValue {
 
 interface FullEditorOption {
   initialValue: string;
+  format: string;
+  readOnly?: boolean;
   onSave: (value: string) => void;
   onCancel: () => void;
 }
@@ -35,47 +38,67 @@ const FullEditorContext = createContext<FullEditorContextValue>({
 });
 
 function FullEditorSheet({ option }: { option: FullEditorOption }) {
-  const [value, setValue] = useState(option.initialValue);
+  const [value, setValue] = useState(() => {
+    if (option.format === "json") {
+      try {
+        return JSON.stringify(JSON.parse(option.initialValue), undefined, 2);
+      } catch {
+        return option.initialValue;
+      }
+    }
+
+    return option.initialValue;
+  });
 
   return (
     <Sheet open>
       <SheetContent
         hideCloseButton
-        className="border-none sm:max-w-[1000px] sm:w-[70vw] flex p-0"
+        className="border-none sm:max-w-[1000px] sm:w-[70vw] overflow-hidden flex p-0"
       >
-        <div className="flex flex-col grow">
+        <div className="flex flex-col grow overflow-hidden">
           <div className="p-4 flex gap-2">
-            <div>
-              <Select>
-                <SelectTrigger value="markdown">
-                  <SelectValue className="w-[200px]" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="markdown">Markdown</SelectItem>
-                  <SelectItem value="json">JSON</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div className="grow" />
             <Button onClick={option.onCancel} variant={"secondary"}>
               Close
             </Button>
             <Button
               onClick={() => {
-                option.onSave(value);
+                if (option.format === "json") {
+                  try {
+                    option.onSave(JSON.stringify(JSON.parse(value)));
+                  } catch {
+                    option.onSave(value);
+                  }
+                } else {
+                  option.onSave(value);
+                }
               }}
             >
               Save Change
             </Button>
           </div>
           <Separator />
-          <textarea
-            autoFocus
-            className="flex-grow p-4 w-full outline-none"
-            value={value}
-            onChange={(e) => setValue(e.currentTarget.value)}
-          />
+
+          {option.format === "text" && (
+            <textarea
+              autoFocus
+              className="flex-grow p-4 w-full outline-none bg-inherit font-mono"
+              value={value}
+              onChange={(e) => setValue(e.currentTarget.value)}
+              readOnly={option.readOnly}
+            />
+          )}
+
+          {option.format === "json" && (
+            <div className="flex-grow overflow-hidden">
+              <JsonEditor
+                value={value}
+                onChange={setValue}
+                readOnly={option.readOnly}
+              />
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
@@ -92,8 +115,11 @@ export function FullEditorProvider({ children }: PropsWithChildren) {
   const props = useMemo(() => {
     return {
       openEditor: (opt: FullEditorOption) => {
+        console.log(opt);
         setOption({
           initialValue: opt.initialValue,
+          format: opt.format,
+          readOnly: opt.readOnly,
           onCancel: () => {
             if (opt.onCancel) opt.onCancel();
             setOption(null);

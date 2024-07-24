@@ -1,4 +1,4 @@
-import createEditableCell from "./createEditableCell";
+import createEditableCell from "./create-editable-cell";
 
 const TextCell = createEditableCell<string>({
   toString: (v) => v,
