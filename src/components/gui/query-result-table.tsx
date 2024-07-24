@@ -49,17 +49,6 @@ interface ResultTableProps {
   sortColumns?: ColumnSortOption[];
 }
 
-function isBlockNoteString(value: DatabaseValue<string>): boolean {
-  if (typeof value !== "string") return false;
-  if (!(value.startsWith("{") && value.endsWith("}"))) return false;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parsedJson = parseSafeJson<any>(value, null);
-  if (!parsedJson) return false;
-
-  return parsedJson?.format === "BLOCK_NOTE";
-}
-
 function detectTextEditorType(
   value: DatabaseValue<string>
 ): "input" | "json" | "text" {
@@ -202,7 +191,7 @@ export default function ResultTable({
 
       if (header.dataType === TableColumnDataType.TEXT) {
         const value = state.getValue(y, x) as DatabaseValue<string>;
-        let editor = detectTextEditorType(value);
+        const editor = detectTextEditorType(value);
 
         return (
           <TextCell
@@ -482,7 +471,7 @@ export default function ResultTable({
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, extensions]
+    [data, tableName, copyCallback, pasteCallback, extensions, openEditor]
   );
 
   const onKeyDown = useCallback(
