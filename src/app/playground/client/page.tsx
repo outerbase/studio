@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default async function PlaygroundEditor({
   searchParams,
 }: {
-  searchParams: { template: string };
+  searchParams: { template?: string; url?: string };
 }) {
   const templateName = searchParams.template;
   let templateFile: string | null = null;
@@ -51,6 +51,8 @@ export default async function PlaygroundEditor({
         })
         .where(eq(dbDataset.id, templateName));
     }
+  } else if (searchParams.url) {
+    templateFile = searchParams.url;
   }
 
   return <PlaygroundEditorBody preloadDatabase={templateFile} />;
