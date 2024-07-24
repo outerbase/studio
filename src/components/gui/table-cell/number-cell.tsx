@@ -1,6 +1,6 @@
-import createEditableCell from "./createEditableCell";
+import createEditableCell from "./create-editable-cell";
 
-const BigNumberCell = createEditableCell<bigint>({
+const NumberCell = createEditableCell<number>({
   align: "right",
   toString: (v) => {
     if (v === null) return null;
@@ -12,12 +12,12 @@ const BigNumberCell = createEditableCell<bigint>({
     if (v === undefined) return undefined;
     if (v === "") return null;
 
-    try {
-      return BigInt(v);
-    } catch {
-      return null;
+    const parsedNumber = Number(v);
+    if (Number.isFinite(parsedNumber)) {
+      return parsedNumber;
     }
+    return null;
   },
 });
 
-export default BigNumberCell;
+export default NumberCell;

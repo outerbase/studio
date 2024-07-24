@@ -1,6 +1,6 @@
-import GenericCell from "@/components/gui/table-cell/GenericCell";
-import NumberCell from "@/components/gui/table-cell/NumberCell";
-import TextCell from "@/components/gui/table-cell/TextCell";
+import GenericCell from "@/components/gui/table-cell/generic-cell";
+import NumberCell from "@/components/gui/table-cell/number-cell";
+import TextCell from "@/components/gui/table-cell/text-cell";
 import OptimizeTable, {
   OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
@@ -37,9 +37,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
-import BigNumberCell from "./table-cell/BigNumberCell";
+import BigNumberCell from "./table-cell/big-number-cell";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useConfig } from "@/context/config-provider";
+import { useFullEditor } from "./providers/full-editor-provider";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -48,15 +49,27 @@ interface ResultTableProps {
   sortColumns?: ColumnSortOption[];
 }
 
-function isBlockNoteString(value: DatabaseValue<string>): boolean {
-  if (typeof value !== "string") return false;
-  if (!(value.startsWith("{") && value.endsWith("}"))) return false;
+function detectTextEditorType(
+  value: DatabaseValue<string>
+): "input" | "json" | "text" {
+  if (typeof value !== "string") return "input";
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parsedJson = parseSafeJson<any>(value, null);
-  if (!parsedJson) return false;
+  // Check if it is JSON format
+  const trimmedText = value.trim();
+  if (
+    trimmedText.substring(0, 1) === "{" &&
+    trimmedText.substring(trimmedText.length - 1) === "}"
+  ) {
+    if (parseSafeJson(trimmedText, undefined) !== undefined) return "json";
+  }
 
-  return parsedJson?.format === "BLOCK_NOTE";
+  // Check if it is long string
+  if (value.length > 200) return "text";
+
+  // If it is multiple line
+  if (value.search(/[\n\r]/) >= 0) return "text";
+
+  return "input";
 }
 
 function Header({
@@ -96,6 +109,7 @@ export default function ResultTable({
   tableName,
   onSortColumnChange,
 }: ResultTableProps) {
+  const { openEditor } = useFullEditor();
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
   const { databaseDriver } = useDatabaseDriver();
   const { extensions } = useConfig();
@@ -177,11 +191,7 @@ export default function ResultTable({
 
       if (header.dataType === TableColumnDataType.TEXT) {
         const value = state.getValue(y, x) as DatabaseValue<string>;
-        let editor: "input" | "blocknote" = "input"; // this is default editor
-
-        if (isBlockNoteString(value)) {
-          editor = "blocknote";
-        }
+        const editor = detectTextEditorType(value);
 
         return (
           <TextCell
@@ -342,6 +352,52 @@ export default function ResultTable({
             },
           ],
         },
+        {
+          title: "Open With",
+          sub: [
+            {
+              title: "Full Text Editor",
+              onClick: () => {
+                const focusValue = state.getFocusValue();
+                if (typeof focusValue === "string") {
+                  openEditor({
+                    initialValue: focusValue,
+                    format: "text",
+                    readOnly: state.getReadOnlyMode(),
+                    onCancel: () => {},
+                    onSave: (newValue) => {
+                      state.setFocusValue(newValue);
+                    },
+                  });
+                }
+              },
+            },
+            {
+              title: "JSON Editor",
+              onClick: () => {
+                const focusValue = state.getFocusValue();
+                if (typeof focusValue === "string") {
+                  openEditor({
+                    initialValue: focusValue,
+                    format: "json",
+                    readOnly: state.getReadOnlyMode(),
+                    onCancel: () => {},
+                    onSave: (newValue) => {
+                      state.setFocusValue(newValue);
+                    },
+                  });
+                }
+              },
+            },
+          ],
+        },
+        ...((extensionMenu ?? []).length > 0
+          ? [
+              {
+                separator: true,
+              },
+            ]
+          : []),
         ...extensionMenu,
         {
           separator: true,
@@ -415,7 +471,7 @@ export default function ResultTable({
         },
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, extensions]
+    [data, tableName, copyCallback, pasteCallback, extensions, openEditor]
   );
 
   const onKeyDown = useCallback(
