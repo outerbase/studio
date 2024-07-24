@@ -21,7 +21,7 @@ export default function GenericCell({
   onDoubleClick,
 }: TableCellProps) {
   const className = [
-    "libsql-cell",
+    "libsql-cell font-mono",
     focus ? "libsql-focus" : null,
     "pl-2 pr-2",
     isChanged ? "libsql-change" : null,
