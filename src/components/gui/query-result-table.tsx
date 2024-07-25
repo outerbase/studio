@@ -9,6 +9,7 @@ import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableSt
 import {
   exportRowsToExcel,
   exportRowsToSqlInsert,
+  exportRowsToJson,
 } from "@/components/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import {
@@ -430,6 +431,20 @@ export default function ResultTable({
                 if (state.getSelectedRowCount() > 0) {
                   window.navigator.clipboard.writeText(
                     exportRowsToExcel(state.getSelectedRowsArray())
+                  );
+                }
+              },
+            },
+            {
+              title: "Copy as Json",
+              onClick: () => {
+                const headers = state
+                  .getHeaders()
+                  .map((column) => column?.name ?? "");
+
+                if (state.getSelectedRowCount() > 0) {
+                  window.navigator.clipboard.writeText(
+                    exportRowsToJson(headers, state.getSelectedRowsArray())
                   );
                 }
               },
