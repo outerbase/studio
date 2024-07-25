@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Database, SqlJsStatic } from "sql.js";
 import ScreenDropZone from "@/components/screen-dropzone";
 import { toast } from "sonner";
+import downloadFileFromUrl from "@/lib/download-file";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
@@ -33,8 +34,7 @@ export default function PlaygroundEditorBody({
   useEffect(() => {
     if (sqlInit) {
       if (preloadDatabase) {
-        fetch(preloadDatabase)
-          .then((r) => r.arrayBuffer())
+        downloadFileFromUrl(preloadDatabase)
           .then((r) => {
             const sqljsDatabase = new sqlInit.Database(new Uint8Array(r));
             setRawDb(sqljsDatabase);
