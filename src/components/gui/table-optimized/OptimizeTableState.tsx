@@ -56,7 +56,8 @@ export default class OptimizeTableState {
             const currentCell = dataResult.rows[i];
             if (currentCell) {
               maxSize = Math.max(
-                (currentCell[headerName ?? ""]?.toString() ?? "").length
+                (currentCell[headerName ?? ""]?.toString() ?? "").length,
+                maxSize
               );
             }
           }
