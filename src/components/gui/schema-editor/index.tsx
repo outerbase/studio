@@ -1,4 +1,4 @@
-import { LucideCode, LucideCopy, LucidePlus } from "lucide-react";
+import { LucideCode, LucideCopy, LucidePlus, LucideSave } from "lucide-react";
 import { Separator } from "../../ui/separator";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { Button, buttonVariants } from "../../ui/button";
@@ -94,9 +94,10 @@ export default function SchemaEditor({
           <Button
             variant="ghost"
             onClick={onSave}
-            disabled={!hasChange}
+            disabled={!hasChange || !value.name?.new}
             size={"sm"}
           >
+            <LucideSave className="w-4 h-4 mr-2" />
             Save
           </Button>
           <Button
@@ -192,7 +193,11 @@ export default function SchemaEditor({
         <Separator />
       </div>
       <div className="grow overflow-y-auto">
-        <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
+        <SchemaEditorColumnList
+          columns={value.columns}
+          onChange={onChange}
+          onAddColumn={onAddColumn}
+        />
         <ColumnsProvider value={value.columns}>
           <SchemaEditorConstraintList
             constraints={value.constraints}
