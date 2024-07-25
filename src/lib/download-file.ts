@@ -26,6 +26,5 @@ function extractCredentialsAndPrepareHeaders(url: string) {
 
 export default function downloadFileFromUrl(url: string) {
   const { cleanedUrl, options } = extractCredentialsAndPrepareHeaders(url);
-  console.log(cleanedUrl, options);
   return fetch(cleanedUrl, options).then((r) => r.arrayBuffer());
 }

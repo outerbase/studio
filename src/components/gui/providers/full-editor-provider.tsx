@@ -108,7 +108,6 @@ export function FullEditorProvider({ children }: PropsWithChildren) {
   const props = useMemo(() => {
     return {
       openEditor: (opt: FullEditorOption) => {
-        console.log(opt);
         setOption({
           initialValue: opt.initialValue,
           format: opt.format,
