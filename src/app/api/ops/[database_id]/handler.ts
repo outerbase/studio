@@ -8,6 +8,7 @@ import handleUpdateTableDataRequest from "./handle-update-table-data";
 import handleSchemaRequest from "./handle-schema";
 import handleTriggerRequest from "./handle-trigger";
 import { NextResponse } from "next/server";
+import handleFindFirst from "./handle-find-first";
 
 export const databaseOperationHandler: DatabaseOperationHandler<
   RequestOperationBody
@@ -22,6 +23,8 @@ export const databaseOperationHandler: DatabaseOperationHandler<
     return await handleSchemasRequest(props);
   } else if (body.type === "select-table") {
     return await handleSelectTableRequest({ ...props, body });
+  } else if (body.type === "find-first") {
+    return await handleFindFirst({ ...props, body });
   } else if (body.type === "update-table-data") {
     return await handleUpdateTableDataRequest({ ...props, body });
   } else if (body.type === "schema") {

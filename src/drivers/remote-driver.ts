@@ -6,6 +6,7 @@ import {
   DatabaseTableOperationReslt,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
+  DatabaseValue,
   SelectFromTableOptions,
 } from "@/drivers/base-driver";
 import {
@@ -57,6 +58,16 @@ export default class RemoteDriver implements BaseDriver {
     const r = await this.request<ApiOpsQueryResponse>({
       type: "query",
       statement: stmt,
+    });
+
+    return r.data;
+  }
+
+  async findFirst(tableName: string, options: Record<string, DatabaseValue>) {
+    const r = await this.request<ApiOpsQueryResponse>({
+      type: "find-first",
+      options,
+      tableName,
     });
 
     return r.data;

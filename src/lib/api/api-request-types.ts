@@ -38,6 +38,12 @@ export interface RequestOperationSelectTable {
   options: SelectFromTableOptions;
 }
 
+export interface RequestOperationFindFirst {
+  type: "find-first";
+  tableName: string;
+  options: Record<string, unknown>;
+}
+
 export interface RequestOperationUpdateTableData {
   type: "update-table-data";
   tableName: string;
@@ -52,4 +58,5 @@ export type RequestOperationBody =
   | RequestOperationUpdateTableData
   | RequestOperationSchema
   | RequestOperationTrigger
-  | RequestTriggerSchema;
+  | RequestTriggerSchema
+  | RequestOperationFindFirst;

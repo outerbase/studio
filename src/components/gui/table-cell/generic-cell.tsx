@@ -38,7 +38,7 @@ function SnippetRow({ fkTableName, fkColumnName, value }: SneakpeakProps) {
       .findFirst(fkTableName, { [fkColumnName]: value })
       .then(setData)
       .catch(console.error);
-  }, [databaseDriver, fkTableName, fkColumnName]);
+  }, [databaseDriver, fkTableName, fkColumnName, value]);
 
   if (!data) {
     return (
@@ -66,7 +66,7 @@ function SnippetRow({ fkTableName, fkColumnName, value }: SneakpeakProps) {
           colorClassName = "text-blue-600 dark:text-blue-300";
 
         return (
-          <div>
+          <div key={header.name}>
             <div className="font-mono text-xs text-gray-400 mb-1">
               {header.displayName}
             </div>
@@ -127,7 +127,10 @@ export default function GenericCell({
   );
   const isAlignRight = align === "right";
 
-  const textBaseStyle = cn("text-gray-500", isAlignRight ? "float-right" : "");
+  const textBaseStyle = cn(
+    "flex flex-grow text-gray-500",
+    isAlignRight ? "justify-end" : ""
+  );
 
   const fkContent = useMemo(() => {
     if (
@@ -145,7 +148,7 @@ export default function GenericCell({
       );
     }
     return null;
-  }, []);
+  }, [header]);
 
   const content = useMemo(() => {
     if (value === null) {
