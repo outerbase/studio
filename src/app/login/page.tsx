@@ -1,7 +1,5 @@
 "use server";
 import LogoLoading from "@/components/gui/logo-loading";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { env } from "@/env";
 import Link from "next/link";
 
@@ -20,8 +18,8 @@ export default async function LoginPage() {
           </p>
 
           <p>
-            LibSQL Studio is free and doesn't require login. However, logged-in
-            users get extra features:
+            LibSQL Studio is free and doesn&apos;t require login. However,
+            logged-in users get extra features:
           </p>
 
           <ul className="list-disc ml-8 leading-8">
@@ -77,7 +75,7 @@ export default async function LoginPage() {
               href="/login/google"
               className="border-2 border-black rounded-lg p-4 flex gap-4 items-center font-bold hover:bg-gray-200 text-black"
             >
-              <img src="/google.png" className="w-6 h-6" />
+              <img src="/google.png" className="w-6 h-6" alt="Google" />
               Continue with Google
             </Link>
           )}

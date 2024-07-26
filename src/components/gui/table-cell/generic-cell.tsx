@@ -148,7 +148,7 @@ export default function GenericCell({
       );
     }
     return null;
-  }, [header]);
+  }, [header, value]);
 
   const content = useMemo(() => {
     if (value === null) {
