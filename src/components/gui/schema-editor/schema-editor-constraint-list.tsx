@@ -87,8 +87,6 @@ function ColumnForeignKey({
         (s) => s.type === "table" && s.name === fkTableName
       );
 
-      console.log(fkTableSchema, "table schema");
-
       if (fkTableSchema) {
         return (fkTableSchema.tableSchema?.columns ?? []).map((c) => c.name);
       }

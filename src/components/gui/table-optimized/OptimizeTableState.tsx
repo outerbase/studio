@@ -77,8 +77,8 @@ export default class OptimizeTableState {
           for (const c of schemaResult.constraints) {
             if (
               c.foreignKey &&
-              c.foreignKey.foreignColumns?.length === 1 &&
-              c.foreignKey.foreignColumns[0] === header.name
+              c.foreignKey.columns?.length === 1 &&
+              c.foreignKey.columns[0] === header.name
             ) {
               foreignKey = c.foreignKey;
             }

@@ -198,6 +198,7 @@ export default function ResultTable({
 
         return (
           <TextCell
+            header={header}
             state={state}
             editor={editor}
             editMode={editMode}
@@ -212,6 +213,7 @@ export default function ResultTable({
       } else if (header.dataType === TableColumnDataType.REAL) {
         return (
           <NumberCell
+            header={header}
             state={state}
             editMode={editMode}
             value={state.getValue(y, x) as DatabaseValue<number>}
@@ -226,6 +228,7 @@ export default function ResultTable({
         if (databaseDriver.supportBigInt()) {
           return (
             <BigNumberCell
+              header={header}
               state={state}
               editMode={editMode}
               value={state.getValue(y, x) as DatabaseValue<bigint>}
@@ -239,6 +242,7 @@ export default function ResultTable({
         } else {
           return (
             <NumberCell
+              header={header}
               state={state}
               editMode={editMode}
               value={state.getValue(y, x) as DatabaseValue<number>}
@@ -252,7 +256,9 @@ export default function ResultTable({
         }
       }
 
-      return <GenericCell value={state.getValue(y, x) as string} />;
+      return (
+        <GenericCell value={state.getValue(y, x) as string} header={header} />
+      );
     },
     [databaseDriver]
   );

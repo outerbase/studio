@@ -3,6 +3,7 @@ import GenericCell from "./generic-cell";
 import { DatabaseValue } from "@/drivers/base-driver";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useFullEditor } from "../providers/full-editor-provider";
+import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
@@ -12,6 +13,7 @@ export interface TableEditableCell<T = unknown> {
   state: OptimizeTableState;
   onChange?: (newValue: DatabaseValue<T>) => void;
   editor?: "input" | "json" | "text";
+  header: OptimizeTableHeaderWithIndexProps;
 }
 
 interface TabeEditableCellProps<T = unknown> {
@@ -108,6 +110,7 @@ export default function createEditableCell<T = unknown>({
     state,
     editor,
     editMode,
+    header,
   }: TableEditableCell<T>) {
     const [editValue, setEditValue] = useState<DatabaseValue<string>>(
       toString(value)
@@ -159,6 +162,7 @@ export default function createEditableCell<T = unknown>({
 
     return (
       <GenericCell
+        header={header}
         value={toValue(editValue)}
         focus={focus}
         isChanged={isChanged}

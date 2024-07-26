@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/drivers/base-driver";
+import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
 import { hex } from "@/lib/bit-operation";
 import type { IdentifyResult } from "sql-query-identifier/lib/defines";
 
@@ -154,4 +154,25 @@ export function escapeCsvValue(value: unknown): string {
   }
 
   return stringValue;
+}
+
+export function convertDatabaseValueToString(value: DatabaseValue) {
+  if (value === null) return "NULL";
+
+  if (typeof value === "string") return value;
+
+  if (typeof value === "bigint" || typeof value === "number") {
+    return value.toString();
+  }
+
+  if (value instanceof ArrayBuffer || value instanceof Uint8Array) {
+    return btoa(
+      new Uint8Array(value).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ""
+      )
+    );
+  }
+
+  return "";
 }
