@@ -177,7 +177,7 @@ function FeatureList() {
       </div>
 
       <div>
-        <div className="fade-view">
+        <div>
           <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-table-editor.mp4"
@@ -197,7 +197,7 @@ function FeatureList() {
       </div>
 
       <div>
-        <div className="fade-view">
+        <div>
           <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-schema-editor.mp4"
@@ -220,7 +220,7 @@ function FeatureList() {
       </div>
 
       <div>
-        <div className="fade-view">
+        <div>
           <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
               src="https://r2.invisal.com/libsqlstudio-sql-query.mp4"
