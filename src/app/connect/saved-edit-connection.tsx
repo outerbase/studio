@@ -43,6 +43,8 @@ function EditRemote({
           config: {
             url: r.config.url,
             token: r.config.token,
+            username: r.config.username,
+            database: r.config.database,
           },
         });
       })
@@ -62,6 +64,8 @@ function EditRemote({
     return <div>Something wrong.</div>;
   }
 
+  console.log("sss", initialData);
+
   return (
     <SavedConnectionConfig
       driver={initialData.driver ?? "turso"}
@@ -79,6 +83,9 @@ function EditRemote({
           config: {
             token: conn.config.token,
             url: conn.config.url,
+            password: conn.config.password,
+            username: conn.config.username,
+            database: conn.config.database,
           },
         })
           .then(() => {
