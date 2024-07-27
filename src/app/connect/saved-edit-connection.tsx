@@ -64,8 +64,6 @@ function EditRemote({
     return <div>Something wrong.</div>;
   }
 
-  console.log("sss", initialData);
-
   return (
     <SavedConnectionConfig
       driver={initialData.driver ?? "turso"}

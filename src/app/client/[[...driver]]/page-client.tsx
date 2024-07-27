@@ -23,7 +23,7 @@ export default function ClientPageBody() {
       return new ValtownDriver(config.token);
     } else if (config.driver === "cloudflare-d1") {
       return new CloudflareD1Driver("/proxy/d1", {
-        Authorization: "Bearer " + config.token ?? "",
+        Authorization: "Bearer " + (config.token ?? ""),
         "x-account-id": config.username ?? "",
         "x-database-id": config.database ?? "",
       });

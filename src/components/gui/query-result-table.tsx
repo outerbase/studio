@@ -24,7 +24,12 @@ import {
   LucideSortDesc,
   LucideTrash2,
 } from "lucide-react";
-import React, { PropsWithChildren, useCallback, useState } from "react";
+import React, {
+  PropsWithChildren,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import {
   ColumnSortOption,
   DatabaseValue,
@@ -116,6 +121,10 @@ export default function ResultTable({
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
   const { databaseDriver } = useDatabaseDriver();
   const { extensions } = useConfig();
+
+  const headerIndex = useMemo(() => {
+    return data.getHeaders().map((_, idx) => idx);
+  }, [data]);
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
@@ -557,6 +566,7 @@ export default function ResultTable({
       onContextMenu={onCellContextMenu}
       onHeaderContextMenu={onHeaderContextMenu}
       stickyHeaderIndex={stickyHeaderIndex}
+      arrangeHeaderIndex={headerIndex}
       renderAhead={20}
       renderHeader={renderHeader}
       renderCell={renderCell}

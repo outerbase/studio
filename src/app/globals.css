@@ -189,6 +189,10 @@ body {
   z-index: 10;
 }
 
+.libsql-table th.sticky {
+  z-index: 20;
+}
+
 .libsql-resizer {
   position: absolute;
   right: 0;

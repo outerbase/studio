@@ -211,6 +211,7 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
     });
 
     const result = await this.transaction(sqls);
+    console.log("result", result);
 
     const tmp: DatabaseTableOperationReslt[] = [];
 
@@ -269,9 +270,9 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
         } else {
           tmp.push({});
         }
+      } else {
+        tmp.push({});
       }
-
-      tmp.push({});
     }
 
     return tmp;
