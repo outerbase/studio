@@ -81,30 +81,6 @@ export default async function LoginPage() {
           )}
         </div>
       </div>
-      {/* <div className="w-[300px]">
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-bold">Sign In</h2>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {GITHUB_LOGIN_SUPPORT && (
-              <Button asChild>
-                <Link prefetch={false} href="/login/github">
-                  Continue with Github
-                </Link>
-              </Button>
-            )}
-
-            {GOOGLE_LOGIN_SUPPORT && (
-              <Button asChild>
-                <Link prefetch={false} href="/login/google">
-                  Continue with Google
-                </Link>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      </div> */}
     </div>
   );
 }
