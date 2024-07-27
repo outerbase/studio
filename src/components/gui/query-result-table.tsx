@@ -1,28 +1,13 @@
-import GenericCell from "@/components/gui/table-cell/generic-cell";
-import NumberCell from "@/components/gui/table-cell/number-cell";
-import TextCell from "@/components/gui/table-cell/text-cell";
 import OptimizeTable, {
-  OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
 } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
-import {
-  exportRowsToExcel,
-  exportRowsToSqlInsert,
-  exportRowsToJson,
-} from "@/components/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
-import {
-  StudioContextMenuItem,
-  openContextMenuFromEvent,
-} from "@/messages/open-context-menu";
 import {
   LucideChevronDown,
   LucidePin,
-  LucidePlus,
   LucideSortAsc,
   LucideSortDesc,
-  LucideTrash2,
 } from "lucide-react";
 import React, {
   PropsWithChildren,
@@ -30,12 +15,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import {
-  ColumnSortOption,
-  DatabaseValue,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
-import parseSafeJson from "@/lib/json-safe";
+import { ColumnSortOption } from "@/drivers/base-driver";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,39 +23,15 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
-import BigNumberCell from "./table-cell/big-number-cell";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { useConfig } from "@/context/config-provider";
-import { useFullEditor } from "./providers/full-editor-provider";
+import useTableResultContextMenu from "./table-result/context-menu";
+import useTableResultCellRenderer from "./table-result/render-cell";
 
 interface ResultTableProps {
   data: OptimizeTableState;
   tableName?: string;
   onSortColumnChange?: (columns: ColumnSortOption[]) => void;
   sortColumns?: ColumnSortOption[];
-}
-
-function detectTextEditorType(
-  value: DatabaseValue<string>
-): "input" | "json" | "text" {
-  if (typeof value !== "string") return "input";
-
-  // Check if it is JSON format
-  const trimmedText = value.trim();
-  if (
-    trimmedText.substring(0, 1) === "{" &&
-    trimmedText.substring(trimmedText.length - 1) === "}"
-  ) {
-    if (parseSafeJson(trimmedText, undefined) !== undefined) return "json";
-  }
-
-  // Check if it is long string
-  if (value.length > 200) return "text";
-
-  // If it is multiple line
-  if (value.search(/[\n\r]/) >= 0) return "text";
-
-  return "input";
+  visibleColumnIndexList?: number[];
 }
 
 function Header({
@@ -116,15 +72,14 @@ export default function ResultTable({
   data,
   tableName,
   onSortColumnChange,
+  visibleColumnIndexList,
 }: ResultTableProps) {
-  const { openEditor } = useFullEditor();
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
-  const { databaseDriver } = useDatabaseDriver();
-  const { extensions } = useConfig();
 
   const headerIndex = useMemo(() => {
+    if (visibleColumnIndexList) return visibleColumnIndexList;
     return data.getHeaders().map((_, idx) => idx);
-  }, [data]);
+  }, [data, visibleColumnIndexList]);
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
@@ -196,82 +151,6 @@ export default function ResultTable({
     [stickyHeaderIndex, tableName, onSortColumnChange]
   );
 
-  const renderCell = useCallback(
-    ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
-      const isFocus = state.hasFocus(y, x);
-      const editMode = isFocus && state.isInEditMode();
-
-      if (header.dataType === TableColumnDataType.TEXT) {
-        const value = state.getValue(y, x) as DatabaseValue<string>;
-        const editor = detectTextEditorType(value);
-
-        return (
-          <TextCell
-            header={header}
-            state={state}
-            editor={editor}
-            editMode={editMode}
-            value={state.getValue(y, x) as DatabaseValue<string>}
-            focus={isFocus}
-            isChanged={state.hasCellChange(y, x)}
-            onChange={(newValue) => {
-              state.changeValue(y, x, newValue);
-            }}
-          />
-        );
-      } else if (header.dataType === TableColumnDataType.REAL) {
-        return (
-          <NumberCell
-            header={header}
-            state={state}
-            editMode={editMode}
-            value={state.getValue(y, x) as DatabaseValue<number>}
-            focus={isFocus}
-            isChanged={state.hasCellChange(y, x)}
-            onChange={(newValue) => {
-              state.changeValue(y, x, newValue);
-            }}
-          />
-        );
-      } else if (header.dataType === TableColumnDataType.INTEGER) {
-        if (databaseDriver.supportBigInt()) {
-          return (
-            <BigNumberCell
-              header={header}
-              state={state}
-              editMode={editMode}
-              value={state.getValue(y, x) as DatabaseValue<bigint>}
-              focus={isFocus}
-              isChanged={state.hasCellChange(y, x)}
-              onChange={(newValue) => {
-                state.changeValue(y, x, newValue);
-              }}
-            />
-          );
-        } else {
-          return (
-            <NumberCell
-              header={header}
-              state={state}
-              editMode={editMode}
-              value={state.getValue(y, x) as DatabaseValue<number>}
-              focus={isFocus}
-              isChanged={state.hasCellChange(y, x)}
-              onChange={(newValue) => {
-                state.changeValue(y, x, newValue);
-              }}
-            />
-          );
-        }
-      }
-
-      return (
-        <GenericCell value={state.getValue(y, x) as string} header={header} />
-      );
-    },
-    [databaseDriver]
-  );
-
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -297,214 +176,13 @@ export default function ResultTable({
     }
   }, []);
 
-  const onCellContextMenu = useCallback(
-    ({
-      state,
-      event,
-    }: {
-      state: OptimizeTableState;
-      event: React.MouseEvent;
-    }) => {
-      const randomUUID = crypto.randomUUID();
-      const timestamp = Math.floor(Date.now() / 1000).toString();
-      const hasFocus = !!state.getFocus();
-
-      function setFocusValue(newValue: unknown) {
-        const focusCell = state.getFocus();
-        if (focusCell) {
-          state.changeValue(focusCell.y, focusCell.x, newValue);
-        }
-      }
-
-      const extensionMenu = (extensions ?? []).reduce<StudioContextMenuItem[]>(
-        (menu, ext) => {
-          if (ext.contextMenu) {
-            return [...menu, ...ext.contextMenu(state)];
-          }
-          return menu;
-        },
-        []
-      );
-
-      openContextMenuFromEvent([
-        {
-          title: "Insert Value",
-          disabled: !hasFocus,
-          subWidth: 200,
-          sub: [
-            {
-              title: <pre>NULL</pre>,
-              onClick: () => {
-                setFocusValue(null);
-              },
-            },
-            {
-              title: <pre>DEFAULT</pre>,
-              onClick: () => {
-                setFocusValue(undefined);
-              },
-            },
-            { separator: true },
-            {
-              title: (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">Unix Timestamp</span>
-                  <span>{timestamp}</span>
-                </div>
-              ),
-              onClick: () => {
-                setFocusValue(timestamp);
-              },
-            },
-            { separator: true },
-            {
-              title: (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">UUID </span>
-                  <span>{randomUUID}</span>
-                </div>
-              ),
-              onClick: () => {
-                setFocusValue(randomUUID);
-              },
-            },
-          ],
-        },
-        {
-          title: "Open With",
-          sub: [
-            {
-              title: "Full Text Editor",
-              onClick: () => {
-                const focusValue = state.getFocusValue();
-                if (typeof focusValue === "string") {
-                  openEditor({
-                    initialValue: focusValue,
-                    format: "text",
-                    readOnly: state.getReadOnlyMode(),
-                    onCancel: () => {},
-                    onSave: (newValue) => {
-                      state.setFocusValue(newValue);
-                    },
-                  });
-                }
-              },
-            },
-            {
-              title: "JSON Editor",
-              onClick: () => {
-                const focusValue = state.getFocusValue();
-                if (typeof focusValue === "string") {
-                  openEditor({
-                    initialValue: focusValue,
-                    format: "json",
-                    readOnly: state.getReadOnlyMode(),
-                    onCancel: () => {},
-                    onSave: (newValue) => {
-                      state.setFocusValue(newValue);
-                    },
-                  });
-                }
-              },
-            },
-          ],
-        },
-        ...((extensionMenu ?? []).length > 0
-          ? [
-              {
-                separator: true,
-              },
-            ]
-          : []),
-        ...extensionMenu,
-        {
-          separator: true,
-        },
-        {
-          title: "Copy Cell Value",
-          shortcut: KEY_BINDING.copy.toString(),
-          onClick: () => {
-            copyCallback(state);
-          },
-        },
-        {
-          title: "Paste",
-          shortcut: KEY_BINDING.paste.toString(),
-          onClick: () => {
-            pasteCallback(state);
-          },
-        },
-        {
-          separator: true,
-        },
-        {
-          title: "Copy Row As",
-          sub: [
-            {
-              title: "Copy as Excel",
-              onClick: () => {
-                if (state.getSelectedRowCount() > 0) {
-                  window.navigator.clipboard.writeText(
-                    exportRowsToExcel(state.getSelectedRowsArray())
-                  );
-                }
-              },
-            },
-            {
-              title: "Copy as Json",
-              onClick: () => {
-                const headers = state
-                  .getHeaders()
-                  .map((column) => column?.name ?? "");
-
-                if (state.getSelectedRowCount() > 0) {
-                  window.navigator.clipboard.writeText(
-                    exportRowsToJson(headers, state.getSelectedRowsArray())
-                  );
-                }
-              },
-            },
-            {
-              title: "Copy as INSERT SQL",
-              onClick: () => {
-                const headers = state
-                  .getHeaders()
-                  .map((column) => column?.name ?? "");
-
-                if (state.getSelectedRowCount() > 0) {
-                  window.navigator.clipboard.writeText(
-                    exportRowsToSqlInsert(
-                      tableName ?? "UnknownTable",
-                      headers,
-                      state.getSelectedRowsArray()
-                    )
-                  );
-                }
-              },
-            },
-          ],
-        },
-        { separator: true },
-        {
-          title: "Insert row",
-          icon: LucidePlus,
-          onClick: () => {
-            data.insertNewRow();
-          },
-        },
-        {
-          title: "Delete selected row(s)",
-          icon: LucideTrash2,
-          onClick: () => {
-            data.getSelectedRowIndex().forEach((index) => {
-              data.removeRow(index);
-            });
-          },
-        },
-      ])(event);
-    },
-    [data, tableName, copyCallback, pasteCallback, extensions, openEditor]
-  );
+  const onRenderCell = useTableResultCellRenderer();
+  const onCellContextMenu = useTableResultContextMenu({
+    tableName,
+    data,
+    copyCallback,
+    pasteCallback,
+  });
 
   const onKeyDown = useCallback(
     (state: OptimizeTableState, e: React.KeyboardEvent) => {
@@ -569,7 +247,7 @@ export default function ResultTable({
       arrangeHeaderIndex={headerIndex}
       renderAhead={20}
       renderHeader={renderHeader}
-      renderCell={renderCell}
+      renderCell={onRenderCell}
       rowHeight={35}
       onKeyDown={onKeyDown}
     />

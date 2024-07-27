@@ -36,6 +36,7 @@ import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import ResultStats from "../result-stat";
 import isEmptyResultStats from "@/components/lib/empty-stats";
+import useTableResultColumnFilter from "../table-result/filter-column";
 
 interface TableDataContentProps {
   tableName: string;
@@ -116,6 +117,10 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       return () => data.removeChangeListener(callback);
     }
   }, [data]);
+
+  const { columnIndexList, filterColumnButton } = useTableResultColumnFilter({
+    state: data,
+  });
 
   const onCommit = useCallback(() => {
     if (!tableSchema) return;
@@ -198,7 +203,13 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             <span className="text-red-500">Discard Change</span>
           </Button>
 
-          <div className="mr-2">
+          <div className="mx-1">
+            <Separator orientation="vertical" />
+          </div>
+
+          {filterColumnButton}
+
+          <div className="mx-1">
             <Separator orientation="vertical" />
           </div>
 
@@ -329,6 +340,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             key={lastQueryTimestamp}
             sortColumns={sortColumns}
             onSortColumnChange={setSortColumns}
+            visibleColumnIndexList={columnIndexList}
           />
         ) : null}
       </div>
