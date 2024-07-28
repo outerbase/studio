@@ -80,7 +80,8 @@ export default function useTableResultColumnFilter({
                       const tmpSet = new Set(columnIndexList);
                       tmpSet.add(idx);
                       const tmpArray = Array.from(tmpSet);
-                      setColumnIndexList(tmpArray.sort());
+                      tmpArray.sort((a, b) => a - b);
+                      setColumnIndexList(tmpArray);
                     }
                   }}
                 >
