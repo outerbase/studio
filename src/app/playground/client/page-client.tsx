@@ -3,13 +3,18 @@ import { saveAs } from "file-saver";
 import MyStudio from "@/components/my-studio";
 import { Button } from "@/components/ui/button";
 import SqljsDriver from "@/drivers/sqljs-driver";
-import { LucideFile, LucideLoader } from "lucide-react";
+import { LucideFile, LucideLoader, LucideRefreshCw } from "lucide-react";
 import Script from "next/script";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Database, SqlJsStatic } from "sql.js";
 import ScreenDropZone from "@/components/screen-dropzone";
 import { toast } from "sonner";
 import downloadFileFromUrl from "@/lib/download-file";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
@@ -61,6 +66,30 @@ export default function PlaygroundEditorBody({
       });
     }
   }, [handler, sqlInit]);
+
+  const onReloadDatabase = useCallback(() => {
+    if (db && db.hasChanged()) {
+      if (
+        !confirm(
+          "You have some changes. Refresh will lose your change. Do you want to refresh"
+        )
+      ) {
+        return;
+      }
+    }
+
+    if (handler && sqlInit) {
+      handler.getFile().then((file) => {
+        file.arrayBuffer().then((buffer) => {
+          const sqljsDatabase = new sqlInit.Database(new Uint8Array(buffer));
+          setRawDb(sqljsDatabase);
+          if (db) {
+            db.reload(sqljsDatabase);
+          }
+        });
+      });
+    }
+  }, [handler, sqlInit, db]);
 
   const sidebarMenu = useMemo(() => {
     return (
@@ -143,6 +172,34 @@ export default function PlaygroundEditorBody({
           >
             Open
           </Button>
+          {handler && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  className="flex-grow-0"
+                  onClick={onReloadDatabase}
+                >
+                  <LucideRefreshCw className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="mb-2">
+                  <strong>Refresh</strong>
+                </p>
+
+                <p className="max-w-[250px] mb-2">
+                  LibSQL Studio loads data into memory. If the file changes, it
+                  is unaware of the update.
+                </p>
+
+                <p className="max-w-[250px]">
+                  To reflect the changes, use the refresh option to reload the
+                  data from the file.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
     );
