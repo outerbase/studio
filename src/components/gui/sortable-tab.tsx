@@ -4,6 +4,7 @@ import { WindowTabItemProps } from "./windows-tab";
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 import { ButtonProps } from "../ui/button";
+import { CSS } from "../lib/dnd-kit";
 
 interface SortableTabProps {
   tab: WindowTabItemProps;
@@ -17,17 +18,20 @@ type WindowTabItemButtonProps = ButtonProps & {
   title: string;
   icon: LucideIcon;
   onClose?: () => void;
+  isDragging?: boolean;
 };
 
 export const WindowTabItemButton = forwardRef<
   HTMLButtonElement,
   WindowTabItemButtonProps
 >(function WindowTabItemButton(props: WindowTabItemButtonProps, ref) {
-  const { icon: Icon, selected, title, onClose, ...rest } = props;
+  const { icon: Icon, selected, title, onClose, isDragging, ...rest } = props;
 
   const className = cn(
     "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px]",
     "libsql-window-tab",
+    isDragging && "z-20",
+    isDragging && !selected && "bg-gray-200 dark:bg-gray-700 rounded-t",
     selected
       ? "border-x border-t bg-background border-b-background rounded-t"
       : "border-b border-t border-t-secondary border-x-secondary opacity-65 hover:opacity-100"
@@ -63,7 +67,19 @@ export function SortableTab({
   onSelectChange,
   onClose,
 }: SortableTabProps) {
-  const { attributes, listeners, setNodeRef } = useSortable({ id: tab.key });
+  const {
+    attributes,
+    listeners,
+    transition,
+    transform,
+    isDragging,
+    setNodeRef,
+  } = useSortable({ id: tab.key });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
 
   return (
     <WindowTabItemButton
@@ -73,6 +89,8 @@ export function SortableTab({
       onClick={onSelectChange}
       selected={selected}
       onClose={onClose}
+      style={style}
+      isDragging={isDragging}
       {...attributes}
       {...listeners}
     />
