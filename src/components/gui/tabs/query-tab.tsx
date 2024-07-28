@@ -1,8 +1,11 @@
+import { format } from "sql-formatter";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { identify } from "sql-query-identifier";
 import {
+  LucideFastForward,
   LucideGrid,
   LucideMessageSquareWarning,
+  LucidePencilRuler,
   LucidePlay,
 } from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
@@ -33,6 +36,12 @@ import {
   SavedDocInput,
 } from "@/drivers/saved-doc/saved-doc-driver";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -67,6 +76,19 @@ export default function QueryWindow({
     initialNamespace ?? "Unsaved Query"
   );
   const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
+
+  const onFormatClicked = () => {
+    try {
+      setCode(
+        format(code, {
+          language: "sqlite",
+          tabWidth: 2,
+        })
+      );
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
 
   const onRunClicked = (all = false) => {
     const statements = identify(code, {
@@ -220,6 +242,10 @@ export default function QueryWindow({
                 if (KEY_BINDING.run.match(e)) {
                   onRunClicked();
                   e.preventDefault();
+                } else if (KEY_BINDING.format.match(e)) {
+                  onFormatClicked();
+                  e.preventDefault();
+                  e.stopPropagation();
                 }
               }}
             />
@@ -241,9 +267,26 @@ export default function QueryWindow({
                 size="sm"
                 onClick={() => onRunClicked(true)}
               >
-                <LucidePlay className="w-4 h-4 mr-2" />
+                <LucideFastForward className="w-4 h-4 mr-2" />
                 Run All
               </Button>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant={"ghost"} size="sm" onClick={onFormatClicked}>
+                    <LucidePencilRuler className="w-4 h-4 mr-2" />
+                    Format
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="p-4">
+                  <p className="mb-2">
+                    <span className="inline-block py-1 px-2 rounded bg-secondary text-secondary-foreground">
+                      {KEY_BINDING.format.toString()}
+                    </span>
+                  </p>
+                  <p>Format SQL queries for readability</p>
+                </TooltipContent>
+              </Tooltip>
 
               <div className="grow items-center flex text-xs mr-2 gap-2 border-l pl-4">
                 <div>Ln {lineNumber}</div>
