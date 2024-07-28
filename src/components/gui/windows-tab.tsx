@@ -1,11 +1,5 @@
 import { type LucideIcon, LucidePlus } from "lucide-react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import {
   DndContext,
   closestCenter,
@@ -13,21 +7,22 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-  DragOverlay,
-  type DragStartEvent,
+  KeyboardSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  horizontalListSortingStrategy,
   SortableContext,
-  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { SortableTab, WindowTabItemButton } from "./sortable-tab";
+import { SortableTab } from "./sortable-tab";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { restrictToHorizontalAxis } from "../lib/dnd-kit";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -70,15 +65,17 @@ export default function WindowTabs({
   onSelectChange,
   onTabsChange,
 }: WindowTabsProps) {
-  const [dragTab, setDragTag] = useState<WindowTabItemProps | null>(null);
-
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
       distance: 8,
     },
   });
 
-  const sensors = useSensors(pointerSensor);
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+
+  const sensors = useSensors(pointerSensor, keyboardSensor);
 
   const replaceCurrentTab = useCallback(
     (tab: WindowTabItemProps) => {
@@ -111,15 +108,6 @@ export default function WindowTabs({
     [changeCurrentTab, replaceCurrentTab]
   );
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      const { active } = event;
-      const activeIndex = tabs.findIndex((tab) => tab.key === active.id);
-      setDragTag(tabs[activeIndex] ?? null);
-    },
-    [tabs, setDragTag]
-  );
-
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
@@ -138,9 +126,8 @@ export default function WindowTabs({
         );
         onSelectChange(selectedIndex);
       }
-      setDragTag(null);
     },
-    [setDragTag, onTabsChange, tabs, onSelectChange, selected]
+    [onTabsChange, tabs, onSelectChange, selected]
   );
 
   return (
@@ -148,11 +135,11 @@ export default function WindowTabs({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        modifiers={[restrictToHorizontalAxis]}
       >
         <div className="flex flex-col w-full h-full">
-          <div className="grow-0 shrink-0 pt-1 bg-secondary">
+          <div className="grow-0 shrink-0 pt-1 bg-secondary overflow-x-auto no-scrollbar">
             <div className="flex">
               {menu ? (
                 <DropdownMenu modal={false}>
@@ -179,7 +166,7 @@ export default function WindowTabs({
               )}
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
-                strategy={verticalListSortingStrategy}
+                strategy={horizontalListSortingStrategy}
               >
                 {tabs.map((tab, idx) => (
                   <SortableTab
@@ -209,7 +196,6 @@ export default function WindowTabs({
                   />
                 ))}
               </SortableContext>
-              <div className="border-b grow" />
             </div>
           </div>
           <div className="grow relative">
@@ -226,13 +212,6 @@ export default function WindowTabs({
             ))}
           </div>
         </div>
-        <DragOverlay>
-          {dragTab ? (
-            <div className="fixed top-0 left-0 w-auto h-auto">
-              <WindowTabItemButton title={dragTab.title} icon={dragTab.icon} />
-            </div>
-          ) : null}
-        </DragOverlay>
       </DndContext>
     </WindowTabsContext.Provider>
   );

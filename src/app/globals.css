@@ -98,9 +98,15 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  display: none;
 }
 
 /* ------------------------------- */
@@ -111,6 +117,7 @@ body {
 .dark .cm-table-name {
   color: #fd79a8;
 }
+
 /* ------------------------------- */
 
 .libsql-window-tab .libsql-window-close {
@@ -273,6 +280,7 @@ For Markdown Side
     opacity: 0;
     transform: scale(0.95);
   }
+
   100% {
     opacity: 1;
     transform: scale(1);
