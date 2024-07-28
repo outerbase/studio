@@ -52,6 +52,8 @@ export default function QueryWindow({
   const { refresh: refreshSchema } = useSchema();
   const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
+
+  const [fontSize, setFontSize] = useState(1);
   const [lineNumber, setLineNumber] = useState(0);
   const [columnNumber, setColumnNumber] = useState(0);
 
@@ -208,6 +210,8 @@ export default function QueryWindow({
               value={code}
               onChange={setCode}
               schema={schema}
+              fontSize={fontSize}
+              onFontSizeChanged={setFontSize}
               onCursorChange={(_, line, col) => {
                 setLineNumber(line);
                 setColumnNumber(col);
