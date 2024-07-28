@@ -5,7 +5,7 @@ import ResultTable from "./query-result-table";
 import ResultStats from "./result-stat";
 import { useMemo } from "react";
 import OptimizeTableState from "./table-optimized/OptimizeTableState";
-import { QueryExplanation, isExplainQueryPlan } from "./query-explain";
+import { QueryExplanation, isExplainQueryPlan } from "./query-explanation";
 
 export default function QueryResult({
   result,
