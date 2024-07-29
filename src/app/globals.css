@@ -296,3 +296,7 @@ For Markdown Side
     opacity: 0;
   }
 }
+
+.mdx-content pre {
+  background-color: transparent;
+}

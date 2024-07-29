@@ -10,7 +10,7 @@ LibSQL Studio allows users to create temporary sessions, providing a temporary l
 
 **Request**
 
-```
+```bash
 curl --location 'https://libsqlstudio.com/api/temp_session' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -22,7 +22,7 @@ curl --location 'https://libsqlstudio.com/api/temp_session' \
 
 **Response**
 
-```
+```http
 {
   "redirect": "https://libsqlstudio.com/client/temp_sess?sid=xxxxxx"
 }
