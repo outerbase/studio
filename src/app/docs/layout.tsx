@@ -19,7 +19,7 @@ const TableContent = [
     ],
   },
   {
-    title: "Other",
+    title: "Integration",
     sub: [
       {
         title: "Embed Client",
