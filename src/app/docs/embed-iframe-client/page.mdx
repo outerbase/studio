@@ -14,7 +14,30 @@ our iframe include:
 - Ability to embed and rebrand it on your website
 - Instant access to LibSQL Studio updates
 
-## Example
+## Integration
+
+First, you need embed iframe to our client
+
+```
+<iframe src="https://libsqlstudio.com/embed/sqlite" />
+```
+
+Our client will send SQL statements that need to be executed via message events.
+You only need to handle two types of messages: query and transaction.
+
+```
+window.addEventListener(e => {
+  console.log(e.data);
+
+  if (e.type === "query") {
+    // a single query request
+  } else if (e.type === "transaction") {
+    // a batch request
+  }
+})
+```
+
+## Full Example
 
 Here is a sample code demonstrating how to integrate using React and connect to Turso:
 
@@ -34,7 +57,6 @@ export default function ExamplePage() {
 
   useEffect(() => {
     const contentWindow = iframeRef.current?.contentWindow;
-    console.log("We are here");
 
     if (contentWindow) {
       const handler = (e: MessageEvent<ClientRequest>) => {
