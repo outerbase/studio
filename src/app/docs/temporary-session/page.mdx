@@ -4,11 +4,12 @@ export const metadata = {
   title: "Create Temporary Session - LibSQL Studio",
 };
 
-<DocContent title="Temporary Session" group="Other">
+<DocContent title="Temporary Session" group="Integration">
 
 LibSQL Studio allows users to create temporary sessions, providing a temporary link that grants access to the database for a limited period.
 
 **Request**
+
 ```
 curl --location 'https://libsqlstudio.com/api/temp_session' \
 --header 'Content-Type: application/json' \
@@ -20,6 +21,7 @@ curl --location 'https://libsqlstudio.com/api/temp_session' \
 ```
 
 **Response**
+
 ```
 {
   "redirect": "https://libsqlstudio.com/client/temp_sess?sid=xxxxxx"

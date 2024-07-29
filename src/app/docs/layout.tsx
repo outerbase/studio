@@ -22,6 +22,10 @@ const TableContent = [
     title: "Other",
     sub: [
       {
+        title: "Embed Client",
+        href: "/docs/embed-iframe-client",
+      },
+      {
         title: "Temporary Session",
         href: "/docs/temporary-session",
       },
