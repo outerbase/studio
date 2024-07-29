@@ -1,7 +1,7 @@
 import { DocContent } from "@/components/mdx/docs";
 
 export const metadata = {
-  title: "Connect to Val.town Database using LibSQL Studio",
+  title: "Embedding Our Client via iFrame",
 };
 
 <DocContent title="Embedding Our Client via iFrame" group="Integration">
@@ -19,6 +19,7 @@ our iframe include:
 Here is a sample code demonstrating how to integrate using React and connect to Turso:
 
 ```
+"use client";
 import { createClient, ResultSet } from "@libsql/client/web";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -27,55 +28,61 @@ export default function ExamplePage() {
   const client = useMemo(() => {
     return createClient({
       url: "libsql://xxx",
-      authToken: "xxx",
+      authToken: "xxx,
     });
   }, []);
 
   useEffect(() => {
     const contentWindow = iframeRef.current?.contentWindow;
+    console.log("We are here");
 
     if (contentWindow) {
-      const handler = (
-        e: MessageEvent<{
-          type: "query" | "transaction";
-          id: number;
-          statement?: string;
-          statements?: string[];
-        }>
-      ) => {
+      const handler = (e: MessageEvent<ClientRequest>) => {
         if (e.data.type === "query" && e.data.statement) {
           client
             .execute(e.data.statement)
             .then((r) => {
-              contentWindow.postMessage({
-                type: e.data.type,
-                id: e.data.id,
-                data: transformRawResult(r),
-              });
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  data: transformRawResult(r),
+                },
+                "*"
+              );
             })
             .catch((e) => {
-              contentWindow.postMessage({
-                type: e.data.type,
-                id: e.data.id,
-                error: (e as Error).message,
-              });
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  error: (e as Error).message,
+                },
+                "*"
+              );
             });
         } else if (e.data.type === "transaction" && e.data.statements) {
           client
             .batch(e.data.statements, "write")
             .then((r) => {
-              contentWindow.postMessage({
-                type: e.data.type,
-                id: e.data.id,
-                data: r.map(transformRawResult),
-              });
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  data: r.map(transformRawResult),
+                },
+                "*"
+              );
             })
             .catch((e) => {
-              contentWindow.postMessage({
-                type: e.data.type,
-                id: e.data.id,
-                error: (e as Error).message,
-              });
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  error: (e as Error).message,
+                },
+                "*"
+              );
             });
         }
       };
@@ -89,9 +96,16 @@ export default function ExamplePage() {
     <iframe
       className="border-0 h-screen w-screen"
       ref={iframeRef}
-      src="https://libsqlstudio.com/embed/sqlite"
+      src="http://localhost:3002/embed/sqlite"
     />
   );
+}
+
+interface ClientRequest {
+  type: "query" | "transaction";
+  id: number;
+  statement?: string;
+  statements?: string[];
 }
 
 interface ResultHeader {
@@ -168,13 +182,10 @@ function transformRawResult(raw: ResultSet): Result {
   });
 
   const rows = raw.rows.map((r) =>
-    headers.reduce(
-      (a, b, idx) => {
-        a[b.name] = r[idx];
-        return a;
-      },
-      {} as Record<string, unknown>
-    )
+    headers.reduce((a, b, idx) => {
+      a[b.name] = r[idx];
+      return a;
+    }, {} as Record<string, unknown>)
   );
 
   return {

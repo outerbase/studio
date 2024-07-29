@@ -47,11 +47,14 @@ export default class IframeDriver extends SqliteLikeBaseDriver {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
 
-      window.parent.postMessage({
-        type: "query",
-        id,
-        statement: stmt,
-      });
+      window.parent.postMessage(
+        {
+          type: "query",
+          id,
+          statement: stmt,
+        },
+        "*"
+      );
     });
   }
 
@@ -60,11 +63,14 @@ export default class IframeDriver extends SqliteLikeBaseDriver {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
 
-      window.parent.postMessage({
-        type: "transaction",
-        id,
-        statements: stmts,
-      });
+      window.parent.postMessage(
+        {
+          type: "transaction",
+          id,
+          statements: stmts,
+        },
+        "*"
+      );
     });
   }
 
