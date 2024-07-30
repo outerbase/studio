@@ -1,6 +1,5 @@
 import { get_database } from "@/db";
 import { dbTempSession } from "@/db/schema";
-import { getSessionFromCookie } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import dynamic from "next/dynamic";
 
@@ -13,12 +12,6 @@ export default async function SessionPage({
 }: {
   searchParams: { sid: string };
 }) {
-  const { session } = await getSessionFromCookie();
-
-  if (!session) {
-    return <div>Something wrong</div>;
-  }
-
   const now = Math.floor(Date.now() / 1000);
   const db = get_database();
   const sessionId = searchParams?.sid;
