@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { createHighlighter, type Highlighter } from "shiki";
 import type { BundledLanguage } from "shiki/bundle/full";
 
@@ -22,54 +19,43 @@ interface CodeBlockProps {
   className?: string;
 }
 
-const CodeBlockInner: React.FC<CodeBlockProps> = ({ children, className }) => {
-  const [highlightedCode, setHighlightedCode] = useState<string>("");
+let highlighter: Highlighter | null = null;
+
+async function getHighlighter() {
+  if (!highlighter) {
+    highlighter = await createHighlighter({
+      themes: ["dracula", "snazzy-light"],
+      langs: ALLOWED_LANGS,
+    });
+  }
+  return highlighter;
+}
+
+async function CodeBlockInner({ children, className }: CodeBlockProps) {
   const language = className ? className.replace(/language-/, "") : "text";
+  const validLang = ALLOWED_LANGS.includes(language as BundledLanguage)
+    ? (language as BundledLanguage)
+    : "text";
 
-  useEffect(() => {
-    let highlighter: Highlighter;
+  const highlighter = await getHighlighter();
+  const highlightedCode = highlighter.codeToHtml(children, {
+    lang: validLang,
+    themes: {
+      dark: "dracula",
+      light: "snazzy-light",
+    },
+  });
 
-    const highlight = async () => {
-      highlighter = await createHighlighter({
-        themes: ["dracula", "snazzy-light"],
-        langs: ALLOWED_LANGS,
-      });
-
-      // Validate the language
-
-      const validLang = ALLOWED_LANGS.includes(language as BundledLanguage)
-        ? (language as BundledLanguage)
-        : "text";
-
-      const highlighted = highlighter.codeToHtml(children, {
-        lang: validLang,
-        themes: {
-          dark: "dracula",
-          light: "snazzy-light",
-        },
-      });
-      setHighlightedCode(highlighted);
-    };
-
-    highlight();
-
-    return () => {
-      if (highlighter) {
-        highlighter.dispose();
-      }
-    };
-  }, [children, language]);
-
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: We are using controlled html
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
   return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
-};
+}
 
 interface MDXCodeBlockProps {
   children?: React.ReactNode;
   className?: string;
 }
 
-const CodeBlock: React.FC<MDXCodeBlockProps> = (props) => {
+async function CodeBlock(props: MDXCodeBlockProps) {
   if (typeof props.children === "string") {
     return <CodeBlockInner {...(props as CodeBlockProps)} />;
   }
@@ -79,6 +65,6 @@ const CodeBlock: React.FC<MDXCodeBlockProps> = (props) => {
       <code {...props} />
     </pre>
   );
-};
+}
 
 export default CodeBlock;
