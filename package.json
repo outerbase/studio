@@ -92,6 +92,7 @@
     "react": "^18.2.01",
     "react-dom": "^18.2.0",
     "react-resizable-panels": "^1.0.9",
+    "shiki": "^1.12.0",
     "sonner": "^1.4.41",
     "sql-formatter": "^15.3.2",
     "sql-query-identifier": "^2.6.0",
