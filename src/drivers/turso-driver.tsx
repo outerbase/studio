@@ -37,7 +37,12 @@ export function transformRawResult(raw: ResultSet): DatabaseResultSet {
 
   const rows = raw.rows.map((r) =>
     headers.reduce((a, b, idx) => {
-      a[b.name] = r[idx];
+      const cellValue = r[idx];
+      if (cellValue instanceof Uint8Array) {
+        a[b.name] = Array.from(cellValue);
+      } else {
+        a[b.name] = r[idx];
+      }
       return a;
     }, {} as DatabaseRow)
   );
