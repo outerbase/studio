@@ -21,7 +21,7 @@ interface CodeBlockProps {
 
 async function getHighlighter() {
   return await createHighlighter({
-    themes: ["dracula", "snazzy-light"],
+    themes: ["dracula"],
     langs: ALLOWED_LANGS,
   });
 }
@@ -40,7 +40,7 @@ async function CodeBlockInner({ children, className }: CodeBlockProps) {
     lang: validLang,
     themes: {
       dark: "dracula",
-      light: "snazzy-light",
+      light: "dracula",
     },
   });
 
