@@ -110,6 +110,50 @@ function ForeignKeyColumnSnippet(props: SneakpeakProps) {
   );
 }
 
+function BlobCellValue({
+  value,
+  vector,
+}: {
+  value: Uint8Array | ArrayBuffer | number[];
+  vector?: boolean;
+}) {
+  if (vector) {
+    const floatArray = [...new Float32Array(new Uint8Array(value).buffer)].join(
+      ", "
+    );
+
+    return (
+      <div className="flex">
+        <div className="mr-2 justify-center items-center flex-col">
+          <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
+            vec
+          </span>
+        </div>
+        <div className="text-orange-600">[{floatArray}]</div>
+      </div>
+    );
+  } else {
+    const sliceByte = value.slice(0, 64);
+    const base64Text = btoa(
+      new Uint8Array(sliceByte).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ""
+      )
+    );
+
+    return (
+      <div className="flex">
+        <div className="mr-2 justify-center items-center flex-col">
+          <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
+            blob
+          </span>
+        </div>
+        <div className="text-orange-600">{base64Text}</div>
+      </div>
+    );
+  }
+}
+
 export default function GenericCell({
   value,
   onFocus,
@@ -189,29 +233,21 @@ export default function GenericCell({
       );
     }
 
-    if (value instanceof ArrayBuffer || value instanceof Uint8Array) {
-      const sliceByte = value.slice(0, 64);
-      const base64Text = btoa(
-        new Uint8Array(sliceByte).reduce(
-          (data, byte) => data + String.fromCharCode(byte),
-          ""
-        )
-      );
-
+    if (
+      value instanceof ArrayBuffer ||
+      value instanceof Uint8Array ||
+      Array.isArray(value)
+    ) {
       return (
-        <div className="flex">
-          <div className="mr-2 justify-center items-center flex-col">
-            <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
-              blob
-            </span>
-          </div>
-          <div className="text-orange-600">{base64Text}</div>
-        </div>
+        <BlobCellValue
+          value={value}
+          vector={header.headerData?.type.includes("F32_BLOB")}
+        />
       );
     }
 
     return <span>{value.toString()}</span>;
-  }, [value, textBaseStyle, isChanged]);
+  }, [value, textBaseStyle, isChanged, header]);
 
   return (
     <div
