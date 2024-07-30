@@ -1,4 +1,4 @@
-import { createHighlighter, type Highlighter } from "shiki";
+import { createHighlighter } from "shiki";
 import type { BundledLanguage } from "shiki/bundle/full";
 
 const ALLOWED_LANGS: BundledLanguage[] = [
@@ -19,24 +19,22 @@ interface CodeBlockProps {
   className?: string;
 }
 
-let highlighter: Highlighter | null = null;
-
 async function getHighlighter() {
-  if (!highlighter) {
-    highlighter = await createHighlighter({
-      themes: ["dracula", "snazzy-light"],
-      langs: ALLOWED_LANGS,
-    });
-  }
-  return highlighter;
+  return await createHighlighter({
+    themes: ["dracula", "snazzy-light"],
+    langs: ALLOWED_LANGS,
+  });
+}
+
+function getValidLang(className?: string): BundledLanguage | "text" {
+  const language = className ? className.replace(/language-/, "") : "text";
+  return ALLOWED_LANGS.includes(language as BundledLanguage)
+    ? (language as BundledLanguage)
+    : "text";
 }
 
 async function CodeBlockInner({ children, className }: CodeBlockProps) {
-  const language = className ? className.replace(/language-/, "") : "text";
-  const validLang = ALLOWED_LANGS.includes(language as BundledLanguage)
-    ? (language as BundledLanguage)
-    : "text";
-
+  const validLang = getValidLang(className);
   const highlighter = await getHighlighter();
   const highlightedCode = highlighter.codeToHtml(children, {
     lang: validLang,
