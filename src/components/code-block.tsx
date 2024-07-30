@@ -31,7 +31,7 @@ const CodeBlockInner: React.FC<CodeBlockProps> = ({ children, className }) => {
 
     const highlight = async () => {
       highlighter = await createHighlighter({
-        themes: ["dracula"],
+        themes: ["dracula", "snazzy-light"],
         langs: ALLOWED_LANGS,
       });
 
@@ -45,7 +45,7 @@ const CodeBlockInner: React.FC<CodeBlockProps> = ({ children, className }) => {
         lang: validLang,
         themes: {
           dark: "dracula",
-          light: "dracula",
+          light: "snazzy-light",
         },
       });
       setHighlightedCode(highlighted);
@@ -73,6 +73,7 @@ const CodeBlock: React.FC<MDXCodeBlockProps> = (props) => {
   if (typeof props.children === "string") {
     return <CodeBlockInner {...(props as CodeBlockProps)} />;
   }
+
   return (
     <pre>
       <code {...props} />
