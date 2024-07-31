@@ -97,6 +97,7 @@ export default class OptimizeTableState {
         return {
           initialSize,
           name: headerName ?? "",
+          originalDataType: header.originalType,
           displayName: header.displayName,
           resizable: true,
           headerData,

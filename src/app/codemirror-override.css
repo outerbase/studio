@@ -39,3 +39,53 @@
   max-height: 600px;
   user-select: text;
 }
+
+.cm-completionIcon-property::after {
+  content: "🆔" !important;
+}
+
+.cm-completionIcon-enum::after {
+  content: "❝" !important;
+}
+
+.cm-completionIcon-keyword::after {
+  content: "🔑" !important;
+}
+
+.cm-completionIcon-table::after {
+  display: block !important;
+  background-size: contain !important;
+  content: "" !important;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAABYgAAAWIBXyfQUwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAMBSURBVHic7ZvNTxNBGId/MzulLUWkQqQkRJKGGpUYo4k3MSYeDPEj8YDx6+LJRC/6H3g2MXIy8UyMB08a8cLBGGM0HiQeEEwJES20BaE00FZYZseDYIROW0JlX2DnufXdnd1nfu1+vJsuYPA2TFfsHlQ1LaOpawuSH1xSvMVtqf+JYE7SbzlDyWjkybMOtrh2+aoA7r5MR5N56+lg1nd83ubacLYrdT5HdTTYHyN19uWerpZvK/W/k7zVN3PlQ9LqzSxyi8TQJcJ+R56M2Dd6zjb1AssB3Hk12dU/HujL22xHfeulCAqlzkTyFx9eiDxn914r0T+WmZvI+wLUYm7SWmsXTreF63kiO/XAa5MHgETeF5zITt7nyZzVTS1DxURBXOKpgthLLUJFKieaedZmO/qsX45ZmwkulSdO/FqkYuDUEtSYAKgFqDEBUAtQYwKgFqBG1AlF7UAKGxge8XQCnj8ETADUAtR4PgChKzbvaUCoNlh2YC5fQHpmtqgeba38FD09nUGu8GtVLRQMoLkxXHHsaCJZVKvGVxtAMOBHfai27AYdx9HWK40DgJnsXFHNJ8S6xuqoxtfzh4AJgFqAGs8HoD0JKqXgOOXvkJXSL680rtTY9eyz3PY26mt6AWoBakwA1ALUeD4A0wvoVja9gIcwAVALUOP5AEwvYHoBj2MCoBagxvMBaK8Ckcbwuu6tU9OZojpFL1CNrzaAgL8GuypsUEqprVP0AtX4ev4QMAEAKHqNZKN3ZFuZEnNa4ACKzirZ+dymC7lNiTklBVN4rxja1q48PvkTTQ27ISz9f6lL/UooegHHUZBS/8BjSUpMzWZLBKDesc9D8fMOYy82tOftDmfnGAAMDI+8BXCCWMdt3hw90H6KA4AQuAqGNLWRWzAgxS11HVi+DB5ub/8ByToBDJGauQHDoJToPBKLJf58/Id4PO7PObitFLsJYD+J4ObxlTH1OMTxKBaLLawUS74u8unLaJtlYZ9kyu+O3+ZgKbYgJb4fOxQdo3YxbEV+A0V6Y/BBlijFAAAAAElFTkSuQmCC") !important;
+  width: 20px !important;
+  height: 20px !important;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.cm-completionIcon-function::after,
+.cm-completionIcon-method::after,
+.cm-completionIcon-variable::after,
+.cm-completionIcon-namespace::after,
+.cm-completionIcon-interface::after {
+  content: "⚡" !important;
+}
+
+.cm-tooltip-autocomplete > ul > li {
+  display: flex;
+}
+
+.cm-tooltip-autocomplete > ul > li > .cm-completionIcon {
+  width: 1em !important;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+}
+
+.cm-tooltip-autocomplete .cm-completionLabel {
+  flex-grow: 1;
+}
+
+.cm-tooltip-autocomplete .cm-completionDetail {
+  padding-left: 15px;
+}
