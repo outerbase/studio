@@ -26,6 +26,7 @@ export interface OptimizeTableHeaderProps {
   initialSize: number;
   resizable?: boolean;
   dataType?: TableColumnDataType;
+  originalDataType?: string | null;
   headerData?: DatabaseTableColumn;
   foreignKey?: DatabaseForeignKeyClause;
   icon?: ReactElement;

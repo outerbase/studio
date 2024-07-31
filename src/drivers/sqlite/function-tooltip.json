@@ -71,6 +71,10 @@
     "syntax": "length(X)",
     "description": "<p>The length(X) function returns the character count of string X, excluding any NUL characters for strings (which SQLite typically lacks), or the byte count for blobs. If X is NULL, length(X) is also NULL. For numeric X, it returns the length of its string representation.</p>\n<pre><code>select length('hello');\n-&gt; 5\n\nselect length(x'ff00ee');\n-&gt; 3\n\nselect length(NULL);\n-&gt; NULL\n</code></pre>"
   },
+  "libsql_vector_idx": {
+    "syntax": "libsql_vector_idx(X)",
+    "description": "<p>Use the <strong>libsql<em>vector</em>idx</strong> expression in the CREATE INDEX statement to create an ANN index.</p>\n<pre><code>CREATE INDEX movies_idx ON movies (libsql_vector_idx(embedding));\n</code></pre>"
+  },
   "like": {
     "syntax": "like(X,Y), like(X,Y,Z)",
     "description": "<p>The like() function checks if the string Y matches the pattern X in the \"Y LIKE X [ESCAPE Z]\" expression.</p>\n<pre><code>select like('hel%', 'hello')\n-&gt; 1\n\nselect like('wor%', 'hello')\n-&gt; 0\n</code></pre>"
@@ -142,5 +146,21 @@
   "total": {
     "syntax": "total(X)",
     "description": "<p>The function returns the sum of all non-NULL values in the group, with a result of 0.0 if there are no non-NULL inputs.\nThe result of total() is always a floating point value.</p>"
+  },
+  "vector": {
+    "syntax": "vector(X)",
+    "description": "<p>Function to convert a vector from string format to binary.</p>\n<pre><code>INSERT INTO movies (title, year, embedding) VALUES('Napoleon', 2023, vector('[1,2,3]'));\n</code></pre>"
+  },
+  "vector_distance_cos": {
+    "syntax": "vector_distance_cos(X, Y)",
+    "description": "<p>Function to calculate cosine distance between two vectors.\nIt computes the distance as 1 minus the cosine similarity,\nmeaning a smaller distance indicates closer vectors.</p>\n<pre><code>SELECT * FROM movie\nORDER BY vector_distance_cos(embedding, '[3,1,2]')\n</code></pre>"
+  },
+  "vector_extract": {
+    "syntax": "vector_extract(X)",
+    "description": "<p>Function to extract string from binary vector</p>\n<pre><code>SELECT title,\n  vector_extract(embedding),\n  vector_distance_cos(embedding, vector('[5,6,7]'))\nFROM movies;\n</code></pre>"
+  },
+  "vector_top_k": {
+    "syntax": "vector_top_k(idx_name, q_vector, k)",
+    "description": "<p>Use <strong>vector<em>top</em>k</strong> with the <strong>idx<em>name</strong> index to efficiently find the top k most similar vectors to <strong>q</em>vector</strong></p>\n<pre><code>SELECT title, year\nFROM vector_top_k('movies_idx', vector('[4,5,6]'), 3)\nJOIN movies ON movies.rowid = id\n</code></pre>"
   }
 }

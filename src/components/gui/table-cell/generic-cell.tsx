@@ -118,34 +118,35 @@ function BlobCellValue({
   vector?: boolean;
 }) {
   if (vector) {
-    const floatArray = [...new Float32Array(new Uint8Array(value).buffer)].join(
-      ", "
-    );
+    const floatArray = new Float32Array(new Uint8Array(value).buffer);
+    const floatArrayText = floatArray.join(", ");
 
     return (
       <div className="flex">
         <div className="mr-2 justify-center items-center flex-col">
           <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
-            vec
+            vec({floatArray.length})
           </span>
         </div>
-        <div className="text-orange-600">[{floatArray}]</div>
+        <div className="text-orange-600">[{floatArrayText}]</div>
       </div>
     );
   } else {
-    const sliceByte = value.slice(0, 64);
+    const bytes = new Uint8Array(value);
     const base64Text = btoa(
-      new Uint8Array(sliceByte).reduce(
-        (data, byte) => data + String.fromCharCode(byte),
-        ""
-      )
+      bytes
+        .slice(0, 64)
+        .reduce((data, byte) => data + String.fromCharCode(byte), "")
     );
 
     return (
       <div className="flex">
         <div className="mr-2 justify-center items-center flex-col">
           <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
-            blob
+            {bytes.length.toLocaleString(undefined, {
+              maximumFractionDigits: 0,
+            })}{" "}
+            bytes
           </span>
         </div>
         <div className="text-orange-600">{base64Text}</div>
@@ -241,7 +242,10 @@ export default function GenericCell({
       return (
         <BlobCellValue
           value={value}
-          vector={header.headerData?.type.includes("F32_BLOB")}
+          vector={
+            header.originalDataType?.includes("F32_BLOB") ||
+            header.originalDataType?.includes("FLOAT32 ")
+          }
         />
       );
     }
