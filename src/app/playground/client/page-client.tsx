@@ -62,7 +62,15 @@ export default function PlaygroundEditorBody({
 
         localDb.file_handler.get(fileHandlerId).then((sessionData) => {
           if (sessionData?.handler) {
-            setHandler(sessionData.handler);
+            sessionData.handler.queryPermission().then((permission) => {
+              if (permission !== "granted") {
+                sessionData.handler.requestPermission().then(() => {
+                  setHandler(sessionData.handler);
+                });
+              } else {
+                setHandler(sessionData.handler);
+              }
+            });
           }
         });
       } else {
