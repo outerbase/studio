@@ -19,14 +19,21 @@ interface IndexDbDoc {
   updated_at: number;
 }
 
+interface IndexDbFileHandler {
+  id: string;
+  handler: FileSystemFileHandle;
+}
+
 const localDb = new Dexie("libstudio") as Dexie & {
   namespace: EntityTable<IndexDbNamespace, "id">;
   saved_doc: EntityTable<IndexDbDoc, "id">;
+  file_handler: EntityTable<IndexDbFileHandler, "id">;
 };
 
-localDb.version(1).stores({
+localDb.version(2).stores({
   namespace: "++id, database_id",
   saved_doc: "++id, database_id, namespace_id",
+  file_handler: "++id, handler",
 });
 
 export { localDb };

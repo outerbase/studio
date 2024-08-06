@@ -43,7 +43,9 @@ export default function ConnectionItemCard({
           )}
           href={
             conn.storage === "local"
-              ? `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`
+              ? conn.driver === "sqlite-filehandler"
+                ? `/playground/client?s=${conn.id}`
+                : `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`
               : `/client/r?p=${conn.id}`
           }
         >

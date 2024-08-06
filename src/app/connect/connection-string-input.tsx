@@ -5,6 +5,7 @@ import {
   SupportedDriver,
 } from "./saved-connection-storage";
 import { Input } from "@/components/ui/input";
+import FileHandlerPicker from "@/components/filehandler-picker";
 
 export default function ConnectionStringInput({
   value,
@@ -62,6 +63,15 @@ export default function ConnectionStringInput({
               value={value[field.name]}
               onChange={(e) => {
                 onChange({ ...value, [field.name]: e.currentTarget.value });
+              }}
+            />
+          );
+        } else if (field.type === "filehandler") {
+          inputDom = (
+            <FileHandlerPicker
+              value={value[field.name]}
+              onChange={(fileId) => {
+                onChange({ ...value, [field.name]: fileId });
               }}
             />
           );

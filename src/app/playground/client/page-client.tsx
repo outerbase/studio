@@ -15,6 +15,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSearchParams } from "next/navigation";
+import { localDb } from "@/indexdb";
+import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
@@ -22,6 +25,7 @@ export default function PlaygroundEditorBody({
   preloadDatabase?: string | null;
 }) {
   const [sqlInit, setSqlInit] = useState<SqlJsStatic>();
+  const searchParams = useSearchParams();
   const [databaseLoading, setDatabaseLoading] = useState(!!preloadDatabase);
   const [rawDb, setRawDb] = useState<Database>();
   const [db, setDb] = useState<SqljsDriver>();
@@ -46,13 +50,28 @@ export default function PlaygroundEditorBody({
             setDb(new SqljsDriver(sqljsDatabase));
           })
           .finally(() => setDatabaseLoading(false));
+      } else if (searchParams.get("s")) {
+        const sessionId = searchParams.get("s");
+        if (!sessionId) return;
+
+        const session = SavedConnectionLocalStorage.get(sessionId);
+        if (!session) return;
+
+        const fileHandlerId = session?.config.filehandler;
+        if (!fileHandlerId) return;
+
+        localDb.file_handler.get(fileHandlerId).then((sessionData) => {
+          if (sessionData?.handler) {
+            setHandler(sessionData.handler);
+          }
+        });
       } else {
         const sqljsDatabase = new sqlInit.Database();
         setRawDb(sqljsDatabase);
         setDb(new SqljsDriver(sqljsDatabase));
       }
     }
-  }, [sqlInit, preloadDatabase]);
+  }, [sqlInit, preloadDatabase, searchParams]);
 
   useEffect(() => {
     if (handler && sqlInit) {
@@ -203,7 +222,7 @@ export default function PlaygroundEditorBody({
         </div>
       </div>
     );
-  }, [rawDb, handler, db, fileName]);
+  }, [rawDb, handler, db, fileName, onReloadDatabase]);
 
   useEffect(() => {
     if (handler && db) {

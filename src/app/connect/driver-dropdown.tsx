@@ -82,16 +82,30 @@ export default function DriverDropdown({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
+            onSelect("sqlite-filehandler");
+          }}
+        >
+          <div className="flex gap-4 px-2 items-center h-16">
+            <img src="/sqlite-icon.svg" alt="sqlite" className="w-9 h-9" />
+            <div>
+              <div className="font-bold">Open SQLite File</div>
+              <div className="text-xs opacity-50">
+                Open SQLite file database directly in your browser.
+              </div>
+            </div>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
             router.push("/playground/client");
           }}
         >
           <div className="flex gap-4 px-2 items-center h-16">
-            <img src="/sqlite-icon.svg" alt="rqlite" className="w-9 h-9" />
+            <img src="/sqlite-icon.svg" alt="sqlite" className="w-9 h-9" />
             <div>
-              <div className="font-bold">SQLite</div>
+              <div className="font-bold">Blank SQLite</div>
               <div className="text-xs opacity-50">
-                Open an SQLite file or start a new SQLite database directly in
-                your browser.
+                Start a new SQLite database directly in your browser.
               </div>
             </div>
           </div>
