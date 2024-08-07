@@ -1,4 +1,4 @@
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItem } from "@/app/(theme)/connect/saved-connection-storage";
 import { get_database } from "@/db";
 import { database, database_user_role, user as userTable } from "@/db/schema";
 import withUser from "@/lib/with-user";

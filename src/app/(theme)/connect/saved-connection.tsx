@@ -2,13 +2,14 @@ import { useCallback, useState } from "react";
 import ConnectionDialogContent from "./saved-connection-content";
 import SaveConnectionType from "./saved-connection-type";
 import {
+  DRIVER_DETAIL,
   SavedConnectionItem,
   SavedConnectionItemConfig,
   SavedConnectionItemWithoutId,
   SavedConnectionLocalStorage,
   SavedConnectionStorage,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@/app/(theme)/connect/saved-connection-storage";
 import SavedConnectionConfig from "./saved-connection-config";
 import { createDatabase } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
@@ -51,9 +52,11 @@ export default function SaveConnection({
   const [storage, setStorage] = useState<SavedConnectionStorage | undefined>(
     user ? undefined : "local"
   );
-  const [step, setStep] = useState<SaveConnectionStep>(
-    user ? "storage" : "config"
-  );
+  const [step, setStep] = useState<SaveConnectionStep>(() => {
+    if (!user) return "config";
+    if (DRIVER_DETAIL[driver].disableRemote) return "config";
+    return "storage";
+  });
   const [loading, setLoading] = useState(false);
 
   const onConnectionTypeSelected = useCallback(
