@@ -9,7 +9,7 @@ import {
   SavedConnectionLocalStorage,
   SavedConnectionStorage,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@/app/(theme)/connect/saved-connection-storage";
 import SavedConnectionConfig from "./saved-connection-config";
 import { createDatabase } from "@/lib/api/fetch-databases";
 import { User } from "lucia";

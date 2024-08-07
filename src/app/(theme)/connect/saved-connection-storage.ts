@@ -329,6 +329,13 @@ export class SavedConnectionLocalStorage {
     ).map(mapRaw);
   }
 
+  static getDetailList(): SavedConnectionItemDetail[] {
+    return parseSafeJson<SavedConnectionRawLocalStorage[]>(
+      localStorage.getItem("connections"),
+      []
+    ).map(mapDetailRaw);
+  }
+
   static remove(id: string) {
     const tmp = getAllConnections().filter((conn) => conn.id !== id);
     localStorage.setItem("connections", JSON.stringify(tmp));

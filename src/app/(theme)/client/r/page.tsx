@@ -1,4 +1,4 @@
-import type { SavedConnectionLabel } from "@/app/connect/saved-connection-storage";
+import type { SavedConnectionLabel } from "@/app/(theme)/connect/saved-connection-storage";
 import { get_database } from "@/db";
 import { database } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";

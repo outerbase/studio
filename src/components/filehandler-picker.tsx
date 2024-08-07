@@ -3,6 +3,58 @@ import { Button, buttonVariants } from "./ui/button";
 import { localDb } from "@/indexdb";
 import { LucideFile, LucideFolderClosed } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
+
+/**
+ * Cleanup file handler from indexdb database when
+ * it is no longer needed.
+ */
+async function cleanupFileHandler() {
+  const connectionList = SavedConnectionLocalStorage.getDetailList();
+  const validHandlerIds = new Set(
+    connectionList.map((c) => c.config?.filehandler).filter(Boolean) as string[]
+  );
+
+  const fileHandlerList = (await localDb.file_handler.toArray()).map(
+    (r) => r.id
+  );
+
+  for (const id of fileHandlerList) {
+    if (!validHandlerIds.has(id)) {
+      await localDb.file_handler.delete(id);
+    }
+  }
+}
+
+async function openFileHandler() {
+  const [newFileHandler] = await window.showOpenFilePicker({
+    types: [
+      {
+        description: "SQLite Files",
+        accept: {
+          "application/x-sqlite3": [
+            ".db",
+            ".sdb",
+            ".sqlite",
+            ".db3",
+            ".s3db",
+            ".sqlite3",
+            ".sl3",
+            ".db2",
+            ".s2db",
+            ".sqlite2",
+            ".sl2",
+          ],
+        },
+      },
+    ],
+  });
+
+  const id = crypto.randomUUID();
+  localDb.file_handler.add({ id, handler: newFileHandler }).then();
+
+  return id;
+}
 
 export default function FileHandlerPicker({
   value,
@@ -24,37 +76,10 @@ export default function FileHandlerPicker({
   }, [value]);
 
   const onChangeFile = useCallback(() => {
-    window
-      .showOpenFilePicker({
-        types: [
-          {
-            description: "SQLite Files",
-            accept: {
-              "application/x-sqlite3": [
-                ".db",
-                ".sdb",
-                ".sqlite",
-                ".db3",
-                ".s3db",
-                ".sqlite3",
-                ".sl3",
-                ".db2",
-                ".s2db",
-                ".sqlite2",
-                ".sl2",
-              ],
-            },
-          },
-        ],
-      })
-      .then(([newFileHandler]) => {
-        if (newFileHandler) {
-          const id = crypto.randomUUID();
-          localDb.file_handler
-            .add({ id, handler: newFileHandler })
-            .then(() => onChange(id));
-        }
-      });
+    cleanupFileHandler()
+      .then(openFileHandler)
+      .then(onChange)
+      .catch(console.error);
   }, [onChange]);
 
   if (handler) {

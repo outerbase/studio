@@ -11,7 +11,7 @@ import {
   SupportedDriver,
   prefillConnectionString,
   validateConnectionString,
-} from "@/app/connect/saved-connection-storage";
+} from "@/app/(theme)/connect/saved-connection-storage";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import { LucideLoader } from "lucide-react";

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useSearchParams } from "next/navigation";
 import { localDb } from "@/indexdb";
-import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,

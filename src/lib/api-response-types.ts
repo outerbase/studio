@@ -1,4 +1,4 @@
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItem } from "@/app/(theme)/connect/saved-connection-storage";
 import {
   DatabaseResultSet,
   DatabaseSchemaItem,

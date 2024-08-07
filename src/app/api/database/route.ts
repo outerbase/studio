@@ -5,7 +5,7 @@ import { database, database_role, database_user_role } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
 import { encrypt } from "@/lib/encryption-edge";
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItem } from "@/app/(theme)/connect/saved-connection-storage";
 import { get_database } from "@/db";
 
 export const runtime = "edge";
