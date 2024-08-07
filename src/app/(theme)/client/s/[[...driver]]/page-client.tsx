@@ -1,5 +1,5 @@
 "use client";
-import { SavedConnectionLocalStorage } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import RqliteDriver from "@/drivers/rqlite-driver";
 import TursoDriver from "@/drivers/turso-driver";
 import ValtownDriver from "@/drivers/valtown-driver";

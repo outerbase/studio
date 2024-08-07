@@ -3,7 +3,7 @@ import parseSafeJson from "@/lib/json-safe";
 
 export interface DriverDetailField {
   name: keyof SavedConnectionItemConfigConfig;
-  type: "text" | "textarea" | "password";
+  type: "text" | "textarea" | "password" | "filehandler";
   secret?: boolean;
   required?: boolean;
   title?: string;
@@ -16,11 +16,26 @@ export interface DriverDetailField {
 export interface DriverDetail {
   name: string;
   icon: string;
+  disableRemote?: boolean;
   fields: DriverDetailField[];
 }
 
 export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
   Object.freeze({
+    "sqlite-filehandler": {
+      name: "sqlite-filehandler",
+      icon: "/sqlite-icon.svg",
+      disableRemote: true,
+      fields: [
+        {
+          name: "filehandler",
+          required: true,
+          type: "filehandler",
+          title: "File",
+          description: "",
+        },
+      ],
+    },
     turso: {
       name: "turso",
       icon: "/turso.jpeg",
@@ -178,7 +193,12 @@ export function prefillConnectionString(
   };
 }
 
-export type SupportedDriver = "turso" | "rqlite" | "valtown" | "cloudflare-d1";
+export type SupportedDriver =
+  | "turso"
+  | "rqlite"
+  | "valtown"
+  | "cloudflare-d1"
+  | "sqlite-filehandler";
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 
@@ -208,6 +228,7 @@ export interface SavedConnectionItemConfigConfig {
   username?: string;
   password?: string;
   database?: string;
+  filehandler?: string;
 }
 
 export interface SavedConnectionItemConfig {
@@ -236,6 +257,7 @@ interface SavedConnectionRawLocalStorage {
   database: string;
   driver?: SupportedDriver;
   label?: SavedConnectionLabel;
+  file_handler?: string;
   description?: string;
   last_used: number;
 }
@@ -250,6 +272,7 @@ function configToRaw(
     driver: data.driver ?? "turso",
     url: data.config?.url ?? "",
     token: data.config?.token ?? "",
+    file_handler: data.config?.filehandler,
     username: data.config?.username ?? "",
     password: data.config?.password ?? "",
     database: data.config?.database ?? "",
@@ -286,6 +309,7 @@ function mapDetailRaw(
       password: data.password,
       username: data.username,
       database: data.database,
+      filehandler: data.file_handler,
     },
   };
 }
@@ -303,6 +327,13 @@ export class SavedConnectionLocalStorage {
       localStorage.getItem("connections"),
       []
     ).map(mapRaw);
+  }
+
+  static getDetailList(): SavedConnectionItemDetail[] {
+    return parseSafeJson<SavedConnectionRawLocalStorage[]>(
+      localStorage.getItem("connections"),
+      []
+    ).map(mapDetailRaw);
   }
 
   static remove(id: string) {

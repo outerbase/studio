@@ -5,7 +5,7 @@ import { database } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { encrypt } from "@/lib/encryption-edge";
 import { env } from "@/env";
-import { SavedConnectionItemConfig } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItemConfig } from "@/app/(theme)/connect/saved-connection-storage";
 import { get_database } from "@/db";
 
 export const runtime = "edge";

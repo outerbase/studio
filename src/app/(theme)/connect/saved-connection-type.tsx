@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { SavedConnectionStorage } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 

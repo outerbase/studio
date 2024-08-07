@@ -1,5 +1,5 @@
 "use client";
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItem } from "@/app/(theme)/connect/saved-connection-storage";
 import CollaborationDriver from "@/drivers/collaboration-driver";
 import RemoteDriver from "@/drivers/remote-driver";
 import { useSearchParams } from "next/navigation";

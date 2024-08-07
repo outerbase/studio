@@ -13,7 +13,7 @@ import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@/app/(theme)/connect/saved-connection-storage";
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
 import ConnectionItemCard from "./saved-connection-card";
