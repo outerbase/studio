@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import {
   index,
   int,
@@ -74,49 +73,5 @@ export const database_user_role = sqliteTable(
   },
   (table) => {
     return { pk: primaryKey({ columns: [table.databaseId, table.userId] }) };
-  }
-);
-
-export const database_role_permission = sqliteTable(
-  "database_role_permission",
-  {
-    id: text("id").primaryKey(),
-    roleId: text("role_id")
-      .notNull()
-      .references(() => database_role.id),
-
-    type: text("role").$type<DatabaseRoleType>(),
-    access: text("access").$type<DatabaseRoleAccess>(),
-    tableName: text("table_name"),
-    columnName: text("column_name"),
-
-    createdBy: text("created_by").references(() => user.id),
-    createdAt: int("created_at"),
-    updatedBy: text("updated_by").references(() => user.id),
-    updatedAt: int("updated_at"),
-  },
-  (table) => {
-    return {
-      databaseRoleIdx: index("role_permission_table_idx").on(
-        table.roleId,
-        table.tableName
-      ),
-    };
-  }
-);
-
-export const databaseRoleRelation = relations(database_role, ({ many }) => {
-  return { permissions: many(database_role_permission) };
-});
-
-export const databaseRolePermissionRelation = relations(
-  database_role_permission,
-  ({ one }) => {
-    return {
-      role: one(database_role, {
-        fields: [database_role_permission.roleId],
-        references: [database_role.id],
-      }),
-    };
   }
 );
