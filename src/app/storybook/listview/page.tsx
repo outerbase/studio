@@ -39,7 +39,7 @@ export default function ListViewStorybookPage() {
               },
               {
                 name: "delete_movies",
-                key: "movies.delete_reviews",
+                key: "movies.delete_movies",
                 icon: LucideTable,
               },
             ],
@@ -71,6 +71,31 @@ export default function ListViewStorybookPage() {
           onCollapsedChange={setCollapsed}
           selectedKey={selected}
           onSelectChange={setSelected}
+        />
+      </div>
+      <br />
+      <div className="w-[300px] border-r">
+        <ListView
+          items={[
+            {
+              name: "insert_movies",
+              key: "movies.insert_movies",
+              icon: LucideTable,
+              data: {},
+            },
+            {
+              name: "update_movies",
+              key: "movies.update_users",
+              icon: LucideTable,
+              data: {},
+            },
+            {
+              name: "delete_movies",
+              key: "movies.delete_movies",
+              icon: LucideTable,
+              data: {},
+            },
+          ]}
         />
       </div>
     </body>

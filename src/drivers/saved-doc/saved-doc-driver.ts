@@ -23,6 +23,11 @@ export interface SavedDocData extends SavedDocInput {
   updatedAt: number;
 }
 
+export interface SavedDocGroupByNamespace {
+  namespace: SavedDocNamespace;
+  docs: SavedDocData[];
+}
+
 export abstract class SavedDocDriver {
   abstract getNamespaces(): Promise<SavedDocNamespace[]>;
   abstract createNamespace(name: string): Promise<SavedDocNamespace>;
@@ -32,7 +37,7 @@ export abstract class SavedDocDriver {
   ): Promise<SavedDocNamespace>;
   abstract removeNamespapce(id: string): Promise<void>;
 
-  abstract getDocs(namespaceId: string): Promise<SavedDocData[]>;
+  abstract getDocs(): Promise<SavedDocGroupByNamespace[]>;
   abstract createDoc(
     type: SavedDocType,
     namespace: string,

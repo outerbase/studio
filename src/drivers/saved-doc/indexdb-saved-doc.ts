@@ -2,6 +2,7 @@ import { localDb } from "@/indexdb";
 import {
   SavedDocData,
   SavedDocDriver,
+  SavedDocGroupByNamespace,
   SavedDocInput,
   SavedDocNamespace,
   SavedDocType,
@@ -162,26 +163,31 @@ export default class IndexdbSavedDoc implements SavedDocDriver {
     };
   }
 
-  async getDocs(namespaceId: string): Promise<SavedDocData[]> {
-    const namespaceData = await localDb.namespace.get(namespaceId);
-    if (!namespaceData) return [];
-
+  async getDocs(): Promise<SavedDocGroupByNamespace[]> {
+    const ns = await this.getNamespaces();
     const docs = await localDb.saved_doc
-      .where({ namespace_id: namespaceId })
+      .where({ database_id: this.databaseId })
       .toArray();
 
-    return docs.map((d) => ({
-      content: d.content,
-      createdAt: d.created_at,
-      id: d.id,
-      name: d.name,
-      namespace: {
-        id: namespaceData.id,
-        name: namespaceData.name,
-      },
-      type: d.type as SavedDocType,
-      updatedAt: d.updated_at,
-    }));
+    return ns.map((n) => {
+      return {
+        namespace: n,
+        docs: docs
+          .filter((d) => d.namespace_id === n.id)
+          .map((d) => ({
+            content: d.content,
+            createdAt: d.created_at,
+            id: d.id,
+            name: d.name,
+            namespace: {
+              id: n.id ?? "",
+              name: n.name ?? "",
+            },
+            type: d.type as SavedDocType,
+            updatedAt: d.updated_at,
+          })),
+      };
+    });
   }
 
   addChangeListener(cb: () => void): void {

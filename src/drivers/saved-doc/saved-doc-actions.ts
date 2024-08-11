@@ -7,7 +7,7 @@ import {
   SavedDocType,
 } from "./saved-doc-driver";
 import { getDatabaseWithAuth } from "@/lib/with-database-ops";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { dbDoc, dbDocNamespace } from "@/db/schema-doc";
 import { generateId } from "lucia";
 import { ApiError } from "@/lib/api-error";
@@ -163,20 +163,22 @@ export async function updateDocNamespace(
 }
 
 export async function getSavedDocList(
-  databaseId: string,
-  namespaceId: string
+  databaseId: string
 ): Promise<SavedDocData[]> {
-  const { db, namespaceData } = await getNamespaceWithAuth(
-    databaseId,
-    namespaceId
-  );
+  const { db } = await getDatabaseWithAuth(databaseId);
+  const ns = await getDocNamespaceList(databaseId);
 
   const docList = await db.query.dbDoc.findMany({
-    where: eq(dbDoc.namespaceId, namespaceId),
+    where: inArray(
+      dbDoc.namespaceId,
+      ns.map((n) => n.id)
+    ),
     orderBy: desc(dbDoc.createdAt),
   });
 
   return docList.map((item) => {
+    const found = ns.find((n) => n.id === item.namespaceId);
+
     return {
       content: item.content ?? "",
       createdAt: item.createdAt ?? 0,
@@ -185,8 +187,8 @@ export async function getSavedDocList(
       name: item.name ?? "",
       type: (item.type ?? "sql") as SavedDocType,
       namespace: {
-        id: namespaceData.id,
-        name: namespaceData.name ?? "",
+        id: found?.id ?? "",
+        name: found?.name ?? "",
       },
     };
   });

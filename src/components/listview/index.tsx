@@ -11,7 +11,7 @@ import {
   LucideChevronRight,
   LucideIcon,
 } from "lucide-react";
-import {
+import React, {
   Dispatch,
   Fragment,
   MutableRefObject,
@@ -51,6 +51,45 @@ interface ListViewRendererProps<T> extends ListViewProps<T> {
   contextOpen: boolean;
 }
 
+function Indentation({ depth }: { depth: number }) {
+  if (depth <= 0) return null;
+
+  return new Array(depth).fill(false).map((_, idx: number) => {
+    return (
+      <div
+        key={idx}
+        className={cn(
+          "ml-2 w-2 border-l border-gray-300 dark:border-gray-500 border-dashed h-full"
+        )}
+      ></div>
+    );
+  });
+}
+
+function CollapsedButton({
+  hasCollapsed,
+  collapsed,
+  onClick,
+}: {
+  hasCollapsed: boolean;
+  collapsed: boolean;
+  onClick: () => void;
+}) {
+  return hasCollapsed ? (
+    <div className="mr-1" onClick={onClick}>
+      {collapsed ? (
+        <LucideChevronDown className={cn("w-4 h-4")} />
+      ) : (
+        <LucideChevronRight className={cn("w-4 h-4")} />
+      )}
+    </div>
+  ) : (
+    <div className="w-2 ml-2 border-l border-gray-300 dark:border-gray-500 border-dashed h-full mr-1 text-gray-300 dark:text-gray-500 relative">
+      <span className="absolute -left-1 top-1.5">●</span>
+    </div>
+  );
+}
+
 function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
   const { items, depth, ...rest } = props;
   const {
@@ -68,14 +107,34 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
   } = rest;
 
   if (items.length === 0) return <Fragment></Fragment>;
+  const listCollapsed = items.some(
+    (item) => item.children && item.children.length > 0
+  );
 
   return (
     <>
       {items.map((item) => {
-        const isCollapsed = collapsedKeys && collapsedKeys.has(item.key);
+        const hasCollaped = !!item.children && item.children.length > 0;
+        const isCollapsed = !!collapsedKeys && collapsedKeys.has(item.key);
+
+        const collapsedClicked = () => {
+          if (onCollapsedChange) {
+            if (collapsedKeys) {
+              const tmpSet = new Set(collapsedKeys);
+              if (tmpSet.has(item.key)) {
+                tmpSet.delete(item.key);
+              } else {
+                tmpSet.add(item.key);
+              }
+              onCollapsedChange(tmpSet);
+            } else {
+              onCollapsedChange(new Set([item.key]));
+            }
+          }
+        };
 
         return (
-          <>
+          <React.Fragment key={item.key}>
             <div
               key={item.key}
               onContextMenu={() => {
@@ -96,7 +155,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
             >
               <div
                 className={cn(
-                  "px-3 flex text-sm items-center gap-0.5 h-8",
+                  "px-1 flex text-xs items-center gap-0.5 h-8",
                   selectedKey === item.key ? "bg-selected" : "hover:bg-accent",
                   contextMenuKey === item.key && contextOpen
                     ? "border border-blue-500"
@@ -106,61 +165,15 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   "cursor-pointer"
                 )}
               >
-                {depth > 0 &&
-                  new Array(depth).fill(false).map((_, idx) => {
-                    const hasCollaped =
-                      item.children &&
-                      item.children.length > 0 &&
-                      idx === depth - 1;
+                <Indentation depth={depth} />
 
-                    return (
-                      <div
-                        onClick={
-                          hasCollaped
-                            ? () => {
-                                if (onCollapsedChange) {
-                                  if (collapsedKeys) {
-                                    const tmpSet = new Set(collapsedKeys);
-                                    if (tmpSet.has(item.key)) {
-                                      tmpSet.delete(item.key);
-                                    } else {
-                                      tmpSet.add(item.key);
-                                    }
-                                    onCollapsedChange(tmpSet);
-                                  } else {
-                                    onCollapsedChange(new Set([item.key]));
-                                  }
-                                }
-                              }
-                            : undefined
-                        }
-                        key={idx}
-                        className={cn(
-                          "w-2 border-l ml-2 mr-1 h-full border-dashed"
-                        )}
-                      >
-                        {hasCollaped ? (
-                          isCollapsed ? (
-                            <LucideChevronDown
-                              className={cn(
-                                "w-4 h-4 -ml-2 mt-2",
-                                item.iconColor
-                              )}
-                            />
-                          ) : (
-                            <LucideChevronRight
-                              className={cn(
-                                "w-4 h-4 -ml-2 mt-2",
-                                item.iconColor
-                              )}
-                            />
-                          )
-                        ) : (
-                          " "
-                        )}
-                      </div>
-                    );
-                  })}
+                {(depth > 0 || listCollapsed) && (
+                  <CollapsedButton
+                    hasCollapsed={hasCollaped}
+                    onClick={collapsedClicked}
+                    collapsed={isCollapsed}
+                  />
+                )}
 
                 {item.icon && (
                   <item.icon className={cn("w-4 h-4 mr-1", item.iconColor)} />
@@ -186,7 +199,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                 depth: depth + 1,
                 items: item.children ?? [],
               })}
-          </>
+          </React.Fragment>
         );
       })}
     </>
@@ -203,16 +216,7 @@ export function ListView<T = unknown>(props: ListViewProps<T>) {
   const stopParentPropagation = useRef<boolean>(false);
 
   const { full, ...rest } = props;
-  const { onContextMenu, items } = rest;
-
-  // Check if any item has children
-  const hasChildren = items.some(
-    (item) => item.children && item.children.length > 0
-  );
-
-  // If there is at least item with children,
-  // We will add the guide line
-  const startingDepth = hasChildren ? 1 : 0;
+  const { onContextMenu } = rest;
 
   return (
     <ContextMenu modal={false} onOpenChange={setContextOpen}>
@@ -220,19 +224,24 @@ export function ListView<T = unknown>(props: ListViewProps<T>) {
         <div
           tabIndex={0}
           className={cn(full ? "grow overflow-auto" : "", "select-none")}
-          onContextMenu={() => {
+          onContextMenu={(e) => {
             if (stopParentPropagation.current) {
               stopParentPropagation.current = false;
               return;
             }
-            if (onContextMenu) setContextMenu(onContextMenu());
+
+            if (onContextMenu) {
+              const menu = onContextMenu();
+              if (menu.length === 0) e.preventDefault();
+            }
+
             setContextMenuKey("");
           }}
         >
           <div className={"flex flex-col gap-0"}>
             {renderList({
               ...rest,
-              depth: startingDepth,
+              depth: 0,
               stopParentPropagation,
               setContextMenu,
               contextMenuKey,

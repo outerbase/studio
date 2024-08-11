@@ -1,68 +1,86 @@
 import { closeTabs, openTab } from "@/messages/open-tab";
-import { Separator } from "@/components/ui/separator";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import {
   SavedDocData,
+  SavedDocGroupByNamespace,
   SavedDocNamespace,
 } from "@/drivers/saved-doc/saved-doc-driver";
 import { ListView, ListViewItem } from "@/components/listview";
-import { LucideCode, LucideFolderGit, LucideTrash } from "lucide-react";
+import { LucideCode, LucideFolder, LucideTrash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import CreateNamespaceButton from "./create-namespace-button";
 import RenameNamespaceDialog from "./rename-namespace-dialog";
 import RemoveDocDialog from "./remove-doc-dialog";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
 import RemoveNamespaceDialog from "./remove-namespace-dialog";
+import { OpenContextMenuList } from "@/messages/open-context-menu";
+import { Separator } from "@/components/ui/separator";
 
-function mapNamespace(
-  data: SavedDocNamespace
-): ListViewItem<SavedDocNamespace> {
-  return {
-    data,
-    key: data.id,
-    icon: LucideFolderGit,
-    name: data.name,
-  };
+type SavedDocListData =
+  | {
+      type: "namespace";
+      data: SavedDocNamespace;
+    }
+  | {
+      type: "doc";
+      data: SavedDocData;
+    };
+
+function mapDoc(
+  data: SavedDocGroupByNamespace[]
+): ListViewItem<SavedDocListData>[] {
+  return data.map((ns) => {
+    return {
+      data: { type: "namespace", data: ns.namespace },
+      key: ns.namespace.id,
+      icon: LucideFolder,
+      name: ns.namespace.name,
+      children: ns.docs.map((d) => {
+        return {
+          key: d.id,
+          data: { type: "doc", data: d },
+          icon: LucideCode,
+          name: d.name,
+        };
+      }) as ListViewItem<SavedDocListData>[],
+    };
+  });
 }
 
-function mapDoc(data: SavedDocData): ListViewItem<SavedDocData> {
-  return {
-    data,
-    key: data.id,
-    icon: LucideCode,
-    iconColor: "text-orange-500",
-    name: data.name,
-  };
-}
-
-function SavedDocNamespaceDocList({
-  namespaceData,
-}: {
-  namespaceData?: SavedDocNamespace;
-}) {
+export default function SavedDocTab() {
   const { docDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState<string>();
-  const [docList, setDocList] = useState<ListViewItem<SavedDocData>[]>([]);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  const [namespaceToRename, setNamespaceToRename] =
+    useState<SavedDocNamespace>();
+  const [namespaceToRemove, setNamespaceToRemove] =
+    useState<SavedDocNamespace>();
   const [docToRemove, setDocToRemove] = useState<SavedDocData | undefined>();
 
+  const [docList, setDocList] = useState<ListViewItem<SavedDocListData>[]>([]);
+
+  const refresh = useCallback(() => {
+    if (docDriver) {
+      docDriver
+        .getDocs()
+        .then((r) => setDocList(mapDoc(r)))
+        .catch(console.error);
+    }
+  }, [docDriver]);
+
   useEffect(() => {
-    const namespaceId = namespaceData?.id;
+    refresh();
 
-    if (docDriver && namespaceId) {
-      docDriver.getDocs(namespaceId).then((r) => {
-        setDocList(r.map(mapDoc));
-      });
-
+    if (docDriver) {
       const onDocChange = () => {
-        docDriver?.getDocs(namespaceId).then((r) => {
-          setDocList(r.map(mapDoc));
-        });
+        refresh();
       };
 
       docDriver.addChangeListener(onDocChange);
       return () => docDriver.removeChangeListener(onDocChange);
     }
-  }, [docDriver, namespaceData]);
+  }, [refresh, docDriver]);
 
   let dialog: JSX.Element | null = null;
 
@@ -74,11 +92,8 @@ function SavedDocNamespaceDocList({
           setDocToRemove(undefined);
         }}
         onComplete={() => {
-          const namespaceId = namespaceData?.id;
-          if (docDriver && namespaceId) {
-            docDriver.getDocs(namespaceId).then((r) => {
-              setDocList(r.map(mapDoc));
-            });
+          if (docDriver) {
+            refresh();
             closeTabs([TAB_PREFIX_SAVED_QUERY + docToRemove.id]);
           }
         }}
@@ -86,91 +101,16 @@ function SavedDocNamespaceDocList({
     );
   }
 
-  return (
-    <>
-      {dialog}
-      <ListView
-        items={docList}
-        full
-        onSelectChange={setSelected}
-        selectedKey={selected}
-        onContextMenu={(item) => {
-          return [
-            {
-              title: "Remove",
-              onClick: () => {
-                if (item) {
-                  setDocToRemove(item.data);
-                }
-              },
-              icon: LucideTrash,
-              destructive: true,
-              disabled: !item,
-            },
-          ];
-        }}
-        onDoubleClick={(item: ListViewItem<SavedDocData>) => {
-          openTab({
-            type: "query",
-            name: item.name,
-            saved: {
-              key: item.key,
-              sql: item.data.content,
-              namespaceName: namespaceData?.name,
-            },
-          });
-        }}
-      />
-    </>
-  );
-}
-
-export default function SavedDocTab() {
-  const { docDriver } = useDatabaseDriver();
-  const [selectedNamespace, setSelectedNamespace] = useState<string>();
-
-  const [namespaceToRename, setNamespaceToRename] =
-    useState<SavedDocNamespace>();
-  const [namespaceToRemove, setNamespaceToRemove] =
-    useState<SavedDocNamespace>();
-
-  const [namespaceList, setNamespaceList] = useState<
-    ListViewItem<SavedDocNamespace>[]
-  >([]);
-
-  useEffect(() => {
-    if (docDriver) {
-      docDriver.getNamespaces().then((r) => {
-        setNamespaceList(r.map(mapNamespace));
-        const firstNamespaceId = r[0].id;
-        setSelectedNamespace(firstNamespaceId);
-      });
-    }
-  }, [docDriver]);
-
-  const onNamespaceCreated = useCallback(
-    (createdNamespace: SavedDocNamespace) => {
-      if (docDriver) {
-        docDriver.getNamespaces().then((r) => {
-          setNamespaceList(r.map(mapNamespace));
-          setSelectedNamespace(createdNamespace.id);
-        });
-      }
-    },
-    [docDriver]
-  );
-
-  let dialog: JSX.Element | null = null;
-
   if (namespaceToRename) {
     dialog = (
       <RenameNamespaceDialog
         onClose={() => setNamespaceToRename(undefined)}
         onComplete={() => {
           if (docDriver) {
-            docDriver.getNamespaces().then((r) => {
-              setNamespaceList(r.map(mapNamespace));
-            });
+            docDriver
+              .getDocs()
+              .then((r) => setDocList(mapDoc(r)))
+              .catch(console.error);
           }
         }}
         value={namespaceToRename}
@@ -185,18 +125,7 @@ export default function SavedDocTab() {
         onComplete={(docs) => {
           if (docDriver) {
             closeTabs(docs.map((d) => TAB_PREFIX_SAVED_QUERY + d.id));
-
-            // Refresh new namespace list
-            docDriver
-              .getNamespaces()
-              .then((r) => {
-                setNamespaceList(r.map(mapNamespace));
-
-                if (selectedNamespace === namespaceToRemove.id) {
-                  setSelectedNamespace(r[0].id);
-                }
-              })
-              .catch(console.error);
+            refresh();
           }
         }}
         value={namespaceToRemove}
@@ -207,19 +136,43 @@ export default function SavedDocTab() {
   return (
     <>
       {dialog}
-      <div className="flex flex-col grow">
-        <div>
-          <ListView
-            items={namespaceList}
-            selectedKey={selectedNamespace}
-            onSelectChange={setSelectedNamespace}
-            onContextMenu={(item) => {
-              return [
+
+      <div className="flex flex-col grow pt-1">
+        <div className="px-2 py-1">
+          <CreateNamespaceButton onCreated={refresh} />
+        </div>
+        <Separator />
+        <ListView
+          full
+          items={docList}
+          selectedKey={selected}
+          onSelectChange={setSelected}
+          collapsedKeys={collapsed}
+          onCollapsedChange={setCollapsed}
+          onDoubleClick={(item: ListViewItem<SavedDocListData>) => {
+            if (item.data.type === "doc") {
+              openTab({
+                type: "query",
+                name: item.name,
+                saved: {
+                  key: item.key,
+                  sql: item.data.data.content,
+                  namespaceName: item.data.data.namespace.name,
+                },
+              });
+            }
+          }}
+          onContextMenu={(item) => {
+            let menu: OpenContextMenuList = [];
+
+            if (item?.data.type === "namespace") {
+              menu = [
+                ...menu,
                 {
                   title: "Rename",
                   disabled: !item,
                   onClick: () => {
-                    if (item) setNamespaceToRename(item.data);
+                    if (item) setNamespaceToRename(item.data.data);
                   },
                 },
                 {
@@ -228,22 +181,30 @@ export default function SavedDocTab() {
                   destructive: true,
                   disabled: !item,
                   onClick: () => {
-                    if (item) setNamespaceToRemove(item.data);
+                    if (item) setNamespaceToRemove(item.data.data);
                   },
                 },
               ];
-            }}
-          />
-          <CreateNamespaceButton onCreated={onNamespaceCreated} />
-        </div>
-        <Separator />
-        <div className="grow overflow-hidden flex">
-          <SavedDocNamespaceDocList
-            namespaceData={
-              namespaceList.find((n) => n.key === selectedNamespace)?.data
+            } else if (item?.data.type === "doc") {
+              menu = [
+                ...menu,
+                {
+                  title: "Remove",
+                  onClick: () => {
+                    if (item) {
+                      setDocToRemove(item.data.data as SavedDocData);
+                    }
+                  },
+                  icon: LucideTrash,
+                  destructive: true,
+                  disabled: !item,
+                },
+              ];
             }
-          />
-        </div>
+
+            return menu;
+          }}
+        />
       </div>
     </>
   );

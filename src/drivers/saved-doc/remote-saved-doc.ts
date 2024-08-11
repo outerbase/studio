@@ -11,6 +11,7 @@ import {
 import {
   SavedDocData,
   SavedDocDriver,
+  SavedDocGroupByNamespace,
   SavedDocInput,
   SavedDocNamespace,
   SavedDocType,
@@ -30,7 +31,18 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     if (this.cacheNamespaceList) {
       return this.cacheNamespaceList;
     }
+
     const t = await getDocNamespaceList(this.databaseId);
+    const d = await getSavedDocList(this.databaseId);
+
+    this.cacheDocs = d.reduce(
+      (a, b) => {
+        if (!a[b.namespace.id]) a[b.namespace.id] = [b];
+        else a[b.namespace.id].push(b);
+        return a;
+      },
+      {} as Record<string, SavedDocData[]>
+    );
     this.cacheNamespaceList = t;
     return t;
   }
@@ -89,14 +101,15 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     return r;
   }
 
-  async getDocs(namespaceId: string): Promise<SavedDocData[]> {
-    if (this.cacheDocs[namespaceId]) {
-      return this.cacheDocs[namespaceId];
-    }
+  async getDocs(): Promise<SavedDocGroupByNamespace[]> {
+    const ns = await this.getNamespaces();
 
-    const t = await getSavedDocList(this.databaseId, namespaceId);
-    this.cacheDocs[namespaceId] = t;
-    return t;
+    return ns.map((n) => {
+      return {
+        namespace: n,
+        docs: this.cacheDocs[n.id] ?? [],
+      };
+    });
   }
 
   async updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData> {
