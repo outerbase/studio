@@ -7,6 +7,7 @@ import type {
   DatabaseTableOperationReslt,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
+  DatabaseValue,
   SelectFromTableOptions,
 } from "./base-driver";
 import { BaseDriver } from "./base-driver";
@@ -142,6 +143,20 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
     return await this.legacyTableSchema(tableName);
   }
 
+  async findFirst(
+    tableName: string,
+    key: Record<string, DatabaseValue>
+  ): Promise<DatabaseResultSet> {
+    const wherePart = Object.entries(key)
+      .map(([colName, colValue]) => {
+        return `${this.escapeId(colName)} = ${escapeSqlValue(colValue)}`;
+      })
+      .join(", ");
+
+    const sql = `SELECT * FROM ${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
+    return this.query(sql);
+  }
+
   async selectTable(
     tableName: string,
     options: SelectFromTableOptions
@@ -196,6 +211,7 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
     });
 
     const result = await this.transaction(sqls);
+    console.log("result", result);
 
     const tmp: DatabaseTableOperationReslt[] = [];
 
@@ -254,9 +270,9 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
         } else {
           tmp.push({});
         }
+      } else {
+        tmp.push({});
       }
-
-      tmp.push({});
     }
 
     return tmp;

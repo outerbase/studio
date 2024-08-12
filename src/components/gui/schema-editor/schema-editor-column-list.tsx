@@ -31,6 +31,7 @@ import ColumnUniquePopup from "./column-unique-popup";
 import ColumnForeignKeyPopup from "./column-fk-popup";
 import ColumnGeneratingPopup from "./column-generate-popup";
 import ColumnCheckPopup from "./column-check-popup";
+import { Button } from "@/components/ui/button";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
@@ -292,9 +293,11 @@ function ColumnItem({
 export default function SchemaEditorColumnList({
   columns,
   onChange,
+  onAddColumn,
 }: Readonly<{
   columns: DatabaseTableColumnChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  onAddColumn: () => void;
 }>) {
   const headerStyle = "text-xs p-2 text-left bg-secondary border";
 
@@ -317,6 +320,15 @@ export default function SchemaEditorColumnList({
             <ColumnItem idx={idx} value={col} key={idx} onChange={onChange} />
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={7} className="px-4 py-2 border">
+              <Button size="sm" onClick={onAddColumn}>
+                <LucidePlus className="w-4 h-4 mr-1" /> Add Column
+              </Button>
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

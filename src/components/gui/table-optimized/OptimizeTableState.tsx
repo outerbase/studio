@@ -56,7 +56,8 @@ export default class OptimizeTableState {
             const currentCell = dataResult.rows[i];
             if (currentCell) {
               maxSize = Math.max(
-                (currentCell[headerName ?? ""]?.toString() ?? "").length
+                (currentCell[headerName ?? ""]?.toString() ?? "").length,
+                maxSize
               );
             }
           }
@@ -76,8 +77,8 @@ export default class OptimizeTableState {
           for (const c of schemaResult.constraints) {
             if (
               c.foreignKey &&
-              c.foreignKey.foreignColumns?.length === 1 &&
-              c.foreignKey.foreignColumns[0] === header.name
+              c.foreignKey.columns?.length === 1 &&
+              c.foreignKey.columns[0] === header.name
             ) {
               foreignKey = c.foreignKey;
             }
@@ -121,6 +122,10 @@ export default class OptimizeTableState {
 
   setReadOnlyMode(readOnly: boolean) {
     this.readOnlyMode = readOnly;
+  }
+
+  getReadOnlyMode() {
+    return this.readOnlyMode;
   }
 
   setContainer(div: HTMLDivElement | null) {
@@ -187,6 +192,8 @@ export default class OptimizeTableState {
   }
 
   changeValue(y: number, x: number, newValue: unknown) {
+    if (this.readOnlyMode) return;
+
     const oldValue = this.getOriginalValue(y, x);
 
     const row = this.data[y];
@@ -382,7 +389,6 @@ export default class OptimizeTableState {
   }
 
   enterEditMode() {
-    if (this.readOnlyMode) return;
     this.editMode = true;
     this.broadcastChange();
   }

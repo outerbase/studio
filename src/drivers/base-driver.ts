@@ -189,6 +189,11 @@ export abstract class BaseDriver {
   abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
   abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
 
+  abstract findFirst(
+    tableName: string,
+    key: Record<string, DatabaseValue>
+  ): Promise<DatabaseResultSet>;
+
   abstract selectTable(
     tableName: string,
     options: SelectFromTableOptions

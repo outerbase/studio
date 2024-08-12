@@ -19,8 +19,12 @@ const TableContent = [
     ],
   },
   {
-    title: "Other",
+    title: "Integration",
     sub: [
+      {
+        title: "Embed Client",
+        href: "/docs/embed-iframe-client",
+      },
       {
         title: "Temporary Session",
         href: "/docs/temporary-session",

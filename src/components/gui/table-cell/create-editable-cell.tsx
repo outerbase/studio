@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import GenericCell from "./GenericCell";
+import GenericCell from "./generic-cell";
 import { DatabaseValue } from "@/drivers/base-driver";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import { useFullEditor } from "../providers/full-editor-provider";
+import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
@@ -10,7 +12,8 @@ export interface TableEditableCell<T = unknown> {
   editMode?: boolean;
   state: OptimizeTableState;
   onChange?: (newValue: DatabaseValue<T>) => void;
-  editor?: "input" | "blocknote";
+  editor?: "input" | "json" | "text";
+  header: OptimizeTableHeaderWithIndexProps;
 }
 
 interface TabeEditableCellProps<T = unknown> {
@@ -23,6 +26,7 @@ function InputCellEditor({
   value,
   align,
   discardChange,
+  readOnly,
   applyChange,
   onChange,
   state,
@@ -33,6 +37,7 @@ function InputCellEditor({
   value: DatabaseValue<string>;
   onChange: (v: string) => void;
   state: OptimizeTableState;
+  readOnly?: boolean;
 }>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const shouldExit = useRef(true);
@@ -48,6 +53,7 @@ function InputCellEditor({
     <input
       ref={inputRef}
       autoFocus
+      readOnly={readOnly}
       onBlur={() => {
         applyChange(value, shouldExit.current);
       }}
@@ -83,8 +89,8 @@ function InputCellEditor({
       type="text"
       className={
         align === "right"
-          ? "bg-background w-full h-full outline-none pl-2 pr-2 border-0 text-right"
-          : "bg-background w-full h-full outline-none pl-2 pr-2 border-0"
+          ? "font-mono bg-background w-full h-full outline-none pl-2 pr-2 border-0 text-right"
+          : "font-mono bg-background w-full h-full outline-none pl-2 pr-2 border-0"
       }
       value={value ?? ""}
     />
@@ -102,11 +108,14 @@ export default function createEditableCell<T = unknown>({
     focus,
     onChange,
     state,
+    editor,
     editMode,
+    header,
   }: TableEditableCell<T>) {
     const [editValue, setEditValue] = useState<DatabaseValue<string>>(
       toString(value)
     );
+    const { openEditor } = useFullEditor();
 
     useEffect(() => {
       setEditValue(toString(value));
@@ -135,11 +144,12 @@ export default function createEditableCell<T = unknown>({
       .filter(Boolean)
       .join(" ");
 
-    if (editMode) {
+    if (editMode && (editor === undefined || editor === "input")) {
       return (
         <div className={className}>
           <InputCellEditor
             state={state}
+            readOnly={state.getReadOnlyMode()}
             align={align}
             applyChange={applyChange}
             discardChange={discardChange}
@@ -152,11 +162,24 @@ export default function createEditableCell<T = unknown>({
 
     return (
       <GenericCell
+        header={header}
         value={toValue(editValue)}
         focus={focus}
         isChanged={isChanged}
         align={align}
         onDoubleClick={() => {
+          if (
+            typeof editValue === "string" &&
+            (editor === "json" || editor === "text")
+          ) {
+            openEditor({
+              format: editor,
+              initialValue: editValue,
+              readOnly: state.getReadOnlyMode(),
+              onCancel: () => state.exitEditMode(),
+              onSave: applyChange,
+            });
+          }
           state.enterEditMode();
         }}
       />

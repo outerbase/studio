@@ -48,5 +48,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.5,
     },
+    {
+      url: "https://libsqlstudio.com/docs/embed-iframe-client",
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.5,
+    },
   ];
 }

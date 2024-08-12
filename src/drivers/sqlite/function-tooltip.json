@@ -3,6 +3,10 @@
     "syntax": "abs(X)",
     "description": "<p>Returns the absolute value of X. If X is a string or blob, it returns 0.</p>\n<pre><code>SELECT abs(-5);  --&gt; 5\nSELECT abs(\"-3\");  --&gt; 3\nSELECT abs(\"libsql\");  --&gt; 0\n</code></pre>"
   },
+  "avg": {
+    "syntax": "avg(X)",
+    "description": "<p>The avg() function returns the average of all non-NULL values in a group, interpreting non-numeric\nstrings and BLOBs as 0. It always yields a floating point result if there is at least one non-NULL\ninput and returns NULL if there are no non-NULL inputs.</p>"
+  },
   "changes": {
     "syntax": "changes()",
     "description": "<p>The changes() function returns the number of rows altered by the latest INSERT, DELETE, or UPDATE statement, excluding changes from lower-level triggers.</p>"
@@ -23,6 +27,10 @@
     "syntax": "concat_ws(SEP,X,...)",
     "description": "<p>The concat_ws concatenates all non-null arguments beyond the first, using the first argument as a separator. If the first argument is NULL, it returns NULL. If all other arguments are NULL, it returns an empty string.</p>\n<pre><code>select concat_ws(', ', 'hello', 'world')\n-&gt; 'hello world'\n</code></pre>"
   },
+  "count": {
+    "syntax": "count(X), count(\\*)",
+    "description": "<p>The count(X) function returns a count of the number of times that X is not NULL in a group.\nThe count(*) function (with no arguments) returns the total number of rows in the group.</p>"
+  },
   "format": {
     "syntax": "format(FORMAT,...)",
     "description": "<p>The FORMAT() function, similar to C's printf(), uses a format string (first argument) to construct the output with values from subsequent arguments.</p>\n<pre><code>select format('i am %d years old', 50);\n-&gt; 'i am 50 years old'\n</code></pre>"
@@ -34,6 +42,10 @@
   "glob": {
     "syntax": "glob(X,Y)",
     "description": "<p>The GLOB operator is like LIKE but uses Unix file globbing syntax and is case-sensitive.</p>\n<pre><code>select glob('*hello*', 'hello world');\n-&gt; 1\n</code></pre>"
+  },
+  "group_concat": {
+    "syntax": "group_concat(X, Y)",
+    "description": "<p>The function concatenates all non-NULL values of X into a string, using Y as the separator. If Y is omitted, a comma (\",\") is used.</p>"
   },
   "hex": {
     "syntax": "hex(X)",
@@ -118,5 +130,17 @@
   "sign": {
     "syntax": "sign(X)",
     "description": "<p>The sign(X) function returns -1, 0, or 1 if X is negative, zero, or positive, respectively. If X is NULL or not a number, it returns NULL.</p>\n<pre><code>select sign(-5);  -&gt; -1\nselect sign(0);   -&gt; 0\nselect sign(5);   -&gt; 1\n</code></pre>"
+  },
+  "string_agg": {
+    "syntax": "string_agg(X, Y)",
+    "description": "<p>The function concatenates all non-NULL values of X into a string, using Y as the separator. If Y is omitted, a comma (\",\") is used.</p>"
+  },
+  "sum": {
+    "syntax": "sum(X)",
+    "description": "<p>The function returns the sum of all non-NULL values in the group, returning NULL if there are no non-NULL inputs.</p>"
+  },
+  "total": {
+    "syntax": "total(X)",
+    "description": "<p>The function returns the sum of all non-NULL values in the group, with a result of 0.0 if there are no non-NULL inputs.\nThe result of total() is always a floating point value.</p>"
   }
 }

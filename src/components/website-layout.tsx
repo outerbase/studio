@@ -50,7 +50,7 @@ async function Topbar() {
           <TopbarProfile user={user} />
         ) : (
           <div className="flex items-center">
-            <Link href="/login">
+            <Link href="/login" prefetch={false}>
               <Button>Sign In</Button>
             </Link>
           </div>

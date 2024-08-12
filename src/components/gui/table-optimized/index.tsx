@@ -67,6 +67,7 @@ interface TableCellListCommonProps {
 }
 
 export interface OptimizeTableProps extends TableCellListCommonProps {
+  arrangeHeaderIndex: number[];
   stickyHeaderIndex?: number;
   renderAhead: number;
 }
@@ -74,7 +75,6 @@ export interface OptimizeTableProps extends TableCellListCommonProps {
 interface RenderCellListProps extends TableCellListCommonProps {
   hasSticky: boolean;
   onHeaderResize: (idx: number, newWidth: number) => void;
-  headerIndex: number[];
   customStyles?: React.CSSProperties;
   headers: OptimizeTableHeaderWithIndexProps[];
   rowEnd: number;
@@ -120,7 +120,6 @@ function handleTableCellMouseDown({
 
 function renderCellList({
   hasSticky,
-  headerIndex,
   customStyles,
   headers,
   renderCell,
@@ -135,19 +134,13 @@ function renderCellList({
   onHeaderContextMenu,
 }: RenderCellListProps) {
   const headerSizes = internalState.getHeaderWidth();
-  const headersWithIndex = headerIndex.map(
-    (idx) => headers[idx]
-  ) as OptimizeTableHeaderWithIndexProps[];
 
-  const templateSizes = headersWithIndex
+  const templateSizes = headers
     .map((header) => headerSizes[header.index] + "px")
     .join(" ");
 
   const onHeaderSizeWithRemap = (idx: number, newWidth: number) => {
-    onHeaderResize(
-      headerSizes[headersWithIndex[idx]?.index ?? 0] ?? 150,
-      newWidth
-    );
+    onHeaderResize(headerSizes[headers[idx]?.index ?? 0] ?? 150, newWidth);
   };
 
   const handleCellClicked = (y: number, x: number) => {
@@ -192,18 +185,16 @@ function renderCellList({
             className={cn("sticky left-0 z-1", "bg-background")}
             onMouseDown={handleCellClicked(
               absoluteRowIndex,
-              headersWithIndex[0]?.index ?? -1
+              headers[0]?.index ?? -1
             )}
           >
             <div className={"libsql-table-cell"}>
-              {headersWithIndex[0] &&
+              {headers[0] &&
                 renderCell({
                   y: absoluteRowIndex,
-                  x: headersWithIndex[0].index,
+                  x: headers[0].index,
                   state: internalState,
-                  header: headers[
-                    headersWithIndex[0].index
-                  ] as OptimizeTableHeaderWithIndexProps,
+                  header: headers[0],
                 })}
             </div>
           </td>
@@ -216,7 +207,7 @@ function renderCellList({
 
         {row.slice(colStart, colEnd + 1).map((_, cellIndex) => {
           const actualIndex = cellIndex + colStart;
-          const header = headersWithIndex[actualIndex];
+          const header = headers[actualIndex];
 
           if (!header) return null;
           if (header.sticky) return null;
@@ -231,18 +222,13 @@ function renderCellList({
                   y: absoluteRowIndex,
                   x: header.index,
                   state: internalState,
-                  header: headers[
-                    header.index
-                  ] as OptimizeTableHeaderWithIndexProps,
+                  header,
                 })}
               </div>
             </td>
           );
         })}
-        <TableFakeRowPadding
-          colStart={colEnd}
-          colEnd={headersWithIndex.length - 1}
-        />
+        <TableFakeRowPadding colStart={colEnd} colEnd={headers.length - 1} />
       </tr>
     );
   });
@@ -252,13 +238,13 @@ function renderCellList({
       <TableHeaderList
         renderHeader={renderHeader}
         sticky={hasSticky}
-        headers={headersWithIndex}
+        headers={headers}
         onHeaderResize={onHeaderSizeWithRemap}
         onHeaderContextMenu={onHeaderContextMenu}
       />
 
       <TableFakeBodyPadding
-        colCount={headerIndex.length}
+        colCount={headers.length}
         rowCount={internalState.getRowsCount()}
         rowEnd={rowEnd}
         rowStart={rowStart}
@@ -280,6 +266,7 @@ export default function OptimizeTable({
   onContextMenu,
   onHeaderContextMenu,
   onKeyDown,
+  arrangeHeaderIndex,
 }: OptimizeTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -303,17 +290,25 @@ export default function OptimizeTable({
     return () => internalState.removeChangeListener(changeCallback);
   }, [internalState, rerender]);
 
-  const headers = useMemo(() => {
-    return internalState.getHeaders();
-  }, [internalState]);
-
   const headerWithIndex = useMemo(() => {
-    return headers.map((header, idx) => ({
+    // Attach the actual index
+    const headers = internalState.getHeaders().map((header, idx) => ({
       ...header,
       index: idx,
       sticky: idx === stickyHeaderIndex,
     }));
-  }, [headers, stickyHeaderIndex]);
+
+    // We will rearrange the index based on specified index
+    const headerAfterArranged = arrangeHeaderIndex.map((arrangedIndex) => {
+      return headers[arrangedIndex];
+    });
+
+    // Sticky will also alter the specified index
+    return [
+      ...(stickyHeaderIndex !== undefined ? [headers[stickyHeaderIndex]] : []),
+      ...headerAfterArranged.filter((x) => x.index !== stickyHeaderIndex),
+    ];
+  }, [internalState, arrangeHeaderIndex, stickyHeaderIndex]);
 
   const { visibileRange, onHeaderResize } = useTableVisibilityRecalculation({
     containerRef,
@@ -325,16 +320,6 @@ export default function OptimizeTable({
   });
 
   const { rowStart, rowEnd, colEnd, colStart } = visibileRange;
-
-  const allHeaderIndex = useMemo(() => {
-    return [
-      ...(stickyHeaderIndex !== undefined ? [stickyHeaderIndex] : []),
-      ...new Array(headers.length)
-        .fill(false)
-        .map((_, idx) => idx)
-        .filter((idx) => idx !== stickyHeaderIndex),
-    ];
-  }, [headers.length, stickyHeaderIndex]);
 
   return useMemo(() => {
     const common = {
@@ -375,7 +360,7 @@ export default function OptimizeTable({
             height: (internalState.getRowsCount() + 1) * rowHeight + 10,
           }}
         >
-          {renderCellList({ headerIndex: allHeaderIndex, ...common })}
+          {renderCellList(common)}
         </div>
       </div>
     );
@@ -389,7 +374,6 @@ export default function OptimizeTable({
     headerWithIndex,
     onHeaderResize,
     stickyHeaderIndex,
-    allHeaderIndex,
     internalState,
     onContextMenu,
     onHeaderContextMenu,

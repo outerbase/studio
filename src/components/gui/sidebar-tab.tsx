@@ -1,7 +1,12 @@
 import { useConfig } from "@/context/config-provider";
 import { useTheme } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
-import { LucideIcon, LucideMoon, LucideSun } from "lucide-react";
+import {
+  LucideChevronLeft,
+  LucideIcon,
+  LucideMoon,
+  LucideSun,
+} from "lucide-react";
 import { ReactElement, useState } from "react";
 
 export interface SidebarTabItem {
@@ -43,6 +48,15 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
     <div className={cn("flex flex-col h-full border-l-8", bgPrimary)}>
       <div className={cn("shrink-0 bg-secondary")}>
         <div className="text-sm my-2 px-3 font-semibold flex">
+          {config.onBack && (
+            <div
+              className="flex items-center -ml-2 mr-2 cursor-pointer hover:text-blue-500"
+              onClick={config.onBack}
+            >
+              <LucideChevronLeft />
+            </div>
+          )}
+
           <div className="flex-grow flex items-center">
             <div className="line-clamp-1 text-ellipsis">{config.name}</div>
           </div>

@@ -15,7 +15,7 @@ const databaseSchema = zod.object({
   description: zod.string(),
   label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
   config: zod.object({
-    url: zod.string().min(5),
+    url: zod.string().optional(),
     token: zod.string().optional(),
     username: zod.string().optional(),
     password: zod.string().optional(),

@@ -22,7 +22,7 @@ export default function TableHeader({
   ) => ReactElement;
 }) {
   const className = cn(
-    sticky ? "sticky left-0 z-20" : undefined,
+    sticky ? "sticky left-0 z-30" : undefined,
     "dark:bg-gray-900 bg-gray-100"
   );
 

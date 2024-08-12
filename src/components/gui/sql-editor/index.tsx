@@ -18,6 +18,7 @@ import createSQLTableNameHighlightPlugin from "./sql-tablename-highlight";
 import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
 import { functionTooltip } from "./function-tooltips";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
+import { toast } from "sonner";
 
 interface SqlEditorProps {
   value: string;
@@ -25,6 +26,8 @@ interface SqlEditorProps {
   onChange?: (value: string) => void;
   schema?: Record<string, string[]>;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+  fontSize?: number;
+  onFontSizeChanged?: (fontSize: number) => void;
   onCursorChange?: (
     pos: number,
     lineNumber: number,
@@ -41,10 +44,12 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       onKeyDown,
       onCursorChange,
       readOnly,
+      fontSize,
+      onFontSizeChanged,
     }: SqlEditorProps,
     ref
   ) {
-    const theme = useCodeEditorTheme();
+    const theme = useCodeEditorTheme({ fontSize });
 
     const tableNameHighlightPlugin = useMemo(() => {
       if (schema) {
@@ -78,9 +83,41 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           preventDefault: true,
           run: startCompletion,
         },
+        {
+          key: "Ctrl-=",
+          mac: "Cmd-=",
+          preventDefault: true,
+          run: () => {
+            if (onFontSizeChanged) {
+              const newFontSize = Math.min(2, (fontSize ?? 1) + 0.2);
+              onFontSizeChanged(newFontSize);
+              toast.info(
+                `Change code editor font size to ${Math.floor(newFontSize * 100)}%`,
+                { duration: 1000, id: "font-size" }
+              );
+            }
+            return true;
+          },
+        },
+        {
+          key: "Ctrl--",
+          mac: "Cmd--",
+          preventDefault: true,
+          run: () => {
+            if (onFontSizeChanged) {
+              const newFontSize = Math.max(0.4, (fontSize ?? 1) - 0.2);
+              onFontSizeChanged(newFontSize);
+              toast.info(
+                `Change code editor font size to ${Math.floor(newFontSize * 100)}%`,
+                { duration: 1000, id: "font-size" }
+              );
+            }
+            return true;
+          },
+        },
         ...defaultKeymap,
       ]);
-    }, []);
+    }, [fontSize, onFontSizeChanged]);
 
     return (
       <CodeMirror

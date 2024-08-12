@@ -1,4 +1,4 @@
-import { LucideCode, LucidePlus } from "lucide-react";
+import { LucideCode, LucideCopy, LucidePlus, LucideSave } from "lucide-react";
 import { Separator } from "../../ui/separator";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { Button, buttonVariants } from "../../ui/button";
@@ -15,6 +15,7 @@ import SchemaEditorConstraintList from "./schema-editor-constraint-list";
 import { ColumnsProvider } from "./column-provider";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import CodePreview from "../code-preview";
+import { toast } from "sonner";
 
 export interface DatabaseTableColumnChange {
   old: DatabaseTableColumn | null;
@@ -93,9 +94,10 @@ export default function SchemaEditor({
           <Button
             variant="ghost"
             onClick={onSave}
-            disabled={!hasChange}
+            disabled={!hasChange || !value.name?.new}
             size={"sm"}
           >
+            <LucideSave className="w-4 h-4 mr-2" />
             Save
           </Button>
           <Button
@@ -135,6 +137,40 @@ export default function SchemaEditor({
               </div>
             </PopoverContent>
           </Popover>
+
+          {value.createScript && (
+            <Popover>
+              <PopoverTrigger>
+                <div
+                  className={buttonVariants({ size: "sm", variant: "ghost" })}
+                >
+                  <LucideCode className="w-4 h-4 mr-1" />
+                  Create Script
+                </div>
+              </PopoverTrigger>
+              <PopoverContent style={{ width: 500 }}>
+                <Button
+                  variant={"outline"}
+                  size="sm"
+                  onClick={() => {
+                    toast.success("Copied create script successfully");
+                    window.navigator.clipboard.writeText(
+                      value.createScript ?? ""
+                    );
+                  }}
+                >
+                  <LucideCopy className="w-4 h-4 mr-2" />
+                  Copy
+                </Button>
+                <div
+                  style={{ maxHeight: 400 }}
+                  className="overflow-y-auto mt-2"
+                >
+                  <CodePreview code={value.createScript} />
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
 
         <div className="flex items-center mx-3 mt-1 mb-2 ml-5 gap-2">
@@ -157,7 +193,11 @@ export default function SchemaEditor({
         <Separator />
       </div>
       <div className="grow overflow-y-auto">
-        <SchemaEditorColumnList columns={value.columns} onChange={onChange} />
+        <SchemaEditorColumnList
+          columns={value.columns}
+          onChange={onChange}
+          onAddColumn={onAddColumn}
+        />
         <ColumnsProvider value={value.columns}>
           <SchemaEditorConstraintList
             constraints={value.constraints}

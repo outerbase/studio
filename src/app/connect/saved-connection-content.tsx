@@ -37,9 +37,8 @@ export default function ConnectionDialogContent({
             <span>{title}</span>
           </div>
         </DialogTitle>
-        <DialogDescription>
-          <div className="flex flex-col gap-4 text-foreground">{children}</div>
-        </DialogDescription>
+        <DialogDescription />
+        <div className="flex flex-col gap-4 text-foreground">{children}</div>
       </DialogContent>
     </Dialog>
   );

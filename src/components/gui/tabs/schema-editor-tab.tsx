@@ -1,21 +1,11 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import { useTabsContext } from "@/components/gui/windows-tab";
 import SchemaEditor, {
   DatabaseTableSchemaChange,
 } from "@/components/gui/schema-editor";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
-import { LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import CodePreview from "../code-preview";
-import { useSchema } from "@/context/schema-provider";
+import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
 
 interface SchemaEditorTabProps {
   tableName?: string;
@@ -35,12 +25,9 @@ export default function SchemaEditorTab({
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
   const { databaseDriver } = useDatabaseDriver();
-  const { refresh: refreshSchema } = useSchema();
   const [schema, setSchema] = useState<DatabaseTableSchemaChange>(EMPTY_SCHEMA);
   const [loading, setLoading] = useState(!!tableName);
   const [isSaving, setIsSaving] = useState(false);
-  const [isExecuting, setIsExecuting] = useState(false);
-  const { replaceCurrentTab } = useTabsContext();
 
   const fetchTable = useCallback(
     async (name: string) => {
@@ -85,39 +72,6 @@ export default function SchemaEditorTab({
     [setIsSaving]
   );
 
-  const onSave = useCallback(() => {
-    setIsExecuting(true);
-    databaseDriver
-      .transaction(previewScript)
-      .then(() => {
-        if (schema.name.new !== schema.name.old) {
-          refreshSchema();
-          replaceCurrentTab({
-            component: <SchemaEditorTab tableName={schema.name.new} />,
-            key: "_schema_" + schema.name.new,
-            identifier: "_schema_" + schema.name.new,
-            title: "Edit " + schema.name.new,
-            icon: LucideTableProperties,
-          });
-        } else if (schema.name.old) {
-          fetchTable(schema.name?.new || schema.name?.old || "").then(() =>
-            setIsSaving(false)
-          );
-        }
-      })
-      .catch((err) => alert((err as Error).message))
-      .finally(() => {
-        setIsExecuting(false);
-      });
-  }, [
-    databaseDriver,
-    schema,
-    fetchTable,
-    previewScript,
-    replaceCurrentTab,
-    refreshSchema,
-  ]);
-
   const onDiscard = useCallback(() => {
     setSchema((prev) => {
       return {
@@ -144,26 +98,16 @@ export default function SchemaEditorTab({
       </div>
     );
   }
-
   return (
     <>
-      <AlertDialog open={isSaving} onOpenChange={onSaveToggle}>
-        <AlertDialogContent>
-          Are you sure you want to run this change?
-          <CodePreview code={previewScript.join(";\n")} />
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button onClick={onSave}>
-              {isExecuting ? (
-                <LucideLoader className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <LucideSave className="w-4 h-4 mr-2" />
-              )}
-              Continue
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {isSaving && (
+        <SchemaSaveDialog
+          fetchTable={fetchTable}
+          onClose={onSaveToggle}
+          schema={schema}
+          previewScript={previewScript}
+        />
+      )}
 
       <SchemaEditor
         value={schema}

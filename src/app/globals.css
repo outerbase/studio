@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  overscroll-behavior-x: none;
+}
+
 :root {
   --color-table-grid: #eee;
   --color-table-change: #f6e58d;
@@ -65,7 +70,7 @@
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 200 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
@@ -93,9 +98,15 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  display: none;
 }
 
 /* ------------------------------- */
@@ -106,6 +117,7 @@
 .dark .cm-table-name {
   color: #fd79a8;
 }
+
 /* ------------------------------- */
 
 .libsql-window-tab .libsql-window-close {
@@ -184,6 +196,10 @@
   z-index: 10;
 }
 
+.libsql-table th.sticky {
+  z-index: 20;
+}
+
 .libsql-resizer {
   position: absolute;
   right: 0;
@@ -248,7 +264,7 @@ For Markdown Side
 }
 
 .mdx-content pre {
-  @apply bg-gray-100 dark:bg-gray-700 p-4 leading-5 rounded overflow-x-auto;
+  @apply bg-gray-200 dark:bg-gray-700 p-4 leading-5 rounded overflow-x-auto m-0;
 }
 
 .mdx-content p {
@@ -257,47 +273,4 @@ For Markdown Side
 
 .mdx-content a {
   @apply text-blue-500 underline;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@supports (animation-timeline: view()) {
-  .fade-view {
-    animation:
-      fadeIn ease-in-out both,
-      fadeOut ease-in forwards;
-    animation-range:
-      cover 30% contain 50%,
-      contain 90% cover 100%;
-    animation-timeline: view();
-  }
-
-  .fade-sticky {
-    position: sticky;
-    bottom: 0;
-    background-image: linear-gradient(
-      to top,
-      var(--background) 40%,
-      transparent
-    );
-  }
 }
