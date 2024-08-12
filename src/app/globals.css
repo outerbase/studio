@@ -60,6 +60,7 @@ body {
     --radius: 0.5rem;
 
     --selected: rgb(229, 229, 229);
+    --scroll-bar: #e2e8f0;
   }
 
   .dark {
@@ -95,7 +96,28 @@ body {
     --ring: 212.7 26.8% 83.9%;
 
     --selected: rgb(38, 38, 38);
+    --scroll-bar: #1e2d3b;
   }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  padding: 2px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-bar);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-bar);
 }
 
 @layer base {
