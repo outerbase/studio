@@ -53,6 +53,8 @@ export interface SelectFromTableOptions {
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
 
+export type DatabaseSchemas = Record<string, DatabaseSchemaItem[]>;
+
 export interface DatabaseSchemaItem {
   type: "table" | "trigger" | "view";
   name: string;

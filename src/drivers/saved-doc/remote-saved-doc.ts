@@ -41,13 +41,21 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
         else a[b.namespace.id].push(b);
         return a;
       },
-      {} as Record<string, SavedDocData[]>
+      t.reduce(
+        (a, b) => {
+          a[b.id] = [];
+          return a;
+        },
+        {} as Record<string, SavedDocData[]>
+      )
     );
+
     this.cacheNamespaceList = t;
     return t;
   }
 
   async createNamespace(name: string): Promise<SavedDocNamespace> {
+    await this.getNamespaces();
     const t = await createDocNamespace(this.databaseId, name);
 
     if (this.cacheNamespaceList) {
@@ -58,6 +66,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async updateNamespace(id: string, name: string): Promise<SavedDocNamespace> {
+    await this.getNamespaces();
     const t = await updateDocNamespace(this.databaseId, id, name);
 
     if (this.cacheNamespaceList) {
@@ -73,6 +82,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async removeNamespapce(id: string): Promise<void> {
+    await this.getNamespaces();
     await removeDocNamespace(this.databaseId, id);
 
     if (this.cacheNamespaceList) {
@@ -91,6 +101,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     namespace: string,
     data: SavedDocInput
   ): Promise<SavedDocData> {
+    await this.getNamespaces();
     const r = await createSavedDoc(this.databaseId, namespace, type, data);
 
     if (this.cacheDocs[r.namespace.id]) {
@@ -113,6 +124,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData> {
+    await this.getNamespaces();
     const r = await updateSavedDoc(this.databaseId, id, data);
 
     if (this.cacheDocs[r.namespace.id]) {
@@ -129,6 +141,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async removeDoc(id: string): Promise<void> {
+    await this.getNamespaces();
     const r = await removeSavedDoc(this.databaseId, id);
 
     for (const namespaceId of Object.keys(this.cacheDocs)) {
