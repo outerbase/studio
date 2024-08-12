@@ -2,12 +2,14 @@ import { validateOperation } from "@/components/lib/validation";
 import type {
   DatabaseResultSet,
   DatabaseSchemaItem,
+  DatabaseSchemas,
   DatabaseTableColumn,
   DatabaseTableOperation,
   DatabaseTableOperationReslt,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
   DatabaseValue,
+  DriverFlags,
   SelectFromTableOptions,
 } from "./base-driver";
 import { BaseDriver } from "./base-driver";
@@ -31,7 +33,15 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
   abstract override query(stmt: string): Promise<DatabaseResultSet>;
   abstract override transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
-  async schemas(): Promise<DatabaseSchemaItem[]> {
+  getFlags(): DriverFlags {
+    return {
+      supportBigInt: false,
+      defaultSchema: "main",
+      optionalSchema: true,
+    };
+  }
+
+  async schemas(): Promise<DatabaseSchemas> {
     const result = await this.query("SELECT * FROM sqlite_schema;");
 
     const tmp: DatabaseSchemaItem[] = [];
@@ -60,7 +70,9 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
       }
     }
 
-    return tmp;
+    return {
+      main: tmp,
+    };
   }
 
   async trigger(name: string): Promise<DatabaseTriggerSchema> {

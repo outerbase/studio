@@ -25,7 +25,7 @@ export default function TableCombobox({
   borderless?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
-  const { schema, refresh } = useSchema();
+  const { currentSchema, refresh } = useSchema();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,7 +48,7 @@ export default function TableCombobox({
 
           <CommandEmpty>No table found.</CommandEmpty>
           <CommandGroup className="max-h-[250px] overflow-y-auto">
-            {schema.map((table) => (
+            {currentSchema.map((table) => (
               <CommandItem
                 key={table.name}
                 value={table.name}

@@ -73,7 +73,7 @@ function ColumnForeignKey({
   disabled?: boolean;
 }>) {
   const { columns } = useColumnList();
-  const { schema } = useSchema();
+  const { currentSchema } = useSchema();
 
   const columnMemo = useMemo(() => {
     return [...new Set(columns.map((c) => c.new?.name ?? c.old?.name ?? ""))];
@@ -83,7 +83,7 @@ function ColumnForeignKey({
     const fkTableName = constraint.foreignKey?.foreignTableName;
 
     if (fkTableName) {
-      const fkTableSchema = schema.find(
+      const fkTableSchema = currentSchema.find(
         (s) => s.type === "table" && s.name === fkTableName
       );
 
@@ -93,7 +93,7 @@ function ColumnForeignKey({
     }
 
     return [];
-  }, [constraint, schema]);
+  }, [constraint, currentSchema]);
 
   const onConstraintChange = useCallback(
     (newColumn: string[]) => {

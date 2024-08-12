@@ -8,15 +8,19 @@ import {
   useState,
 } from "react";
 import ConnectingDialog from "@/components/gui/connection-dialog";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
+import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "./driver-provider";
 import { useAutoComplete } from "./auto-complete-provider";
 
 const SchemaContext = createContext<{
-  schema: DatabaseSchemaItem[];
+  schema: DatabaseSchemas;
+  currentSchema: DatabaseSchemaItem[];
+  currentSchemaName: string;
   refresh: () => void;
 }>({
-  schema: [],
+  schema: {},
+  currentSchema: [],
+  currentSchemaName: "",
   refresh: () => {
     throw new Error("Not implemented");
   },
@@ -29,9 +33,12 @@ export function useSchema() {
 export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
   const { updateTableList, updateTableSchema } = useAutoComplete();
   const [error, setError] = useState<string>();
-  const [schemaItems, setSchemaItems] = useState<DatabaseSchemaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { databaseDriver } = useDatabaseDriver();
+
+  const [schema, setSchema] = useState<DatabaseSchemas>({});
+  const [currentSchema, setCurrentSchema] = useState<DatabaseSchemaItem[]>([]);
+  const currentSchemaName = databaseDriver.getFlags().defaultSchema;
 
   const fetchSchema = useCallback(
     (refresh?: boolean) => {
@@ -41,20 +48,8 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
 
       databaseDriver
         .schemas()
-        .then((tableList) => {
-          const sortedTableList = [...tableList];
-          sortedTableList.sort((a, b) => {
-            return a.name.localeCompare(b.name);
-          });
-
-          setSchemaItems(sortedTableList);
-          updateTableList(tableList.map((table) => table.name));
-          for (const table of tableList) {
-            if (table.tableSchema) {
-              updateTableSchema(table.name, table.tableSchema.columns);
-            }
-          }
-
+        .then((result) => {
+          setSchema(result);
           setError(undefined);
           setLoading(false);
         })
@@ -63,16 +58,37 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
           setLoading(false);
         });
     },
-    [databaseDriver, updateTableList, setError, updateTableSchema]
+    [databaseDriver, setError]
   );
+
+  useEffect(() => {
+    if (schema[currentSchemaName]) {
+      setCurrentSchema(schema[currentSchemaName]);
+    }
+  }, [currentSchemaName, schema, setCurrentSchema]);
+
+  useEffect(() => {
+    const sortedTableList = [...currentSchema];
+    sortedTableList.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    updateTableList(currentSchema.map((table) => table.name));
+
+    for (const table of currentSchema) {
+      if (table.tableSchema) {
+        updateTableSchema(table.name, table.tableSchema.columns);
+      }
+    }
+  }, [currentSchema, updateTableList, updateTableSchema]);
 
   useEffect(() => {
     fetchSchema(true);
   }, [fetchSchema]);
 
   const props = useMemo(() => {
-    return { schema: schemaItems, refresh: fetchSchema };
-  }, [schemaItems, fetchSchema]);
+    return { schema, currentSchema, currentSchemaName, refresh: fetchSchema };
+  }, [schema, fetchSchema, currentSchema, currentSchemaName]);
 
   if (error || loading) {
     return <ConnectingDialog message={error} loading={loading} />;
@@ -82,7 +98,3 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
     <SchemaContext.Provider value={props}>{children}</SchemaContext.Provider>
   );
 }
-
-// function useAutoComplete(): { updateTableList: any } {
-//   return { updateTableList: () => console.log("Not implemented") };
-// }

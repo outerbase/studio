@@ -90,7 +90,7 @@ function groupByFtsTable(items: ListViewItem<DatabaseSchemaItem>[]) {
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const [selected, setSelected] = useState("");
   const [collapsed, setCollapsed] = useState(new Set<string>());
-  const { refresh, schema } = useSchema();
+  const { refresh, currentSchema } = useSchema();
 
   useEffect(() => {
     setSelected("");
@@ -137,8 +137,10 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   );
 
   const filteredSchema = useMemo(() => {
-    return groupByFtsTable(groupTriggerByTable(prepareListViewItem(schema)));
-  }, [schema]);
+    return groupByFtsTable(
+      groupTriggerByTable(prepareListViewItem(currentSchema))
+    );
+  }, [currentSchema]);
 
   const filterCallback = useCallback(
     (item: ListViewItem<DatabaseSchemaItem>) => {

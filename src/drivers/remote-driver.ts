@@ -17,10 +17,6 @@ export default class RemoteDriver extends SqliteLikeBaseDriver {
     this.type = type;
   }
 
-  supportBigInt(): boolean {
-    return false;
-  }
-
   close(): void {
     // do nothing
   }

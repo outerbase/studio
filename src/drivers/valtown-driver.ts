@@ -28,10 +28,6 @@ export default class ValtownDriver extends SqliteLikeBaseDriver {
     return json.map(transformRawResult);
   }
 
-  supportBigInt(): boolean {
-    return false;
-  }
-
   async query(stmt: InStatement): Promise<DatabaseResultSet> {
     const r = await fetch(`https://api.val.town/v1/sqlite/execute`, {
       method: "POST",

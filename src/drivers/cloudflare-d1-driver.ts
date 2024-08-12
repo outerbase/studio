@@ -78,10 +78,6 @@ export default class CloudflareD1Driver extends SqliteLikeBaseDriver {
     this.url = url;
   }
 
-  supportBigInt(): boolean {
-    return false;
-  }
-
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = await fetch(this.url, {
       method: "POST",
