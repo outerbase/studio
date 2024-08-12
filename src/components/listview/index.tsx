@@ -35,6 +35,8 @@ interface ListViewProps<T> {
   items: ListViewItem<T>[];
   selectedKey?: string;
   full?: boolean;
+  filter?: (item: ListViewItem<T>) => boolean;
+  highlight?: string;
   collapsedKeys?: Set<string>;
   onCollapsedChange?: (keys: Set<string>) => void;
   onSelectChange?: (key: string) => void;
@@ -49,6 +51,31 @@ interface ListViewRendererProps<T> extends ListViewProps<T> {
   contextMenuKey: string;
   setContextMenuKey: Dispatch<SetStateAction<string>>;
   contextOpen: boolean;
+}
+
+function Highlight({ text, highlight }: { text: string; highlight?: string }) {
+  if (!highlight) return <span>{text}</span>;
+
+  const regex = new RegExp(
+    "(" + (highlight ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
+    "i"
+  );
+
+  const splitedText = text.split(regex);
+
+  return (
+    <span>
+      {splitedText.map((text, idx) => {
+        return text.toLowerCase() === (highlight ?? "").toLowerCase() ? (
+          <span key={idx} className="bg-yellow-300 text-black">
+            {text}
+          </span>
+        ) : (
+          <span key={idx}>{text}</span>
+        );
+      })}
+    </span>
+  );
 }
 
 function Indentation({ depth }: { depth: number }) {
@@ -90,9 +117,23 @@ function CollapsedButton({
   );
 }
 
+function matchFilter<T = unknown>(
+  item: ListViewItem<T>,
+  filter?: (item: ListViewItem<T>) => boolean
+): boolean {
+  if (!filter) return true;
+
+  return (
+    filter(item) ||
+    (item.children ?? []).some((child) => matchFilter(child, filter))
+  );
+}
+
 function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
   const { items, depth, ...rest } = props;
   const {
+    filter,
+    highlight,
     stopParentPropagation,
     onContextMenu,
     onDoubleClick,
@@ -113,95 +154,99 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
 
   return (
     <>
-      {items.map((item) => {
-        const hasCollaped = !!item.children && item.children.length > 0;
-        const isCollapsed = !!collapsedKeys && collapsedKeys.has(item.key);
+      {items
+        .filter((item) => matchFilter(item, filter))
+        .map((item) => {
+          const hasCollaped = !!item.children && item.children.length > 0;
+          const isCollapsed = !!collapsedKeys && collapsedKeys.has(item.key);
 
-        const collapsedClicked = () => {
-          if (onCollapsedChange) {
-            if (collapsedKeys) {
-              const tmpSet = new Set(collapsedKeys);
-              if (tmpSet.has(item.key)) {
-                tmpSet.delete(item.key);
+          const collapsedClicked = () => {
+            if (onCollapsedChange) {
+              if (collapsedKeys) {
+                const tmpSet = new Set(collapsedKeys);
+                if (tmpSet.has(item.key)) {
+                  tmpSet.delete(item.key);
+                } else {
+                  tmpSet.add(item.key);
+                }
+                onCollapsedChange(tmpSet);
               } else {
-                tmpSet.add(item.key);
+                onCollapsedChange(new Set([item.key]));
               }
-              onCollapsedChange(tmpSet);
-            } else {
-              onCollapsedChange(new Set([item.key]));
             }
-          }
-        };
+          };
 
-        return (
-          <React.Fragment key={item.key}>
-            <div
-              key={item.key}
-              onContextMenu={() => {
-                stopParentPropagation.current = true;
-                setContextMenuKey(item.key);
-                if (onContextMenu) setContextMenu(onContextMenu(item));
-              }}
-              onDoubleClick={() => {
-                if (onDoubleClick) {
-                  onDoubleClick(item);
-                }
-              }}
-              onClick={() => {
-                if (onSelectChange) {
-                  onSelectChange(item.key);
-                }
-              }}
-            >
+          return (
+            <React.Fragment key={item.key}>
               <div
-                className={cn(
-                  "px-1 flex text-xs items-center gap-0.5 h-8",
-                  selectedKey === item.key ? "bg-selected" : "hover:bg-accent",
-                  contextMenuKey === item.key && contextOpen
-                    ? "border border-blue-500"
-                    : "border border-transparent",
-                  "w-full",
-                  "justify-start",
-                  "cursor-pointer"
-                )}
+                key={item.key}
+                onContextMenu={() => {
+                  stopParentPropagation.current = true;
+                  setContextMenuKey(item.key);
+                  if (onContextMenu) setContextMenu(onContextMenu(item));
+                }}
+                onDoubleClick={() => {
+                  if (onDoubleClick) {
+                    onDoubleClick(item);
+                  }
+                }}
+                onClick={() => {
+                  if (onSelectChange) {
+                    onSelectChange(item.key);
+                  }
+                }}
               >
-                <Indentation depth={depth} />
-
-                {(depth > 0 || listCollapsed) && (
-                  <CollapsedButton
-                    hasCollapsed={hasCollaped}
-                    onClick={collapsedClicked}
-                    collapsed={isCollapsed}
-                  />
-                )}
-
-                {item.icon && (
-                  <item.icon className={cn("w-4 h-4 mr-1", item.iconColor)} />
-                )}
-                <div>
-                  {item.name}
-                  {item.badgeContent && (
-                    <span
-                      className={cn(
-                        "rounded p-0.5 px-1 ml-1 text-xs font-mono font-normal",
-                        item.badgeClassName ?? "bg-red-500 text-white"
-                      )}
-                    >
-                      {item.badgeContent}
-                    </span>
+                <div
+                  className={cn(
+                    "px-1 flex text-xs items-center gap-0.5 h-8",
+                    selectedKey === item.key
+                      ? "bg-selected"
+                      : "hover:bg-accent",
+                    contextMenuKey === item.key && contextOpen
+                      ? "border border-blue-500"
+                      : "border border-transparent",
+                    "w-full",
+                    "justify-start",
+                    "cursor-pointer"
                   )}
+                >
+                  <Indentation depth={depth} />
+
+                  {(depth > 0 || listCollapsed) && (
+                    <CollapsedButton
+                      hasCollapsed={hasCollaped}
+                      onClick={collapsedClicked}
+                      collapsed={isCollapsed}
+                    />
+                  )}
+
+                  {item.icon && (
+                    <item.icon className={cn("w-4 h-4 mr-1", item.iconColor)} />
+                  )}
+                  <div>
+                    <Highlight text={item.name} highlight={highlight} />
+                    {item.badgeContent && (
+                      <span
+                        className={cn(
+                          "rounded p-0.5 px-1 ml-1 text-xs font-mono font-normal",
+                          item.badgeClassName ?? "bg-red-500 text-white"
+                        )}
+                      >
+                        {item.badgeContent}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            {isCollapsed &&
-              renderList({
-                ...rest,
-                depth: depth + 1,
-                items: item.children ?? [],
-              })}
-          </React.Fragment>
-        );
-      })}
+              {isCollapsed &&
+                renderList({
+                  ...rest,
+                  depth: depth + 1,
+                  items: item.children ?? [],
+                })}
+            </React.Fragment>
+          );
+        })}
     </>
   );
 }
