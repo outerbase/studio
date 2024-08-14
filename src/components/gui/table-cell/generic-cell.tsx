@@ -110,12 +110,14 @@ function ForeignKeyColumnSnippet(props: SneakpeakProps) {
   );
 }
 
-function prettifyBytes(bytes: Uint8Array) {
-  return [...bytes.subarray(0, 64)]
+export function prettifyBytes(bytes: Uint8Array) {
+  return [...bytes]
     .map((b) =>
-      b >= 0x20 && b !== 0x7f
-        ? String.fromCharCode(b)
-        : "\\x" + b.toString(16).toUpperCase().padStart(2, "0")
+      b === 0x5c
+        ? "\\\\"
+        : b >= 0x20 && b !== 0x7f
+          ? String.fromCharCode(b)
+          : "\\x" + b.toString(16).toUpperCase().padStart(2, "0")
     )
     .join("");
 }
@@ -147,7 +149,7 @@ function BlobCellValue({
     return (
       <div className="flex w-full">
         <span className="flex-1 text-ellipsis overflow-hidden whitespace-nowrap text-orange-600 dark:text-orange-400">
-          {prettifyBytes(bytes)}
+          {prettifyBytes(bytes.subarray(0, 64))}
         </span>
         <div className="ml-2 justify-center items-center flex-col">
           <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">

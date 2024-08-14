@@ -7,6 +7,7 @@ import {
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { ReactElement } from "react";
+import deepEqual from "deep-equal";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -202,7 +203,7 @@ export default class OptimizeTableState {
 
     if (!row) return;
 
-    if (oldValue === newValue) {
+    if (deepEqual(oldValue, newValue)) {
       const rowChange = row.change;
       if (rowChange && headerName in rowChange) {
         delete rowChange[headerName];
