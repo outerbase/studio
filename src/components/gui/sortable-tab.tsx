@@ -47,13 +47,13 @@ export const WindowTabItemButton = forwardRef<
             "rounded-full hover:bg-red-600 hover:text-white w-4 h-4 ml-2 flex justify-center items-center",
             "libsql-window-close"
           )}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClose) onClose();
+          }}
         >
           <LucideX
             className={cn("w-3 h-3 grow-0 shrink-0", "libsql-window-close")}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onClose) onClose();
-            }}
           />
         </div>
       )}
