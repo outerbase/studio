@@ -72,7 +72,10 @@ export default function useTableResultCellRenderer() {
           />
         );
       } else if (header.dataType === TableColumnDataType.INTEGER) {
-        if (databaseDriver.supportBigInt()) {
+        if (
+          databaseDriver.supportBigInt() &&
+          Number.isInteger(state.getValue(y, x))
+        ) {
           return (
             <BigNumberCell
               header={header}
