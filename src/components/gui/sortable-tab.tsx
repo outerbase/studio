@@ -27,19 +27,22 @@ export const WindowTabItemButton = forwardRef<
 >(function WindowTabItemButton(props: WindowTabItemButtonProps, ref) {
   const { icon: Icon, selected, title, onClose, isDragging, ...rest } = props;
 
-  const className = cn(
-    "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px]",
-    "libsql-window-tab",
-    isDragging && "z-20",
-    isDragging && !selected && "bg-gray-200 dark:bg-gray-700 rounded-t",
-    selected
-      ? "border-x border-t bg-background border-b-background rounded-t"
-      : "border-b border-t border-t-secondary border-x-secondary opacity-65 hover:opacity-100"
-  );
-
   return (
-    <button className={className} ref={ref} {...rest}>
-      <Icon className="w-4 h-4 ml-2 grow-0 shrink-0" />
+    <button
+      className={cn(
+        "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px] border-x border-t",
+        "libsql-window-tab",
+        isDragging && "z-20",
+        isDragging && !selected && "bg-gray-200 dark:bg-gray-700 rounded-t",
+        selected
+          ? "border-b-background bg-background rounded-t"
+          : "border-t-secondary border-x-secondary opacity-65 hover:opacity-100"
+      )}
+      onAuxClick={({ button }) => button === 1 && onClose && onClose()}
+      ref={ref}
+      {...rest}
+    >
+      <Icon className="ml-2 h-4 w-4 shrink-0 grow-0" />
       <div className="line-clamp-1 grow px-2">{title}</div>
       {onClose && (
         <div
