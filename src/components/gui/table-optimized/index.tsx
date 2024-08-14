@@ -19,6 +19,7 @@ import {
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
+import tableResultCellRenderer from "@/components/gui/table-result/render-cell";
 
 export interface OptimizeTableHeaderProps {
   name: string;
@@ -54,7 +55,6 @@ interface TableCellListCommonProps {
     props: OptimizeTableHeaderWithIndexProps,
     idx: number
   ) => ReactElement;
-  renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
   onHeaderContextMenu?: (
     e: React.MouseEvent,
@@ -123,7 +123,6 @@ function renderCellList({
   hasSticky,
   customStyles,
   headers,
-  renderCell,
   rowEnd,
   rowStart,
   colEnd,
@@ -191,7 +190,7 @@ function renderCellList({
           >
             <div className={"libsql-table-cell"}>
               {headers[0] &&
-                renderCell({
+                tableResultCellRenderer({
                   y: absoluteRowIndex,
                   x: headers[0].index,
                   state: internalState,
@@ -219,7 +218,7 @@ function renderCellList({
               onMouseDown={handleCellClicked(absoluteRowIndex, header.index)}
             >
               <div className={"libsql-table-cell"}>
-                {renderCell({
+                {tableResultCellRenderer({
                   y: absoluteRowIndex,
                   x: header.index,
                   state: internalState,
@@ -260,7 +259,6 @@ function renderCellList({
 export default function OptimizeTable({
   stickyHeaderIndex,
   internalState,
-  renderCell,
   renderHeader,
   rowHeight,
   renderAhead,
@@ -325,7 +323,6 @@ export default function OptimizeTable({
   return useMemo(() => {
     const common = {
       headers: headerWithIndex,
-      renderCell,
       rowEnd,
       rowStart,
       colEnd,
@@ -370,7 +367,6 @@ export default function OptimizeTable({
     rowStart,
     colEnd,
     colStart,
-    renderCell,
     rowHeight,
     headerWithIndex,
     onHeaderResize,

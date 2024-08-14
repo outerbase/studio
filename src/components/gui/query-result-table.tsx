@@ -24,7 +24,6 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
-import useTableResultCellRenderer from "./table-result/render-cell";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -176,7 +175,6 @@ export default function ResultTable({
     }
   }, []);
 
-  const onRenderCell = useTableResultCellRenderer();
   const onCellContextMenu = useTableResultContextMenu({
     tableName,
     data,
@@ -247,7 +245,6 @@ export default function ResultTable({
       arrangeHeaderIndex={headerIndex}
       renderAhead={20}
       renderHeader={renderHeader}
-      renderCell={onRenderCell}
       rowHeight={35}
       onKeyDown={onKeyDown}
     />
