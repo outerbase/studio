@@ -30,6 +30,7 @@ function detectTextEditorType(
 }
 
 function determineCellType(value: unknown) {
+  if (value === null) return undefined;
   if (typeof value === "bigint") return TableColumnDataType.INTEGER;
   if (typeof value === "number") return TableColumnDataType.REAL;
   if (typeof value === "string") return TableColumnDataType.TEXT;
