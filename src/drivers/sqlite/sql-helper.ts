@@ -34,8 +34,9 @@ export function escapeSqlValue(value: unknown) {
 
 export function convertSqliteType(
   type: string | undefined
-): TableColumnDataType {
+): TableColumnDataType | undefined {
   // https://www.sqlite.org/datatype3.html
+  if (type === "") return undefined;
   if (type === undefined) return TableColumnDataType.BLOB;
 
   type = type.toUpperCase();

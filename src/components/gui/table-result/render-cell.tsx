@@ -48,8 +48,9 @@ export default function tableResultCellRenderer({
   const isFocus = state.hasFocus(y, x);
   const editMode = isFocus && state.isInEditMode();
   const value = state.getValue(y, x);
+  const valueType = determineCellType(value);
 
-  switch (determineCellType(value) ?? header.dataType) {
+  switch (valueType ?? header.dataType) {
     case TableColumnDataType.INTEGER:
       return (
         <BigNumberCell
@@ -57,6 +58,7 @@ export default function tableResultCellRenderer({
           state={state}
           editMode={editMode}
           value={value as DatabaseValue<bigint>}
+          valueType={valueType}
           focus={isFocus}
           isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
@@ -72,6 +74,7 @@ export default function tableResultCellRenderer({
           state={state}
           editMode={editMode}
           value={value as DatabaseValue<number>}
+          valueType={valueType}
           focus={isFocus}
           isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
@@ -88,6 +91,7 @@ export default function tableResultCellRenderer({
           editor={detectTextEditorType(value as DatabaseValue<string>)}
           editMode={editMode}
           value={value as DatabaseValue<string>}
+          valueType={valueType}
           focus={isFocus}
           isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
