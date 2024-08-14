@@ -110,6 +110,16 @@ function ForeignKeyColumnSnippet(props: SneakpeakProps) {
   );
 }
 
+function prettifyBytes(bytes: Uint8Array) {
+  return [...bytes.subarray(0, 64)]
+    .map((b) =>
+      b >= 0x20 && b !== 0x7f
+        ? String.fromCharCode(b)
+        : "\\x" + b.toString(16).toUpperCase().padStart(2, "0")
+    )
+    .join("");
+}
+
 function BlobCellValue({
   value,
   vector,
@@ -133,23 +143,20 @@ function BlobCellValue({
     );
   } else {
     const bytes = new Uint8Array(value);
-    const base64Text = btoa(
-      bytes
-        .slice(0, 64)
-        .reduce((data, byte) => data + String.fromCharCode(byte), "")
-    );
 
     return (
-      <div className="flex">
-        <div className="mr-2 justify-center items-center flex-col">
+      <div className="flex w-full">
+        <span className="flex-1 text-ellipsis overflow-hidden whitespace-nowrap text-orange-600 dark:text-orange-400">
+          {prettifyBytes(bytes)}
+        </span>
+        <div className="ml-2 justify-center items-center flex-col">
           <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
             {bytes.length.toLocaleString(undefined, {
               maximumFractionDigits: 0,
-            })}{" "}
-            bytes
+            })}
+            {" bytes"}
           </span>
         </div>
-        <div className="text-orange-600">{base64Text}</div>
       </div>
     );
   }
