@@ -107,6 +107,7 @@ export default function tableResultCellRenderer({
           header={header}
           state={state}
           editMode={editMode}
+          valueType={valueType}
           value={value as DatabaseValue<number[]>}
           focus={isFocus}
           isChanged={state.hasCellChange(y, x)}
