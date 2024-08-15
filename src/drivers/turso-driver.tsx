@@ -9,6 +9,7 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
+  DriverFlags,
 } from "@/drivers/base-driver";
 import { convertSqliteType } from "./sqlite/sql-helper";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
@@ -97,8 +98,8 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
     }
   }
 
-  supportBigInt(): boolean {
-    return this.bigInt;
+  override getFlags(): DriverFlags {
+    return { ...super.getFlags(), supportBigInt: this.bigInt };
   }
 
   async query(stmt: InStatement) {

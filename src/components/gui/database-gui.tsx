@@ -134,7 +134,7 @@ export default function DatabaseGui() {
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
           <SidebarTab tabs={sidebarTabs} />
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel defaultSize={100 - defaultWidthPercentage}>
           <WindowTabs
             menu={tabSideMenu}

@@ -81,9 +81,6 @@ export default function withDatabaseOperation<T = unknown>(
       const roleId = databaseRole.roleId ?? "";
       const permission = await db.query.database_role.findFirst({
         where: eq(database_role.id, roleId),
-        with: {
-          permissions: true,
-        },
       });
 
       if (!permission) {
@@ -103,12 +100,7 @@ export default function withDatabaseOperation<T = unknown>(
         permission: {
           isOwner: !!permission.isOwner,
           canExecuteQuery: !!permission.canExecuteQuery,
-          roles: permission.permissions.map((p) => ({
-            type: p.type ?? "table",
-            access: p.access ?? "read",
-            tableName: p.tableName,
-            columnName: p.columnName,
-          })),
+          roles: [],
         },
       });
     }

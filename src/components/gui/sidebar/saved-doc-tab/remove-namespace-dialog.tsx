@@ -32,13 +32,15 @@ export default function RemoveNamespaceDialog({
       setLoading(true);
 
       docDriver
-        .getDocs(value.id)
+        .getDocs()
         .then((docs) => {
           docDriver
             .removeNamespapce(value.id)
             .then(() => {
               onClose();
-              onComplete(docs);
+              onComplete(
+                docs.find((n) => n.namespace.id === value.id)?.docs ?? []
+              );
             })
             .finally(() => {
               setLoading(false);

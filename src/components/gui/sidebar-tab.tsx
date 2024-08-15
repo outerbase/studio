@@ -127,11 +127,11 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
               key={tab.key}
               style={{
                 contentVisibility: selected ? "auto" : "hidden",
-                zIndex: selected ? 1 : 0,
+                zIndex: selected ? 0 : -1,
                 position: "absolute",
                 display: "flex",
                 left: 0,
-                right: 5,
+                right: 0,
                 bottom: 0,
                 top: 0,
               }}

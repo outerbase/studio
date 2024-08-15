@@ -1,38 +1,25 @@
 import {
-  BaseDriver,
-  DatabaseResultSet,
-  DatabaseSchemaItem,
-  DatabaseTableOperation,
-  DatabaseTableOperationReslt,
-  DatabaseTableSchema,
-  DatabaseTriggerSchema,
-  DatabaseValue,
-  SelectFromTableOptions,
-} from "@/drivers/base-driver";
-import {
   ApiOpsBatchResponse,
   ApiOpsQueryResponse,
-  ApiSchemaListResponse,
-  ApiSchemaResponse,
-  ApiTriggerResponse,
 } from "@/lib/api-response-types";
 import { RequestOperationBody } from "@/lib/api/api-request-types";
+import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
-export default class RemoteDriver implements BaseDriver {
+export default class RemoteDriver extends SqliteLikeBaseDriver {
   protected id: string = "";
   protected authToken = "";
   protected type: "temporary" | "remote" = "remote";
 
   constructor(type: "temporary" | "remote", id: string, authToken: string) {
+    super();
     this.id = id;
     this.authToken = authToken;
     this.type = type;
   }
 
-  supportBigInt(): boolean {
-    return false;
+  close(): void {
+    // do nothing
   }
-
   protected async request<T = unknown>(body: RequestOperationBody) {
     const url =
       this.type === "temporary"
@@ -63,16 +50,6 @@ export default class RemoteDriver implements BaseDriver {
     return r.data;
   }
 
-  async findFirst(tableName: string, options: Record<string, DatabaseValue>) {
-    const r = await this.request<ApiOpsQueryResponse>({
-      type: "find-first",
-      options,
-      tableName,
-    });
-
-    return r.data;
-  }
-
   async transaction(stmt: string[]) {
     const r = await this.request<ApiOpsBatchResponse>({
       type: "batch",
@@ -80,45 +57,5 @@ export default class RemoteDriver implements BaseDriver {
     });
 
     return r.data;
-  }
-
-  close() {}
-
-  async schemas(): Promise<DatabaseSchemaItem[]> {
-    return (await this.request<ApiSchemaListResponse>({ type: "schemas" }))
-      .data;
-  }
-
-  async tableSchema(tableName: string): Promise<DatabaseTableSchema> {
-    return (
-      await this.request<ApiSchemaResponse>({ type: "schema", tableName })
-    ).data;
-  }
-
-  async trigger(name: string): Promise<DatabaseTriggerSchema> {
-    return (await this.request<ApiTriggerResponse>({ type: "trigger", name }))
-      .data;
-  }
-
-  async updateTableData(
-    tableName: string,
-    ops: DatabaseTableOperation[]
-  ): Promise<DatabaseTableOperationReslt[]> {
-    return await this.request({
-      type: "update-table-data",
-      ops,
-      tableName,
-    });
-  }
-
-  async selectTable(
-    tableName: string,
-    options: SelectFromTableOptions
-  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
-    return await this.request({
-      type: "select-table",
-      tableName,
-      options,
-    });
   }
 }

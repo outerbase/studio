@@ -77,7 +77,11 @@ describe("Namespace", () => {
       name: "Testing 2",
     });
 
-    expect((await remoteDoc.getDocs(defaultNamespaceId)).length).toBe(2);
+    expect(
+      (await remoteDoc.getDocs()).find(
+        (n) => n.namespace.id === defaultNamespaceId
+      )!.docs.length
+    ).toBe(2);
 
     await remoteDoc.updateDoc(d1.id, {
       name: "Renamed Test",
@@ -85,12 +89,17 @@ describe("Namespace", () => {
     });
 
     expect(
-      (await remoteDoc.getDocs(defaultNamespaceId)).find((n) => n.id === d1.id)
-        ?.name
+      (await remoteDoc.getDocs())!
+        .find((n) => n.namespace.id === defaultNamespaceId)!
+        .docs.find((n) => n.id === d1.id)?.name
     ).toBe("Renamed Test");
 
     await remoteDoc.removeDoc(d2.id);
-    expect((await remoteDoc.getDocs(defaultNamespaceId)).length).toBe(1);
+    expect(
+      (await remoteDoc.getDocs())!.find(
+        (n) => n.namespace.id === defaultNamespaceId
+      )?.docs.length
+    ).toBe(1);
   });
 
   it("rename namespace", async () => {

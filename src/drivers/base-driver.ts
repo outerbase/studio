@@ -69,6 +69,8 @@ export interface SelectFromTableOptions {
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
 
+export type DatabaseSchemas = Record<string, DatabaseSchemaItem[]>;
+
 export interface DatabaseSchemaItem {
   type: "table" | "trigger" | "view";
   name: string;
@@ -191,9 +193,15 @@ export interface DatabaseTableOperationReslt {
   record?: Record<string, DatabaseValue>;
 }
 
+export interface DriverFlags {
+  defaultSchema: string;
+  optionalSchema: boolean;
+  supportBigInt: boolean;
+}
+
 export abstract class BaseDriver {
   // Flags
-  abstract supportBigInt(): boolean;
+  abstract getFlags(): DriverFlags;
 
   // Methods
   abstract close(): void;
@@ -201,7 +209,7 @@ export abstract class BaseDriver {
   abstract query(stmt: string): Promise<DatabaseResultSet>;
   abstract transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
-  abstract schemas(): Promise<DatabaseSchemaItem[]>;
+  abstract schemas(): Promise<DatabaseSchemas>;
   abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
   abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
 

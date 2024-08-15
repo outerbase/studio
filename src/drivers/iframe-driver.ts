@@ -74,10 +74,6 @@ export default class IframeDriver extends SqliteLikeBaseDriver {
     });
   }
 
-  supportBigInt(): boolean {
-    return false;
-  }
-
   close(): void {
     // do nothing
   }

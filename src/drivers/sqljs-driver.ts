@@ -32,10 +32,6 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
     return r;
   }
 
-  supportBigInt(): boolean {
-    return false;
-  }
-
   async query(stmt: InStatement): Promise<DatabaseResultSet> {
     const sql = typeof stmt === "string" ? stmt : stmt.sql;
     const bind =

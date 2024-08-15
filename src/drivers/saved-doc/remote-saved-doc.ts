@@ -11,6 +11,7 @@ import {
 import {
   SavedDocData,
   SavedDocDriver,
+  SavedDocGroupByNamespace,
   SavedDocInput,
   SavedDocNamespace,
   SavedDocType,
@@ -30,12 +31,31 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     if (this.cacheNamespaceList) {
       return this.cacheNamespaceList;
     }
+
     const t = await getDocNamespaceList(this.databaseId);
+    const d = await getSavedDocList(this.databaseId);
+
+    this.cacheDocs = d.reduce(
+      (a, b) => {
+        if (!a[b.namespace.id]) a[b.namespace.id] = [b];
+        else a[b.namespace.id].push(b);
+        return a;
+      },
+      t.reduce(
+        (a, b) => {
+          a[b.id] = [];
+          return a;
+        },
+        {} as Record<string, SavedDocData[]>
+      )
+    );
+
     this.cacheNamespaceList = t;
     return t;
   }
 
   async createNamespace(name: string): Promise<SavedDocNamespace> {
+    await this.getNamespaces();
     const t = await createDocNamespace(this.databaseId, name);
 
     if (this.cacheNamespaceList) {
@@ -46,6 +66,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async updateNamespace(id: string, name: string): Promise<SavedDocNamespace> {
+    await this.getNamespaces();
     const t = await updateDocNamespace(this.databaseId, id, name);
 
     if (this.cacheNamespaceList) {
@@ -61,6 +82,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async removeNamespapce(id: string): Promise<void> {
+    await this.getNamespaces();
     await removeDocNamespace(this.databaseId, id);
 
     if (this.cacheNamespaceList) {
@@ -79,6 +101,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     namespace: string,
     data: SavedDocInput
   ): Promise<SavedDocData> {
+    await this.getNamespaces();
     const r = await createSavedDoc(this.databaseId, namespace, type, data);
 
     if (this.cacheDocs[r.namespace.id]) {
@@ -89,17 +112,19 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     return r;
   }
 
-  async getDocs(namespaceId: string): Promise<SavedDocData[]> {
-    if (this.cacheDocs[namespaceId]) {
-      return this.cacheDocs[namespaceId];
-    }
+  async getDocs(): Promise<SavedDocGroupByNamespace[]> {
+    const ns = await this.getNamespaces();
 
-    const t = await getSavedDocList(this.databaseId, namespaceId);
-    this.cacheDocs[namespaceId] = t;
-    return t;
+    return ns.map((n) => {
+      return {
+        namespace: n,
+        docs: this.cacheDocs[n.id] ?? [],
+      };
+    });
   }
 
   async updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData> {
+    await this.getNamespaces();
     const r = await updateSavedDoc(this.databaseId, id, data);
 
     if (this.cacheDocs[r.namespace.id]) {
@@ -116,6 +141,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
   }
 
   async removeDoc(id: string): Promise<void> {
+    await this.getNamespaces();
     const r = await removeSavedDoc(this.databaseId, id);
 
     for (const namespaceId of Object.keys(this.cacheDocs)) {
