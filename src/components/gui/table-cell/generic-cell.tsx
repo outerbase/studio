@@ -9,13 +9,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DatabaseResultSet, DatabaseValue } from "@/drivers/base-driver";
+import {
+  DatabaseResultSet,
+  DatabaseValue,
+  describeTableColumnType,
+  TableColumnDataType,
+} from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
   value: T;
+  valueType?: TableColumnDataType;
   focus?: boolean;
   isChanged?: boolean;
   onFocus?: () => void;
@@ -110,6 +121,18 @@ function ForeignKeyColumnSnippet(props: SneakpeakProps) {
   );
 }
 
+export function prettifyBytes(bytes: Uint8Array) {
+  return [...bytes]
+    .map((b) =>
+      b === 0x5c
+        ? "\\\\"
+        : b >= 0x20 && b !== 0x7f
+          ? String.fromCharCode(b)
+          : "\\x" + b.toString(16).toUpperCase().padStart(2, "0")
+    )
+    .join("");
+}
+
 function BlobCellValue({
   value,
   vector,
@@ -133,23 +156,20 @@ function BlobCellValue({
     );
   } else {
     const bytes = new Uint8Array(value);
-    const base64Text = btoa(
-      bytes
-        .slice(0, 64)
-        .reduce((data, byte) => data + String.fromCharCode(byte), "")
-    );
 
     return (
-      <div className="flex">
-        <div className="mr-2 justify-center items-center flex-col">
+      <div className="flex w-full">
+        <span className="flex-1 text-ellipsis overflow-hidden whitespace-nowrap text-orange-600 dark:text-orange-400">
+          {prettifyBytes(bytes.subarray(0, 64))}
+        </span>
+        <div className="ml-2 justify-center items-center flex-col">
           <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
             {bytes.length.toLocaleString(undefined, {
               maximumFractionDigits: 0,
-            })}{" "}
-            bytes
+            })}
+            {" bytes"}
           </span>
         </div>
-        <div className="text-orange-600">{base64Text}</div>
       </div>
     );
   }
@@ -157,6 +177,7 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
+  valueType,
   onFocus,
   isChanged,
   focus,
@@ -212,7 +233,7 @@ export default function GenericCell({
       return (
         <span
           className={
-            isChanged ? "text-black" : "text-gray-500 dark:text-gray-300"
+            isChanged ? "text-black" : "text-green-600 dark:text-green-500"
           }
         >
           {value}
@@ -254,13 +275,36 @@ export default function GenericCell({
   }, [value, textBaseStyle, isChanged, header]);
 
   return (
-    <div
-      className={className}
-      onMouseDown={onFocus}
-      onDoubleClick={onDoubleClick}
-    >
-      <div className="flex flex-grow overflow-hidden">{content}</div>
-      {fkContent}
+    <div className="relative">
+      {valueType && header.dataType && valueType !== header.dataType && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="libsql-mismatch-arrow absolute right-0 top-0"></div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <strong>Mismatched type:</strong>
+            <ul>
+              <li>
+                <strong>- Expected by column:</strong>{" "}
+                <code>{describeTableColumnType(header.dataType)}</code>
+              </li>
+              <li>
+                <strong>- But stored as:</strong>{" "}
+                <code>{describeTableColumnType(valueType)}</code>
+              </li>
+            </ul>
+          </TooltipContent>
+        </Tooltip>
+      )}
+
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
+        <div className="flex flex-grow overflow-hidden">{content}</div>
+        {fkContent}
+      </div>
     </div>
   );
 }

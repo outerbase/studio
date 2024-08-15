@@ -28,14 +28,17 @@ export function escapeSqlValue(value: unknown) {
   if (typeof value === "number") return value.toString();
   if (typeof value === "bigint") return value.toString();
   if (value instanceof ArrayBuffer) return escapeSqlBinary(value);
+  if (Array.isArray(value))
+    return escapeSqlBinary(Uint8Array.from(value).buffer);
   // eslint-disable-next-line @typescript-eslint/no-base-to-string
   throw new Error(value.toString() + " is unrecongize type of value");
 }
 
 export function convertSqliteType(
   type: string | undefined
-): TableColumnDataType {
+): TableColumnDataType | undefined {
   // https://www.sqlite.org/datatype3.html
+  if (type === "") return undefined;
   if (type === undefined) return TableColumnDataType.BLOB;
 
   type = type.toUpperCase();

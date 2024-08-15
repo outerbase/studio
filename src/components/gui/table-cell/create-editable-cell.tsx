@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GenericCell from "./generic-cell";
-import { DatabaseValue } from "@/drivers/base-driver";
+import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useFullEditor } from "../providers/full-editor-provider";
 import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import { cn } from "@/lib/utils";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
+  valueType: TableColumnDataType | undefined;
   isChanged?: boolean;
   focus?: boolean;
   editMode?: boolean;
@@ -104,6 +106,7 @@ export default function createEditableCell<T = unknown>({
 }: TabeEditableCellProps<T>): React.FC<TableEditableCell<T>> {
   return function GenericEditableCell({
     value,
+    valueType,
     isChanged,
     focus,
     onChange,
@@ -136,17 +139,15 @@ export default function createEditableCell<T = unknown>({
       state.exitEditMode();
     }, [setEditValue, state, value]);
 
-    const className = [
-      "libsql-cell",
-      focus ? "libsql-focus" : null,
-      isChanged ? "libsql-change" : null,
-    ]
-      .filter(Boolean)
-      .join(" ");
-
     if (editMode && (editor === undefined || editor === "input")) {
       return (
-        <div className={className}>
+        <div
+          className={cn(
+            "libsql-cell flex",
+            focus && "libsql-focus",
+            isChanged && "libsql-change"
+          )}
+        >
           <InputCellEditor
             state={state}
             readOnly={state.getReadOnlyMode()}
@@ -164,6 +165,7 @@ export default function createEditableCell<T = unknown>({
       <GenericCell
         header={header}
         value={toValue(editValue)}
+        valueType={valueType}
         focus={focus}
         isChanged={isChanged}
         align={align}
