@@ -212,7 +212,7 @@ export default function GenericCell({
       return (
         <span
           className={
-            isChanged ? "text-black" : "text-gray-500 dark:text-gray-300"
+            isChanged ? "text-black" : "text-green-600 dark:text-green-500"
           }
         >
           {value}
