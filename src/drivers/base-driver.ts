@@ -15,6 +15,22 @@ export enum TableColumnDataType {
   BLOB = 4,
 }
 
+export function describeTableColumnType(type: TableColumnDataType) {
+  switch (type) {
+    case TableColumnDataType.TEXT:
+      return "TEXT";
+
+    case TableColumnDataType.INTEGER:
+      return "INTEGER";
+
+    case TableColumnDataType.REAL:
+      return "REAL";
+
+    case TableColumnDataType.BLOB:
+      return "BLOB";
+  }
+}
+
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 
@@ -22,7 +38,7 @@ export interface DatabaseHeader {
   name: string;
   displayName: string;
   originalType: string | null;
-  type: TableColumnDataType;
+  type: TableColumnDataType | undefined;
 }
 
 export interface DatabaseResultStat {

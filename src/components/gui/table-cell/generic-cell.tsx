@@ -9,13 +9,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DatabaseResultSet, DatabaseValue } from "@/drivers/base-driver";
+import {
+  DatabaseResultSet,
+  DatabaseValue,
+  describeTableColumnType,
+  TableColumnDataType,
+} from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
   value: T;
+  valueType?: TableColumnDataType;
   focus?: boolean;
   isChanged?: boolean;
   onFocus?: () => void;
@@ -157,6 +168,7 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
+  valueType,
   onFocus,
   isChanged,
   focus,
@@ -254,13 +266,36 @@ export default function GenericCell({
   }, [value, textBaseStyle, isChanged, header]);
 
   return (
-    <div
-      className={className}
-      onMouseDown={onFocus}
-      onDoubleClick={onDoubleClick}
-    >
-      <div className="flex flex-grow overflow-hidden">{content}</div>
-      {fkContent}
+    <div className="relative">
+      {valueType && header.dataType && valueType !== header.dataType && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="libsql-mismatch-arrow absolute right-0 top-0"></div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <strong>Mismatched type:</strong>
+            <ul>
+              <li>
+                <strong>- Expected by column:</strong>{" "}
+                <code>{describeTableColumnType(header.dataType)}</code>
+              </li>
+              <li>
+                <strong>- But stored as:</strong>{" "}
+                <code>{describeTableColumnType(valueType)}</code>
+              </li>
+            </ul>
+          </TooltipContent>
+        </Tooltip>
+      )}
+
+      <div
+        className={className}
+        onMouseDown={onFocus}
+        onDoubleClick={onDoubleClick}
+      >
+        <div className="flex flex-grow overflow-hidden">{content}</div>
+        {fkContent}
+      </div>
     </div>
   );
 }

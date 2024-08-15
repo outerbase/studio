@@ -228,6 +228,14 @@ body {
   color: var(--color-text);
 }
 
+.libsql-mismatch-arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 8px 0;
+  border-color: transparent theme("colors.red.400") transparent transparent;
+}
+
 .dark .libsql-removed-row td {
   @apply bg-red-800;
 }
