@@ -4,6 +4,7 @@ import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useFullEditor } from "../providers/full-editor-provider";
 import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import { cn } from "@/lib/utils";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
@@ -138,17 +139,15 @@ export default function createEditableCell<T = unknown>({
       state.exitEditMode();
     }, [setEditValue, state, value]);
 
-    const className = [
-      "libsql-cell",
-      focus ? "libsql-focus" : null,
-      isChanged ? "libsql-change" : null,
-    ]
-      .filter(Boolean)
-      .join(" ");
-
     if (editMode && (editor === undefined || editor === "input")) {
       return (
-        <div className={className}>
+        <div
+          className={cn(
+            "libsql-cell flex",
+            focus && "libsql-focus",
+            isChanged && "libsql-change"
+          )}
+        >
           <InputCellEditor
             state={state}
             readOnly={state.getReadOnlyMode()}
