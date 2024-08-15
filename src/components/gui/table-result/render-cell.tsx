@@ -5,6 +5,7 @@ import parseSafeJson from "@/lib/json-safe";
 import NumberCell from "../table-cell/number-cell";
 import BigNumberCell from "../table-cell/big-number-cell";
 import GenericCell from "../table-cell/generic-cell";
+import BlobCell from "@/components/gui/table-cell/blob-cell";
 
 function detectTextEditorType(
   value: DatabaseValue<string>
@@ -92,6 +93,21 @@ export default function tableResultCellRenderer({
           editMode={editMode}
           value={value as DatabaseValue<string>}
           valueType={valueType}
+          focus={isFocus}
+          isChanged={state.hasCellChange(y, x)}
+          onChange={(newValue) => {
+            state.changeValue(y, x, newValue);
+          }}
+        />
+      );
+
+    case TableColumnDataType.BLOB:
+      return (
+        <BlobCell
+          header={header}
+          state={state}
+          editMode={editMode}
+          value={value as DatabaseValue<number[]>}
           focus={isFocus}
           isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
