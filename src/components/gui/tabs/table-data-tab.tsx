@@ -171,7 +171,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         </AlertDialog>
       )}
       <div className="shrink-0 grow-0">
-        <div className="flex p-1 gap-1 pb-2">
+        <div className="flex p-1 gap-1">
           <Button
             variant={"ghost"}
             size={"sm"}

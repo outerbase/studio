@@ -140,7 +140,7 @@ export default function WindowTabs({
       >
         <div className="flex flex-col w-full h-full">
           <div className="grow-0 shrink-0 pt-1 bg-secondary overflow-x-auto no-scrollbar">
-            <div className="flex">
+            <div className="flex min-h-9">
               {menu ? (
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger>
