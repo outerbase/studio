@@ -56,8 +56,8 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       return {
         name: renameColName,
         displayName: colName,
-        originalType: "text",
-        type: TableColumnDataType.TEXT,
+        originalType: null,
+        type: undefined,
       };
     });
 

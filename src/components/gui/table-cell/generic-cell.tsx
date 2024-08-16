@@ -12,10 +12,16 @@ import {
 import {
   DatabaseResultSet,
   DatabaseValue,
+  describeTableColumnType,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
@@ -171,6 +177,7 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
+  valueType,
   onFocus,
   isChanged,
   focus,
@@ -269,18 +276,10 @@ export default function GenericCell({
 
   return (
     <div className="relative">
-      {/*
-        Temporary disable mismatch hint:
-        - Some driver do not support BigInteger which gives a false positive warning
-          (This can easily be fixed)
-        - Some driver do not even give us the header type
-          (For sqljs driver does not return header type. I need to find better driver first)
-        
-      */}
-      {/* {valueType && header.dataType && valueType !== header.dataType && (
+      {valueType && header.dataType && valueType !== header.dataType && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="libsql-mismatch-arrow absolute right-0 top-0"></div>
+            <div className="w-0 h-0 border-transparent border-r-8 border-b-8 border-r-red-400 dark:border-r-red-600 absolute right-0 top-0"></div>
           </TooltipTrigger>
           <TooltipContent>
             <strong>Mismatched type:</strong>
@@ -296,7 +295,7 @@ export default function GenericCell({
             </ul>
           </TooltipContent>
         </Tooltip>
-      )} */}
+      )}
 
       <div
         className={className}
