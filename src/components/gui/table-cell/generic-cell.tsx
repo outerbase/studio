@@ -276,7 +276,15 @@ export default function GenericCell({
 
   return (
     <div className="relative">
-      {valueType && header.dataType && valueType !== header.dataType && (
+      {/*
+        Temporary disable mismatch hint:
+        - Some driver do not support BigInteger which gives a false positive warning
+          (This can easily be fixed)
+        - Some driver do not even give us the header type
+          (For sqljs driver does not return header type. I need to find better driver first)
+        
+      */}
+      {/* {valueType && header.dataType && valueType !== header.dataType && (
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="libsql-mismatch-arrow absolute right-0 top-0"></div>
@@ -295,7 +303,7 @@ export default function GenericCell({
             </ul>
           </TooltipContent>
         </Tooltip>
-      )}
+      )} */}
 
       <div
         className={className}
