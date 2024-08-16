@@ -82,14 +82,7 @@ function Indentation({ depth }: { depth: number }) {
   if (depth <= 0) return null;
 
   return new Array(depth).fill(false).map((_, idx: number) => {
-    return (
-      <div
-        key={idx}
-        className={cn(
-          "ml-2 w-2 border-l border-gray-300 dark:border-gray-500 border-dashed h-full"
-        )}
-      ></div>
-    );
+    return <div key={idx} className={cn("w-4")}></div>;
   });
 }
 
@@ -103,7 +96,7 @@ function CollapsedButton({
   onClick: () => void;
 }) {
   return hasCollapsed ? (
-    <div className="mr-1" onClick={onClick}>
+    <div onClick={onClick}>
       {collapsed ? (
         <LucideChevronDown className={cn("w-4 h-4")} />
       ) : (
@@ -111,9 +104,7 @@ function CollapsedButton({
       )}
     </div>
   ) : (
-    <div className="w-2 ml-2 border-l border-gray-300 dark:border-gray-500 border-dashed h-full mr-1 text-gray-300 dark:text-gray-500 relative">
-      <span className="absolute -left-1 top-1.5">●</span>
-    </div>
+    <div className="w-4"></div>
   );
 }
 
@@ -198,7 +189,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
               >
                 <div
                   className={cn(
-                    "px-1 flex text-xs items-center gap-0.5 h-8",
+                    "px-2    flex text-xs items-center gap-0.5 h-8",
                     selectedKey === item.key
                       ? "bg-selected"
                       : "hover:bg-accent",
