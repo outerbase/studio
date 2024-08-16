@@ -12,16 +12,10 @@ import {
 import {
   DatabaseResultSet,
   DatabaseValue,
-  describeTableColumnType,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
@@ -177,7 +171,6 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
-  valueType,
   onFocus,
   isChanged,
   focus,
