@@ -1,37 +1,24 @@
-import { validateOperation } from "@/components/lib/validation";
 import type {
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseSchemas,
   DatabaseTableColumn,
-  DatabaseTableOperation,
-  DatabaseTableOperationReslt,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
   DatabaseValue,
   DriverFlags,
   SelectFromTableOptions,
 } from "./base-driver";
-import { BaseDriver } from "./base-driver";
-
-import {
-  escapeSqlValue,
-  generateInsertStatement,
-  generateDeleteStatement,
-  generateUpdateStatement,
-  generateSelectOneWithConditionStatement,
-} from "@/drivers/sqlite/sql-helper";
+import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
+import CommonSQLImplement from "./common-sql-imp";
 
-export abstract class SqliteLikeBaseDriver extends BaseDriver {
+export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   protected escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;
   }
-
-  abstract override query(stmt: string): Promise<DatabaseResultSet>;
-  abstract override transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
   getFlags(): DriverFlags {
     return {
@@ -190,103 +177,5 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
       data: await this.query(sql),
       schema: await this.tableSchema(tableName),
     };
-  }
-
-  protected validateUpdateOperation(
-    ops: DatabaseTableOperation[],
-    validateSchema: DatabaseTableSchema
-  ) {
-    for (const op of ops) {
-      const { valid, reason } = validateOperation(op, validateSchema);
-      if (!valid) {
-        throw new Error(reason);
-      }
-    }
-  }
-
-  async updateTableData(
-    tableName: string,
-    ops: DatabaseTableOperation[],
-    validateSchema?: DatabaseTableSchema
-  ): Promise<DatabaseTableOperationReslt[]> {
-    if (validateSchema) {
-      this.validateUpdateOperation(ops, validateSchema);
-    }
-
-    const sqls = ops.map((op) => {
-      if (op.operation === "INSERT")
-        return generateInsertStatement(tableName, op.values);
-      if (op.operation === "DELETE")
-        return generateDeleteStatement(tableName, op.where);
-
-      return generateUpdateStatement(tableName, op.where, op.values);
-    });
-
-    const result = await this.transaction(sqls);
-    console.log("result", result);
-
-    const tmp: DatabaseTableOperationReslt[] = [];
-
-    for (let i = 0; i < result.length; i++) {
-      const r = result[i];
-      const op = ops[i];
-
-      if (!r || !op) {
-        tmp.push({});
-        continue;
-      }
-
-      if (op.operation === "UPDATE") {
-        const selectStatement = generateSelectOneWithConditionStatement(
-          tableName,
-          op.where
-        );
-
-        // This transform to make it friendly for sending via HTTP
-        const selectResult = await this.query(selectStatement);
-
-        tmp.push({
-          lastId: r.lastInsertRowid,
-          record: selectResult.rows[0],
-        });
-      } else if (op.operation === "INSERT") {
-        if (op.autoIncrementPkColumn) {
-          const selectStatement = generateSelectOneWithConditionStatement(
-            tableName,
-            { [op.autoIncrementPkColumn]: r.lastInsertRowid }
-          );
-
-          // This transform to make it friendly for sending via HTTP
-          const selectResult = await this.query(selectStatement);
-
-          tmp.push({
-            record: selectResult.rows[0],
-            lastId: r.lastInsertRowid,
-          });
-        } else if (op.pk && op.pk.length > 0) {
-          const selectStatement = generateSelectOneWithConditionStatement(
-            tableName,
-            op.pk.reduce<Record<string, unknown>>((a, b) => {
-              a[b] = op.values[b];
-              return a;
-            }, {})
-          );
-
-          // This transform to make it friendly for sending via HTTP
-          const selectResult = await this.query(selectStatement);
-
-          tmp.push({
-            record: selectResult.rows[0],
-            lastId: r.lastInsertRowid,
-          });
-        } else {
-          tmp.push({});
-        }
-      } else {
-        tmp.push({});
-      }
-    }
-
-    return tmp;
   }
 }

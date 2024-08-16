@@ -20,13 +20,10 @@ type PromiseResolveReject = {
   reject: (value: string) => void;
 };
 
-export default class IframeDriver extends SqliteLikeBaseDriver {
+class IframeConnection {
   protected counter = 0;
   protected queryPromise: Record<number, PromiseResolveReject> = {};
 
-  /**
-   * This will listen to the parent window response
-   */
   listen() {
     const handler = (e: MessageEvent<ParentResponseData>) => {
       if (e.data.error) {
@@ -73,8 +70,11 @@ export default class IframeDriver extends SqliteLikeBaseDriver {
       );
     });
   }
+}
 
-  close(): void {
-    // do nothing
-  }
+export default class IframeDriver extends SqliteLikeBaseDriver {
+  protected conn = new IframeConnection();
+  listen = this.conn.listen;
+  query = this.conn.query;
+  transaction = this.conn.transaction;
 }
