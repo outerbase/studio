@@ -86,6 +86,7 @@ export async function commitChange({
 
   try {
     const result = await driver.updateTableData(
+      tableSchema.schemaName ?? "main",
       tableName,
       plans.map((p) => p.plan),
       tableSchema

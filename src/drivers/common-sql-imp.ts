@@ -1,16 +1,20 @@
 import { validateOperation } from "@/components/lib/validation";
 import {
   BaseDriver,
+  DatabaseResultSet,
   DatabaseTableOperation,
   DatabaseTableOperationReslt,
   DatabaseTableSchema,
+  DatabaseValue,
+  SelectFromTableOptions,
 } from "./base-driver";
+import { escapeSqlValue } from "./sqlite/sql-helper";
 import {
-  generateDeleteStatement,
-  generateInsertStatement,
-  generateSelectOneWithConditionStatement,
-  generateUpdateStatement,
-} from "./sqlite/sql-helper";
+  deleteFrom,
+  insertInto,
+  selectFrom,
+  updateTable,
+} from "./query-builder";
 
 export default abstract class CommonSQLImplement extends BaseDriver {
   protected validateUpdateOperation(
@@ -26,6 +30,7 @@ export default abstract class CommonSQLImplement extends BaseDriver {
   }
 
   async updateTableData(
+    schemaName: string,
     tableName: string,
     ops: DatabaseTableOperation[],
     validateSchema?: DatabaseTableSchema
@@ -36,11 +41,11 @@ export default abstract class CommonSQLImplement extends BaseDriver {
 
     const sqls = ops.map((op) => {
       if (op.operation === "INSERT")
-        return generateInsertStatement(tableName, op.values);
+        return insertInto(this, schemaName, tableName, op.values);
       if (op.operation === "DELETE")
-        return generateDeleteStatement(tableName, op.where);
+        return deleteFrom(this, schemaName, tableName, op.where, 1);
 
-      return generateUpdateStatement(tableName, op.where, op.values);
+      return updateTable(this, schemaName, tableName, op.where, op.values, 1);
     });
 
     const result = await this.transaction(sqls);
@@ -57,9 +62,12 @@ export default abstract class CommonSQLImplement extends BaseDriver {
       }
 
       if (op.operation === "UPDATE") {
-        const selectStatement = generateSelectOneWithConditionStatement(
+        const selectStatement = selectFrom(
+          this,
+          schemaName,
           tableName,
-          op.where
+          op.where,
+          { limit: 1, offset: 0 }
         );
 
         // This transform to make it friendly for sending via HTTP
@@ -71,9 +79,12 @@ export default abstract class CommonSQLImplement extends BaseDriver {
         });
       } else if (op.operation === "INSERT") {
         if (op.autoIncrementPkColumn) {
-          const selectStatement = generateSelectOneWithConditionStatement(
+          const selectStatement = selectFrom(
+            this,
+            schemaName,
             tableName,
-            { [op.autoIncrementPkColumn]: r.lastInsertRowid }
+            { [op.autoIncrementPkColumn]: r.lastInsertRowid },
+            { limit: 1, offset: 0 }
           );
 
           // This transform to make it friendly for sending via HTTP
@@ -84,12 +95,15 @@ export default abstract class CommonSQLImplement extends BaseDriver {
             lastId: r.lastInsertRowid,
           });
         } else if (op.pk && op.pk.length > 0) {
-          const selectStatement = generateSelectOneWithConditionStatement(
+          const selectStatement = selectFrom(
+            this,
+            schemaName,
             tableName,
             op.pk.reduce<Record<string, unknown>>((a, b) => {
               a[b] = op.values[b];
               return a;
-            }, {})
+            }, {}),
+            { limit: 1, offset: 0 }
           );
 
           // This transform to make it friendly for sending via HTTP
@@ -108,5 +122,44 @@ export default abstract class CommonSQLImplement extends BaseDriver {
     }
 
     return tmp;
+  }
+
+  async findFirst(
+    schemaName: string,
+    tableName: string,
+    key: Record<string, DatabaseValue>
+  ): Promise<DatabaseResultSet> {
+    const wherePart = Object.entries(key)
+      .map(([colName, colValue]) => {
+        return `${this.escapeId(colName)} = ${escapeSqlValue(colValue)}`;
+      })
+      .join(", ");
+
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
+    return this.query(sql);
+  }
+
+  async selectTable(
+    schemaName: string,
+    tableName: string,
+    options: SelectFromTableOptions
+  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
+    const whereRaw = options.whereRaw?.trim();
+
+    const orderPart =
+      options.orderBy && options.orderBy.length > 0
+        ? options.orderBy
+            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+            .join(", ")
+        : "";
+
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
+      whereRaw ? ` WHERE ${whereRaw} ` : ""
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+
+    return {
+      data: await this.query(sql),
+      schema: await this.tableSchema(schemaName, tableName),
+    };
   }
 }

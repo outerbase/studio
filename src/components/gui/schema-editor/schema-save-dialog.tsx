@@ -20,11 +20,13 @@ import { useCallback, useState } from "react";
 import SchemaEditorTab from "../tabs/schema-editor-tab";
 
 export default function SchemaSaveDialog({
+  schemaName,
   schema,
   previewScript,
   onClose,
   fetchTable,
 }: {
+  schemaName: string;
   schema: DatabaseTableSchemaChange;
   previewScript: string[];
   onClose: () => void;
@@ -44,7 +46,12 @@ export default function SchemaSaveDialog({
         if (schema.name.new !== schema.name.old) {
           refreshSchema();
           replaceCurrentTab({
-            component: <SchemaEditorTab tableName={schema.name.new} />,
+            component: (
+              <SchemaEditorTab
+                tableName={schema.name.new}
+                schemaName={schemaName}
+              />
+            ),
             key: "_schema_" + schema.name.new,
             identifier: "_schema_" + schema.name.new,
             title: "Edit " + schema.name.new,
@@ -60,6 +67,7 @@ export default function SchemaSaveDialog({
       });
   }, [
     onClose,
+    schemaName,
     databaseDriver,
     schema,
     fetchTable,

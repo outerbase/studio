@@ -16,6 +16,7 @@ import TriggerTab from "@/components/gui/tabs/trigger-tab";
 
 interface OpenTableTab {
   type: "table";
+  schemaName: string;
   tableName: string;
 }
 
@@ -31,6 +32,7 @@ interface OpenQueryTab {
 
 interface OpenTableSchemaTab {
   type: "schema";
+  schemaName: string;
   tableName?: string;
 }
 
@@ -111,9 +113,13 @@ function generateComponent(tab: OpenTabsProps, title: string) {
     return <QueryWindow initialName={title} />;
   }
   if (tab.type === "table")
-    return <TableDataWindow tableName={tab.tableName} />;
+    return (
+      <TableDataWindow tableName={tab.tableName} schemaName={tab.schemaName} />
+    );
   if (tab.type === "schema")
-    return <SchemaEditorTab tableName={tab.tableName} />;
+    return (
+      <SchemaEditorTab tableName={tab.tableName} schemaName={tab.schemaName} />
+    );
   if (tab.type === "user") return <UsersTab />;
   return <TriggerTab name={tab.name ?? ""} />;
 }

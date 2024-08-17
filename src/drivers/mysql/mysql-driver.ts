@@ -1,5 +1,136 @@
+import {
+  DatabaseSchemas,
+  DatabaseTableSchema,
+  DatabaseTriggerSchema,
+  DriverFlags,
+  DatabaseSchemaItem,
+  DatabaseTableColumn,
+} from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
+import { escapeSqlValue } from "../sqlite/sql-helper";
+
+interface MySqlDatabase {
+  SCHEMA_NAME: string;
+}
+
+interface MySqlColumn {
+  TABLE_SCHEMA: string;
+  TABLE_NAME: string;
+  COLUMN_NAME: string;
+  DATA_TYPE: string;
+  IS_NULLABLE: "YES" | "NO";
+  COLUMN_COMMENT: string;
+  CHARACTER_MAXIMUM_LENGTH: number;
+  NUMERIC_PRECISION: number;
+  NUMERIC_SCALE: number;
+  COLUMN_DEFAULT: string;
+  COLUMN_TYPE: string;
+}
+
+interface MySqlTable {
+  TABLE_SCHEMA: string;
+  TABLE_NAME: string;
+  TABLE_TYPE: string;
+}
 
 export default abstract class MySQLLikeDriver extends CommonSQLImplement {
-  
+  escapeId(id: string) {
+    return `\`${id.replace(/`/g, "``")}\``;
+  }
+
+  escapeValue(value: unknown): string {
+    return escapeSqlValue(value);
+  }
+
+  getFlags(): DriverFlags {
+    return {
+      defaultSchema: "",
+      optionalSchema: false,
+      supportBigInt: false,
+    };
+  }
+
+  async schemas(): Promise<DatabaseSchemas> {
+    const schemaSql = "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA";
+    const schemaResult = (await this.query(schemaSql))
+      .rows as unknown as MySqlDatabase[];
+
+    const tableSql =
+      "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.tables";
+    const tableResult = (await this.query(tableSql))
+      .rows as unknown as MySqlTable[];
+
+    const columnSql =
+      "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA FROM information_schema.columns";
+    const columnResult = (await this.query(columnSql))
+      .rows as unknown as MySqlColumn[];
+
+    // Hash table of schema
+    const schemaRecord: Record<string, DatabaseSchemaItem[]> = {};
+    for (const s of schemaResult) {
+      schemaRecord[s.SCHEMA_NAME] = [];
+    }
+
+    // Hash table of table
+    const tableRecord: Record<string, DatabaseSchemaItem> = {};
+    for (const t of tableResult) {
+      const key = t.TABLE_SCHEMA + "." + t.TABLE_NAME;
+      const table: DatabaseSchemaItem = {
+        name: t.TABLE_NAME,
+        type: t.TABLE_TYPE === "VIEW" ? "view" : "table",
+        tableName: t.TABLE_NAME,
+        schemaName: t.TABLE_SCHEMA,
+        tableSchema: {
+          autoIncrement: false,
+          pk: [],
+          columns: [],
+          tableName: t.TABLE_NAME,
+          schemaName: t.TABLE_SCHEMA,
+        },
+      };
+
+      tableRecord[key] = table;
+      if (schemaRecord[t.TABLE_SCHEMA]) {
+        schemaRecord[t.TABLE_SCHEMA].push(table);
+      }
+    }
+
+    for (const c of columnResult) {
+      const column: DatabaseTableColumn = {
+        name: c.COLUMN_NAME,
+        type: c.COLUMN_TYPE,
+      };
+
+      const tableKey = c.TABLE_SCHEMA + "." + c.TABLE_NAME;
+      if (tableRecord[tableKey].tableSchema) {
+        tableRecord[tableKey].tableSchema.columns.push(column);
+      }
+    }
+
+    return schemaRecord;
+  }
+
+  async tableSchema(
+    schemaName: string,
+    tableName: string
+  ): Promise<DatabaseTableSchema> {
+    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)}`;
+    const columnResult = (await this.query(columnSql))
+      .rows as unknown as MySqlColumn[];
+
+    return {
+      autoIncrement: false,
+      pk: [],
+      tableName,
+      schemaName,
+      columns: columnResult.map((c) => ({
+        name: c.COLUMN_NAME,
+        type: c.COLUMN_TYPE,
+      })),
+    };
+  }
+
+  trigger(): Promise<DatabaseTriggerSchema> {
+    throw new Error("Not implemented");
+  }
 }

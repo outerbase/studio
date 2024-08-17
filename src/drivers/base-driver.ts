@@ -74,6 +74,7 @@ export type DatabaseSchemas = Record<string, DatabaseSchemaItem[]>;
 export interface DatabaseSchemaItem {
   type: "table" | "trigger" | "view";
   name: string;
+  schemaName: string;
   tableName?: string;
   tableSchema?: DatabaseTableSchema;
 }
@@ -145,6 +146,7 @@ export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
   autoIncrement: boolean;
+  schemaName: string;
   tableName?: string;
   constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
@@ -203,6 +205,10 @@ export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
 
+  // Helper class
+  abstract escapeId(id: string): string;
+  abstract escapeValue(value: unknown): string;
+
   // Methods
   abstract close(): void;
 
@@ -210,20 +216,27 @@ export abstract class BaseDriver {
   abstract transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
   abstract schemas(): Promise<DatabaseSchemas>;
-  abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
+  abstract tableSchema(
+    schemaName: string,
+    tableName: string
+  ): Promise<DatabaseTableSchema>;
+
   abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
 
   abstract findFirst(
+    schemaName: string,
     tableName: string,
     key: Record<string, DatabaseValue>
   ): Promise<DatabaseResultSet>;
 
   abstract selectTable(
+    schemaName: string,
     tableName: string,
     options: SelectFromTableOptions
   ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }>;
 
   abstract updateTableData(
+    schemaName: string,
     tableName: string,
     ops: DatabaseTableOperation[],
 

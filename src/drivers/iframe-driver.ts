@@ -1,4 +1,5 @@
 import { DatabaseResultSet } from "./base-driver";
+import MySQLLikeDriver from "./mysql/mysql-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
 type ParentResponseData =
@@ -44,6 +45,15 @@ class IframeConnection {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
 
+      console.log(
+        "POST " +
+          {
+            type: "query",
+            id,
+            statement: stmt,
+          }
+      );
+
       window.parent.postMessage(
         {
           type: "query",
@@ -60,6 +70,15 @@ class IframeConnection {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
 
+      console.log(
+        "POST " +
+          {
+            type: "transaction",
+            id,
+            statement: stmts,
+          }
+      );
+
       window.parent.postMessage(
         {
           type: "transaction",
@@ -72,9 +91,32 @@ class IframeConnection {
   }
 }
 
-export default class IframeDriver extends SqliteLikeBaseDriver {
+export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
   protected conn = new IframeConnection();
   listen = this.conn.listen;
   query = this.conn.query;
   transaction = this.conn.transaction;
+  close() {}
+}
+
+export class IframeMySQLDriver extends MySQLLikeDriver {
+  protected conn = new IframeConnection();
+
+  listen() {
+    this.conn.listen();
+  }
+
+  close(): void {}
+
+  async query(stmt: string): Promise<DatabaseResultSet> {
+    const r = await this.conn.query(stmt);
+    console.log(r);
+    return r;
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    const r = this.conn.transaction(stmts);
+    console.log(r);
+    return r;
+  }
 }

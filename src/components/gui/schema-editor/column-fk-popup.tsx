@@ -64,6 +64,7 @@ export default function ColumnForeignKeyPopup({
                     },
                   });
                 }}
+                schemaName={"main"}
                 tableName={constraint.foreignTableName}
               />
             </div>

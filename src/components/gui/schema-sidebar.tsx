@@ -10,6 +10,7 @@ export default function SchemaView() {
   const onNewTable = useCallback(() => {
     openTab({
       type: "schema",
+      schemaName: "main",
     });
   }, []);
 

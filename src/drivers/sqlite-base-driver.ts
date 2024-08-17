@@ -1,13 +1,9 @@
 import type {
-  DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseSchemas,
-  DatabaseTableColumn,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
-  DatabaseValue,
   DriverFlags,
-  SelectFromTableOptions,
 } from "./base-driver";
 import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 
@@ -16,8 +12,12 @@ import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
 import CommonSQLImplement from "./common-sql-imp";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
-  protected escapeId(id: string) {
+  escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;
+  }
+
+  escapeValue(value: unknown): string {
+    return escapeSqlValue(value);
   }
 
   getFlags(): DriverFlags {
@@ -44,16 +44,22 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
         try {
           tmp.push({
             type: "table",
+            schemaName: "main",
             name: row.name,
             tableSchema: parseCreateTableScript(row.sql),
           });
         } catch {
-          tmp.push({ type: "table", name: row.name });
+          tmp.push({ type: "table", name: row.name, schemaName: "main" });
         }
       } else if (row.type === "trigger") {
-        tmp.push({ type: "trigger", name: row.name, tableName: row.tbl_name });
+        tmp.push({
+          type: "trigger",
+          name: row.name,
+          tableName: row.tbl_name,
+          schemaName: "main",
+        });
       } else if (row.type === "view") {
-        tmp.push({ type: "view", name: row.name });
+        tmp.push({ type: "view", name: row.name, schemaName: "main" });
       }
     }
 
@@ -79,50 +85,10 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     // do nothing
   }
 
-  protected async legacyTableSchema(
+  async tableSchema(
+    schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const sql = `SELECT * FROM pragma_table_info(${this.escapeId(tableName)});`;
-    const result = await this.query(sql);
-
-    const rows = result.rows as Array<{
-      name: string;
-      type: string;
-      pk: number;
-    }>;
-
-    const columns: DatabaseTableColumn[] = rows.map((row) => ({
-      name: row.name,
-      type: row.type,
-      pk: !!row.pk,
-    }));
-
-    // Check auto increment
-    let hasAutoIncrement = false;
-
-    try {
-      const seqCount = await this.query(
-        `SELECT COUNT(*) AS total FROM sqlite_sequence WHERE name=${escapeSqlValue(
-          tableName
-        )};`
-      );
-
-      const seqRow = seqCount.rows[0];
-      if (seqRow && Number(seqRow[0] ?? 0) > 0) {
-        hasAutoIncrement = true;
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    return {
-      columns,
-      pk: columns.filter((col) => col.pk).map((col) => col.name),
-      autoIncrement: hasAutoIncrement,
-    };
-  }
-
-  async tableSchema(tableName: string): Promise<DatabaseTableSchema> {
     const sql = `SELECT * FROM sqlite_schema WHERE tbl_name = ${escapeSqlValue(
       tableName
     )};`;
@@ -133,49 +99,16 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       const def = rows.find((row) => row.type === "table");
       if (def) {
         const createScript = def.sql;
-        return { ...parseCreateTableScript(createScript), createScript };
+        return {
+          ...parseCreateTableScript(createScript),
+          createScript,
+          schemaName,
+        };
       }
+
+      throw new Error("Unexpected error finding table " + tableName);
     } catch (e) {
-      console.error(e);
+      throw new Error("Unexpected error while parsing");
     }
-
-    return await this.legacyTableSchema(tableName);
-  }
-
-  async findFirst(
-    tableName: string,
-    key: Record<string, DatabaseValue>
-  ): Promise<DatabaseResultSet> {
-    const wherePart = Object.entries(key)
-      .map(([colName, colValue]) => {
-        return `${this.escapeId(colName)} = ${escapeSqlValue(colValue)}`;
-      })
-      .join(", ");
-
-    const sql = `SELECT * FROM ${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
-    return this.query(sql);
-  }
-
-  async selectTable(
-    tableName: string,
-    options: SelectFromTableOptions
-  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
-    const whereRaw = options.whereRaw?.trim();
-
-    const orderPart =
-      options.orderBy && options.orderBy.length > 0
-        ? options.orderBy
-            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-            .join(", ")
-        : "";
-
-    const sql = `SELECT * FROM ${this.escapeId(tableName)}${
-      whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
-
-    return {
-      data: await this.query(sql),
-      schema: await this.tableSchema(tableName),
-    };
   }
 }

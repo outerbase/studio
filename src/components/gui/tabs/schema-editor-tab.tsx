@@ -9,6 +9,7 @@ import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
 
 interface SchemaEditorTabProps {
   tableName?: string;
+  schemaName: string;
 }
 
 const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
@@ -22,6 +23,7 @@ const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
 };
 
 export default function SchemaEditorTab({
+  schemaName,
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
   const { databaseDriver } = useDatabaseDriver();
@@ -32,7 +34,7 @@ export default function SchemaEditorTab({
   const fetchTable = useCallback(
     async (name: string) => {
       databaseDriver
-        .tableSchema(name)
+        .tableSchema(schemaName, name)
         .then((schema) => {
           setSchema({
             name: {
@@ -54,7 +56,7 @@ export default function SchemaEditorTab({
         .catch(console.error)
         .finally(() => setLoading(false));
     },
-    [databaseDriver, setSchema]
+    [schemaName, databaseDriver, setSchema]
   );
 
   useEffect(() => {
@@ -102,6 +104,7 @@ export default function SchemaEditorTab({
     <>
       {isSaving && (
         <SchemaSaveDialog
+          schemaName={schemaName}
           fetchTable={fetchTable}
           onClose={onSaveToggle}
           schema={schema}

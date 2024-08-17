@@ -537,6 +537,7 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
 
   return {
     tableName,
+    schemaName: "main",
     ...defs,
     pk,
     autoIncrement,

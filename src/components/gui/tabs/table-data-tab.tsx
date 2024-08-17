@@ -40,9 +40,13 @@ import useTableResultColumnFilter from "../table-result/filter-column";
 
 interface TableDataContentProps {
   tableName: string;
+  schemaName: string;
 }
 
-export default function TableDataWindow({ tableName }: TableDataContentProps) {
+export default function TableDataWindow({
+  schemaName,
+  tableName,
+}: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [error, setError] = useState<string>();
@@ -74,7 +78,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
       try {
         const { data: dataResult, schema: schemaResult } =
-          await databaseDriver.selectTable(tableName, {
+          await databaseDriver.selectTable(schemaName, tableName, {
             whereRaw: where,
             limit: finalLimit,
             offset: finalOffset,
@@ -99,6 +103,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   }, [
     databaseDriver,
     tableName,
+    schemaName,
     sortColumns,
     updateTableSchema,
     setStat,

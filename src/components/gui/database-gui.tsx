@@ -122,7 +122,7 @@ export default function DatabaseGui() {
       {
         text: "New Table",
         onClick: () => {
-          openTab({ type: "schema" });
+          openTab({ type: "schema", schemaName: "main" });
         },
       },
     ];

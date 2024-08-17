@@ -1,13 +1,13 @@
 "use client";
 
 import MyStudio from "@/components/my-studio";
-import { IframeSQLiteDriver } from "@/drivers/iframe-driver";
+import { IframeMySQLDriver } from "@/drivers/iframe-driver";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 export default function EmbedPageClient() {
   const searchParams = useSearchParams();
-  const driver = useMemo(() => new IframeSQLiteDriver(), []);
+  const driver = useMemo(() => new IframeMySQLDriver(), []);
 
   useEffect(() => {
     return driver.listen();
