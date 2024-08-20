@@ -70,7 +70,7 @@ export function insertInto(
     "INSERT INTO",
     `${dialect.escapeId(schema)}.${dialect.escapeId(table)}`,
     generateInsertValue(dialect, value),
-  ].join();
+  ].join(" ");
 }
 
 export function updateTable(
@@ -90,7 +90,7 @@ export function updateTable(
     limit ? `LIMIT ${limit}` : null,
   ]
     .filter(Boolean)
-    .join();
+    .join(" ");
 }
 
 export function deleteFrom(
@@ -107,5 +107,5 @@ export function deleteFrom(
     limit ? `LIMIT ${limit}` : null,
   ]
     .filter(Boolean)
-    .join();
+    .join(" ");
 }

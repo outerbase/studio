@@ -45,14 +45,11 @@ class IframeConnection {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
 
-      console.log(
-        "POST " +
-          {
-            type: "query",
-            id,
-            statement: stmt,
-          }
-      );
+      console.log("POST ", {
+        type: "query",
+        id,
+        statement: stmt,
+      });
 
       window.parent.postMessage(
         {
@@ -70,14 +67,11 @@ class IframeConnection {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
 
-      console.log(
-        "POST " +
-          {
-            type: "transaction",
-            id,
-            statement: stmts,
-          }
-      );
+      console.log("POST ", {
+        type: "transaction",
+        id,
+        statement: stmts,
+      });
 
       window.parent.postMessage(
         {

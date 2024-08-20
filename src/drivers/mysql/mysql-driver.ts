@@ -17,6 +17,8 @@ interface MySqlColumn {
   TABLE_SCHEMA: string;
   TABLE_NAME: string;
   COLUMN_NAME: string;
+  EXTRA: string;
+  COLUMN_KEY: string;
   DATA_TYPE: string;
   IS_NULLABLE: "YES" | "NO";
   COLUMN_COMMENT: string;
@@ -114,13 +116,21 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)}`;
+    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA, COLUMN_KEY FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)} ORDER BY ORDINAL_POSITION`;
     const columnResult = (await this.query(columnSql))
       .rows as unknown as MySqlColumn[];
 
+    const pk = columnResult
+      .filter((c) => c.COLUMN_KEY === "PRI")
+      .map((c) => c.COLUMN_NAME);
+
+    const autoIncrement = columnResult.some(
+      (c) => c.EXTRA === "auto_increment"
+    );
+
     return {
-      autoIncrement: false,
-      pk: [],
+      autoIncrement,
+      pk,
       tableName,
       schemaName,
       columns: columnResult.map((c) => ({
