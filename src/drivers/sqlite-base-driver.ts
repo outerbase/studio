@@ -38,6 +38,7 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
       supportBigInt: false,
       defaultSchema: "main",
       optionalSchema: true,
+      mismatchDetection: false,
     };
   }
 

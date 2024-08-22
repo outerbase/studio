@@ -81,7 +81,14 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             orderBy: sortColumns,
           });
 
-        setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
+        const tableState = OptimizeTableState.createFromResult(
+          dataResult,
+          schemaResult
+        );
+        tableState.mismatchDetection =
+          databaseDriver.getFlags().mismatchDetection;
+        setData(tableState);
+
         setStat(dataResult.stat);
         setTableSchema(schemaResult);
         updateTableSchema(tableName, schemaResult.columns);

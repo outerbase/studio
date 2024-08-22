@@ -6,12 +6,15 @@ import ResultStats from "./result-stat";
 import { useMemo } from "react";
 import OptimizeTableState from "./table-optimized/OptimizeTableState";
 import { QueryExplanation, isExplainQueryPlan } from "./query-explanation";
+import { useDatabaseDriver } from "@/context/driver-provider";
 
 export default function QueryResult({
   result,
 }: {
   result: MultipleQueryResult;
 }) {
+  const { databaseDriver } = useDatabaseDriver();
+
   const data = useMemo(() => {
     if (isExplainQueryPlan(result.sql)) {
       return { _tag: "EXPLAIN", value: result.result } as const;
@@ -19,8 +22,9 @@ export default function QueryResult({
 
     const state = OptimizeTableState.createFromResult(result.result);
     state.setReadOnlyMode(true);
+    state.mismatchDetection = databaseDriver.getFlags().mismatchDetection;
     return { _tag: "QUERY", value: state } as const;
-  }, [result]);
+  }, [result, databaseDriver]);
 
   const stats = result.result.stat;
 

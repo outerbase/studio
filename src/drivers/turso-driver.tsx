@@ -99,7 +99,11 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
   }
 
   override getFlags(): DriverFlags {
-    return { ...super.getFlags(), supportBigInt: this.bigInt };
+    return {
+      ...super.getFlags(),
+      supportBigInt: this.bigInt,
+      mismatchDetection: this.bigInt,
+    };
   }
 
   async query(stmt: InStatement) {
