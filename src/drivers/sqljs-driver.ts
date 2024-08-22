@@ -3,7 +3,6 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
-  TableColumnDataType,
 } from "@/drivers/base-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 import { BindParams, Database } from "sql.js";
