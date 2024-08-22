@@ -22,7 +22,7 @@ interface SidebarTabProps {
 
 export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, disableToggle } = useTheme();
   const [loadedIndex, setLoadedIndex] = useState(() => {
     const a: boolean[] = new Array(tabs.length).fill(false);
     a[0] = true;
@@ -61,24 +61,26 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
             <div className="line-clamp-1 text-ellipsis">{config.name}</div>
           </div>
 
-          <div className="flex justify-center items-center">
-            <button
-              onClick={() => toggleTheme()}
-              className="text-xs font-normal flex gap-0.5 border rounded px-2 py-1 bg-background"
-            >
-              {theme === "dark" ? (
-                <>
-                  <LucideMoon className={cn("w-4 h-4")} />
-                  Dark
-                </>
-              ) : (
-                <>
-                  <LucideSun className={cn("w-4 h-4")} />
-                  Light
-                </>
-              )}
-            </button>
-          </div>
+          {!disableToggle && (
+            <div className="flex justify-center items-center">
+              <button
+                onClick={() => toggleTheme()}
+                className="text-xs font-normal flex gap-0.5 border rounded px-2 py-1 bg-background"
+              >
+                {theme === "dark" ? (
+                  <>
+                    <LucideMoon className={cn("w-4 h-4")} />
+                    Dark
+                  </>
+                ) : (
+                  <>
+                    <LucideSun className={cn("w-4 h-4")} />
+                    Light
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {config.sideBarFooterComponent && (

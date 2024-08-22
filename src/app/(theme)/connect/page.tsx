@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { getSessionFromCookie } from "@/lib/auth";
 import ConnectBody from "./page-client";
+import ThemeLayout from "../theme_layout";
 
 export const metadata: Metadata = {
   title: "LibSQL Studio",
@@ -10,5 +11,9 @@ export const metadata: Metadata = {
 export default async function Home() {
   const { user } = await getSessionFromCookie();
 
-  return <ConnectBody user={user} />;
+  return (
+    <ThemeLayout>
+      <ConnectBody user={user} />
+    </ThemeLayout>
+  );
 }

@@ -1,4 +1,3 @@
-import { useTheme } from "@/context/theme-provider";
 import { useRouter } from "next/navigation";
 import { ReactElement, useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -32,7 +31,6 @@ function MyStudioInternal({
 }: MyStudioProps) {
   const router = useRouter();
   const { openBlockEditor } = useBlockEditor();
-  const { theme, toggleTheme } = useTheme();
 
   const goBack = useCallback(() => {
     router.push("/connect");
@@ -91,8 +89,6 @@ function MyStudioInternal({
       driver={driver}
       name={name}
       color={color ?? "blue"}
-      theme={theme}
-      onThemeChange={toggleTheme}
       onBack={goBack}
       collaboration={collabarator}
       docDriver={docDriver}

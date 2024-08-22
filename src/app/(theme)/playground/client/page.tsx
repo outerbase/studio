@@ -3,6 +3,7 @@ import PlaygroundEditorBody from "./page-client";
 import { eq, sql } from "drizzle-orm";
 import { dbDataset } from "@/db/schema-dataset";
 import { Metadata } from "next";
+import ThemeLayout from "../../theme_layout";
 
 export const metadata: Metadata = {
   title:
@@ -55,5 +56,9 @@ export default async function PlaygroundEditor({
     templateFile = searchParams.url;
   }
 
-  return <PlaygroundEditorBody preloadDatabase={templateFile} />;
+  return (
+    <ThemeLayout>
+      <PlaygroundEditorBody preloadDatabase={templateFile} />
+    </ThemeLayout>
+  );
 }
