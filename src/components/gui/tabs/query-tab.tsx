@@ -117,8 +117,8 @@ export default function QueryWindow({
       setProgress(undefined);
       setQueryTabIndex(0);
 
-      multipleQuery(databaseDriver, finalStatements, (currentProgrss) => {
-        setProgress(currentProgrss);
+      multipleQuery(databaseDriver, finalStatements, (currentProgress) => {
+        setProgress(currentProgress);
       })
         .then(({ result: completeQueryResult, logs: completeLogs }) => {
           setData(completeQueryResult);
