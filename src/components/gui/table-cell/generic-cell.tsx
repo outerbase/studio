@@ -232,9 +232,10 @@ export default function GenericCell({
 
       return (
         <span
-          className={
+          className={cn(
+            "flex-1 text-ellipsis overflow-hidden whitespace-nowrap",
             isChanged ? "text-black" : "text-green-600 dark:text-green-500"
-          }
+          )}
         >
           {value}
         </span>
@@ -244,11 +245,12 @@ export default function GenericCell({
     if (typeof value === "number" || typeof value === "bigint") {
       return (
         <span
-          className={
+          className={cn(
+            "flex-1 text-ellipsis overflow-hidden whitespace-nowrap",
             isChanged
               ? "text-black block text-right flex-grow"
               : "text-blue-700 dark:text-blue-300 block text-right flex-grow"
-          }
+          )}
         >
           {value.toString()}
         </span>

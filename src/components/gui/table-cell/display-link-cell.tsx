@@ -12,11 +12,11 @@ export default function DisplayLinkCell({ link }: { link: string }) {
   const isImage = IMAGE_EXTENSION.includes((extension ?? "").toLowerCase());
 
   return (
-    <div className="flex">
+    <div className="flex w-full">
       <HoverCard>
         <HoverCardTrigger
           target="_blank"
-          className="text-blue-600 dark:text-blue-300 underline"
+          className="text-blue-600 dark:text-blue-300 underline flex-1 text-ellipsis overflow-hidden whitespace-nowrap"
         >
           {link}
         </HoverCardTrigger>

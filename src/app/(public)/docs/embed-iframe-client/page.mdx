@@ -64,12 +64,12 @@ export default function ExamplePage() {
                 "*"
               );
             })
-            .catch((e) => {
+            .catch((err) => {
               contentWindow.postMessage(
                 {
                   type: e.data.type,
                   id: e.data.id,
-                  error: (e as Error).message,
+                  error: (err as Error).message,
                 },
                 "*"
               );
@@ -87,12 +87,12 @@ export default function ExamplePage() {
                 "*"
               );
             })
-            .catch((e) => {
+            .catch((err) => {
               contentWindow.postMessage(
                 {
                   type: e.data.type,
                   id: e.data.id,
-                  error: (e as Error).message,
+                  error: (err as Error).message,
                 },
                 "*"
               );
