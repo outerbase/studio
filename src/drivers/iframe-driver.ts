@@ -36,6 +36,7 @@ class IframeConnection {
       }
     };
 
+    console.log("register listener");
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   }
@@ -87,10 +88,24 @@ class IframeConnection {
 
 export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
   protected conn = new IframeConnection();
-  listen = this.conn.listen;
-  query = this.conn.query;
-  transaction = this.conn.transaction;
-  close() {}
+
+  listen() {
+    this.conn.listen();
+  }
+
+  close(): void {}
+
+  async query(stmt: string): Promise<DatabaseResultSet> {
+    const r = await this.conn.query(stmt);
+    console.log(r);
+    return r;
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    const r = this.conn.transaction(stmts);
+    console.log(r);
+    return r;
+  }
 }
 
 export class IframeMySQLDriver extends MySQLLikeDriver {

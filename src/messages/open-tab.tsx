@@ -69,9 +69,12 @@ function generateKeyFromTab(tab: OpenTabsProps) {
     return "query-" + window.crypto.randomUUID();
   }
 
-  if (tab.type === "table") return "table-" + tab.tableName;
+  if (tab.type === "table")
+    return "table-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "schema")
-    return !tab.tableName ? "create-schema" : "schema-" + tab.tableName;
+    return !tab.tableName
+      ? "create-schema"
+      : "schema-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "user") return "user";
 
   return "trigger-" + (tab.name ?? "");

@@ -78,8 +78,7 @@ export function updateTable(
   schema: string,
   table: string,
   value: Record<string, unknown>,
-  where: Record<string, unknown>,
-  limit?: number
+  where: Record<string, unknown>
 ): string {
   return [
     "UPDATE",
@@ -87,7 +86,6 @@ export function updateTable(
     "SET",
     generateSet(dialect, value),
     generateWhere(dialect, where),
-    limit ? `LIMIT ${limit}` : null,
   ]
     .filter(Boolean)
     .join(" ");
@@ -97,14 +95,12 @@ export function deleteFrom(
   dialect: BaseDriver,
   schema: string,
   table: string,
-  where: Record<string, unknown>,
-  limit?: number
+  where: Record<string, unknown>
 ): string {
   return [
     "DELETE FROM",
     `${dialect.escapeId(schema)}.${dialect.escapeId(table)}`,
     generateWhere(dialect, where),
-    limit ? `LIMIT ${limit}` : null,
   ]
     .filter(Boolean)
     .join(" ");

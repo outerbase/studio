@@ -43,9 +43,9 @@ export default abstract class CommonSQLImplement extends BaseDriver {
       if (op.operation === "INSERT")
         return insertInto(this, schemaName, tableName, op.values);
       if (op.operation === "DELETE")
-        return deleteFrom(this, schemaName, tableName, op.where, 1);
+        return deleteFrom(this, schemaName, tableName, op.where);
 
-      return updateTable(this, schemaName, tableName, op.values, op.where, 1);
+      return updateTable(this, schemaName, tableName, op.values, op.where);
     });
 
     const result = await this.transaction(sqls);
