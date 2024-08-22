@@ -14,9 +14,11 @@ type ThemeType = "dark" | "light";
 
 const ThemeContext = createContext<{
   theme: ThemeType;
+  disableToggle: boolean;
   toggleTheme: (theme?: string) => void;
 }>({
   theme: "dark",
+  disableToggle: false,
   toggleTheme: () => {
     throw new Error("Not implemented");
   },
@@ -29,14 +31,24 @@ export function useTheme() {
 export default function ThemeProvider({
   children,
   defaultTheme,
-}: PropsWithChildren<{ defaultTheme: ThemeType }>) {
+  disableToggle,
+}: PropsWithChildren<{ defaultTheme: ThemeType; disableToggle?: boolean }>) {
   const [theme, setTheme] = useState<ThemeType>(defaultTheme);
 
-  const toggleTheme = useCallback(() => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setCookie("theme", newTheme);
-    setTheme(newTheme);
-  }, [setTheme, theme]);
+  const toggleTheme = useCallback(
+    (assignedTheme?: string) => {
+      setTheme((prevTheme) => {
+        if (assignedTheme) {
+          return assignedTheme === "dark" ? "dark" : "light";
+        }
+
+        const newTheme = prevTheme === "dark" ? "light" : "dark";
+        setCookie("theme", newTheme);
+        return newTheme;
+      });
+    },
+    [setTheme]
+  );
 
   useEffect(() => {
     if (theme === "light") {
@@ -46,7 +58,10 @@ export default function ThemeProvider({
     }
   }, [theme]);
 
-  const value = useMemo(() => ({ toggleTheme, theme }), [toggleTheme, theme]);
+  const value = useMemo(
+    () => ({ toggleTheme, theme, disableToggle: disableToggle ?? false }),
+    [toggleTheme, theme, disableToggle]
+  );
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

@@ -25,9 +25,7 @@ export default function ConnectingDialog({
         <div className="text-2xl font-semibold">
           We have problem connecting to database
         </div>
-        <p className="mt-4">
-          <pre>{message}</pre>
-        </p>
+        <pre className="mt-4">{message}</pre>
         <div className="mt-4 flex gap-4">
           <Button onClick={onRetry}>Retry</Button>
           <Button variant={"secondary"} onClick={onBack}>

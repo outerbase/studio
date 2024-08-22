@@ -1,9 +1,9 @@
-import { Fragment } from "react";
+import ThemeLayout from "../theme_layout";
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <Fragment>{children}</Fragment>;
+  return <ThemeLayout>{children}</ThemeLayout>;
 }
