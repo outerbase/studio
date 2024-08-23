@@ -3,7 +3,6 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
-  TableColumnDataType,
 } from "@/drivers/base-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 import { BindParams, Database } from "sql.js";
@@ -56,8 +55,8 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       return {
         name: renameColName,
         displayName: colName,
-        originalType: "text",
-        type: TableColumnDataType.TEXT,
+        originalType: null,
+        type: undefined,
       };
     });
 

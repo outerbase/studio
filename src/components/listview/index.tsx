@@ -266,9 +266,16 @@ export function ListView<T = unknown>(props: ListViewProps<T>) {
               return;
             }
 
+            console.log("here2");
+
             if (onContextMenu) {
               const menu = onContextMenu();
-              if (menu.length === 0) e.preventDefault();
+              if (menu.length === 0) {
+                e.preventDefault();
+                e.stopPropagation();
+              } else {
+                setContextMenu(menu);
+              }
             }
 
             setContextMenuKey("");

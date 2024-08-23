@@ -26,6 +26,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       supportBigInt: false,
       defaultSchema: "main",
       optionalSchema: true,
+      mismatchDetection: false,
     };
   }
 

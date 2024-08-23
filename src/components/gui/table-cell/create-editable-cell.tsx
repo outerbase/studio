@@ -169,6 +169,7 @@ export default function createEditableCell<T = unknown>({
         focus={focus}
         isChanged={isChanged}
         align={align}
+        mismatchDetection={state.mismatchDetection}
         onDoubleClick={() => {
           if (
             typeof editValue === "string" &&
