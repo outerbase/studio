@@ -1,23 +1,37 @@
-"use client";
+import ThemeLayout from "../../theme_layout";
+import EmbedPageClient from "./page-client";
 
-import MyStudio from "@/components/my-studio";
-import { IframeSQLiteDriver } from "@/drivers/iframe-driver";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+export default async function EmbedPage(props: {
+  searchParams: {
+    theme?: string;
+    disableThemeToggle?: string;
+    [key: string]: any;
+  };
+}) {
+  let overrideTheme: "dark" | "light" | undefined = undefined;
+  const disableToggle = props.searchParams.disableThemeToggle === "1";
 
-export default function EmbedPageClient() {
-  const searchParams = useSearchParams();
-  const driver = useMemo(() => new IframeSQLiteDriver(), []);
+  if (props.searchParams.theme) {
+    overrideTheme = props.searchParams.theme === "dark" ? "dark" : "light";
+  }
 
-  useEffect(() => {
-    return driver.listen();
-  }, [driver]);
+  const overrideThemeVariables: Record<string, string> = {};
+
+  for (const key in props.searchParams) {
+    if (!key.startsWith("themeVariables[")) {
+      continue;
+    }
+
+    overrideThemeVariables[key.slice(15, -1)] = props.searchParams[key];
+  }
 
   return (
-    <MyStudio
-      driver={driver}
-      color={searchParams.get("color") || "gray"}
-      name={searchParams.get("name") || "Unnamed Connection"}
-    />
+    <ThemeLayout
+      overrideTheme={overrideTheme}
+      disableToggle={disableToggle}
+      overrideThemeVariables={overrideThemeVariables}
+    >
+      <EmbedPageClient />
+    </ThemeLayout>
   );
 }

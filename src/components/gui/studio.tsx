@@ -20,13 +20,9 @@ interface StudioProps {
   docDriver?: SavedDocDriver;
   name: string;
   color: string;
-
   onBack?: () => void;
   sideBarFooterComponent?: ReactElement;
-
   theme?: "dark" | "light";
-  onThemeChange?: (theme: "dark" | "light") => void;
-
   extensions?: StudioExtension[];
 }
 
