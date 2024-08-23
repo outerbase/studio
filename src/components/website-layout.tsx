@@ -9,7 +9,7 @@ import {
 
 async function Topbar() {
   return (
-    <header className="border-b">
+    <header>
       <div className="mx-auto container flex">
         <Link href="/">
           <h1 className="text-lg py-2">
