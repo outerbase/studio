@@ -64,7 +64,7 @@ body {
   }
 
   .dark {
-    --background: rgb(10, 10, 10);
+    --background: black;
     --foreground: 210 40% 98%;
 
     --color-surface: #1f1f1f;

@@ -1,8 +1,5 @@
-import { getSessionFromCookie } from "@/lib/auth";
 import { PropsWithChildren } from "react";
-import TopbarProfile from "./topbar-profile";
 import Link from "next/link";
-import { Button } from "./ui/button";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -11,8 +8,6 @@ import {
 } from "./ui/navigation-menu";
 
 async function Topbar() {
-  const { user } = await getSessionFromCookie();
-
   return (
     <header className="border-b">
       <div className="mx-auto container flex">
@@ -46,15 +41,6 @@ async function Topbar() {
             aria-label="Star invisal/libsql-studio on GitHub"
           ></a>
         </div>
-        {user ? (
-          <TopbarProfile user={user} />
-        ) : (
-          <div className="flex items-center">
-            <Link href="/login" prefetch={false}>
-              <Button>Sign In</Button>
-            </Link>
-          </div>
-        )}
       </div>
     </header>
   );
@@ -122,7 +108,7 @@ function Footer() {
           </Link>
         </div>
 
-        <p>© 2024 Visal .In. | LibSQL Studio</p>
+        <p>© 2024 Outerbase Inc.</p>
       </div>
     </div>
   );

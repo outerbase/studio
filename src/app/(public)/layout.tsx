@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Fragment } from "react";
 import Script from "next/script";
+import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,7 +13,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <body className={inter.className} suppressHydrationWarning>
+    <body className={cn(inter.className, "dark")}>
       <Fragment>{children}</Fragment>
       <Toaster />
       <Analytics />
