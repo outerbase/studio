@@ -40,7 +40,7 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
       href={url}
       className={cn(
         buttonVariants({ variant: "default", size: "lg" }),
-        "text-2xl p-6"
+        "font-bold text-xl p-8 px-10 shadow-[6px_6px_0px_#999] hover:shadow-[8px_-4px_0px_#aaa] transition-all duration-400"
       )}
     >
       {title}
@@ -145,7 +145,7 @@ function FeatureList() {
         industry. Lorem Ipsum has been the industry standard.
       </p>
 
-      <div className="grid grid-cols-2 gap-8 mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
         <div>
           <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
