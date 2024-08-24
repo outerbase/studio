@@ -9,7 +9,7 @@ export default async function LoginPage() {
 
   return (
     <div className="flex h-screen w-screen dark flex-col lg:flex-row">
-      <div className="lg:w-1/2 h-full bg-black flex justify-center items-center order-2">
+      <div className="lg:w-1/2 h-full flex justify-center items-center order-2">
         <div className="text-white max-w-[500px] flex flex-col gap-4 text-lg">
           <LogoLoading />
 
@@ -41,7 +41,7 @@ export default async function LoginPage() {
           </ul>
         </div>
       </div>
-      <div className="lg:w-1/2 h-full flex justify-center items-center bg-white order-1">
+      <div className="lg:w-1/2 h-full flex justify-center items-center order-1 bg-zinc-900">
         <div className="w-[300px] flex flex-col gap-4 text-lg">
           <p className="font-mono">Login to your account</p>
 
@@ -49,7 +49,7 @@ export default async function LoginPage() {
             <Link
               prefetch={false}
               href="/login/github"
-              className="border-2 border-black rounded-lg p-4 flex gap-4 items-center font-bold hover:bg-gray-200 text-black"
+              className="border-2 border-white rounded-lg p-4 flex gap-4 items-center font-bold hover:bg-gray-800 text-white"
             >
               <svg
                 width="98"
@@ -73,7 +73,7 @@ export default async function LoginPage() {
             <Link
               prefetch={false}
               href="/login/google"
-              className="border-2 border-black rounded-lg p-4 flex gap-4 items-center font-bold hover:bg-gray-200 text-black"
+              className="border-2 border-white rounded-lg p-4 flex gap-4 items-center font-bold hover:bg-gray-800 text-white"
             >
               <img src="/google.png" className="w-6 h-6" alt="Google" />
               Continue with Google

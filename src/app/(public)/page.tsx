@@ -51,16 +51,18 @@ function LinkButton({ title, url }: Readonly<{ title: string; url: string }>) {
 function DatabaseBlock({
   children,
   center,
-}: PropsWithChildren<{ center?: boolean }>) {
+  link,
+}: PropsWithChildren<{ center?: boolean; link: string }>) {
   return (
-    <div
+    <Link
+      href={link}
       className={cn(
         "shadow-[8px_8px_0px_#111] hover:shadow-[8px_-8px_0px_#444] transition-all duration-200 border-2 border-zinc-800 rounded-lg flex flex-col gap-2 py-8 cursor-pointer px-4 hover:text-yellow-500",
         center ? "justify-center items-center" : ""
       )}
     >
       {children}
-    </div>
+    </Link>
   );
 }
 
@@ -102,27 +104,26 @@ function SupportDriver() {
         <div className="mb-4 font-semibold text-3xl">Supporting Drivers</div>
 
         <p className="my-4 mb-8 max-w-[500px] text-zinc-400">
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry standard.
+          We support a variety of databases, with more to come in the future.
         </p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          <DatabaseBlock center>
+          <DatabaseBlock center link="#">
             <SQLiteIcon />
             <div>SQLite</div>
           </DatabaseBlock>
 
-          <DatabaseBlock center>
+          <DatabaseBlock center link="#">
             <PostgreIcon />
             <div>PostgreSQL</div>
           </DatabaseBlock>
 
-          <DatabaseBlock center>
+          <DatabaseBlock center link="#">
             <MySQLIcon />
             <div>MySQL</div>
           </DatabaseBlock>
 
-          <DatabaseBlock center>
+          <DatabaseBlock center link="#">
             <SQLiteIcon />
             <div>LibSQL</div>
           </DatabaseBlock>
@@ -137,12 +138,12 @@ function FeatureList() {
     <div className="mx-auto container mt-12">
       <div className="mb-4 font-semibold text-3xl">
         Modern Design and <br />
-        Thoughtful UI
+        Intuitive Interface
       </div>
 
       <p className="my-4 max-w-[500px] text-zinc-400">
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry standard.
+        Sleek modern design meets a thoughtfully crafted, intuitive user
+        interface for a seamless experience.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
@@ -227,12 +228,12 @@ function CommunitySection() {
       <h1 className="mb-4 font-semibold text-3xl">Community</h1>
 
       <p className="mt-2 text-zinc-400 max-w-[500px] mb-8">
-        LibSQL Studio allows you to quickly create, modify, and remove table
-        columns with just a few clicks without writing any SQL.
+        Join our community for the latest updates, roadmap insights, and
+        discussions on the future of LibSQL Studio.
       </p>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        <DatabaseBlock>
+        <DatabaseBlock link="https://github.com/outerbase/libsql-studio">
           <svg
             width="98"
             height="96"
@@ -249,7 +250,7 @@ function CommunitySection() {
           </svg>
           <div className="font-bold mt-1">Github</div>
         </DatabaseBlock>
-        <DatabaseBlock>
+        <DatabaseBlock link="https://discord.gg/CvfB3nzK">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 127.14 96.36"
@@ -264,7 +265,7 @@ function CommunitySection() {
           </svg>
           <div className="font-bold mt-1">Discord</div>
         </DatabaseBlock>
-        <DatabaseBlock>
+        <DatabaseBlock link="https://x.com/outerbase">
           <svg
             className="w-8 h-8"
             width="1200"
@@ -302,14 +303,14 @@ export default async function MainPage() {
             LibSQL Studio has many features and is regularly updated. Since it
             is an{" "}
             <Link
-              href="https://github.com/invisal/libsql-studio"
+              href="https://github.com/outerbase/libsql-studio"
               className="border-b-4 inline-block hover:border-yellow-500"
             >
               open-source
             </Link>{" "}
             project, you can{" "}
             <Link
-              href="https://github.com/invisal/libsql-studio/issues"
+              href="https://github.com/outerbase/libsql-studio/issues"
               className="border-b-4 inline-block hover:border-yellow-500"
             >
               request new features
