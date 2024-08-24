@@ -179,19 +179,18 @@ function FeatureList() {
         <div>
           <video muted autoPlay loop className="lg:rounded-lg" playsInline>
             <source
-              src="https://r2.invisal.com/libsqlstudio-sql-query.mp4"
+              src="https://r2.invisal.com/libsqlstudio-saved-query3.mp4"
               type="video/mp4"
             />
           </video>
 
           <h1 className="text-lg font-semibold mt-4 text-white">
-            Writing and Running SQL
+            Saved Your Query
           </h1>
 
           <p className="mt-2 text-zinc-400">
-            LibSQL Studio features a user-friendly query editor equipped with
-            auto-completion and function hint tooltips. It allows you to execute
-            multiple queries simultaneously and view their results efficiently.
+            LibSQL Studio allows you to save your queries and organize them into
+            folders, with the ability to sync across multiple devices.
           </p>
         </div>
 
