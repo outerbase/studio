@@ -125,7 +125,7 @@ function Footer() {
 
 export default function WebsiteLayout({ children }: PropsWithChildren) {
   return (
-    <main>
+    <main className="bg-black">
       <Topbar />
       {children}
       <Footer />

@@ -57,7 +57,7 @@ function DatabaseBlock({
     <Link
       href={link}
       className={cn(
-        "shadow-[8px_8px_0px_#111] hover:shadow-[8px_-8px_0px_#444] transition-all duration-200 border-2 border-zinc-800 rounded-lg flex flex-col gap-2 py-8 cursor-pointer px-4 hover:text-yellow-500",
+        "shadow-[8px_8px_0px_#111] hover:shadow-[8px_-8px_0px_#444] transition-all duration-200 border-2 border-zinc-800 rounded-lg flex flex-col gap-2 py-6 cursor-pointer px-4 hover:text-yellow-500",
         center ? "justify-center items-center" : ""
       )}
     >
@@ -80,7 +80,9 @@ function HeroSection() {
 
       <div className="absolute top-0 bottom-0 left-0 right-0 -mt-16">
         <div className="mx-auto container">
-          <h2 className="text-4xl font-bold">Powerful Database Client</h2>
+          <h2 className="text-4xl font-bold text-white">
+            Powerful Database Client
+          </h2>
           <p className="max-w-[700px] mt-6 text-lg">
             LibSQL Studio is a fully-featured, lightweight GUI client for
             managing Turso, LibSQL, Cloudflare D1, rqlite, MySQL, and
@@ -101,7 +103,9 @@ function SupportDriver() {
   return (
     <div>
       <div className="container mx-auto py-12 px-8">
-        <div className="mb-4 font-semibold text-3xl">Supporting Drivers</div>
+        <div className="mb-4 font-semibold text-3xl text-white">
+          Supporting Drivers
+        </div>
 
         <p className="my-4 mb-8 max-w-[500px] text-zinc-400">
           We support a variety of databases, with more to come in the future.
@@ -115,12 +119,18 @@ function SupportDriver() {
 
           <DatabaseBlock center link="#">
             <PostgreIcon />
-            <div>PostgreSQL</div>
+            <span>PostgreSQL</span>
+            <span className="text-xs -mt-2 text-yellow-500">
+              Coming Soon 15th Sep 2024
+            </span>
           </DatabaseBlock>
 
           <DatabaseBlock center link="#">
             <MySQLIcon />
-            <div>MySQL</div>
+            <span>MySQL</span>
+            <span className="text-xs -mt-2 text-yellow-500">
+              Coming Soon 15th Sep 2024
+            </span>
           </DatabaseBlock>
 
           <DatabaseBlock center link="#">
@@ -136,7 +146,7 @@ function SupportDriver() {
 function FeatureList() {
   return (
     <div className="mx-auto container mt-12">
-      <div className="mb-4 font-semibold text-3xl">
+      <div className="mb-4 font-semibold text-3xl text-white">
         Modern Design and <br />
         Intuitive Interface
       </div>
@@ -155,7 +165,9 @@ function FeatureList() {
             />
           </video>
 
-          <h1 className="font-semibold text-lg mt-4">Powerful Data Editor</h1>
+          <h1 className="font-semibold text-lg mt-4 text-white">
+            Powerful Data Editor
+          </h1>
 
           <p className="mt-2 text-zinc-400">
             The handy data editor allows you to add, delete, and edit
@@ -172,7 +184,7 @@ function FeatureList() {
             />
           </video>
 
-          <h1 className="text-lg font-semibold mt-4">
+          <h1 className="text-lg font-semibold mt-4 text-white">
             Writing and Running SQL
           </h1>
 
@@ -191,7 +203,7 @@ function FeatureList() {
             />
           </video>
 
-          <h1 className="text-lg font-semibold mt-4">
+          <h1 className="text-lg font-semibold mt-4 text-white">
             Writing and Running SQL
           </h1>
 
@@ -210,7 +222,9 @@ function FeatureList() {
             />
           </video>
 
-          <h1 className="font-semibold text-lg mt-4">Create and Edit Table</h1>
+          <h1 className="font-semibold text-lg mt-4 text-white">
+            Create and Edit Table
+          </h1>
 
           <p className="mt-2 text-zinc-400">
             LibSQL Studio allows you to quickly create, modify, and remove table
@@ -225,7 +239,7 @@ function FeatureList() {
 function CommunitySection() {
   return (
     <div className="mx-auto container px-8 my-24">
-      <h1 className="mb-4 font-semibold text-3xl">Community</h1>
+      <h1 className="mb-4 font-semibold text-3xl text-white">Community</h1>
 
       <p className="mt-2 text-zinc-400 max-w-[500px] mb-8">
         Join our community for the latest updates, roadmap insights, and
