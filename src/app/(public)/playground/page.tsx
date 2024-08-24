@@ -13,8 +13,14 @@ export const metadata: Metadata = {
 };
 
 export default async function PlaygroundPage() {
-  const db = get_database();
-  const templateList = await db.select().from(dbDataset);
+  let templateList: (typeof dbDataset.$inferSelect)[] = [];
+
+  try {
+    const db = get_database();
+    templateList = await db.select().from(dbDataset);
+  } catch {
+    templateList = [];
+  }
 
   return (
     <WebsiteLayout>
