@@ -23,7 +23,7 @@ export default function TableHeader({
 }) {
   const className = cn(
     sticky ? "sticky left-0 z-30" : undefined,
-    "dark:bg-gray-900 bg-gray-100"
+    "bg-background"
   );
 
   return (

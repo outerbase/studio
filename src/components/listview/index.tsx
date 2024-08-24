@@ -214,7 +214,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   {item.icon && (
                     <item.icon className={cn("w-4 h-4 mr-1", item.iconColor)} />
                   )}
-                  <div>
+                  <div className="text-xs">
                     <Highlight text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span

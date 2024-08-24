@@ -34,7 +34,7 @@ export default function TriggerTab({ name }: { name: string }) {
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       <div className="p-4 flex flex-col gap-2">
-        <div className="text-xs text-gray-800">Trigger Name</div>
+        <div className="text-xs">Trigger Name</div>
         <Input value={trigger?.name ?? ""} readOnly />
 
         <div className="flex gap-2">

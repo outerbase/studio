@@ -30,7 +30,7 @@ export const WindowTabItemButton = forwardRef<
   return (
     <button
       className={cn(
-        "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px] border-x border-t",
+        "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px] border-x border-t-2 border-t-yellow-500",
         "libsql-window-tab",
         isDragging && "z-20",
         isDragging && !selected && "bg-gray-200 dark:bg-gray-700 rounded-t",
