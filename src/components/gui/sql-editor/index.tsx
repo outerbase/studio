@@ -19,6 +19,7 @@ import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
 import { functionTooltip } from "./function-tooltips";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 import { toast } from "sonner";
+import SqlStatementHighlightPlugin from "./statement-highlight";
 
 interface SqlEditorProps {
   value: string;
@@ -57,6 +58,15 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       }
       return createSQLTableNameHighlightPlugin([]);
     }, [schema]);
+
+    const baseTheme = useMemo(() => {
+      return EditorView.baseTheme({
+        "& .cm-line": {
+          borderLeft: "3px solid transparent",
+          paddingLeft: "10px",
+        },
+      });
+    }, []);
 
     const keyExtensions = useMemo(() => {
       return keymap.of([
@@ -138,6 +148,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           height: "100%",
         }}
         extensions={[
+          baseTheme,
           keyExtensions,
           sql({
             dialect: sqliteDialect,
@@ -152,6 +163,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
             const columnNumber = pos - line.from;
             if (onCursorChange) onCursorChange(pos, lineNumber, columnNumber);
           }),
+          SqlStatementHighlightPlugin,
         ]}
       />
     );
