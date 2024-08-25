@@ -52,7 +52,7 @@ function FullEditorSheet({ option }: { option: FullEditorOption }) {
         <div className="flex flex-col grow overflow-hidden">
           <div className="p-4 flex gap-2">
             <div className="grow" />
-            <Button onClick={option.onCancel} variant={"secondary"}>
+            <Button onClick={option.onCancel} variant={"destructive"}>
               Close
             </Button>
             <Button
