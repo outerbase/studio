@@ -7,7 +7,7 @@ import {
   completionStatus,
   startCompletion,
 } from "@codemirror/autocomplete";
-import { sql } from "@codemirror/lang-sql";
+import { sql, SQLNamespace } from "@codemirror/lang-sql";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
 import { defaultKeymap, insertTab } from "@codemirror/commands";
@@ -24,7 +24,7 @@ interface SqlEditorProps {
   value: string;
   readOnly?: boolean;
   onChange?: (value: string) => void;
-  schema?: Record<string, string[]>;
+  schema?: SQLNamespace;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   fontSize?: number;
   onFontSizeChanged?: (fontSize: number) => void;

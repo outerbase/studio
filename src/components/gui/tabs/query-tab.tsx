@@ -20,7 +20,6 @@ import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { selectStatementFromPosition } from "@/drivers/sqlite/sql-helper";
 import QueryProgressLog from "../query-progress-log";
-import { useAutoComplete } from "@/context/auto-complete-provider";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import {
   MultipleQueryProgress,
@@ -56,9 +55,8 @@ export default function QueryWindow({
   initialSavedKey,
   initialNamespace,
 }: QueryWindowProps) {
-  const { schema } = useAutoComplete();
   const { databaseDriver, docDriver } = useDatabaseDriver();
-  const { refresh: refreshSchema } = useSchema();
+  const { refresh: refreshSchema, autoCompleteSchema } = useSchema();
   const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
@@ -231,7 +229,7 @@ export default function QueryWindow({
               ref={editorRef}
               value={code}
               onChange={setCode}
-              schema={schema}
+              schema={autoCompleteSchema}
               fontSize={fontSize}
               onFontSizeChanged={setFontSize}
               onCursorChange={(_, line, col) => {
