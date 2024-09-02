@@ -122,7 +122,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           },
         },
         { separator: true },
-        {
+        databaseDriver.getFlags().supportCreateUpdateTable && {
           title: "Create New Table",
           onClick: () => {
             openTab({
@@ -131,7 +131,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             });
           },
         },
-        isTable
+        isTable && databaseDriver.getFlags().supportCreateUpdateTable
           ? {
               title: "Edit Table",
               onClick: () => {
@@ -143,11 +143,13 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               },
             }
           : undefined,
-        { separator: true },
+        databaseDriver.getFlags().supportCreateUpdateTable
+          ? { separator: true }
+          : undefined,
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
     },
-    [refresh, currentSchemaName]
+    [refresh, databaseDriver, currentSchemaName]
   );
 
   const listViewItems = useMemo(() => {

@@ -34,7 +34,8 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
-  const { collaborationDriver, docDriver } = useDatabaseDriver();
+  const { databaseDriver, collaborationDriver, docDriver } =
+    useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const { currentSchemaName } = useSchema();
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
@@ -121,14 +122,16 @@ export default function DatabaseGui() {
           openTab({ type: "query" });
         },
       },
-      {
-        text: "New Table",
-        onClick: () => {
-          openTab({ type: "schema", schemaName: currentSchemaName });
-        },
-      },
-    ];
-  }, [currentSchemaName]);
+      databaseDriver.getFlags().supportCreateUpdateTable
+        ? {
+            text: "New Table",
+            onClick: () => {
+              openTab({ type: "schema", schemaName: currentSchemaName });
+            },
+          }
+        : undefined,
+    ].filter(Boolean) as { text: string; onClick: () => void }[];
+  }, [currentSchemaName, databaseDriver]);
 
   return (
     <div className="h-screen w-screen flex flex-col">

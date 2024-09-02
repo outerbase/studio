@@ -199,6 +199,7 @@ export interface DriverFlags {
   defaultSchema: string;
   optionalSchema: boolean;
   supportBigInt: boolean;
+  supportCreateUpdateTable: boolean;
   mismatchDetection: boolean;
 }
 
