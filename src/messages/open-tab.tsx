@@ -42,6 +42,7 @@ interface OpenUserTab {
 
 interface OpenTriggerTab {
   type: "trigger";
+  schemaName: string;
   tableName?: string;
   name?: string;
 }
@@ -124,7 +125,7 @@ function generateComponent(tab: OpenTabsProps, title: string) {
       <SchemaEditorTab tableName={tab.tableName} schemaName={tab.schemaName} />
     );
   if (tab.type === "user") return <UsersTab />;
-  return <TriggerTab name={tab.name ?? ""} />;
+  return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
 }
 
 export function receiveOpenTabMessage({

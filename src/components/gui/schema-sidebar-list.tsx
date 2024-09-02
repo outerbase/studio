@@ -181,6 +181,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         } else if (item.data.type === "trigger") {
           openTab({
             type: "trigger",
+            schemaName: item.data.schemaName,
             name: item.name,
           });
         }

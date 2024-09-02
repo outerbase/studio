@@ -13,19 +13,25 @@ import SqlEditor from "../sql-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
 import { noop } from "@/lib/utils";
 
-export default function TriggerTab({ name }: { name: string }) {
+export default function TriggerTab({
+  schemaName,
+  name,
+}: {
+  schemaName: string;
+  name: string;
+}) {
   const { databaseDriver } = useDatabaseDriver();
   const [trigger, setTrigger] = useState<DatabaseTriggerSchema>();
   const [error, setError] = useState<string>();
 
   useEffect(() => {
     databaseDriver
-      .trigger(name)
+      .trigger(schemaName, name)
       .then(setTrigger)
       .catch((e: Error) => {
         setError(e.message);
       });
-  }, [databaseDriver, name]);
+  }, [databaseDriver, schemaName, name]);
 
   if (error) {
     return <div className="p-4">{error}</div>;

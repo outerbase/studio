@@ -49,6 +49,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       defaultSchema: "",
       optionalSchema: false,
       supportBigInt: false,
+      mismatchDetection: false,
     };
   }
 

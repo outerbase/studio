@@ -87,9 +87,12 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     }, {} as DatabaseSchemas);
   }
 
-  async trigger(name: string): Promise<DatabaseTriggerSchema> {
+  async trigger(
+    schemaName: string,
+    name: string
+  ): Promise<DatabaseTriggerSchema> {
     const result = await this.query(
-      `SELECT * FROM sqlite_schema WHERE "type"='trigger' AND name=${escapeSqlValue(
+      `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE "type"='trigger' AND name=${escapeSqlValue(
         name
       )};`
     );

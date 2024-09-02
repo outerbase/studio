@@ -222,7 +222,10 @@ export abstract class BaseDriver {
     tableName: string
   ): Promise<DatabaseTableSchema>;
 
-  abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
+  abstract trigger(
+    schemaName: string,
+    name: string
+  ): Promise<DatabaseTriggerSchema>;
 
   abstract findFirst(
     schemaName: string,
