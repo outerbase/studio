@@ -87,6 +87,14 @@ function groupByFtsTable(items: ListViewItem<DatabaseSchemaItem>[]) {
   return items.filter((item) => !excludes.has(item.data.name));
 }
 
+function flattenSchemaGroup(
+  schemaGroup: ListViewItem<DatabaseSchemaItem>[]
+): ListViewItem<DatabaseSchemaItem>[] {
+  console.log(schemaGroup);
+  if (schemaGroup.length === 1) return schemaGroup[0].children ?? [];
+  return schemaGroup;
+}
+
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const [selected, setSelected] = useState("");
   const [collapsed, setCollapsed] = useState(new Set<string>());
@@ -138,18 +146,20 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     [refresh]
   );
 
-  const filteredSchema = useMemo(() => {
-    return Object.entries(schema).map(([s, tables]) => {
-      return {
-        data: {},
-        icon: LucideDatabase,
-        name: s,
-        key: s.toString(),
-        children: groupByFtsTable(
-          groupTriggerByTable(prepareListViewItem(tables))
-        ),
-      } as ListViewItem<DatabaseSchemaItem>;
-    });
+  const listViewItems = useMemo(() => {
+    return flattenSchemaGroup(
+      Object.entries(schema).map(([s, tables]) => {
+        return {
+          data: {},
+          icon: LucideDatabase,
+          name: s,
+          key: s.toString(),
+          children: groupByFtsTable(
+            groupTriggerByTable(prepareListViewItem(tables))
+          ),
+        } as ListViewItem<DatabaseSchemaItem>;
+      })
+    );
   }, [schema]);
 
   const filterCallback = useCallback(
@@ -165,7 +175,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       full
       filter={filterCallback}
       highlight={search}
-      items={filteredSchema}
+      items={listViewItems}
       collapsedKeys={collapsed}
       onCollapsedChange={setCollapsed}
       onContextMenu={(item) => prepareContextMenu(item?.data)}

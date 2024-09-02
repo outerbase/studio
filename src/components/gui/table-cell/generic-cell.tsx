@@ -12,10 +12,16 @@ import {
 import {
   DatabaseResultSet,
   DatabaseValue,
+  describeTableColumnType,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
@@ -30,27 +36,21 @@ interface TableCellProps<T = unknown> {
 }
 
 interface SneakpeakProps {
-  fkSchemaName: string;
   fkTableName: string;
   fkColumnName: string;
   value: DatabaseValue;
 }
 
-function SnippetRow({
-  fkSchemaName,
-  fkTableName,
-  fkColumnName,
-  value,
-}: SneakpeakProps) {
+function SnippetRow({ fkTableName, fkColumnName, value }: SneakpeakProps) {
   const { databaseDriver } = useDatabaseDriver();
   const [data, setData] = useState<DatabaseResultSet>();
 
   useEffect(() => {
     databaseDriver
-      .findFirst(fkSchemaName, fkTableName, { [fkColumnName]: value })
+      .findFirst("main", fkTableName, { [fkColumnName]: value })
       .then(setData)
       .catch(console.error);
-  }, [databaseDriver, fkSchemaName, fkTableName, fkColumnName, value]);
+  }, [databaseDriver, fkTableName, fkColumnName, value]);
 
   if (!data) {
     return (
@@ -178,6 +178,7 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
+  valueType,
   onFocus,
   isChanged,
   focus,
@@ -207,7 +208,6 @@ export default function GenericCell({
       return (
         <div className="flex items-center shrink-0 cursor-pointer ml-2">
           <ForeignKeyColumnSnippet
-            fkSchemaName={"main"}
             fkColumnName={header.foreignKey.foreignColumns[0] as string}
             fkTableName={header.foreignKey.foreignTableName}
             value={value}

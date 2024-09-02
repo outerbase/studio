@@ -23,6 +23,7 @@ import SettingSidebar from "./sidebar/setting-sidebar";
 
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
+import { useSchema } from "@/context/schema-provider";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -35,6 +36,7 @@ export default function DatabaseGui() {
 
   const { collaborationDriver, docDriver } = useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const { currentSchemaName } = useSchema();
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
     {
       title: "Query",
@@ -122,11 +124,11 @@ export default function DatabaseGui() {
       {
         text: "New Table",
         onClick: () => {
-          openTab({ type: "schema", schemaName: "main" });
+          openTab({ type: "schema", schemaName: currentSchemaName });
         },
       },
     ];
-  }, []);
+  }, [currentSchemaName]);
 
   return (
     <div className="h-screen w-screen flex flex-col">
