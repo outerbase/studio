@@ -1,4 +1,8 @@
-import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
+import {
+  DatabaseTableColumnConstraint,
+  DatabaseTableConstraintChange,
+  DatabaseTableSchemaChange,
+} from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import {
   LucideArrowUpRight,
@@ -8,7 +12,6 @@ import {
   LucideShieldPlus,
   LucideTrash2,
 } from "lucide-react";
-import { DatabaseTableConstraintChange, DatabaseTableSchemaChange } from ".";
 import TableCombobox from "../table-combobox/TableCombobox";
 import {
   DropdownMenu,

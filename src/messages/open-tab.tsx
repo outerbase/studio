@@ -32,7 +32,7 @@ interface OpenQueryTab {
 
 interface OpenTableSchemaTab {
   type: "schema";
-  schemaName: string;
+  schemaName?: string;
   tableName?: string;
 }
 

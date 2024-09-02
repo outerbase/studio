@@ -1,15 +1,13 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import SchemaEditor, {
-  DatabaseTableSchemaChange,
-} from "@/components/gui/schema-editor";
-import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import SchemaEditor from "../schema-editor";
 
 interface SchemaEditorTabProps {
   tableName?: string;
-  schemaName: string;
+  schemaName?: string;
 }
 
 const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
@@ -32,11 +30,12 @@ export default function SchemaEditorTab({
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchTable = useCallback(
-    async (name: string) => {
+    async (schemaName: string, name: string) => {
       databaseDriver
         .tableSchema(schemaName, name)
         .then((schema) => {
           setSchema({
+            schemaName,
             name: {
               old: schema.tableName,
               new: schema.tableName,
@@ -56,18 +55,18 @@ export default function SchemaEditorTab({
         .catch(console.error)
         .finally(() => setLoading(false));
     },
-    [schemaName, databaseDriver, setSchema]
+    [databaseDriver, setSchema]
   );
 
   useEffect(() => {
-    if (tableName) {
-      fetchTable(tableName).then().catch(console.error);
+    if (tableName && schemaName) {
+      fetchTable(schemaName, tableName).then().catch(console.error);
     }
-  }, [fetchTable, tableName]);
+  }, [fetchTable, schemaName, tableName]);
 
   const previewScript = useMemo(() => {
-    return generateSqlSchemaChange(schema);
-  }, [schema]);
+    return databaseDriver.createUpdateTableSchema(schema);
+  }, [schema, databaseDriver]);
 
   const onSaveToggle = useCallback(
     () => setIsSaving((prev) => !prev),
@@ -104,7 +103,6 @@ export default function SchemaEditorTab({
     <>
       {isSaving && (
         <SchemaSaveDialog
-          schemaName={schemaName}
           fetchTable={fetchTable}
           onClose={onSaveToggle}
           schema={schema}
@@ -117,6 +115,7 @@ export default function SchemaEditorTab({
         onChange={setSchema}
         onSave={onSaveToggle}
         onDiscard={onDiscard}
+        isCreate={!tableName && !schemaName}
       />
     </>
   );

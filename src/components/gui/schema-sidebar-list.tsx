@@ -5,6 +5,7 @@ import { openTab } from "@/messages/open-tab";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
+import { useDatabaseDriver } from "@/context/driver-provider";
 
 interface SchemaListProps {
   search: string;
@@ -90,15 +91,18 @@ function groupByFtsTable(items: ListViewItem<DatabaseSchemaItem>[]) {
 function flattenSchemaGroup(
   schemaGroup: ListViewItem<DatabaseSchemaItem>[]
 ): ListViewItem<DatabaseSchemaItem>[] {
-  console.log(schemaGroup);
   if (schemaGroup.length === 1) return schemaGroup[0].children ?? [];
   return schemaGroup;
 }
 
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
+  const { databaseDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState("");
-  const [collapsed, setCollapsed] = useState(new Set<string>());
   const { refresh, schema } = useSchema();
+
+  const [collapsed, setCollapsed] = useState(() => {
+    return new Set<string>();
+  });
 
   useEffect(() => {
     setSelected("");
@@ -147,20 +151,26 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   );
 
   const listViewItems = useMemo(() => {
-    return flattenSchemaGroup(
-      Object.entries(schema).map(([s, tables]) => {
-        return {
-          data: {},
-          icon: LucideDatabase,
-          name: s,
-          key: s.toString(),
-          children: groupByFtsTable(
-            groupTriggerByTable(prepareListViewItem(tables))
-          ),
-        } as ListViewItem<DatabaseSchemaItem>;
-      })
-    );
-  }, [schema]);
+    const r = Object.entries(schema).map(([s, tables]) => {
+      return {
+        data: {},
+        icon: LucideDatabase,
+        name: s,
+        key: s.toString(),
+        children: groupByFtsTable(
+          groupTriggerByTable(prepareListViewItem(tables))
+        ),
+      } as ListViewItem<DatabaseSchemaItem>;
+    });
+
+    if (databaseDriver.getFlags().optionalSchema) {
+      // For SQLite, the default schema is main and
+      // it is optional.
+      return flattenSchemaGroup(r);
+    }
+    return r;
+  }, [schema, databaseDriver]);
+  console.log(listViewItems, schema);
 
   const filterCallback = useCallback(
     (item: ListViewItem<DatabaseSchemaItem>) => {

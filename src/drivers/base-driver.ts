@@ -202,6 +202,28 @@ export interface DriverFlags {
   mismatchDetection: boolean;
 }
 
+export interface DatabaseTableColumnChange {
+  old: DatabaseTableColumn | null;
+  new: DatabaseTableColumn | null;
+}
+
+export interface DatabaseTableConstraintChange {
+  id: string;
+  old: DatabaseTableColumnConstraint | null;
+  new: DatabaseTableColumnConstraint | null;
+}
+
+export interface DatabaseTableSchemaChange {
+  schemaName?: string;
+  name: {
+    old?: string;
+    new?: string;
+  };
+  columns: DatabaseTableColumnChange[];
+  constraints: DatabaseTableConstraintChange[];
+  createScript?: string;
+}
+
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
@@ -248,4 +270,6 @@ export abstract class BaseDriver {
     // if the operation is unsafe
     validateSchema?: DatabaseTableSchema
   ): Promise<DatabaseTableOperationReslt[]>;
+
+  abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
 }

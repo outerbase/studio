@@ -1,4 +1,3 @@
-import { DatabaseTableColumnChange, DatabaseTableSchemaChange } from ".";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import {
   DropdownMenu,
@@ -22,7 +21,9 @@ import ColumnDefaultValueInput from "./column-default-value-input";
 import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
+  DatabaseTableColumnChange,
   DatabaseTableColumnConstraint,
+  DatabaseTableSchemaChange,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";

@@ -144,4 +144,8 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
   trigger(): Promise<DatabaseTriggerSchema> {
     throw new Error("Not implemented");
   }
+
+  createUpdateTableSchema(): string[] {
+    throw new Error("Not implemented");
+  }
 }

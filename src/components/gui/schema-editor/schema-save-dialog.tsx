@@ -12,25 +12,23 @@ import {
   LucideSave,
   LucideTableProperties,
 } from "lucide-react";
-import { DatabaseTableSchemaChange } from ".";
 import { useTabsContext } from "../windows-tab";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { useCallback, useState } from "react";
 import SchemaEditorTab from "../tabs/schema-editor-tab";
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 
 export default function SchemaSaveDialog({
-  schemaName,
   schema,
   previewScript,
   onClose,
   fetchTable,
 }: {
-  schemaName: string;
   schema: DatabaseTableSchemaChange;
   previewScript: string[];
   onClose: () => void;
-  fetchTable: (tableName: string) => Promise<void>;
+  fetchTable: (schemeName: string, tableName: string) => Promise<void>;
 }) {
   const { databaseDriver } = useDatabaseDriver();
   const { refresh: refreshSchema } = useSchema();
@@ -49,7 +47,7 @@ export default function SchemaSaveDialog({
             component: (
               <SchemaEditorTab
                 tableName={schema.name.new}
-                schemaName={schemaName}
+                schemaName={schema.schemaName}
               />
             ),
             key: "_schema_" + schema.name.new,
@@ -57,8 +55,11 @@ export default function SchemaSaveDialog({
             title: "Edit " + schema.name.new,
             icon: LucideTableProperties,
           });
-        } else if (schema.name.old) {
-          fetchTable(schema.name?.new || schema.name?.old || "").then(onClose);
+        } else if (schema.name.old && schema.schemaName) {
+          fetchTable(
+            schema.schemaName,
+            schema.name?.new || schema.name?.old || ""
+          ).then(onClose);
         }
       })
       .catch((err) => setErrorMessage((err as Error).message))
@@ -67,7 +68,6 @@ export default function SchemaSaveDialog({
       });
   }, [
     onClose,
-    schemaName,
     databaseDriver,
     schema,
     fetchTable,

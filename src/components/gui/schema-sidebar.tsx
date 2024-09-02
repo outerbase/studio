@@ -7,6 +7,7 @@ import { openTab } from "@/messages/open-tab";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
+
   const onNewTable = useCallback(() => {
     openTab({
       type: "schema",

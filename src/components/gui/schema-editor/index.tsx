@@ -4,45 +4,22 @@ import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { Button, buttonVariants } from "../../ui/button";
 import SchemaEditorColumnList from "./schema-editor-column-list";
 import { Input } from "../../ui/input";
-import generateSqlSchemaChange, {
-  checkSchemaChange,
-} from "@/components/lib/sql-generate.schema";
-import {
-  DatabaseTableColumn,
-  DatabaseTableColumnConstraint,
-} from "@/drivers/base-driver";
+import { checkSchemaChange } from "@/components/lib/sql-generate.schema";
 import SchemaEditorConstraintList from "./schema-editor-constraint-list";
 import { ColumnsProvider } from "./column-provider";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import CodePreview from "../code-preview";
 import { toast } from "sonner";
-
-export interface DatabaseTableColumnChange {
-  old: DatabaseTableColumn | null;
-  new: DatabaseTableColumn | null;
-}
-
-export interface DatabaseTableConstraintChange {
-  id: string;
-  old: DatabaseTableColumnConstraint | null;
-  new: DatabaseTableColumnConstraint | null;
-}
-
-export interface DatabaseTableSchemaChange {
-  name: {
-    old?: string;
-    new?: string;
-  };
-  columns: DatabaseTableColumnChange[];
-  constraints: DatabaseTableConstraintChange[];
-  createScript?: string;
-}
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import SchemaNameSelect from "./schema-name-select";
 
 interface Props {
   onSave: () => void;
   onDiscard: () => void;
   value: DatabaseTableSchemaChange;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  isCreate?: boolean;
 }
 
 export default function SchemaEditor({
@@ -50,7 +27,9 @@ export default function SchemaEditor({
   onChange,
   onSave,
   onDiscard,
+  isCreate,
 }: Readonly<Props>) {
+  const { databaseDriver } = useDatabaseDriver();
   const isCreateScript = value.name.old === "";
 
   const onAddColumn = useCallback(() => {
@@ -84,8 +63,8 @@ export default function SchemaEditor({
   const hasChange = checkSchemaChange(value);
 
   const previewScript = useMemo(() => {
-    return generateSqlSchemaChange(value).join("\n");
-  }, [value]);
+    return databaseDriver.createUpdateTableSchema(value).join("\n");
+  }, [value, databaseDriver]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -174,7 +153,14 @@ export default function SchemaEditor({
         </div>
 
         <div className="flex items-center mx-3 mt-1 mb-2 ml-5 gap-2">
-          <div className="text-xs flex items-center justify-center">Name</div>
+          <SchemaNameSelect
+            readonly={!isCreate}
+            value={value.schemaName}
+            onChange={(selectedSchema) => {
+              onChange({ ...value, schemaName: selectedSchema });
+            }}
+          />
+          ●
           <Input
             placeholder="Table Name"
             value={value.name.new ?? value.name.old ?? ""}

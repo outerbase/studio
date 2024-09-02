@@ -3,6 +3,7 @@ import type {
   DatabaseSchemaItem,
   DatabaseSchemas,
   DatabaseTableSchema,
+  DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
   DriverFlags,
 } from "./base-driver";
@@ -11,6 +12,7 @@ import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
 import CommonSQLImplement from "./common-sql-imp";
+import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   escapeId(id: string) {
@@ -132,5 +134,9 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     } catch (e) {
       throw new Error("Unexpected error while parsing");
     }
+  }
+
+  createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
+    return generateSqlSchemaChange(change);
   }
 }
