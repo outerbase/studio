@@ -98,7 +98,7 @@ function flattenSchemaGroup(
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const { databaseDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState("");
-  const { refresh, schema } = useSchema();
+  const { refresh, schema, currentSchemaName } = useSchema();
 
   const [collapsed, setCollapsed] = useState(() => {
     return new Set<string>();
@@ -127,7 +127,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           onClick: () => {
             openTab({
               type: "schema",
-              schemaName: item?.schemaName ?? "",
+              schemaName: item?.schemaName ?? currentSchemaName,
             });
           },
         },
@@ -147,13 +147,13 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
     },
-    [refresh]
+    [refresh, currentSchemaName]
   );
 
   const listViewItems = useMemo(() => {
     const r = Object.entries(schema).map(([s, tables]) => {
       return {
-        data: {},
+        data: { type: "schema", schemaName: s },
         icon: LucideDatabase,
         name: s,
         key: s.toString(),

@@ -40,7 +40,7 @@ export default function SchemaNameSelect({
           className="w-[200px] justify-between"
           disabled={readonly}
         >
-          {value ?? "Select schema"}
+          {value || "Select schema"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

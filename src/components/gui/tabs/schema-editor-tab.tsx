@@ -25,7 +25,10 @@ export default function SchemaEditorTab({
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
   const { databaseDriver } = useDatabaseDriver();
-  const [schema, setSchema] = useState<DatabaseTableSchemaChange>(EMPTY_SCHEMA);
+  const [schema, setSchema] = useState<DatabaseTableSchemaChange>({
+    ...EMPTY_SCHEMA,
+    schemaName,
+  });
   const [loading, setLoading] = useState(!!tableName);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -115,7 +118,6 @@ export default function SchemaEditorTab({
         onChange={setSchema}
         onSave={onSaveToggle}
         onDiscard={onDiscard}
-        isCreate={!tableName && !schemaName}
       />
     </>
   );

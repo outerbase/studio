@@ -72,7 +72,7 @@ export type DatabaseValue<T = unknown> = T | undefined | null;
 export type DatabaseSchemas = Record<string, DatabaseSchemaItem[]>;
 
 export interface DatabaseSchemaItem {
-  type: "table" | "trigger" | "view";
+  type: "table" | "trigger" | "view" | "schema";
   name: string;
   schemaName: string;
   tableName?: string;

@@ -19,7 +19,6 @@ interface Props {
   onDiscard: () => void;
   value: DatabaseTableSchemaChange;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
-  isCreate?: boolean;
 }
 
 export default function SchemaEditor({
@@ -27,7 +26,6 @@ export default function SchemaEditor({
   onChange,
   onSave,
   onDiscard,
-  isCreate,
 }: Readonly<Props>) {
   const { databaseDriver } = useDatabaseDriver();
   const isCreateScript = value.name.old === "";
@@ -73,7 +71,7 @@ export default function SchemaEditor({
           <Button
             variant="ghost"
             onClick={onSave}
-            disabled={!hasChange || !value.name?.new}
+            disabled={!hasChange || !value.name?.new || !value.schemaName}
             size={"sm"}
           >
             <LucideSave className="w-4 h-4 mr-2" />
@@ -152,29 +150,34 @@ export default function SchemaEditor({
           )}
         </div>
 
-        <div className="flex items-center mx-3 mt-1 mb-2 ml-5 gap-2">
-          <SchemaNameSelect
-            readonly={!isCreate}
-            value={value.schemaName}
-            onChange={(selectedSchema) => {
-              onChange({ ...value, schemaName: selectedSchema });
-            }}
-          />
-          ●
-          <Input
-            placeholder="Table Name"
-            value={value.name.new ?? value.name.old ?? ""}
-            onChange={(e) => {
-              onChange({
-                ...value,
-                name: {
-                  ...value.name,
-                  new: e.currentTarget.value,
-                },
-              });
-            }}
-            className="w-[200px]"
-          />
+        <div className="flex items-center mx-3 mt-3 mb-4 ml-5 gap-2">
+          <div>
+            <div className="text-xs font-medium mb-1">Table Name</div>
+            <Input
+              placeholder="Table Name"
+              value={value.name.new ?? value.name.old ?? ""}
+              onChange={(e) => {
+                onChange({
+                  ...value,
+                  name: {
+                    ...value.name,
+                    new: e.currentTarget.value,
+                  },
+                });
+              }}
+              className="w-[200px]"
+            />
+          </div>
+          <div>
+            <div className="text-xs font-medium mb-1">Schema</div>
+            <SchemaNameSelect
+              readonly={!isCreateScript}
+              value={value.schemaName}
+              onChange={(selectedSchema) => {
+                onChange({ ...value, schemaName: selectedSchema });
+              }}
+            />
+          </div>
         </div>
         <Separator />
       </div>
