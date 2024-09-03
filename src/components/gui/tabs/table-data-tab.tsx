@@ -37,6 +37,7 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 import ResultStats from "../result-stat";
 import isEmptyResultStats from "@/components/lib/empty-stats";
 import useTableResultColumnFilter from "../table-result/filter-column";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 
 interface TableDataContentProps {
   tableName: string;
@@ -142,6 +143,7 @@ export default function TableDataWindow({
 
     commitChange({ driver: databaseDriver, tableName, tableSchema, data })
       .then(({ errorMessage }) => {
+        console.log("here", errorMessage);
         if (errorMessage) setExecuteError(errorMessage);
       })
       .catch(console.error)
@@ -172,7 +174,8 @@ export default function TableDataWindow({
     <div className="flex flex-col overflow-hidden w-full h-full">
       {executeError && (
         <AlertDialog open={true}>
-          <AlertDialogContent>
+          <AlertDialogContent title="Error">
+            <AlertDialogTitle>Error</AlertDialogTitle>
             <AlertDialogDescription>{executeError} </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogAction onClick={() => setExecuteError(null)}>

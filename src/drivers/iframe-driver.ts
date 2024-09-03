@@ -18,7 +18,7 @@ type ParentResponseData =
 
 type PromiseResolveReject = {
   resolve: (value: any) => void;
-  reject: (value: string) => void;
+  reject: (value: { message: string }) => void;
 };
 
 class IframeConnection {
@@ -28,7 +28,7 @@ class IframeConnection {
   listen() {
     const handler = (e: MessageEvent<ParentResponseData>) => {
       if (e.data.error) {
-        this.queryPromise[e.data.id].reject(e.data.error);
+        this.queryPromise[e.data.id].reject({ message: e.data.error });
         delete this.queryPromise[e.data.id];
       } else {
         this.queryPromise[e.data.id].resolve(e.data.data);

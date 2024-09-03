@@ -3,6 +3,7 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import CodePreview from "../code-preview";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,8 @@ export default function SchemaSaveDialog({
   return (
     <AlertDialog open onOpenChange={onClose}>
       <AlertDialogContent>
+        <AlertDialogTitle>Preview</AlertDialogTitle>
+
         {errorMessage && (
           <div className="text-sm text-red-500 font-mono flex gap-4 justify-end items-end">
             <LucideAlertCircle className="w-12 h-12" />
