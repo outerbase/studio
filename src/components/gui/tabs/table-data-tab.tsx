@@ -143,7 +143,6 @@ export default function TableDataWindow({
 
     commitChange({ driver: databaseDriver, tableName, tableSchema, data })
       .then(({ errorMessage }) => {
-        console.log("here", errorMessage);
         if (errorMessage) setExecuteError(errorMessage);
       })
       .catch(console.error)

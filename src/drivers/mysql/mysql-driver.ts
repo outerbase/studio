@@ -55,17 +55,18 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
   }
 
   async schemas(): Promise<DatabaseSchemas> {
-    const schemaSql = "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA";
+    const schemaSql =
+      "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
     const schemaResult = (await this.query(schemaSql))
       .rows as unknown as MySqlDatabase[];
 
     const tableSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.tables";
+      "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.tables WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
     const tableResult = (await this.query(tableSql))
       .rows as unknown as MySqlTable[];
 
     const columnSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA FROM information_schema.columns";
+      "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA FROM information_schema.columns WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
     const columnResult = (await this.query(columnSql))
       .rows as unknown as MySqlColumn[];
 
