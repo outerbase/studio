@@ -36,7 +36,6 @@ class IframeConnection {
       }
     };
 
-    console.log("register listener");
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   }
@@ -45,12 +44,6 @@ class IframeConnection {
     return new Promise((resolve, reject) => {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
-
-      console.log("POST ", {
-        type: "query",
-        id,
-        statement: stmt,
-      });
 
       window.parent.postMessage(
         {
@@ -67,12 +60,6 @@ class IframeConnection {
     return new Promise((resolve, reject) => {
       const id = ++this.counter;
       this.queryPromise[id] = { resolve, reject };
-
-      console.log("POST ", {
-        type: "transaction",
-        id,
-        statement: stmts,
-      });
 
       window.parent.postMessage(
         {
@@ -97,13 +84,11 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
-    console.log(r);
     return r;
   }
 
   transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = this.conn.transaction(stmts);
-    console.log(r);
     return r;
   }
 }
@@ -119,13 +104,11 @@ export class IframeMySQLDriver extends MySQLLikeDriver {
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
-    console.log(r);
     return r;
   }
 
   transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = this.conn.transaction(stmts);
-    console.log(r);
     return r;
   }
 }

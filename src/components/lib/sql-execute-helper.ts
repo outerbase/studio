@@ -92,8 +92,6 @@ export async function commitChange({
       tableSchema
     );
 
-    console.log(result, plans);
-
     data.applyChanges(
       plans.map((p, idx) => {
         return {

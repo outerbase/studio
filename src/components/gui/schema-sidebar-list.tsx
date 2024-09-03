@@ -172,7 +172,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     }
     return r;
   }, [schema, databaseDriver]);
-  console.log(listViewItems, schema);
 
   const filterCallback = useCallback(
     (item: ListViewItem<DatabaseSchemaItem>) => {
