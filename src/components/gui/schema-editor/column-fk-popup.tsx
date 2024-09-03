@@ -11,9 +11,11 @@ import { Separator } from "../../ui/separator";
 export default function ColumnForeignKeyPopup({
   constraint,
   disabled,
+  schemaName,
   onChange,
 }: Readonly<{
   constraint: DatabaseForeignKeyClause;
+  schemaName: string;
   disabled: boolean;
   onChange: ColumnChangeEvent;
 }>) {
@@ -33,6 +35,7 @@ export default function ColumnForeignKeyPopup({
           <div className="flex flex-col gap-2 mt-2">
             <Label className="text-xs font-normal">Foreign Table Name</Label>
             <TableCombobox
+              schemaName={schemaName}
               value={constraint.foreignTableName}
               disabled={disabled}
               onChange={(newTable) => {
@@ -64,7 +67,7 @@ export default function ColumnForeignKeyPopup({
                     },
                   });
                 }}
-                schemaName={"main"}
+                schemaName={schemaName}
                 tableName={constraint.foreignTableName}
               />
             </div>

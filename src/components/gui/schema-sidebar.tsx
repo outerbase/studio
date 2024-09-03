@@ -4,16 +4,18 @@ import SchemaList from "./schema-sidebar-list";
 import ListButtonItem from "./list-button-item";
 import { Separator } from "../ui/separator";
 import { openTab } from "@/messages/open-tab";
+import { useSchema } from "@/context/schema-provider";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
+  const { currentSchemaName } = useSchema();
 
   const onNewTable = useCallback(() => {
     openTab({
       type: "schema",
-      schemaName: "main",
+      schemaName: currentSchemaName,
     });
-  }, []);
+  }, [currentSchemaName]);
 
   return (
     <div className="flex flex-col overflow-hidden grow">

@@ -52,7 +52,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
             type: "table",
             schemaName,
             name: row.name,
-            tableSchema: parseCreateTableScript(row.sql),
+            tableSchema: parseCreateTableScript(schemaName, row.sql),
           });
         } catch {
           tmp.push({ type: "table", name: row.name, schemaName });
@@ -125,7 +125,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       if (def) {
         const createScript = def.sql;
         return {
-          ...parseCreateTableScript(createScript),
+          ...parseCreateTableScript(schemaName, createScript),
           createScript,
           schemaName,
         };

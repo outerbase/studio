@@ -101,6 +101,7 @@ export type DatabaseForeignKeyAction =
   | "NO_ACTION";
 
 export interface DatabaseForeignKeyClause {
+  foreignSchemaName?: string;
   foreignTableName?: string;
   foreignColumns?: string[];
   columns?: string[];

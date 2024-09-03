@@ -36,21 +36,27 @@ interface TableCellProps<T = unknown> {
 }
 
 interface SneakpeakProps {
+  fkSchemaName: string;
   fkTableName: string;
   fkColumnName: string;
   value: DatabaseValue;
 }
 
-function SnippetRow({ fkTableName, fkColumnName, value }: SneakpeakProps) {
+function SnippetRow({
+  fkSchemaName,
+  fkTableName,
+  fkColumnName,
+  value,
+}: SneakpeakProps) {
   const { databaseDriver } = useDatabaseDriver();
   const [data, setData] = useState<DatabaseResultSet>();
 
   useEffect(() => {
     databaseDriver
-      .findFirst("main", fkTableName, { [fkColumnName]: value })
+      .findFirst(fkSchemaName, fkTableName, { [fkColumnName]: value })
       .then(setData)
       .catch(console.error);
-  }, [databaseDriver, fkTableName, fkColumnName, value]);
+  }, [databaseDriver, fkSchemaName, fkTableName, fkColumnName, value]);
 
   if (!data) {
     return (
@@ -208,6 +214,7 @@ export default function GenericCell({
       return (
         <div className="flex items-center shrink-0 cursor-pointer ml-2">
           <ForeignKeyColumnSnippet
+            fkSchemaName={header.foreignKey.foreignSchemaName}
             fkColumnName={header.foreignKey.foreignColumns[0] as string}
             fkTableName={header.foreignKey.foreignTableName}
             value={value}

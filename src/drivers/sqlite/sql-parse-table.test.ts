@@ -10,11 +10,11 @@ import {
 
 // Parse column constraint
 function pcc(sql: string) {
-  return parseColumnConstraint(buildSyntaxCursor(sql));
+  return parseColumnConstraint("main", buildSyntaxCursor(sql));
 }
 
 function p(sql: string) {
-  return parseCreateTableScript(sql);
+  return parseCreateTableScript("main", sql);
 }
 
 it("parse column constraint", () => {

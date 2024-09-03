@@ -68,7 +68,11 @@ export default function TriggerTab({
               </SelectContent>
             </Select>
           </div>
-          <TableCombobox value={trigger?.tableName} onChange={noop} />
+          <TableCombobox
+            schemaName={schemaName}
+            value={trigger?.tableName}
+            onChange={noop}
+          />
         </div>
       </div>
       <div className="grow overflow-hidden">

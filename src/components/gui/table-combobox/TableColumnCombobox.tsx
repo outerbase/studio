@@ -39,7 +39,7 @@ export default function TableColumnCombobox({
         .catch(() => {
           setSchema({
             tableName,
-            schemaName: "main",
+            schemaName,
             columns: [],
             pk: [],
             autoIncrement: false,

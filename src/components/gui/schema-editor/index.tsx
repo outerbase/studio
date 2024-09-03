@@ -186,9 +186,11 @@ export default function SchemaEditor({
           columns={value.columns}
           onChange={onChange}
           onAddColumn={onAddColumn}
+          schemaName={value.schemaName}
         />
         <ColumnsProvider value={value.columns}>
           <SchemaEditorConstraintList
+            schemaName={value.schemaName}
             constraints={value.constraints}
             onChange={onChange}
             disabled={!isCreateScript}

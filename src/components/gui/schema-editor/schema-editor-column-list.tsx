@@ -84,10 +84,12 @@ function changeColumnOnIndex(
 function ColumnItem({
   value,
   idx,
+  schemaName,
   onChange,
 }: {
   value: DatabaseTableColumnChange;
   idx: number;
+  schemaName?: string;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }) {
   const disabled = !!value.old;
@@ -198,11 +200,12 @@ function ColumnItem({
             />
           )}
 
-          {column.constraint?.foreignKey && (
+          {column.constraint?.foreignKey && schemaName && (
             <ColumnForeignKeyPopup
               constraint={column.constraint.foreignKey}
               disabled={disabled}
               onChange={change}
+              schemaName={schemaName}
             />
           )}
 
@@ -294,10 +297,12 @@ function ColumnItem({
 export default function SchemaEditorColumnList({
   columns,
   onChange,
+  schemaName,
   onAddColumn,
 }: Readonly<{
   columns: DatabaseTableColumnChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  schemaName?: string;
   onAddColumn: () => void;
 }>) {
   const headerStyle = "text-xs p-2 text-left bg-secondary border";
@@ -318,7 +323,13 @@ export default function SchemaEditorColumnList({
         </thead>
         <tbody>
           {columns.map((col, idx) => (
-            <ColumnItem idx={idx} value={col} key={idx} onChange={onChange} />
+            <ColumnItem
+              idx={idx}
+              value={col}
+              key={idx}
+              onChange={onChange}
+              schemaName={schemaName}
+            />
           ))}
         </tbody>
         <tfoot>
