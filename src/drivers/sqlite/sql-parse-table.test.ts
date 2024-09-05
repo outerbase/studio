@@ -10,11 +10,11 @@ import {
 
 // Parse column constraint
 function pcc(sql: string) {
-  return parseColumnConstraint(buildSyntaxCursor(sql));
+  return parseColumnConstraint("main", buildSyntaxCursor(sql));
 }
 
 function p(sql: string) {
-  return parseCreateTableScript(sql);
+  return parseCreateTableScript("main", sql);
 }
 
 it("parse column constraint", () => {
@@ -79,6 +79,7 @@ it("parse column constraint", () => {
     pcc(`foreign key ("user_id") references "users" on delete cascade ("id")`)
   ).toEqual({
     foreignKey: {
+      foreignSchemaName: "main",
       columns: ["user_id"],
       foreignTableName: "users",
       foreignColumns: ["id"],
@@ -113,6 +114,7 @@ it("parse create table", () => {
     pk: ["id"],
     autoIncrement: true,
     constraints: [],
+    schemaName: "main",
     columns: [
       {
         name: "id",
@@ -171,6 +173,7 @@ it("parse create table with table constraints", () => {
 
   expect(p(sql)).toEqual({
     tableName: "users",
+    schemaName: "main",
     pk: ["first_name", "last_name"],
     autoIncrement: false,
     constraints: [
@@ -181,6 +184,7 @@ it("parse create table with table constraints", () => {
       },
       {
         foreignKey: {
+          foreignSchemaName: "main",
           columns: ["category_id"],
           foreignColumns: ["id"],
           foreignTableName: "category",
@@ -210,6 +214,7 @@ it("parse fts5 virtual table", () => {
   const sql = `create virtual table name_fts using fts5(name, tokenize='trigram');`;
   expect(p(sql)).toEqual({
     tableName: "name_fts",
+    schemaName: "main",
     autoIncrement: false,
     pk: [],
     columns: [],
@@ -222,6 +227,7 @@ it("parse fts5 virtual table with external content", () => {
   const sql = `create virtual table name_fts using fts5(name, tokenize='trigram', content='student', content_rowid='id');`;
   expect(p(sql)).toEqual({
     tableName: "name_fts",
+    schemaName: "main",
     autoIncrement: false,
     pk: [],
     columns: [],

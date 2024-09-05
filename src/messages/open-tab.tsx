@@ -16,6 +16,7 @@ import TriggerTab from "@/components/gui/tabs/trigger-tab";
 
 interface OpenTableTab {
   type: "table";
+  schemaName: string;
   tableName: string;
 }
 
@@ -31,6 +32,7 @@ interface OpenQueryTab {
 
 interface OpenTableSchemaTab {
   type: "schema";
+  schemaName?: string;
   tableName?: string;
 }
 
@@ -40,6 +42,7 @@ interface OpenUserTab {
 
 interface OpenTriggerTab {
   type: "trigger";
+  schemaName: string;
   tableName?: string;
   name?: string;
 }
@@ -67,9 +70,12 @@ function generateKeyFromTab(tab: OpenTabsProps) {
     return "query-" + window.crypto.randomUUID();
   }
 
-  if (tab.type === "table") return "table-" + tab.tableName;
+  if (tab.type === "table")
+    return "table-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "schema")
-    return !tab.tableName ? "create-schema" : "schema-" + tab.tableName;
+    return !tab.tableName
+      ? "create-schema"
+      : "schema-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "user") return "user";
 
   return "trigger-" + (tab.name ?? "");
@@ -111,11 +117,15 @@ function generateComponent(tab: OpenTabsProps, title: string) {
     return <QueryWindow initialName={title} />;
   }
   if (tab.type === "table")
-    return <TableDataWindow tableName={tab.tableName} />;
+    return (
+      <TableDataWindow tableName={tab.tableName} schemaName={tab.schemaName} />
+    );
   if (tab.type === "schema")
-    return <SchemaEditorTab tableName={tab.tableName} />;
+    return (
+      <SchemaEditorTab tableName={tab.tableName} schemaName={tab.schemaName} />
+    );
   if (tab.type === "user") return <UsersTab />;
-  return <TriggerTab name={tab.name ?? ""} />;
+  return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
 }
 
 export function receiveOpenTabMessage({

@@ -72,8 +72,9 @@ export type DatabaseValue<T = unknown> = T | undefined | null;
 export type DatabaseSchemas = Record<string, DatabaseSchemaItem[]>;
 
 export interface DatabaseSchemaItem {
-  type: "table" | "trigger" | "view";
+  type: "table" | "trigger" | "view" | "schema";
   name: string;
+  schemaName: string;
   tableName?: string;
   tableSchema?: DatabaseTableSchema;
 }
@@ -100,6 +101,7 @@ export type DatabaseForeignKeyAction =
   | "NO_ACTION";
 
 export interface DatabaseForeignKeyClause {
+  foreignSchemaName?: string;
   foreignTableName?: string;
   foreignColumns?: string[];
   columns?: string[];
@@ -145,6 +147,7 @@ export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
   autoIncrement: boolean;
+  schemaName: string;
   tableName?: string;
   constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
@@ -197,12 +200,39 @@ export interface DriverFlags {
   defaultSchema: string;
   optionalSchema: boolean;
   supportBigInt: boolean;
+  supportCreateUpdateTable: boolean;
   mismatchDetection: boolean;
+}
+
+export interface DatabaseTableColumnChange {
+  old: DatabaseTableColumn | null;
+  new: DatabaseTableColumn | null;
+}
+
+export interface DatabaseTableConstraintChange {
+  id: string;
+  old: DatabaseTableColumnConstraint | null;
+  new: DatabaseTableColumnConstraint | null;
+}
+
+export interface DatabaseTableSchemaChange {
+  schemaName?: string;
+  name: {
+    old?: string;
+    new?: string;
+  };
+  columns: DatabaseTableColumnChange[];
+  constraints: DatabaseTableConstraintChange[];
+  createScript?: string;
 }
 
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
+
+  // Helper class
+  abstract escapeId(id: string): string;
+  abstract escapeValue(value: unknown): string;
 
   // Methods
   abstract close(): void;
@@ -211,20 +241,30 @@ export abstract class BaseDriver {
   abstract transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
   abstract schemas(): Promise<DatabaseSchemas>;
-  abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
-  abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
+  abstract tableSchema(
+    schemaName: string,
+    tableName: string
+  ): Promise<DatabaseTableSchema>;
+
+  abstract trigger(
+    schemaName: string,
+    name: string
+  ): Promise<DatabaseTriggerSchema>;
 
   abstract findFirst(
+    schemaName: string,
     tableName: string,
     key: Record<string, DatabaseValue>
   ): Promise<DatabaseResultSet>;
 
   abstract selectTable(
+    schemaName: string,
     tableName: string,
     options: SelectFromTableOptions
   ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }>;
 
   abstract updateTableData(
+    schemaName: string,
     tableName: string,
     ops: DatabaseTableOperation[],
 
@@ -232,4 +272,6 @@ export abstract class BaseDriver {
     // if the operation is unsafe
     validateSchema?: DatabaseTableSchema
   ): Promise<DatabaseTableOperationReslt[]>;
+
+  abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
 }
