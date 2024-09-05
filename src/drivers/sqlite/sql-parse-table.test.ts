@@ -79,6 +79,7 @@ it("parse column constraint", () => {
     pcc(`foreign key ("user_id") references "users" on delete cascade ("id")`)
   ).toEqual({
     foreignKey: {
+      foreignSchemaName: "main",
       columns: ["user_id"],
       foreignTableName: "users",
       foreignColumns: ["id"],
@@ -183,6 +184,7 @@ it("parse create table with table constraints", () => {
       },
       {
         foreignKey: {
+          foreignSchemaName: "main",
           columns: ["category_id"],
           foreignColumns: ["id"],
           foreignTableName: "category",
