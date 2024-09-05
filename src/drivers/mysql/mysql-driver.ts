@@ -107,8 +107,9 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       };
 
       const tableKey = c.TABLE_SCHEMA + "." + c.TABLE_NAME;
-      if (tableRecord[tableKey].tableSchema) {
-        tableRecord[tableKey].tableSchema.columns.push(column);
+      const tableSchema = tableRecord[tableKey].tableSchema;
+      if (tableSchema) {
+        tableSchema.columns.push(column);
       }
     }
 

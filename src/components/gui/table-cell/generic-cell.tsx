@@ -209,7 +209,8 @@ export default function GenericCell({
   const fkContent = useMemo(() => {
     if (
       header.foreignKey?.foreignTableName &&
-      header.foreignKey.foreignColumns
+      header.foreignKey.foreignColumns &&
+      header.foreignKey?.foreignSchemaName
     ) {
       return (
         <div className="flex items-center shrink-0 cursor-pointer ml-2">
