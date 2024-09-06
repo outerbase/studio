@@ -365,6 +365,7 @@ export function parseColumnConstraint(
 
     return {
       foreignKey: {
+        foreignSchemaName: schemaName,
         foreignTableName,
         foreignColumns,
       },
