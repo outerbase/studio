@@ -49,6 +49,7 @@ export function convertSqliteType(
   if (type.includes("STRING")) return TableColumnDataType.TEXT;
 
   if (type.includes("INT")) return TableColumnDataType.INTEGER;
+  if (type.includes("NUMBER")) return TableColumnDataType.INTEGER;
 
   if (type.includes("BLOB")) return TableColumnDataType.BLOB;
 
