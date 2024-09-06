@@ -219,7 +219,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                       )}
                     />
                   )}
-                  <div className="text-xs">
+                  <div className="text-xs line-clamp-1">
                     <Highlight text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span
