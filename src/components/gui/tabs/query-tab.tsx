@@ -227,6 +227,7 @@ export default function QueryWindow({
           <div className="grow overflow-hidden">
             <SqlEditor
               ref={editorRef}
+              dialect={databaseDriver.getFlags().dialect}
               value={code}
               onChange={setCode}
               schema={autoCompleteSchema}
