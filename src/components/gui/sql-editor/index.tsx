@@ -137,6 +137,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       } else {
         sqlDialect = sql({
           dialect: MySQLDialect,
+          schema,
         });
       }
 
@@ -153,7 +154,13 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           if (onCursorChange) onCursorChange(pos, lineNumber, columnNumber);
         }),
       ].filter(Boolean) as Extension[];
-    }, [dialect, onCursorChange]);
+    }, [
+      dialect,
+      onCursorChange,
+      keyExtensions,
+      schema,
+      tableNameHighlightPlugin,
+    ]);
 
     return (
       <CodeMirror
