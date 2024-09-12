@@ -3,6 +3,7 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import CodePreview from "../code-preview";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,12 @@ import {
   LucideSave,
   LucideTableProperties,
 } from "lucide-react";
-import { DatabaseTableSchemaChange } from ".";
 import { useTabsContext } from "../windows-tab";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { useCallback, useState } from "react";
 import SchemaEditorTab from "../tabs/schema-editor-tab";
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 
 export default function SchemaSaveDialog({
   schema,
@@ -28,7 +29,7 @@ export default function SchemaSaveDialog({
   schema: DatabaseTableSchemaChange;
   previewScript: string[];
   onClose: () => void;
-  fetchTable: (tableName: string) => Promise<void>;
+  fetchTable: (schemeName: string, tableName: string) => Promise<void>;
 }) {
   const { databaseDriver } = useDatabaseDriver();
   const { refresh: refreshSchema } = useSchema();
@@ -44,14 +45,22 @@ export default function SchemaSaveDialog({
         if (schema.name.new !== schema.name.old) {
           refreshSchema();
           replaceCurrentTab({
-            component: <SchemaEditorTab tableName={schema.name.new} />,
+            component: (
+              <SchemaEditorTab
+                tableName={schema.name.new}
+                schemaName={schema.schemaName}
+              />
+            ),
             key: "_schema_" + schema.name.new,
             identifier: "_schema_" + schema.name.new,
             title: "Edit " + schema.name.new,
             icon: LucideTableProperties,
           });
-        } else if (schema.name.old) {
-          fetchTable(schema.name?.new || schema.name?.old || "").then(onClose);
+        } else if (schema.name.old && schema.schemaName) {
+          fetchTable(
+            schema.schemaName,
+            schema.name?.new || schema.name?.old || ""
+          ).then(onClose);
         }
       })
       .catch((err) => setErrorMessage((err as Error).message))
@@ -71,6 +80,8 @@ export default function SchemaSaveDialog({
   return (
     <AlertDialog open onOpenChange={onClose}>
       <AlertDialogContent>
+        <AlertDialogTitle>Preview</AlertDialogTitle>
+
         {errorMessage && (
           <div className="text-sm text-red-500 font-mono flex gap-4 justify-end items-end">
             <LucideAlertCircle className="w-12 h-12" />

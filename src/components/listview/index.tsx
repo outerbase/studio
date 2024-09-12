@@ -82,7 +82,7 @@ function Indentation({ depth }: { depth: number }) {
   if (depth <= 0) return null;
 
   return new Array(depth).fill(false).map((_, idx: number) => {
-    return <div key={idx} className={cn("w-4")}></div>;
+    return <div key={idx} className={cn("w-4 flex-shrink-0")}></div>;
   });
 }
 
@@ -104,7 +104,7 @@ function CollapsedButton({
       )}
     </div>
   ) : (
-    <div className="w-4"></div>
+    <div className="w-4 flex-shrink-0"></div>
   );
 }
 
@@ -212,9 +212,14 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   )}
 
                   {item.icon && (
-                    <item.icon className={cn("w-4 h-4 mr-1", item.iconColor)} />
+                    <item.icon
+                      className={cn(
+                        "w-4 h-4 mr-1 flex-shrink-0",
+                        item.iconColor
+                      )}
+                    />
                   )}
-                  <div className="text-xs">
+                  <div className="text-xs line-clamp-1">
                     <Highlight text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span
@@ -265,8 +270,6 @@ export function ListView<T = unknown>(props: ListViewProps<T>) {
               stopParentPropagation.current = false;
               return;
             }
-
-            console.log("here2");
 
             if (onContextMenu) {
               const menu = onContextMenu();

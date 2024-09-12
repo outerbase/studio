@@ -12,19 +12,52 @@ import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "./driver-provider";
 import { useAutoComplete } from "./auto-complete-provider";
 
+type AutoCompletionSchema = Record<string, Record<string, string[]> | string[]>;
+
 const SchemaContext = createContext<{
   schema: DatabaseSchemas;
   currentSchema: DatabaseSchemaItem[];
+  autoCompleteSchema: AutoCompletionSchema;
   currentSchemaName: string;
   refresh: () => void;
 }>({
   schema: {},
+  autoCompleteSchema: {},
   currentSchema: [],
   currentSchemaName: "",
   refresh: () => {
     throw new Error("Not implemented");
   },
 });
+
+function generateAutoCompleteFromSchemaItems(
+  items?: DatabaseSchemaItem[]
+): Record<string, string[]> {
+  if (!items) return {};
+
+  return items
+    .filter((x) => x.type === "table" || x.type === "view")
+    .reduce(
+      (a, b) => {
+        a[b.name] = (b.tableSchema?.columns ?? []).map((c) => c.name);
+        return a;
+      },
+      {} as Record<string, string[]>
+    );
+}
+
+function generateAutoComplete(
+  currentSchemaName: string,
+  schema: DatabaseSchemas
+) {
+  return {
+    ...generateAutoCompleteFromSchemaItems(schema[currentSchemaName]),
+    ...Object.entries(schema).reduce((a, [schemaName, tableList]) => {
+      a[schemaName] = generateAutoCompleteFromSchemaItems(tableList);
+      return a;
+    }, {} as AutoCompletionSchema),
+  };
+}
 
 export function useSchema() {
   return useContext(SchemaContext);
@@ -87,7 +120,13 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
   }, [fetchSchema]);
 
   const props = useMemo(() => {
-    return { schema, currentSchema, currentSchemaName, refresh: fetchSchema };
+    return {
+      schema,
+      currentSchema,
+      currentSchemaName,
+      refresh: fetchSchema,
+      autoCompleteSchema: generateAutoComplete(currentSchemaName, schema),
+    };
   }, [schema, fetchSchema, currentSchema, currentSchemaName]);
 
   if (error || loading) {

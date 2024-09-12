@@ -49,6 +49,7 @@ export function convertSqliteType(
   if (type.includes("STRING")) return TableColumnDataType.TEXT;
 
   if (type.includes("INT")) return TableColumnDataType.INTEGER;
+  if (type.includes("NUMBER")) return TableColumnDataType.INTEGER;
 
   if (type.includes("BLOB")) return TableColumnDataType.BLOB;
 
@@ -60,75 +61,6 @@ export function convertSqliteType(
     return TableColumnDataType.REAL;
 
   return TableColumnDataType.TEXT;
-}
-
-export function generateSelectOneWithConditionStatement(
-  tableName: string,
-  condition: Record<string, unknown>
-) {
-  const wherePart = Object.entries(condition)
-    .map(
-      ([columnName, value]) =>
-        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
-    )
-    .join(" AND ");
-
-  return `SELECT * FROM ${escapeIdentity(
-    tableName
-  )} WHERE ${wherePart} LIMIT 1 OFFSET 0;`;
-}
-
-export function generateInsertStatement(
-  tableName: string,
-  value: Record<string, unknown>
-): string {
-  const fieldPart: string[] = [];
-  const valuePart: unknown[] = [];
-
-  for (const entry of Object.entries(value)) {
-    fieldPart.push(entry[0]);
-    valuePart.push(entry[1]);
-  }
-  return `INSERT INTO ${escapeIdentity(tableName)}(${fieldPart
-    .map(escapeIdentity)
-    .join(", ")}) VALUES(${valuePart.map(escapeSqlValue).join(", ")});`;
-}
-
-export function generateDeleteStatement(
-  tableName: string,
-  where: Record<string, unknown>
-) {
-  const wherePart: string = Object.entries(where)
-    .map(
-      ([columnName, value]) =>
-        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
-    )
-    .join(" AND ");
-
-  return `DELETE FROM ${escapeIdentity(tableName)} WHERE ${wherePart};`;
-}
-
-export function generateUpdateStatement(
-  tableName: string,
-  where: Record<string, unknown>,
-  changeValue: Record<string, unknown>
-): string {
-  const setPart = Object.entries(changeValue)
-    .map(([colName, value]) => {
-      return `${escapeIdentity(colName)} = ${escapeSqlValue(value)}`;
-    })
-    .join(", ");
-
-  const wherePart: string = Object.entries(where)
-    .map(
-      ([columnName, value]) =>
-        `${escapeIdentity(columnName)} = ${escapeSqlValue(value)}`
-    )
-    .join(" AND ");
-
-  return `UPDATE ${escapeIdentity(
-    tableName
-  )} SET ${setPart} WHERE ${wherePart};`;
 }
 
 export function selectStatementFromPosition(
