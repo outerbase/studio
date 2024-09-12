@@ -96,15 +96,12 @@ export default function QueryWindow({
     const editorState = editorRef.current?.view?.state;
 
     if (!editorState) return;
-    console.log(editorState);
 
     if (all) {
       finalStatements = splitSqlQuery(editorState).map((q) => q.text);
     } else {
       const segment = resolveToNearestStatement(editorState);
       if (!segment) return;
-
-      console.log(segment);
 
       const statement = editorState.doc.sliceString(segment.from, segment.to);
 
