@@ -1,10 +1,11 @@
-import { LucideCog, LucideView, Table2 } from "lucide-react";
+import { LucideCog, LucideDatabase, LucideView, Table2 } from "lucide-react";
 import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { openTab } from "@/messages/open-tab";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
+import { useDatabaseDriver } from "@/context/driver-provider";
 
 interface SchemaListProps {
   search: string;
@@ -29,7 +30,7 @@ function prepareListViewItem(
       data: s,
       icon: icon,
       iconColor: iconClassName,
-      key: s.name,
+      key: s.schemaName + "." + s.name,
       name: s.name,
     };
   });
@@ -87,10 +88,21 @@ function groupByFtsTable(items: ListViewItem<DatabaseSchemaItem>[]) {
   return items.filter((item) => !excludes.has(item.data.name));
 }
 
+function flattenSchemaGroup(
+  schemaGroup: ListViewItem<DatabaseSchemaItem>[]
+): ListViewItem<DatabaseSchemaItem>[] {
+  if (schemaGroup.length === 1) return schemaGroup[0].children ?? [];
+  return schemaGroup;
+}
+
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
+  const { databaseDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState("");
-  const [collapsed, setCollapsed] = useState(new Set<string>());
-  const { refresh, currentSchema } = useSchema();
+  const { refresh, schema, currentSchemaName } = useSchema();
+
+  const [collapsed, setCollapsed] = useState(() => {
+    return new Set<string>();
+  });
 
   useEffect(() => {
     setSelected("");
@@ -110,37 +122,56 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           },
         },
         { separator: true },
-        {
+        databaseDriver.getFlags().supportCreateUpdateTable && {
           title: "Create New Table",
           onClick: () => {
             openTab({
               type: "schema",
+              schemaName: item?.schemaName ?? currentSchemaName,
             });
           },
         },
-        isTable
+        isTable && databaseDriver.getFlags().supportCreateUpdateTable
           ? {
               title: "Edit Table",
               onClick: () => {
                 openTab({
                   tableName: item?.name,
                   type: "schema",
+                  schemaName: item?.schemaName ?? "",
                 });
               },
             }
           : undefined,
-        { separator: true },
+        databaseDriver.getFlags().supportCreateUpdateTable
+          ? { separator: true }
+          : undefined,
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
     },
-    [refresh]
+    [refresh, databaseDriver, currentSchemaName]
   );
 
-  const filteredSchema = useMemo(() => {
-    return groupByFtsTable(
-      groupTriggerByTable(prepareListViewItem(currentSchema))
-    );
-  }, [currentSchema]);
+  const listViewItems = useMemo(() => {
+    const r = Object.entries(schema).map(([s, tables]) => {
+      return {
+        data: { type: "schema", schemaName: s },
+        icon: LucideDatabase,
+        name: s,
+        key: s.toString(),
+        children: groupByFtsTable(
+          groupTriggerByTable(prepareListViewItem(tables))
+        ),
+      } as ListViewItem<DatabaseSchemaItem>;
+    });
+
+    if (databaseDriver.getFlags().optionalSchema) {
+      // For SQLite, the default schema is main and
+      // it is optional.
+      return flattenSchemaGroup(r);
+    }
+    return r;
+  }, [schema, databaseDriver]);
 
   const filterCallback = useCallback(
     (item: ListViewItem<DatabaseSchemaItem>) => {
@@ -155,7 +186,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       full
       filter={filterCallback}
       highlight={search}
-      items={filteredSchema}
+      items={listViewItems}
       collapsedKeys={collapsed}
       onCollapsedChange={setCollapsed}
       onContextMenu={(item) => prepareContextMenu(item?.data)}
@@ -165,11 +196,13 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         if (item.data.type === "table" || item.data.type === "view") {
           openTab({
             type: "table",
+            schemaName: item.data.schemaName ?? "",
             tableName: item.data.name,
           });
         } else if (item.data.type === "trigger") {
           openTab({
             type: "trigger",
+            schemaName: item.data.schemaName,
             name: item.name,
           });
         }

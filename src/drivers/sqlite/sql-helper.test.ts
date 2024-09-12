@@ -5,9 +5,6 @@ import {
   escapeSqlBinary,
   escapeSqlString,
   escapeSqlValue,
-  generateDeleteStatement,
-  generateInsertStatement,
-  generateUpdateStatement,
   selectStatementFromPosition,
   unescapeIdentity,
 } from "./sql-helper";
@@ -38,40 +35,6 @@ describe("Escape SQL", () => {
     expect(unescapeIdentity(`"users"`)).toBe("users");
     expect(unescapeIdentity(`"us""ers"`)).toBe(`us"ers`);
     expect(unescapeIdentity(`[users]`)).toBe(`users`);
-  });
-});
-
-describe("Generate SQL Statement", () => {
-  it("Generate insert statement from object", () => {
-    expect(
-      generateInsertStatement("users", {
-        name: "Visal",
-        age: 50,
-        title: "O'reilly",
-      })
-    ).toBe(
-      `INSERT INTO "users"("name", "age", "title") VALUES('Visal', 50, 'O''reilly');`
-    );
-  });
-
-  it("Generate update statement", () => {
-    expect(
-      generateUpdateStatement(
-        "users",
-        {
-          id: 5,
-        },
-        { age: 50, title: "O'reilly" }
-      )
-    ).toBe(
-      `UPDATE "users" SET "age" = 50, "title" = 'O''reilly' WHERE "id" = 5;`
-    );
-  });
-
-  it("Generate delete statement", () => {
-    expect(generateDeleteStatement("users", { id: 5 })).toBe(
-      `DELETE FROM "users" WHERE "id" = 5;`
-    );
   });
 });
 

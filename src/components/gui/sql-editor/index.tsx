@@ -1,13 +1,15 @@
 import CodeMirror, {
   EditorView,
+  Extension,
   ReactCodeMirrorRef,
 } from "@uiw/react-codemirror";
+import { LanguageSupport } from "@codemirror/language";
 import {
   acceptCompletion,
   completionStatus,
   startCompletion,
 } from "@codemirror/autocomplete";
-import { sql } from "@codemirror/lang-sql";
+import { sql, SQLNamespace, MySQL as MySQLDialect } from "@codemirror/lang-sql";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
 import { defaultKeymap, insertTab } from "@codemirror/commands";
@@ -20,12 +22,14 @@ import { functionTooltip } from "./function-tooltips";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 import { toast } from "sonner";
 import SqlStatementHighlightPlugin from "./statement-highlight";
+import { SupportedDialect } from "@/drivers/base-driver";
 
 interface SqlEditorProps {
   value: string;
+  dialect: SupportedDialect;
   readOnly?: boolean;
   onChange?: (value: string) => void;
-  schema?: Record<string, string[]>;
+  schema?: SQLNamespace;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   fontSize?: number;
   onFontSizeChanged?: (fontSize: number) => void;
@@ -39,6 +43,7 @@ interface SqlEditorProps {
 const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
   function SqlEditor(
     {
+      dialect,
       value,
       onChange,
       schema,
@@ -129,6 +134,44 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       ]);
     }, [fontSize, onFontSizeChanged]);
 
+    const extensions = useMemo(() => {
+      let sqlDialect: LanguageSupport | undefined = undefined;
+      let tooltipExtension: Extension | undefined = undefined;
+
+      if (dialect === "sqlite") {
+        sqlDialect = sql({
+          dialect: sqliteDialect,
+          schema,
+        });
+        tooltipExtension = functionTooltip(sqliteFunctionList);
+      } else {
+        sqlDialect = sql({
+          dialect: MySQLDialect,
+          schema,
+        });
+      }
+
+      return [
+        keyExtensions,
+        sqlDialect,
+        tooltipExtension,
+        tableNameHighlightPlugin,
+        EditorView.updateListener.of((state) => {
+          const pos = state.state.selection.main.head;
+          const line = state.state.doc.lineAt(pos);
+          const lineNumber = line.number;
+          const columnNumber = pos - line.from;
+          if (onCursorChange) onCursorChange(pos, lineNumber, columnNumber);
+        }),
+      ].filter(Boolean) as Extension[];
+    }, [
+      dialect,
+      onCursorChange,
+      keyExtensions,
+      schema,
+      tableNameHighlightPlugin,
+    ]);
+
     return (
       <CodeMirror
         ref={ref}
@@ -147,24 +190,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           fontSize: 20,
           height: "100%",
         }}
-        extensions={[
-          baseTheme,
-          keyExtensions,
-          sql({
-            dialect: sqliteDialect,
-            schema,
-          }),
-          functionTooltip(sqliteFunctionList),
-          tableNameHighlightPlugin,
-          EditorView.updateListener.of((state) => {
-            const pos = state.state.selection.main.head;
-            const line = state.state.doc.lineAt(pos);
-            const lineNumber = line.number;
-            const columnNumber = pos - line.from;
-            if (onCursorChange) onCursorChange(pos, lineNumber, columnNumber);
-          }),
-          SqlStatementHighlightPlugin,
-        ]}
+        extensions={extensions}
       />
     );
   }

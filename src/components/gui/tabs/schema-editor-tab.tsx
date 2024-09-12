@@ -1,14 +1,13 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import SchemaEditor, {
-  DatabaseTableSchemaChange,
-} from "@/components/gui/schema-editor";
-import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import SchemaEditor from "../schema-editor";
 
 interface SchemaEditorTabProps {
   tableName?: string;
+  schemaName?: string;
 }
 
 const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
@@ -22,19 +21,24 @@ const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
 };
 
 export default function SchemaEditorTab({
+  schemaName,
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
   const { databaseDriver } = useDatabaseDriver();
-  const [schema, setSchema] = useState<DatabaseTableSchemaChange>(EMPTY_SCHEMA);
+  const [schema, setSchema] = useState<DatabaseTableSchemaChange>({
+    ...EMPTY_SCHEMA,
+    schemaName,
+  });
   const [loading, setLoading] = useState(!!tableName);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchTable = useCallback(
-    async (name: string) => {
+    async (schemaName: string, name: string) => {
       databaseDriver
-        .tableSchema(name)
+        .tableSchema(schemaName, name)
         .then((schema) => {
           setSchema({
+            schemaName,
             name: {
               old: schema.tableName,
               new: schema.tableName,
@@ -58,14 +62,14 @@ export default function SchemaEditorTab({
   );
 
   useEffect(() => {
-    if (tableName) {
-      fetchTable(tableName).then().catch(console.error);
+    if (tableName && schemaName) {
+      fetchTable(schemaName, tableName).then().catch(console.error);
     }
-  }, [fetchTable, tableName]);
+  }, [fetchTable, schemaName, tableName]);
 
   const previewScript = useMemo(() => {
-    return generateSqlSchemaChange(schema);
-  }, [schema]);
+    return databaseDriver.createUpdateTableSchema(schema);
+  }, [schema, databaseDriver]);
 
   const onSaveToggle = useCallback(
     () => setIsSaving((prev) => !prev),

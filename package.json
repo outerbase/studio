@@ -3,7 +3,7 @@
   "version": "0.6.4",
   "private": false,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3008",
     "dev-https": "next dev --experimental-https",
     "build": "next build",
     "build-with-migrate": "npm run db:migrate && next build",

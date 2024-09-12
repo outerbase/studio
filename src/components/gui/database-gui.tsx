@@ -23,6 +23,7 @@ import SettingSidebar from "./sidebar/setting-sidebar";
 
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
+import { useSchema } from "@/context/schema-provider";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -33,8 +34,10 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
-  const { collaborationDriver, docDriver } = useDatabaseDriver();
+  const { databaseDriver, collaborationDriver, docDriver } =
+    useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const { currentSchemaName } = useSchema();
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
     {
       title: "Query",
@@ -119,14 +122,16 @@ export default function DatabaseGui() {
           openTab({ type: "query" });
         },
       },
-      {
-        text: "New Table",
-        onClick: () => {
-          openTab({ type: "schema" });
-        },
-      },
-    ];
-  }, []);
+      databaseDriver.getFlags().supportCreateUpdateTable
+        ? {
+            text: "New Table",
+            onClick: () => {
+              openTab({ type: "schema", schemaName: currentSchemaName });
+            },
+          }
+        : undefined,
+    ].filter(Boolean) as { text: string; onClick: () => void }[];
+  }, [currentSchemaName, databaseDriver]);
 
   return (
     <div className="h-screen w-screen flex flex-col">

@@ -43,7 +43,7 @@ function Header({
     <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
       <DropdownMenuTrigger asChild>
         <div
-          className="flex grow items-center px-2"
+          className="flex grow items-center px-2 overflow-hidden"
           onContextMenu={() => {
             setOpen(true);
           }}
@@ -52,7 +52,7 @@ function Header({
           <div className="grow line-clamp-1 font-mono font-bold">
             {header.displayName}
           </div>
-          <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer" />
+          <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer flex-shrink-0" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
