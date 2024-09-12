@@ -21,6 +21,7 @@ import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
 import { functionTooltip } from "./function-tooltips";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 import { toast } from "sonner";
+import SqlStatementHighlightPlugin from "./statement-highlight";
 import { SupportedDialect } from "@/drivers/base-driver";
 
 interface SqlEditorProps {
@@ -142,10 +143,17 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       }
 
       return [
+        EditorView.baseTheme({
+          "& .cm-line": {
+            borderLeft: "3px solid transparent",
+            paddingLeft: "10px",
+          },
+        }),
         keyExtensions,
         sqlDialect,
         tooltipExtension,
         tableNameHighlightPlugin,
+        SqlStatementHighlightPlugin,
         EditorView.updateListener.of((state) => {
           const pos = state.state.selection.main.head;
           const line = state.state.doc.lineAt(pos);
