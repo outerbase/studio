@@ -1,6 +1,5 @@
 import { format } from "sql-formatter";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { identify } from "sql-query-identifier";
 import {
   LucideFastForward,
   LucideGrid,
@@ -18,7 +17,6 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { selectStatementFromPosition } from "@/drivers/sqlite/sql-helper";
 import QueryProgressLog from "../query-progress-log";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import {
@@ -41,6 +39,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  resolveToNearestStatement,
+  splitSqlQuery,
+} from "../sql-editor/statement-highlight";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -89,23 +91,22 @@ export default function QueryWindow({
   };
 
   const onRunClicked = (all = false) => {
-    const statements = identify(code, {
-      dialect: "sqlite",
-      strict: false,
-    });
-
     let finalStatements: string[] = [];
 
-    const editor = editorRef.current;
+    const editorState = editorRef.current?.view?.state;
+
+    if (!editorState) return;
 
     if (all) {
-      finalStatements = statements.map((s) => s.text);
-    } else if (editor?.view) {
-      const position = editor.view.state.selection.main.head;
-      const statement = selectStatementFromPosition(statements, position);
+      finalStatements = splitSqlQuery(editorState).map((q) => q.text);
+    } else {
+      const segment = resolveToNearestStatement(editorState);
+      if (!segment) return;
+
+      const statement = editorState.doc.sliceString(segment.from, segment.to);
 
       if (statement) {
-        finalStatements = [statement.text];
+        finalStatements = [statement];
       }
     }
 
@@ -227,6 +228,7 @@ export default function QueryWindow({
           <div className="grow overflow-hidden">
             <SqlEditor
               ref={editorRef}
+              dialect={databaseDriver.getFlags().dialect}
               value={code}
               onChange={setCode}
               schema={autoCompleteSchema}

@@ -77,7 +77,10 @@ export default function TriggerTab({
       </div>
       <div className="grow overflow-hidden">
         <div className="h-full">
-          <SqlEditor value={trigger?.statement ?? ""} />
+          <SqlEditor
+            value={trigger?.statement ?? ""}
+            dialect={databaseDriver.getFlags().dialect}
+          />
         </div>
       </div>
     </div>

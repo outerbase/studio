@@ -1,6 +1,6 @@
 {
   "name": "@libsqlstudio/studio",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3008",
@@ -94,7 +94,6 @@
     "react-resizable-panels": "^1.0.9",
     "sonner": "^1.4.41",
     "sql-formatter": "^15.3.2",
-    "sql-query-identifier": "^2.6.0",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4"

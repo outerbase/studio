@@ -1,6 +1,5 @@
 import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
 import { hex } from "@/lib/bit-operation";
-import type { IdentifyResult } from "sql-query-identifier/lib/defines";
 
 export function escapeIdentity(str: string) {
   return `"${str.replace(/"/g, `""`)}"`;
@@ -61,16 +60,6 @@ export function convertSqliteType(
     return TableColumnDataType.REAL;
 
   return TableColumnDataType.TEXT;
-}
-
-export function selectStatementFromPosition(
-  statements: IdentifyResult[],
-  pos: number
-): IdentifyResult | undefined {
-  for (const statement of statements) {
-    if (statement.end + 1 >= pos) return statement;
-  }
-  return undefined;
 }
 
 export function escapeCsvValue(value: unknown): string {

@@ -31,6 +31,7 @@ export function describeTableColumnType(type: TableColumnDataType) {
   }
 }
 
+export type SupportedDialect = "sqlite" | "mysql";
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 
@@ -202,6 +203,7 @@ export interface DriverFlags {
   supportBigInt: boolean;
   supportCreateUpdateTable: boolean;
   mismatchDetection: boolean;
+  dialect: SupportedDialect;
 }
 
 export interface DatabaseTableColumnChange {

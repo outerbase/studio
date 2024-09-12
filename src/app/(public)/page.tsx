@@ -125,12 +125,9 @@ function SupportDriver() {
             </span>
           </DatabaseBlock>
 
-          <DatabaseBlock center link="#">
+          <DatabaseBlock center link="/databases/mysql">
             <MySQLIcon />
             <span>MySQL</span>
-            <span className="text-xs -mt-2 text-yellow-500">
-              Coming Soon 15th Sep 2024
-            </span>
           </DatabaseBlock>
 
           <DatabaseBlock center link="#">

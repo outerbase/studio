@@ -88,6 +88,7 @@ it("parse column constraint", () => {
 
   expect(pcc(`references "users" on delete cascade ("id")`)).toEqual({
     foreignKey: {
+      foreignSchemaName: "main",
       foreignTableName: "users",
       foreignColumns: ["id"],
     },
@@ -130,6 +131,7 @@ it("parse create table", () => {
         type: "integer",
         constraint: {
           foreignKey: {
+            foreignSchemaName: "main",
             foreignTableName: "product",
             foreignColumns: ["id"],
           },
