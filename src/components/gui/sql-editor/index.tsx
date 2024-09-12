@@ -64,15 +64,6 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       return createSQLTableNameHighlightPlugin([]);
     }, [schema]);
 
-    const baseTheme = useMemo(() => {
-      return EditorView.baseTheme({
-        "& .cm-line": {
-          borderLeft: "3px solid transparent",
-          paddingLeft: "10px",
-        },
-      });
-    }, []);
-
     const keyExtensions = useMemo(() => {
       return keymap.of([
         {
@@ -152,10 +143,17 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       }
 
       return [
+        EditorView.baseTheme({
+          "& .cm-line": {
+            borderLeft: "3px solid transparent",
+            paddingLeft: "10px",
+          },
+        }),
         keyExtensions,
         sqlDialect,
         tooltipExtension,
         tableNameHighlightPlugin,
+        SqlStatementHighlightPlugin,
         EditorView.updateListener.of((state) => {
           const pos = state.state.selection.main.head;
           const line = state.state.doc.lineAt(pos);

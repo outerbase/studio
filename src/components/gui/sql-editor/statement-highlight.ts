@@ -12,84 +12,134 @@ const statementLineHighlight = Decoration.line({
   class: "cm-highlight-statement",
 });
 
-function checkRequireEndStatement(statement: string) {
-  const prefixList = ["CREATE TRIGGER", "ALTER TRIGGER"];
-
-  for (const prefix of prefixList) {
-    if (statement.substring(0, prefix.length).toUpperCase() === prefix)
-      return true;
-  }
-
-  return false;
+export interface StatementSegment {
+  from: number;
+  to: number;
+  text: string;
 }
 
-function resolveToNearestStatement(
+function toNodeString(state: EditorState, node: SyntaxNode) {
+  return state.doc.sliceString(node.from, node.to);
+}
+
+function isRequireEndStatement(state: EditorState, node: SyntaxNode): number {
+  const ptr = node.firstChild;
+  if (!ptr) return 0;
+
+  // Majority of the query will fall in SELECT, INSERT, UPDATE, DELETE
+  const firstKeyword = toNodeString(state, ptr).toLowerCase();
+  if (firstKeyword === "select") return 0;
+  if (firstKeyword === "insert") return 0;
+  if (firstKeyword === "update") return 0;
+  if (firstKeyword === "delete") return 0;
+
+  const keywords = node.getChildren("Keyword");
+  if (keywords.length === 0) return 0;
+
+  return keywords.filter(
+    (k) => toNodeString(state, k).toLowerCase() === "begin"
+  ).length;
+}
+
+function isEndStatement(state: EditorState, node: SyntaxNode) {
+  let ptr = node.firstChild;
+  if (!ptr) return false;
+  if (toNodeString(state, ptr).toLowerCase() !== "end") return false;
+
+  ptr = ptr.nextSibling;
+  if (!ptr) return false;
+  if (toNodeString(state, ptr) !== ";") return false;
+
+  return true;
+}
+
+export function splitSqlQuery(
   state: EditorState,
-  node: SyntaxNode,
-  cursor: number
-) {
-  const statements = node.getChildren("Statement");
+  generateText: boolean = true
+): StatementSegment[] {
+  const topNode = syntaxTree(state).topNode;
+
+  // Get all the statements
+  let needEndStatementCounter = 0;
+  const statements = topNode.getChildren("Statement");
 
   if (statements.length === 0) return [];
 
-  let nodes: SyntaxNode[] = [];
-  let needEndStatement = false;
+  const statementGroups: SyntaxNode[][] = [];
+  let accumulateNodes: SyntaxNode[] = [];
   let i = 0;
 
   for (; i < statements.length; i++) {
     const statement = statements[i];
+    needEndStatementCounter += isRequireEndStatement(state, statement);
 
-    // Check if it is required end statement
-    const nodeString = state.doc.sliceString(statement.from, statement.to);
-    needEndStatement = needEndStatement || checkRequireEndStatement(nodeString);
-
-    if (needEndStatement) {
-      nodes.push(statement);
+    if (needEndStatementCounter) {
+      accumulateNodes.push(statement);
+    } else {
+      statementGroups.push([statement]);
     }
 
-    if (statement.to > cursor) {
-      break;
-    }
-
-    if (nodeString.toUpperCase() === "END;") {
-      nodes = [];
-      needEndStatement = false;
-    }
-  }
-
-  console.log(needEndStatement, "sss");
-  if (needEndStatement) {
-    // Loop till we find END statement
-    for (; i < statements.length; i++) {
-      const statement = statements[i];
-      const nodeString = state.doc.sliceString(statement.from, statement.to);
-      nodes.push(statement);
-
-      if (nodeString.toUpperCase() === "END;") {
-        break;
+    if (needEndStatementCounter && isEndStatement(state, statement)) {
+      needEndStatementCounter--;
+      if (needEndStatementCounter === 0) {
+        statementGroups.push(accumulateNodes);
+        accumulateNodes = [];
       }
     }
-  } else {
-    nodes.push(statements[Math.min(i, statements.length - 1)]);
   }
 
-  return nodes;
+  if (accumulateNodes.length > 0) {
+    statementGroups.push(accumulateNodes);
+  }
+
+  return statementGroups.map((r) => ({
+    from: r[0].from,
+    to: r[r.length - 1].to,
+    text: generateText
+      ? state.doc.sliceString(r[0].from, r[r.length - 1].to)
+      : "",
+  }));
 }
 
-function getDecorationFromState(state: EditorState) {
-  const tree = syntaxTree(state);
-  const node = resolveToNearestStatement(
-    state,
-    tree.topNode,
-    state.selection.main.from
-  );
+export function resolveToNearestStatement(
+  state: EditorState
+): { from: number; to: number } | null {
+  // Breakdown and grouping the statement
+  const cursor = state.selection.main.from;
+  const statements = splitSqlQuery(state, false);
 
-  console.log(node);
-  if (node.length === 0) return Decoration.none;
+  if (statements.length === 0) return null;
+
+  // Check if our current cursor is within any statement
+  let i = 0;
+  for (; i < statements.length; i++) {
+    const statement = statements[i];
+    if (cursor < statement.from) break;
+    if (cursor > statement.to) continue;
+    if (cursor >= statement.from && cursor <= statement.to) return statement;
+  }
+
+  if (i === 0) return statements[0];
+  if (i === statements.length) return statements[i - 1];
+
+  const cursorLine = state.doc.lineAt(cursor).number;
+  const topLine = state.doc.lineAt(statements[i - 1].to).number;
+  const bottomLine = state.doc.lineAt(statements[i].from).number;
+
+  if (cursorLine - topLine >= bottomLine - cursorLine) {
+    return statements[i];
+  } else {
+    return statements[i - 1];
+  }
+}
+function getDecorationFromState(state: EditorState) {
+  const statement = resolveToNearestStatement(state);
+
+  if (!statement) return Decoration.none;
 
   // Get the line of the node
-  const fromLineNumber = state.doc.lineAt(node[0].from).number;
-  const toLineNumber = state.doc.lineAt(node[node.length - 1].to).number;
+  const fromLineNumber = state.doc.lineAt(statement.from).number;
+  const toLineNumber = state.doc.lineAt(statement.to).number;
 
   const d: Range<Decoration>[] = [];
   for (let i = fromLineNumber; i <= toLineNumber; i++) {
