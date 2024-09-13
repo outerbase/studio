@@ -182,7 +182,7 @@ function renderCellList({
       >
         {hasSticky && (
           <td
-            style={{ zIndex: 100 }}
+            style={{ zIndex: 15 }}
             className={cn("sticky left-0", "bg-background")}
             onMouseDown={handleCellClicked(
               absoluteRowIndex,
