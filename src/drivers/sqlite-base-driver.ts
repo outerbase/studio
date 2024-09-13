@@ -2,6 +2,7 @@ import type {
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseSchemas,
+  DatabaseTableColumn,
   DatabaseTableSchema,
   DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
@@ -73,6 +74,51 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     return tmp;
   }
 
+  protected async legacyTableSchema(
+    schemaName: string,
+    tableName: string
+  ): Promise<DatabaseTableSchema> {
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.pragma_table_info(${this.escapeId(tableName)});`;
+    const result = await this.query(sql);
+
+    const rows = result.rows as Array<{
+      name: string;
+      type: string;
+      pk: number;
+    }>;
+
+    const columns: DatabaseTableColumn[] = rows.map((row) => ({
+      name: row.name,
+      type: row.type,
+      pk: !!row.pk,
+    }));
+
+    // Check auto increment
+    let hasAutoIncrement = false;
+
+    try {
+      const seqCount = await this.query(
+        `SELECT COUNT(*) AS total FROM ${this.escapeId(schemaName)}.sqlite_sequence WHERE name=${escapeSqlValue(
+          tableName
+        )};`
+      );
+
+      const seqRow = seqCount.rows[0];
+      if (seqRow && Number(seqRow[0] ?? 0) > 0) {
+        hasAutoIncrement = true;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      columns,
+      schemaName,
+      pk: columns.filter((col) => col.pk).map((col) => col.name),
+      autoIncrement: hasAutoIncrement,
+    };
+  }
+
   async schemas(): Promise<DatabaseSchemas> {
     const databaseList = (await this.query("PRAGMA database_list;")).rows as {
       name: string;
@@ -121,20 +167,25 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const result = await this.query(sql);
 
     try {
-      const rows = result.rows as Array<{ type: string; sql: string }>;
-      const def = rows.find((row) => row.type === "table");
-      if (def) {
-        const createScript = def.sql;
-        return {
-          ...parseCreateTableScript(schemaName, createScript),
-          createScript,
-          schemaName,
-        };
-      }
+      try {
+        const rows = result.rows as Array<{ type: string; sql: string }>;
+        const def = rows.find((row) => row.type === "table");
+        if (def) {
+          const createScript = def.sql;
 
-      throw new Error("Unexpected error finding table " + tableName);
-    } catch (e) {
-      throw new Error("Unexpected error while parsing");
+          return {
+            ...parseCreateTableScript(schemaName, createScript),
+            createScript,
+            schemaName,
+          };
+        }
+
+        throw new Error("Unexpected error finding table " + tableName);
+      } catch (e) {
+        throw new Error("Unexpected error while parsing");
+      }
+    } catch {
+      return await this.legacyTableSchema(schemaName, tableName);
     }
   }
 
