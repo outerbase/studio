@@ -6,7 +6,9 @@ import type {
   DatabaseTableSchema,
   DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
+  DatabaseValue,
   DriverFlags,
+  SelectFromTableOptions,
 } from "./base-driver";
 import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 
@@ -191,5 +193,74 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
     return generateSqlSchemaChange(change);
+  }
+
+  override async findFirst(
+    schemaName: string,
+    tableName: string,
+    key: Record<string, DatabaseValue>
+  ): Promise<DatabaseResultSet> {
+    const wherePart = Object.entries(key)
+      .map(([colName, colValue]) => {
+        return `${this.escapeId(colName)} = ${escapeSqlValue(colValue)}`;
+      })
+      .join(", ");
+
+    // If there is rowid, it is likely, we need to query that row back
+    console.log("sss", key);
+    const hasRowId = !!key["rowid"];
+
+    const sql = `SELECT ${hasRowId ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
+    return this.query(sql);
+  }
+
+  async selectTable(
+    schemaName: string,
+    tableName: string,
+    options: SelectFromTableOptions
+  ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
+    const schema = await this.tableSchema(schemaName, tableName);
+    let injectRowIdColumn = false;
+
+    // If there is no primary key, we will fallback to rowid.
+    // But we need to make sure there is no rowid column
+    if (
+      schema.pk.length === 0 &&
+      !schema.columns.find((c) => c.name === "rowid")
+    ) {
+      // Inject the rowid column
+      injectRowIdColumn = true;
+      schema.columns = [
+        {
+          name: "rowid",
+          type: "INTEGER",
+          constraint: {
+            primaryKey: true,
+            autoIncrement: true,
+          },
+        },
+        ...schema.columns,
+      ];
+      schema.pk = ["rowid"];
+      schema.autoIncrement = true;
+    }
+
+    const whereRaw = options.whereRaw?.trim();
+
+    const orderPart =
+      options.orderBy && options.orderBy.length > 0
+        ? options.orderBy
+            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+            .join(", ")
+        : "";
+
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
+      whereRaw ? ` WHERE ${whereRaw} ` : ""
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+
+    return {
+      data: await this.query(sql),
+      schema,
+    };
   }
 }
