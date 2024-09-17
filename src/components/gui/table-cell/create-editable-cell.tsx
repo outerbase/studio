@@ -139,7 +139,14 @@ export default function createEditableCell<T = unknown>({
       state.exitEditMode();
     }, [setEditValue, state, value]);
 
-    if (editMode && (editor === undefined || editor === "input")) {
+    const uneditableColumn =
+      !!header.headerData?.constraint?.generatedExpression;
+
+    if (
+      !uneditableColumn &&
+      editMode &&
+      (editor === undefined || editor === "input")
+    ) {
       return (
         <div
           className={cn(

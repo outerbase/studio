@@ -210,7 +210,8 @@ export default function GenericCell({
     if (
       header.foreignKey?.foreignTableName &&
       header.foreignKey.foreignColumns &&
-      header.foreignKey?.foreignSchemaName
+      header.foreignKey?.foreignSchemaName &&
+      value !== undefined
     ) {
       return (
         <div className="flex items-center shrink-0 cursor-pointer ml-2">
@@ -232,7 +233,11 @@ export default function GenericCell({
     }
 
     if (value === undefined) {
-      return <span className={textBaseStyle}>DEFAULT</span>;
+      return (
+        <span className={textBaseStyle}>
+          {header.headerData?.constraint?.generatedExpression ?? "DEFAULT"}
+        </span>
+      );
     }
 
     if (typeof value === "string") {
