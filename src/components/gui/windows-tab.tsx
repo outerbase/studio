@@ -53,8 +53,16 @@ const WindowTabsContext = createContext<{
   },
 });
 
+const CurrentWindowTab = createContext<{ isActiveTab: boolean }>({
+  isActiveTab: false,
+});
+
 export function useTabsContext() {
   return useContext(WindowTabsContext);
+}
+
+export function useCurrentTab() {
+  return useContext(CurrentWindowTab);
 }
 
 export default function WindowTabs({
@@ -200,15 +208,19 @@ export default function WindowTabs({
           </div>
           <div className="grow relative">
             {tabs.map((tab, tabIndex) => (
-              <div
-                className="absolute left-0 right-0 top-0 bottom-0"
-                style={{
-                  visibility: tabIndex === selected ? "inherit" : "hidden",
-                }}
+              <CurrentWindowTab.Provider
                 key={tab.key}
+                value={{ isActiveTab: tabIndex === selected }}
               >
-                {tab.component}
-              </div>
+                <div
+                  className="absolute left-0 right-0 top-0 bottom-0"
+                  style={{
+                    visibility: tabIndex === selected ? "inherit" : "hidden",
+                  }}
+                >
+                  {tab.component}
+                </div>
+              </CurrentWindowTab.Provider>
             ))}
           </div>
         </div>
