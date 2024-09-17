@@ -6,7 +6,6 @@ import {
   LucideArrowRight,
   LucideDelete,
   LucideFilter,
-  LucideLoader,
   LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
@@ -38,6 +37,9 @@ import ResultStats from "../result-stat";
 import isEmptyResultStats from "@/components/lib/empty-stats";
 import useTableResultColumnFilter from "../table-result/filter-column";
 import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
+import { useCurrentTab } from "../windows-tab";
+import { KEY_BINDING } from "@/lib/key-matcher";
+import { Toolbar, ToolbarButton } from "../toolbar";
 
 interface TableDataContentProps {
   tableName: string;
@@ -169,6 +171,28 @@ export default function TableDataWindow({
     }
   }, [data]);
 
+  const { isActiveTab } = useCurrentTab();
+
+  useEffect(() => {
+    if (isActiveTab) {
+      const handleGlobalKeyBinding = (e: KeyboardEvent) => {
+        if (KEY_BINDING.commit.match(e)) {
+          onCommit();
+          e.preventDefault();
+          e.stopPropagation();
+        } else if (KEY_BINDING.discard.match(e)) {
+          onDiscard();
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      document.addEventListener("keydown", handleGlobalKeyBinding);
+      return () =>
+        document.removeEventListener("keydown", handleGlobalKeyBinding);
+    }
+  }, [isActiveTab, onCommit, onDiscard]);
+
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       {executeError && (
@@ -185,37 +209,24 @@ export default function TableDataWindow({
         </AlertDialog>
       )}
       <div className="shrink-0 grow-0">
-        <div className="flex p-1 gap-1">
-          <Button
-            variant={"ghost"}
-            size={"sm"}
+        <Toolbar>
+          <ToolbarButton
+            text="Commit"
+            icon={<LucideSaveAll className="w-4 h-4 mr-2" />}
+            tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
             disabled={!changeNumber || isExecuting}
+            loading={isExecuting}
             onClick={onCommit}
-          >
-            {isExecuting ? (
-              <LucideLoader className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <LucideSaveAll className="w-4 h-4 mr-2 text-green-600" />
-            )}
-            Commit
-            {!!changeNumber && (
-              <span
-                className="ml-2 bg-red-500 text-white leading-5 w-5 h-5 rounded-full"
-                style={{ fontSize: 9 }}
-              >
-                {changeNumber}
-              </span>
-            )}
-          </Button>
+            badge={changeNumber ? changeNumber.toString() : ""}
+          />
 
-          <Button
-            variant={"ghost"}
-            size={"sm"}
+          <ToolbarButton
+            text="Discard Change"
+            tooltip={`Dicard all changes (${KEY_BINDING.discard.toString()})`}
+            destructive
             disabled={!changeNumber}
             onClick={onDiscard}
-          >
-            <span className="text-red-500">Discard Change</span>
-          </Button>
+          />
 
           <div className="mx-1">
             <Separator orientation="vertical" />
@@ -337,7 +348,7 @@ export default function TableDataWindow({
               }}
             />
           </Button>
-        </div>
+        </Toolbar>
         <Separator />
       </div>
       <div className="grow overflow-hidden relative">
