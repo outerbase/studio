@@ -226,6 +226,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     // But we need to make sure there is no rowid column
     if (
       schema.pk.length === 0 &&
+      !schema.withoutRowId &&
       !schema.columns.find((c) => c.name === "rowid")
     ) {
       // Inject the rowid column

@@ -503,6 +503,34 @@ function parseFTS5(cursor: Cursor | null): DatabaseTableFts5 {
   };
 }
 
+function parseTableOption(cursor: Cursor):
+  | {
+      strict?: boolean;
+      withoutRowId?: boolean;
+    }
+  | undefined {
+  if (cursor.match("WITHOUT")) {
+    cursor.next();
+    if (cursor.match("ROWID")) {
+      cursor.next();
+      if (cursor.match(",")) {
+        cursor.next();
+        return { withoutRowId: true, ...parseTableOption(cursor) };
+      } else {
+        return { withoutRowId: true };
+      }
+    }
+  } else if (cursor.match("STRICT")) {
+    cursor.next();
+    if (cursor.match(",")) {
+      cursor.next();
+      return { strict: true, ...parseTableOption(cursor) };
+    } else {
+      return { strict: true };
+    }
+  }
+}
+
 // Our parser follows this spec
 // https://www.sqlite.org/lang_createtable.html
 export function parseCreateTableScript(
@@ -541,6 +569,9 @@ export function parseCreateTableScript(
     ? parseTableDefinition(schemaName, defCursor)
     : { columns: [], constraints: [] };
 
+  cursor.next();
+  // Parsing table options
+
   const pk = defs.columns.filter((col) => col.pk).map((col) => col.name);
 
   const autoIncrement = defs.columns.some(
@@ -554,5 +585,6 @@ export function parseCreateTableScript(
     pk,
     autoIncrement,
     fts5,
+    ...parseTableOption(cursor),
   };
 }
