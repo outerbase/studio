@@ -240,3 +240,43 @@ it("parse fts5 virtual table with external content", () => {
     },
   } as DatabaseTableSchema);
 });
+
+it("parse without row id", () => {
+  const sql = `create table students(name text) without rowid;`;
+  expect(p(sql)).toEqual({
+    tableName: "students",
+    schemaName: "main",
+    autoIncrement: false,
+    pk: [],
+    columns: [{ name: "name", type: "text" }],
+    constraints: [],
+    withoutRowId: true,
+  } as DatabaseTableSchema);
+});
+
+it("parse strict table", () => {
+  const sql = `create table students(name text) strict;`;
+  expect(p(sql)).toEqual({
+    tableName: "students",
+    schemaName: "main",
+    autoIncrement: false,
+    pk: [],
+    columns: [{ name: "name", type: "text" }],
+    constraints: [],
+    strict: true,
+  } as DatabaseTableSchema);
+});
+
+it("parse strict and without row id table", () => {
+  const sql = `create table students(name text) strict, without rowid;`;
+  expect(p(sql)).toEqual({
+    tableName: "students",
+    schemaName: "main",
+    autoIncrement: false,
+    pk: [],
+    columns: [{ name: "name", type: "text" }],
+    constraints: [],
+    strict: true,
+    withoutRowId: true,
+  } as DatabaseTableSchema);
+});

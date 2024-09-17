@@ -9,12 +9,7 @@ import {
   SelectFromTableOptions,
 } from "./base-driver";
 import { escapeSqlValue } from "./sqlite/sql-helper";
-import {
-  deleteFrom,
-  insertInto,
-  selectFrom,
-  updateTable,
-} from "./query-builder";
+import { deleteFrom, insertInto, updateTable } from "./query-builder";
 
 export default abstract class CommonSQLImplement extends BaseDriver {
   protected validateUpdateOperation(
@@ -62,16 +57,11 @@ export default abstract class CommonSQLImplement extends BaseDriver {
       }
 
       if (op.operation === "UPDATE") {
-        const selectStatement = selectFrom(
-          this,
+        const selectResult = await this.findFirst(
           schemaName,
           tableName,
-          op.where,
-          { limit: 1, offset: 0 }
+          op.where
         );
-
-        // This transform to make it friendly for sending via HTTP
-        const selectResult = await this.query(selectStatement);
 
         tmp.push({
           lastId: r.lastInsertRowid,
@@ -79,35 +69,23 @@ export default abstract class CommonSQLImplement extends BaseDriver {
         });
       } else if (op.operation === "INSERT") {
         if (op.autoIncrementPkColumn) {
-          const selectStatement = selectFrom(
-            this,
-            schemaName,
-            tableName,
-            { [op.autoIncrementPkColumn]: r.lastInsertRowid },
-            { limit: 1, offset: 0 }
-          );
-
-          // This transform to make it friendly for sending via HTTP
-          const selectResult = await this.query(selectStatement);
+          const selectResult = await this.findFirst(schemaName, tableName, {
+            [op.autoIncrementPkColumn]: r.lastInsertRowid,
+          });
 
           tmp.push({
             record: selectResult.rows[0],
             lastId: r.lastInsertRowid,
           });
         } else if (op.pk && op.pk.length > 0) {
-          const selectStatement = selectFrom(
-            this,
+          const selectResult = await this.findFirst(
             schemaName,
             tableName,
             op.pk.reduce<Record<string, unknown>>((a, b) => {
               a[b] = op.values[b];
               return a;
-            }, {}),
-            { limit: 1, offset: 0 }
+            }, {})
           );
-
-          // This transform to make it friendly for sending via HTTP
-          const selectResult = await this.query(selectStatement);
 
           tmp.push({
             record: selectResult.rows[0],

@@ -153,6 +153,8 @@ export interface DatabaseTableSchema {
   constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
   fts5?: DatabaseTableFts5;
+  withoutRowId?: boolean;
+  strict?: boolean;
 }
 
 export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
