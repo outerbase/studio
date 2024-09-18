@@ -1,18 +1,15 @@
 import { useCallback } from "react";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import {
-  openContextMenuFromEvent,
-  StudioContextMenuItem,
-} from "@/messages/open-context-menu";
+import { openContextMenuFromEvent } from "@/messages/open-context-menu";
 import { useFullEditor } from "../providers/full-editor-provider";
-import { useConfig } from "@/context/config-provider";
 import {
   exportRowsToExcel,
   exportRowsToJson,
   exportRowsToSqlInsert,
 } from "@/components/lib/export-helper";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
+import TableStateActions from "../table-optimized/table-state-actions";
 
 export default function useTableResultContextMenu({
   tableName,
@@ -26,7 +23,6 @@ export default function useTableResultContextMenu({
   pasteCallback: (state: OptimizeTableState) => void;
 }) {
   const { openEditor } = useFullEditor();
-  const { extensions } = useConfig();
 
   return useCallback(
     ({
@@ -46,16 +42,6 @@ export default function useTableResultContextMenu({
           state.changeValue(focusCell.y, focusCell.x, newValue);
         }
       }
-
-      const extensionMenu = (extensions ?? []).reduce<StudioContextMenuItem[]>(
-        (menu, ext) => {
-          if (ext.contextMenu) {
-            return [...menu, ...ext.contextMenu(state)];
-          }
-          return menu;
-        },
-        []
-      );
 
       openContextMenuFromEvent([
         {
@@ -140,14 +126,6 @@ export default function useTableResultContextMenu({
             },
           ],
         },
-        ...((extensionMenu ?? []).length > 0
-          ? [
-              {
-                separator: true,
-              },
-            ]
-          : []),
-        ...extensionMenu,
         {
           separator: true,
         },
@@ -215,25 +193,42 @@ export default function useTableResultContextMenu({
             },
           ],
         },
-        { separator: true },
-        {
-          title: "Insert row",
-          icon: LucidePlus,
-          onClick: () => {
-            data.insertNewRow();
-          },
-        },
-        {
-          title: "Delete selected row(s)",
-          icon: LucideTrash2,
-          onClick: () => {
-            data.getSelectedRowIndex().forEach((index) => {
-              data.removeRow(index);
-            });
-          },
-        },
+        ...(state.getReadOnlyMode()
+          ? []
+          : [
+              { separator: true },
+              {
+                title: "Insert row",
+                icon: LucidePlus,
+                onClick: () => {
+                  data.insertNewRow();
+                },
+              },
+              {
+                title: "Duplicate row without keys",
+                onClick: () => {
+                  TableStateActions.duplicateRowWithoutKey(state);
+                },
+              },
+              {
+                title: "Duplicate row with keys",
+                onClick: () => {
+                  TableStateActions.duplicateRow(state);
+                },
+              },
+              { separator: true },
+              {
+                title: "Delete selected row(s)",
+                icon: LucideTrash2,
+                onClick: () => {
+                  data.getSelectedRowIndex().forEach((index) => {
+                    data.removeRow(index);
+                  });
+                },
+              },
+            ]),
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, extensions, openEditor]
+    [data, tableName, copyCallback, pasteCallback, openEditor]
   );
 }

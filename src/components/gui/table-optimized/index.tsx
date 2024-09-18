@@ -33,6 +33,7 @@ export interface OptimizeTableHeaderProps {
   icon?: ReactElement;
   rightIcon?: ReactElement;
   tooltip?: string;
+  isPrimaryKey?: boolean;
   onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
 }
 
