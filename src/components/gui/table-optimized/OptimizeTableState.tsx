@@ -102,6 +102,9 @@ export default class OptimizeTableState {
           originalDataType: header.originalType,
           displayName: header.displayName,
           resizable: true,
+          isPrimaryKey: schemaResult
+            ? schemaResult.pk.includes(header.name)
+            : false,
           headerData,
           foreignKey,
           dataType,
@@ -291,7 +294,7 @@ export default class OptimizeTableState {
     this.broadcastChange();
   }
 
-  insertNewRow(index = -1) {
+  insertNewRow(index = -1, initialData: Record<string, unknown> = {}) {
     if (index === -1) {
       const focus = this.getFocus();
       if (focus) index = focus.y;
@@ -302,7 +305,7 @@ export default class OptimizeTableState {
     const newRow = {
       isNewRow: true,
       raw: {},
-      change: {},
+      change: initialData,
       changeKey: ++this.changeCounter,
     };
 
@@ -347,6 +350,10 @@ export default class OptimizeTableState {
 
   getAllRows() {
     return this.data;
+  }
+
+  getRowByIndex(idx: number) {
+    return this.data[idx];
   }
 
   // ------------------------------------------------
