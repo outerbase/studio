@@ -18,6 +18,8 @@ import CommonSQLImplement from "./common-sql-imp";
 import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
+  supportPragmaList = true;
+
   escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;
   }
@@ -122,9 +124,17 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   }
 
   async schemas(): Promise<DatabaseSchemas> {
-    const databaseList = (await this.query("PRAGMA database_list;")).rows as {
-      name: string;
-    }[];
+    let databaseList = [{ name: "main" }];
+
+    try {
+      if (this.supportPragmaList) {
+        databaseList = (await this.query("PRAGMA database_list;")).rows as {
+          name: string;
+        }[];
+      }
+    } catch {
+      console.error("PRAGMA database_list statement is not supported");
+    }
 
     const tableListPerDatabase = await this.transaction(
       databaseList.map(

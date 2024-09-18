@@ -69,6 +69,7 @@ function transformRawResult(raw: CloudflareResult): DatabaseResultSet {
 }
 
 export default class CloudflareD1Driver extends SqliteLikeBaseDriver {
+  supportPragmaList: boolean = false;
   protected headers: Record<string, string> = {};
   protected url: string;
 
