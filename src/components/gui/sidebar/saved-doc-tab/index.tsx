@@ -14,7 +14,16 @@ import RemoveDocDialog from "./remove-doc-dialog";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
 import RemoveNamespaceDialog from "./remove-namespace-dialog";
 import { OpenContextMenuList } from "@/messages/open-context-menu";
-import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { Binoculars, Folder, Plus } from "@phosphor-icons/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import CreateNamespaceDialog from "./create-namespace-button";
 
 type SavedDocListData =
   | {
@@ -33,13 +42,13 @@ function mapDoc(
     return {
       data: { type: "namespace", data: ns.namespace },
       key: ns.namespace.id,
-      icon: LucideFolder,
+      icon: Folder,
       name: ns.namespace.name,
       children: ns.docs.map((d) => {
         return {
           key: d.id,
           data: { type: "doc", data: d },
-          icon: LucideCode,
+          icon: Binoculars,
           name: d.name,
         };
       }) as ListViewItem<SavedDocListData>[],
@@ -52,6 +61,7 @@ export default function SavedDocTab() {
   const [selected, setSelected] = useState<string>();
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
+  const [namespaceCreating, setNamespaceCreating] = useState(false);
   const [namespaceToRename, setNamespaceToRename] =
     useState<SavedDocNamespace>();
   const [namespaceToRemove, setNamespaceToRemove] =
@@ -133,15 +143,52 @@ export default function SavedDocTab() {
     );
   }
 
+  if (namespaceCreating) {
+    dialog = (
+      <CreateNamespaceDialog
+        onCreated={refresh}
+        onClose={() => setNamespaceCreating(false)}
+      />
+    );
+  }
+
   return (
     <>
       {dialog}
 
-      <div className="flex flex-col grow pt-1">
-        <div className="px-2 py-1">
-          <CreateNamespaceButton onCreated={refresh} />
+      <div className="flex flex-col grow">
+        <div className="flex justify-between mb-2 items-center mx-2 pt-2 px-2">
+          <h1 className="text-xl py-2 font-semibold text-primary">Queries</h1>
+
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  buttonVariants({
+                    size: "icon",
+                  }),
+                  "rounded-full h-8 w-8"
+                )}
+              >
+                <Plus size={16} weight="bold" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setNamespaceCreating(true)}>
+                New Folder
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  openTab({
+                    type: "query",
+                  });
+                }}
+              >
+                New Query
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <Separator />
         <ListView
           full
           items={docList}

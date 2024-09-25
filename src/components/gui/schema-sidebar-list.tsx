@@ -1,4 +1,4 @@
-import { LucideCog, LucideDatabase, LucideView, Table2 } from "lucide-react";
+import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
 import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { openTab } from "@/messages/open-tab";
@@ -6,6 +6,7 @@ import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
 import { useDatabaseDriver } from "@/context/driver-provider";
+import { Table } from "@phosphor-icons/react";
 
 interface SchemaListProps {
   search: string;
@@ -15,8 +16,8 @@ function prepareListViewItem(
   schema: DatabaseSchemaItem[]
 ): ListViewItem<DatabaseSchemaItem>[] {
   return schema.map((s) => {
-    let icon = Table2;
-    let iconClassName = "text-blue-600 dark:text-blue-300";
+    let icon = Table;
+    let iconClassName = "";
 
     if (s.type === "trigger") {
       icon = LucideCog;

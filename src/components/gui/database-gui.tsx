@@ -24,6 +24,7 @@ import SettingSidebar from "./sidebar/setting-sidebar";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
 import { useSchema } from "@/context/schema-provider";
+import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -93,14 +94,14 @@ export default function DatabaseGui() {
         key: "database",
         name: "Schema",
         content: <SchemaView />,
-        icon: LucideDatabase,
+        icon: <Table size={24} />,
       },
       docDriver
         ? {
             key: "saved",
-            name: "Saved",
+            name: "Queries",
             content: <SavedDocTab />,
-            icon: LucideBookmark,
+            icon: <Binoculars size={24} />,
           }
         : undefined,
       collaborationDriver
@@ -108,7 +109,7 @@ export default function DatabaseGui() {
             key: "setting",
             name: "Setting",
             content: <SettingSidebar />,
-            icon: LucideSettings,
+            icon: <GearSix size={24} />,
           }
         : undefined,
     ].filter(Boolean) as SidebarTabItem[];
