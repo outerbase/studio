@@ -79,7 +79,7 @@ body {
     --primary: white;
     --primary-foreground: black;
 
-    --secondary: #1f1f1f;
+    --secondary: #171717;
     --secondary-foreground: #eee;
 
     --muted: #333;
@@ -91,7 +91,7 @@ body {
     --destructive: red;
     --destructive-foreground: white;
 
-    --border: #2b2b2b;
+    --border: #313131;
     --input: #333;
     --ring: #444;
 

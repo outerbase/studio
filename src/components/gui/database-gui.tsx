@@ -45,7 +45,7 @@ export default function DatabaseGui() {
       identifier: "query",
       key: "query",
       component: <QueryWindow initialName="Query" />,
-      icon: LucideCode,
+      icon: Binoculars,
     },
   ]);
 

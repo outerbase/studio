@@ -147,31 +147,8 @@ export default function WindowTabs({
         modifiers={[restrictToHorizontalAxis]}
       >
         <div className="flex flex-col w-full h-full">
-          <div className="grow-0 shrink-0 pt-1 bg-secondary overflow-x-auto no-scrollbar">
-            <div className="flex min-h-9">
-              {menu ? (
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger>
-                    <div className="px-3 py-2">
-                      <LucidePlus className="w-4 h-4" />
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {menu.map((menuItem, menuIdx) => {
-                      return (
-                        <DropdownMenuItem
-                          key={menuIdx}
-                          onClick={menuItem.onClick}
-                        >
-                          {menuItem.text}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <div className="w-2 border-b"></div>
-              )}
+          <div className="grow-0 shrink-0 bg-secondary overflow-x-auto no-scrollbar">
+            <div className="flex h-[45px]">
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
                 strategy={horizontalListSortingStrategy}
@@ -179,6 +156,8 @@ export default function WindowTabs({
                 {tabs.map((tab, idx) => (
                   <SortableTab
                     key={tab.key}
+                    index={idx}
+                    tabCount={tabs.length}
                     tab={tab}
                     selected={idx === selected}
                     onSelectChange={() => {
@@ -204,6 +183,32 @@ export default function WindowTabs({
                   />
                 ))}
               </SortableContext>
+
+              {menu && (
+                <div className="flex h-[45px] items-center border-b">
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger>
+                      <div className="px-3 py-2 text-xs flex gap-2">
+                        <LucidePlus className="w-4 h-4" /> New
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {menu.map((menuItem, menuIdx) => {
+                        return (
+                          <DropdownMenuItem
+                            key={menuIdx}
+                            onClick={menuItem.onClick}
+                          >
+                            {menuItem.text}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+
+              <div className="flex h-[45px] border-b flex-1"></div>
             </div>
           </div>
           <div className="grow relative">

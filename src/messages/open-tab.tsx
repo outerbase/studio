@@ -13,6 +13,8 @@ import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
 import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
+import { Table } from "@phosphor-icons/react";
+import { Binoculars } from "@phosphor-icons/react/dist/ssr";
 
 interface OpenTableTab {
   type: "table";
@@ -82,7 +84,7 @@ function generateKeyFromTab(tab: OpenTabsProps) {
 }
 
 function generateIconFromTab(tab: OpenTabsProps) {
-  if (tab.type === "query") return LucideCode;
+  if (tab.type === "query") return Binoculars;
   if (tab.type === "table") return LucideTable;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
