@@ -111,9 +111,12 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
                   backgroundSize: "cover",
                 }}
               >
-                <div className="p-1" style={{ background: "#000C" }}>
+                <div
+                  className="p-1 text-white px-2"
+                  style={{ background: "#000C" }}
+                >
                   <div className="font-bold">Outerbase Studio</div>
-                  <div className="text-xs">v0.7.1</div>
+                  <div className="text-xs -mt-0.5">v0.7.1</div>
                 </div>
               </div>
 
