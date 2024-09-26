@@ -116,7 +116,9 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
                   style={{ background: "#000C" }}
                 >
                   <div className="font-bold">Outerbase Studio</div>
-                  <div className="text-xs -mt-0.5">v0.7.1</div>
+                  <div className="text-xs -mt-0.5">
+                    v{process.env.NEXT_PUBLIC_STUDIO_VERSION}
+                  </div>
                 </div>
               </div>
 
