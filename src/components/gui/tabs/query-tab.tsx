@@ -98,7 +98,7 @@ export default function QueryWindow({
     }
   };
 
-  const onRunClicked = (all = false) => {
+  const onRunClicked = (all = false, explained = false) => {
     let finalStatements: string[] = [];
 
     const editorState = editorRef.current?.view?.state;
@@ -111,7 +111,14 @@ export default function QueryWindow({
       const segment = resolveToNearestStatement(editorState);
       if (!segment) return;
 
-      const statement = editorState.doc.sliceString(segment.from, segment.to);
+      let statement = editorState.doc.sliceString(segment.from, segment.to);
+
+      if (
+        explained &&
+        statement.toLowerCase().indexOf("explain query plan") !== 0
+      ) {
+        statement = "explain query plan " + statement;
+      }
 
       if (statement) {
         finalStatements = [statement];
@@ -274,7 +281,7 @@ export default function QueryWindow({
                       Run All Statements
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onRunClicked(false, true)}>
                       Explain Current Statement
                     </DropdownMenuItem>
                   </DropdownMenuContent>
