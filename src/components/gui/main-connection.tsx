@@ -8,6 +8,7 @@ import { useConfig } from "@/context/config-provider";
 import { AutoCompleteProvider } from "@/context/auto-complete-provider";
 import InternalPubSub from "@/components/lib/internal-pubsub";
 import { SchemaProvider } from "@/context/schema-provider";
+import { WEBSITE_NAME } from "@/const";
 
 function MainConnection() {
   const { databaseDriver: driver } = useDatabaseDriver();
@@ -41,7 +42,7 @@ function MainConnectionContainer() {
   }, [driver]);
 
   useEffect(() => {
-    document.title = name + " - LibSQL Studio";
+    document.title = name + " - " + WEBSITE_NAME;
   }, [name]);
 
   return (

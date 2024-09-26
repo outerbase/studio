@@ -1,5 +1,6 @@
 "use server";
 import LogoLoading from "@/components/gui/logo-loading";
+import { WEBSITE_NAME } from "@/const";
 import { env } from "@/env";
 import Link from "next/link";
 
@@ -18,7 +19,7 @@ export default async function LoginPage() {
           </p>
 
           <p>
-            LibSQL Studio is free and doesn&apos;t require login. However,
+            {WEBSITE_NAME} is free and doesn&apos;t require login. However,
             logged-in users get extra features:
           </p>
 

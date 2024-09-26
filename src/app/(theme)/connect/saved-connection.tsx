@@ -13,13 +13,14 @@ import {
 import SavedConnectionConfig from "./saved-connection-config";
 import { createDatabase } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
+import { WEBSITE_NAME } from "@/const";
 
 type SaveConnectionStep = "storage" | "config";
 
 export function RqliteInstruction() {
   return (
     <div className="bg-secondary p-4 mb-4 text-sm">
-      You should include LibSQL Studio in the list of allowed origins for CORS
+      You should include {WEBSITE_NAME} in the list of allowed origins for CORS
       (Cross-Origin Resource Sharing)
       <pre className="mt-2">
         <code>{`rqlited --http-allow-origin="https://libsqlstudio.com"`}</code>
