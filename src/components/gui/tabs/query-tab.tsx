@@ -263,7 +263,7 @@ export default function QueryWindow({
                   Run
                 </button>
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
+                  <DropdownMenuTrigger asChild>
                     <button
                       className={cn(
                         buttonVariants({ size: "sm" }),

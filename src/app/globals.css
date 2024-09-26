@@ -140,6 +140,10 @@ body {
   color: #e84393;
 }
 
+.cm-focused {
+  outline: none !important;
+}
+
 .dark .cm-table-name {
   color: #fd79a8;
 }

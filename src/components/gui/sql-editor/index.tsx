@@ -148,6 +148,9 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
             borderLeft: "3px solid transparent",
             paddingLeft: "10px",
           },
+          "& .cm-focused": {
+            outline: "none !important",
+          },
         }),
         keyExtensions,
         sqlDialect,

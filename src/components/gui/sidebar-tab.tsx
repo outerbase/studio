@@ -120,35 +120,54 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
                 </div>
               </div>
 
-              <DropdownMenuItem
-                onClick={() => {
-                  toggleTheme();
-                }}
-              >
-                {theme === "dark" ? (
-                  <Sun className="mr-2" />
-                ) : (
-                  <MoonStars className="mr-2" />
-                )}
-                Switch to {theme === "dark" ? "light mode" : "dark mode"}
+              {config.sideBarFooterComponent}
+
+              {!disableToggle && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    toggleTheme();
+                  }}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="mr-2" />
+                  ) : (
+                    <MoonStars className="mr-2" />
+                  )}
+                  Switch to {theme === "dark" ? "light mode" : "dark mode"}
+                </DropdownMenuItem>
+              )}
+              {config.onBack && (
+                <DropdownMenuItem onClick={config.onBack}>
+                  <ArrowLeft className="mr-2" />
+                  Back to bases
+                </DropdownMenuItem>
+              )}
+              {config.onBack && !disableToggle && <DropdownMenuSeparator />}
+              <DropdownMenuItem inset>
+                <Link
+                  className="block w-full"
+                  href="https://github.com/outerbase/studio/issues"
+                  target="_blank"
+                >
+                  Report issues
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <ArrowLeft className="mr-2" />
-                Back to bases
+              <DropdownMenuItem inset>
+                <Link
+                  className="block w-full"
+                  href="https://www.outerbase.com/about/"
+                  target="_blank"
+                >
+                  About us
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem inset>Open File</DropdownMenuItem>
-              <DropdownMenuItem inset>Save File</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem inset>Learn More</DropdownMenuItem>
-              <DropdownMenuItem inset>About us</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
           {tabs.map(({ key, name, icon }, idx) => {
             return (
               <Tooltip key={key}>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <button
                     title={name}
                     onClick={() => {

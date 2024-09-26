@@ -18,6 +18,10 @@ import {
 import { useSearchParams } from "next/navigation";
 import { localDb } from "@/indexdb";
 import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
@@ -132,102 +136,80 @@ export default function PlaygroundEditorBody({
             </div>
           </div>
         )}
-        <div className="flex flex-row gap-2 px-2 pb-2">
-          <Button
-            className="flex-grow"
-            size="sm"
-            onClick={() => {
-              if (rawDb) {
-                if (handler) {
-                  handler
-                    .createWritable()
-                    .then((writable) => {
-                      writable.write(rawDb.export());
-                      writable.close();
-                      toast.success(
-                        <div>
-                          Successfully save <strong>{fileName}</strong>
-                        </div>
-                      );
-                      db?.resetChange();
-                    })
-                    .catch(console.error);
-                } else {
-                  saveAs(
-                    new Blob([rawDb.export()], {
-                      type: "application/x-sqlite3",
-                    }),
-                    "sqlite-dump.db"
-                  );
-                }
+
+        <DropdownMenuItem
+          inset
+          onClick={() => {
+            if (rawDb) {
+              if (handler) {
+                handler
+                  .createWritable()
+                  .then((writable) => {
+                    writable.write(rawDb.export());
+                    writable.close();
+                    toast.success(
+                      <div>
+                        Successfully save <strong>{fileName}</strong>
+                      </div>
+                    );
+                    db?.resetChange();
+                  })
+                  .catch(console.error);
+              } else {
+                saveAs(
+                  new Blob([rawDb.export()], {
+                    type: "application/x-sqlite3",
+                  }),
+                  "sqlite-dump.db"
+                );
               }
-            }}
-          >
-            Save
-          </Button>
-          <Button
-            className="flex-grow"
-            size="sm"
-            onClick={() => {
-              window
-                .showOpenFilePicker({
-                  types: [
-                    {
-                      description: "SQLite Files",
-                      accept: {
-                        "application/x-sqlite3": [
-                          ".db",
-                          ".sdb",
-                          ".sqlite",
-                          ".db3",
-                          ".s3db",
-                          ".sqlite3",
-                          ".sl3",
-                          ".db2",
-                          ".s2db",
-                          ".sqlite2",
-                          ".sl2",
-                        ],
-                      },
+            }
+          }}
+        >
+          Save
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          inset
+          onClick={() => {
+            window
+              .showOpenFilePicker({
+                types: [
+                  {
+                    description: "SQLite Files",
+                    accept: {
+                      "application/x-sqlite3": [
+                        ".db",
+                        ".sdb",
+                        ".sqlite",
+                        ".db3",
+                        ".s3db",
+                        ".sqlite3",
+                        ".sl3",
+                        ".db2",
+                        ".s2db",
+                        ".sqlite2",
+                        ".sl2",
+                      ],
                     },
-                  ],
-                })
-                .then(([fileHandler]) => {
-                  setHandler(fileHandler);
-                });
-            }}
-          >
-            Open
-          </Button>
-          {handler && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  className="flex-grow-0"
-                  onClick={onReloadDatabase}
-                >
-                  <LucideRefreshCw className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="mb-2">
-                  <strong>Refresh</strong>
-                </p>
+                  },
+                ],
+              })
+              .then(([fileHandler]) => {
+                setHandler(fileHandler);
+              });
+          }}
+        >
+          Open SQLite file
+        </DropdownMenuItem>
 
-                <p className="max-w-[250px] mb-2">
-                  LibSQL Studio loads data into memory. If the file changes, it
-                  is unaware of the update.
-                </p>
+        {handler && (
+          <DropdownMenuItem onClick={onReloadDatabase}>
+            <LucideRefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </DropdownMenuItem>
+        )}
 
-                <p className="max-w-[250px]">
-                  To reflect the changes, use the refresh option to reload the
-                  data from the file.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
+        <DropdownMenuSeparator />
       </div>
     );
   }, [rawDb, handler, db, fileName, onReloadDatabase]);
