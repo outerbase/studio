@@ -1,8 +1,9 @@
-export function MySQLIcon() {
+import { cn } from "@/lib/utils";
+
+export function MySQLIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="48"
-      height="48"
+      className={cn("w-12 h-12 flex-shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -88,11 +89,10 @@ export function MySQLIcon() {
   );
 }
 
-export function PostgreIcon() {
+export function PostgreIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="48"
-      height="48"
+      className={cn("w-12 h-12 flex-shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -137,11 +137,54 @@ export function PostgreIcon() {
   );
 }
 
-export function SQLiteIcon() {
+export function TursoIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="48"
-      height="48"
+      viewBox="0 0 201 170"
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M200.035 48.61C195.365 20.67 170.875 0 170.875 0V30.78L156.335 34.53L147.225 23.56L142.415 33.02C132.495 30.32 118.835 28.58 100.045 28.58C81.2549 28.58 67.5949 30.33 57.6749 33.02L52.8649 23.56L43.7549 34.53L29.2149 30.78V0C29.2149 0 4.72493 20.67 0.0549316 48.61L32.1949 59.73C33.2449 79.16 41.9849 131.61 44.4849 136.37C47.1449 141.44 61.2649 155.93 72.3149 161.5C72.3149 161.5 76.3149 157.27 78.7549 153.54C81.8549 157.19 97.8649 169.99 100.055 169.99C102.245 169.99 118.255 157.2 121.355 153.54C123.795 157.27 127.795 161.5 127.795 161.5C138.845 155.93 152.965 141.44 155.625 136.37C158.125 131.61 166.865 79.16 167.915 59.73L200.055 48.61H200.035ZM153.845 93.35L132.095 95.29L134.005 121.96C134.005 121.96 120.775 132.91 100.045 132.91C79.3149 132.91 66.0849 121.96 66.0849 121.96L67.9949 95.29L46.2449 93.35L42.5249 63.31L78.5749 75.79L75.7749 113.18C82.4749 114.88 89.5249 116.57 100.055 116.57C110.585 116.57 117.625 114.88 124.325 113.18L121.525 75.79L157.575 63.31L153.855 93.35H153.845Z"
+        fill="currentColor"
+      ></path>
+    </svg>
+  );
+}
+
+export function CloudflareIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      viewBox="0 0 25 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="5.5" y="18" width="14" height="2" fill="currentColor"></rect>
+      <rect x="19.5" y="16" width="2" height="2" fill="currentColor"></rect>
+      <rect x="21.5" y="12" width="2" height="4" fill="currentColor"></rect>
+      <rect x="3.5" y="16" width="2" height="2" fill="currentColor"></rect>
+      <rect x="1.5" y="12" width="2" height="4" fill="currentColor"></rect>
+      <rect x="3.5" y="10" width="2" height="2" fill="currentColor"></rect>
+      <rect x="5.5" y="8" width="6" height="2" fill="currentColor"></rect>
+      <rect x="7.5" y="6" width="2" height="2" fill="currentColor"></rect>
+      <rect x="9.5" y="4" width="6" height="2" fill="currentColor"></rect>
+      <rect x="15.5" y="6" width="2" height="2" fill="currentColor"></rect>
+      <rect x="17.5" y="8" width="2" height="2" fill="currentColor"></rect>
+      <rect x="19.5" y="10" width="2" height="2" fill="currentColor"></rect>
+      <rect x="15.5" y="12" width="2" height="2" fill="currentColor"></rect>
+      <rect x="9.5" y="10" width="2" height="2" fill="currentColor"></rect>
+      <rect x="11.5" y="12" width="2" height="2" fill="currentColor"></rect>
+      <rect x="17.5" y="10" width="2" height="2" fill="currentColor"></rect>
+    </svg>
+  );
+}
+
+export function SQLiteIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

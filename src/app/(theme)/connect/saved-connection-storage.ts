@@ -14,6 +14,7 @@ export interface DriverDetailField {
 }
 
 export interface DriverDetail {
+  displayName: string;
   name: string;
   icon: string;
   disableRemote?: boolean;
@@ -23,6 +24,7 @@ export interface DriverDetail {
 export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
   Object.freeze({
     "sqlite-filehandler": {
+      displayName: "SQLite",
       name: "sqlite-filehandler",
       icon: "/sqlite-icon.svg",
       disableRemote: true,
@@ -38,6 +40,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     },
     turso: {
       name: "turso",
+      displayName: "Turso",
       icon: "/turso.jpeg",
       fields: [
         {
@@ -67,6 +70,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     },
     valtown: {
       name: "valtown",
+      displayName: "Valtown",
       icon: "/valtown.svg",
       prefill: "",
       fields: [
@@ -81,6 +85,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     },
     "cloudflare-d1": {
       name: "cloudflare-d1",
+      displayName: "Cloudflare D1",
       icon: "/cloudflare.png",
       fields: [
         {
@@ -108,6 +113,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     },
     rqlite: {
       name: "rqlite",
+      displayName: "rqlite",
       icon: "/rqlite.png",
       fields: [
         {

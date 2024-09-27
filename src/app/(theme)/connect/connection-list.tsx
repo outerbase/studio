@@ -20,7 +20,7 @@ import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
 import QuickConnect from "./quick-connect";
-import { LucideChevronDown } from "lucide-react";
+import { LucideChevronDown, LucideSearch } from "lucide-react";
 import DriverDropdown from "./driver-dropdown";
 
 function ConnectionListSection({
@@ -43,7 +43,7 @@ function ConnectionListSection({
       );
 
     return (
-      <div className="flex flex-wrap gap-4 p-4">
+      <div className="flex flex-wrap gap-4 mt-8">
         {data.map((conn) => {
           return (
             <ConnectionItemCard
@@ -64,7 +64,7 @@ function ConnectionListSection({
 
   return (
     <>
-      {name && <h2 className="mt-4 ml-4 font-bold">{name}</h2>}
+      {/* {name && <h2 className="my-4 font-semibold text-primary">{name}</h2>} */}
       {body}
     </>
   );
@@ -199,17 +199,34 @@ export default function ConnectionList({
   }
 
   return (
-    <>
-      <div className="px-8 py-2 border-b">
+    <div className="flex flex-col flex-1 max-w-[1000px] mx-auto">
+      <div className="flex mt-12 gap-2">
+        <h1 className="flex-1 flex items-center font-semibold text-xl text-primary">
+          Bases
+        </h1>
+
+        <div>
+          <div className="border rounded overflow-hidden flex items-center grow mx-2 bg-background">
+            <div className="text-sm px-2 h-full flex items-center">
+              <LucideSearch className="h-4 w-4 text-black dark:text-white" />
+            </div>
+            <input
+              type="text"
+              className="bg-inherit p-2 pl-2 pr-2 outline-none text-sm  h-full grow"
+              placeholder="Search base name"
+            />
+          </div>
+        </div>
+
         <DriverDropdown onSelect={setShowAddConnection}>
-          <Button variant={"ghost"}>
+          <Button variant={"default"}>
             New Connection
             <LucideChevronDown className="ml-2 w-4 h-4" />
           </Button>
         </DriverDropdown>
 
         <DriverDropdown onSelect={setQuickConnect}>
-          <Button variant={"ghost"}>Quick Connect</Button>
+          <Button variant={"secondary"}>Quick Connect</Button>
         </DriverDropdown>
       </div>
 
@@ -230,6 +247,6 @@ export default function ConnectionList({
           onEdit={setEditConnection}
         />
       )}
-    </>
+    </div>
   );
 }

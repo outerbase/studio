@@ -26,6 +26,8 @@ export default function ConnectionItemCard({
 }>) {
   const [open, setOpen] = useState(false);
 
+  console.log(conn);
+
   return (
     <ContextMenu onOpenChange={setOpen}>
       <ContextMenuTrigger
@@ -38,7 +40,7 @@ export default function ConnectionItemCard({
       >
         <Link
           className={cn(
-            "border rounded w-[285px] flex overflow-hidden hover:border-secondary hover:bg-secondary",
+            "border rounded-lg w-[300px] bg-background flex overflow-hidden hover:bg-zinc-50 dark:hover:bg-zinc-900",
             open ? "border-secondary bg-secondary" : ""
           )}
           href={
@@ -49,31 +51,33 @@ export default function ConnectionItemCard({
               : `/client/r?p=${conn.id}`
           }
         >
-          <div
-            className={cn(
-              "w-2 shrink-0 bg-yellow-300",
-              CONNECTION_LABEL_COLORS[conn.label ?? "gray"]
-            )}
-          />
-          <div className="pt-4 shrink-0 ml-3 mr-2">
-            <img
-              src={DRIVER_DETAIL[conn.driver ?? "turso"].icon}
-              alt={DRIVER_DETAIL[conn.driver ?? "turso"].name}
-              className="w-9 h-9 rounded-lg"
-            />
-          </div>
-          <div className="p-2">
-            <h2 className="line-clamp-1">{conn.name}</h2>
-            {conn.shared ? (
-              <p className="text-gray-600 text-xs line-clamp-2 h-8 mt-1">
-                <LucideUsers className="w-4 h-4 mr-1 inline" />
-                Shared by <strong>{conn.shared.sharedBy.name}</strong>
-              </p>
-            ) : (
-              <p className="text-gray-600 text-xs line-clamp-2 h-8">
-                {conn.description || <i>No description</i>}
-              </p>
-            )}
+          <div className="py-4 shrink-0 ml-3 mr-2 flex flex-col gap-3">
+            <div className="flex gap-2">
+              <img
+                src={DRIVER_DETAIL[conn.driver ?? "turso"].icon}
+                alt={DRIVER_DETAIL[conn.driver ?? "turso"].name}
+                className="w-10 h-10 rounded-lg"
+              />
+
+              <div>
+                <div className="line-clamp-1 text-primary">{conn.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {DRIVER_DETAIL[conn.driver ?? "turso"].displayName}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <div
+                className={cn(
+                  "w-4 h-4 shrink-0 bg-yellow-300 rounded-full",
+                  CONNECTION_LABEL_COLORS[conn.label ?? "gray"]
+                )}
+              />
+              <div className="text-xs line-clamp-1">
+                {conn.description ?? "No description"}
+              </div>
+            </div>
           </div>
         </Link>
       </ContextMenuTrigger>
