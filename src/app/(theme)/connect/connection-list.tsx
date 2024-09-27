@@ -25,7 +25,6 @@ import DriverDropdown from "./driver-dropdown";
 
 function ConnectionListSection({
   data,
-  name,
   onRemove,
   onEdit,
 }: Readonly<{

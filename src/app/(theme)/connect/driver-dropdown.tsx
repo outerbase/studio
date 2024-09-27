@@ -12,8 +12,10 @@ import {
   CloudflareIcon,
   MySQLIcon,
   PostgreIcon,
+  RqliteIcon,
   SQLiteIcon,
   TursoIcon,
+  ValtownIcon,
 } from "@/components/icons/outerbase-icon";
 import Link from "next/link";
 
@@ -67,7 +69,7 @@ export default function DriverDropdown({
                 }}
               >
                 <div className="flex gap-4 px-2 items-center h-8">
-                  <img src="/rqlite.png" alt="rqlite" className="w-6 h-6" />
+                  <RqliteIcon className="w-6 h-6" />
                   <div className="font-semibold">rqlite</div>
                 </div>
               </DropdownMenuItem>
@@ -78,11 +80,7 @@ export default function DriverDropdown({
                 }}
               >
                 <div className="flex gap-4 px-2 items-center h-8">
-                  <img
-                    src="/valtown.svg"
-                    alt="valtown"
-                    className="w-6 h-6 rounded"
-                  />
+                  <ValtownIcon className="w-6 h-6" />
                   <div className="font-semibold">val.town</div>
                 </div>
               </DropdownMenuItem>

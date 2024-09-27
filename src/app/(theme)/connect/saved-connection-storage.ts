@@ -1,5 +1,13 @@
+import {
+  CloudflareIcon,
+  RqliteIcon,
+  SQLiteIcon,
+  TursoIcon,
+  ValtownIcon,
+} from "@/components/icons/outerbase-icon";
 import { ApiUser } from "@/lib/api/api-database-response";
 import parseSafeJson from "@/lib/json-safe";
+import { FunctionComponent, ReactElement } from "react";
 
 export interface DriverDetailField {
   name: keyof SavedConnectionItemConfigConfig;
@@ -16,7 +24,7 @@ export interface DriverDetailField {
 export interface DriverDetail {
   displayName: string;
   name: string;
-  icon: string;
+  icon: FunctionComponent<{ className: string }>;
   disableRemote?: boolean;
   fields: DriverDetailField[];
 }
@@ -26,7 +34,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     "sqlite-filehandler": {
       displayName: "SQLite",
       name: "sqlite-filehandler",
-      icon: "/sqlite-icon.svg",
+      icon: SQLiteIcon,
       disableRemote: true,
       fields: [
         {
@@ -41,7 +49,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     turso: {
       name: "turso",
       displayName: "Turso",
-      icon: "/turso.jpeg",
+      icon: TursoIcon,
       fields: [
         {
           name: "url",
@@ -71,7 +79,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     valtown: {
       name: "valtown",
       displayName: "Valtown",
-      icon: "/valtown.svg",
+      icon: ValtownIcon,
       prefill: "",
       fields: [
         {
@@ -86,7 +94,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     "cloudflare-d1": {
       name: "cloudflare-d1",
       displayName: "Cloudflare D1",
-      icon: "/cloudflare.png",
+      icon: CloudflareIcon,
       fields: [
         {
           name: "username",
@@ -114,7 +122,7 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     rqlite: {
       name: "rqlite",
       displayName: "rqlite",
-      icon: "/rqlite.png",
+      icon: RqliteIcon,
       fields: [
         {
           name: "url",

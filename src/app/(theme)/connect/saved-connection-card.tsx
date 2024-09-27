@@ -26,7 +26,7 @@ export default function ConnectionItemCard({
 }>) {
   const [open, setOpen] = useState(false);
 
-  console.log(conn);
+  const DatabaseIcon = DRIVER_DETAIL[conn.driver ?? "turso"].icon;
 
   return (
     <ContextMenu onOpenChange={setOpen}>
@@ -53,11 +53,9 @@ export default function ConnectionItemCard({
         >
           <div className="py-4 shrink-0 ml-3 mr-2 flex flex-col gap-3">
             <div className="flex gap-2">
-              <img
-                src={DRIVER_DETAIL[conn.driver ?? "turso"].icon}
-                alt={DRIVER_DETAIL[conn.driver ?? "turso"].name}
-                className="w-10 h-10 rounded-lg"
-              />
+              <div className="w-10 h-10 bg-accent flex justify-center items-center rounded">
+                <DatabaseIcon className="w-6 h-6 text-accent-foreground" />
+              </div>
 
               <div>
                 <div className="line-clamp-1 text-primary">{conn.name}</div>
@@ -75,7 +73,7 @@ export default function ConnectionItemCard({
                 )}
               />
               <div className="text-xs line-clamp-1">
-                {conn.description ?? "No description"}
+                {conn.description || "No description"}
               </div>
             </div>
           </div>

@@ -181,6 +181,85 @@ export function CloudflareIcon({ className }: { className?: string }) {
   );
 }
 
+export function ValtownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      viewBox="75 75 225 225"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M265.026 271.002C257.83 271.002 251.994 268.767 247.518 264.293C243.038 259.821 240.802 253.841 240.802 246.363V184.761H226.364V161.881H240.802V128H268.548V161.881H298.5V184.761H268.548V241.521C268.548 245.921 270.604 248.123 274.716 248.123H295.856V271.002H265.026Z"
+          fill="currentColor"
+        />
+        <path
+          d="M204.362 174.325L158.23 250.768H154.266V178.601C154.266 169.37 146.776 161.887 137.536 161.887H126.518V253.01C126.518 262.95 134.586 271.01 144.536 271.01H163.396C173.396 271.01 182.638 265.682 187.64 257.03L242.664 161.887H226.404C217.384 161.887 209.02 166.606 204.362 174.325Z"
+          fill="currentColor"
+        />
+        <path
+          d="M99.9939 161.887H127.8V184.769H99.9939V161.887Z"
+          fill="currentColor"
+        />
+      </g>
+    </svg>
+  );
+}
+
+export function RqliteIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      viewBox="0 0 126 126"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M40 14H86L113 41V86L85 114H40L13 87V41L40 14ZM51 37L36 52V75L52 91H75L90 76V53L74 37H51Z"
+          fill="currentColor"
+          fillOpacity={0.2}
+        />
+        <path
+          d="M13 42L40 15H51.5L72.5 35.5L50.5 36.5L14 74L13 42Z"
+          fill="currentColor"
+        />
+        <path
+          d="M52 14.5L89.5 52.5L90 19L85 14.5H52Z"
+          fill="currentColor"
+          fill-opacity="0.8"
+        />
+        <path
+          d="M90.5 19.5V74L112.5 52V41.5L90.5 19.5Z"
+          fill="currentColor"
+          fill-opacity="0.6"
+        />
+        <path
+          d="M113 53.5L112.5 87L85.5 113.5H74L52 91H73.5L112.5 52.5L113 53.5Z"
+          fill="currentColor"
+          fill-opacity="0.4"
+        />
+        <path
+          d="M36 75.5L35 108L40 113H73L36 75.5Z"
+          fill="currentColor"
+          fill-opacity="0.6"
+        />
+        <path
+          d="M13.5 75V86L34.5 107L35.5 53.5L13.5 75Z"
+          fill="currentColor"
+          fill-opacity="0.8"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_51_2">
+          <rect width="126" height="126" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
 export function SQLiteIcon({ className }: { className?: string }) {
   return (
     <svg
