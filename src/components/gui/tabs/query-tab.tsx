@@ -1,7 +1,6 @@
 import { format } from "sql-formatter";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  LucideFastForward,
   LucideGrid,
   LucideMessageSquareWarning,
   LucidePencilRuler,
@@ -13,8 +12,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import QueryProgressLog from "../query-progress-log";
@@ -43,6 +41,15 @@ import {
   resolveToNearestStatement,
   splitSqlQuery,
 } from "../sql-editor/statement-highlight";
+import { CaretDown } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -90,7 +97,7 @@ export default function QueryWindow({
     }
   };
 
-  const onRunClicked = (all = false) => {
+  const onRunClicked = (all = false, explained = false) => {
     let finalStatements: string[] = [];
 
     const editorState = editorRef.current?.view?.state;
@@ -103,7 +110,14 @@ export default function QueryWindow({
       const segment = resolveToNearestStatement(editorState);
       if (!segment) return;
 
-      const statement = editorState.doc.sliceString(segment.from, segment.to);
+      let statement = editorState.doc.sliceString(segment.from, segment.to);
+
+      if (
+        explained &&
+        statement.toLowerCase().indexOf("explain query plan") !== 0
+      ) {
+        statement = "explain query plan " + statement;
+      }
 
       if (statement) {
         finalStatements = [statement];
@@ -203,12 +217,12 @@ export default function QueryWindow({
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
-          <div className="border-b pl-2 pr-1 py-1 flex">
-            <div className="text-xs shrink-0 items-center flex text-secondary-foreground p-1">
+          <div className="border-b pl-3 pr-1 py-2 flex">
+            <div className="text-sm shrink-0 items-center flex text-secondary-foreground p-1">
               {namespaceName} /
             </div>
             <div className="inline-block relative">
-              <span className="inline-block text-xs p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0 bg-background">
+              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0 bg-background">
                 &nbsp;{name}
               </span>
               <input
@@ -219,13 +233,62 @@ export default function QueryWindow({
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"
-                className="absolute top-0 right-0 left-0 bottom-0 text-xs p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded bg-background"
+                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded bg-background"
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
               />
             </div>
+
+            <div className="flex-1" />
+
+            <div className="flex gap-2">
+              {docDriver && (
+                <SaveDocButton
+                  onComplete={onSaveComplete}
+                  onPrepareContent={onPrepareSaveContent}
+                  docId={savedKey}
+                />
+              )}
+
+              <div className="flex">
+                <button
+                  onClick={() => onRunClicked()}
+                  className={cn(
+                    buttonVariants({ size: "sm" }),
+                    "rounded-r-none"
+                  )}
+                >
+                  <LucidePlay className="w-4 h-4 mr-2" />
+                  Run
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className={cn(
+                        buttonVariants({ size: "sm" }),
+                        "rounded-l-none border-l"
+                      )}
+                    >
+                      <CaretDown size={12} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => onRunClicked()}>
+                      Run Current Statement
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onRunClicked(true)}>
+                      Run All Statements
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onRunClicked(false, true)}>
+                      Explain Current Statement
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
-          <div className="grow overflow-hidden">
+          <div className="grow overflow-hidden p-2">
             <SqlEditor
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
@@ -251,25 +314,11 @@ export default function QueryWindow({
             />
           </div>
           <div className="grow-0 shrink-0">
-            <Separator />
-            <div className="flex gap-1 p-2">
-              <Button
-                variant={"default"}
-                size="sm"
-                onClick={() => onRunClicked()}
-              >
-                <LucidePlay className="w-4 h-4 mr-2" />
-                Run Current
-              </Button>
-
-              <Button
-                variant={"ghost"}
-                size="sm"
-                onClick={() => onRunClicked(true)}
-              >
-                <LucideFastForward className="w-4 h-4 mr-2" />
-                Run All
-              </Button>
+            <div className="flex gap-1 pb-2 px-2">
+              <div className="grow items-center flex text-xs mr-2 gap-2 pl-4">
+                <div>Ln {lineNumber}</div>
+                <div>Col {columnNumber + 1}</div>
+              </div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -287,19 +336,6 @@ export default function QueryWindow({
                   <p>Format SQL queries for readability</p>
                 </TooltipContent>
               </Tooltip>
-
-              <div className="grow items-center flex text-xs mr-2 gap-2 border-l pl-4">
-                <div>Ln {lineNumber}</div>
-                <div>Col {columnNumber + 1}</div>
-              </div>
-
-              {docDriver && (
-                <SaveDocButton
-                  onComplete={onSaveComplete}
-                  onPrepareContent={onPrepareSaveContent}
-                  docId={savedKey}
-                />
-              )}
             </div>
           </div>
         </div>

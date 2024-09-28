@@ -44,7 +44,7 @@ body {
     --secondary: #f1f5f9;
     --secondary-foreground: #444;
 
-    --muted: 210 40% 96.1%;
+    --muted: #eee;
     --muted-foreground: #888;
 
     --accent: #f1f5f9;
@@ -64,7 +64,7 @@ body {
   }
 
   .dark {
-    --background: #181818;
+    --background: #000;
     --foreground: #aaa;
 
     --color-surface: black;
@@ -79,7 +79,7 @@ body {
     --primary: white;
     --primary-foreground: black;
 
-    --secondary: #1f1f1f;
+    --secondary: #171717;
     --secondary-foreground: #eee;
 
     --muted: #333;
@@ -91,7 +91,7 @@ body {
     --destructive: red;
     --destructive-foreground: white;
 
-    --border: #2b2b2b;
+    --border: #313131;
     --input: #333;
     --ring: #444;
 
@@ -138,6 +138,10 @@ body {
 /* ------------------------------- */
 .cm-table-name {
   color: #e84393;
+}
+
+.cm-focused {
+  outline: none !important;
 }
 
 .dark .cm-table-name {

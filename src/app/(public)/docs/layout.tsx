@@ -1,8 +1,9 @@
 import { DocLayout } from "@/components/mdx/docs";
+import { WEBSITE_NAME } from "@/const";
 
 const TableContent = [
   {
-    title: "LibSQL Studio",
+    title: WEBSITE_NAME,
     href: "/docs",
   },
   {

@@ -3,12 +3,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./codemirror-override.css";
 import { Fragment } from "react";
+import { WEBSITE_NAME } from "@/const";
 
-const siteDescription =
-  "LibSQL Studio is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything";
+const siteDescription = `${WEBSITE_NAME} is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything`;
 
 export const metadata: Metadata = {
-  title: "LibSQL Studio",
+  title: WEBSITE_NAME,
   keywords: [
     "libsql",
     "rqlite",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   ],
   description: siteDescription,
   openGraph: {
-    siteName: "LibSQL Studio",
+    siteName: WEBSITE_NAME,
     description: siteDescription,
   },
 };

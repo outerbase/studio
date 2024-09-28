@@ -5,25 +5,24 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { SavedDocNamespace } from "@/drivers/saved-doc/saved-doc-driver";
-import { LucidePlus } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface CreateNamespaceButtonProps {
   onCreated: (v: SavedDocNamespace) => void;
+  onClose: () => void;
 }
 
-export default function CreateNamespaceButton({
+export default function CreateNamespaceDialog({
   onCreated,
+  onClose,
 }: CreateNamespaceButtonProps) {
   const { docDriver } = useDatabaseDriver();
   const [namespace, setNamespace] = useState("");
   const [error, setError] = useState("");
-  const [open, setOpen] = useState(false);
 
   const onCreateNamespace = useCallback(() => {
     if (docDriver) {
@@ -32,7 +31,7 @@ export default function CreateNamespaceButton({
           .createNamespace(namespace)
           .then((n) => {
             onCreated(n);
-            setOpen(false);
+            onClose();
           })
           .catch((e) => {
             setError((e as Error).message);
@@ -41,50 +40,36 @@ export default function CreateNamespaceButton({
         setError("The namespace name must be at least 3 characters long");
       }
     }
-  }, [docDriver, namespace, onCreated]);
+  }, [docDriver, namespace, onCreated, onClose]);
 
   return (
-    <>
-      <Dialog
-        open={open}
-        onOpenChange={(openState) => {
-          setOpen(openState);
-          setNamespace("");
-          setError("");
-        }}
-      >
-        <DialogTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="mb-1 flex w-full justify-start"
-          >
-            <LucidePlus className="w-4 h-4 mr-2" />
-            Create Namespace
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogTitle>Create Namespace</DialogTitle>
+    <Dialog
+      open
+      onOpenChange={(openState) => {
+        if (!openState) onClose();
+      }}
+    >
+      <DialogContent>
+        <DialogTitle>Create Namespace</DialogTitle>
 
-          <DialogDescription>
-            A namespace is similar to a folder that groups your work together.
-            It helps you organize and arrange your queries
-          </DialogDescription>
+        <DialogDescription>
+          A namespace is similar to a folder that groups your work together. It
+          helps you organize and arrange your queries
+        </DialogDescription>
 
-          <Input
-            placeholder="Please enter namespace"
-            autoFocus
-            value={namespace}
-            onChange={(e) => setNamespace(e.currentTarget.value)}
-          />
+        <Input
+          placeholder="Please enter namespace"
+          autoFocus
+          value={namespace}
+          onChange={(e) => setNamespace(e.currentTarget.value)}
+        />
 
-          {error && <div className="text-xs text-red-500 -mt-2">{error}</div>}
+        {error && <div className="text-xs text-red-500 -mt-2">{error}</div>}
 
-          <DialogFooter>
-            <Button onClick={onCreateNamespace}>Create</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        <DialogFooter>
+          <Button onClick={onCreateNamespace}>Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

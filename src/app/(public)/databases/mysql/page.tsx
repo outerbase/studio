@@ -1,16 +1,16 @@
 import { MySQLIcon } from "@/components/icons/outerbase-icon";
 import WebsiteLayout from "@/components/website-layout";
+import { WEBSITE_NAME } from "@/const";
 import { Metadata } from "next";
 
-const siteDescription =
-  "LibSQL Studio is a fully-featured, lightweight GUI client for managing MySQL databases";
+const siteDescription = `${WEBSITE_NAME} is a fully-featured, lightweight GUI client for managing MySQL databases`;
 
 export const metadata: Metadata = {
-  title: "MySQL - LibSQL Studio",
+  title: `MySQL - ${WEBSITE_NAME}`,
   keywords: ["mysql", "studio", "browser", "editor", "gui", "online", "client"],
   description: siteDescription,
   openGraph: {
-    siteName: "LibSQL Studio",
+    siteName: WEBSITE_NAME,
     description: siteDescription,
   },
 };
@@ -34,7 +34,7 @@ function HeroSection() {
             <span>MySQL Support</span>
           </h2>
           <p className="max-w-[700px] mt-6 text-lg">
-            LibSQL Studio is a lightweight, fully-featured GUI client for MySQL
+            {WEBSITE_NAME} is a lightweight, fully-featured GUI client for MySQL
             databases. It enables you to manage and view your database, or
             expose your database interface externally and much more.
           </p>

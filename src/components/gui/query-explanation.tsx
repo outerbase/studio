@@ -49,9 +49,14 @@ function buildQueryExplanationTree(nodes: ExplanationRow[]) {
 
 export function QueryExplanation(props: QueryExplanationProps) {
   const tree = useMemo(() => {
-    const isExplanationRows = z
-      .array(queryExplanationRowSchema)
-      .safeParse(props.data.rows);
+    const isExplanationRows = z.array(queryExplanationRowSchema).safeParse(
+      props.data.rows.map((r) => ({
+        ...r,
+        id: Number(r.id),
+        parent: Number(r.parent),
+        notused: Number(r.notused),
+      }))
+    );
 
     if (isExplanationRows.error) {
       return { _tag: "ERROR" as const, value: isExplanationRows.error };

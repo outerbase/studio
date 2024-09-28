@@ -1,10 +1,11 @@
-import { LucidePlus, LucideSearch } from "lucide-react";
+import { LucideSearch } from "lucide-react";
 import { useCallback, useState } from "react";
 import SchemaList from "./schema-sidebar-list";
-import ListButtonItem from "./list-button-item";
-import { Separator } from "../ui/separator";
 import { openTab } from "@/messages/open-tab";
 import { useSchema } from "@/context/schema-provider";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "../ui/button";
+import { Plus } from "@phosphor-icons/react";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
@@ -19,8 +20,23 @@ export default function SchemaView() {
 
   return (
     <div className="flex flex-col overflow-hidden grow">
-      <div className="pt-2 px-2 flex h-10 -ml-3 mb-2">
-        <div className="border rounded overflow-hidden flex items-center ml-3 grow">
+      <div className="pt-2 px-2 flex mb-2 flex flex-col">
+        <div className="flex justify-between mb-2 items-center mx-2">
+          <h1 className="text-xl py-2 font-semibold text-primary">Tables</h1>
+          <button
+            className={cn(
+              buttonVariants({
+                size: "icon",
+              }),
+              "rounded-full h-8 w-8"
+            )}
+            onClick={onNewTable}
+          >
+            <Plus size={16} weight="bold" />
+          </button>
+        </div>
+
+        <div className="border rounded overflow-hidden flex items-center grow mx-2">
           <div className="text-sm px-2 h-full flex items-center">
             <LucideSearch className="h-4 w-4 text-black dark:text-white" />
           </div>
@@ -37,17 +53,6 @@ export default function SchemaView() {
       </div>
 
       <SchemaList search={search} />
-
-      <div className="flex flex-col">
-        <Separator />
-        <div className="p-2 flex flex-col">
-          <ListButtonItem
-            text="Create New Table"
-            icon={LucidePlus}
-            onClick={onNewTable}
-          />
-        </div>
-      </div>
     </div>
   );
 }

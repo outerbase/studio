@@ -12,8 +12,8 @@ async function Topbar() {
     <header>
       <div className="mx-auto container flex">
         <Link href="/">
-          <h1 className="text-lg py-2">
-            LibSQL <strong>Studio</strong>
+          <h1 className="text-lg py-2 text-white">
+            Outerbase <strong>Studio</strong>
           </h1>
         </Link>
         <div className="grow flex items-center ml-3">
@@ -51,8 +51,8 @@ function Footer() {
     <div className="py-4 text-sm mx-auto container px-8">
       <div className="grid grid-cols-2 lg:grid-cols-4 mb-8">
         <div className="mb-8">
-          <h1 className="text-lg">
-            LibSQL <strong>Studio</strong>
+          <h1 className="text-lg text-white">
+            Outerbase <strong>Studio</strong>
           </h1>
           <p>© 2024 Outerbase Inc.</p>
         </div>

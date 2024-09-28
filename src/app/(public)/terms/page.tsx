@@ -1,4 +1,5 @@
 import WebsiteLayout from "@/components/website-layout";
+import { WEBSITE_NAME } from "@/const";
 
 export default function TermPage() {
   return (
@@ -9,7 +10,7 @@ export default function TermPage() {
         <p>Effective Date: 2024-06-23</p>
 
         <p>{`
-        Welcome to LibSQL Studio ("we," "our," or "us"). 
+        Welcome to ${WEBSITE_NAME} ("we," "our," or "us"). 
         By accessing or using our tool, you agree to be bound by these Terms and Conditions ("Terms").
         If you do not agree to these Terms, please do not use the Tool.
       `}</p>
@@ -53,7 +54,7 @@ export default function TermPage() {
         </p>
 
         <h2 className="font-bold text-lg">6. Limitation of Liability</h2>
-        <p>{`LibSQL Studio is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the Tool.`}</p>
+        <p>{`${WEBSITE_NAME} is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the Tool.`}</p>
 
         <p>
           By using the Tool, you acknowledge that you have read, understood, and

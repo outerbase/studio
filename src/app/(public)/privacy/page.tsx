@@ -1,4 +1,5 @@
 import WebsiteLayout from "@/components/website-layout";
+import { WEBSITE_NAME } from "@/const";
 
 export default function PrivacyPage() {
   return (
@@ -8,7 +9,7 @@ export default function PrivacyPage() {
         <p>Effective Date: 2024-06-23</p>
         <p>
           {`
-          Welcome to LibSQL Studio ("we," "our," or "us"). We are committed to protecting your privacy and ensuring
+          Welcome to ${WEBSITE_NAME} ("we," "our," or "us"). We are committed to protecting your privacy and ensuring
           that your personal information is handled in a safe and responsible manner. This Privacy Policy explains how we
           collect, use, and protect your information when you use our tool.
         `}

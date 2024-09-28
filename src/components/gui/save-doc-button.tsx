@@ -82,8 +82,8 @@ export default function SaveDocButton({
         <Button
           size="sm"
           onClick={() => onSaveQuery()}
-          className="mr-2"
           disabled={loading}
+          variant={"secondary"}
         >
           {loading ? (
             <LucideLoader className="w-4 h-4 animate-spin mr-2" />

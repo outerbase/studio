@@ -9,6 +9,8 @@ import { CSS } from "../lib/dnd-kit";
 interface SortableTabProps {
   tab: WindowTabItemProps;
   selected: boolean;
+  index: number;
+  tabCount: number;
   onSelectChange: () => void;
   onClose?: () => void;
 }
@@ -19,24 +21,34 @@ type WindowTabItemButtonProps = ButtonProps & {
   icon: LucideIcon;
   onClose?: () => void;
   isDragging?: boolean;
+  index: number;
+  tabCount: number;
 };
 
 export const WindowTabItemButton = forwardRef<
   HTMLButtonElement,
   WindowTabItemButtonProps
 >(function WindowTabItemButton(props: WindowTabItemButtonProps, ref) {
-  const { icon: Icon, selected, title, onClose, isDragging, ...rest } = props;
+  const {
+    icon: Icon,
+    selected,
+    title,
+    onClose,
+    isDragging,
+    index,
+    ...rest
+  } = props;
 
   return (
     <button
       className={cn(
-        "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px] border-x border-t-2 border-t-yellow-500",
+        "h-[45px] bg-secondary flex items-center text-left text-xs px-2 border-b border-t-3 border-r w-[170px]",
         "libsql-window-tab",
         isDragging && "z-20",
-        isDragging && !selected && "bg-gray-200 dark:bg-gray-700 rounded-t",
         selected
-          ? "border-b-background bg-background rounded-t"
-          : "border-t-secondary border-x-secondary opacity-65 hover:opacity-100"
+          ? "border-b-background bg-background text-primary"
+          : "opacity-65 hover:opacity-100",
+        index === 0 ? "border-l-none" : ""
       )}
       onAuxClick={({ button }) => button === 1 && onClose && onClose()}
       ref={ref}
@@ -65,6 +77,8 @@ export const WindowTabItemButton = forwardRef<
 });
 
 export function SortableTab({
+  index,
+  tabCount,
   tab,
   selected,
   onSelectChange,
@@ -93,6 +107,8 @@ export function SortableTab({
       selected={selected}
       onClose={onClose}
       style={style}
+      index={index}
+      tabCount={tabCount}
       isDragging={isDragging}
       {...attributes}
       {...listeners}

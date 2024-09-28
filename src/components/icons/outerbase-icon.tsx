@@ -1,8 +1,9 @@
-export function MySQLIcon() {
+import { cn } from "@/lib/utils";
+
+export function MySQLIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="48"
-      height="48"
+      className={cn("w-12 h-12 flex-shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -88,11 +89,10 @@ export function MySQLIcon() {
   );
 }
 
-export function PostgreIcon() {
+export function PostgreIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="48"
-      height="48"
+      className={cn("w-12 h-12 flex-shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -137,11 +137,133 @@ export function PostgreIcon() {
   );
 }
 
-export function SQLiteIcon() {
+export function TursoIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="48"
-      height="48"
+      viewBox="0 0 201 170"
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M200.035 48.61C195.365 20.67 170.875 0 170.875 0V30.78L156.335 34.53L147.225 23.56L142.415 33.02C132.495 30.32 118.835 28.58 100.045 28.58C81.2549 28.58 67.5949 30.33 57.6749 33.02L52.8649 23.56L43.7549 34.53L29.2149 30.78V0C29.2149 0 4.72493 20.67 0.0549316 48.61L32.1949 59.73C33.2449 79.16 41.9849 131.61 44.4849 136.37C47.1449 141.44 61.2649 155.93 72.3149 161.5C72.3149 161.5 76.3149 157.27 78.7549 153.54C81.8549 157.19 97.8649 169.99 100.055 169.99C102.245 169.99 118.255 157.2 121.355 153.54C123.795 157.27 127.795 161.5 127.795 161.5C138.845 155.93 152.965 141.44 155.625 136.37C158.125 131.61 166.865 79.16 167.915 59.73L200.055 48.61H200.035ZM153.845 93.35L132.095 95.29L134.005 121.96C134.005 121.96 120.775 132.91 100.045 132.91C79.3149 132.91 66.0849 121.96 66.0849 121.96L67.9949 95.29L46.2449 93.35L42.5249 63.31L78.5749 75.79L75.7749 113.18C82.4749 114.88 89.5249 116.57 100.055 116.57C110.585 116.57 117.625 114.88 124.325 113.18L121.525 75.79L157.575 63.31L153.855 93.35H153.845Z"
+        fill="currentColor"
+      ></path>
+    </svg>
+  );
+}
+
+export function CloudflareIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      viewBox="0 0 25 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="5.5" y="18" width="14" height="2" fill="currentColor"></rect>
+      <rect x="19.5" y="16" width="2" height="2" fill="currentColor"></rect>
+      <rect x="21.5" y="12" width="2" height="4" fill="currentColor"></rect>
+      <rect x="3.5" y="16" width="2" height="2" fill="currentColor"></rect>
+      <rect x="1.5" y="12" width="2" height="4" fill="currentColor"></rect>
+      <rect x="3.5" y="10" width="2" height="2" fill="currentColor"></rect>
+      <rect x="5.5" y="8" width="6" height="2" fill="currentColor"></rect>
+      <rect x="7.5" y="6" width="2" height="2" fill="currentColor"></rect>
+      <rect x="9.5" y="4" width="6" height="2" fill="currentColor"></rect>
+      <rect x="15.5" y="6" width="2" height="2" fill="currentColor"></rect>
+      <rect x="17.5" y="8" width="2" height="2" fill="currentColor"></rect>
+      <rect x="19.5" y="10" width="2" height="2" fill="currentColor"></rect>
+      <rect x="15.5" y="12" width="2" height="2" fill="currentColor"></rect>
+      <rect x="9.5" y="10" width="2" height="2" fill="currentColor"></rect>
+      <rect x="11.5" y="12" width="2" height="2" fill="currentColor"></rect>
+      <rect x="17.5" y="10" width="2" height="2" fill="currentColor"></rect>
+    </svg>
+  );
+}
+
+export function ValtownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      viewBox="80 85 230 225"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M265.026 271.002C257.83 271.002 251.994 268.767 247.518 264.293C243.038 259.821 240.802 253.841 240.802 246.363V184.761H226.364V161.881H240.802V128H268.548V161.881H298.5V184.761H268.548V241.521C268.548 245.921 270.604 248.123 274.716 248.123H295.856V271.002H265.026Z"
+          fill="currentColor"
+        />
+        <path
+          d="M204.362 174.325L158.23 250.768H154.266V178.601C154.266 169.37 146.776 161.887 137.536 161.887H126.518V253.01C126.518 262.95 134.586 271.01 144.536 271.01H163.396C173.396 271.01 182.638 265.682 187.64 257.03L242.664 161.887H226.404C217.384 161.887 209.02 166.606 204.362 174.325Z"
+          fill="currentColor"
+        />
+        <path
+          d="M99.9939 161.887H127.8V184.769H99.9939V161.887Z"
+          fill="currentColor"
+        />
+      </g>
+    </svg>
+  );
+}
+
+export function RqliteIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
+      viewBox="0 0 126 126"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g>
+        <path
+          d="M40 14H86L113 41V86L85 114H40L13 87V41L40 14ZM51 37L36 52V75L52 91H75L90 76V53L74 37H51Z"
+          fill="currentColor"
+          fillOpacity={0.2}
+        />
+        <path
+          d="M13 42L40 15H51.5L72.5 35.5L50.5 36.5L14 74L13 42Z"
+          fill="currentColor"
+        />
+        <path
+          d="M52 14.5L89.5 52.5L90 19L85 14.5H52Z"
+          fill="currentColor"
+          fillOpacity="0.8"
+        />
+        <path
+          d="M90.5 19.5V74L112.5 52V41.5L90.5 19.5Z"
+          fill="currentColor"
+          fillOpacity="0.6"
+        />
+        <path
+          d="M113 53.5L112.5 87L85.5 113.5H74L52 91H73.5L112.5 52.5L113 53.5Z"
+          fill="currentColor"
+          fillOpacity="0.4"
+        />
+        <path
+          d="M36 75.5L35 108L40 113H73L36 75.5Z"
+          fill="currentColor"
+          fillOpacity="0.6"
+        />
+        <path
+          d="M13.5 75V86L34.5 107L35.5 53.5L13.5 75Z"
+          fill="currentColor"
+          fillOpacity="0.8"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_51_2">
+          <rect width="126" height="126" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
+export function SQLiteIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("w-12 h-12 flex-shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

@@ -5,16 +5,14 @@ import {
 } from "@/components/icons/outerbase-icon";
 import { buttonVariants } from "@/components/ui/button";
 import WebsiteLayout from "@/components/website-layout";
+import { WEBSITE_GENERAL_DESCRIPTION, WEBSITE_NAME } from "@/const";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 
-const siteDescription =
-  "LibSQL Studio is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything";
-
 export const metadata: Metadata = {
-  title: "LibSQL Studio",
+  title: WEBSITE_NAME,
   keywords: [
     "libsql",
     "rqlite",
@@ -27,10 +25,10 @@ export const metadata: Metadata = {
     "online",
     "client",
   ],
-  description: siteDescription,
+  description: WEBSITE_GENERAL_DESCRIPTION,
   openGraph: {
-    siteName: "LibSQL Studio",
-    description: siteDescription,
+    siteName: WEBSITE_NAME,
+    description: WEBSITE_GENERAL_DESCRIPTION,
   },
 };
 
@@ -84,14 +82,14 @@ function HeroSection() {
             Powerful Database Client
           </h2>
           <p className="max-w-[700px] mt-6 text-lg">
-            LibSQL Studio is a fully-featured, lightweight GUI client for
+            {WEBSITE_NAME} is a fully-featured, lightweight GUI client for
             managing Turso, LibSQL, Cloudflare D1, rqlite, MySQL, and
             PostgreSQL. It runs entirely in your browser, so there&apos;s no
             need to download anything.
           </p>
 
           <div className="flex gap-4 mt-8">
-            <LinkButton title="Open LibSQL Studio" url="/connect" />
+            <LinkButton title={`Open ${WEBSITE_NAME}`} url="/connect" />
           </div>
         </div>
       </div>
@@ -121,7 +119,7 @@ function SupportDriver() {
             <PostgreIcon />
             <span>PostgreSQL</span>
             <span className="text-xs -mt-2 text-yellow-500">
-              Coming Soon 15th Sep 2024
+              Coming Soon 7th Oct 2024
             </span>
           </DatabaseBlock>
 
@@ -186,8 +184,8 @@ function FeatureList() {
           </h1>
 
           <p className="mt-2 text-zinc-400">
-            LibSQL Studio allows you to save your queries and organize them into
-            folders, with the ability to sync across multiple devices.
+            {WEBSITE_NAME} allows you to save your queries and organize them
+            into folders, with the ability to sync across multiple devices.
           </p>
         </div>
 
@@ -204,7 +202,7 @@ function FeatureList() {
           </h1>
 
           <p className="mt-2 text-zinc-400">
-            LibSQL Studio features a user-friendly query editor equipped with
+            {WEBSITE_NAME} features a user-friendly query editor equipped with
             auto-completion and function hint tooltips. It allows you to execute
             multiple queries simultaneously and view their results efficiently.
           </p>
@@ -223,8 +221,8 @@ function FeatureList() {
           </h1>
 
           <p className="mt-2 text-zinc-400">
-            LibSQL Studio allows you to quickly create, modify, and remove table
-            columns with just a few clicks without writing any SQL.
+            {WEBSITE_NAME} allows you to quickly create, modify, and remove
+            table columns with just a few clicks without writing any SQL.
           </p>
         </div>
       </div>
@@ -239,7 +237,7 @@ function CommunitySection() {
 
       <p className="mt-2 text-zinc-400 max-w-[500px] mb-8">
         Join our community for the latest updates, roadmap insights, and
-        discussions on the future of LibSQL Studio.
+        discussions on the future of {WEBSITE_NAME}.
       </p>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -310,7 +308,7 @@ export default async function MainPage() {
           </div>
 
           <p className="tmb-4 max-w-[500px] text-zinc-400">
-            LibSQL Studio has many features and is regularly updated. Since it
+            {WEBSITE_NAME} has many features and is regularly updated. Since it
             is an{" "}
             <Link
               href="https://github.com/outerbase/libsql-studio"
