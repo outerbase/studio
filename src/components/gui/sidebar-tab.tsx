@@ -104,8 +104,7 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
               <div
                 className="w-[250px] h-[120px] mb-2 rounded flex flex-col justify-end m-1"
                 style={{
-                  background:
-                    "url(https://www.outerbase.com/_next/static/media/cloudflare-bg.e2029f2e.jpg)",
+                  background: "url(/outerbase-banner.jpg)",
                   backgroundPosition: "center",
                   backgroundSize: "cover",
                 }}
