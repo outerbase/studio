@@ -51,42 +51,6 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   return (
     <div className={cn("flex h-full border-l-8", bgPrimary)}>
       <div className={cn("shrink-0")}>
-        {/* <div className="text-sm my-2 px-3 font-semibold flex">
-          {config.onBack && (
-            <div
-              className="flex items-center -ml-2 mr-2 cursor-pointer hover:text-blue-500"
-              onClick={config.onBack}
-            >
-              <LucideChevronLeft />
-            </div>
-          )}
-
-          <div className="flex-grow flex items-center">
-            <div className="line-clamp-1 text-ellipsis">{config.name}</div>
-          </div>
-
-          {!disableToggle && (
-            <div className="flex justify-center items-center">
-              <button
-                onClick={() => toggleTheme()}
-                className="text-xs font-normal flex gap-0.5 border rounded px-2 py-1 bg-background"
-              >
-                {theme === "dark" ? (
-                  <>
-                    <LucideMoon className={cn("w-4 h-4")} />
-                    Dark
-                  </>
-                ) : (
-                  <>
-                    <LucideSun className={cn("w-4 h-4")} />
-                    Light
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </div> */}
-
         <div className="flex flex-col border-r h-full p-2 gap-2">
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger>

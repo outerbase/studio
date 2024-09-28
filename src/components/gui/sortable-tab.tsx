@@ -22,7 +22,6 @@ type WindowTabItemButtonProps = ButtonProps & {
   onClose?: () => void;
   isDragging?: boolean;
   index: number;
-  tabCount: number;
 };
 
 export const WindowTabItemButton = forwardRef<
@@ -78,7 +77,6 @@ export const WindowTabItemButton = forwardRef<
 
 export function SortableTab({
   index,
-  tabCount,
   tab,
   selected,
   onSelectChange,
@@ -108,7 +106,6 @@ export function SortableTab({
       onClose={onClose}
       style={style}
       index={index}
-      tabCount={tabCount}
       isDragging={isDragging}
       {...attributes}
       {...listeners}

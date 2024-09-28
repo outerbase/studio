@@ -16,6 +16,77 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+
+function OverlayAround({
+  x,
+  y,
+  w,
+  h,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}) {
+  return (
+    <>
+      <div
+        className="opacity-40 bg-black fixed z-30"
+        style={{ left: 0, width: x + "px", top: 0, bottom: 0 }}
+      ></div>
+      <div
+        className="opacity-40 bg-black fixed z-30"
+        style={{ left: x + w + "px", right: 0, top: 0, bottom: 0 }}
+      ></div>
+      <div
+        className="opacity-40 bg-black fixed z-30"
+        style={{ left: x + "px", top: 0, height: y, width: w }}
+      ></div>
+      <div
+        className="opacity-40 bg-black fixed z-30"
+        style={{ left: x + "px", top: y + h + "px", bottom: 0, width: w }}
+      ></div>
+    </>
+  );
+}
+
+function Onboarding() {
+  const [onboard, setOnboard] = useState(
+    () => !localStorage.getItem("sqlite-onboard-v1")
+  );
+
+  if (!onboard) return null;
+
+  return (
+    <>
+      <OverlayAround x={15} y={8} w={50} h={50} />
+      <div
+        className="fixed z-40 bg-background p-3 rounded-lg shadow-lg text-sm"
+        style={{ top: 10, left: 75 }}
+      >
+        <h2 className="font-semibold text-lg">There is more!</h2>
+        <ul className="list-disc mt-2 mb-4 mx-4">
+          <li>
+            You can <strong>open</strong> and <strong>save</strong> your SQLite
+            database here.
+          </li>
+          <li>Switch dark and light mode</li>
+          <li>And many more in the future</li>
+        </ul>
+        <Button
+          size={"sm"}
+          onClick={() => {
+            setOnboard(false);
+            localStorage.setItem("sqlite-onboard-v1", "1");
+          }}
+        >
+          Got it
+        </Button>
+      </div>
+    </>
+  );
+}
 
 export default function PlaygroundEditorBody({
   preloadDatabase,
@@ -255,6 +326,7 @@ export default function PlaygroundEditorBody({
     <>
       <Script src="/sqljs/sql-wasm.js" onReady={onReady} />
       <ScreenDropZone onFileDrop={setHandler} />
+      <Onboarding />
       {dom}
     </>
   );
