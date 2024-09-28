@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from "react";
-import { identify } from "sql-query-identifier";
+import { format } from "sql-formatter";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   LucideGrid,
   LucideMessageSquareWarning,
+  LucidePencilRuler,
   LucidePlay,
 } from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
@@ -11,54 +12,115 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { selectStatementFromPosition } from "@/drivers/sqlite/sql-helper";
 import QueryProgressLog from "../query-progress-log";
-import { useAutoComplete } from "@/context/auto-complete-provider";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import {
   MultipleQueryProgress,
   MultipleQueryResult,
   multipleQuery,
 } from "@/components/lib/multiple-query";
-import WindowTabs from "../windows-tab";
+import WindowTabs, { useTabsContext } from "../windows-tab";
 import QueryResult from "../query-result";
 import { useSchema } from "@/context/schema-provider";
+import SaveDocButton from "../save-doc-button";
+import {
+  SavedDocData,
+  SavedDocInput,
+} from "@/drivers/saved-doc/saved-doc-driver";
+import { TAB_PREFIX_SAVED_QUERY } from "@/const";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  resolveToNearestStatement,
+  splitSqlQuery,
+} from "../sql-editor/statement-highlight";
+import { CaretDown } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export default function QueryWindow() {
-  const { schema } = useAutoComplete();
-  const { databaseDriver } = useDatabaseDriver();
-  const { refresh: refreshSchema } = useSchema();
-  const [code, setCode] = useState("");
+interface QueryWindowProps {
+  initialCode?: string;
+  initialName: string;
+  initialSavedKey?: string;
+  initialNamespace?: string;
+}
+
+export default function QueryWindow({
+  initialCode,
+  initialName,
+  initialSavedKey,
+  initialNamespace,
+}: QueryWindowProps) {
+  const { databaseDriver, docDriver } = useDatabaseDriver();
+  const { refresh: refreshSchema, autoCompleteSchema } = useSchema();
+  const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
+
+  const [fontSize, setFontSize] = useState(1);
   const [lineNumber, setLineNumber] = useState(0);
   const [columnNumber, setColumnNumber] = useState(0);
 
   const [queryTabIndex, setQueryTabIndex] = useState(0);
   const [progress, setProgress] = useState<MultipleQueryProgress>();
   const [data, setData] = useState<MultipleQueryResult[]>();
+  const [name, setName] = useState(initialName);
+  const { changeCurrentTab } = useTabsContext();
 
-  const onRunClicked = (all = false) => {
-    const statements = identify(code, {
-      dialect: "sqlite",
-      strict: false,
-    });
+  const [namespaceName, setNamespaceName] = useState(
+    initialNamespace ?? "Unsaved Query"
+  );
+  const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
 
+  const onFormatClicked = () => {
+    try {
+      setCode(
+        format(code, {
+          language: "sqlite",
+          tabWidth: 2,
+        })
+      );
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const onRunClicked = (all = false, explained = false) => {
     let finalStatements: string[] = [];
 
-    const editor = editorRef.current;
+    const editorState = editorRef.current?.view?.state;
+
+    if (!editorState) return;
 
     if (all) {
-      finalStatements = statements.map((s) => s.text);
-    } else if (editor?.view) {
-      const position = editor.view.state.selection.main.head;
-      const statement = selectStatementFromPosition(statements, position);
+      finalStatements = splitSqlQuery(editorState).map((q) => q.text);
+    } else {
+      const segment = resolveToNearestStatement(editorState);
+      if (!segment) return;
+
+      let statement = editorState.doc.sliceString(segment.from, segment.to);
+
+      if (
+        explained &&
+        statement.toLowerCase().indexOf("explain query plan") !== 0
+      ) {
+        statement = "explain query plan " + statement;
+      }
 
       if (statement) {
-        finalStatements = [statement.text];
+        finalStatements = [statement];
       }
     }
 
@@ -68,8 +130,8 @@ export default function QueryWindow() {
       setProgress(undefined);
       setQueryTabIndex(0);
 
-      multipleQuery(databaseDriver, finalStatements, (currentProgrss) => {
-        setProgress(currentProgrss);
+      multipleQuery(databaseDriver, finalStatements, (currentProgress) => {
+        setProgress(currentProgress);
       })
         .then(({ result: completeQueryResult, logs: completeLogs }) => {
           setData(completeQueryResult);
@@ -100,6 +162,19 @@ export default function QueryWindow() {
     }
   };
 
+  const onSaveComplete = useCallback(
+    (doc: SavedDocData) => {
+      setNamespaceName(doc.namespace.name);
+      setSavedKey(doc.id);
+      changeCurrentTab({ identifier: TAB_PREFIX_SAVED_QUERY + doc.id });
+    },
+    [changeCurrentTab]
+  );
+
+  const onPrepareSaveContent = useCallback((): SavedDocInput => {
+    return { content: code, name };
+  }, [code, name]);
+
   const windowTab = useMemo(() => {
     return (
       <WindowTabs
@@ -114,6 +189,7 @@ export default function QueryWindow() {
               <QueryResult result={queryResult} key={queryResult.order} />
             ),
             key: "query_" + queryResult.order,
+            identifier: "query_" + queryResult.order,
             title: "Query " + (queryIdx + 1),
             icon: LucideGrid,
           })),
@@ -121,6 +197,7 @@ export default function QueryWindow() {
             ? [
                 {
                   key: "summary",
+                  identifier: "summary",
                   title: "Summary",
                   icon: LucideMessageSquareWarning,
                   component: (
@@ -140,12 +217,86 @@ export default function QueryWindow() {
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
-          <div className="grow overflow-hidden">
+          <div className="border-b pl-3 pr-1 py-2 flex">
+            <div className="text-sm shrink-0 items-center flex text-secondary-foreground p-1">
+              {namespaceName} /
+            </div>
+            <div className="inline-block relative">
+              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0 bg-background">
+                &nbsp;{name}
+              </span>
+              <input
+                onBlur={(e) => {
+                  changeCurrentTab({
+                    title: e.currentTarget.value || "Unnamed Query",
+                  });
+                }}
+                placeholder="Please name your query"
+                spellCheck="false"
+                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded bg-background"
+                value={name}
+                onChange={(e) => setName(e.currentTarget.value)}
+              />
+            </div>
+
+            <div className="flex-1" />
+
+            <div className="flex gap-2">
+              {docDriver && (
+                <SaveDocButton
+                  onComplete={onSaveComplete}
+                  onPrepareContent={onPrepareSaveContent}
+                  docId={savedKey}
+                />
+              )}
+
+              <div className="flex">
+                <button
+                  onClick={() => onRunClicked()}
+                  className={cn(
+                    buttonVariants({ size: "sm" }),
+                    "rounded-r-none"
+                  )}
+                >
+                  <LucidePlay className="w-4 h-4 mr-2" />
+                  Run
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className={cn(
+                        buttonVariants({ size: "sm" }),
+                        "rounded-l-none border-l"
+                      )}
+                    >
+                      <CaretDown size={12} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => onRunClicked()}>
+                      Run Current Statement
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onRunClicked(true)}>
+                      Run All Statements
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onRunClicked(false, true)}>
+                      Explain Current Statement
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
+          <div className="grow overflow-hidden p-2">
             <SqlEditor
               ref={editorRef}
+              dialect={databaseDriver.getFlags().dialect}
               value={code}
               onChange={setCode}
-              schema={schema}
+              schema={autoCompleteSchema}
+              fontSize={fontSize}
+              onFontSizeChanged={setFontSize}
               onCursorChange={(_, line, col) => {
                 setLineNumber(line);
                 setColumnNumber(col);
@@ -154,30 +305,37 @@ export default function QueryWindow() {
                 if (KEY_BINDING.run.match(e)) {
                   onRunClicked();
                   e.preventDefault();
+                } else if (KEY_BINDING.format.match(e)) {
+                  onFormatClicked();
+                  e.preventDefault();
+                  e.stopPropagation();
                 }
               }}
             />
           </div>
           <div className="grow-0 shrink-0">
-            <Separator />
-            <div className="flex gap-1 p-1">
-              <Button variant={"ghost"} onClick={() => onRunClicked()}>
-                <LucidePlay className="w-4 h-4 mr-2" />
-                Run Current{" "}
-                <span className="text-xs ml-2 px-2 bg-secondary py-1 rounded">
-                  {KEY_BINDING.run.toString()}
-                </span>
-              </Button>
-
-              <Button variant={"ghost"} onClick={() => onRunClicked(true)}>
-                <LucidePlay className="w-4 h-4 mr-2" />
-                Run All
-              </Button>
-
-              <div className="grow justify-end items-center flex text-sm mr-2 gap-2">
+            <div className="flex gap-1 pb-2 px-2">
+              <div className="grow items-center flex text-xs mr-2 gap-2 pl-4">
                 <div>Ln {lineNumber}</div>
                 <div>Col {columnNumber + 1}</div>
               </div>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant={"ghost"} size="sm" onClick={onFormatClicked}>
+                    <LucidePencilRuler className="w-4 h-4 mr-2" />
+                    Format
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="p-4">
+                  <p className="mb-2">
+                    <span className="inline-block py-1 px-2 rounded bg-secondary text-secondary-foreground">
+                      {KEY_BINDING.format.toString()}
+                    </span>
+                  </p>
+                  <p>Format SQL queries for readability</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>

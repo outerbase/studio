@@ -4,10 +4,13 @@ import { WindowTabItemProps } from "./windows-tab";
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 import { ButtonProps } from "../ui/button";
+import { CSS } from "../lib/dnd-kit";
 
 interface SortableTabProps {
   tab: WindowTabItemProps;
   selected: boolean;
+  index: number;
+  tabCount: number;
   onSelectChange: () => void;
   onClose?: () => void;
 }
@@ -17,25 +20,40 @@ type WindowTabItemButtonProps = ButtonProps & {
   title: string;
   icon: LucideIcon;
   onClose?: () => void;
+  isDragging?: boolean;
+  index: number;
 };
 
 export const WindowTabItemButton = forwardRef<
   HTMLButtonElement,
   WindowTabItemButtonProps
 >(function WindowTabItemButton(props: WindowTabItemButtonProps, ref) {
-  const { icon: Icon, selected, title, onClose, ...rest } = props;
-
-  const className = cn(
-    "h-9 flex items-center text-left text-xs font-semibold px-2 w-max-[150px]",
-    "libsql-window-tab",
-    selected
-      ? "border-x border-t bg-background border-b-background rounded-t"
-      : "border-b border-t border-t-secondary border-x-secondary opacity-65 hover:opacity-100"
-  );
+  const {
+    icon: Icon,
+    selected,
+    title,
+    onClose,
+    isDragging,
+    index,
+    ...rest
+  } = props;
 
   return (
-    <button className={className} ref={ref} {...rest}>
-      <Icon className="w-4 h-4 ml-2 grow-0 shrink-0" />
+    <button
+      className={cn(
+        "h-[45px] bg-secondary flex items-center text-left text-xs px-2 border-b border-t-3 border-r w-[170px]",
+        "libsql-window-tab",
+        isDragging && "z-20",
+        selected
+          ? "border-b-background bg-background text-primary"
+          : "opacity-65 hover:opacity-100",
+        index === 0 ? "border-l-none" : ""
+      )}
+      onAuxClick={({ button }) => button === 1 && onClose && onClose()}
+      ref={ref}
+      {...rest}
+    >
+      <Icon className="ml-2 h-4 w-4 shrink-0 grow-0" />
       <div className="line-clamp-1 grow px-2">{title}</div>
       {onClose && (
         <div
@@ -43,13 +61,13 @@ export const WindowTabItemButton = forwardRef<
             "rounded-full hover:bg-red-600 hover:text-white w-4 h-4 ml-2 flex justify-center items-center",
             "libsql-window-close"
           )}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClose) onClose();
+          }}
         >
           <LucideX
             className={cn("w-3 h-3 grow-0 shrink-0", "libsql-window-close")}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onClose) onClose();
-            }}
           />
         </div>
       )}
@@ -58,12 +76,25 @@ export const WindowTabItemButton = forwardRef<
 });
 
 export function SortableTab({
+  index,
   tab,
   selected,
   onSelectChange,
   onClose,
 }: SortableTabProps) {
-  const { attributes, listeners, setNodeRef } = useSortable({ id: tab.key });
+  const {
+    attributes,
+    listeners,
+    transition,
+    transform,
+    isDragging,
+    setNodeRef,
+  } = useSortable({ id: tab.key });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
 
   return (
     <WindowTabItemButton
@@ -73,6 +104,9 @@ export function SortableTab({
       onClick={onSelectChange}
       selected={selected}
       onClose={onClose}
+      style={style}
+      index={index}
+      isDragging={isDragging}
       {...attributes}
       {...listeners}
     />

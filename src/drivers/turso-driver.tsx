@@ -9,6 +9,7 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
+  DriverFlags,
 } from "@/drivers/base-driver";
 import { convertSqliteType } from "./sqlite/sql-helper";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
@@ -37,7 +38,12 @@ export function transformRawResult(raw: ResultSet): DatabaseResultSet {
 
   const rows = raw.rows.map((r) =>
     headers.reduce((a, b, idx) => {
-      a[b.name] = r[idx];
+      const cellValue = r[idx];
+      if (cellValue instanceof Uint8Array) {
+        a[b.name] = Array.from(cellValue);
+      } else {
+        a[b.name] = r[idx];
+      }
       return a;
     }, {} as DatabaseRow)
   );
@@ -92,8 +98,12 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
     }
   }
 
-  supportBigInt(): boolean {
-    return this.bigInt;
+  override getFlags(): DriverFlags {
+    return {
+      ...super.getFlags(),
+      supportBigInt: this.bigInt,
+      mismatchDetection: this.bigInt,
+    };
   }
 
   async query(stmt: InStatement) {

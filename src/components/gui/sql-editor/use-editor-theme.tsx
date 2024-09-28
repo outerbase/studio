@@ -3,7 +3,11 @@ import { tags as t } from "@lezer/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
 import { useMemo } from "react";
 
-export default function useCodeEditorTheme() {
+export default function useCodeEditorTheme({
+  fontSize = 1,
+}: {
+  fontSize?: number;
+}) {
   const { theme } = useTheme();
 
   return useMemo(() => {
@@ -19,7 +23,8 @@ export default function useCodeEditorTheme() {
           gutterBackground: "#fff",
           gutterForeground: "#4D4D4C",
           gutterBorder: "transparent",
-          lineHighlight: "#00000012",
+          lineHighlight: "var(--accent)",
+          fontSize: fontSize + "rem",
           fontFamily:
             'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
         },
@@ -48,10 +53,11 @@ export default function useCodeEditorTheme() {
           caret: "#c6c6c6",
           selection: "#6199ff2f",
           selectionMatch: "#72a1ff59",
-          lineHighlight: "#ffffff0f",
+          lineHighlight: "var(--accent)",
           gutterBackground: "var(--background)",
           gutterForeground: "#838383",
           gutterActiveForeground: "#fff",
+          fontSize: fontSize + "rem",
           fontFamily:
             'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
         },
@@ -67,5 +73,5 @@ export default function useCodeEditorTheme() {
         ],
       });
     }
-  }, [theme]);
+  }, [theme, fontSize]);
 }

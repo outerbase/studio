@@ -8,13 +8,6 @@ export type InValue =
   | Uint8Array
   | Date;
 
-export type Statement =
-  | string
-  | {
-      sql: string;
-      args: InValue[] | Record<string, InValue>;
-    };
-
 export enum TableColumnDataType {
   TEXT = 1,
   INTEGER = 2,
@@ -22,6 +15,23 @@ export enum TableColumnDataType {
   BLOB = 4,
 }
 
+export function describeTableColumnType(type: TableColumnDataType) {
+  switch (type) {
+    case TableColumnDataType.TEXT:
+      return "TEXT";
+
+    case TableColumnDataType.INTEGER:
+      return "INTEGER";
+
+    case TableColumnDataType.REAL:
+      return "REAL";
+
+    case TableColumnDataType.BLOB:
+      return "BLOB";
+  }
+}
+
+export type SupportedDialect = "sqlite" | "mysql";
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 
@@ -29,7 +39,7 @@ export interface DatabaseHeader {
   name: string;
   displayName: string;
   originalType: string | null;
-  type: TableColumnDataType;
+  type: TableColumnDataType | undefined;
 }
 
 export interface DatabaseResultStat {
@@ -60,9 +70,12 @@ export interface SelectFromTableOptions {
 
 export type DatabaseValue<T = unknown> = T | undefined | null;
 
+export type DatabaseSchemas = Record<string, DatabaseSchemaItem[]>;
+
 export interface DatabaseSchemaItem {
-  type: "table" | "trigger" | "view";
+  type: "table" | "trigger" | "view" | "schema";
   name: string;
+  schemaName: string;
   tableName?: string;
   tableSchema?: DatabaseTableSchema;
 }
@@ -89,6 +102,7 @@ export type DatabaseForeignKeyAction =
   | "NO_ACTION";
 
 export interface DatabaseForeignKeyClause {
+  foreignSchemaName?: string;
   foreignTableName?: string;
   foreignColumns?: string[];
   columns?: string[];
@@ -134,10 +148,13 @@ export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
   autoIncrement: boolean;
+  schemaName: string;
   tableName?: string;
   constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
   fts5?: DatabaseTableFts5;
+  withoutRowId?: boolean;
+  strict?: boolean;
 }
 
 export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
@@ -182,26 +199,76 @@ export interface DatabaseTableOperationReslt {
   record?: Record<string, DatabaseValue>;
 }
 
+export interface DriverFlags {
+  defaultSchema: string;
+  optionalSchema: boolean;
+  supportBigInt: boolean;
+  supportCreateUpdateTable: boolean;
+  mismatchDetection: boolean;
+  dialect: SupportedDialect;
+}
+
+export interface DatabaseTableColumnChange {
+  old: DatabaseTableColumn | null;
+  new: DatabaseTableColumn | null;
+}
+
+export interface DatabaseTableConstraintChange {
+  id: string;
+  old: DatabaseTableColumnConstraint | null;
+  new: DatabaseTableColumnConstraint | null;
+}
+
+export interface DatabaseTableSchemaChange {
+  schemaName?: string;
+  name: {
+    old?: string;
+    new?: string;
+  };
+  columns: DatabaseTableColumnChange[];
+  constraints: DatabaseTableConstraintChange[];
+  createScript?: string;
+}
+
 export abstract class BaseDriver {
   // Flags
-  abstract supportBigInt(): boolean;
+  abstract getFlags(): DriverFlags;
+
+  // Helper class
+  abstract escapeId(id: string): string;
+  abstract escapeValue(value: unknown): string;
 
   // Methods
   abstract close(): void;
 
-  abstract query(stmt: Statement): Promise<DatabaseResultSet>;
-  abstract transaction(stmts: Statement[]): Promise<DatabaseResultSet[]>;
+  abstract query(stmt: string): Promise<DatabaseResultSet>;
+  abstract transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
-  abstract schemas(): Promise<DatabaseSchemaItem[]>;
-  abstract tableSchema(tableName: string): Promise<DatabaseTableSchema>;
-  abstract trigger(name: string): Promise<DatabaseTriggerSchema>;
+  abstract schemas(): Promise<DatabaseSchemas>;
+  abstract tableSchema(
+    schemaName: string,
+    tableName: string
+  ): Promise<DatabaseTableSchema>;
+
+  abstract trigger(
+    schemaName: string,
+    name: string
+  ): Promise<DatabaseTriggerSchema>;
+
+  abstract findFirst(
+    schemaName: string,
+    tableName: string,
+    key: Record<string, DatabaseValue>
+  ): Promise<DatabaseResultSet>;
 
   abstract selectTable(
+    schemaName: string,
     tableName: string,
     options: SelectFromTableOptions
   ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }>;
 
   abstract updateTableData(
+    schemaName: string,
     tableName: string,
     ops: DatabaseTableOperation[],
 
@@ -209,4 +276,6 @@ export abstract class BaseDriver {
     // if the operation is unsafe
     validateSchema?: DatabaseTableSchema
   ): Promise<DatabaseTableOperationReslt[]>;
+
+  abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
 }

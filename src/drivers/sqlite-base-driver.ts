@@ -1,41 +1,48 @@
-import { validateOperation } from "@/components/lib/validation";
 import type {
-  Statement,
   DatabaseResultSet,
   DatabaseSchemaItem,
+  DatabaseSchemas,
   DatabaseTableColumn,
-  DatabaseTableOperation,
-  DatabaseTableOperationReslt,
   DatabaseTableSchema,
+  DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
+  DatabaseValue,
+  DriverFlags,
   SelectFromTableOptions,
 } from "./base-driver";
-import { BaseDriver } from "./base-driver";
-
-import {
-  escapeSqlValue,
-  generateInsertStatement,
-  generateDeleteStatement,
-  generateUpdateStatement,
-  generateSelectOneWithConditionStatement,
-} from "@/drivers/sqlite/sql-helper";
+import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
+import CommonSQLImplement from "./common-sql-imp";
+import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
 
-export abstract class SqliteLikeBaseDriver extends BaseDriver {
-  protected escapeId(id: string) {
+export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
+  supportPragmaList = true;
+
+  escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;
   }
 
-  abstract override query(stmt: Statement): Promise<DatabaseResultSet>;
-  abstract override transaction(
-    stmts: Statement[]
-  ): Promise<DatabaseResultSet[]>;
+  escapeValue(value: unknown): string {
+    return escapeSqlValue(value);
+  }
 
-  async schemas(): Promise<DatabaseSchemaItem[]> {
-    const result = await this.query("SELECT * FROM sqlite_schema;");
+  getFlags(): DriverFlags {
+    return {
+      supportBigInt: false,
+      defaultSchema: "main",
+      optionalSchema: true,
+      mismatchDetection: false,
+      supportCreateUpdateTable: true,
+      dialect: "sqlite",
+    };
+  }
 
+  protected getSchemaList(
+    result: DatabaseResultSet,
+    schemaName: string
+  ): DatabaseSchemaItem[] {
     const tmp: DatabaseSchemaItem[] = [];
     const rows = result.rows as Array<{
       type: string;
@@ -49,45 +56,34 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
         try {
           tmp.push({
             type: "table",
+            schemaName,
             name: row.name,
-            tableSchema: parseCreateTableScript(row.sql),
+            tableSchema: parseCreateTableScript(schemaName, row.sql),
           });
         } catch {
-          tmp.push({ type: "table", name: row.name });
+          tmp.push({ type: "table", name: row.name, schemaName });
         }
       } else if (row.type === "trigger") {
-        tmp.push({ type: "trigger", name: row.name, tableName: row.tbl_name });
+        tmp.push({
+          type: "trigger",
+          name: row.name,
+          tableName: row.tbl_name,
+          schemaName,
+        });
       } else if (row.type === "view") {
-        tmp.push({ type: "view", name: row.name });
+        tmp.push({ type: "view", name: row.name, schemaName });
       }
     }
 
     return tmp;
   }
 
-  async trigger(name: string): Promise<DatabaseTriggerSchema> {
-    const result = await this.query(
-      `SELECT * FROM sqlite_schema WHERE "type"='trigger' AND name=${escapeSqlValue(
-        name
-      )};`
-    );
-
-    const triggerRow = result.rows[0] as { sql: string } | undefined;
-    if (!triggerRow) throw new Error("Trigger does not exist");
-
-    return parseCreateTriggerScript(triggerRow.sql);
-  }
-
-  close(): void {
-    // do nothing
-  }
-
   protected async legacyTableSchema(
+    schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const sql = "SELECT * FROM pragma_table_info(?);";
-    const binding = [tableName];
-    const result = await this.query({ sql, args: binding });
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.pragma_table_info(${this.escapeId(tableName)});`;
+    const result = await this.query(sql);
 
     const rows = result.rows as Array<{
       name: string;
@@ -106,7 +102,7 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
 
     try {
       const seqCount = await this.query(
-        `SELECT COUNT(*) AS total FROM sqlite_sequence WHERE name=${escapeSqlValue(
+        `SELECT COUNT(*) AS total FROM ${this.escapeId(schemaName)}.sqlite_sequence WHERE name=${escapeSqlValue(
           tableName
         )};`
       );
@@ -121,35 +117,145 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
 
     return {
       columns,
+      schemaName,
       pk: columns.filter((col) => col.pk).map((col) => col.name),
       autoIncrement: hasAutoIncrement,
     };
   }
 
-  async tableSchema(tableName: string): Promise<DatabaseTableSchema> {
-    const sql = `SELECT * FROM sqlite_schema WHERE tbl_name = ${escapeSqlValue(
+  async schemas(): Promise<DatabaseSchemas> {
+    let databaseList = [{ name: "main" }];
+
+    try {
+      if (this.supportPragmaList) {
+        databaseList = (await this.query("PRAGMA database_list;")).rows as {
+          name: string;
+        }[];
+      }
+    } catch {
+      console.error("PRAGMA database_list statement is not supported");
+    }
+
+    const tableListPerDatabase = await this.transaction(
+      databaseList.map(
+        (d) => `SELECT * FROM ${this.escapeId(d.name)}.sqlite_schema;`
+      )
+    );
+
+    return tableListPerDatabase.reduce((a, b, idx) => {
+      const schemaName = databaseList[idx].name;
+      a[databaseList[idx].name] = this.getSchemaList(b, schemaName);
+      return a;
+    }, {} as DatabaseSchemas);
+  }
+
+  async trigger(
+    schemaName: string,
+    name: string
+  ): Promise<DatabaseTriggerSchema> {
+    const result = await this.query(
+      `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE "type"='trigger' AND name=${escapeSqlValue(
+        name
+      )};`
+    );
+
+    const triggerRow = result.rows[0] as { sql: string } | undefined;
+    if (!triggerRow) throw new Error("Trigger does not exist");
+
+    return parseCreateTriggerScript(triggerRow.sql);
+  }
+
+  close(): void {
+    // do nothing
+  }
+
+  async tableSchema(
+    schemaName: string,
+    tableName: string
+  ): Promise<DatabaseTableSchema> {
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE tbl_name = ${escapeSqlValue(
       tableName
     )};`;
     const result = await this.query(sql);
 
     try {
-      const rows = result.rows as Array<{ type: string; sql: string }>;
-      const def = rows.find((row) => row.type === "table");
-      if (def) {
-        const createScript = def.sql;
-        return { ...parseCreateTableScript(createScript), createScript };
-      }
-    } catch (e) {
-      console.error(e);
-    }
+      try {
+        const rows = result.rows as Array<{ type: string; sql: string }>;
+        const def = rows.find((row) => row.type === "table");
+        if (def) {
+          const createScript = def.sql;
 
-    return await this.legacyTableSchema(tableName);
+          return {
+            ...parseCreateTableScript(schemaName, createScript),
+            createScript,
+            schemaName,
+          };
+        }
+
+        throw new Error("Unexpected error finding table " + tableName);
+      } catch (e) {
+        throw new Error("Unexpected error while parsing");
+      }
+    } catch {
+      return await this.legacyTableSchema(schemaName, tableName);
+    }
+  }
+
+  createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
+    return generateSqlSchemaChange(change);
+  }
+
+  override async findFirst(
+    schemaName: string,
+    tableName: string,
+    key: Record<string, DatabaseValue>
+  ): Promise<DatabaseResultSet> {
+    const wherePart = Object.entries(key)
+      .map(([colName, colValue]) => {
+        return `${this.escapeId(colName)} = ${escapeSqlValue(colValue)}`;
+      })
+      .join(", ");
+
+    // If there is rowid, it is likely, we need to query that row back
+    console.log("sss", key);
+    const hasRowId = !!key["rowid"];
+
+    const sql = `SELECT ${hasRowId ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
+    return this.query(sql);
   }
 
   async selectTable(
+    schemaName: string,
     tableName: string,
     options: SelectFromTableOptions
   ): Promise<{ data: DatabaseResultSet; schema: DatabaseTableSchema }> {
+    const schema = await this.tableSchema(schemaName, tableName);
+    let injectRowIdColumn = false;
+
+    // If there is no primary key, we will fallback to rowid.
+    // But we need to make sure there is no rowid column
+    if (
+      schema.pk.length === 0 &&
+      !schema.withoutRowId &&
+      !schema.columns.find((c) => c.name === "rowid")
+    ) {
+      // Inject the rowid column
+      injectRowIdColumn = true;
+      schema.columns = [
+        {
+          name: "rowid",
+          type: "INTEGER",
+          constraint: {
+            primaryKey: true,
+            autoIncrement: true,
+          },
+        },
+        ...schema.columns,
+      ];
+      schema.pk = ["rowid"];
+      schema.autoIncrement = true;
+    }
+
     const whereRaw = options.whereRaw?.trim();
 
     const orderPart =
@@ -159,111 +265,13 @@ export abstract class SqliteLikeBaseDriver extends BaseDriver {
             .join(", ")
         : "";
 
-    const sql = `SELECT * FROM ${this.escapeId(tableName)}${
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
       whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ? OFFSET ?;`;
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
-    const binding = [options.limit, options.offset];
     return {
-      data: await this.query({ sql, args: binding }),
-      schema: await this.tableSchema(tableName),
+      data: await this.query(sql),
+      schema,
     };
-  }
-
-  protected validateUpdateOperation(
-    ops: DatabaseTableOperation[],
-    validateSchema: DatabaseTableSchema
-  ) {
-    for (const op of ops) {
-      const { valid, reason } = validateOperation(op, validateSchema);
-      if (!valid) {
-        throw new Error(reason);
-      }
-    }
-  }
-
-  async updateTableData(
-    tableName: string,
-    ops: DatabaseTableOperation[],
-    validateSchema?: DatabaseTableSchema
-  ): Promise<DatabaseTableOperationReslt[]> {
-    if (validateSchema) {
-      this.validateUpdateOperation(ops, validateSchema);
-    }
-
-    const sqls = ops.map((op) => {
-      if (op.operation === "INSERT")
-        return generateInsertStatement(tableName, op.values);
-      if (op.operation === "DELETE")
-        return generateDeleteStatement(tableName, op.where);
-
-      return generateUpdateStatement(tableName, op.where, op.values);
-    });
-
-    const result = await this.transaction(sqls);
-
-    const tmp: DatabaseTableOperationReslt[] = [];
-
-    for (let i = 0; i < result.length; i++) {
-      const r = result[i];
-      const op = ops[i];
-
-      if (!r || !op) {
-        tmp.push({});
-        continue;
-      }
-
-      if (op.operation === "UPDATE") {
-        const selectStatement = generateSelectOneWithConditionStatement(
-          tableName,
-          op.where
-        );
-
-        // This transform to make it friendly for sending via HTTP
-        const selectResult = await this.query(selectStatement);
-
-        tmp.push({
-          lastId: r.lastInsertRowid,
-          record: selectResult.rows[0],
-        });
-      } else if (op.operation === "INSERT") {
-        if (op.autoIncrementPkColumn) {
-          const selectStatement = generateSelectOneWithConditionStatement(
-            tableName,
-            { [op.autoIncrementPkColumn]: r.lastInsertRowid }
-          );
-
-          // This transform to make it friendly for sending via HTTP
-          const selectResult = await this.query(selectStatement);
-
-          tmp.push({
-            record: selectResult.rows[0],
-            lastId: r.lastInsertRowid,
-          });
-        } else if (op.pk && op.pk.length > 0) {
-          const selectStatement = generateSelectOneWithConditionStatement(
-            tableName,
-            op.pk.reduce<Record<string, unknown>>((a, b) => {
-              a[b] = op.values[b];
-              return a;
-            }, {})
-          );
-
-          // This transform to make it friendly for sending via HTTP
-          const selectResult = await this.query(selectStatement);
-
-          tmp.push({
-            record: selectResult.rows[0],
-            lastId: r.lastInsertRowid,
-          });
-        } else {
-          tmp.push({});
-        }
-      }
-
-      tmp.push({});
-    }
-
-    return tmp;
   }
 }

@@ -1,4 +1,3 @@
-import { DatabaseTableColumnChange, DatabaseTableSchemaChange } from ".";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import {
   DropdownMenu,
@@ -22,7 +21,9 @@ import ColumnDefaultValueInput from "./column-default-value-input";
 import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
+  DatabaseTableColumnChange,
   DatabaseTableColumnConstraint,
+  DatabaseTableSchemaChange,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ import ColumnUniquePopup from "./column-unique-popup";
 import ColumnForeignKeyPopup from "./column-fk-popup";
 import ColumnGeneratingPopup from "./column-generate-popup";
 import ColumnCheckPopup from "./column-check-popup";
+import { Button } from "@/components/ui/button";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
@@ -82,10 +84,12 @@ function changeColumnOnIndex(
 function ColumnItem({
   value,
   idx,
+  schemaName,
   onChange,
 }: {
   value: DatabaseTableColumnChange;
   idx: number;
+  schemaName?: string;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }) {
   const disabled = !!value.old;
@@ -196,11 +200,12 @@ function ColumnItem({
             />
           )}
 
-          {column.constraint?.foreignKey && (
+          {column.constraint?.foreignKey && schemaName && (
             <ColumnForeignKeyPopup
               constraint={column.constraint.foreignKey}
               disabled={disabled}
               onChange={change}
+              schemaName={schemaName}
             />
           )}
 
@@ -292,9 +297,13 @@ function ColumnItem({
 export default function SchemaEditorColumnList({
   columns,
   onChange,
+  schemaName,
+  onAddColumn,
 }: Readonly<{
   columns: DatabaseTableColumnChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  schemaName?: string;
+  onAddColumn: () => void;
 }>) {
   const headerStyle = "text-xs p-2 text-left bg-secondary border";
 
@@ -314,9 +323,24 @@ export default function SchemaEditorColumnList({
         </thead>
         <tbody>
           {columns.map((col, idx) => (
-            <ColumnItem idx={idx} value={col} key={idx} onChange={onChange} />
+            <ColumnItem
+              idx={idx}
+              value={col}
+              key={idx}
+              onChange={onChange}
+              schemaName={schemaName}
+            />
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={7} className="px-4 py-2 border">
+              <Button size="sm" onClick={onAddColumn}>
+                <LucidePlus className="w-4 h-4 mr-1" /> Add Column
+              </Button>
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

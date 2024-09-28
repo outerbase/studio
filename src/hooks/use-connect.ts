@@ -2,7 +2,7 @@
 import {
   SavedConnectionItemConfigConfig,
   SupportedDriver,
-} from "@/app/connect/saved-connection-storage";
+} from "@/app/(theme)/connect/saved-connection-storage";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
@@ -19,6 +19,7 @@ export default function useConnect() {
           token: config.token,
           username: config.username,
           password: config.password,
+          database: config.database,
         })
       );
 

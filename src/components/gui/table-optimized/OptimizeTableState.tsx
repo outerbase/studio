@@ -7,6 +7,7 @@ import {
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { ReactElement } from "react";
+import deepEqual from "deep-equal";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -26,6 +27,7 @@ export default class OptimizeTableState {
   protected headerWidth: number[] = [];
   protected editMode = false;
   protected readOnlyMode = false;
+  public mismatchDetection = false;
   protected container: HTMLDivElement | null = null;
 
   protected changeCallback: TableChangeEventCallback[] = [];
@@ -56,7 +58,8 @@ export default class OptimizeTableState {
             const currentCell = dataResult.rows[i];
             if (currentCell) {
               maxSize = Math.max(
-                (currentCell[headerName ?? ""]?.toString() ?? "").length
+                (currentCell[headerName ?? ""]?.toString() ?? "").length,
+                maxSize
               );
             }
           }
@@ -76,8 +79,8 @@ export default class OptimizeTableState {
           for (const c of schemaResult.constraints) {
             if (
               c.foreignKey &&
-              c.foreignKey.foreignColumns?.length === 1 &&
-              c.foreignKey.foreignColumns[0] === header.name
+              c.foreignKey.columns?.length === 1 &&
+              c.foreignKey.columns[0] === header.name
             ) {
               foreignKey = c.foreignKey;
             }
@@ -96,8 +99,12 @@ export default class OptimizeTableState {
         return {
           initialSize,
           name: headerName ?? "",
+          originalDataType: header.originalType,
           displayName: header.displayName,
           resizable: true,
+          isPrimaryKey: schemaResult
+            ? schemaResult.pk.includes(header.name)
+            : false,
           headerData,
           foreignKey,
           dataType,
@@ -121,6 +128,10 @@ export default class OptimizeTableState {
 
   setReadOnlyMode(readOnly: boolean) {
     this.readOnlyMode = readOnly;
+  }
+
+  getReadOnlyMode() {
+    return this.readOnlyMode;
   }
 
   setContainer(div: HTMLDivElement | null) {
@@ -187,6 +198,8 @@ export default class OptimizeTableState {
   }
 
   changeValue(y: number, x: number, newValue: unknown) {
+    if (this.readOnlyMode) return;
+
     const oldValue = this.getOriginalValue(y, x);
 
     const row = this.data[y];
@@ -194,7 +207,7 @@ export default class OptimizeTableState {
 
     if (!row) return;
 
-    if (oldValue === newValue) {
+    if (deepEqual(oldValue, newValue)) {
       const rowChange = row.change;
       if (rowChange && headerName in rowChange) {
         delete rowChange[headerName];
@@ -281,7 +294,7 @@ export default class OptimizeTableState {
     this.broadcastChange();
   }
 
-  insertNewRow(index = -1) {
+  insertNewRow(index = -1, initialData: Record<string, unknown> = {}) {
     if (index === -1) {
       const focus = this.getFocus();
       if (focus) index = focus.y;
@@ -292,7 +305,7 @@ export default class OptimizeTableState {
     const newRow = {
       isNewRow: true,
       raw: {},
-      change: {},
+      change: initialData,
       changeKey: ++this.changeCounter,
     };
 
@@ -339,6 +352,10 @@ export default class OptimizeTableState {
     return this.data;
   }
 
+  getRowByIndex(idx: number) {
+    return this.data[idx];
+  }
+
   // ------------------------------------------------
   // Handle focus logic
   // ------------------------------------------------
@@ -382,7 +399,6 @@ export default class OptimizeTableState {
   }
 
   enterEditMode() {
-    if (this.readOnlyMode) return;
     this.editMode = true;
     this.broadcastChange();
   }

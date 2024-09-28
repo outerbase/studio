@@ -34,7 +34,7 @@ export default function TopbarProfile({ user }: Readonly<{ user: User }>) {
         </Link>
         <DropdownMenuSeparator />
 
-        <Link href="/logout">
+        <Link href="/logout" prefetch={false}>
           <DropdownMenuItem inset>Logout</DropdownMenuItem>
         </Link>
       </DropdownMenuContent>

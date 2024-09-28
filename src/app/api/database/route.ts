@@ -5,7 +5,7 @@ import { database, database_role, database_user_role } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
 import { encrypt } from "@/lib/encryption-edge";
-import { SavedConnectionItem } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItem } from "@/app/(theme)/connect/saved-connection-storage";
 import { get_database } from "@/db";
 
 export const runtime = "edge";
@@ -14,12 +14,13 @@ const databaseSchema = zod.object({
   name: zod.string().min(3).max(50),
   description: zod.string(),
   label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
-  driver: zod.enum(["turso", "rqlite", "valtown"]),
+  driver: zod.enum(["turso", "rqlite", "valtown", "cloudflare-d1"]),
   config: zod.object({
     url: zod.string().optional(),
     token: zod.string().optional(),
     username: zod.string().optional(),
     password: zod.string().optional(),
+    database: zod.string().optional(),
   }),
 });
 
@@ -54,12 +55,11 @@ export const POST = withUser(async ({ user, req }) => {
         driver: data.driver,
         name: data.name,
         host: data.config.url,
+        databaseName: data.config.database,
         token: data.config.token
           ? await encrypt(env.ENCRYPTION_KEY, data.config.token)
           : undefined,
-        username: data.config.username
-          ? await encrypt(env.ENCRYPTION_KEY, data.config.username)
-          : undefined,
+        username: data.config.username,
         password: data.config.password
           ? await encrypt(env.ENCRYPTION_KEY, data.config.password)
           : undefined,

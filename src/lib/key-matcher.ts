@@ -76,4 +76,7 @@ export const KEY_BINDING = {
   run: new KeyMatcher({ ctrl: true, key: "Enter" }),
   copy: new KeyMatcher({ ctrl: true, key: "c" }),
   paste: new KeyMatcher({ ctrl: true, key: "v" }),
+  format: new KeyMatcher({ ctrl: true, shift: true, key: "i" }),
+  commit: new KeyMatcher({ ctrl: true, key: "s" }),
+  discard: new KeyMatcher({ ctrl: true, shift: true, key: "Delete" }),
 };

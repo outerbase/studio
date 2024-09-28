@@ -5,7 +5,7 @@ import { database } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { encrypt } from "@/lib/encryption-edge";
 import { env } from "@/env";
-import { SavedConnectionItemConfig } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItemConfig } from "@/app/(theme)/connect/saved-connection-storage";
 import { get_database } from "@/db";
 
 export const runtime = "edge";
@@ -15,10 +15,11 @@ const databaseSchema = zod.object({
   description: zod.string(),
   label: zod.enum(["gray", "red", "yellow", "green", "blue"]),
   config: zod.object({
-    url: zod.string().min(5),
+    url: zod.string().optional(),
     token: zod.string().optional(),
     username: zod.string().optional(),
     password: zod.string().optional(),
+    database: zod.string().optional(),
   }),
 });
 
@@ -32,6 +33,8 @@ export const GET = withDatabaseOperation(async ({ database: databaseInfo }) => {
     label: databaseInfo.color,
     config: {
       url: databaseInfo.host,
+      username: databaseInfo.username,
+      database: databaseInfo.databaseName,
       token: "",
     },
   } as SavedConnectionItemConfig);
@@ -88,9 +91,8 @@ export const PUT = withDatabaseOperation(
         token: data.config.token
           ? await encrypt(env.ENCRYPTION_KEY, data.config.token)
           : undefined,
-        username: data.config.username
-          ? await encrypt(env.ENCRYPTION_KEY, data.config.username)
-          : undefined,
+        username: data.config.username,
+        databaseName: data.config.database,
         password: data.config.password
           ? await encrypt(env.ENCRYPTION_KEY, data.config.password)
           : undefined,

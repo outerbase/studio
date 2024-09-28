@@ -53,8 +53,8 @@ export default function QueryProgressLog({
           return (
             <div key={detail.order}>
               {!!detail.error && (
-                <div className="mt-2 mb-2 text-red-500">
-                  <pre>{detail.error}</pre>
+                <div className="mt-2 mb-2 text-red-500 font-mono">
+                  {detail.error}
                 </div>
               )}
 

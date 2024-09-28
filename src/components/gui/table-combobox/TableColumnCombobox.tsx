@@ -17,9 +17,11 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 export default function TableColumnCombobox({
   value,
   tableName,
+  schemaName,
   onChange,
   disabled,
 }: Readonly<{
+  schemaName: string;
   tableName: string;
   value?: string;
   onChange: (value: string) => void;
@@ -32,11 +34,12 @@ export default function TableColumnCombobox({
   useEffect(() => {
     if (tableName) {
       databaseDriver
-        .tableSchema(tableName)
+        .tableSchema(schemaName, tableName)
         .then(setSchema)
         .catch(() => {
           setSchema({
             tableName,
+            schemaName,
             columns: [],
             pk: [],
             autoIncrement: false,
@@ -44,7 +47,7 @@ export default function TableColumnCombobox({
           });
         });
     }
-  }, [tableName, databaseDriver]);
+  }, [schemaName, tableName, databaseDriver]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -7,7 +7,7 @@ import withErrorHandler from "@/lib/with-error-handler";
 import { ApiError } from "@/lib/api-error";
 import { HttpStatus } from "@/constants/http-status";
 import parseSafeJson from "@/lib/json-safe";
-import { SavedConnectionItemConfigConfig } from "@/app/connect/saved-connection-storage";
+import { SavedConnectionItemConfigConfig } from "@/app/(theme)/connect/saved-connection-storage";
 
 export const runtime = "edge";
 
@@ -54,6 +54,7 @@ export const POST = withErrorHandler<{ params: { session_id: string } }>(
       body,
       permission: { canExecuteQuery: true, isOwner: true, roles: [] },
       database: {
+        databaseName: "",
         driver: session.driver,
         host: config.url,
         password: config.password ?? null,

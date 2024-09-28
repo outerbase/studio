@@ -1,8 +1,7 @@
 import type { WindowTabItemProps } from "@/components/gui/windows-tab";
-import { MessageChannelName } from "./const";
+import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
 import type { Dispatch, SetStateAction } from "react";
 import {
-  LucideCode,
   LucideTable,
   LucideTableProperties,
   LucideUser,
@@ -13,19 +12,27 @@ import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
 import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
+import { Binoculars } from "@phosphor-icons/react/dist/ssr";
 
 interface OpenTableTab {
   type: "table";
+  schemaName: string;
   tableName: string;
 }
 
 interface OpenQueryTab {
   type: "query";
   name?: string;
+  saved?: {
+    namespaceName?: string;
+    key: string;
+    sql: string;
+  };
 }
 
 interface OpenTableSchemaTab {
   type: "schema";
+  schemaName?: string;
   tableName?: string;
 }
 
@@ -35,6 +42,7 @@ interface OpenUserTab {
 
 interface OpenTriggerTab {
   type: "trigger";
+  schemaName: string;
   tableName?: string;
   name?: string;
 }
@@ -50,18 +58,31 @@ export function openTab(props: OpenTabsProps) {
   window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
 }
 
+export function closeTabs(key: string[]) {
+  window.internalPubSub.send(MessageChannelName.CLOSE_TABS, key);
+}
+
 function generateKeyFromTab(tab: OpenTabsProps) {
-  if (tab.type === "query") return "query-" + window.crypto.randomUUID();
-  if (tab.type === "table") return "table-" + tab.tableName;
+  if (tab.type === "query") {
+    if (tab.saved) {
+      return TAB_PREFIX_SAVED_QUERY + tab.saved.key;
+    }
+    return "query-" + window.crypto.randomUUID();
+  }
+
+  if (tab.type === "table")
+    return "table-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "schema")
-    return !tab.tableName ? "create-schema" : "schema-" + tab.tableName;
+    return !tab.tableName
+      ? "create-schema"
+      : "schema-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "user") return "user";
 
   return "trigger-" + (tab.name ?? "");
 }
 
 function generateIconFromTab(tab: OpenTabsProps) {
-  if (tab.type === "query") return LucideCode;
+  if (tab.type === "query") return Binoculars;
   if (tab.type === "table") return LucideTable;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
@@ -71,21 +92,40 @@ function generateIconFromTab(tab: OpenTabsProps) {
 
 let QUERY_COUNTER = 2;
 function generateTitle(tab: OpenTabsProps) {
-  if (tab.type === "query") return "Query " + (QUERY_COUNTER++).toString();
+  if (tab.type === "query") {
+    if (tab.saved) return tab.name ?? "Query";
+    return "Query " + (QUERY_COUNTER++).toString();
+  }
   if (tab.type === "table") return tab.tableName;
   if (tab.type === "schema") return tab.tableName ? tab.tableName : "New Table";
   if (tab.type === "user") return "User & Permission";
   return tab.name ?? "";
 }
 
-function generateComponent(tab: OpenTabsProps) {
-  if (tab.type === "query") return <QueryWindow />;
+function generateComponent(tab: OpenTabsProps, title: string) {
+  if (tab.type === "query") {
+    if (tab.saved) {
+      return (
+        <QueryWindow
+          initialName={title}
+          initialCode={tab.saved.sql}
+          initialSavedKey={tab.saved.key}
+          initialNamespace={tab.saved.namespaceName}
+        />
+      );
+    }
+    return <QueryWindow initialName={title} />;
+  }
   if (tab.type === "table")
-    return <TableDataWindow tableName={tab.tableName} />;
+    return (
+      <TableDataWindow tableName={tab.tableName} schemaName={tab.schemaName} />
+    );
   if (tab.type === "schema")
-    return <SchemaEditorTab tableName={tab.tableName} />;
+    return (
+      <SchemaEditorTab tableName={tab.tableName} schemaName={tab.schemaName} />
+    );
   if (tab.type === "user") return <UsersTab />;
-  return <TriggerTab name={tab.name ?? ""} />;
+  return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
 }
 
 export function receiveOpenTabMessage({
@@ -99,21 +139,23 @@ export function receiveOpenTabMessage({
 }) {
   setTabs((prev) => {
     const key = generateKeyFromTab(newTab);
-    const foundIndex = prev.findIndex((tab) => tab.key === key);
+    const foundIndex = prev.findIndex((tab) => tab.identifier === key);
 
     if (foundIndex >= 0) {
       setSelectedTabIndex(foundIndex);
       return prev;
     }
     setSelectedTabIndex(prev.length);
+    const title = generateTitle(newTab);
 
     return [
       ...prev,
       {
         icon: generateIconFromTab(newTab),
-        title: generateTitle(newTab),
+        title,
         key,
-        component: generateComponent(newTab),
+        identifier: key,
+        component: generateComponent(newTab, title),
       },
     ];
   });

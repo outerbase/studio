@@ -1,0 +1,222 @@
+import { DocContent } from "@/components/mdx/docs";
+
+export const metadata = {
+  title: "Embedding Our Client via iFrame",
+};
+
+<DocContent title="Embedding Our Client via iFrame" group="Integration">
+
+LibSQL Studio is a powerful SQLite client that you can now embed
+in your website using our iFrame API. Key advantages of using
+our iframe include:
+
+- No need to expose any sensitive credentials to our client
+- Ability to embed and rebrand it on your website
+- Instant access to LibSQL Studio updates
+
+## Embed LibSQL Studio
+
+You can embed LibSQL Studio as the following
+
+```html
+<iframe src="https://libsqlstudio.com/embed/sqlite"></iframe>
+```
+
+There are several parameters you can control. For example:
+
+```html
+<iframe src="https://libsqlstudio.com/embed/sqlite?name=MyCoolDatabase"></iframe>
+```
+
+## Example
+
+Here is a sample code demonstrating how to integrate using React and connect to Turso:
+
+```tsx
+"use client";
+import { createClient, ResultSet } from "@libsql/client/web";
+import { useEffect, useMemo, useRef } from "react";
+
+export default function ExamplePage() {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const client = useMemo(() => {
+    return createClient({
+      url: "libsql://xxx",
+      authToken: "xxx",
+    });
+  }, []);
+
+  useEffect(() => {
+    const contentWindow = iframeRef.current?.contentWindow;
+
+    if (contentWindow) {
+      const handler = (e: MessageEvent<ClientRequest>) => {
+        if (e.data.type === "query" && e.data.statement) {
+          client
+            .execute(e.data.statement)
+            .then((r) => {
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  data: transformRawResult(r),
+                },
+                "*"
+              );
+            })
+            .catch((err) => {
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  error: (err as Error).message,
+                },
+                "*"
+              );
+            });
+        } else if (e.data.type === "transaction" && e.data.statements) {
+          client
+            .batch(e.data.statements, "write")
+            .then((r) => {
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  data: r.map(transformRawResult),
+                },
+                "*"
+              );
+            })
+            .catch((err) => {
+              contentWindow.postMessage(
+                {
+                  type: e.data.type,
+                  id: e.data.id,
+                  error: (err as Error).message,
+                },
+                "*"
+              );
+            });
+        }
+      };
+
+      window.addEventListener("message", handler);
+      return () => window.removeEventListener("message", handler);
+    }
+  }, [iframeRef]);
+
+  return (
+    <iframe
+      className="border-0 h-screen w-screen"
+      ref={iframeRef}
+      src="https://libsqlstudio.com/embed/sqlite"
+    />
+  );
+}
+
+interface ClientRequest {
+  type: "query" | "transaction";
+  id: number;
+  statement?: string;
+  statements?: string[];
+}
+
+interface ResultHeader {
+  name: string;
+  displayName: string;
+  originalType: string | null;
+  type: ColumnType;
+}
+
+interface Result {
+  rows: Record<string, unknown>[];
+  headers: ResultHeader[];
+  stat: {
+    rowsAffected: number;
+    rowsRead: number | null;
+    rowsWritten: number | null;
+    queryDurationMs: number | null;
+  };
+  lastInsertRowid?: number;
+}
+
+enum ColumnType {
+  TEXT = 1,
+  INTEGER = 2,
+  REAL = 3,
+  BLOB = 4,
+}
+
+function convertSqliteType(type: string | undefined): ColumnType {
+  // https://www.sqlite.org/datatype3.html
+  if (type === undefined) return ColumnType.BLOB;
+
+  type = type.toUpperCase();
+
+  if (type.includes("CHAR")) return ColumnType.TEXT;
+  if (type.includes("TEXT")) return ColumnType.TEXT;
+  if (type.includes("CLOB")) return ColumnType.TEXT;
+  if (type.includes("STRING")) return ColumnType.TEXT;
+
+  if (type.includes("INT")) return ColumnType.INTEGER;
+
+  if (type.includes("BLOB")) return ColumnType.BLOB;
+
+  if (
+    type.includes("REAL") ||
+    type.includes("DOUBLE") ||
+    type.includes("FLOAT")
+  )
+    return ColumnType.REAL;
+
+  return ColumnType.TEXT;
+}
+
+function transformRawResult(raw: ResultSet): Result {
+  const headerSet = new Set();
+
+  const headers: ResultHeader[] = raw.columns.map((colName, colIdx) => {
+    const colType = raw.columnTypes[colIdx];
+    let renameColName = colName;
+
+    for (let i = 0; i < 20; i++) {
+      if (!headerSet.has(renameColName)) break;
+      renameColName = `__${colName}_${i}`;
+    }
+
+    headerSet.add(renameColName);
+
+    return {
+      name: renameColName,
+      displayName: colName,
+      originalType: colType,
+      type: convertSqliteType(colType),
+    };
+  });
+
+  const rows = raw.rows.map((r) =>
+    headers.reduce((a, b, idx) => {
+      a[b.name] = r[idx];
+      return a;
+    }, {} as Record<string, unknown>)
+  );
+
+  return {
+    rows,
+    stat: {
+      rowsAffected: raw.rowsAffected,
+      rowsRead: null,
+      rowsWritten: null,
+      queryDurationMs: 0,
+    },
+    headers,
+    lastInsertRowid:
+      raw.lastInsertRowid === undefined
+        ? undefined
+        : Number(raw.lastInsertRowid),
+  };
+}
+
+```
+
+</DocContent>

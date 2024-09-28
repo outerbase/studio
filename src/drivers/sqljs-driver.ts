@@ -3,19 +3,22 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
-  TableColumnDataType,
 } from "@/drivers/base-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 import { BindParams, Database } from "sql.js";
 
 export default class SqljsDriver extends SqliteLikeBaseDriver {
   protected db: Database;
-  protected username?: string;
-  protected password?: string;
+  protected hasRowsChanged: boolean = false;
 
   constructor(sqljs: Database) {
     super();
     this.db = sqljs;
+  }
+
+  reload(sqljs: Database) {
+    this.db = sqljs;
+    this.hasRowsChanged = false;
   }
 
   async transaction(stmts: InStatement[]): Promise<DatabaseResultSet[]> {
@@ -26,10 +29,6 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
     }
 
     return r;
-  }
-
-  supportBigInt(): boolean {
-    return false;
   }
 
   async query(stmt: InStatement): Promise<DatabaseResultSet> {
@@ -56,8 +55,8 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       return {
         name: renameColName,
         displayName: colName,
-        originalType: "text",
-        type: TableColumnDataType.TEXT,
+        originalType: null,
+        type: undefined,
       };
     });
 
@@ -70,6 +69,10 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
           return a;
         }, {} as DatabaseRow)
       );
+    }
+
+    if (this.db.getRowsModified() > 0) {
+      this.hasRowsChanged = true;
     }
 
     return {
@@ -88,6 +91,14 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
               | number
               | undefined),
     };
+  }
+
+  resetChange() {
+    this.hasRowsChanged = false;
+  }
+
+  hasChanged() {
+    return this.hasRowsChanged;
   }
 
   close(): void {

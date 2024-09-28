@@ -6,7 +6,6 @@ import {
   LucideArrowRight,
   LucideDelete,
   LucideFilter,
-  LucideLoader,
   LucidePlus,
   LucideRefreshCcw,
   LucideSaveAll,
@@ -36,12 +35,21 @@ import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import ResultStats from "../result-stat";
 import isEmptyResultStats from "@/components/lib/empty-stats";
+import useTableResultColumnFilter from "../table-result/filter-column";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
+import { useCurrentTab } from "../windows-tab";
+import { KEY_BINDING } from "@/lib/key-matcher";
+import { Toolbar, ToolbarButton } from "../toolbar";
 
 interface TableDataContentProps {
   tableName: string;
+  schemaName: string;
 }
 
-export default function TableDataWindow({ tableName }: TableDataContentProps) {
+export default function TableDataWindow({
+  schemaName,
+  tableName,
+}: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
   const { databaseDriver } = useDatabaseDriver();
   const [error, setError] = useState<string>();
@@ -73,14 +81,21 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
 
       try {
         const { data: dataResult, schema: schemaResult } =
-          await databaseDriver.selectTable(tableName, {
+          await databaseDriver.selectTable(schemaName, tableName, {
             whereRaw: where,
             limit: finalLimit,
             offset: finalOffset,
             orderBy: sortColumns,
           });
 
-        setData(OptimizeTableState.createFromResult(dataResult, schemaResult));
+        const tableState = OptimizeTableState.createFromResult(
+          dataResult,
+          schemaResult
+        );
+        tableState.mismatchDetection =
+          databaseDriver.getFlags().mismatchDetection;
+        setData(tableState);
+
         setStat(dataResult.stat);
         setTableSchema(schemaResult);
         updateTableSchema(tableName, schemaResult.columns);
@@ -98,6 +113,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
   }, [
     databaseDriver,
     tableName,
+    schemaName,
     sortColumns,
     updateTableSchema,
     setStat,
@@ -116,6 +132,10 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
       return () => data.removeChangeListener(callback);
     }
   }, [data]);
+
+  const { columnIndexList, filterColumnButton } = useTableResultColumnFilter({
+    state: data,
+  });
 
   const onCommit = useCallback(() => {
     if (!tableSchema) return;
@@ -151,11 +171,34 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
     }
   }, [data]);
 
+  const { isActiveTab } = useCurrentTab();
+
+  useEffect(() => {
+    if (isActiveTab) {
+      const handleGlobalKeyBinding = (e: KeyboardEvent) => {
+        if (KEY_BINDING.commit.match(e)) {
+          onCommit();
+          e.preventDefault();
+          e.stopPropagation();
+        } else if (KEY_BINDING.discard.match(e)) {
+          onDiscard();
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      document.addEventListener("keydown", handleGlobalKeyBinding);
+      return () =>
+        document.removeEventListener("keydown", handleGlobalKeyBinding);
+    }
+  }, [isActiveTab, onCommit, onDiscard]);
+
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       {executeError && (
         <AlertDialog open={true}>
-          <AlertDialogContent>
+          <AlertDialogContent title="Error">
+            <AlertDialogTitle>Error</AlertDialogTitle>
             <AlertDialogDescription>{executeError} </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogAction onClick={() => setExecuteError(null)}>
@@ -166,39 +209,32 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
         </AlertDialog>
       )}
       <div className="shrink-0 grow-0">
-        <div className="flex p-1 gap-1 pb-2">
-          <Button
-            variant={"ghost"}
-            size={"sm"}
+        <Toolbar>
+          <ToolbarButton
+            text="Commit"
+            icon={<LucideSaveAll className="w-4 h-4 mr-2" />}
+            tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
             disabled={!changeNumber || isExecuting}
+            loading={isExecuting}
             onClick={onCommit}
-          >
-            {isExecuting ? (
-              <LucideLoader className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <LucideSaveAll className="w-4 h-4 mr-2 text-green-600" />
-            )}
-            Commit
-            {!!changeNumber && (
-              <span
-                className="ml-2 bg-red-500 text-white leading-5 w-5 h-5 rounded-full"
-                style={{ fontSize: 9 }}
-              >
-                {changeNumber}
-              </span>
-            )}
-          </Button>
+            badge={changeNumber ? changeNumber.toString() : ""}
+          />
 
-          <Button
-            variant={"ghost"}
-            size={"sm"}
+          <ToolbarButton
+            text="Discard Change"
+            tooltip={`Dicard all changes (${KEY_BINDING.discard.toString()})`}
+            destructive
             disabled={!changeNumber}
             onClick={onDiscard}
-          >
-            <span className="text-red-500">Discard Change</span>
-          </Button>
+          />
 
-          <div className="mr-2">
+          <div className="mx-1">
+            <Separator orientation="vertical" />
+          </div>
+
+          {filterColumnButton}
+
+          <div className="mx-1">
             <Separator orientation="vertical" />
           </div>
 
@@ -312,7 +348,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
               }}
             />
           </Button>
-        </div>
+        </Toolbar>
         <Separator />
       </div>
       <div className="grow overflow-hidden relative">
@@ -329,6 +365,7 @@ export default function TableDataWindow({ tableName }: TableDataContentProps) {
             key={lastQueryTimestamp}
             sortColumns={sortColumns}
             onSortColumnChange={setSortColumns}
+            visibleColumnIndexList={columnIndexList}
           />
         ) : null}
       </div>

@@ -8,14 +8,17 @@ import { useEffect, useMemo, useState } from "react";
 import { openTab } from "@/messages/open-tab";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 import useMessageListener from "@/components/hooks/useMessageListener";
-import { MessageChannelName } from "@/messages/const";
+import { MessageChannelName } from "@/const";
 import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
-import { LucideCode, LucideDatabase, LucideSettings } from "lucide-react";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
 import SettingSidebar from "./sidebar/setting-sidebar";
+
 import { useDatabaseDriver } from "@/context/driver-provider";
+import SavedDocTab from "./sidebar/saved-doc-tab";
+import { useSchema } from "@/context/schema-provider";
+import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -26,14 +29,17 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
-  const { collaborationDriver } = useDatabaseDriver();
+  const { databaseDriver, collaborationDriver, docDriver } =
+    useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const { currentSchemaName } = useSchema();
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
     {
       title: "Query",
+      identifier: "query",
       key: "query",
-      component: <QueryWindow />,
-      icon: LucideCode,
+      component: <QueryWindow initialName="Query" />,
+      icon: Binoculars,
     },
   ]);
 
@@ -46,24 +52,62 @@ export default function DatabaseGui() {
     }
   );
 
+  useMessageListener<string[]>(
+    MessageChannelName.CLOSE_TABS,
+    (keys) => {
+      if (keys) {
+        setTabs((currentTabs) => {
+          const selectedTab = currentTabs[selectedTabIndex];
+          const newTabs = currentTabs.filter(
+            (t) => !keys?.includes(t.identifier)
+          );
+
+          if (selectedTab) {
+            const selectedTabNewIndex = newTabs.findIndex(
+              (t) => t.identifier === selectedTab.identifier
+            );
+            if (selectedTabNewIndex < 0) {
+              setSelectedTabIndex(
+                Math.min(selectedTabIndex, newTabs.length - 1)
+              );
+            } else {
+              setSelectedTabIndex(selectedTabNewIndex);
+            }
+          }
+
+          return newTabs;
+        });
+      }
+    },
+    [selectedTabIndex]
+  );
+
   const sidebarTabs = useMemo(() => {
     return [
       {
         key: "database",
-        name: "Database",
+        name: "Schema",
         content: <SchemaView />,
-        icon: LucideDatabase,
+        icon: <Table size={24} />,
       },
+      docDriver
+        ? {
+            key: "saved",
+            name: "Queries",
+            content: <SavedDocTab />,
+            icon: <Binoculars size={24} />,
+          }
+        : undefined,
       collaborationDriver
         ? {
             key: "setting",
             name: "Setting",
             content: <SettingSidebar />,
-            icon: LucideSettings,
+            icon: <GearSix size={24} />,
           }
         : undefined,
     ].filter(Boolean) as SidebarTabItem[];
-  }, [collaborationDriver]);
+  }, [collaborationDriver, docDriver]);
 
   const tabSideMenu = useMemo(() => {
     return [
@@ -73,14 +117,16 @@ export default function DatabaseGui() {
           openTab({ type: "query" });
         },
       },
-      {
-        text: "New Table",
-        onClick: () => {
-          openTab({ type: "schema" });
-        },
-      },
-    ];
-  }, []);
+      databaseDriver.getFlags().supportCreateUpdateTable
+        ? {
+            text: "New Table",
+            onClick: () => {
+              openTab({ type: "schema", schemaName: currentSchemaName });
+            },
+          }
+        : undefined,
+    ].filter(Boolean) as { text: string; onClick: () => void }[];
+  }, [currentSchemaName, databaseDriver]);
 
   return (
     <div className="h-screen w-screen flex flex-col">
@@ -88,7 +134,7 @@ export default function DatabaseGui() {
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
           <SidebarTab tabs={sidebarTabs} />
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel defaultSize={100 - defaultWidthPercentage}>
           <WindowTabs
             menu={tabSideMenu}

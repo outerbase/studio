@@ -1,35 +1,21 @@
-import GenericCell from "@/components/gui/table-cell/GenericCell";
-import NumberCell from "@/components/gui/table-cell/NumberCell";
-import TextCell from "@/components/gui/table-cell/TextCell";
 import OptimizeTable, {
-  OptimizeTableCellRenderProps,
   OptimizeTableHeaderWithIndexProps,
 } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
-import {
-  exportRowsToExcel,
-  exportRowsToSqlInsert,
-} from "@/components/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
-import {
-  StudioContextMenuItem,
-  openContextMenuFromEvent,
-} from "@/messages/open-context-menu";
 import {
   LucideChevronDown,
   LucidePin,
-  LucidePlus,
   LucideSortAsc,
   LucideSortDesc,
-  LucideTrash2,
 } from "lucide-react";
-import React, { PropsWithChildren, useCallback, useState } from "react";
-import {
-  ColumnSortOption,
-  DatabaseValue,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
-import parseSafeJson from "@/lib/json-safe";
+import React, {
+  PropsWithChildren,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+import { ColumnSortOption } from "@/drivers/base-driver";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,26 +23,14 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
-import BigNumberCell from "./table-cell/BigNumberCell";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { useConfig } from "@/context/config-provider";
+import useTableResultContextMenu from "./table-result/context-menu";
 
 interface ResultTableProps {
   data: OptimizeTableState;
   tableName?: string;
   onSortColumnChange?: (columns: ColumnSortOption[]) => void;
   sortColumns?: ColumnSortOption[];
-}
-
-function isBlockNoteString(value: DatabaseValue<string>): boolean {
-  if (typeof value !== "string") return false;
-  if (!(value.startsWith("{") && value.endsWith("}"))) return false;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parsedJson = parseSafeJson<any>(value, null);
-  if (!parsedJson) return false;
-
-  return parsedJson?.format === "BLOCK_NOTE";
+  visibleColumnIndexList?: number[];
 }
 
 function Header({
@@ -69,14 +43,16 @@ function Header({
     <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
       <DropdownMenuTrigger asChild>
         <div
-          className="flex grow items-center px-2"
+          className="flex grow items-center px-2 overflow-hidden"
           onContextMenu={() => {
             setOpen(true);
           }}
         >
           {header.icon ? <div className="mr-2">{header.icon}</div> : null}
-          <div className="grow">{header.displayName}</div>
-          <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer" />
+          <div className="grow line-clamp-1 font-mono font-bold">
+            {header.displayName}
+          </div>
+          <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer flex-shrink-0" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -95,10 +71,14 @@ export default function ResultTable({
   data,
   tableName,
   onSortColumnChange,
+  visibleColumnIndexList,
 }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
-  const { databaseDriver } = useDatabaseDriver();
-  const { extensions } = useConfig();
+
+  const headerIndex = useMemo(() => {
+    if (visibleColumnIndexList) return visibleColumnIndexList;
+    return data.getHeaders().map((_, idx) => idx);
+  }, [data, visibleColumnIndexList]);
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
@@ -170,80 +150,6 @@ export default function ResultTable({
     [stickyHeaderIndex, tableName, onSortColumnChange]
   );
 
-  const renderCell = useCallback(
-    ({ y, x, state, header }: OptimizeTableCellRenderProps) => {
-      const isFocus = state.hasFocus(y, x);
-      const editMode = isFocus && state.isInEditMode();
-
-      if (header.dataType === TableColumnDataType.TEXT) {
-        const value = state.getValue(y, x) as DatabaseValue<string>;
-        let editor: "input" | "blocknote" = "input"; // this is default editor
-
-        if (isBlockNoteString(value)) {
-          editor = "blocknote";
-        }
-
-        return (
-          <TextCell
-            state={state}
-            editor={editor}
-            editMode={editMode}
-            value={state.getValue(y, x) as DatabaseValue<string>}
-            focus={isFocus}
-            isChanged={state.hasCellChange(y, x)}
-            onChange={(newValue) => {
-              state.changeValue(y, x, newValue);
-            }}
-          />
-        );
-      } else if (header.dataType === TableColumnDataType.REAL) {
-        return (
-          <NumberCell
-            state={state}
-            editMode={editMode}
-            value={state.getValue(y, x) as DatabaseValue<number>}
-            focus={isFocus}
-            isChanged={state.hasCellChange(y, x)}
-            onChange={(newValue) => {
-              state.changeValue(y, x, newValue);
-            }}
-          />
-        );
-      } else if (header.dataType === TableColumnDataType.INTEGER) {
-        if (databaseDriver.supportBigInt()) {
-          return (
-            <BigNumberCell
-              state={state}
-              editMode={editMode}
-              value={state.getValue(y, x) as DatabaseValue<bigint>}
-              focus={isFocus}
-              isChanged={state.hasCellChange(y, x)}
-              onChange={(newValue) => {
-                state.changeValue(y, x, newValue);
-              }}
-            />
-          );
-        } else {
-          return (
-            <NumberCell
-              state={state}
-              editMode={editMode}
-              value={state.getValue(y, x) as DatabaseValue<number>}
-              focus={isFocus}
-              isChanged={state.hasCellChange(y, x)}
-              onChange={(newValue) => {
-                state.changeValue(y, x, newValue);
-              }}
-            />
-          );
-        }
-      }
-
-      return <GenericCell value={state.getValue(y, x) as string} />;
-    },
-    [databaseDriver]
-  );
-
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -269,154 +175,12 @@ export default function ResultTable({
     }
   }, []);
 
-  const onCellContextMenu = useCallback(
-    ({
-      state,
-      event,
-    }: {
-      state: OptimizeTableState;
-      event: React.MouseEvent;
-    }) => {
-      const randomUUID = crypto.randomUUID();
-      const timestamp = Math.floor(Date.now() / 1000).toString();
-      const hasFocus = !!state.getFocus();
-
-      function setFocusValue(newValue: unknown) {
-        const focusCell = state.getFocus();
-        if (focusCell) {
-          state.changeValue(focusCell.y, focusCell.x, newValue);
-        }
-      }
-
-      const extensionMenu = (extensions ?? []).reduce<StudioContextMenuItem[]>(
-        (menu, ext) => {
-          if (ext.contextMenu) {
-            return [...menu, ...ext.contextMenu(state)];
-          }
-          return menu;
-        },
-        []
-      );
-
-      openContextMenuFromEvent([
-        {
-          title: "Insert Value",
-          disabled: !hasFocus,
-          subWidth: 200,
-          sub: [
-            {
-              title: <pre>NULL</pre>,
-              onClick: () => {
-                setFocusValue(null);
-              },
-            },
-            {
-              title: <pre>DEFAULT</pre>,
-              onClick: () => {
-                setFocusValue(undefined);
-              },
-            },
-            { separator: true },
-            {
-              title: (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">Unix Timestamp</span>
-                  <span>{timestamp}</span>
-                </div>
-              ),
-              onClick: () => {
-                setFocusValue(timestamp);
-              },
-            },
-            { separator: true },
-            {
-              title: (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">UUID </span>
-                  <span>{randomUUID}</span>
-                </div>
-              ),
-              onClick: () => {
-                setFocusValue(randomUUID);
-              },
-            },
-          ],
-        },
-        ...extensionMenu,
-        {
-          separator: true,
-        },
-        {
-          title: "Copy Cell Value",
-          shortcut: KEY_BINDING.copy.toString(),
-          onClick: () => {
-            copyCallback(state);
-          },
-        },
-        {
-          title: "Paste",
-          shortcut: KEY_BINDING.paste.toString(),
-          onClick: () => {
-            pasteCallback(state);
-          },
-        },
-        {
-          separator: true,
-        },
-        {
-          title: "Copy Row As",
-          sub: [
-            {
-              title: "Copy as Excel",
-              onClick: () => {
-                if (state.getSelectedRowCount() > 0) {
-                  window.navigator.clipboard.writeText(
-                    exportRowsToExcel(state.getSelectedRowsArray())
-                  );
-                }
-              },
-            },
-            {
-              title: "Copy as INSERT SQL",
-              onClick: () => {
-                const headers = state
-                  .getHeaders()
-                  .map((column) => column?.name ?? "");
-
-                if (state.getSelectedRowCount() > 0) {
-                  window.navigator.clipboard.writeText(
-                    exportRowsToSqlInsert(
-                      tableName ?? "UnknownTable",
-                      headers,
-                      state.getSelectedRowsArray()
-                    )
-                  );
-                }
-              },
-            },
-          ],
-        },
-        { separator: true },
-        {
-          title: "Insert row",
-          icon: LucidePlus,
-          onClick: () => {
-            data.insertNewRow();
-          },
-        },
-        {
-          title: "Delete selected row(s)",
-          icon: LucideTrash2,
-          onClick: () => {
-            data.getSelectedRowIndex().forEach((index) => {
-              data.removeRow(index);
-            });
-          },
-        },
-      ])(event);
-    },
-    [data, tableName, copyCallback, pasteCallback, extensions]
-  );
+  const onCellContextMenu = useTableResultContextMenu({
+    tableName,
+    data,
+    copyCallback,
+    pasteCallback,
+  });
 
   const onKeyDown = useCallback(
     (state: OptimizeTableState, e: React.KeyboardEvent) => {
@@ -478,9 +242,9 @@ export default function ResultTable({
       onContextMenu={onCellContextMenu}
       onHeaderContextMenu={onHeaderContextMenu}
       stickyHeaderIndex={stickyHeaderIndex}
+      arrangeHeaderIndex={headerIndex}
       renderAhead={20}
       renderHeader={renderHeader}
-      renderCell={renderCell}
       rowHeight={35}
       onKeyDown={onKeyDown}
     />

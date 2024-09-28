@@ -13,19 +13,25 @@ import SqlEditor from "../sql-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
 import { noop } from "@/lib/utils";
 
-export default function TriggerTab({ name }: { name: string }) {
+export default function TriggerTab({
+  schemaName,
+  name,
+}: {
+  schemaName: string;
+  name: string;
+}) {
   const { databaseDriver } = useDatabaseDriver();
   const [trigger, setTrigger] = useState<DatabaseTriggerSchema>();
   const [error, setError] = useState<string>();
 
   useEffect(() => {
     databaseDriver
-      .trigger(name)
+      .trigger(schemaName, name)
       .then(setTrigger)
       .catch((e: Error) => {
         setError(e.message);
       });
-  }, [databaseDriver, name]);
+  }, [databaseDriver, schemaName, name]);
 
   if (error) {
     return <div className="p-4">{error}</div>;
@@ -34,7 +40,7 @@ export default function TriggerTab({ name }: { name: string }) {
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
       <div className="p-4 flex flex-col gap-2">
-        <div className="text-xs text-gray-800">Trigger Name</div>
+        <div className="text-xs">Trigger Name</div>
         <Input value={trigger?.name ?? ""} readOnly />
 
         <div className="flex gap-2">
@@ -62,12 +68,19 @@ export default function TriggerTab({ name }: { name: string }) {
               </SelectContent>
             </Select>
           </div>
-          <TableCombobox value={trigger?.tableName} onChange={noop} />
+          <TableCombobox
+            schemaName={schemaName}
+            value={trigger?.tableName}
+            onChange={noop}
+          />
         </div>
       </div>
       <div className="grow overflow-hidden">
         <div className="h-full">
-          <SqlEditor value={trigger?.statement ?? ""} />
+          <SqlEditor
+            value={trigger?.statement ?? ""}
+            dialect={databaseDriver.getFlags().dialect}
+          />
         </div>
       </div>
     </div>

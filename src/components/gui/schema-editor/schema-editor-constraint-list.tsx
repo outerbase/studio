@@ -1,4 +1,8 @@
-import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
+import {
+  DatabaseTableColumnConstraint,
+  DatabaseTableConstraintChange,
+  DatabaseTableSchemaChange,
+} from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import {
   LucideArrowUpRight,
@@ -8,7 +12,6 @@ import {
   LucideShieldPlus,
   LucideTrash2,
 } from "lucide-react";
-import { DatabaseTableConstraintChange, DatabaseTableSchemaChange } from ".";
 import TableCombobox from "../table-combobox/TableCombobox";
 import {
   DropdownMenu,
@@ -67,10 +70,12 @@ function ColumnForeignKey({
   constraint,
   onChange,
   disabled,
+  schemaName,
 }: Readonly<{
   constraint: DatabaseTableColumnConstraint;
   onChange: ConstraintChangeHandler;
   disabled?: boolean;
+  schemaName: string;
 }>) {
   const { columns } = useColumnList();
   const { schema } = useSchema();
@@ -83,11 +88,9 @@ function ColumnForeignKey({
     const fkTableName = constraint.foreignKey?.foreignTableName;
 
     if (fkTableName) {
-      const fkTableSchema = schema.find(
+      const fkTableSchema = (schema[schemaName] ?? []).find(
         (s) => s.type === "table" && s.name === fkTableName
       );
-
-      console.log(fkTableSchema, "table schema");
 
       if (fkTableSchema) {
         return (fkTableSchema.tableSchema?.columns ?? []).map((c) => c.name);
@@ -95,7 +98,7 @@ function ColumnForeignKey({
     }
 
     return [];
-  }, [constraint, schema]);
+  }, [constraint, schemaName, schema]);
 
   const onConstraintChange = useCallback(
     (newColumn: string[]) => {
@@ -136,6 +139,7 @@ function ColumnForeignKey({
       <td className="border">
         <TableCombobox
           borderless
+          schemaName={schemaName}
           disabled={disabled}
           onChange={onFkTableNameChange}
           value={constraint.foreignKey?.foreignTableName}
@@ -286,12 +290,14 @@ function RemovableConstraintItem({
 
 function ColumnItemBody({
   onChange,
+  schemaName,
   constraint,
   disabled,
 }: PropsWithChildren<{
   idx: number;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   constraint: DatabaseTableConstraintChange;
+  schemaName?: string;
   disabled?: boolean;
 }>) {
   const onChangeConstraint = useCallback(
@@ -314,12 +320,13 @@ function ColumnItemBody({
   const currentConstraint = constraint.new ?? constraint.old;
   if (!currentConstraint) return null;
 
-  if (currentConstraint.foreignKey) {
+  if (currentConstraint.foreignKey && schemaName) {
     return (
       <ColumnForeignKey
         disabled={disabled}
         constraint={currentConstraint}
         onChange={onChangeConstraint}
+        schemaName={schemaName}
       />
     );
   }
@@ -361,12 +368,14 @@ function ColumnItem({
   constraint,
   onChange,
   idx,
+  schemaName,
   disabled,
 }: Readonly<{
   constraint: DatabaseTableConstraintChange;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   idx: number;
   disabled?: boolean;
+  schemaName?: string;
 }>) {
   return (
     <RemovableConstraintItem idx={idx} onChange={onChange}>
@@ -374,6 +383,7 @@ function ColumnItem({
         constraint={constraint}
         onChange={onChange}
         idx={idx}
+        schemaName={schemaName}
         disabled={disabled}
       />
     </RemovableConstraintItem>
@@ -383,10 +393,12 @@ function ColumnItem({
 export default function SchemaEditorConstraintList({
   constraints,
   onChange,
+  schemaName,
   disabled,
 }: Readonly<{
   constraints: DatabaseTableConstraintChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  schemaName?: string;
   disabled?: boolean;
 }>) {
   const headerClassName = "text-xs p-2 text-left bg-secondary border";
@@ -428,6 +440,7 @@ export default function SchemaEditorConstraintList({
                 constraint={constraint}
                 onChange={onChange}
                 disabled={disabled}
+                schemaName={schemaName}
               />
             );
           })}

@@ -1,11 +1,5 @@
 import { type LucideIcon, LucidePlus } from "lucide-react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import {
   DndContext,
   closestCenter,
@@ -13,26 +7,28 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-  DragOverlay,
-  type DragStartEvent,
+  KeyboardSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  horizontalListSortingStrategy,
   SortableContext,
-  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { SortableTab, WindowTabItemButton } from "./sortable-tab";
+import { SortableTab } from "./sortable-tab";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { restrictToHorizontalAxis } from "../lib/dnd-kit";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
   icon: LucideIcon;
   title: string;
+  identifier: string;
   key: string;
 }
 
@@ -47,14 +43,26 @@ interface WindowTabsProps {
 
 const WindowTabsContext = createContext<{
   replaceCurrentTab: (tab: WindowTabItemProps) => void;
+  changeCurrentTab: (value: { title?: string; identifier?: string }) => void;
 }>({
   replaceCurrentTab: () => {
     throw new Error("Not implemented");
   },
+  changeCurrentTab: () => {
+    throw new Error("Not implemented");
+  },
+});
+
+const CurrentWindowTab = createContext<{ isActiveTab: boolean }>({
+  isActiveTab: false,
 });
 
 export function useTabsContext() {
   return useContext(WindowTabsContext);
+}
+
+export function useCurrentTab() {
+  return useContext(CurrentWindowTab);
 }
 
 export default function WindowTabs({
@@ -65,15 +73,17 @@ export default function WindowTabs({
   onSelectChange,
   onTabsChange,
 }: WindowTabsProps) {
-  const [dragTab, setDragTag] = useState<WindowTabItemProps | null>(null);
-
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
       distance: 8,
     },
   });
 
-  const sensors = useSensors(pointerSensor);
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+
+  const sensors = useSensors(pointerSensor, keyboardSensor);
 
   const replaceCurrentTab = useCallback(
     (tab: WindowTabItemProps) => {
@@ -87,18 +97,23 @@ export default function WindowTabs({
     [tabs, selected, onTabsChange]
   );
 
-  const contextValue = useMemo(
-    () => ({ replaceCurrentTab }),
-    [replaceCurrentTab]
+  const changeCurrentTab = useCallback(
+    (value: { title?: string; identifier?: string }) => {
+      if (tabs[selected]) {
+        if (value.title) tabs[selected].title = value.title;
+        if (value.identifier) tabs[selected].identifier = value.identifier;
+
+        if (onTabsChange) {
+          onTabsChange([...tabs]);
+        }
+      }
+    },
+    [tabs, selected, onTabsChange]
   );
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      const { active } = event;
-      const activeIndex = tabs.findIndex((tab) => tab.key === active.id);
-      setDragTag(tabs[activeIndex] ?? null);
-    },
-    [tabs, setDragTag]
+  const contextValue = useMemo(
+    () => ({ replaceCurrentTab, changeCurrentTab }),
+    [changeCurrentTab, replaceCurrentTab]
   );
 
   const handleDragEnd = useCallback(
@@ -119,9 +134,8 @@ export default function WindowTabs({
         );
         onSelectChange(selectedIndex);
       }
-      setDragTag(null);
     },
-    [setDragTag, onTabsChange, tabs, onSelectChange, selected]
+    [onTabsChange, tabs, onSelectChange, selected]
   );
 
   return (
@@ -129,42 +143,21 @@ export default function WindowTabs({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        modifiers={[restrictToHorizontalAxis]}
       >
         <div className="flex flex-col w-full h-full">
-          <div className="grow-0 shrink-0 pt-1 bg-secondary">
-            <div className="flex">
-              {menu ? (
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger>
-                    <div className="px-3 py-2 border-b">
-                      <LucidePlus className="w-4 h-4" />
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {menu.map((menuItem, menuIdx) => {
-                      return (
-                        <DropdownMenuItem
-                          key={menuIdx}
-                          onClick={menuItem.onClick}
-                        >
-                          {menuItem.text}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <div className="w-2 border-b"></div>
-              )}
+          <div className="grow-0 shrink-0 bg-secondary overflow-x-auto no-scrollbar">
+            <div className="flex h-[45px]">
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
-                strategy={verticalListSortingStrategy}
+                strategy={horizontalListSortingStrategy}
               >
                 {tabs.map((tab, idx) => (
                   <SortableTab
                     key={tab.key}
+                    index={idx}
+                    tabCount={tabs.length}
                     tab={tab}
                     selected={idx === selected}
                     onSelectChange={() => {
@@ -190,30 +183,52 @@ export default function WindowTabs({
                   />
                 ))}
               </SortableContext>
-              <div className="border-b grow" />
+
+              {menu && (
+                <div className="flex h-[45px] items-center border-b">
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger>
+                      <div className="px-3 py-2 text-xs flex gap-2">
+                        <LucidePlus className="w-4 h-4" /> New
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {menu.map((menuItem, menuIdx) => {
+                        return (
+                          <DropdownMenuItem
+                            key={menuIdx}
+                            onClick={menuItem.onClick}
+                          >
+                            {menuItem.text}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+
+              <div className="flex h-[45px] border-b flex-1"></div>
             </div>
           </div>
           <div className="grow relative">
             {tabs.map((tab, tabIndex) => (
-              <div
-                className="absolute left-0 right-0 top-0 bottom-0"
-                style={{
-                  visibility: tabIndex === selected ? "inherit" : "hidden",
-                }}
+              <CurrentWindowTab.Provider
                 key={tab.key}
+                value={{ isActiveTab: tabIndex === selected }}
               >
-                {tab.component}
-              </div>
+                <div
+                  className="absolute left-0 right-0 top-0 bottom-0"
+                  style={{
+                    visibility: tabIndex === selected ? "inherit" : "hidden",
+                  }}
+                >
+                  {tab.component}
+                </div>
+              </CurrentWindowTab.Provider>
             ))}
           </div>
         </div>
-        <DragOverlay>
-          {dragTab ? (
-            <div className="fixed top-0 left-0 w-auto h-auto">
-              <WindowTabItemButton title={dragTab.title} icon={dragTab.icon} />
-            </div>
-          ) : null}
-        </DragOverlay>
       </DndContext>
     </WindowTabsContext.Provider>
   );

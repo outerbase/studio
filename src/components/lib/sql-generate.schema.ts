@@ -1,12 +1,10 @@
-import {
-  DatabaseTableColumnChange,
-  DatabaseTableSchemaChange,
-} from "@/components/gui/schema-editor";
 import { escapeIdentity, escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 import deepEqual from "deep-equal";
 import {
   DatabaseTableColumn,
+  DatabaseTableColumnChange,
   DatabaseTableColumnConstraint,
+  DatabaseTableSchemaChange,
 } from "@/drivers/base-driver";
 
 export function checkSchemaColumnChange(change: DatabaseTableColumnChange) {
@@ -170,18 +168,20 @@ export default function generateSqlSchemaChange(
 
   if (!isCreateScript) {
     if (change.name.new !== change.name.old) {
-      lines.push("RENAME TO " + escapeIdentity(change.name.new ?? ""));
+      lines.push(
+        `RENAME TO ${escapeIdentity(change.schemaName ?? "main")}.${escapeIdentity(change.name.new ?? "")}`
+      );
     }
   }
 
   if (isCreateScript) {
     return [
-      `CREATE TABLE ${escapeIdentity(
+      `CREATE TABLE ${escapeIdentity(change.schemaName ?? "main")}.${escapeIdentity(
         change.name.new || "no_table_name"
       )}(\n${lines.map((line) => "  " + line).join(",\n")}\n)`,
     ];
   } else {
-    const alter = `ALTER TABLE ${escapeIdentity(change.name.old ?? "")} `;
+    const alter = `ALTER TABLE ${escapeIdentity(change.schemaName ?? "main")}.${escapeIdentity(change.name.old ?? "")} `;
     return lines.map((line) => alter + line);
   }
 }

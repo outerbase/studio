@@ -5,13 +5,8 @@ import {
   escapeSqlBinary,
   escapeSqlString,
   escapeSqlValue,
-  generateDeleteStatement,
-  generateInsertStatement,
-  generateUpdateStatement,
-  selectStatementFromPosition,
   unescapeIdentity,
 } from "./sql-helper";
-import { identify } from "sql-query-identifier";
 
 describe("Escape SQL", () => {
   it("escape sql string", () => {
@@ -38,40 +33,6 @@ describe("Escape SQL", () => {
     expect(unescapeIdentity(`"users"`)).toBe("users");
     expect(unescapeIdentity(`"us""ers"`)).toBe(`us"ers`);
     expect(unescapeIdentity(`[users]`)).toBe(`users`);
-  });
-});
-
-describe("Generate SQL Statement", () => {
-  it("Generate insert statement from object", () => {
-    expect(
-      generateInsertStatement("users", {
-        name: "Visal",
-        age: 50,
-        title: "O'reilly",
-      })
-    ).toBe(
-      `INSERT INTO "users"("name", "age", "title") VALUES('Visal', 50, 'O''reilly');`
-    );
-  });
-
-  it("Generate update statement", () => {
-    expect(
-      generateUpdateStatement(
-        "users",
-        {
-          id: 5,
-        },
-        { age: 50, title: "O'reilly" }
-      )
-    ).toBe(
-      `UPDATE "users" SET "age" = 50, "title" = 'O''reilly' WHERE "id" = 5;`
-    );
-  });
-
-  it("Generate delete statement", () => {
-    expect(generateDeleteStatement("users", { id: 5 })).toBe(
-      `DELETE FROM "users" WHERE "id" = 5;`
-    );
   });
 });
 
@@ -121,30 +82,4 @@ describe("Mapping sqlite column type to our table type", () => {
       expect(convertSqliteType(type)).toBe(TableColumnDataType.REAL);
     });
   }
-});
-
-function ss(sql: string) {
-  const pos = sql.indexOf("|");
-  const statements = identify(sql.replace("|", ""));
-  return selectStatementFromPosition(statements, pos);
-}
-
-describe("Select current query", () => {
-  it("select current query", () => {
-    expect(ss("select * from |t1; update t1 set name='visal';")?.text).toBe(
-      "select * from t1;"
-    );
-
-    expect(ss("select * from t1|; update t1 set name='visal';")?.text).toBe(
-      "select * from t1;"
-    );
-
-    expect(ss("select * from t1;| update t1 set name='visal';")?.text).toBe(
-      "select * from t1;"
-    );
-
-    expect(ss("select * from t1; update| t1 set name='visal';")?.text).toBe(
-      "update t1 set name='visal';"
-    );
-  });
 });

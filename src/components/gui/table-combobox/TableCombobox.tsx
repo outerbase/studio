@@ -16,10 +16,12 @@ import { useSchema } from "@/context/schema-provider";
 export default function TableCombobox({
   value,
   onChange,
+  schemaName,
   disabled,
   borderless,
 }: Readonly<{
   value?: string;
+  schemaName: string;
   onChange: (v: string) => void;
   disabled?: boolean;
   borderless?: boolean;
@@ -48,7 +50,7 @@ export default function TableCombobox({
 
           <CommandEmpty>No table found.</CommandEmpty>
           <CommandGroup className="max-h-[250px] overflow-y-auto">
-            {schema.map((table) => (
+            {(schema[schemaName] ?? []).map((table) => (
               <CommandItem
                 key={table.name}
                 value={table.name}

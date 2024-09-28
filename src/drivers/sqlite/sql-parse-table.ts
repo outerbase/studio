@@ -122,7 +122,10 @@ export function buildSyntaxCursor(sql: string): Cursor {
   return new Cursor(r, sql);
 }
 
-function parseColumnDef(cursor: Cursor): DatabaseTableColumn | null {
+function parseColumnDef(
+  schemaName: string,
+  cursor: Cursor
+): DatabaseTableColumn | null {
   const columnName = cursor.consumeIdentifier();
   if (!columnName) return null;
 
@@ -136,7 +139,7 @@ function parseColumnDef(cursor: Cursor): DatabaseTableColumn | null {
     cursor.next();
   }
 
-  const constraint = parseColumnConstraint(cursor);
+  const constraint = parseColumnConstraint(schemaName, cursor);
 
   return {
     name: columnName,
@@ -178,6 +181,7 @@ export function parseColumnList(columnPtr: Cursor) {
 }
 
 export function parseColumnConstraint(
+  schemaName: string,
   cursor: Cursor
 ): DatabaseTableColumnConstraint | undefined {
   if (cursor.matchKeyword("CONSTRAINT")) {
@@ -185,7 +189,7 @@ export function parseColumnConstraint(
     const constraintName = cursor.consumeIdentifier();
 
     return {
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
       name: constraintName,
     };
   } else if (cursor.matchKeyword("PRIMARY")) {
@@ -226,7 +230,7 @@ export function parseColumnConstraint(
       primaryColumns,
       autoIncrement,
       primaryKeyConflict: conflict,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.matchKeyword("NOT")) {
     cursor.next();
@@ -237,7 +241,7 @@ export function parseColumnConstraint(
     return {
       notNull: true,
       notNullConflict: conflict,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.matchKeyword("UNIQUE")) {
     let uniqueColumns: string[] | undefined;
@@ -256,7 +260,7 @@ export function parseColumnConstraint(
       unique: true,
       uniqueConflict: conflict,
       uniqueColumns,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.matchKeyword("DEFAULT")) {
     let defaultValue: unknown;
@@ -296,7 +300,7 @@ export function parseColumnConstraint(
     return {
       defaultValue,
       defaultExpression,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.matchKeyword("CHECK")) {
     cursor.next();
@@ -306,7 +310,7 @@ export function parseColumnConstraint(
 
     return {
       checkExpression: expr,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.matchKeyword("COLLATE")) {
     cursor.next();
@@ -316,7 +320,7 @@ export function parseColumnConstraint(
 
     return {
       collate: collationName,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.matchKeyword("FOREIGN")) {
     cursor.next();
@@ -330,10 +334,11 @@ export function parseColumnConstraint(
 
     const columns = parseColumnList(parens);
     cursor.next();
-    const refConstraint = parseColumnConstraint(cursor);
+    const refConstraint = parseColumnConstraint(schemaName, cursor);
 
     return {
       foreignKey: {
+        foreignSchemaName: schemaName,
         foreignTableName: refConstraint?.foreignKey?.foreignTableName ?? "",
         foreignColumns: refConstraint?.foreignKey?.foreignColumns ?? [],
         columns,
@@ -360,10 +365,11 @@ export function parseColumnConstraint(
 
     return {
       foreignKey: {
+        foreignSchemaName: schemaName,
         foreignTableName,
         foreignColumns,
       },
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   } else if (cursor.match("GENERATED")) {
     cursor.next();
@@ -385,14 +391,17 @@ export function parseColumnConstraint(
     return {
       generatedType: virtualColumnType,
       generatedExpression: expr,
-      ...parseColumnConstraint(cursor),
+      ...parseColumnConstraint(schemaName, cursor),
     };
   }
 
   return undefined;
 }
 
-function parseTableDefinition(cursor: Cursor): {
+function parseTableDefinition(
+  schemaName: string,
+  cursor: Cursor
+): {
   columns: DatabaseTableColumn[];
   constraints: DatabaseTableColumnConstraint[];
 } {
@@ -412,13 +421,13 @@ function parseTableDefinition(cursor: Cursor): {
         "FOREIGN",
       ])
     ) {
-      const constraint = parseColumnConstraint(cursor);
+      const constraint = parseColumnConstraint(schemaName, cursor);
       if (constraint) {
         constraints.push(constraint);
         moveNext = true;
       }
     } else {
-      const column = parseColumnDef(cursor);
+      const column = parseColumnDef(schemaName, cursor);
       if (column) {
         columns.push(column);
         moveNext = true;
@@ -494,9 +503,40 @@ function parseFTS5(cursor: Cursor | null): DatabaseTableFts5 {
   };
 }
 
+function parseTableOption(cursor: Cursor):
+  | {
+      strict?: boolean;
+      withoutRowId?: boolean;
+    }
+  | undefined {
+  if (cursor.match("WITHOUT")) {
+    cursor.next();
+    if (cursor.match("ROWID")) {
+      cursor.next();
+      if (cursor.match(",")) {
+        cursor.next();
+        return { withoutRowId: true, ...parseTableOption(cursor) };
+      } else {
+        return { withoutRowId: true };
+      }
+    }
+  } else if (cursor.match("STRICT")) {
+    cursor.next();
+    if (cursor.match(",")) {
+      cursor.next();
+      return { strict: true, ...parseTableOption(cursor) };
+    } else {
+      return { strict: true };
+    }
+  }
+}
+
 // Our parser follows this spec
 // https://www.sqlite.org/lang_createtable.html
-export function parseCreateTableScript(sql: string): DatabaseTableSchema {
+export function parseCreateTableScript(
+  schemaName: string,
+  sql: string
+): DatabaseTableSchema {
   const tree = sqliteDialect.language.parser.parse(sql);
   const ptr = tree.cursor();
 
@@ -526,8 +566,11 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
 
   const defCursor = cursor.enterParens();
   const defs = defCursor
-    ? parseTableDefinition(defCursor)
+    ? parseTableDefinition(schemaName, defCursor)
     : { columns: [], constraints: [] };
+
+  cursor.next();
+  // Parsing table options
 
   const pk = defs.columns.filter((col) => col.pk).map((col) => col.name);
 
@@ -537,9 +580,11 @@ export function parseCreateTableScript(sql: string): DatabaseTableSchema {
 
   return {
     tableName,
+    schemaName,
     ...defs,
     pk,
     autoIncrement,
     fts5,
+    ...parseTableOption(cursor),
   };
 }
