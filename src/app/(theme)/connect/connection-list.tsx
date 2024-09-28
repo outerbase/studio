@@ -52,7 +52,7 @@ function ConnectionListSection({
       );
 
     return (
-      <div className={cn("flex flex-wrap gap-4", name ? "mt-4" : "mt=8")}>
+      <div className={cn("flex flex-wrap gap-4", name ? "mt-4" : "mt-8")}>
         {filteredData.map((conn) => {
           return (
             <ConnectionItemCard
