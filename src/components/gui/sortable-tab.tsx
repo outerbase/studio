@@ -36,7 +36,6 @@ export const WindowTabItemButton = forwardRef<
     onClose,
     isDragging,
     index,
-    tabCount,
     ...rest
   } = props;
 

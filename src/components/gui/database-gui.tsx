@@ -11,12 +11,6 @@ import useMessageListener from "@/components/hooks/useMessageListener";
 import { MessageChannelName } from "@/const";
 import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
-import {
-  LucideBookmark,
-  LucideCode,
-  LucideDatabase,
-  LucideSettings,
-} from "lucide-react";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
 import SettingSidebar from "./sidebar/setting-sidebar";

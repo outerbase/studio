@@ -40,7 +40,7 @@ export default function CreateNamespaceDialog({
         setError("The namespace name must be at least 3 characters long");
       }
     }
-  }, [docDriver, namespace, onCreated]);
+  }, [docDriver, namespace, onCreated, onClose]);
 
   return (
     <Dialog

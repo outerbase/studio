@@ -7,7 +7,7 @@ import {
 } from "@/components/icons/outerbase-icon";
 import { ApiUser } from "@/lib/api/api-database-response";
 import parseSafeJson from "@/lib/json-safe";
-import { FunctionComponent, ReactElement } from "react";
+import { FunctionComponent } from "react";
 
 export interface DriverDetailField {
   name: keyof SavedConnectionItemConfigConfig;

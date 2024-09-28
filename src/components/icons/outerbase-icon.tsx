@@ -185,7 +185,7 @@ export function ValtownIcon({ className }: { className?: string }) {
   return (
     <svg
       className={cn("w-12 h-12 flex-shrink-0", className)}
-      viewBox="75 75 225 225"
+      viewBox="80 85 230 225"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -228,27 +228,27 @@ export function RqliteIcon({ className }: { className?: string }) {
         <path
           d="M52 14.5L89.5 52.5L90 19L85 14.5H52Z"
           fill="currentColor"
-          fill-opacity="0.8"
+          fillOpacity="0.8"
         />
         <path
           d="M90.5 19.5V74L112.5 52V41.5L90.5 19.5Z"
           fill="currentColor"
-          fill-opacity="0.6"
+          fillOpacity="0.6"
         />
         <path
           d="M113 53.5L112.5 87L85.5 113.5H74L52 91H73.5L112.5 52.5L113 53.5Z"
           fill="currentColor"
-          fill-opacity="0.4"
+          fillOpacity="0.4"
         />
         <path
           d="M36 75.5L35 108L40 113H73L36 75.5Z"
           fill="currentColor"
-          fill-opacity="0.6"
+          fillOpacity="0.6"
         />
         <path
           d="M13.5 75V86L34.5 107L35.5 53.5L13.5 75Z"
           fill="currentColor"
-          fill-opacity="0.8"
+          fillOpacity="0.8"
         />
       </g>
       <defs>

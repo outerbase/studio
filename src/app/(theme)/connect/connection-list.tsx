@@ -22,28 +22,38 @@ import { User } from "lucia";
 import QuickConnect from "./quick-connect";
 import { LucideChevronDown, LucideSearch } from "lucide-react";
 import DriverDropdown from "./driver-dropdown";
+import { cn } from "@/lib/utils";
 
 function ConnectionListSection({
   data,
+  name,
+  search,
   onRemove,
   onEdit,
 }: Readonly<{
+  search: string;
   data: SavedConnectionItem[];
   name?: string;
   onRemove: Dispatch<SetStateAction<SavedConnectionItem | undefined>>;
   onEdit: Dispatch<SetStateAction<SavedConnectionItem | undefined>>;
 }>) {
   const body = useMemo(() => {
-    if (data.length === 0)
+    const filteredData = data.filter((d) =>
+      d.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (filteredData.length === 0)
       return (
-        <div className="p-4">
-          There is no connection. Please add new connection
+        <div className="py-4 text-sm">
+          {search
+            ? `There is no record with '${search}'`
+            : "There is no base. Please add new base"}
         </div>
       );
 
     return (
-      <div className="flex flex-wrap gap-4 mt-8">
-        {data.map((conn) => {
+      <div className={cn("flex flex-wrap gap-4", name ? "mt-4" : "mt=8")}>
+        {filteredData.map((conn) => {
           return (
             <ConnectionItemCard
               key={conn.id}
@@ -59,11 +69,13 @@ function ConnectionListSection({
         })}
       </div>
     );
-  }, [data, onRemove, onEdit]);
+  }, [name, data, search, onRemove, onEdit]);
 
   return (
     <>
-      {/* {name && <h2 className="my-4 font-semibold text-primary">{name}</h2>} */}
+      {name && (
+        <h2 className="mt-4 font-semibold text-sm text-primary">{name}</h2>
+      )}
       {body}
     </>
   );
@@ -72,6 +84,7 @@ function ConnectionListSection({
 export default function ConnectionList({
   user,
 }: Readonly<{ user: User | null }>) {
+  const [search, setSearch] = useState("");
   const [quickConnect, setQuickConnect] = useState<SupportedDriver | null>(
     null
   );
@@ -198,7 +211,7 @@ export default function ConnectionList({
   }
 
   return (
-    <div className="flex flex-col flex-1 max-w-[1000px] mx-auto">
+    <div className="flex flex-col flex-1 max-w-[1000px] mx-auto pb-12">
       <div className="flex mt-12 gap-2">
         <h1 className="flex-1 flex items-center font-semibold text-xl text-primary">
           Bases
@@ -210,6 +223,8 @@ export default function ConnectionList({
               <LucideSearch className="h-4 w-4 text-black dark:text-white" />
             </div>
             <input
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
               type="text"
               className="bg-inherit p-2 pl-2 pr-2 outline-none text-sm  h-full grow"
               placeholder="Search base name"
@@ -232,7 +247,8 @@ export default function ConnectionList({
       {dialogComponent}
 
       <ConnectionListSection
-        name="Local"
+        name={user ? "Local" : ""}
+        search={search}
         data={localSavedConns}
         onRemove={setRemoveConnection}
         onEdit={setEditConnection}
@@ -240,6 +256,7 @@ export default function ConnectionList({
 
       {user && (
         <ConnectionListSection
+          search={search}
           name="Remote"
           data={remoteSavedConns}
           onRemove={setRemoveConnection}

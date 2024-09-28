@@ -6,7 +6,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { LucidePencil, LucideTrash, LucideUsers } from "lucide-react";
+import { LucidePencil, LucideTrash } from "lucide-react";
 import { useState } from "react";
 import {
   SavedConnectionItem,

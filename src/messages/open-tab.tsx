@@ -2,7 +2,6 @@ import type { WindowTabItemProps } from "@/components/gui/windows-tab";
 import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
 import type { Dispatch, SetStateAction } from "react";
 import {
-  LucideCode,
   LucideTable,
   LucideTableProperties,
   LucideUser,
@@ -13,7 +12,6 @@ import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
 import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
-import { Table } from "@phosphor-icons/react";
 import { Binoculars } from "@phosphor-icons/react/dist/ssr";
 
 interface OpenTableTab {

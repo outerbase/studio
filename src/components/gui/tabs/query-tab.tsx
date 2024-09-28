@@ -1,7 +1,6 @@
 import { format } from "sql-formatter";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  LucideFastForward,
   LucideGrid,
   LucideMessageSquareWarning,
   LucidePencilRuler,

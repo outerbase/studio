@@ -19,6 +19,8 @@ export default function ConnectionDialogContent({
     driver: SupportedDriver;
   }>
 >) {
+  const DatabaseIcon = DRIVER_DETAIL[driver ?? "turso"].icon;
+
   return (
     <Dialog
       open
@@ -28,13 +30,9 @@ export default function ConnectionDialogContent({
     >
       <DialogContent className="lg:min-w-[600px] xl:min-w-[600px]">
         <DialogTitle>
-          <div className="flex gap-2 items-center">
-            <img
-              src={DRIVER_DETAIL[driver ?? "turso"].icon}
-              alt=""
-              className="w-8 h-8 rounded mr-2"
-            />
-            <span>{title}</span>
+          <div className="flex gap-2 items-center h-8">
+            <DatabaseIcon className="w-8 h-8" />
+            <div className="flex flex-1 items-center">{title}</div>
           </div>
         </DialogTitle>
         <DialogDescription />

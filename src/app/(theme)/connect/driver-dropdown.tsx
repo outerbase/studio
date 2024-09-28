@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import {
   CloudflareIcon,
   MySQLIcon,
-  PostgreIcon,
   RqliteIcon,
   SQLiteIcon,
   TursoIcon,
@@ -130,23 +129,6 @@ export default function DriverDropdown({
                   <MySQLIcon className="w-6 h-6" />
                   <div>
                     <div className="font-semibold">MySQL</div>
-                  </div>
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => {
-                  onSelect("valtown");
-                }}
-              >
-                <Link
-                  className="flex gap-4 px-2 items-center h-8 block"
-                  href="/databases/mysql"
-                  target="_blank"
-                >
-                  <PostgreIcon className="w-6 h-6" />
-                  <div>
-                    <div className="font-semibold">PostgreSQL</div>
                   </div>
                 </Link>
               </DropdownMenuItem>

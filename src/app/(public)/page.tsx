@@ -119,7 +119,7 @@ function SupportDriver() {
             <PostgreIcon />
             <span>PostgreSQL</span>
             <span className="text-xs -mt-2 text-yellow-500">
-              Coming Soon 15th Sep 2024
+              Coming Soon 7th Oct 2024
             </span>
           </DatabaseBlock>
 

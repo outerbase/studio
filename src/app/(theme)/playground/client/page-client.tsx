@@ -1,7 +1,6 @@
 "use client";
 import { saveAs } from "file-saver";
 import MyStudio from "@/components/my-studio";
-import { Button } from "@/components/ui/button";
 import SqljsDriver from "@/drivers/sqljs-driver";
 import { LucideFile, LucideLoader, LucideRefreshCw } from "lucide-react";
 import Script from "next/script";
@@ -10,11 +9,6 @@ import { Database, SqlJsStatic } from "sql.js";
 import ScreenDropZone from "@/components/screen-dropzone";
 import { toast } from "sonner";
 import downloadFileFromUrl from "@/lib/download-file";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useSearchParams } from "next/navigation";
 import { localDb } from "@/indexdb";
 import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";

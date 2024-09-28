@@ -6,9 +6,8 @@ import {
   SavedDocNamespace,
 } from "@/drivers/saved-doc/saved-doc-driver";
 import { ListView, ListViewItem } from "@/components/listview";
-import { LucideCode, LucideFolder, LucideTrash } from "lucide-react";
+import { LucideTrash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import CreateNamespaceButton from "./create-namespace-button";
 import RenameNamespaceDialog from "./rename-namespace-dialog";
 import RemoveDocDialog from "./remove-doc-dialog";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
