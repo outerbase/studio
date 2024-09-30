@@ -354,7 +354,7 @@ export default function SchemaEditorColumnList({
         const newIndex = columns.findIndex((c) => c.key === over?.id);
 
         // You cannot change the order of existing column
-        if (!!columns[newIndex].old) return;
+        if (columns[newIndex].old) return;
 
         const newColumns = arrayMove(columns, oldIndex, newIndex);
 
