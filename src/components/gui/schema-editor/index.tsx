@@ -51,6 +51,7 @@ export default function SchemaEditor({
       columns: [
         ...value.columns,
         {
+          key: window.crypto.randomUUID(),
           old: null,
           new: newColumn,
         },
