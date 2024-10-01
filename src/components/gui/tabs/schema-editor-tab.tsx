@@ -44,6 +44,7 @@ export default function SchemaEditorTab({
               new: schema.tableName,
             },
             columns: schema.columns.map((col) => ({
+              key: window.crypto.randomUUID(),
               old: col,
               new: structuredClone(col),
             })),
@@ -82,6 +83,7 @@ export default function SchemaEditorTab({
         name: { ...prev.name, new: prev.name.old },
         columns: prev.columns
           .map((col) => ({
+            key: col.key,
             old: col.old,
             new: structuredClone(col.old),
           }))

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
+import { CSS } from "@dnd-kit/utilities";
 import { convertSqliteType } from "@/drivers/sqlite/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./column-default-value-input";
@@ -33,6 +34,14 @@ import ColumnForeignKeyPopup from "./column-fk-popup";
 import ColumnGeneratingPopup from "./column-generate-popup";
 import ColumnCheckPopup from "./column-check-popup";
 import { Button } from "@/components/ui/button";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
@@ -92,7 +101,20 @@ function ColumnItem({
   schemaName?: string;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
 }) {
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    setActivatorNodeRef,
+  } = useSortable({ id: value.key, disabled: !!value.old });
   const disabled = !!value.old;
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const change = useCallback(
     (newValue: Partial<DatabaseTableColumn> | null) => {
@@ -121,13 +143,30 @@ function ColumnItem({
   }
 
   return (
-    <tr>
-      <td className={cn("border-l border-t border-b", highlightClassName)}></td>
+    <tr
+      style={style}
+      {...attributes}
+      ref={setNodeRef}
+      className={
+        value.new === null
+          ? "bg-red-100 dark:bg-red-400 dark:text-black"
+          : "bg-background"
+      }
+    >
+      <td
+        ref={setActivatorNodeRef}
+        {...listeners}
+        className={cn("border-l border-t border-b")}
+      >
+        <div
+          className={cn("w-[12px] h-[30px] ml-1 rounded", highlightClassName)}
+        ></div>
+      </td>
       <td className="border-r border-t border-b">
         <input
           value={column.name}
           onChange={(e) => change({ name: e.currentTarget.value })}
-          className="p-2 text-sm outline-none bg-background w-[150px]"
+          className="p-2 text-sm outline-none w-[150px] bg-inherit"
           spellCheck={false}
         />
       </td>
@@ -137,7 +176,7 @@ function ColumnItem({
           onValueChange={(newType) => change({ type: newType })}
           disabled={disabled}
         >
-          <SelectTrigger className="bg-background border-0 rounded-none shadow-none text-sm">
+          <SelectTrigger className="bg-inherit border-0 rounded-none shadow-none text-sm">
             <SelectValue placeholder="Select datatype" />
           </SelectTrigger>
           <SelectContent>
@@ -307,6 +346,27 @@ export default function SchemaEditorColumnList({
 }>) {
   const headerStyle = "text-xs p-2 text-left bg-secondary border";
 
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (active.id !== over?.id) {
+        const oldIndex = columns.findIndex((c) => c.key === active.id);
+        const newIndex = columns.findIndex((c) => c.key === over?.id);
+
+        // You cannot change the order of existing column
+        if (columns[newIndex].old) return;
+
+        const newColumns = arrayMove(columns, oldIndex, newIndex);
+
+        onChange((prev) => ({
+          ...prev,
+          columns: newColumns,
+        }));
+      }
+    },
+    [columns, onChange]
+  );
+
   return (
     <div className="p-4">
       <table className="w-full rounded overflow-hidden">
@@ -322,15 +382,25 @@ export default function SchemaEditorColumnList({
           </tr>
         </thead>
         <tbody>
-          {columns.map((col, idx) => (
-            <ColumnItem
-              idx={idx}
-              value={col}
-              key={idx}
-              onChange={onChange}
-              schemaName={schemaName}
-            />
-          ))}
+          <DndContext
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext
+              items={columns.map((c) => c.key)}
+              strategy={verticalListSortingStrategy}
+            >
+              {columns.map((col, idx) => (
+                <ColumnItem
+                  idx={idx}
+                  value={col}
+                  key={col.key}
+                  onChange={onChange}
+                  schemaName={schemaName}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </tbody>
         <tfoot>
           <tr>
