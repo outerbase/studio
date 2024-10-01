@@ -15,7 +15,7 @@ import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
 import CommonSQLImplement from "./common-sql-imp";
-import generateSqlSchemaChange from "@/components/lib/sql-generate.schema";
+import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   supportPragmaList = true;
@@ -31,6 +31,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   getFlags(): DriverFlags {
     return {
       supportBigInt: false,
+      supportModifyColumn: false,
       defaultSchema: "main",
       optionalSchema: true,
       mismatchDetection: false,

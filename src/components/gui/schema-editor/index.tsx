@@ -62,7 +62,7 @@ export default function SchemaEditor({
   const hasChange = checkSchemaChange(value);
 
   const previewScript = useMemo(() => {
-    return databaseDriver.createUpdateTableSchema(value).join("\n");
+    return databaseDriver.createUpdateTableSchema(value).join(";\n");
   }, [value, databaseDriver]);
 
   return (
@@ -188,6 +188,9 @@ export default function SchemaEditor({
           onChange={onChange}
           onAddColumn={onAddColumn}
           schemaName={value.schemaName}
+          disabledEditExistingColumn={
+            !databaseDriver.getFlags().supportModifyColumn
+          }
         />
         <ColumnsProvider value={value.columns}>
           <SchemaEditorConstraintList
