@@ -209,6 +209,7 @@ export interface DriverFlags {
 }
 
 export interface DatabaseTableColumnChange {
+  key: string;
   old: DatabaseTableColumn | null;
   new: DatabaseTableColumn | null;
 }
