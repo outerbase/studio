@@ -4,6 +4,8 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import SchemaEditor from "../schema-editor";
+import { createTableSchemaDraft } from "@/components/lib/sql-generate.schema";
+import { cloneDeep } from "lodash";
 
 interface SchemaEditorTabProps {
   tableName?: string;
@@ -37,24 +39,7 @@ export default function SchemaEditorTab({
       databaseDriver
         .tableSchema(schemaName, name)
         .then((schema) => {
-          setSchema({
-            schemaName,
-            name: {
-              old: schema.tableName,
-              new: schema.tableName,
-            },
-            columns: schema.columns.map((col) => ({
-              key: window.crypto.randomUUID(),
-              old: col,
-              new: structuredClone(col),
-            })),
-            constraints: (schema.constraints ?? []).map((con) => ({
-              id: window.crypto.randomUUID(),
-              old: con,
-              new: structuredClone(con),
-            })),
-            createScript: schema.createScript,
-          });
+          setSchema(createTableSchemaDraft(schemaName, schema));
         })
         .catch(console.error)
         .finally(() => setLoading(false));
@@ -85,13 +70,13 @@ export default function SchemaEditorTab({
           .map((col) => ({
             key: col.key,
             old: col.old,
-            new: structuredClone(col.old),
+            new: cloneDeep(col.old),
           }))
           .filter((col) => col.old),
         constraints: prev.constraints.map((con) => ({
           id: window.crypto.randomUUID(),
           old: con.old,
-          new: structuredClone(con.old),
+          new: cloneDeep(con.old),
         })),
       };
     });

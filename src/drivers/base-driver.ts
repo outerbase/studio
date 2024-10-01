@@ -204,6 +204,7 @@ export interface DriverFlags {
   optionalSchema: boolean;
   supportBigInt: boolean;
   supportCreateUpdateTable: boolean;
+  supportModifyColumn: boolean;
   mismatchDetection: boolean;
   dialect: SupportedDialect;
 }

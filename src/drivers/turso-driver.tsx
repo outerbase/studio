@@ -102,6 +102,7 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
     return {
       ...super.getFlags(),
       supportBigInt: this.bigInt,
+      supportModifyColumn: true,
       mismatchDetection: this.bigInt,
     };
   }
