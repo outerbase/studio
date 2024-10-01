@@ -95,11 +95,13 @@ function ColumnItem({
   idx,
   schemaName,
   onChange,
+  disabledEditExistingColumn,
 }: {
   value: DatabaseTableColumnChange;
   idx: number;
   schemaName?: string;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+  disabledEditExistingColumn?: boolean;
 }) {
   const {
     setNodeRef,
@@ -109,7 +111,7 @@ function ColumnItem({
     transition,
     setActivatorNodeRef,
   } = useSortable({ id: value.key, disabled: !!value.old });
-  const disabled = !!value.old;
+  const disabled = !!disabledEditExistingColumn && !!value.old;
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -338,11 +340,13 @@ export default function SchemaEditorColumnList({
   onChange,
   schemaName,
   onAddColumn,
+  disabledEditExistingColumn,
 }: Readonly<{
   columns: DatabaseTableColumnChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   schemaName?: string;
   onAddColumn: () => void;
+  disabledEditExistingColumn?: boolean;
 }>) {
   const headerStyle = "text-xs p-2 text-left bg-secondary border";
 
@@ -397,6 +401,7 @@ export default function SchemaEditorColumnList({
                   key={col.key}
                   onChange={onChange}
                   schemaName={schemaName}
+                  disabledEditExistingColumn={disabledEditExistingColumn}
                 />
               ))}
             </SortableContext>
