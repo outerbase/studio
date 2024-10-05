@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import MyStudio from "@/components/my-studio";
 import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
 import CloudflareD1Driver from "@/drivers/cloudflare-d1-driver";
+import StarbaseDriver from "@/drivers/starbase-driver";
 
 export default function ClientPageBody() {
   const params = useSearchParams();
@@ -34,6 +35,11 @@ export default function ClientPageBody() {
         Authorization: "Bearer " + conn.config.token,
         "x-account-id": conn.config.username ?? "",
         "x-database-id": conn.config.database ?? "",
+      });
+    } else if (conn.driver === "starbase") {
+      return new StarbaseDriver("/proxy/starbase", {
+        Authorization: "Bearer " + (conn.config.token ?? ""),
+        "x-starbase-url": conn.config.url ?? "",
       });
     }
 

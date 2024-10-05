@@ -91,6 +91,41 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
         },
       ],
     },
+    starbase: {
+      name: "starbase",
+      displayName: "Starbase",
+      icon: SQLiteIcon,
+      disableRemote: true,
+      prefill: "",
+      fields: [
+        {
+          name: "url",
+          title: "Endpoint",
+          required: true,
+          type: "text",
+          secret: false,
+          invalidate: (url: string): null | string => {
+            const trimmedUrl = url.trim();
+            const valid =
+              trimmedUrl.startsWith("https://") ||
+              trimmedUrl.startsWith("http://");
+
+            if (!valid) {
+              return "Endpoint must start with https:// or http://";
+            }
+
+            return null;
+          },
+        },
+        {
+          name: "token",
+          title: "API Token",
+          required: true,
+          type: "text",
+          secret: true,
+        },
+      ],
+    },
     "cloudflare-d1": {
       name: "cloudflare-d1",
       displayName: "Cloudflare D1",
@@ -211,8 +246,10 @@ export type SupportedDriver =
   | "turso"
   | "rqlite"
   | "valtown"
+  | "starbase"
   | "cloudflare-d1"
   | "sqlite-filehandler";
+
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 
