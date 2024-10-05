@@ -84,12 +84,6 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
         rowsWritten: null,
         queryDurationMs: endTime - startTime,
       },
-      lastInsertRowid:
-        headers.length > 0
-          ? undefined
-          : (this.db.exec("select last_insert_rowid();")[0].values[0][0] as
-              | number
-              | undefined),
     };
   }
 

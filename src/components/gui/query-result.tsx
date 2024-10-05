@@ -20,7 +20,10 @@ export default function QueryResult({
       return { _tag: "EXPLAIN", value: result.result } as const;
     }
 
-    const state = OptimizeTableState.createFromResult(result.result);
+    const state = OptimizeTableState.createFromResult(
+      databaseDriver,
+      result.result
+    );
     state.setReadOnlyMode(true);
     state.mismatchDetection = databaseDriver.getFlags().mismatchDetection;
     return { _tag: "QUERY", value: state } as const;

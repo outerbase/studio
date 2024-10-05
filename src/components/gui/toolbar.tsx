@@ -48,7 +48,7 @@ export function ToolbarButton({
   if (tooltip) {
     return (
       <Tooltip>
-        <TooltipTrigger>{buttonContent}</TooltipTrigger>
+        <TooltipTrigger asChild>{buttonContent}</TooltipTrigger>
         <TooltipContent>{tooltip}</TooltipContent>
       </Tooltip>
     );

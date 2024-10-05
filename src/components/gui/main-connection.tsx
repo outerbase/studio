@@ -38,7 +38,7 @@ function MainConnectionContainer() {
    */
   useLayoutEffect(() => {
     console.info("Injecting message into window object");
-    window.internalPubSub = new InternalPubSub();
+    if (!window.internalPubSub) window.internalPubSub = new InternalPubSub();
   }, [driver]);
 
   useEffect(() => {

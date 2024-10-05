@@ -84,6 +84,17 @@ export default function DriverDropdown({
                 </div>
               </DropdownMenuItem>
 
+              <DropdownMenuItem
+                onClick={() => {
+                  onSelect("starbase");
+                }}
+              >
+                <div className="flex gap-4 px-2 items-center h-8">
+                  <SQLiteIcon className="w-6 h-6" />
+                  <div className="font-semibold">StarbaseDB</div>
+                </div>
+              </DropdownMenuItem>
+
               <DropdownMenuSeparator />
 
               <DropdownMenuItem

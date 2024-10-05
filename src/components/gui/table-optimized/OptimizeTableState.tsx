@@ -2,6 +2,7 @@ import { selectArrayFromIndexList } from "@/components/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
 import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 import {
+  BaseDriver,
   DatabaseResultSet,
   DatabaseTableSchema,
   TableColumnDataType,
@@ -37,14 +38,19 @@ export default class OptimizeTableState {
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
 
   static createFromResult(
+    driver: BaseDriver,
     dataResult: DatabaseResultSet,
     schemaResult?: DatabaseTableSchema
   ) {
     return new OptimizeTableState(
       dataResult.headers.map((header) => {
+        const headerData = schemaResult
+          ? schemaResult.columns.find((c) => c.name === header.name)
+          : undefined;
+
         let initialSize = 150;
         const headerName = header.name;
-        const dataType = header.type;
+        const dataType = header.type ?? driver.inferTypeFromHeader(headerData);
 
         if (
           dataType === TableColumnDataType.INTEGER ||
@@ -66,10 +72,6 @@ export default class OptimizeTableState {
 
           initialSize = Math.max(150, Math.min(500, maxSize * 8));
         }
-
-        const headerData = schemaResult
-          ? schemaResult.columns.find((c) => c.name === header.name)
-          : undefined;
 
         // --------------------------------------
         // Matching foreign key

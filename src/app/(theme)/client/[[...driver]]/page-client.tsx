@@ -10,6 +10,7 @@ import ValtownDriver from "@/drivers/valtown-driver";
 
 import MyStudio from "@/components/my-studio";
 import CloudflareD1Driver from "@/drivers/cloudflare-d1-driver";
+import StarbaseDriver from "@/drivers/starbase-driver";
 
 export default function ClientPageBody() {
   const driver = useMemo(() => {
@@ -27,7 +28,13 @@ export default function ClientPageBody() {
         "x-account-id": config.username ?? "",
         "x-database-id": config.database ?? "",
       });
+    } else if (config.driver === "starbase") {
+      return new StarbaseDriver("/proxy/starbase", {
+        Authorization: "Bearer " + (config.token ?? ""),
+        "x-starbase-url": config.url ?? "",
+      });
     }
+
     return new TursoDriver(config.url, config.token as string, true);
   }, []);
 
