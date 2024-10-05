@@ -2,6 +2,7 @@ import {
   CloudflareIcon,
   RqliteIcon,
   SQLiteIcon,
+  StarbaseIcon,
   TursoIcon,
   ValtownIcon,
 } from "@/components/icons/outerbase-icon";
@@ -93,8 +94,8 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
     },
     starbase: {
       name: "starbase",
-      displayName: "Starbase",
-      icon: SQLiteIcon,
+      displayName: "StarbaseDB",
+      icon: StarbaseIcon,
       disableRemote: true,
       prefill: "",
       fields: [
