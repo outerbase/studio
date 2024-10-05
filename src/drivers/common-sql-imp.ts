@@ -36,11 +36,25 @@ export default abstract class CommonSQLImplement extends BaseDriver {
 
     const sqls = ops.map((op) => {
       if (op.operation === "INSERT")
-        return insertInto(this, schemaName, tableName, op.values);
+        return insertInto(
+          this,
+          schemaName,
+          tableName,
+          op.values,
+          this.getFlags().supportInsertReturning
+        );
+
       if (op.operation === "DELETE")
         return deleteFrom(this, schemaName, tableName, op.where);
 
-      return updateTable(this, schemaName, tableName, op.values, op.where);
+      return updateTable(
+        this,
+        schemaName,
+        tableName,
+        op.values,
+        op.where,
+        this.getFlags().supportInsertReturning
+      );
     });
 
     const result = await this.transaction(sqls);
@@ -57,18 +71,29 @@ export default abstract class CommonSQLImplement extends BaseDriver {
       }
 
       if (op.operation === "UPDATE") {
-        const selectResult = await this.findFirst(
-          schemaName,
-          tableName,
-          op.where
-        );
+        if (r.rows.length === 1)
+          // This is when database support RETURNING
+          tmp.push({
+            record: r.rows[0],
+          });
+        else {
+          const selectResult = await this.findFirst(
+            schemaName,
+            tableName,
+            op.where
+          );
 
-        tmp.push({
-          lastId: r.lastInsertRowid,
-          record: selectResult.rows[0],
-        });
+          tmp.push({
+            lastId: r.lastInsertRowid,
+            record: selectResult.rows[0],
+          });
+        }
       } else if (op.operation === "INSERT") {
-        if (op.autoIncrementPkColumn) {
+        if (r.rows.length === 1) {
+          tmp.push({
+            record: r.rows[0],
+          });
+        } else if (op.autoIncrementPkColumn) {
           const selectResult = await this.findFirst(schemaName, tableName, {
             [op.autoIncrementPkColumn]: r.lastInsertRowid,
           });

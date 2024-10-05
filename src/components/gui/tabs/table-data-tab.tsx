@@ -89,6 +89,7 @@ export default function TableDataWindow({
           });
 
         const tableState = OptimizeTableState.createFromResult(
+          databaseDriver,
           dataResult,
           schemaResult
         );

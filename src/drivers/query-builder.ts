@@ -64,12 +64,14 @@ export function insertInto(
   dialect: BaseDriver,
   schema: string,
   table: string,
-  value: Record<string, unknown>
+  value: Record<string, unknown>,
+  supportReturning: boolean
 ) {
   return [
     "INSERT INTO",
     `${dialect.escapeId(schema)}.${dialect.escapeId(table)}`,
     generateInsertValue(dialect, value),
+    supportReturning ? "RETURNING *" : "",
   ].join(" ");
 }
 
@@ -78,7 +80,8 @@ export function updateTable(
   schema: string,
   table: string,
   value: Record<string, unknown>,
-  where: Record<string, unknown>
+  where: Record<string, unknown>,
+  supportReturning: boolean
 ): string {
   return [
     "UPDATE",
@@ -86,6 +89,7 @@ export function updateTable(
     "SET",
     generateSet(dialect, value),
     generateWhere(dialect, where),
+    supportReturning ? "RETURNING *" : "",
   ]
     .filter(Boolean)
     .join(" ");
