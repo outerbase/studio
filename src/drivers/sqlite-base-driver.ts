@@ -9,8 +9,9 @@ import type {
   DatabaseValue,
   DriverFlags,
   SelectFromTableOptions,
+  TableColumnDataType,
 } from "./base-driver";
-import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
+import { convertSqliteType, escapeSqlValue } from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
@@ -32,6 +33,8 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     return {
       supportBigInt: false,
       supportModifyColumn: false,
+      supportInsertReturning: true,
+      supportUpdateReturning: true,
       defaultSchema: "main",
       optionalSchema: true,
       mismatchDetection: false,
@@ -168,6 +171,13 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   close(): void {
     // do nothing
+  }
+
+  inferTypeFromHeader(
+    header?: DatabaseTableColumn
+  ): TableColumnDataType | undefined {
+    if (!header) return undefined;
+    return convertSqliteType(header.type);
   }
 
   async tableSchema(

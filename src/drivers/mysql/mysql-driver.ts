@@ -5,6 +5,7 @@ import {
   DriverFlags,
   DatabaseSchemaItem,
   DatabaseTableColumn,
+  TableColumnDataType,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -53,6 +54,9 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       mismatchDetection: false,
       supportCreateUpdateTable: false,
       dialect: "mysql",
+
+      supportInsertReturning: false,
+      supportUpdateReturning: false,
     };
   }
 
@@ -152,5 +156,9 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
 
   createUpdateTableSchema(): string[] {
     throw new Error("Not implemented");
+  }
+
+  inferTypeFromHeader(): TableColumnDataType | undefined {
+    return undefined;
   }
 }
