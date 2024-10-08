@@ -79,7 +79,7 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
   constructor(options?: { supportPragmaList: boolean }) {
     super();
     if (options?.supportPragmaList) {
-      this.supportPragmaList = true;
+      this.supportPragmaList = options.supportPragmaList;
     }
   }
 
