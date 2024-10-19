@@ -188,7 +188,7 @@ export default function WindowTabs({
                 <div className="flex h-[45px] items-center border-b">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger>
-                      <div className="px-3 py-2 text-xs flex gap-2">
+                      <div className="ml-1.5 text-xs flex h-7 items-center justify-center gap-1 rounded-lg p-1.5 py-2 text-neutral-600 transition hover:bg-neutral-200 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white">
                         <LucidePlus className="w-4 h-4" /> New
                       </div>
                     </DropdownMenuTrigger>
