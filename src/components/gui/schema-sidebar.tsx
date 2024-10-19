@@ -20,15 +20,15 @@ export default function SchemaView() {
 
   return (
     <div className="flex flex-col overflow-hidden grow">
-      <div className="pt-2 px-2 flex mb-2 flex flex-col">
-        <div className="flex justify-between mb-2 items-center mx-2">
-          <h1 className="text-xl py-2 font-semibold text-primary">Tables</h1>
+      <div className="p-4 pb-2 flex flex-col">
+        <div className="flex justify-between mb-5 items-center">
+          <h1 className="text-xl font-medium text-primary">Tables</h1>
           <button
             className={cn(
               buttonVariants({
                 size: "icon",
               }),
-              "rounded-full h-8 w-8"
+              "rounded-full h-8 w-8 bg-neutral-800 dark:bg-neutral-200"
             )}
             onClick={onNewTable}
           >
@@ -36,15 +36,18 @@ export default function SchemaView() {
           </button>
         </div>
 
-        <div className="border rounded overflow-hidden flex items-center grow mx-2">
-          <div className="text-sm px-2 h-full flex items-center">
-            <LucideSearch className="h-4 w-4 text-black dark:text-white" />
+        <div className="cursor-text items-center has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 has-[:focus]:outline-neutral-400/70 has-[:enabled]:active:outline-neutral-400/70 dark:has-[:focus]:outline-neutral-600 dark:has-[:enabled]:active:outline-neutral-600 flex w-full rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600 h-[32px]">
+          <div className="text-sm h-full flex items-center">
+            <LucideSearch
+              className="text-neutral-500 "
+              style={{ width: 14, height: 14 }}
+            />
           </div>
           <input
             type="text"
-            className="bg-inherit p-2 pl-2 pr-2 outline-none text-sm  h-full grow"
+            className="bg-inherit p-2 pl-2 pr-2 outline-none text-sm font-light h-full grow placeholder:text-neutral-500"
             value={search}
-            placeholder="Search table"
+            placeholder="Search tables"
             onChange={(e) => {
               setSearch(e.currentTarget.value);
             }}

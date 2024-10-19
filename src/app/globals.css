@@ -53,7 +53,7 @@ body {
     --destructive: #f1f5f9;
     --destructive-foreground: red;
 
-    --border: #e2e8f0;
+    --border: #e5e5e5;
     --input: #e2e8f0;
     --ring: #ccc;
 
@@ -91,7 +91,7 @@ body {
     --destructive: red;
     --destructive-foreground: white;
 
-    --border: #313131;
+    --border: #262626;
     --input: #333;
     --ring: #444;
 

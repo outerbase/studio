@@ -23,7 +23,7 @@ import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
 
-  const [defaultWidthPercentage, setDefaultWidthPercentage] = useState(20);
+  const [defaultWidthPercentage, setDefaultWidthPercentage] = useState(25);
 
   useEffect(() => {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
