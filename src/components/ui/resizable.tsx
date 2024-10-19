@@ -23,9 +23,11 @@ const ResizablePanel = ResizablePrimitive.Panel;
 const ResizableHandle = ({
   withHandle,
   className,
+  orientation = "vertical",
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean;
+  orientation?: "vertical" | "horizontal";
 }) => (
   <ResizablePrimitive.PanelResizeHandle
     className={cn(
@@ -35,8 +37,13 @@ const ResizableHandle = ({
     {...props}
   >
     {withHandle && (
-      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
-        <DragHandleDots2Icon className="h-2.5 w-2.5" />
+      <div
+        style={{
+          transform: "translateY(-2px)",
+        }}
+        className={`z-10 flex ${orientation === "vertical" ? "h-full w-1" : "w-full h-1"} hover:dark:bg-neutral-700 hover:bg-neutral-300 opacity-0 hover:opacity-100 transition-opacity duration-200`}
+      >
+        <div className="h-2.5 w-2.5" />
       </div>
     )}
   </ResizablePrimitive.PanelResizeHandle>

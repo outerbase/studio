@@ -340,7 +340,7 @@ export default function QueryWindow({
           </div>
         </div>
       </ResizablePanel>
-      <ResizableHandle withHandle />
+      <ResizableHandle orientation="horizontal" withHandle />
       <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
         {windowTab}
       </ResizablePanel>
