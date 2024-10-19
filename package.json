@@ -8,6 +8,8 @@
     "build": "next build",
     "build-with-migrate": "npm run db:migrate && next build",
     "start": "next start",
+    "electron": "electron .",
+    "start-electron": "npm run build && concurrently \"npm run start\" \"wait-on http://localhost:3000 && npm run electron\"",
     "tsc": "tsc --noEmit --skipLibCheck",
     "test": "jest",
     "test:coverage": "jest --coverage",
@@ -21,7 +23,9 @@
     "format:fix": "prettier --write .",
     "lint": "next lint",
     "lint:fix": "next lint --fix .",
-    "dialect": "node build-dialect.js"
+    "dialect": "node build-dialect.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
@@ -119,6 +123,8 @@
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.19",
     "drizzle-kit": "^0.20.14",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "gui": "^0.15.3",
@@ -132,5 +138,19 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5"
+  },
+  "description": "LibSQL Studio is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything.",
+  "main": "main.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "build": {
+    "appId": "com.yourcompany.yourappname",
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }
