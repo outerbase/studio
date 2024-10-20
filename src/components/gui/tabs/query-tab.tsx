@@ -69,7 +69,7 @@ export default function QueryWindow({
   const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
-  const [fontSize, setFontSize] = useState(1);
+  const [fontSize, setFontSize] = useState(0.875);
   const [lineNumber, setLineNumber] = useState(0);
   const [columnNumber, setColumnNumber] = useState(0);
 
@@ -288,7 +288,7 @@ export default function QueryWindow({
               </div>
             </div>
           </div>
-          <div className="grow overflow-hidden p-2">
+          <div className="grow overflow-hidden p-2 dark:bg-neutral-950 bg-neutral-50">
             <SqlEditor
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
@@ -322,8 +322,12 @@ export default function QueryWindow({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant={"ghost"} size="sm" onClick={onFormatClicked}>
-                    <LucidePencilRuler className="w-4 h-4 mr-2" />
+                  <Button
+                    variant={"ghost"}
+                    size="sm"
+                    onClick={onFormatClicked}
+                    className="text-neutral-800 dark:text-neutral-200"
+                  >
                     Format
                   </Button>
                 </TooltipTrigger>

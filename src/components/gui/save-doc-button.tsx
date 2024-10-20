@@ -88,7 +88,7 @@ export default function SaveDocButton({
           {loading ? (
             <LucideLoader className="w-4 h-4 animate-spin mr-2" />
           ) : (
-            <LucideSave className="w-4 h-4 mr-2" />
+            <></>
           )}
           Save
         </Button>
