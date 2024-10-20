@@ -217,12 +217,12 @@ export default function QueryWindow({
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
-          <div className="border-b pl-3 pr-1 py-2 flex">
+          <div className="border-b pl-3 pr-1 py-3 flex dark:bg-neutral-950 bg-neutral-50">
             <div className="text-sm shrink-0 items-center flex text-secondary-foreground p-1">
               {namespaceName} /
             </div>
             <div className="inline-block relative">
-              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0 bg-background">
+              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0">
                 &nbsp;{name}
               </span>
               <input
@@ -233,7 +233,7 @@ export default function QueryWindow({
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"
-                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded bg-background"
+                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold focus:border-secondary-foreground rounded bg-transparent"
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
               />

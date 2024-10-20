@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import "./inter-font.css";
 import "./codemirror-override.css";
 import { Fragment } from "react";
 import { WEBSITE_NAME } from "@/const";
