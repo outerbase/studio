@@ -6,7 +6,7 @@ import {
 import { Button } from "../ui/button";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useCallback, useState } from "react";
-import { LucideFolderGit, LucideLoader, LucideSave } from "lucide-react";
+import { LucideFolderGit, LucideLoader } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

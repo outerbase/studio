@@ -1,12 +1,7 @@
 import type { WindowTabItemProps } from "@/components/gui/windows-tab";
 import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
 import type { Dispatch, SetStateAction } from "react";
-import {
-  LucideTable,
-  LucideTableProperties,
-  LucideUser,
-  LucideCog,
-} from "lucide-react";
+import { LucideTableProperties, LucideUser, LucideCog } from "lucide-react";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
 import TableDataWindow from "@/components/gui/tabs/table-data-tab";

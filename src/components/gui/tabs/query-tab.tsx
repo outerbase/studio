@@ -3,7 +3,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   LucideGrid,
   LucideMessageSquareWarning,
-  LucidePencilRuler,
   LucidePlay,
 } from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
