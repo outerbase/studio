@@ -156,8 +156,8 @@ export default function SavedDocTab() {
       {dialog}
 
       <div className="flex flex-col grow">
-        <div className="flex justify-between mb-2 items-center mx-2 pt-2 px-2">
-          <h1 className="text-xl py-2 font-semibold text-primary">Queries</h1>
+        <div className="flex justify-between mb-5 items-center mx-2 pt-4 px-2">
+          <h1 className="text-xl font-medium text-primary">Queries</h1>
 
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
@@ -166,7 +166,7 @@ export default function SavedDocTab() {
                   buttonVariants({
                     size: "icon",
                   }),
-                  "rounded-full h-8 w-8"
+                  "rounded-full h-8 w-8 bg-neutral-800 dark:bg-neutral-200"
                 )}
               >
                 <Plus size={16} weight="bold" />
