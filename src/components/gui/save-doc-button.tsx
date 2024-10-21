@@ -6,7 +6,7 @@ import {
 import { Button } from "../ui/button";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useCallback, useState } from "react";
-import { LucideFolderGit, LucideLoader, LucideSave } from "lucide-react";
+import { LucideFolderGit, LucideLoader } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,7 +88,7 @@ export default function SaveDocButton({
           {loading ? (
             <LucideLoader className="w-4 h-4 animate-spin mr-2" />
           ) : (
-            <LucideSave className="w-4 h-4 mr-2" />
+            <></>
           )}
           Save
         </Button>

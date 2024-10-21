@@ -189,10 +189,10 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
               >
                 <div
                   className={cn(
-                    "px-2    flex text-xs items-center gap-0.5 h-8",
+                    "px-4 flex text-xs items-center gap-0.5 h-8 text-neutral-500",
                     selectedKey === item.key
-                      ? "bg-selected"
-                      : "hover:bg-accent",
+                      ? "dark:bg-neutral-800 dark:text-white bg-neutral-200 text-black"
+                      : "hover:dark:bg-neutral-900 hover:bg-neutral-100",
                     contextMenuKey === item.key && contextOpen
                       ? "border border-blue-500"
                       : "border border-transparent",

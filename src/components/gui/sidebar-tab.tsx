@@ -35,26 +35,13 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
 
   const config = useConfig();
 
-  const color = config.color;
-  let bgPrimary = "border-l-gray-500 dark:border-l-gray-600";
-
-  if (color === "red") {
-    bgPrimary = "border-l-red-500 dark:border-l-red-600";
-  } else if (color === "yellow") {
-    bgPrimary = "border-l-yellow-500 dark:border-l-yellow-600";
-  } else if (color === "green") {
-    bgPrimary = "border-l-green-500 dark:border-l-green-600";
-  } else if (color === "gray") {
-    bgPrimary = "border-l-gray-500 dark:border-l-gray-600";
-  }
-
   return (
-    <div className={cn("flex h-full border-l-8", bgPrimary)}>
+    <div className={cn("flex h-full bg-neutral-50 dark:bg-neutral-950")}>
       <div className={cn("shrink-0")}>
-        <div className="flex flex-col border-r h-full p-2 gap-2">
+        <div className="flex flex-col border-r border-neutral-200 dark:border-neutral-800 h-full p-3 gap-4">
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger>
-              <div className="h-12 w-12 flex justify-center items-center">
+              <div className="h-8 w-8 ml-1 mb-2 flex justify-center items-center">
                 <svg
                   fill="currentColor"
                   viewBox="75 75 350 350"
@@ -145,9 +132,9 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
                       }
                     }}
                     className={cn(
-                      "cursor cursor-pointer h-12 w-12 flex flex-col gap-0.5 justify-center items-center rounded-t hover:text-primary",
+                      "cursor cursor-pointer h-10 w-10 flex flex-col gap-0.5 justify-center items-center hover:text-neutral-900 dark:hover:text-neutral-100 text-neutral-400 dark:text-neutral-600",
                       selectedIndex === idx
-                        ? "bg-secondary rounded-lg text-primary"
+                        ? "bg-neutral-200 dark:bg-neutral-800 rounded-xl text-neutral-900 dark:text-neutral-100"
                         : undefined
                     )}
                   >

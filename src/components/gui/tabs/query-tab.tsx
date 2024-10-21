@@ -3,7 +3,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   LucideGrid,
   LucideMessageSquareWarning,
-  LucidePencilRuler,
   LucidePlay,
 } from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
@@ -69,7 +68,7 @@ export default function QueryWindow({
   const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
-  const [fontSize, setFontSize] = useState(1);
+  const [fontSize, setFontSize] = useState(0.875);
   const [lineNumber, setLineNumber] = useState(0);
   const [columnNumber, setColumnNumber] = useState(0);
 
@@ -217,12 +216,12 @@ export default function QueryWindow({
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
         <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
-          <div className="border-b pl-3 pr-1 py-2 flex">
+          <div className="border-b pl-3 pr-1 py-3 flex dark:bg-neutral-950 bg-neutral-50">
             <div className="text-sm shrink-0 items-center flex text-secondary-foreground p-1">
               {namespaceName} /
             </div>
             <div className="inline-block relative">
-              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0 bg-background">
+              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0">
                 &nbsp;{name}
               </span>
               <input
@@ -233,7 +232,7 @@ export default function QueryWindow({
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"
-                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold border border-background focus:border-secondary-foreground rounded bg-background"
+                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold focus:border-secondary-foreground rounded bg-transparent"
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
               />
@@ -288,7 +287,7 @@ export default function QueryWindow({
               </div>
             </div>
           </div>
-          <div className="grow overflow-hidden p-2">
+          <div className="grow overflow-hidden p-2 dark:bg-neutral-950 bg-neutral-50">
             <SqlEditor
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
@@ -322,8 +321,12 @@ export default function QueryWindow({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant={"ghost"} size="sm" onClick={onFormatClicked}>
-                    <LucidePencilRuler className="w-4 h-4 mr-2" />
+                  <Button
+                    variant={"ghost"}
+                    size="sm"
+                    onClick={onFormatClicked}
+                    className="text-neutral-800 dark:text-neutral-200"
+                  >
                     Format
                   </Button>
                 </TooltipTrigger>
@@ -340,7 +343,7 @@ export default function QueryWindow({
           </div>
         </div>
       </ResizablePanel>
-      <ResizableHandle withHandle />
+      <ResizableHandle orientation="horizontal" withHandle />
       <ResizablePanel defaultSize={50} style={{ position: "relative" }}>
         {windowTab}
       </ResizablePanel>

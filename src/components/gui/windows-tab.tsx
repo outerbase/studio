@@ -147,8 +147,8 @@ export default function WindowTabs({
         modifiers={[restrictToHorizontalAxis]}
       >
         <div className="flex flex-col w-full h-full">
-          <div className="grow-0 shrink-0 bg-secondary overflow-x-auto no-scrollbar">
-            <div className="flex h-[45px]">
+          <div className="grow-0 shrink-0 bg-neutral-100 dark:bg-neutral-900 overflow-x-auto no-scrollbar">
+            <div className="flex h-[40px]">
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
                 strategy={horizontalListSortingStrategy}
@@ -185,10 +185,10 @@ export default function WindowTabs({
               </SortableContext>
 
               {menu && (
-                <div className="flex h-[45px] items-center border-b">
+                <div className="flex h-[40px] items-center border-b">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger>
-                      <div className="px-3 py-2 text-xs flex gap-2">
+                      <div className="ml-1.5 text-xs flex h-7 items-center justify-center gap-1 rounded-lg p-1.5 py-2 text-neutral-600 transition hover:bg-neutral-200 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white">
                         <LucidePlus className="w-4 h-4" /> New
                       </div>
                     </DropdownMenuTrigger>
@@ -208,7 +208,7 @@ export default function WindowTabs({
                 </div>
               )}
 
-              <div className="flex h-[45px] border-b flex-1"></div>
+              <div className="flex h-[40px] border-b flex-1"></div>
             </div>
           </div>
           <div className="grow relative">
