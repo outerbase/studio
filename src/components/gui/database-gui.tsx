@@ -23,7 +23,7 @@ import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
 
-  const [defaultWidthPercentage, setDefaultWidthPercentage] = useState(20);
+  const [defaultWidthPercentage, setDefaultWidthPercentage] = useState(25);
 
   useEffect(() => {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
@@ -88,14 +88,14 @@ export default function DatabaseGui() {
         key: "database",
         name: "Schema",
         content: <SchemaView />,
-        icon: <Table size={24} />,
+        icon: <Table weight="light" size={24} />,
       },
       docDriver
         ? {
             key: "saved",
             name: "Queries",
             content: <SavedDocTab />,
-            icon: <Binoculars size={24} />,
+            icon: <Binoculars weight="light" size={24} />,
           }
         : undefined,
       collaborationDriver
@@ -103,7 +103,7 @@ export default function DatabaseGui() {
             key: "setting",
             name: "Setting",
             content: <SettingSidebar />,
-            icon: <GearSix size={24} />,
+            icon: <GearSix weight="light" size={24} />,
           }
         : undefined,
     ].filter(Boolean) as SidebarTabItem[];

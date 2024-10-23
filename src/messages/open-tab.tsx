@@ -1,18 +1,14 @@
 import type { WindowTabItemProps } from "@/components/gui/windows-tab";
 import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
 import type { Dispatch, SetStateAction } from "react";
-import {
-  LucideTable,
-  LucideTableProperties,
-  LucideUser,
-  LucideCog,
-} from "lucide-react";
+import { LucideTableProperties, LucideUser, LucideCog } from "lucide-react";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
 import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
 import { Binoculars } from "@phosphor-icons/react/dist/ssr";
+import { Table } from "@phosphor-icons/react";
 
 interface OpenTableTab {
   type: "table";
@@ -83,7 +79,7 @@ function generateKeyFromTab(tab: OpenTabsProps) {
 
 function generateIconFromTab(tab: OpenTabsProps) {
   if (tab.type === "query") return Binoculars;
-  if (tab.type === "table") return LucideTable;
+  if (tab.type === "table") return Table;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
 
