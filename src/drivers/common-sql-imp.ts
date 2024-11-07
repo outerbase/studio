@@ -165,4 +165,16 @@ export default abstract class CommonSQLImplement extends BaseDriver {
       schema: await this.tableSchema(schemaName, tableName),
     };
   }
+
+  async dropTable(schemaName: string, tableName: string): Promise<void> {
+    await this.query(
+      `DROP TABLE ${this.escapeId(schemaName)}.${this.escapeId(tableName)};`
+    );
+  }
+
+  async emptyTable(schemaName: string, tableName: string): Promise<void> {
+    await this.query(
+      `DELETE FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)};`
+    );
+  }
 }

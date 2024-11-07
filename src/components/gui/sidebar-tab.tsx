@@ -120,7 +120,6 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
               <Tooltip key={key}>
                 <TooltipTrigger asChild>
                   <button
-                    title={name}
                     onClick={() => {
                       if (!loadedIndex[idx]) {
                         loadedIndex[idx] = true;

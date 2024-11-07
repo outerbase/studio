@@ -1,6 +1,6 @@
 import { buttonVariants } from "../ui/button";
+import { Icon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
 export default function ListButtonItem({
   selected,
@@ -10,7 +10,7 @@ export default function ListButtonItem({
 }: Readonly<{
   selected?: boolean;
   text: string;
-  icon: LucideIcon;
+  icon: Icon;
   onClick: () => void;
 }>) {
   return (
