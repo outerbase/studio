@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
   darkMode: ["class"],
@@ -90,6 +91,10 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         shake: "shake 0.82s cubic-bezier(.36,.07,.19,.97) both",
       },
+    },
+    fontFamily: {
+        ...defaultTheme.fontFamily,
+        sans: ['Inter', 'Helvetica', ...defaultTheme.fontFamily.sans],
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -13,6 +13,7 @@ import {
   MySQLIcon,
   RqliteIcon,
   SQLiteIcon,
+  StarbaseIcon,
   TursoIcon,
   ValtownIcon,
 } from "@/components/icons/outerbase-icon";
@@ -81,6 +82,17 @@ export default function DriverDropdown({
                 <div className="flex gap-4 px-2 items-center h-8">
                   <ValtownIcon className="w-6 h-6" />
                   <div className="font-semibold">val.town</div>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => {
+                  onSelect("starbase");
+                }}
+              >
+                <div className="flex gap-4 px-2 items-center h-8">
+                  <StarbaseIcon className="w-6 h-6" />
+                  <div className="font-semibold">StarbaseDB</div>
                 </div>
               </DropdownMenuItem>
 

@@ -41,13 +41,12 @@ export const WindowTabItemButton = forwardRef<
   return (
     <button
       className={cn(
-        "h-[45px] bg-secondary flex items-center text-left text-xs px-2 border-b border-t-3 border-r w-[170px]",
-        "libsql-window-tab",
+        "relative h-[40px] border-x text-neutral-500 flex items-center text-left text-xs px-2 w-[170px] hover:dark:text-white hover:text-black",
         isDragging && "z-20",
         selected
-          ? "border-b-background bg-background text-primary"
-          : "opacity-65 hover:opacity-100",
-        index === 0 ? "border-l-none" : ""
+          ? "bg-neutral-50 dark:bg-neutral-950 text-primary"
+          : "border-b border-x-transparent",
+        index === 0 ? "border-l-0" : ""
       )}
       onAuxClick={({ button }) => button === 1 && onClose && onClose()}
       ref={ref}
@@ -58,18 +57,19 @@ export const WindowTabItemButton = forwardRef<
       {onClose && (
         <div
           className={cn(
-            "rounded-full hover:bg-red-600 hover:text-white w-4 h-4 ml-2 flex justify-center items-center",
-            "libsql-window-close"
+            "rounded hover:bg-neutral-800 hover:text-white w-5 h-5 ml-2 flex justify-center items-center"
           )}
           onClick={(e) => {
             e.stopPropagation();
             if (onClose) onClose();
           }}
         >
-          <LucideX
-            className={cn("w-3 h-3 grow-0 shrink-0", "libsql-window-close")}
-          />
+          <LucideX className={cn("w-3 h-3 grow-0 shrink-0")} />
         </div>
+      )}
+
+      {!selected && (
+        <div className="absolute right-[-1px] top-2 w-[1px] h-6 bg-neutral-800" />
       )}
     </button>
   );

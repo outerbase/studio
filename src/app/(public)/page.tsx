@@ -118,9 +118,7 @@ function SupportDriver() {
           <DatabaseBlock center link="#">
             <PostgreIcon />
             <span>PostgreSQL</span>
-            <span className="text-xs -mt-2 text-yellow-500">
-              Coming Soon 7th Oct 2024
-            </span>
+            <span className="text-xs -mt-2 text-yellow-500">Coming Soon</span>
           </DatabaseBlock>
 
           <DatabaseBlock center link="/databases/mysql">

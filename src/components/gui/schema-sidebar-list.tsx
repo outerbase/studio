@@ -89,6 +89,10 @@ function groupByFtsTable(items: ListViewItem<DatabaseSchemaItem>[]) {
   return items.filter((item) => !excludes.has(item.data.name));
 }
 
+function sortTable(items: ListViewItem<DatabaseSchemaItem>[]) {
+  return items.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function flattenSchemaGroup(
   schemaGroup: ListViewItem<DatabaseSchemaItem>[]
 ): ListViewItem<DatabaseSchemaItem>[] {
@@ -154,17 +158,19 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   );
 
   const listViewItems = useMemo(() => {
-    const r = Object.entries(schema).map(([s, tables]) => {
-      return {
-        data: { type: "schema", schemaName: s },
-        icon: LucideDatabase,
-        name: s,
-        key: s.toString(),
-        children: groupByFtsTable(
-          groupTriggerByTable(prepareListViewItem(tables))
-        ),
-      } as ListViewItem<DatabaseSchemaItem>;
-    });
+    const r = sortTable(
+      Object.entries(schema).map(([s, tables]) => {
+        return {
+          data: { type: "schema", schemaName: s },
+          icon: LucideDatabase,
+          name: s,
+          key: s.toString(),
+          children: sortTable(
+            groupByFtsTable(groupTriggerByTable(prepareListViewItem(tables)))
+          ),
+        } as ListViewItem<DatabaseSchemaItem>;
+      })
+    );
 
     if (databaseDriver.getFlags().optionalSchema) {
       // For SQLite, the default schema is main and

@@ -2,6 +2,7 @@ import {
   CloudflareIcon,
   RqliteIcon,
   SQLiteIcon,
+  StarbaseIcon,
   TursoIcon,
   ValtownIcon,
 } from "@/components/icons/outerbase-icon";
@@ -82,6 +83,41 @@ export const DRIVER_DETAIL: Record<SupportedDriver, DriverDetail> =
       icon: ValtownIcon,
       prefill: "",
       fields: [
+        {
+          name: "token",
+          title: "API Token",
+          required: true,
+          type: "text",
+          secret: true,
+        },
+      ],
+    },
+    starbase: {
+      name: "starbase",
+      displayName: "StarbaseDB",
+      icon: StarbaseIcon,
+      disableRemote: true,
+      prefill: "",
+      fields: [
+        {
+          name: "url",
+          title: "Endpoint",
+          required: true,
+          type: "text",
+          secret: false,
+          invalidate: (url: string): null | string => {
+            const trimmedUrl = url.trim();
+            const valid =
+              trimmedUrl.startsWith("https://") ||
+              trimmedUrl.startsWith("http://");
+
+            if (!valid) {
+              return "Endpoint must start with https:// or http://";
+            }
+
+            return null;
+          },
+        },
         {
           name: "token",
           title: "API Token",
@@ -211,8 +247,10 @@ export type SupportedDriver =
   | "turso"
   | "rqlite"
   | "valtown"
+  | "starbase"
   | "cloudflare-d1"
   | "sqlite-filehandler";
+
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";
 

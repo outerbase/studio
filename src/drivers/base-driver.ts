@@ -204,11 +204,19 @@ export interface DriverFlags {
   optionalSchema: boolean;
   supportBigInt: boolean;
   supportCreateUpdateTable: boolean;
+  supportModifyColumn: boolean;
   mismatchDetection: boolean;
   dialect: SupportedDialect;
+
+  // If database supports this, we don't need
+  // to make a separate request to get updated
+  // data when update
+  supportInsertReturning: boolean;
+  supportUpdateReturning: boolean;
 }
 
 export interface DatabaseTableColumnChange {
+  key: string;
   old: DatabaseTableColumn | null;
   new: DatabaseTableColumn | null;
 }
@@ -249,6 +257,10 @@ export abstract class BaseDriver {
     schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema>;
+
+  abstract inferTypeFromHeader(
+    header?: DatabaseTableColumn
+  ): TableColumnDataType | undefined;
 
   abstract trigger(
     schemaName: string,

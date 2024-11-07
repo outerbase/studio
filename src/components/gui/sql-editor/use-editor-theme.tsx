@@ -4,7 +4,7 @@ import { createTheme } from "@uiw/codemirror-themes";
 import { useMemo } from "react";
 
 export default function useCodeEditorTheme({
-  fontSize = 1,
+  fontSize = 0.875,
 }: {
   fontSize?: number;
 }) {

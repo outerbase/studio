@@ -89,6 +89,7 @@ export default function TableDataWindow({
           });
 
         const tableState = OptimizeTableState.createFromResult(
+          databaseDriver,
           dataResult,
           schemaResult
         );
@@ -208,7 +209,7 @@ export default function TableDataWindow({
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <div className="shrink-0 grow-0">
+      <div className="shrink-0 grow-0 py-2 border-b border-neutral-200 dark:border-neutral-800">
         <Toolbar>
           <ToolbarButton
             text="Commit"
@@ -257,7 +258,7 @@ export default function TableDataWindow({
 
           <div className="flex grow mx-2">
             <div className="bg-secondary rounded overflow-hidden flex items-center w-full">
-              <div className="text-sm px-2 text-gray-500 bg-gray-200 dark:bg-gray-700 h-full flex items-center">
+              <div className="text-sm px-2 text-gray-500 bg-neutral-200 dark:bg-neutral-800 h-full flex items-center">
                 <LucideFilter className="h-4 w-4 text-black dark:text-white" />
               </div>
               <input
@@ -308,7 +309,7 @@ export default function TableDataWindow({
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 pl-2 pr-2 bg-gray-100 dark:bg-gray-800 rounded text-xs h-full"
+                  className="p-1 pl-2 pr-2 bg-neutral-200 dark:bg-neutral-800 rounded text-xs h-full"
                   alt="Limit"
                 />
               </TooltipTrigger>
@@ -331,7 +332,7 @@ export default function TableDataWindow({
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 pl-2 pr-2 bg-gray-100 dark:bg-gray-800 rounded text-xs h-full"
+                  className="p-1 pl-2 pr-2 bg-neutral-200 dark:bg-neutral-800 rounded text-xs h-full"
                   alt="Offset"
                 />
               </TooltipTrigger>
@@ -349,7 +350,6 @@ export default function TableDataWindow({
             />
           </Button>
         </Toolbar>
-        <Separator />
       </div>
       <div className="grow overflow-hidden relative">
         {loading && <OpacityLoading />}

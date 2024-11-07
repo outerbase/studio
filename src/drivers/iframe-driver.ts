@@ -76,6 +76,13 @@ class IframeConnection {
 export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
   protected conn = new IframeConnection();
 
+  constructor(options?: { supportPragmaList: boolean }) {
+    super();
+    if (options?.supportPragmaList) {
+      this.supportPragmaList = options.supportPragmaList;
+    }
+  }
+
   listen() {
     this.conn.listen();
   }
