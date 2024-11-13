@@ -1,3 +1,4 @@
+"use client";
 import { DatabaseResultSet } from "./base-driver";
 import MySQLLikeDriver from "./mysql/mysql-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
@@ -73,8 +74,24 @@ class IframeConnection {
   }
 }
 
+class ElectronConnection {
+  listen() {
+    // do nothing here
+  }
+
+  query(stmt: string): Promise<DatabaseResultSet> {
+    return window.outerbaseIpc.query(stmt);
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return window.outerbaseIpc.transaction(stmts);
+  }
+}
+
 export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
-  protected conn = new IframeConnection();
+  protected conn = window.outerbaseIpc
+    ? new ElectronConnection()
+    : new IframeConnection();
 
   constructor(options?: { supportPragmaList: boolean }) {
     super();
@@ -101,7 +118,10 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
 }
 
 export class IframeMySQLDriver extends MySQLLikeDriver {
-  protected conn = new IframeConnection();
+  protected conn =
+    typeof window !== "undefined" && window?.outerbaseIpc
+      ? new ElectronConnection()
+      : new IframeConnection();
 
   listen() {
     this.conn.listen();
