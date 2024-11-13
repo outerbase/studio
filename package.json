@@ -21,9 +21,7 @@
     "format:fix": "prettier --write .",
     "lint": "next lint",
     "lint:fix": "next lint --fix .",
-    "dialect": "node build-dialect.js",
-    "build-gui": "tsup",
-    "build-gui-type": "tsc ./gui/index.ts --emitDeclarationOnly --declaration --outFile ./gui/dist"
+    "dialect": "node build-dialect.js"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
