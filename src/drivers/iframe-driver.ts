@@ -1,3 +1,4 @@
+"use client";
 import { DatabaseResultSet } from "./base-driver";
 import MySQLLikeDriver from "./mysql/mysql-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
@@ -117,9 +118,10 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
 }
 
 export class IframeMySQLDriver extends MySQLLikeDriver {
-  protected conn = window.outerbaseIpc
-    ? new ElectronConnection()
-    : new IframeConnection();
+  protected conn =
+    typeof window !== "undefined" && window?.outerbaseIpc
+      ? new ElectronConnection()
+      : new IframeConnection();
 
   listen() {
     this.conn.listen();
