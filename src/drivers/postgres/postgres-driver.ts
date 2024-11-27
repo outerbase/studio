@@ -178,8 +178,9 @@ WHERE
 
       const tableKey = column.table_schema + "." + column.table_name;
 
-      if (tableRecord[tableKey]?.tableSchema) {
-        tableRecord[tableKey].tableSchema.columns.push(columnItem);
+      const tableSchema = tableRecord[tableKey].tableSchema;
+      if (tableSchema) {
+        tableSchema.columns.push(columnItem);
       }
     }
 
@@ -218,8 +219,9 @@ WHERE
       }
 
       constraintRecord[constraintKey] = constraintItem;
-      if (tableRecord[tableKey].tableSchema) {
-        tableRecord[tableKey].tableSchema.constraints = [
+      const tableSchema = tableRecord[tableKey]?.tableSchema;
+      if (tableSchema) {
+        tableSchema.constraints = [
           ...(tableRecord[tableKey].tableSchema?.constraints ?? []),
           constraintItem,
         ];
