@@ -178,7 +178,7 @@ WHERE
 
       const tableKey = column.table_schema + "." + column.table_name;
 
-      const tableSchema = tableRecord[tableKey].tableSchema;
+      const tableSchema = tableRecord[tableKey]?.tableSchema;
       if (tableSchema) {
         tableSchema.columns.push(columnItem);
       }
