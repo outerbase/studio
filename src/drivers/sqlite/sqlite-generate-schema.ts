@@ -159,9 +159,7 @@ export default function generateSqlSchemaChange(
 
   if (!isCreateScript) {
     if (change.name.new !== change.name.old) {
-      lines.push(
-        `RENAME TO ${escapeIdentity(change.schemaName ?? "main")}.${escapeIdentity(change.name.new ?? "")}`
-      );
+      lines.push(`RENAME TO ${escapeIdentity(change.name.new ?? "")}`);
     }
   }
 
