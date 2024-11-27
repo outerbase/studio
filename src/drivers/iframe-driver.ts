@@ -1,6 +1,7 @@
 "use client";
 import { DatabaseResultSet } from "./base-driver";
 import MySQLLikeDriver from "./mysql/mysql-driver";
+import PostgresLikeDriver from "./postgres/postgres-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
 type ParentResponseData =
@@ -89,9 +90,10 @@ class ElectronConnection {
 }
 
 export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
-  protected conn = window.outerbaseIpc
-    ? new ElectronConnection()
-    : new IframeConnection();
+  protected conn =
+    typeof window !== "undefined" && window?.outerbaseIpc
+      ? new ElectronConnection()
+      : new IframeConnection();
 
   constructor(options?: { supportPragmaList: boolean }) {
     super();
@@ -118,6 +120,29 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
 }
 
 export class IframeMySQLDriver extends MySQLLikeDriver {
+  protected conn =
+    typeof window !== "undefined" && window?.outerbaseIpc
+      ? new ElectronConnection()
+      : new IframeConnection();
+
+  listen() {
+    this.conn.listen();
+  }
+
+  close(): void {}
+
+  async query(stmt: string): Promise<DatabaseResultSet> {
+    const r = await this.conn.query(stmt);
+    return r;
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    const r = this.conn.transaction(stmts);
+    return r;
+  }
+}
+
+export class IframePostgresDriver extends PostgresLikeDriver {
   protected conn =
     typeof window !== "undefined" && window?.outerbaseIpc
       ? new ElectronConnection()
