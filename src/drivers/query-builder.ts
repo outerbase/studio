@@ -65,13 +65,14 @@ export function insertInto(
   schema: string,
   table: string,
   value: Record<string, unknown>,
-  supportReturning: boolean
+  supportReturning: boolean,
+  supportRowId: boolean
 ) {
   return [
     "INSERT INTO",
     `${dialect.escapeId(schema)}.${dialect.escapeId(table)}`,
     generateInsertValue(dialect, value),
-    supportReturning ? "RETURNING *" : "",
+    supportReturning ? `RETURNING ${supportRowId ? "rowid, " : ""}*` : "",
   ].join(" ");
 }
 
@@ -81,7 +82,8 @@ export function updateTable(
   table: string,
   value: Record<string, unknown>,
   where: Record<string, unknown>,
-  supportReturning: boolean
+  supportReturning: boolean,
+  supportRowId: boolean
 ): string {
   return [
     "UPDATE",
@@ -89,7 +91,7 @@ export function updateTable(
     "SET",
     generateSet(dialect, value),
     generateWhere(dialect, where),
-    supportReturning ? "RETURNING *" : "",
+    supportReturning ? `RETURNING ${supportRowId ? "rowid, " : ""}*` : "",
   ]
     .filter(Boolean)
     .join(" ");

@@ -153,6 +153,7 @@ export interface DatabaseTableSchema {
   constraints?: DatabaseTableColumnConstraint[];
   createScript?: string;
   fts5?: DatabaseTableFts5;
+  type?: "table" | "view";
   withoutRowId?: boolean;
   strict?: boolean;
 }
@@ -213,6 +214,7 @@ export interface DriverFlags {
   // data when update
   supportInsertReturning: boolean;
   supportUpdateReturning: boolean;
+  supportRowId: boolean;
 }
 
 export interface DatabaseTableColumnChange {

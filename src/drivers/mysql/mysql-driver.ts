@@ -55,6 +55,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       supportCreateUpdateTable: false,
       dialect: "mysql",
 
+      supportRowId: false,
       supportInsertReturning: false,
       supportUpdateReturning: false,
     };
