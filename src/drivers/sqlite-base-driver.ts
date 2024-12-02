@@ -31,6 +31,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   getFlags(): DriverFlags {
     return {
+      supportRowId: true,
       supportBigInt: false,
       supportModifyColumn: false,
       supportInsertReturning: true,
@@ -193,6 +194,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       try {
         const rows = result.rows as Array<{ type: string; sql: string }>;
         const def = rows.find((row) => row.type === "table");
+
         if (def) {
           const createScript = def.sql;
 
@@ -200,6 +202,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
             ...parseCreateTableScript(schemaName, createScript),
             createScript,
             schemaName,
+            type: "table",
           };
         }
 
@@ -228,7 +231,6 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       .join(", ");
 
     // If there is rowid, it is likely, we need to query that row back
-    console.log("sss", key);
     const hasRowId = !!key["rowid"];
 
     const sql = `SELECT ${hasRowId ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
@@ -248,7 +250,8 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     if (
       schema.pk.length === 0 &&
       !schema.withoutRowId &&
-      !schema.columns.find((c) => c.name === "rowid")
+      !schema.columns.find((c) => c.name === "rowid") &&
+      schema.type === "table"
     ) {
       // Inject the rowid column
       injectRowIdColumn = true;
