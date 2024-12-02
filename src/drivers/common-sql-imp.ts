@@ -41,7 +41,8 @@ export default abstract class CommonSQLImplement extends BaseDriver {
           schemaName,
           tableName,
           op.values,
-          this.getFlags().supportInsertReturning
+          this.getFlags().supportInsertReturning,
+          this.getFlags().supportRowId
         );
 
       if (op.operation === "DELETE")
@@ -53,7 +54,8 @@ export default abstract class CommonSQLImplement extends BaseDriver {
         tableName,
         op.values,
         op.where,
-        this.getFlags().supportInsertReturning
+        this.getFlags().supportInsertReturning,
+        this.getFlags().supportRowId
       );
     });
 
