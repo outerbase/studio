@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import LogoLoading from "./logo-loading";
 import { useConfig } from "@/context/config-provider";
+import { useMemo } from "react";
 
 export default function ConnectingDialog({
   message,
@@ -11,6 +12,21 @@ export default function ConnectingDialog({
   onRetry?: () => void;
 }>) {
   const { name, onBack } = useConfig();
+
+  const isElectron = useMemo(() => {
+    return typeof window !== "undefined" && window.outerbaseIpc;
+  }, []);
+
+  const onElectronBack = () => {
+    if (window.outerbaseIpc?.close) {
+      window.outerbaseIpc?.close();
+    }
+  };
+
+  const onElectronRetry = () => {
+    window.location.reload();
+  };
+
   let body = (
     <div>
       <p className="mt-4 flex gap-4">
@@ -27,8 +43,13 @@ export default function ConnectingDialog({
         </div>
         <pre className="mt-4">{message}</pre>
         <div className="mt-4 flex gap-4">
-          <Button onClick={onRetry}>Retry</Button>
-          <Button variant={"secondary"} onClick={onBack}>
+          <Button onClick={isElectron ? onElectronRetry : onRetry}>
+            Retry
+          </Button>
+          <Button
+            variant={"secondary"}
+            onClick={isElectron ? onElectronBack : onBack}
+          >
             Back
           </Button>
         </div>
