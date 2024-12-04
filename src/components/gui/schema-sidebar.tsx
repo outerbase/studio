@@ -25,7 +25,7 @@ export default function SchemaView() {
       <div className="p-4 pb-2 flex flex-col">
         <div className="flex justify-between mb-5 items-center">
           <h1 className="text-xl font-medium text-primary">Tables</h1>
-          {databaseDriver.getFlags().supportModifyColumn && (
+          {databaseDriver.getFlags().supportCreateUpdateTable && (
             <button
               className={cn(
                 buttonVariants({
