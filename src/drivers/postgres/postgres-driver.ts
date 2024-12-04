@@ -71,7 +71,7 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
       supportBigInt: false,
       supportModifyColumn: false,
       mismatchDetection: false,
-      supportCreateUpdateTable: true,
+      supportCreateUpdateTable: false,
       supportInsertReturning: true,
       supportUpdateReturning: true,
     };
