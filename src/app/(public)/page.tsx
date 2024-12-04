@@ -115,15 +115,16 @@ function SupportDriver() {
             <div>SQLite</div>
           </DatabaseBlock>
 
-          <DatabaseBlock center link="#">
+          <DatabaseBlock center link="/databases/postgres">
             <PostgreIcon />
             <span>PostgreSQL</span>
-            <span className="text-xs -mt-2 text-yellow-500">Coming Soon</span>
+            <span className="text-xs -mt-2 text-blue-500">Beta</span>
           </DatabaseBlock>
 
           <DatabaseBlock center link="/databases/mysql">
             <MySQLIcon />
             <span>MySQL</span>
+            <span className="text-xs -mt-2 text-blue-500">Beta</span>
           </DatabaseBlock>
 
           <DatabaseBlock center link="#">

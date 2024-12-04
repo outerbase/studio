@@ -2,6 +2,7 @@ import { MySQLIcon } from "@/components/icons/outerbase-icon";
 import WebsiteLayout from "@/components/website-layout";
 import { WEBSITE_NAME } from "@/const";
 import { Metadata } from "next";
+import Link from "next/link";
 
 const siteDescription = `${WEBSITE_NAME} is a fully-featured, lightweight GUI client for managing MySQL databases`;
 
@@ -17,28 +18,35 @@ export const metadata: Metadata = {
 
 function HeroSection() {
   return (
-    <div className="mt-32 relative h-[428px]">
-      <div
-        className="absolute top-0 bottom-0 left-0 right-0 transform-gpu before:absolute before:top-0 before:z-10 before:h-32 before:w-full before:bg-gradient-to-b before:from-black before:to-black/0 after:absolute after:bottom-0 after:left-0 after:h-full after:w-full after:bg-gradient-to-t after:from-black after:to-black/0"
-        style={{
-          background: `url(/hero-banner.jpg)`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-      ></div>
+    <div className="mt-24 relative">
+      <div className="mx-auto max-w-[800px] p-2">
+        <h2 className="text-4xl flex gap-4 justify-center items-center font-bold text-white">
+          <MySQLIcon />
+          <span>MySQL Support</span>
+        </h2>
 
-      <div className="absolute top-0 bottom-0 left-0 right-0 -mt-16">
-        <div className="mx-auto container">
-          <h2 className="text-4xl flex  gap-4  items-center font-bold text-white">
-            <MySQLIcon />
-            <span>MySQL Support</span>
-          </h2>
-          <p className="max-w-[700px] mt-6 text-lg">
-            {WEBSITE_NAME} is a lightweight, fully-featured GUI client for MySQL
-            databases. It enables you to manage and view your database, or
-            expose your database interface externally and much more.
-          </p>
-        </div>
+        <p className="mt-6 text-lg text-center">
+          {WEBSITE_NAME} is a lightweight GUI client for MySQL databases. It
+          enables you to manage and view your database, or expose your database
+          interface externally and much more. You can download desktop app or
+          run it from your command line.
+        </p>
+
+        <p className="my-12 text-center">
+          <Link
+            className="bg-primary text-primary-foreground px-4 py-4 font-bold rounded-lg"
+            href="https://github.com/outerbase/studio-desktop/releases"
+          >
+            Download Mac and Windows
+          </Link>
+        </p>
+
+        <video muted autoPlay loop className="lg:rounded-lg" playsInline>
+          <source
+            src="https://r2.invisal.com/libsqlstudio-mysql.mp4"
+            type="video/mp4"
+          />
+        </video>
       </div>
     </div>
   );
@@ -51,7 +59,7 @@ export default function DatabaseMySqlPage() {
 
       <div className="container mx-auto my-24">
         <h2 className="text-2xl flex  gap-4  items-center font-bold text-white mb-4">
-          Connecting
+          Connecting via Command Line
         </h2>
 
         <p>
