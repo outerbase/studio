@@ -25,6 +25,7 @@ export interface ListViewItem<T = unknown> {
   name: string;
   icon: LucideIcon;
   iconColor?: string;
+  iconBadgeColor?: string;
   data: T;
   badgeContent?: string;
   badgeClassName?: string;
@@ -202,7 +203,6 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   )}
                 >
                   <Indentation depth={depth} />
-
                   {(depth > 0 || listCollapsed) && (
                     <CollapsedButton
                       hasCollapsed={hasCollaped}
@@ -210,15 +210,20 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                       collapsed={isCollapsed}
                     />
                   )}
-
                   {item.icon && (
-                    <item.icon
-                      className={cn(
-                        "w-4 h-4 mr-1 flex-shrink-0",
-                        item.iconColor
+                    <div className="w-4 h-4 mr-1 flex-shrink-0 relative">
+                      <item.icon className={cn("w-4 h-4", item.iconColor)} />
+                      {item.iconBadgeColor && (
+                        <div
+                          className={cn(
+                            "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full",
+                            item.iconBadgeColor
+                          )}
+                        ></div>
                       )}
-                    />
+                    </div>
                   )}
+
                   <div className="text-xs line-clamp-1">
                     <Highlight text={item.name} highlight={highlight} />
                     {item.badgeContent && (

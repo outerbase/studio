@@ -71,7 +71,9 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
 
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [currentSchema, setCurrentSchema] = useState<DatabaseSchemaItem[]>([]);
-  const currentSchemaName = databaseDriver.getFlags().defaultSchema;
+  const [currentSchemaName, setCurrentSchemaName] = useState(
+    () => databaseDriver.getFlags().defaultSchema
+  );
 
   const fetchSchema = useCallback(
     (refresh?: boolean) => {
@@ -79,10 +81,27 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
         setLoading(true);
       }
 
-      databaseDriver
-        .schemas()
+      const getSchema = async () => {
+        const schemaResult = await databaseDriver.schemas();
+        let selectedSchema = null;
+
+        // If databasse driver support get current schema,
+        // We will use it to override the default schema
+        if (databaseDriver.getCurrentSchema) {
+          selectedSchema = await databaseDriver.getCurrentSchema();
+        }
+
+        return { schemaResult, selectedSchema };
+      };
+
+      getSchema()
         .then((result) => {
-          setSchema(result);
+          setSchema(result.schemaResult);
+
+          if (result.selectedSchema) {
+            setCurrentSchemaName(result.selectedSchema);
+          }
+
           setError(undefined);
           setLoading(false);
         })
