@@ -245,7 +245,7 @@ export interface DatabaseTableSchemaChange {
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
-  abstract getCurrentSchema?(): Promise<string | null>;
+  abstract getCurrentSchema(): Promise<string | null>;
 
   // Helper class
   abstract escapeId(id: string): string;

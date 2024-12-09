@@ -87,7 +87,7 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
 
         // If databasse driver support get current schema,
         // We will use it to override the default schema
-        if (databaseDriver.getCurrentSchema) {
+        if (databaseDriver.getFlags().supportUseStatement) {
           selectedSchema = await databaseDriver.getCurrentSchema();
         }
 

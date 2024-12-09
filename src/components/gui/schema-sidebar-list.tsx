@@ -213,6 +213,14 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             schemaName: item.data.schemaName,
             name: item.name,
           });
+        } else if (item.data.type === "schema") {
+          if (databaseDriver.getFlags().supportUseStatement) {
+            databaseDriver
+              .query("USE " + databaseDriver.escapeId(item.name))
+              .then(() => {
+                refresh();
+              });
+          }
         }
       }}
     />
