@@ -4,8 +4,8 @@ import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
 import { get_connection } from "@/db";
 import { env } from "@/env";
 import { cache } from "react";
-import { NextApiRequest } from "next";
 import { cookies, headers } from "next/headers";
+import { NextRequest } from "next/server";
 
 export const PROVIDER = {
   GITHUB: "GITHUB",
@@ -16,9 +16,9 @@ type ObjectValues<T> = T[keyof T];
 
 export type Provider = ObjectValues<typeof PROVIDER>;
 
-export const github = (req: NextApiRequest) => {
-  const proto = (req.headers["x-forwarded-proto"] as string) ?? "http";
-  const baseUrl = `${proto}://${req.headers.host}`;
+export const github = (req: NextRequest) => {
+  const proto = (req.headers.get("x-forwarded-proto") as string) ?? "http";
+  const baseUrl = `${proto}://${req.headers.get("host")}`;
 
   return new GitHub(
     env.GITHUB_CLIENT_ID ?? "",
@@ -29,9 +29,9 @@ export const github = (req: NextApiRequest) => {
   );
 };
 
-export const google = (req: NextApiRequest) => {
-  const proto = (req.headers["x-forwarded-proto"] as string) ?? "http";
-  const baseUrl = `${proto}://${req.headers.host}`;
+export const google = (req: NextRequest) => {
+  const proto = (req.headers.get("x-forwarded-proto") as string) ?? "http";
+  const baseUrl = `${proto}://${req.headers.get("host")}`;
 
   return new Google(
     env.GOOGLE_CLIENT_ID ?? "",

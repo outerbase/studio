@@ -2,9 +2,9 @@ import { PROVIDER, github } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { OAuth2RequestError } from "arctic";
 import * as AuthController from "@/controllers/auth";
-import { NextApiHandler } from "next";
+import { NextRequest } from "next/server";
 
-export const GET: NextApiHandler = async (request) => {
+export const GET = async (request: NextRequest) => {
   const url = new URL(request.url!);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");

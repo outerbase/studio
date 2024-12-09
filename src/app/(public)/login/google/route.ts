@@ -1,9 +1,9 @@
 import { google } from "@/lib/auth";
 import { generateCodeVerifier, generateState } from "arctic";
-import { NextApiHandler } from "next";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
-export const GET: NextApiHandler = async (req) => {
+export const GET = async (req: NextRequest) => {
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
   const url = await google(req).createAuthorizationURL(state, codeVerifier, {

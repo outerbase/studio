@@ -1,9 +1,9 @@
 import { github } from "@/lib/auth";
 import { generateState } from "arctic";
-import { NextApiHandler } from "next";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
-export const GET: NextApiHandler = async (req) => {
+export const GET = async (req: NextRequest) => {
   const state = generateState();
   const url = await github(req).createAuthorizationURL(state, {
     scopes: ["user:email"],
