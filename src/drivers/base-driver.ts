@@ -209,6 +209,8 @@ export interface DriverFlags {
   mismatchDetection: boolean;
   dialect: SupportedDialect;
 
+  supportUseStatement?: boolean;
+
   // If database supports this, we don't need
   // to make a separate request to get updated
   // data when update
@@ -243,6 +245,7 @@ export interface DatabaseTableSchemaChange {
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
+  abstract getCurrentSchema(): Promise<string | null>;
 
   // Helper class
   abstract escapeId(id: string): string;

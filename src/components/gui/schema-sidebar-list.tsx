@@ -164,6 +164,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           data: { type: "schema", schemaName: s },
           icon: LucideDatabase,
           name: s,
+          iconBadgeColor: s === currentSchemaName ? "bg-green-600" : undefined,
           key: s.toString(),
           children: sortTable(
             groupByFtsTable(groupTriggerByTable(prepareListViewItem(tables)))
@@ -178,7 +179,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       return flattenSchemaGroup(r);
     }
     return r;
-  }, [schema, databaseDriver]);
+  }, [schema, currentSchemaName, databaseDriver]);
 
   const filterCallback = useCallback(
     (item: ListViewItem<DatabaseSchemaItem>) => {
@@ -212,6 +213,14 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             schemaName: item.data.schemaName,
             name: item.name,
           });
+        } else if (item.data.type === "schema") {
+          if (databaseDriver.getFlags().supportUseStatement) {
+            databaseDriver
+              .query("USE " + databaseDriver.escapeId(item.name))
+              .then(() => {
+                refresh();
+              });
+          }
         }
       }}
     />
