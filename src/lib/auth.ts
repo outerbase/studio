@@ -4,6 +4,7 @@ import { LibSQLAdapter } from "@lucia-auth/adapter-sqlite";
 import { get_connection } from "@/db";
 import { env } from "@/env";
 import { cache } from "react";
+import { NextApiRequest } from "next";
 import { cookies, headers } from "next/headers";
 
 export const PROVIDER = {
@@ -15,19 +16,29 @@ type ObjectValues<T> = T[keyof T];
 
 export type Provider = ObjectValues<typeof PROVIDER>;
 
-export const github = new GitHub(
-  env.GITHUB_CLIENT_ID ?? "",
-  env.GITHUB_CLIENT_SECRET ?? "",
-  {
-    redirectURI: `${env.BASE_URL}/login/github/callback`,
-  }
-);
+export const github = (req: NextApiRequest) => {
+  const proto = (req.headers["x-forwarded-proto"] as string) ?? "http";
+  const baseUrl = `${proto}://${req.headers.host}`;
 
-export const google = new Google(
-  env.GOOGLE_CLIENT_ID ?? "",
-  env.GOOGLE_CLIENT_SECRET ?? "",
-  `${env.BASE_URL}/login/google/callback`
-);
+  return new GitHub(
+    env.GITHUB_CLIENT_ID ?? "",
+    env.GITHUB_CLIENT_SECRET ?? "",
+    {
+      redirectURI: `${baseUrl}/login/github/callback`,
+    }
+  );
+};
+
+export const google = (req: NextApiRequest) => {
+  const proto = (req.headers["x-forwarded-proto"] as string) ?? "http";
+  const baseUrl = `${proto}://${req.headers.host}`;
+
+  return new Google(
+    env.GOOGLE_CLIENT_ID ?? "",
+    env.GOOGLE_CLIENT_SECRET ?? "",
+    `${baseUrl}/login/google/callback`
+  );
+};
 
 export class LuciaAuth {
   static app?: Lucia<

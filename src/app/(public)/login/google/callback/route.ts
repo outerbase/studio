@@ -2,9 +2,10 @@ import { PROVIDER, google } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { OAuth2RequestError } from "arctic";
 import * as AuthController from "@/controllers/auth";
+import { NextApiHandler } from "next";
 
-export async function GET(request: Request): Promise<Response> {
-  const url = new URL(request.url);
+export const GET: NextApiHandler = async (request) => {
+  const url = new URL(request.url!);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
 
@@ -24,7 +25,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   try {
-    const token = await google.validateAuthorizationCode(
+    const token = await google(request).validateAuthorizationCode(
       code,
       storedCodeVerifier
     );
@@ -67,7 +68,7 @@ export async function GET(request: Request): Promise<Response> {
       status: 500,
     });
   }
-}
+};
 
 interface GoogleUser {
   sub: string;

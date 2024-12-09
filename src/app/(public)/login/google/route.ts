@@ -1,11 +1,12 @@
 import { google } from "@/lib/auth";
 import { generateCodeVerifier, generateState } from "arctic";
+import { NextApiHandler } from "next";
 import { cookies } from "next/headers";
 
-export async function GET(): Promise<Response> {
+export const GET: NextApiHandler = async (req) => {
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
-  const url = await google.createAuthorizationURL(state, codeVerifier, {
+  const url = await google(req).createAuthorizationURL(state, codeVerifier, {
     scopes: ["profile", "email"],
   });
 
@@ -26,4 +27,4 @@ export async function GET(): Promise<Response> {
   });
 
   return Response.redirect(url);
-}
+};
