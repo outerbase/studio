@@ -1,22 +1,9 @@
 import { SelectableTable } from "@/components/selectable-table";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
-import {
-  Check,
-  Database,
-  Spinner,
-  Table,
-  Trash,
-  XCircle,
-} from "@phosphor-icons/react";
+import { Check, Spinner, Table, Trash, XCircle } from "@phosphor-icons/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import { Toolbar, ToolbarButton, ToolbarSeparator } from "../toolbar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { Toolbar, ToolbarButton } from "../toolbar";
 import {
   Dialog,
   DialogContent,
@@ -109,6 +96,9 @@ export default function MassDropTableTab() {
   const [operationType, setOperationType] = useState<"drop" | "empty" | null>(
     null
   );
+
+  const [completed, setCompleted] = useState(false);
+
   const [isConfirming, setIsConfirming] = useState(false);
 
   useEffect(() => {
@@ -164,6 +154,7 @@ export default function MassDropTableTab() {
         }
       }
 
+      setCompleted(true);
       refresh();
     },
     [operationType, currentSchemaName, databaseDriver, refresh]
@@ -232,30 +223,8 @@ export default function MassDropTableTab() {
 
         <div className="px-1">
           <Toolbar>
-            {/* <DropdownMenu modal>
-              <DropdownMenuTrigger>
-                <ToolbarButton text="main" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[250px] p-0 m-0"
-                side="bottom"
-                align="start"
-              >
-                <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
-                  {Object.keys(schema).map((schemaName) => {
-                    return (
-                      <DropdownMenuItem key={schemaName}>
-                        <Database size={16} className="mr-2" /> {schemaName}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <ToolbarSeparator /> */}
             <ToolbarButton
-              disabled={selectedItems.length === 0}
+              disabled={selectedItems.length === 0 || completed}
               icon={<Trash size={16} className="text-red-500" />}
               text="Drop Selected Table"
               onClick={dropSelectedTableClicked}
@@ -263,7 +232,7 @@ export default function MassDropTableTab() {
             />
             <ToolbarButton
               text="Empty Selected Table"
-              disabled={selectedItems.length === 0}
+              disabled={selectedItems.length === 0 || completed}
               onClick={emptySelectedTableClicked}
               destructive
             />
