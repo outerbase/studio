@@ -8,8 +8,9 @@ import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
 import { Binoculars } from "@phosphor-icons/react/dist/ssr";
-import { StackMinus, Table } from "@phosphor-icons/react";
+import { StackMinus, Table, TreeStructure } from "@phosphor-icons/react";
 import MassDropTableTab from "@/components/gui/tabs/mass-drop-table";
+import RelationalDiagramTab from "@/components/gui/tabs/relational-diagram-tab";
 
 interface OpenTableTab {
   type: "table";
@@ -38,7 +39,7 @@ interface OpenUserTab {
 }
 
 interface ToolsTab {
-  type: "mass-drop-table" | "import-sqlite" | "import-csv";
+  type: "mass-drop-table" | "import-sqlite" | "import-csv" | 'erd';
 }
 
 interface OpenTriggerTab {
@@ -80,6 +81,7 @@ function generateKeyFromTab(tab: OpenTabsProps) {
       : "schema-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "user") return "user";
 
+  if (tab.type === 'erd') return 'erd';
   if (tab.type === "mass-drop-table") return "mass-drop-table";
   if (tab.type === "import-sqlite") return "import-sqlite";
   if (tab.type === "import-csv") return "import-csv";
@@ -96,6 +98,7 @@ function generateIconFromTab(tab: OpenTabsProps) {
   if (tab.type === "table") return Table;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
+  if (tab.type === 'erd') return TreeStructure;
   if (tab.type === "mass-drop-table") return StackMinus;
 
   return LucideCog;
@@ -112,6 +115,7 @@ function generateTitle(tab: OpenTabsProps) {
   if (tab.type === "user") return "User & Permission";
   if (tab.type === "import-csv") return "Import from CSV";
   if (tab.type === "import-sqlite") return "Import from SQLite";
+  if (tab.type === 'erd') return 'Relational Diagram';
   if (tab.type === "mass-drop-table") return "Mass Drop Tables";
   if (tab.type === "trigger") return tab.name ?? "";
   return "Unnamed";
@@ -140,6 +144,7 @@ function generateComponent(tab: OpenTabsProps, title: string) {
       <SchemaEditorTab tableName={tab.tableName} schemaName={tab.schemaName} />
     );
   if (tab.type === "user") return <UsersTab />;
+  if (tab.type === "erd") return <RelationalDiagramTab />;
   if (tab.type === "mass-drop-table") return <MassDropTableTab />;
   if (tab.type === "trigger")
     return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;

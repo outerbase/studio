@@ -167,18 +167,18 @@ export default function WindowTabs({
                       hideCloseButton
                         ? undefined
                         : () => {
-                            const newTabs = tabs.filter(
-                              (t) => t.key !== tab.key
-                            );
+                          const newTabs = tabs.filter(
+                            (t) => t.key !== tab.key
+                          );
 
-                            if (selected >= idx) {
-                              onSelectChange(newTabs.length - 1);
-                            }
-
-                            if (onTabsChange) {
-                              onTabsChange(newTabs);
-                            }
+                          if (selected >= idx) {
+                            onSelectChange(newTabs.length - 1);
                           }
+
+                          if (onTabsChange) {
+                            onTabsChange(newTabs);
+                          }
+                        }
                     }
                   />
                 ))}
@@ -220,7 +220,7 @@ export default function WindowTabs({
                 <div
                   className="absolute left-0 right-0 top-0 bottom-0"
                   style={{
-                    visibility: tabIndex === selected ? "inherit" : "hidden",
+                    display: tabIndex === selected ? 'inherit' : 'none'
                   }}
                 >
                   {tab.component}
