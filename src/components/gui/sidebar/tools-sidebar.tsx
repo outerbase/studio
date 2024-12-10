@@ -1,17 +1,17 @@
 "use client";
-import { LucideUser } from "lucide-react";
 import ListButtonItem from "../list-button-item";
 import { openTab } from "@/messages/open-tab";
+import { StackMinus } from "@phosphor-icons/react";
 
 export default function SettingSidebar() {
   return (
     <div className="flex flex-col grow p-2">
       <ListButtonItem
-        text="User and Permission"
+        text="Drop & Empty Multiple Tables"
         onClick={() => {
-          openTab({ type: "user" });
+          openTab({ type: "mass-drop-table" });
         }}
-        icon={LucideUser}
+        icon={StackMinus}
       />
     </div>
   );

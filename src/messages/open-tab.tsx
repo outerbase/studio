@@ -8,7 +8,8 @@ import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
 import { Binoculars } from "@phosphor-icons/react/dist/ssr";
-import { Table } from "@phosphor-icons/react";
+import { StackMinus, Table } from "@phosphor-icons/react";
+import MassDropTableTab from "@/components/gui/tabs/mass-drop-table";
 
 interface OpenTableTab {
   type: "table";
@@ -36,6 +37,10 @@ interface OpenUserTab {
   type: "user";
 }
 
+interface ToolsTab {
+  type: "mass-drop-table" | "import-sqlite" | "import-csv";
+}
+
 interface OpenTriggerTab {
   type: "trigger";
   schemaName: string;
@@ -48,7 +53,8 @@ export type OpenTabsProps =
   | OpenQueryTab
   | OpenTableSchemaTab
   | OpenUserTab
-  | OpenTriggerTab;
+  | OpenTriggerTab
+  | ToolsTab;
 
 export function openTab(props: OpenTabsProps) {
   window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
@@ -74,7 +80,15 @@ function generateKeyFromTab(tab: OpenTabsProps) {
       : "schema-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "user") return "user";
 
-  return "trigger-" + (tab.name ?? "");
+  if (tab.type === "mass-drop-table") return "mass-drop-table";
+  if (tab.type === "import-sqlite") return "import-sqlite";
+  if (tab.type === "import-csv") return "import-csv";
+
+  if (tab.type === "trigger") {
+    return "trigger-" + (tab.name ?? "");
+  }
+
+  return "Unnamed";
 }
 
 function generateIconFromTab(tab: OpenTabsProps) {
@@ -82,6 +96,7 @@ function generateIconFromTab(tab: OpenTabsProps) {
   if (tab.type === "table") return Table;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
+  if (tab.type === "mass-drop-table") return StackMinus;
 
   return LucideCog;
 }
@@ -95,7 +110,11 @@ function generateTitle(tab: OpenTabsProps) {
   if (tab.type === "table") return tab.tableName;
   if (tab.type === "schema") return tab.tableName ? tab.tableName : "New Table";
   if (tab.type === "user") return "User & Permission";
-  return tab.name ?? "";
+  if (tab.type === "import-csv") return "Import from CSV";
+  if (tab.type === "import-sqlite") return "Import from SQLite";
+  if (tab.type === "mass-drop-table") return "Mass Drop Tables";
+  if (tab.type === "trigger") return tab.name ?? "";
+  return "Unnamed";
 }
 
 function generateComponent(tab: OpenTabsProps, title: string) {
@@ -121,7 +140,11 @@ function generateComponent(tab: OpenTabsProps, title: string) {
       <SchemaEditorTab tableName={tab.tableName} schemaName={tab.schemaName} />
     );
   if (tab.type === "user") return <UsersTab />;
-  return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
+  if (tab.type === "mass-drop-table") return <MassDropTableTab />;
+  if (tab.type === "trigger")
+    return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
+
+  return <div>Unknown Tab</div>;
 }
 
 export function receiveOpenTabMessage({
