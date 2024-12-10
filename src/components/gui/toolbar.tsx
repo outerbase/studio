@@ -1,10 +1,20 @@
 import { PropsWithChildren, ReactElement } from "react";
-import { Button } from "../ui/button";
+import { buttonVariants } from "../ui/button";
 import { LucideLoader } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Separator } from "../ui/separator";
+import { cn } from "@/lib/utils";
 
 export function Toolbar({ children }: PropsWithChildren) {
   return <div className="flex p-1 gap-1">{children}</div>;
+}
+
+export function ToolbarSeparator() {
+  return (
+    <div className="mx-1">
+      <Separator orientation="vertical" />
+    </div>
+  );
 }
 
 export function ToolbarButton({
@@ -27,11 +37,17 @@ export function ToolbarButton({
   destructive?: boolean;
 }) {
   const buttonContent = (
-    <Button variant={"ghost"} size={"sm"} disabled={disabled} onClick={onClick}>
-      {loading ? <LucideLoader className="w-4 h-4 animate-spin mr-2" /> : icon}
-
-      {destructive ? <span className="text-red-500">{text}</span> : text}
-
+    <button
+      className={cn(
+        "flex gap-2",
+        buttonVariants({ variant: "ghost", size: "sm" }),
+        destructive ? "text-red-500 hover:text-red-500" : ""
+      )}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {loading ? <LucideLoader className="w-4 h-4 animate-spin" /> : icon}
+      <span>{text}</span>
       {badge && (
         <span
           className={
@@ -42,7 +58,7 @@ export function ToolbarButton({
           {badge}
         </span>
       )}
-    </Button>
+    </button>
   );
 
   if (tooltip) {

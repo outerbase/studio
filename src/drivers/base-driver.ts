@@ -294,5 +294,8 @@ export abstract class BaseDriver {
     validateSchema?: DatabaseTableSchema
   ): Promise<DatabaseTableOperationReslt[]>;
 
+  abstract dropTable(schemaName: string, tableName: string): Promise<void>;
+  abstract emptyTable(schemaName: string, tableName: string): Promise<void>;
+
   abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
 }

@@ -13,7 +13,7 @@ import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
-import SettingSidebar from "./sidebar/setting-sidebar";
+import ToolSidebar from "./sidebar/tools-sidebar";
 
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
@@ -29,8 +29,7 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
-  const { databaseDriver, collaborationDriver, docDriver } =
-    useDatabaseDriver();
+  const { databaseDriver, docDriver } = useDatabaseDriver();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const { currentSchemaName } = useSchema();
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
@@ -98,16 +97,14 @@ export default function DatabaseGui() {
             icon: <Binoculars weight="light" size={24} />,
           }
         : undefined,
-      collaborationDriver
-        ? {
-            key: "setting",
-            name: "Setting",
-            content: <SettingSidebar />,
-            icon: <GearSix weight="light" size={24} />,
-          }
-        : undefined,
+      {
+        key: "tools",
+        name: "Tools",
+        content: <ToolSidebar />,
+        icon: <GearSix weight="light" size={24} />,
+      },
     ].filter(Boolean) as SidebarTabItem[];
-  }, [collaborationDriver, docDriver]);
+  }, [docDriver]);
 
   const tabSideMenu = useMemo(() => {
     return [
