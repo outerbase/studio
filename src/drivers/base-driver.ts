@@ -200,6 +200,11 @@ export interface DatabaseTableOperationReslt {
   record?: Record<string, DatabaseValue>;
 }
 
+export interface ColumnTypeSelector {
+  type: "dropdown" | "text";
+  dropdownOptions?: { value: string; text: string }[];
+}
+
 export interface DriverFlags {
   defaultSchema: string;
   optionalSchema: boolean;
@@ -246,6 +251,7 @@ export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
   abstract getCurrentSchema(): Promise<string | null>;
+  abstract columnTypeSelector: ColumnTypeSelector;
 
   // Helper class
   abstract escapeId(id: string): string;
