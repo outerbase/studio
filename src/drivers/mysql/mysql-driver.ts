@@ -55,10 +55,19 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       supportCreateUpdateTable: false,
       dialect: "mysql",
 
+      supportUseStatement: true,
       supportRowId: false,
       supportInsertReturning: false,
       supportUpdateReturning: false,
     };
+  }
+
+  async getCurrentSchema(): Promise<string | null> {
+    const result = (await this.query("SELECT DATABASE() AS db")) as unknown as {
+      rows: { db?: string | null }[];
+    };
+
+    return result.rows[0].db!;
   }
 
   async schemas(): Promise<DatabaseSchemas> {

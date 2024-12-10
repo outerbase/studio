@@ -150,6 +150,13 @@ export default function QueryWindow({
             ) {
               hasAlterSchema = true;
               break;
+            } else if (
+              databaseDriver.getFlags().supportUseStatement &&
+              log.sql.trim().substring(0, "use ".length).toLowerCase() ===
+                "use "
+            ) {
+              hasAlterSchema = true;
+              break;
             }
           }
 

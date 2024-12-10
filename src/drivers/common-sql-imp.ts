@@ -24,6 +24,10 @@ export default abstract class CommonSQLImplement extends BaseDriver {
     }
   }
 
+  async getCurrentSchema(): Promise<string | null> {
+    return null;
+  }
+
   async updateTableData(
     schemaName: string,
     tableName: string,
