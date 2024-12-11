@@ -20,6 +20,9 @@ dependencies:
   '@codemirror/lang-sql':
     specifier: ^6.5.5
     version: 6.8.0(@codemirror/view@6.35.3)
+  '@dagrejs/dagre':
+    specifier: ^1.1.4
+    version: 1.1.4
   '@dnd-kit/core':
     specifier: ^6.1.0
     version: 6.3.1(react-dom@18.3.1)(react@18.3.1)
@@ -1666,6 +1669,17 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+
+  /@dagrejs/dagre@1.1.4:
+    resolution: {integrity: sha512-QUTc54Cg/wvmlEUxB+uvoPVKFazM1H18kVHBQNmK2NbrDR5ihOCR6CXLnDSZzMcSQKJtabPUWridBOlJM3WkDg==}
+    dependencies:
+      '@dagrejs/graphlib': 2.2.4
+    dev: false
+
+  /@dagrejs/graphlib@2.2.4:
+    resolution: {integrity: sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==}
+    engines: {node: '>17.0.0'}
+    dev: false
 
   /@dnd-kit/accessibility@3.1.1(react@18.3.1):
     resolution: {integrity: sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw==}
