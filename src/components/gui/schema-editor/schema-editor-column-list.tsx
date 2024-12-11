@@ -41,6 +41,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useDatabaseDriver } from "@/context/driver-provider";
+import ColumnTypeSelector from "./column-type-selector";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
@@ -121,11 +122,10 @@ function ColumnItemType({
   }
 
   return (
-    <input
+    <ColumnTypeSelector
+      onChange={onChange}
       value={value}
-      onChange={(e) => onChange(e.currentTarget.value)}
-      className="p-2 text-sm outline-none w-[150px] bg-inherit"
-      spellCheck={false}
+      suggestions={databaseDriver.columnTypeSelector.typeSuggestions ?? []}
     />
   );
 }
