@@ -21,6 +21,7 @@ interface CloudflareResult {
 }
 
 interface CloudflareResponse {
+  error: string;
   result: CloudflareResult[];
 }
 
@@ -89,6 +90,9 @@ export default class CloudflareD1Driver extends SqliteLikeBaseDriver {
     });
 
     const json: CloudflareResponse = await r.json();
+
+    if (json.error) throw new Error(json.error);
+
     return json.result.map(transformRawResult);
   }
 
