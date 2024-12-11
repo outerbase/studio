@@ -79,14 +79,7 @@ function mapSchema(
     );
 
     for (const column of item.tableSchema?.columns || []) {
-      items.push({
-        title: column.name,
-        type: column.type,
-        pk: !!column.pk,
-        fk: !!column.constraint?.foreignKey,
-        unique: !!column.constraint?.unique,
-      });
-
+      let FK = !!column.constraint?.foreignKey;
       if (column.constraint && column.constraint.foreignKey) {
         initialEdges.push({
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
@@ -106,6 +99,11 @@ function mapSchema(
           constraint.foreignKey.foreignTableName !== item.name &&
           (constraint.foreignKey.foreignColumns ?? []).length === 1
         ) {
+
+          if ((constraint.foreignKey.columns ?? []).includes(column.name)) {
+            FK = true;
+          }
+
           initialEdges.push({
             id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
             source: item.name,
@@ -120,6 +118,14 @@ function mapSchema(
           });
         }
       }
+
+      items.push({
+        title: column.name,
+        type: column.type,
+        pk: !!column.pk,
+        fk: FK,
+        unique: !!column.constraint?.unique,
+      });
     }
 
     initialNodes.push({
@@ -140,14 +146,54 @@ function mapSchema(
     });
   }
 
-  const layout = getLayoutElements(initialNodes, initialEdges, {
+  let initialNodesNoneRelationship = initialNodes.filter(x => !initialEdges.map(e => [e.source, e.target]).flat().includes(x.id)).sort((a, b) => (b.measured?.height || 0) - (a.measured?.height || 0));
+
+  const layout = getLayoutElements([...initialNodes.filter(f => !initialNodesNoneRelationship.map(x => x.id).includes(f.id)), ...initialNodesNoneRelationship], initialEdges, {
     rankdir: "LR",
     marginx: 50,
     marginy: 50,
   });
 
+  initialNodesNoneRelationship = layout.nodes.filter(x => !initialEdges.map(e => [e.source, e.target]).flat().includes(x.id));
+
+  const maxHeight = initialNodesNoneRelationship.reduce((a, b) => a = a + (b.measured?.height || 0), 0);
+  const squareRoot = Math.sqrt(300 * maxHeight);
+  // check how many column in row 
+  const cell = Math.ceil(squareRoot / 300);
+
+  const topPosition = Math.max(...layout.nodes.map(x => x.position.x));
+  const positionX = topPosition + 300
+  const positionY = layout.nodes[layout.nodes.map(x => x.position.x).indexOf(topPosition)].position.y;
+
+  const nodeBox: Node[][] = [...new Array(cell)].map((_, i) => [
+    {
+      ...initialNodesNoneRelationship[i],
+      position: {
+        x: positionX + (225 * i),
+        y: positionY
+      }
+    }
+  ])
+
+  for (const node of initialNodesNoneRelationship) {
+    const index = initialNodesNoneRelationship.findIndex(f => f.id === node.id);
+    const items = nodeBox.map(x => x.map(m => (m.measured?.height || 0) + 25).reduce((a, b) => a = a + b, 0))
+    const next = items.indexOf(Math.min(...items));
+    if (index >= cell) {
+      nodeBox[next].push({
+        ...node,
+        position: {
+          x: nodeBox[next][0].position.x,
+          y: positionY + items[next]
+        }
+      })
+    }
+  }
+
+  const nodes = [...layout.nodes.filter(f => !initialNodesNoneRelationship.map(x => x.id).includes(f.id)), ...nodeBox.flat()];
+
   return {
-    initialNodes: layout.nodes,
+    initialNodes: nodes,
     initialEdges: layout.edges,
   };
 }
@@ -160,9 +206,11 @@ function LayoutFlow() {
   const [selectedSchema, setSelectedSchema] = useState(currentSchemaName);
 
   useEffect(() => {
-    const { initialEdges, initialNodes } = mapSchema(schema, selectedSchema);
-    setNodes(initialNodes);
-    setEdges(initialEdges);
+    if (selectedSchema) {
+      const { initialEdges, initialNodes } = mapSchema(schema, selectedSchema);
+      setNodes(initialNodes);
+      setEdges(initialEdges);
+    }
   }, [schema, selectedSchema, setNodes, setEdges]);
 
   const nodeTypes = {
@@ -229,21 +277,23 @@ function LayoutFlow() {
           />
         </Toolbar>
       </div>
-      <div className="flex-1 relative overflow-hidden">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          fitView
-          nodeTypes={nodeTypes}
-        >
-          <Background />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
-      </div>
+      {
+        selectedSchema && <div className="flex-1 relative overflow-hidden">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            fitView
+            nodeTypes={nodeTypes}
+          >
+            <Background />
+            <Controls />
+            <MiniMap />
+          </ReactFlow>
+        </div>
+      }
     </div>
   );
 }
