@@ -10,6 +10,8 @@ import { LucideRefreshCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import SchemaNameSelect from "../schema-editor/schema-name-select";
 import Dagre from '@dagrejs/dagre';
+import { AlignCenterHorizontalSimple, AlignCenterVerticalSimple } from "@phosphor-icons/react";
+import { DownloadImageDiagram } from "../export/download-image-diagram";
 
 function getLayoutElements(nodes: Node[], edges: Edge[], options: any) {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -145,7 +147,6 @@ function LayoutFlow() {
             variant={"ghost"}
             size={"sm"}
             onClick={refresh}
-          // disabled={loading}
           >
             <LucideRefreshCcw className="w-4 h-4 text-green-600" />
           </Button>
@@ -156,9 +157,8 @@ function LayoutFlow() {
               const layout = getLayoutElements(nodes, edges, { direction: 'LR' })
               setNodes(layout.nodes);
             }}
-          // disabled={loading}
           >
-            Vertical
+            <AlignCenterVerticalSimple size={15} />
           </Button>
           <Button
             variant={"ghost"}
@@ -167,10 +167,13 @@ function LayoutFlow() {
               const layout = getLayoutElements(nodes, edges, { direction: 'TB' })
               setNodes(layout.nodes);
             }}
-          // disabled={loading}
           >
-            Horizontal
+            <AlignCenterHorizontalSimple size={15} />
           </Button>
+          <div className="mx-1">
+            <Separator orientation="vertical" />
+          </div>
+          <DownloadImageDiagram />
           <div className="mx-1">
             <Separator orientation="vertical" />
           </div>

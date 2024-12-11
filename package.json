@@ -87,6 +87,7 @@
     "drizzle-orm": "^0.30.1",
     "eslint-plugin-jest": "^27.6.3",
     "file-saver": "^2.0.5",
+    "html-to-image": "^1.11.11",
     "immer": "^10.1.1",
     "libsql-stateless-easy": "^1.6.11",
     "lodash": "^4.17.21",
