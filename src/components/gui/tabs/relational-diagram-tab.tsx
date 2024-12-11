@@ -1,21 +1,40 @@
 import { DatabaseSchemaNode } from "@/components/database-schema-node";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
-import { addEdge, Background, Connection, Controls, Edge, MiniMap, Node, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState, useReactFlow } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import {
+  addEdge,
+  Background,
+  Connection,
+  Controls,
+  Edge,
+  MiniMap,
+  Node,
+  ReactFlow,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useState } from "react";
 import { Toolbar } from "../toolbar";
 import { Button } from "@/components/ui/button";
 import { LucideRefreshCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import SchemaNameSelect from "../schema-editor/schema-name-select";
-import Dagre from '@dagrejs/dagre';
-import { AlignCenterHorizontalSimple, AlignCenterVerticalSimple } from "@phosphor-icons/react";
+import Dagre from "@dagrejs/dagre";
+import {
+  AlignCenterHorizontalSimple,
+  AlignCenterVerticalSimple,
+} from "@phosphor-icons/react";
 import { DownloadImageDiagram } from "../export/download-image-diagram";
 
-function getLayoutElements(nodes: Node[], edges: Edge[], options: any) {
+function getLayoutElements(
+  nodes: Node[],
+  edges: Edge[],
+  options: Dagre.GraphLabel
+) {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: options.direction });
+  g.setGraph(options);
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
   nodes.forEach((node) =>
@@ -23,7 +42,7 @@ function getLayoutElements(nodes: Node[], edges: Edge[], options: any) {
       ...node,
       width: node.measured?.width ?? 0,
       height: node.measured?.height ?? 0,
-    }),
+    })
   );
 
   Dagre.layout(g);
@@ -35,21 +54,29 @@ function getLayoutElements(nodes: Node[], edges: Edge[], options: any) {
       // so it matches the React Flow node anchor point (top left).
       const x = position.x - (node.measured?.width ?? 0) / 2;
       const y = position.y - (node.measured?.height ?? 0) / 2;
-
-      // return { ...node }
       return { ...node, position: { x, y } };
     }),
     edges,
   };
 }
 
-function mapSchema(schema: DatabaseSchemas, selectedSchema: string): { initialNodes: Node[]; initialEdges: Edge[] } {
-  const initialNodes: unknown[] = [];
+function mapSchema(
+  schema: DatabaseSchemas,
+  selectedSchema: string
+): { initialNodes: Node[]; initialEdges: Edge[] } {
+  const initialNodes: Node[] = [];
   const initialEdges: Edge[] = [];
 
   for (const item of schema[selectedSchema]) {
+    if (item.type !== "table") continue;
+
     const items: unknown[] = [];
-    const relationShip = schema[selectedSchema].filter(x => x.tableSchema?.columns.filter(c => c.constraint?.foreignKey).map(c => c.constraint?.foreignKey?.foreignTableName).includes(item.name));
+    const relationship = schema[selectedSchema].filter((x) =>
+      x.tableSchema?.columns
+        .filter((c) => c.constraint?.foreignKey)
+        .map((c) => c.constraint?.foreignKey?.foreignTableName)
+        .includes(item.name)
+    );
 
     for (const column of item.tableSchema?.columns || []) {
       items.push({
@@ -58,72 +85,85 @@ function mapSchema(schema: DatabaseSchemas, selectedSchema: string): { initialNo
         pk: !!column.pk,
         fk: !!column.constraint?.foreignKey,
         unique: !!column.constraint?.unique,
-      })
+      });
 
       if (column.constraint && column.constraint.foreignKey) {
         initialEdges.push({
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
           source: item.name,
-          target: column.constraint.foreignKey.foreignTableName || '',
+          target: column.constraint.foreignKey.foreignTableName || "",
           sourceHandle: column.name,
-          targetHandle: column.constraint.foreignKey.foreignColumns ? column.constraint.foreignKey.foreignColumns[0] : '',
+          targetHandle: column.constraint.foreignKey.foreignColumns
+            ? column.constraint.foreignKey.foreignColumns[0]
+            : "",
           animated: true,
         });
+      }
+
+      for (const constraint of item.tableSchema?.constraints ?? []) {
+        if (
+          constraint.foreignKey &&
+          constraint.foreignKey.foreignTableName !== item.name &&
+          (constraint.foreignKey.foreignColumns ?? []).length === 1
+        ) {
+          initialEdges.push({
+            id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
+            source: item.name,
+            target: constraint.foreignKey.foreignTableName || "",
+            sourceHandle: constraint.foreignKey.columns
+              ? constraint.foreignKey.columns[0]
+              : "",
+            targetHandle: constraint.foreignKey.foreignColumns
+              ? constraint.foreignKey.foreignColumns[0]
+              : "",
+            animated: true,
+          });
+        }
       }
     }
 
     initialNodes.push({
       id: String(item.name),
-      type: 'databaseSchema',
-      position: { x: relationShip.length < 0 ? 200 : 0, y: relationShip.length * 100 },
-      countRelationship: relationShip.length,
+      type: "databaseSchema",
+      position: {
+        x: relationship.length < 0 ? 200 : 0,
+        y: relationship.length * 100,
+      },
       measured: {
-        width: 370,
-        height: ((item.tableSchema?.columns.length || 0) * 60) + 67
+        width: 300,
+        height: (item.tableSchema?.columns.length || 0) * 32 + 32,
       },
       data: {
         label: item.name,
-        schema: items
-      }
-    })
+        schema: items,
+      },
+    });
   }
 
-  const nodes = initialNodes.sort((a: any, b: any) => b.countRelationship - a.countRelationship) as any;
-
-  const layout = getLayoutElements(nodes, initialEdges, { direction: 'LR' })
+  const layout = getLayoutElements(initialNodes, initialEdges, {
+    rankdir: "LR",
+    marginx: 50,
+    marginy: 50,
+  });
 
   return {
     initialNodes: layout.nodes,
-    initialEdges: layout.edges
-  }
+    initialEdges: layout.edges,
+  };
 }
 
 function LayoutFlow() {
-  const { fitView } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { schema: initialSchema, currentSchemaName, refresh } = useSchema();
   const [schema] = useState(initialSchema);
   const [selectedSchema, setSelectedSchema] = useState(currentSchemaName);
-  const [revision, setRevision] = useState(true);
 
   useEffect(() => {
-    if (revision) {
-      const { initialEdges, initialNodes } = mapSchema(schema, selectedSchema);
-      setTimeout(() => {
-        if (initialNodes) {
-          // const layout = getLayoutElements(initialNodes, initialEdges, { direction: 'LR' })
-          setNodes(initialNodes);
-          setEdges(initialEdges);
-          setRevision(false);
-          typeof window !== "undefined" && window.requestAnimationFrame(() => {
-            fitView();
-          })
-        }
-      }, 1000)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, edges, revision])
+    const { initialEdges, initialNodes } = mapSchema(schema, selectedSchema);
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [schema, selectedSchema, setNodes, setEdges]);
 
   const nodeTypes = {
     databaseSchema: DatabaseSchemaNode,
@@ -131,7 +171,7 @@ function LayoutFlow() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((els) => addEdge(params, els)),
-    [setEdges],
+    [setEdges]
   );
 
   return (
@@ -143,18 +183,18 @@ function LayoutFlow() {
       </div>
       <div className="shrink-0 grow-0 border-b border-neutral-200 dark:border-neutral-800">
         <Toolbar>
-          <Button
-            variant={"ghost"}
-            size={"sm"}
-            onClick={refresh}
-          >
+          <Button variant={"ghost"} size={"sm"} onClick={refresh}>
             <LucideRefreshCcw className="w-4 h-4 text-green-600" />
           </Button>
           <Button
             variant={"ghost"}
             size={"sm"}
             onClick={() => {
-              const layout = getLayoutElements(nodes, edges, { direction: 'LR' })
+              const layout = getLayoutElements(nodes, edges, {
+                rankdir: "LR",
+                marginx: 50,
+                marginy: 50,
+              });
               setNodes(layout.nodes);
             }}
           >
@@ -164,7 +204,11 @@ function LayoutFlow() {
             variant={"ghost"}
             size={"sm"}
             onClick={() => {
-              const layout = getLayoutElements(nodes, edges, { direction: 'TB' })
+              const layout = getLayoutElements(nodes, edges, {
+                rankdir: "TB",
+                marginx: 50,
+                marginy: 50,
+              });
               setNodes(layout.nodes);
             }}
           >
@@ -181,7 +225,6 @@ function LayoutFlow() {
             value={selectedSchema}
             onChange={(value) => {
               setSelectedSchema(value);
-              setRevision(true);
             }}
           />
         </Toolbar>
@@ -202,7 +245,7 @@ function LayoutFlow() {
         </ReactFlow>
       </div>
     </div>
-  )
+  );
 }
 
 export default function RelationalDiagramTab() {
@@ -210,5 +253,5 @@ export default function RelationalDiagramTab() {
     <ReactFlowProvider>
       <LayoutFlow />
     </ReactFlowProvider>
-  )
+  );
 }

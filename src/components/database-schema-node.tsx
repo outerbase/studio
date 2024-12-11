@@ -8,7 +8,13 @@ import { Key, Star } from "@phosphor-icons/react";
 
 type DatabaseSchemaNode = Node<{
   label: string;
-  schema: { title: string; type: string, pk: boolean, fk: boolean, unique: boolean }[];
+  schema: {
+    title: string;
+    type: string;
+    pk: boolean;
+    fk: boolean;
+    unique: boolean;
+  }[];
 }>;
 
 export function DatabaseSchemaNode({
@@ -17,28 +23,34 @@ export function DatabaseSchemaNode({
 }: NodeProps<DatabaseSchemaNode>) {
   return (
     <BaseNode className="p-0" selected={selected}>
-      <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 text-center text-sm text-muted-foreground">
+      <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 text-center text-sm text-muted-foreground h-[30px] max-w-[300px]">
         {data.label}
       </h2>
       {/* shadcn Table cannot be used because of hardcoded overflow-auto */}
-      <table className="border-spacing-10 overflow-visible">
+      <table className="overflow-visible w-full">
         <TableBody>
           {data.schema.map((entry) => (
             <TableRow key={entry.title} className="relative text-xs">
-              <TableCell className="pl-0 pr-6 font-light">
+              <TableCell className="pl-0 pr-6 font-light h-[30px]">
                 <LabeledHandle
                   id={entry.title}
                   title={entry.title}
                   type="target"
                   position={Position.Left}
-                  childrenKey={<div className="w-6 mx-1">
-                    {entry.pk && <Key size={15} color={'rgb(153 27 27)'} />}
-                    {entry.fk && <Key size={15} color={'rgb(245 158 11)'} />}
-                    {entry.unique && <div className="bg-rose-800 p-1 rounded-md w-5 flex flex-row items-center justify-center"><Star size={10} color={'#FFFFFF'} /></div>}
-                  </div>}
+                  childrenKey={
+                    <div className="w-6 mx-1">
+                      {entry.pk && <Key size={15} color={"rgb(153 27 27)"} />}
+                      {entry.fk && <Key size={15} color={"rgb(245 158 11)"} />}
+                      {entry.unique && (
+                        <div className="bg-rose-800 p-1 rounded-md w-5 flex flex-row items-center justify-center">
+                          <Star size={10} color={"#FFFFFF"} />
+                        </div>
+                      )}
+                    </div>
+                  }
                 />
               </TableCell>
-              <TableCell className="pr-0 text-right font-thin">
+              <TableCell className="pr-0 text-right font-thin h-[30px]">
                 <LabeledHandle
                   id={entry.title}
                   title={entry.type}
