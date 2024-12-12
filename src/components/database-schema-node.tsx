@@ -4,8 +4,8 @@ import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 import { BaseNode } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
-import { CaretDown, CaretUp, Key, Star } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { Key, Star } from "@phosphor-icons/react";
+import ContextMenuERD from "./context-menu-diagram";
 
 type DatabaseSchemaNode = Node<{
   label: string;
@@ -21,37 +21,23 @@ type DatabaseSchemaNode = Node<{
 export function DatabaseSchemaNode({
   data,
   selected,
+  ...props
 }: NodeProps<DatabaseSchemaNode>) {
-  const [show, setShow] = useState(data.schema.length < 20 ? true : false);
-
-  const toggleShow = useCallback(() => setShow(!show), [show]);
-
-  const totalColumn = data.schema.length;
-  const items = data.schema
-    .sort((a, b) => Number(b.pk) - Number(a.pk) || Number(b.fk) - Number(a.fk))
-    .map((entry) => {
-      const key = [];
-
-      if (entry.pk) key.push("PK");
-      if (entry.fk) key.push("FK");
-      if (entry.unique) key.push("UQ");
-      return { ...entry, key };
-    });
-
+  const key = data.schema.filter(f => f.pk || f.fk).map(x => x.title);
   return (
-    <BaseNode className="p-0" selected={selected}>
-      <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 text-center text-sm text-muted-foreground h-[30px] max-w-[300px]">
-        {data.label}
-      </h2>
-      {/* shadcn Table cannot be used because of hardcoded overflow-auto */}
-      <table className="overflow-visible w-full">
-        <TableBody>
-          {(show ? items : items.filter((x) => x.key.length > 0)).map(
-            (entry) => {
+    <ContextMenuERD {...{ data, ...props }}>
+      <BaseNode className="p-0" selected={selected}>
+        <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 text-center text-sm text-muted-foreground h-[30px] max-w-[300px]">
+          {data.label}
+        </h2>
+        {/* shadcn Table cannot be used because of hardcoded overflow-auto */}
+        <table className="overflow-visible w-full">
+          <TableBody>
+            {data.schema.map((entry) => {
               return (
                 <TableRow key={entry.title} className="relative text-xs">
                   <TableCell className="pl-0 pr-6 font-light h-[30px]">
-                    {entry.key.length > 0 ? (
+                    {key.includes(entry.title) ? (
                       <LabeledHandle
                         id={entry.title}
                         title={entry.title}
@@ -78,7 +64,7 @@ export function DatabaseSchemaNode({
                     )}
                   </TableCell>
                   <TableCell className="pr-0 text-right font-thin h-[30px]">
-                    {entry.key.length > 0 ? (
+                    {key.includes(entry.title) ? (
                       <LabeledHandle
                         id={entry.title}
                         title={entry.type}
@@ -95,26 +81,10 @@ export function DatabaseSchemaNode({
                 </TableRow>
               );
             }
-          )}
-          <TableRow
-            className="relative text-xs bg-secondary text-muted-foreground cursor-pointer hover:text-muted"
-            onClick={toggleShow}
-          >
-            <TableCell className="pl-0 pr-6 font-light h-[30px]">
-              <div className="pl-2 text-xs">
-                {show
-                  ? "collapse"
-                  : `more ${totalColumn - items.filter((x) => x.key.length > 0).length} columns`}
-              </div>
-            </TableCell>
-            <TableCell className="text-right">
-              <div className="pr-2 flex flex-row justify-end items-center">
-                {!show ? <CaretDown size={15} /> : <CaretUp size={15} />}
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </table>
-    </BaseNode>
+            )}
+          </TableBody>
+        </table>
+      </BaseNode>
+    </ContextMenuERD>
   );
 }

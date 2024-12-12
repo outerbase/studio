@@ -1,14 +1,14 @@
 import {
-  useEffect, 
+  useEffect,
   useState,
   type Dispatch,
   type SetStateAction,
   useCallback
 } from 'react';
 
-import { 
-  useNodes, 
-  Panel, 
+import {
+  useNodes,
+  Panel,
   useStore,
   useStoreApi,
   type OnNodesChange,
@@ -20,8 +20,8 @@ import {
 
 import {
   ToggleGroup,
-  ToggleGroupItem,
 } from "@/components/ui/toggle-group"
+import { Button } from './ui/button';
 
 export function ViewportLogger() {
   const viewport = useStore(
@@ -189,22 +189,19 @@ type DevToolsToggleProps = {
 
 function DevToolsToggle({ tools }: DevToolsToggleProps) {
   return (
-    <Panel position="top-left" className="bg-card p-1 border rounded shadow-sm">
-      <ToggleGroup type="multiple">
-        {tools.map(({ active, setActive, label, value }) => (
-          <ToggleGroupItem
-            key={value}
-            value={value}
-            onClick={() => setActive((prev) => !prev)}
-            aria-pressed={active}
-            className="bg-card text-card-foreground transition-colors duration-300 hover:bg-secondary hover:text-secondary-foreground"
-          >
-            {label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-    </Panel>
-  );
+    <ToggleGroup type="multiple">
+      {tools.map(({ active, setActive, label, value }) => (
+        <Button
+          variant={'ghost'}
+          size="sm"
+          onClick={() => setActive((prev) => !prev)}
+          key={value}
+          aria-pressed={active}
+          className={`${active ? 'bg-secondary' : ''}`}
+        >{label}</Button>
+      ))}
+    </ToggleGroup>
+  )
 }
 
 
@@ -223,7 +220,7 @@ export function DevTools() {
   return (
     <>
       <DevToolsToggle tools={tools} />
-      
+
       {changeLoggerActive && (
         <Panel className="text-xs p-5 bg-white rounded shadow-md overflow-y-auto max-h-[50%] mt-20" position="bottom-right">
           <ChangeLogger />
@@ -231,7 +228,7 @@ export function DevTools() {
       )}
 
       {nodeInspectorActive && <NodeInspector />}
-      
+
       {viewportLoggerActive && (
         <Panel position="bottom-left" className="text-secondary-foreground">
           <ViewportLogger />
