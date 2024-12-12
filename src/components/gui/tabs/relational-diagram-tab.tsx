@@ -161,7 +161,7 @@ function mapSchema(
       },
       measured: {
         width: 300,
-        height: (item.tableSchema?.columns.length || 0) * 32 + 32,
+        height: Math.min(20, item.tableSchema?.columns.length || 0) * 32 + 64,
       },
       data: {
         label: item.name,
@@ -204,7 +204,11 @@ function mapSchema(
   const area =
     schemaWithoutRelationship.reduce(
       (a, b) =>
-        (a = a + (b.tableSchema?.columns.length || 0) * 32 + 32 + NODE_MARGIN),
+        (a =
+          a +
+          Math.min(20, b.tableSchema?.columns.length || 0) * 32 +
+          64 +
+          NODE_MARGIN),
       0
     ) * MAX_NODE_WIDTH;
 
@@ -220,7 +224,8 @@ function mapSchema(
     const columnIndex = columnHeight.indexOf(Math.min(...columnHeight));
 
     // Calculate the height of the node
-    const nodeHeight = (node.tableSchema?.columns.length || 0) * 32 + 32;
+    const nodeHeight =
+      Math.min(20, node.tableSchema?.columns.length || 0) * 32 + 64;
 
     // Calculate the position of the node
     const nodeX =
