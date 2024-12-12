@@ -28,6 +28,9 @@ import {
 } from "@phosphor-icons/react";
 import { DownloadImageDiagram } from "../export/download-image-diagram";
 
+const NODE_MARGIN = 50;
+const MAX_NODE_WIDTH = 300;
+
 function getLayoutElements(
   nodes: Node[],
   edges: Edge[],
@@ -64,24 +67,27 @@ function mapSchema(
   schema: DatabaseSchemas,
   selectedSchema: string
 ): { initialNodes: Node[]; initialEdges: Edge[] } {
-  const initialNodes: Node[] = [];
   const initialEdges: Edge[] = [];
+
+  // Keep name of all table that has relationship
+  const tableNameWithRelationship = new Set<string>();
+  const foreignKeyList = new Set<string>();
 
   for (const item of schema[selectedSchema]) {
     if (item.type !== "table") continue;
 
-    const items: unknown[] = [];
-    const relationship = schema[selectedSchema].filter((x) =>
-      x.tableSchema?.columns
-        .filter((c) => c.constraint?.foreignKey)
-        .map((c) => c.constraint?.foreignKey?.foreignTableName)
-        .includes(item.name)
-    );
-
+    // Get the relationship via column constraint
     for (const column of item.tableSchema?.columns || []) {
-      let FK = !!column.constraint?.foreignKey;
       if (column.constraint && column.constraint.foreignKey) {
+        tableNameWithRelationship.add(item.name);
+        tableNameWithRelationship.add(
+          column.constraint.foreignKey.foreignTableName || ""
+        );
+
+        foreignKeyList.add(`${item.name}.${column.name}`);
+
         initialEdges.push({
+          type: "smoothstep",
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
           source: item.name,
           target: column.constraint.foreignKey.foreignTableName || "",
@@ -92,48 +98,59 @@ function mapSchema(
           animated: true,
         });
       }
-
-      for (const constraint of item.tableSchema?.constraints ?? []) {
-        if (
-          constraint.foreignKey &&
-          constraint.foreignKey.foreignTableName !== item.name &&
-          (constraint.foreignKey.foreignColumns ?? []).length === 1
-        ) {
-
-          if ((constraint.foreignKey.columns ?? []).includes(column.name)) {
-            FK = true;
-          }
-
-          initialEdges.push({
-            id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
-            source: item.name,
-            target: constraint.foreignKey.foreignTableName || "",
-            sourceHandle: constraint.foreignKey.columns
-              ? constraint.foreignKey.columns[0]
-              : "",
-            targetHandle: constraint.foreignKey.foreignColumns
-              ? constraint.foreignKey.foreignColumns[0]
-              : "",
-            animated: true,
-          });
-        }
-      }
-
-      items.push({
-        title: column.name,
-        type: column.type,
-        pk: !!column.pk,
-        fk: FK,
-        unique: !!column.constraint?.unique,
-      });
     }
 
-    initialNodes.push({
+    // Get the relationship via table constraint
+    for (const constraint of item.tableSchema?.constraints || []) {
+      if (
+        constraint.foreignKey &&
+        constraint.foreignKey.foreignTableName !== item.name &&
+        (constraint.foreignKey.foreignColumns ?? []).length === 1
+      ) {
+        tableNameWithRelationship.add(item.name);
+        tableNameWithRelationship.add(
+          constraint.foreignKey.foreignTableName || ""
+        );
+
+        const columnName = constraint.foreignKey.columns
+          ? constraint.foreignKey.columns[0]
+          : "";
+
+        foreignKeyList.add(`${item.name}.${columnName}`);
+
+        initialEdges.push({
+          type: "smoothstep",
+          id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
+          source: item.name,
+          target: constraint.foreignKey.foreignTableName || "",
+          sourceHandle: columnName,
+          targetHandle: constraint.foreignKey.foreignColumns
+            ? constraint.foreignKey.foreignColumns[0]
+            : "",
+          animated: true,
+        });
+      }
+    }
+  }
+
+  // Split the schema into without relationship and with relationship
+  const schemaWithRelationship = schema[selectedSchema].filter((x) => {
+    if (x.type !== "table") return false;
+    return tableNameWithRelationship.has(x.name);
+  });
+
+  const schemaWithoutRelationship = schema[selectedSchema].filter((x) => {
+    if (x.type !== "table") return false;
+    return !tableNameWithRelationship.has(x.name);
+  });
+
+  const relationshipNodes = schemaWithRelationship.map((item) => {
+    return {
       id: String(item.name),
       type: "databaseSchema",
       position: {
-        x: relationship.length < 0 ? 200 : 0,
-        y: relationship.length * 100,
+        x: 0,
+        y: 0,
       },
       measured: {
         width: 300,
@@ -141,60 +158,101 @@ function mapSchema(
       },
       data: {
         label: item.name,
-        schema: items,
+        schema: item.tableSchema?.columns.map((column) => {
+          return {
+            title: column.name,
+            type: column.type,
+            pk: !!column.pk,
+            fk: foreignKeyList.has(`${item.name}.${column.name}`),
+            unique: !!column.constraint?.unique,
+          };
+        }),
+      },
+    };
+  });
+
+  // Rearrange the nodes with relationship
+  const layoutRelationship = getLayoutElements(
+    relationshipNodes,
+    initialEdges,
+    {
+      rankdir: "LR",
+      marginx: NODE_MARGIN,
+      marginy: NODE_MARGIN,
+    }
+  );
+
+  // Rearrange the nodes with relationship
+  // We need to find the position
+  const relationshipRightPosition =
+    Math.max(...layoutRelationship.nodes.map((x) => x.position.x)) +
+    NODE_MARGIN +
+    MAX_NODE_WIDTH;
+
+  const relationshipTopPosition = Math.min(
+    ...layoutRelationship.nodes.map((x) => x.position.y)
+  );
+
+  // Calculate estimate area of the nodes without relationship
+  const area =
+    schemaWithoutRelationship.reduce(
+      (a, b) =>
+        (a = a + (b.tableSchema?.columns.length || 0) * 32 + 32 + NODE_MARGIN),
+      0
+    ) * MAX_NODE_WIDTH;
+
+  // Calculate the number column to fit all the none relationship nodes
+  const columnCount = Math.ceil(Math.sqrt(area) / MAX_NODE_WIDTH);
+  const columnHeight = Array.from({ length: columnCount }).map(() => 0);
+  const columnNodes: Node[][] = Array.from({ length: columnCount }).map(
+    () => []
+  );
+
+  for (const node of schemaWithoutRelationship) {
+    // Get the index of the column with the minimum height
+    const columnIndex = columnHeight.indexOf(Math.min(...columnHeight));
+
+    // Calculate the height of the node
+    const nodeHeight = (node.tableSchema?.columns.length || 0) * 32 + 32;
+
+    // Calculate the position of the node
+    const nodeX =
+      relationshipRightPosition + NODE_MARGIN + columnIndex * MAX_NODE_WIDTH;
+    const nodeY = relationshipTopPosition + columnHeight[columnIndex];
+
+    // Update the height of the column
+    columnHeight[columnIndex] += nodeHeight + NODE_MARGIN;
+
+    // Add the node to the column
+    columnNodes[columnIndex].push({
+      id: String(node.name),
+      type: "databaseSchema",
+      position: {
+        x: nodeX,
+        y: nodeY,
+      },
+      measured: {
+        width: 300,
+        height: nodeHeight,
+      },
+      data: {
+        label: node.name,
+        schema: node.tableSchema?.columns.map((column) => {
+          return {
+            title: column.name,
+            type: column.type,
+            pk: !!column.pk,
+            fk: foreignKeyList.has(`${node.name}.${column.name}`),
+            unique: !!column.constraint?.unique,
+          };
+        }),
       },
     });
   }
 
-  let initialNodesNoneRelationship = initialNodes.filter(x => !initialEdges.map(e => [e.source, e.target]).flat().includes(x.id)).sort((a, b) => (b.measured?.height || 0) - (a.measured?.height || 0));
-
-  const layout = getLayoutElements([...initialNodes.filter(f => !initialNodesNoneRelationship.map(x => x.id).includes(f.id)), ...initialNodesNoneRelationship], initialEdges, {
-    rankdir: "LR",
-    marginx: 50,
-    marginy: 50,
-  });
-
-  initialNodesNoneRelationship = layout.nodes.filter(x => !initialEdges.map(e => [e.source, e.target]).flat().includes(x.id));
-
-  const maxHeight = initialNodesNoneRelationship.reduce((a, b) => a = a + (b.measured?.height || 0), 0);
-  const squareRoot = Math.sqrt(300 * maxHeight);
-  // check how many column in row 
-  const cell = Math.ceil(squareRoot / 300);
-
-  const topPosition = Math.max(...layout.nodes.map(x => x.position.x));
-  const positionX = topPosition + 300
-  const positionY = layout.nodes[layout.nodes.map(x => x.position.x).indexOf(topPosition)].position.y;
-
-  const nodeBox: Node[][] = [...new Array(cell)].map((_, i) => [
-    {
-      ...initialNodesNoneRelationship[i],
-      position: {
-        x: positionX + (225 * i),
-        y: positionY
-      }
-    }
-  ])
-
-  for (const node of initialNodesNoneRelationship) {
-    const index = initialNodesNoneRelationship.findIndex(f => f.id === node.id);
-    const items = nodeBox.map(x => x.map(m => (m.measured?.height || 0) + 25).reduce((a, b) => a = a + b, 0))
-    const next = items.indexOf(Math.min(...items));
-    if (index >= cell) {
-      nodeBox[next].push({
-        ...node,
-        position: {
-          x: nodeBox[next][0].position.x,
-          y: positionY + items[next]
-        }
-      })
-    }
-  }
-
-  const nodes = [...layout.nodes.filter(f => !initialNodesNoneRelationship.map(x => x.id).includes(f.id)), ...nodeBox.flat()];
-
   return {
-    initialNodes: nodes,
-    initialEdges: layout.edges,
+    initialNodes: [...layoutRelationship.nodes, ...columnNodes.flat()],
+    initialEdges: layoutRelationship.edges,
   };
 }
 
@@ -277,8 +335,8 @@ function LayoutFlow() {
           />
         </Toolbar>
       </div>
-      {
-        selectedSchema && <div className="flex-1 relative overflow-hidden">
+      {selectedSchema && (
+        <div className="flex-1 relative overflow-hidden">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -293,7 +351,7 @@ function LayoutFlow() {
             <MiniMap />
           </ReactFlow>
         </div>
-      }
+      )}
     </div>
   );
 }
