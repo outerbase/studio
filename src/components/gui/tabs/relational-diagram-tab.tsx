@@ -87,26 +87,9 @@ function mapSchema(
 
         foreignKeyList.add(`${item.name}.${column.name}`);
 
-        let label =
-          column.constraint.foreignKey.foreignTableName === item.name
-            ? "1:M"
-            : "M:1";
-
-        const PKFK = item.tableSchema?.columns.filter(
-          (f) => !!f.pk && f.constraint?.foreignKey
-        );
-
-        if ((PKFK?.length || 0) > 1) {
-          label = "M:M";
-        }
-
-        if ((PKFK?.length || 0) === 1) {
-          label = "1:1";
-        }
-
         initialEdges.push({
           type: "smoothstep",
-          markerEnd: {
+          markerStart: {
             type: MarkerType.Arrow,
           },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
@@ -117,7 +100,6 @@ function mapSchema(
             ? column.constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
-          label: label,
         });
       }
     }
@@ -140,24 +122,9 @@ function mapSchema(
 
         foreignKeyList.add(`${item.name}.${columnName}`);
 
-        let label =
-          constraint.foreignKey.foreignTableName === item.name ? "1:M" : "M:1";
-
-        const PKFK = item.tableSchema?.constraints?.filter((f) =>
-          item.tableSchema?.pk.includes((f.foreignKey?.columns || [])[0] || "")
-        );
-
-        if ((PKFK?.length || 0) > 1) {
-          label = "M:M";
-        }
-
-        if ((PKFK?.length || 0) === 1) {
-          label = "1:1";
-        }
-
         initialEdges.push({
           type: "smoothstep",
-          markerEnd: {
+          markerStart: {
             type: MarkerType.Arrow,
           },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
@@ -168,7 +135,6 @@ function mapSchema(
             ? constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
-          label,
         });
       }
     }

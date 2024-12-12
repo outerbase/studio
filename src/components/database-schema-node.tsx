@@ -97,7 +97,7 @@ export function DatabaseSchemaNode({
           )}
           <TableRow className="relative text-xs bg-secondary text-muted-foreground">
             <TableCell className="pl-0 pr-6 font-light h-[30px]">
-              <div className="pl-2 text-xs">Expand</div>
+              <div className="pl-2 text-xs">{show ? "" : ""}</div>
             </TableCell>
             <TableCell
               onClick={toggleShow}
