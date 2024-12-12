@@ -22,10 +22,11 @@ export function DatabaseSchemaNode({
   data,
   selected,
 }: NodeProps<DatabaseSchemaNode>) {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(data.schema.length < 20 ? true : false);
 
   const toggleShow = useCallback(() => setShow(!show), [show]);
 
+  const totalColumn = data.schema.length;
   const items = data.schema
     .sort((a, b) => Number(b.pk) - Number(a.pk) || Number(b.fk) - Number(a.fk))
     .map((entry) => {
@@ -95,14 +96,18 @@ export function DatabaseSchemaNode({
               );
             }
           )}
-          <TableRow className="relative text-xs bg-secondary text-muted-foreground">
+          <TableRow
+            className="relative text-xs bg-secondary text-muted-foreground cursor-pointer hover:text-muted"
+            onClick={toggleShow}
+          >
             <TableCell className="pl-0 pr-6 font-light h-[30px]">
-              <div className="pl-2 text-xs">{show ? "" : ""}</div>
+              <div className="pl-2 text-xs">
+                {show
+                  ? "collapse"
+                  : `more ${totalColumn - items.filter((x) => x.key.length > 0).length} columns`}
+              </div>
             </TableCell>
-            <TableCell
-              onClick={toggleShow}
-              className="cursor-pointer transition-all text-right"
-            >
+            <TableCell className="text-right">
               <div className="pr-2 flex flex-row justify-end items-center">
                 {!show ? <CaretDown size={15} /> : <CaretUp size={15} />}
               </div>
