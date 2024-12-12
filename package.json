@@ -27,9 +27,6 @@
     "@libsql/client": "^0.5.3"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.540.0",
-    "@blocknote/core": "^0.12.1",
-    "@blocknote/react": "^0.12.2",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-sql": "^6.5.5",
     "@dagrejs/dagre": "^1.1.4",
