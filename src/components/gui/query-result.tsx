@@ -29,7 +29,6 @@ export default function QueryResult({
   }, [result, databaseDriver]);
 
   const stats = result.result.stat;
-  console.log(stats);
 
   return (
     <div className="flex flex-col h-full w-full border-t">

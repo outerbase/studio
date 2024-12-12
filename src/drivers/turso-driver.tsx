@@ -48,8 +48,6 @@ export function transformRawResult(raw: ResultSet): DatabaseResultSet {
     }, {} as DatabaseRow)
   );
 
-  console.log(raw);
-
   return {
     rows,
     stat: {
