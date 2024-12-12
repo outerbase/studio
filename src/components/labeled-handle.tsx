@@ -20,27 +20,36 @@ function getFlexDirection(position: string) {
 const LabeledHandle = React.forwardRef<
   HTMLDivElement,
   HandleProps &
-  React.HTMLAttributes<HTMLDivElement> & {
-    title: string;
-    handleClassName?: string;
-    labelClassName?: string;
-    childrenKey?: React.ReactNode;
-  }
->(({ className, labelClassName, title, position, childrenKey, ...props }, ref) => (
-  <div
-    ref={ref}
-    title={title}
-    className={cn(
-      "relative flex items-center",
-      getFlexDirection(position),
-      className,
-    )}
-  >
-    <BaseHandle position={position} {...props} />
-    {childrenKey}
-    <label className={`${childrenKey ? '' : 'px-3'} text-foreground ${labelClassName}`}>{title}</label>
-  </div>
-));
+    React.HTMLAttributes<HTMLDivElement> & {
+      title: string;
+      handleClassName?: string;
+      labelClassName?: string;
+      childrenKey?: React.ReactNode;
+    }
+>(
+  (
+    { className, labelClassName, title, position, childrenKey, ...props },
+    ref
+  ) => (
+    <div
+      ref={ref}
+      title={title}
+      className={cn(
+        "relative flex items-center",
+        getFlexDirection(position),
+        className
+      )}
+    >
+      <BaseHandle position={position} {...props} />
+      {childrenKey}
+      <label
+        className={`${childrenKey ? "" : "px-3"} text-foreground ${labelClassName}`}
+      >
+        {title}
+      </label>
+    </div>
+  )
+);
 
 LabeledHandle.displayName = "LabeledHandle";
 

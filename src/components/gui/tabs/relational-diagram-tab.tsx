@@ -2,11 +2,10 @@ import { DatabaseSchemaNode } from "@/components/database-schema-node";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
 import {
-  addEdge,
   Background,
-  Connection,
   Controls,
   Edge,
+  MarkerType,
   MiniMap,
   Node,
   ReactFlow,
@@ -15,7 +14,7 @@ import {
   useNodesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Toolbar } from "../toolbar";
 import { Button } from "@/components/ui/button";
 import { LucideRefreshCcw } from "lucide-react";
@@ -27,6 +26,7 @@ import {
   AlignCenterVerticalSimple,
 } from "@phosphor-icons/react";
 import { DownloadImageDiagram } from "../export/download-image-diagram";
+import { DevTools } from "@/components/devtools";
 
 const NODE_MARGIN = 50;
 const MAX_NODE_WIDTH = 300;
@@ -65,7 +65,8 @@ function getLayoutElements(
 
 function mapSchema(
   schema: DatabaseSchemas,
-  selectedSchema: string
+  selectedSchema: string,
+  rankdir?: string
 ): { initialNodes: Node[]; initialEdges: Edge[] } {
   const initialEdges: Edge[] = [];
 
@@ -86,8 +87,28 @@ function mapSchema(
 
         foreignKeyList.add(`${item.name}.${column.name}`);
 
+        let label =
+          column.constraint.foreignKey.foreignTableName === item.name
+            ? "1:M"
+            : "M:1";
+
+        const PKFK = item.tableSchema?.columns.filter(
+          (f) => !!f.pk && f.constraint?.foreignKey
+        );
+
+        if ((PKFK?.length || 0) > 1) {
+          label = "M:M";
+        }
+
+        if ((PKFK?.length || 0) === 1) {
+          label = "1:1";
+        }
+
         initialEdges.push({
           type: "smoothstep",
+          markerEnd: {
+            type: MarkerType.Arrow,
+          },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
           source: item.name,
           target: column.constraint.foreignKey.foreignTableName || "",
@@ -96,6 +117,7 @@ function mapSchema(
             ? column.constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
+          label: label,
         });
       }
     }
@@ -118,8 +140,26 @@ function mapSchema(
 
         foreignKeyList.add(`${item.name}.${columnName}`);
 
+        let label =
+          constraint.foreignKey.foreignTableName === item.name ? "1:M" : "M:1";
+
+        const PKFK = item.tableSchema?.constraints?.filter((f) =>
+          item.tableSchema?.pk.includes((f.foreignKey?.columns || [])[0] || "")
+        );
+
+        if ((PKFK?.length || 0) > 1) {
+          label = "M:M";
+        }
+
+        if ((PKFK?.length || 0) === 1) {
+          label = "1:1";
+        }
+
         initialEdges.push({
           type: "smoothstep",
+          markerEnd: {
+            type: MarkerType.Arrow,
+          },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
           source: item.name,
           target: constraint.foreignKey.foreignTableName || "",
@@ -128,6 +168,7 @@ function mapSchema(
             ? constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
+          label,
         });
       }
     }
@@ -176,7 +217,7 @@ function mapSchema(
     relationshipNodes,
     initialEdges,
     {
-      rankdir: "LR",
+      rankdir: rankdir ? rankdir : "LR",
       marginx: NODE_MARGIN,
       marginy: NODE_MARGIN,
     }
@@ -275,11 +316,6 @@ function LayoutFlow() {
     databaseSchema: DatabaseSchemaNode,
   };
 
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((els) => addEdge(params, els)),
-    [setEdges]
-  );
-
   return (
     <div className="flex h-full flex-col overflow-hidden relative">
       <div className="border-b pb-1">
@@ -296,12 +332,14 @@ function LayoutFlow() {
             variant={"ghost"}
             size={"sm"}
             onClick={() => {
-              const layout = getLayoutElements(nodes, edges, {
-                rankdir: "LR",
-                marginx: 50,
-                marginy: 50,
-              });
-              setNodes(layout.nodes);
+              if (selectedSchema) {
+                const { initialEdges, initialNodes } = mapSchema(
+                  schema,
+                  selectedSchema
+                );
+                setNodes(initialNodes);
+                setEdges(initialEdges);
+              }
             }}
           >
             <AlignCenterVerticalSimple size={15} />
@@ -310,12 +348,15 @@ function LayoutFlow() {
             variant={"ghost"}
             size={"sm"}
             onClick={() => {
-              const layout = getLayoutElements(nodes, edges, {
-                rankdir: "TB",
-                marginx: 50,
-                marginy: 50,
-              });
-              setNodes(layout.nodes);
+              if (selectedSchema) {
+                const { initialEdges, initialNodes } = mapSchema(
+                  schema,
+                  selectedSchema,
+                  "TB"
+                );
+                setNodes(initialNodes);
+                setEdges(initialEdges);
+              }
             }}
           >
             <AlignCenterHorizontalSimple size={15} />
@@ -342,13 +383,13 @@ function LayoutFlow() {
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
             fitView
             nodeTypes={nodeTypes}
           >
             <Background />
             <Controls />
             <MiniMap />
+            {process.env.NODE_ENV === "development" && <DevTools />}
           </ReactFlow>
         </div>
       )}
