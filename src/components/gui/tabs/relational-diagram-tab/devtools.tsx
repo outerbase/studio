@@ -21,7 +21,7 @@ import {
 import {
   ToggleGroup,
 } from "@/components/ui/toggle-group"
-import { Button } from './ui/button';
+import { Button } from '../../../ui/button';
 
 export function ViewportLogger() {
   const viewport = useStore(

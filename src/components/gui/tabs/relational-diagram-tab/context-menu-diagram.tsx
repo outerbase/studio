@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from './ui/context-menu';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '../../../ui/context-menu';
 import { useDatabaseDriver } from '@/context/driver-provider';
 import { openTab } from '@/messages/open-tab';
 import { Node, NodeProps } from '@xyflow/react';
 import { useSchema } from '@/context/schema-provider';
-import { createTableSchemaDraft } from './lib/sql-generate.schema';
+import { createTableSchemaDraft } from '../../../lib/sql-generate.schema';
 
 type DatabaseSchemaNode = Node<{
   label: string;

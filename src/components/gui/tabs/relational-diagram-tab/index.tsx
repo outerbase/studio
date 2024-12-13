@@ -1,4 +1,4 @@
-import { DatabaseSchemaNode } from "@/components/database-schema-node";
+import { DatabaseSchemaNode } from "@/components/gui/tabs/relational-diagram-tab/database-schema-node";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
 import {
@@ -15,18 +15,18 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useEffect, useState } from "react";
-import { Toolbar } from "../toolbar";
+import { Toolbar } from "../../toolbar";
 import { Button } from "@/components/ui/button";
 import { LucideRefreshCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import SchemaNameSelect from "../schema-editor/schema-name-select";
+import SchemaNameSelect from "../../schema-editor/schema-name-select";
 import Dagre from "@dagrejs/dagre";
 import {
   AlignCenterHorizontalSimple,
   AlignCenterVerticalSimple,
 } from "@phosphor-icons/react";
-import { DownloadImageDiagram } from "../export/download-image-diagram";
-import { DevTools } from "@/components/devtools";
+import { DownloadImageDiagram } from "./download-image-diagram";
+import { DevTools } from "@/components/gui/tabs/relational-diagram-tab/devtools";
 
 const NODE_MARGIN = 50;
 const MAX_NODE_WIDTH = 300;
