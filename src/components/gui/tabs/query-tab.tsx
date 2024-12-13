@@ -196,7 +196,9 @@ export default function QueryWindow({
             ),
             key: "query_" + queryResult.order,
             identifier: "query_" + queryResult.order,
-            title: "Query " + (queryIdx + 1),
+            title:
+              `${getSingleTableName(queryResult.sql) ?? "Query " + (queryIdx + 1)}` +
+              ` (${queryResult.result.rows.length}r x ${queryResult.result.headers.length}c)`,
             icon: LucideGrid,
           })),
           ...(progress
@@ -356,4 +358,34 @@ export default function QueryWindow({
       </ResizablePanel>
     </ResizablePanelGroup>
   );
+}
+
+function getSingleTableName(query: string): string | null {
+  // Normalize query by removing extra spaces and converting to lowercase
+  const normalizedQuery = query.replace(/\s+/g, " ").trim().toLowerCase();
+
+  // Match the table names after "from" keyword
+  const fromMatch = normalizedQuery.match(/from\s+([^\s,;]+)/i);
+  const joinMatches = normalizedQuery.match(/join\s+([^\s,;]+)/gi);
+
+  // If there are JOINs, more than one table is referenced
+  if (joinMatches && joinMatches.length > 0) {
+    return null;
+  }
+
+  // Check if a single table is present
+  if (fromMatch) {
+    const tableName = fromMatch[1];
+
+    // Ensure no additional tables are mentioned
+    const additionalTablesMatch = normalizedQuery.match(/,\s*[^\s,;]+/);
+    if (additionalTablesMatch) {
+      return null;
+    }
+
+    return tableName;
+  }
+
+  // No table found
+  return null;
 }
