@@ -24,6 +24,9 @@ export function DatabaseSchemaNode({
   ...props
 }: NodeProps<DatabaseSchemaNode>) {
   const key = data.schema.filter(f => f.pk || f.fk).map(x => x.title);
+
+  const schema = data.schema.sort((a, b) => Number(b.pk) - Number(a.pk) || Number(b.fk) - Number(a.fk)).filter((_, i) => i <= 20);
+
   return (
     <ContextMenuERD {...{ data, ...props }}>
       <BaseNode className="p-0" selected={selected}>
@@ -33,7 +36,7 @@ export function DatabaseSchemaNode({
         {/* shadcn Table cannot be used because of hardcoded overflow-auto */}
         <table className="overflow-visible w-full">
           <TableBody>
-            {data.schema.map((entry) => {
+            {schema.filter((_, i) => i <= 20).map((entry) => {
               return (
                 <TableRow key={entry.title} className="relative text-xs">
                   <TableCell className="pl-0 pr-6 font-light h-[30px]">
@@ -82,6 +85,13 @@ export function DatabaseSchemaNode({
               );
             }
             )}
+            {
+              data.schema.length > 20 && <TableRow className="relative text-xs">
+                <TableCell className="pl-0 pr-6 font-light h-[30px]">
+                  <div className="text-sm text-muted-foreground pl-2">{data.schema.length - schema.length} more columns...</div>
+                </TableCell>
+              </TableRow>
+            }
           </TableBody>
         </table>
       </BaseNode>

@@ -90,7 +90,9 @@ function mapSchema(
         initialEdges.push({
           type: "smoothstep",
           markerStart: {
-            type: MarkerType.Arrow,
+            type: MarkerType.ArrowClosed,
+            width: 20,
+            height: 20,
           },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
           source: item.name,
@@ -100,6 +102,9 @@ function mapSchema(
             ? column.constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
+          style: {
+            strokeWidth: 2
+          }
         });
       }
     }
@@ -125,7 +130,9 @@ function mapSchema(
         initialEdges.push({
           type: "smoothstep",
           markerStart: {
-            type: MarkerType.Arrow,
+            type: MarkerType.ArrowClosed,
+            width: 20,
+            height: 20,
           },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
           source: item.name,
@@ -135,6 +142,9 @@ function mapSchema(
             ? constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
+          style: {
+            strokeWidth: 2
+          }
         });
       }
     }
@@ -161,7 +171,7 @@ function mapSchema(
       },
       measured: {
         width: 300,
-        height: (item.tableSchema?.columns.length || 0) * 32 + 32,
+        height: Math.min(21, (item.tableSchema?.columns.length || 0)) * 32 + 32,
       },
       data: {
         label: item.name,
@@ -206,7 +216,7 @@ function mapSchema(
       (a, b) =>
       (a =
         a +
-        (b.tableSchema?.columns.length || 0) * 32 +
+        Math.min(21, (b.tableSchema?.columns.length || 0)) * 32 +
         32 +
         NODE_MARGIN),
       0
@@ -224,7 +234,7 @@ function mapSchema(
     const columnIndex = columnHeight.indexOf(Math.min(...columnHeight));
 
     // Calculate the height of the node
-    const nodeHeight = (node.tableSchema?.columns.length || 0) * 32 + 32;
+    const nodeHeight = Math.min(21, (node.tableSchema?.columns.length || 0)) * 32 + 32;
 
     // Calculate the position of the node
     const nodeX =
