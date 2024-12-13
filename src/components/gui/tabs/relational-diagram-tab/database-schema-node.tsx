@@ -30,7 +30,7 @@ export function DatabaseSchemaNode({
   return (
     <BaseNode className="p-0" selected={selected}>
       <ContextMenuERD {...{ data, ...props }}>
-        <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 text-center text-sm text-muted-foreground h-[30px] max-w-[300px]">
+        <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 text-center text-sm text-muted-foreground h-[30px] max-w-[300px] hover:text-blue-600 transition-all">
           {data.label}
         </h2>
       </ContextMenuERD>
