@@ -91,11 +91,11 @@ export default function DatabaseGui() {
       },
       docDriver
         ? {
-            key: "saved",
-            name: "Queries",
-            content: <SavedDocTab />,
-            icon: <Binoculars weight="light" size={24} />,
-          }
+          key: "saved",
+          name: "Queries",
+          content: <SavedDocTab />,
+          icon: <Binoculars weight="light" size={24} />,
+        }
         : undefined,
       {
         key: "tools",
@@ -116,11 +116,11 @@ export default function DatabaseGui() {
       },
       databaseDriver.getFlags().supportCreateUpdateTable
         ? {
-            text: "New Table",
-            onClick: () => {
-              openTab({ type: "schema", schemaName: currentSchemaName });
-            },
-          }
+          text: "New Table",
+          onClick: () => {
+            openTab({ type: "schema", schemaName: currentSchemaName });
+          },
+        }
         : undefined,
     ].filter(Boolean) as { text: string; onClick: () => void }[];
   }, [currentSchemaName, databaseDriver]);
