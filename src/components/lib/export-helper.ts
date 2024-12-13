@@ -3,6 +3,7 @@ import {
   escapeIdentity,
   escapeSqlValue,
 } from "@/drivers/sqlite/sql-helper";
+import * as XLSX from "xlsx";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],
@@ -35,7 +36,8 @@ export function exportRowsToSqlInsert(
 function cellToExcelValue(value: unknown) {
   if (value === undefined) return "";
   if (value === null) return "NULL";
-  return value.toString();
+  const parsed = Number(value);
+  return isNaN(parsed) ? value : parsed;
 }
 
 export function exportRowsToExcel(records: unknown[][]) {
@@ -47,6 +49,25 @@ export function exportRowsToExcel(records: unknown[][]) {
   }
 
   return result.join("\r\n");
+}
+
+export function exportToExcel(
+  records: unknown[][],
+  headers: string[],
+  tablename: string
+) {
+  const processedData = records.map((row) =>
+    row.map((cell) => {
+      return cellToExcelValue(cell);
+    })
+  );
+  const data = [headers, ...processedData];
+  console.log(data);
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "sheet1");
+  XLSX.writeFile(workbook, `${tablename}.xlsx`);
+  return "";
 }
 
 export function exportRowsToJson(
@@ -102,5 +123,6 @@ export function getFormatHandlers(
     csv: () => exportRowsToCsv(headers, records),
     json: () => exportRowsToJson(headers, records),
     sql: () => exportRowsToSqlInsert(tableName, headers, records),
+    xlsx: () => exportToExcel(records, headers, tableName),
   };
 }
