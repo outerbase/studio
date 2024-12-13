@@ -67,7 +67,7 @@ function Footer() {
             </li>
             <li>
               <Link
-                href="https://discord.gg/CvfB3nzK"
+                href="https://discord.gg/t8twVN5KdG"
                 className="hover:underline"
               >
                 Community
