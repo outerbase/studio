@@ -63,7 +63,7 @@ export function DatabaseSchemaNode({
                         }
                       />
                     ) : (
-                      <div className="pl-2">{entry.title}</div>
+                      <div className="pl-2 text-foreground">{entry.title}</div>
                     )}
                   </TableCell>
                   <TableCell className="pr-0 text-right font-thin h-[30px]">
@@ -78,7 +78,7 @@ export function DatabaseSchemaNode({
                         labelClassName="p-0"
                       />
                     ) : (
-                      <div className="pr-2">{entry.type}</div>
+                      <div className="pr-2 text-foreground">{entry.type}</div>
                     )}
                   </TableCell>
                 </TableRow>
