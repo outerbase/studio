@@ -361,31 +361,35 @@ export default function QueryWindow({
 }
 
 function getSingleTableName(query: string): string | null {
-  // Normalize query by removing extra spaces and converting to lowercase
-  const normalizedQuery = query.replace(/\s+/g, " ").trim().toLowerCase();
+  try {
+    // Normalize query by removing extra spaces and converting to lowercase
+    const normalizedQuery = query.replace(/\s+/g, " ").trim().toLowerCase();
 
-  // Match the table names after "from" keyword
-  const fromMatch = normalizedQuery.match(/from\s+([^\s,;]+)/i);
-  const joinMatches = normalizedQuery.match(/join\s+([^\s,;]+)/gi);
+    // Match the table names after "from" keyword
+    const fromMatch = normalizedQuery.match(/from\s+([^\s,;]+)/i);
+    const joinMatches = normalizedQuery.match(/join\s+([^\s,;]+)/gi);
 
-  // If there are JOINs, more than one table is referenced
-  if (joinMatches && joinMatches.length > 0) {
-    return null;
-  }
-
-  // Check if a single table is present
-  if (fromMatch) {
-    const tableName = fromMatch[1];
-
-    // Ensure no additional tables are mentioned
-    const additionalTablesMatch = normalizedQuery.match(/,\s*[^\s,;]+/);
-    if (additionalTablesMatch) {
+    // If there are JOINs, more than one table is referenced
+    if (joinMatches && joinMatches.length > 0) {
       return null;
     }
 
-    return tableName;
-  }
+    // Check if a single table is present
+    if (fromMatch) {
+      const tableName = fromMatch[1];
 
-  // No table found
-  return null;
+      // Ensure no additional tables are mentioned
+      const additionalTablesMatch = normalizedQuery.match(/,\s*[^\s,;]+/);
+      if (additionalTablesMatch) {
+        return null;
+      }
+
+      return tableName;
+    }
+
+    // No table found
+    return null;
+  } catch (e) {
+    return null;
+  }
 }
