@@ -1,4 +1,3 @@
-import isEmptyResultStats from "../lib/empty-stats";
 import { MultipleQueryResult } from "../lib/multiple-query";
 import ExportResultButton from "./export/export-result-button";
 import ResultTable from "./query-result-table";
@@ -40,7 +39,7 @@ export default function QueryResult({
           <QueryExplanation data={data.value} />
         )}
       </div>
-      {stats && !isEmptyResultStats(stats) && (
+      {stats && (
         <div className="shrink-0">
           <div className="flex p-1 border-t">
             <ResultStats stats={stats} />
