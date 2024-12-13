@@ -198,7 +198,7 @@ export default function QueryWindow({
             identifier: "query_" + queryResult.order,
             title:
               `${getSingleTableName(queryResult.sql) ?? "Query " + (queryIdx + 1)}` +
-              ` (${queryResult.result.rows.length}r x ${queryResult.result.headers.length}c)`,
+              ` (${queryResult.result.rows.length}x${queryResult.result.headers.length})`,
             icon: LucideGrid,
           })),
           ...(progress
