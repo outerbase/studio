@@ -3,7 +3,6 @@ import {
   escapeIdentity,
   escapeSqlValue,
 } from "@/drivers/sqlite/sql-helper";
-import * as XLSX from "xlsx";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],
@@ -61,12 +60,18 @@ export function exportToExcel(
       return cellToExcelValue(cell);
     })
   );
+
   const data = [headers, ...processedData];
   console.log(data);
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.aoa_to_sheet(data);
-  XLSX.utils.book_append_sheet(workbook, worksheet, "sheet1");
-  XLSX.writeFile(workbook, `${tablename}.xlsx`);
+
+  import("xlsx").then((module) => {
+    const XLSX = module;
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "sheet1");
+    XLSX.writeFile(workbook, `${tablename}.xlsx`);
+  });
+
   return "";
 }
 
