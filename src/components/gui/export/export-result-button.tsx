@@ -36,6 +36,8 @@ export default function ExportResultButton({
       content = handler();
     }
 
+    if (!content) return;
+
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -63,6 +65,7 @@ export default function ExportResultButton({
               <SelectItem value="csv">CSV</SelectItem>
               <SelectItem value="json">JSON</SelectItem>
               <SelectItem value="sql">SQL</SelectItem>
+              <SelectItem value="xlsx">EXCEL</SelectItem>
             </SelectContent>
           </Select>
         </div>
