@@ -200,6 +200,25 @@ export interface DatabaseTableOperationReslt {
   record?: Record<string, DatabaseValue>;
 }
 
+export interface ColumnTypeSuggestionGroup {
+  name: string;
+  suggestions: ColumnTypeSuggestion[];
+}
+export interface ColumnTypeSuggestion {
+  name: string;
+  parameters?: {
+    name: string;
+    description?: string;
+    default: string;
+  }[];
+  description?: string | ((type: string, parameters?: string[]) => string);
+}
+export interface ColumnTypeSelector {
+  type: "dropdown" | "text";
+  dropdownOptions?: { value: string; text: string }[];
+  typeSuggestions?: ColumnTypeSuggestionGroup[];
+}
+
 export interface DriverFlags {
   defaultSchema: string;
   optionalSchema: boolean;
@@ -246,6 +265,7 @@ export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
   abstract getCurrentSchema(): Promise<string | null>;
+  abstract columnTypeSelector: ColumnTypeSelector;
 
   // Helper class
   abstract escapeId(id: string): string;

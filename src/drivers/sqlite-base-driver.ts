@@ -1,4 +1,5 @@
 import type {
+  ColumnTypeSelector,
   DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseSchemas,
@@ -20,6 +21,16 @@ import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   supportPragmaList = true;
+
+  columnTypeSelector: ColumnTypeSelector = {
+    type: "dropdown",
+    dropdownOptions: [
+      { text: "Integer", value: "INTEGER" },
+      { text: "Real", value: "REAL" },
+      { text: "Text", value: "TEXT" },
+      { text: "Blob", value: "BLOB" },
+    ],
+  };
 
   escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;

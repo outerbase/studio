@@ -6,9 +6,13 @@ import {
   DatabaseSchemaItem,
   DatabaseTableColumn,
   TableColumnDataType,
+  DatabaseTableSchemaChange,
+  ColumnTypeSelector,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
+import { generateMySqlSchemaChange } from "./generate-schema";
+import { MYSQL_DATA_TYPE_SUGGESTION } from "./mysql-data-type";
 
 interface MySqlDatabase {
   SCHEMA_NAME: string;
@@ -37,6 +41,8 @@ interface MySqlTable {
 }
 
 export default abstract class MySQLLikeDriver extends CommonSQLImplement {
+  columnTypeSelector: ColumnTypeSelector = MYSQL_DATA_TYPE_SUGGESTION;
+
   escapeId(id: string) {
     return `\`${id.replace(/`/g, "``")}\``;
   }
@@ -50,9 +56,9 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       defaultSchema: "",
       optionalSchema: false,
       supportBigInt: false,
-      supportModifyColumn: false,
+      supportModifyColumn: true,
       mismatchDetection: false,
-      supportCreateUpdateTable: false,
+      supportCreateUpdateTable: true,
       dialect: "mysql",
 
       supportUseStatement: true,
@@ -82,7 +88,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       .rows as unknown as MySqlTable[];
 
     const columnSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA FROM information_schema.columns WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+      "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA FROM information_schema.columns WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
     const columnResult = (await this.query(columnSql))
       .rows as unknown as MySqlColumn[];
 
@@ -120,6 +126,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       const column: DatabaseTableColumn = {
         name: c.COLUMN_NAME,
         type: c.COLUMN_TYPE,
+        constraint: undefined,
       };
 
       const tableKey = c.TABLE_SCHEMA + "." + c.TABLE_NAME;
@@ -136,7 +143,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, EXTRA, COLUMN_KEY FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)} ORDER BY ORDINAL_POSITION`;
+    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)} ORDER BY ORDINAL_POSITION`;
     const columnResult = (await this.query(columnSql))
       .rows as unknown as MySqlColumn[];
 
@@ -156,6 +163,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       columns: columnResult.map((c) => ({
         name: c.COLUMN_NAME,
         type: c.COLUMN_TYPE,
+        constraint: undefined,
       })),
     };
   }
@@ -164,8 +172,8 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     throw new Error("Not implemented");
   }
 
-  createUpdateTableSchema(): string[] {
-    throw new Error("Not implemented");
+  createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
+    return generateMySqlSchemaChange(this, change);
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {

@@ -1,4 +1,5 @@
 import {
+  ColumnTypeSelector,
   DatabaseSchemaItem,
   DatabaseSchemas,
   DatabaseTableColumn,
@@ -54,6 +55,10 @@ interface PostgresConstraintRow {
 }
 
 export default abstract class PostgresLikeDriver extends CommonSQLImplement {
+  columnTypeSelector: ColumnTypeSelector = {
+    type: "text",
+  };
+
   escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;
   }

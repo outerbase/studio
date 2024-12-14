@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { CSS } from "@dnd-kit/utilities";
-import { convertSqliteType } from "@/drivers/sqlite/sql-helper";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./column-default-value-input";
 import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
@@ -25,7 +24,6 @@ import {
   DatabaseTableColumnChange,
   DatabaseTableColumnConstraint,
   DatabaseTableSchemaChange,
-  TableColumnDataType,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import ColumnPrimaryKeyPopup from "./column-pk-popup";
@@ -42,6 +40,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import ColumnTypeSelector from "./column-type-selector";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
@@ -90,6 +90,46 @@ function changeColumnOnIndex(
   });
 }
 
+function ColumnItemType({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (type: string) => void;
+  disabled?: boolean;
+}) {
+  const { databaseDriver } = useDatabaseDriver();
+
+  if (
+    databaseDriver.columnTypeSelector.type === "dropdown" &&
+    databaseDriver.columnTypeSelector.dropdownOptions
+  ) {
+    return (
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger className="bg-inherit border-0 rounded-none shadow-none text-sm">
+          <SelectValue placeholder="Select datatype" />
+        </SelectTrigger>
+        <SelectContent>
+          {databaseDriver.columnTypeSelector.dropdownOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.text}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  }
+
+  return (
+    <ColumnTypeSelector
+      onChange={onChange}
+      value={value}
+      suggestions={databaseDriver.columnTypeSelector.typeSuggestions ?? []}
+    />
+  );
+}
+
 function ColumnItem({
   value,
   idx,
@@ -127,13 +167,6 @@ function ColumnItem({
 
   const column = value.new || value.old;
   if (!column) return null;
-
-  const normalizeType = convertSqliteType(column.type);
-  let type = "TEXT";
-
-  if (normalizeType === TableColumnDataType.INTEGER) type = "INTEGER";
-  if (normalizeType === TableColumnDataType.REAL) type = "REAL";
-  if (normalizeType === TableColumnDataType.BLOB) type = "BLOB";
 
   let highlightClassName = "";
   if (value.new === null) {
@@ -173,21 +206,11 @@ function ColumnItem({
         />
       </td>
       <td className="border">
-        <Select
-          value={type}
-          onValueChange={(newType) => change({ type: newType })}
+        <ColumnItemType
+          value={column.type}
+          onChange={(newType) => change({ type: newType })}
           disabled={disabled}
-        >
-          <SelectTrigger className="bg-inherit border-0 rounded-none shadow-none text-sm">
-            <SelectValue placeholder="Select datatype" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="INTEGER">Integer</SelectItem>
-            <SelectItem value="REAL">Real</SelectItem>
-            <SelectItem value="TEXT">Text</SelectItem>
-            <SelectItem value="BLOB">Blob</SelectItem>
-          </SelectContent>
-        </Select>
+        />
       </td>
       <td className="border">
         <ColumnDefaultValueInput
