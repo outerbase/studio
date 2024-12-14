@@ -89,10 +89,10 @@ function mapSchema(
 
         initialEdges.push({
           type: "smoothstep",
-          markerStart: {
+          markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 20,
-            height: 20,
+            width: 14,
+            height: 14,
           },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
           source: item.name,
@@ -103,8 +103,8 @@ function mapSchema(
             : "",
           animated: true,
           style: {
-            strokeWidth: 2
-          }
+            strokeWidth: 2,
+          },
         });
       }
     }
@@ -131,8 +131,8 @@ function mapSchema(
           type: "smoothstep",
           markerStart: {
             type: MarkerType.ArrowClosed,
-            width: 20,
-            height: 20,
+            width: 14,
+            height: 14,
           },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
           source: item.name,
@@ -143,8 +143,8 @@ function mapSchema(
             : "",
           animated: true,
           style: {
-            strokeWidth: 2
-          }
+            strokeWidth: 2,
+          },
         });
       }
     }
@@ -171,10 +171,11 @@ function mapSchema(
       },
       measured: {
         width: 300,
-        height: Math.min(21, (item.tableSchema?.columns.length || 0)) * 32 + 32,
+        height: (item.tableSchema?.columns.length || 0) * 32 + 32,
       },
       data: {
         label: item.name,
+        schemaName: selectedSchema,
         schema: item.tableSchema?.columns.map((column) => {
           return {
             title: column.name,
@@ -214,11 +215,7 @@ function mapSchema(
   const area =
     schemaWithoutRelationship.reduce(
       (a, b) =>
-      (a =
-        a +
-        Math.min(21, (b.tableSchema?.columns.length || 0)) * 32 +
-        32 +
-        NODE_MARGIN),
+        (a = a + (b.tableSchema?.columns.length || 0) * 32 + 32 + NODE_MARGIN),
       0
     ) * MAX_NODE_WIDTH;
 
@@ -234,7 +231,7 @@ function mapSchema(
     const columnIndex = columnHeight.indexOf(Math.min(...columnHeight));
 
     // Calculate the height of the node
-    const nodeHeight = Math.min(21, (node.tableSchema?.columns.length || 0)) * 32 + 32;
+    const nodeHeight = (node.tableSchema?.columns.length || 0) * 32 + 32;
 
     // Calculate the position of the node
     const nodeX =
@@ -258,6 +255,7 @@ function mapSchema(
       },
       data: {
         label: node.name,
+        schemaName: selectedSchema,
         schema: node.tableSchema?.columns.map((column) => {
           return {
             title: column.name,
@@ -354,13 +352,14 @@ function LayoutFlow() {
               setSelectedSchema(value);
             }}
           />
-          {process.env.NODE_ENV === "development" && <>
-            <div className="mx-1">
-              <Separator orientation="vertical" />
-            </div>
-            <DevTools />
-          </>
-          }
+          {process.env.NODE_ENV === "development" && (
+            <>
+              <div className="mx-1">
+                <Separator orientation="vertical" />
+              </div>
+              <DevTools />
+            </>
+          )}
         </Toolbar>
       </div>
       {selectedSchema && (
