@@ -1,12 +1,11 @@
-import { DatabaseSchemaNode } from "@/components/database-schema-node";
+import { DatabaseSchemaNode } from "@/components/gui/tabs/relational-diagram-tab/database-schema-node";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
 import {
-  addEdge,
   Background,
-  Connection,
   Controls,
   Edge,
+  MarkerType,
   MiniMap,
   Node,
   ReactFlow,
@@ -15,18 +14,19 @@ import {
   useNodesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useState } from "react";
-import { Toolbar } from "../toolbar";
+import { useEffect, useState } from "react";
+import { Toolbar } from "../../toolbar";
 import { Button } from "@/components/ui/button";
 import { LucideRefreshCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import SchemaNameSelect from "../schema-editor/schema-name-select";
+import SchemaNameSelect from "../../schema-editor/schema-name-select";
 import Dagre from "@dagrejs/dagre";
 import {
   AlignCenterHorizontalSimple,
   AlignCenterVerticalSimple,
 } from "@phosphor-icons/react";
-import { DownloadImageDiagram } from "../export/download-image-diagram";
+import { DownloadImageDiagram } from "./download-image-diagram";
+import { DevTools } from "@/components/gui/tabs/relational-diagram-tab/devtools";
 
 const NODE_MARGIN = 50;
 const MAX_NODE_WIDTH = 300;
@@ -65,7 +65,8 @@ function getLayoutElements(
 
 function mapSchema(
   schema: DatabaseSchemas,
-  selectedSchema: string
+  selectedSchema: string,
+  rankdir?: string
 ): { initialNodes: Node[]; initialEdges: Edge[] } {
   const initialEdges: Edge[] = [];
 
@@ -88,6 +89,11 @@ function mapSchema(
 
         initialEdges.push({
           type: "smoothstep",
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 14,
+            height: 14,
+          },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
           source: item.name,
           target: column.constraint.foreignKey.foreignTableName || "",
@@ -96,6 +102,9 @@ function mapSchema(
             ? column.constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
+          style: {
+            strokeWidth: 2,
+          },
         });
       }
     }
@@ -120,6 +129,11 @@ function mapSchema(
 
         initialEdges.push({
           type: "smoothstep",
+          markerStart: {
+            type: MarkerType.ArrowClosed,
+            width: 14,
+            height: 14,
+          },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
           source: item.name,
           target: constraint.foreignKey.foreignTableName || "",
@@ -128,6 +142,9 @@ function mapSchema(
             ? constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
+          style: {
+            strokeWidth: 2,
+          },
         });
       }
     }
@@ -158,6 +175,7 @@ function mapSchema(
       },
       data: {
         label: item.name,
+        schemaName: selectedSchema,
         schema: item.tableSchema?.columns.map((column) => {
           return {
             title: column.name,
@@ -176,7 +194,7 @@ function mapSchema(
     relationshipNodes,
     initialEdges,
     {
-      rankdir: "LR",
+      rankdir: rankdir ? rankdir : "LR",
       marginx: NODE_MARGIN,
       marginy: NODE_MARGIN,
     }
@@ -237,6 +255,7 @@ function mapSchema(
       },
       data: {
         label: node.name,
+        schemaName: selectedSchema,
         schema: node.tableSchema?.columns.map((column) => {
           return {
             title: column.name,
@@ -275,11 +294,6 @@ function LayoutFlow() {
     databaseSchema: DatabaseSchemaNode,
   };
 
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((els) => addEdge(params, els)),
-    [setEdges]
-  );
-
   return (
     <div className="flex h-full flex-col overflow-hidden relative">
       <div className="border-b pb-1">
@@ -296,12 +310,14 @@ function LayoutFlow() {
             variant={"ghost"}
             size={"sm"}
             onClick={() => {
-              const layout = getLayoutElements(nodes, edges, {
-                rankdir: "LR",
-                marginx: 50,
-                marginy: 50,
-              });
-              setNodes(layout.nodes);
+              if (selectedSchema) {
+                const { initialEdges, initialNodes } = mapSchema(
+                  schema,
+                  selectedSchema
+                );
+                setNodes(initialNodes);
+                setEdges(initialEdges);
+              }
             }}
           >
             <AlignCenterVerticalSimple size={15} />
@@ -310,12 +326,15 @@ function LayoutFlow() {
             variant={"ghost"}
             size={"sm"}
             onClick={() => {
-              const layout = getLayoutElements(nodes, edges, {
-                rankdir: "TB",
-                marginx: 50,
-                marginy: 50,
-              });
-              setNodes(layout.nodes);
+              if (selectedSchema) {
+                const { initialEdges, initialNodes } = mapSchema(
+                  schema,
+                  selectedSchema,
+                  "TB"
+                );
+                setNodes(initialNodes);
+                setEdges(initialEdges);
+              }
             }}
           >
             <AlignCenterHorizontalSimple size={15} />
@@ -333,6 +352,14 @@ function LayoutFlow() {
               setSelectedSchema(value);
             }}
           />
+          {process.env.NODE_ENV === "development" && (
+            <>
+              <div className="mx-1">
+                <Separator orientation="vertical" />
+              </div>
+              <DevTools />
+            </>
+          )}
         </Toolbar>
       </div>
       {selectedSchema && (
@@ -342,7 +369,6 @@ function LayoutFlow() {
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
             fitView
             nodeTypes={nodeTypes}
           >
