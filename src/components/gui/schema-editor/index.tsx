@@ -65,6 +65,12 @@ export default function SchemaEditor({
     return databaseDriver.createUpdateTableSchema(value).join(";\n");
   }, [value, databaseDriver]);
 
+  const editorOptions = useMemo(() => {
+    return {
+      collations: databaseDriver.getCollationList(),
+    };
+  }, [databaseDriver]);
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="grow-0 shrink-0">
@@ -188,6 +194,7 @@ export default function SchemaEditor({
           onChange={onChange}
           onAddColumn={onAddColumn}
           schemaName={value.schemaName}
+          options={editorOptions}
           disabledEditExistingColumn={
             !databaseDriver.getFlags().supportModifyColumn
           }

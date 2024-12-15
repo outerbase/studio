@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback } from "react";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,10 +42,15 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import ColumnTypeSelector from "./column-type-selector";
+import ColumnCollation from "./column-collation";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
 ) => void;
+
+export interface SchemaEditorOptions {
+  collations: string[];
+}
 
 function changeColumnOnIndex(
   idx: number,
@@ -135,6 +140,7 @@ function ColumnItem({
   idx,
   schemaName,
   onChange,
+  options,
   disabledEditExistingColumn,
 }: {
   value: DatabaseTableColumnChange;
@@ -142,6 +148,7 @@ function ColumnItem({
   schemaName?: string;
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   disabledEditExistingColumn?: boolean;
+  options: SchemaEditorOptions;
 }) {
   const {
     setNodeRef,
@@ -344,6 +351,21 @@ function ColumnItem({
           </DropdownMenu>
         </div>
       </td>
+      {options.collations.length > 0 && (
+        <td className="border">
+          <ColumnCollation
+            value={column.constraint?.collate}
+            onChange={(value) => {
+              change({
+                constraint: {
+                  ...column.constraint,
+                  collate: value || undefined,
+                },
+              });
+            }}
+          />
+        </td>
+      )}
       <td className="px-1 border">
         <button
           className="p-1"
@@ -364,12 +386,14 @@ export default function SchemaEditorColumnList({
   schemaName,
   onAddColumn,
   disabledEditExistingColumn,
+  options,
 }: Readonly<{
   columns: DatabaseTableColumnChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
   schemaName?: string;
   onAddColumn: () => void;
   disabledEditExistingColumn?: boolean;
+  options: SchemaEditorOptions;
 }>) {
   const headerStyle = "text-xs p-2 text-left bg-secondary border";
 
@@ -394,25 +418,47 @@ export default function SchemaEditorColumnList({
     [columns, onChange]
   );
 
+  const headerCounter = useMemo(() => {
+    let initialCounter = 7;
+    if (options.collations.length > 0) {
+      initialCounter++;
+    }
+
+    return initialCounter;
+  }, [options]);
+
   return (
     <div className="p-4">
-      <table className="w-full rounded overflow-hidden">
-        <thead>
-          <tr>
-            <td className={cn(headerStyle, "w-[20px]")}></td>
-            <th className={cn(headerStyle, "w-[100px]")}>Name</th>
-            <th className={cn(headerStyle, "w-[150px]")}>Type</th>
-            <th className={cn(headerStyle, "w-[150px]")}>Default</th>
-            <th className={cn(headerStyle, "w-[50px]")}>Null</th>
-            <th className={cn(headerStyle)}>Constraint</th>
-            <th className={cn(headerStyle, "w-[30px]")}></th>
-          </tr>
-        </thead>
-        <tbody>
-          <DndContext
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
-          >
+      {options.collations.length > 0 && (
+        <datalist id="collation-list" className="hidden">
+          {options.collations.map((collation) => (
+            <option key={collation} value={collation} />
+          ))}
+        </datalist>
+      )}
+
+      <DndContext
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis]}
+      >
+        <table className="w-full rounded overflow-hidden">
+          <thead>
+            <tr>
+              <td className={cn(headerStyle, "w-[20px]")}></td>
+              <th className={cn(headerStyle, "w-[100px]")}>Name</th>
+              <th className={cn(headerStyle, "w-[150px]")}>Type</th>
+              <th className={cn(headerStyle, "w-[150px]")}>Default</th>
+              <th className={cn(headerStyle, "w-[50px]")}>Null</th>
+              <th className={cn(headerStyle)}>Constraint</th>
+
+              {options.collations.length > 0 && (
+                <th className={cn(headerStyle, "w-[160px]")}>Collation</th>
+              )}
+
+              <th className={cn(headerStyle, "w-[30px]")}></th>
+            </tr>
+          </thead>
+          <tbody>
             <SortableContext
               items={columns.map((c) => c.key)}
               strategy={verticalListSortingStrategy}
@@ -425,21 +471,22 @@ export default function SchemaEditorColumnList({
                   onChange={onChange}
                   schemaName={schemaName}
                   disabledEditExistingColumn={disabledEditExistingColumn}
+                  options={options}
                 />
               ))}
             </SortableContext>
-          </DndContext>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan={7} className="px-4 py-2 border">
-              <Button size="sm" onClick={onAddColumn}>
-                <LucidePlus className="w-4 h-4 mr-1" /> Add Column
-              </Button>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={headerCounter} className="px-4 py-2 border">
+                <Button size="sm" onClick={onAddColumn}>
+                  <LucidePlus className="w-4 h-4 mr-1" /> Add Column
+                </Button>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </DndContext>
     </div>
   );
 }
