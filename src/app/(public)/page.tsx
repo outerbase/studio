@@ -257,7 +257,7 @@ function CommunitySection() {
           </svg>
           <div className="font-bold mt-1">Github</div>
         </DatabaseBlock>
-        <DatabaseBlock link="https://discord.gg/t8twVN5KdG">
+        <DatabaseBlock link="https://discord.gg/7zfESKF6QpG">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 127.14 96.36"

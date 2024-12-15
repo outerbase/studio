@@ -2,6 +2,8 @@ import { ColumnTypeSelector } from "../base-driver";
 
 export const MYSQL_DATA_TYPE_SUGGESTION: ColumnTypeSelector = {
   type: "text",
+  idTypeName: "INT",
+  textTypeName: "VARCHAR(255)",
   typeSuggestions: [
     {
       name: "Integer",

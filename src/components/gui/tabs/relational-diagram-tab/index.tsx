@@ -95,10 +95,10 @@ function mapSchema(
             height: 14,
           },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
-          target: item.name,
-          source: column.constraint.foreignKey.foreignTableName || "",
-          targetHandle: column.name,
-          sourceHandle: column.constraint.foreignKey.foreignColumns
+          source: item.name,
+          target: column.constraint.foreignKey.foreignTableName || "",
+          sourceHandle: column.name,
+          targetHandle: column.constraint.foreignKey.foreignColumns
             ? column.constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,

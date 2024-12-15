@@ -15,13 +15,13 @@ function ColumnTypeList({
 }) {
   return items.map((group) => (
     <div key={group.name}>
-      <div className="text-sm font-bold py-1 px-4 bg-muted mb-1">
+      <div className="text-sm font-bold py-1 px-4 bg-accent mb-1">
         {group.name}
       </div>
       <div className="flex flex-col">
         {group.suggestions.map((type) => {
           const itemClassName =
-            "py-0.5 px-3 pl-8 cursor-pointer hover:bg-gray-100";
+            "py-0.5 px-3 pl-8 cursor-pointer hover:bg-muted";
 
           const parameters = type.parameters ?? [];
           let content = <span>{type.name.toUpperCase()}</span>;

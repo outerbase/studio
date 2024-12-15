@@ -35,14 +35,14 @@ export default function SchemaEditor({
       value.columns.length === 0
         ? {
             name: "id",
-            type: "INTEGER",
+            type: databaseDriver.columnTypeSelector.idTypeName ?? "INTEGER",
             constraint: {
               primaryKey: true,
             },
           }
         : {
             name: "column",
-            type: "TEXT",
+            type: databaseDriver.columnTypeSelector.textTypeName ?? "TEXT",
             constraint: {},
           };
 
@@ -57,7 +57,7 @@ export default function SchemaEditor({
         },
       ],
     });
-  }, [value, onChange]);
+  }, [value, onChange, databaseDriver]);
 
   const hasChange = checkSchemaChange(value);
 
