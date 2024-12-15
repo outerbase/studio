@@ -95,10 +95,10 @@ function mapSchema(
             height: 14,
           },
           id: `${item.name}-${column.constraint.foreignKey.foreignTableName}`,
-          source: item.name,
-          target: column.constraint.foreignKey.foreignTableName || "",
-          sourceHandle: column.name,
-          targetHandle: column.constraint.foreignKey.foreignColumns
+          target: item.name,
+          source: column.constraint.foreignKey.foreignTableName || "",
+          targetHandle: column.name,
+          sourceHandle: column.constraint.foreignKey.foreignColumns
             ? column.constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
@@ -135,10 +135,10 @@ function mapSchema(
             height: 14,
           },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
-          source: item.name,
-          target: constraint.foreignKey.foreignTableName || "",
-          sourceHandle: columnName,
-          targetHandle: constraint.foreignKey.foreignColumns
+          target: item.name,
+          source: constraint.foreignKey.foreignTableName || "",
+          targetHandle: columnName,
+          sourceHandle: constraint.foreignKey.foreignColumns
             ? constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
@@ -203,13 +203,12 @@ function mapSchema(
   // Rearrange the nodes with relationship
   // We need to find the position
   const relationshipRightPosition =
-    Math.max(...layoutRelationship.nodes.map((x) => x.position.x)) +
+    (Math.max(...layoutRelationship.nodes.map((x) => x.position.x)) ?? 0) +
     NODE_MARGIN +
     MAX_NODE_WIDTH;
 
-  const relationshipTopPosition = Math.min(
-    ...layoutRelationship.nodes.map((x) => x.position.y)
-  );
+  const relationshipTopPosition =
+    Math.min(...layoutRelationship.nodes.map((x) => x.position.y)) ?? 0;
 
   // Calculate estimate area of the nodes without relationship
   const area =
