@@ -8,6 +8,7 @@ import {
 import { omit, isEqual } from "lodash";
 
 function wrapParen(str: string) {
+  if (str.toUpperCase() === "NULL") return str;
   if (str.length >= 2 && str.startsWith("(") && str.endsWith(")")) return str;
   return "(" + str + ")";
 }
@@ -81,6 +82,10 @@ function generateCreateColumn(
     );
   }
 
+  if (col.constraint?.collate) {
+    tokens.push("COLLATE " + driver.escapeValue(col.constraint.collate));
+  }
+
   if (col.constraint?.checkExpression) {
     tokens.push("CHECK " + wrapParen(col.constraint.checkExpression));
   }
@@ -148,8 +153,6 @@ export function generateMySqlSchemaChange(
           )}`
         );
       }
-
-      console.log(col.old, col.new);
 
       // check if there is any changed except name
       if (!isEqual(omit(col.old, ["name"]), omit(col.new, ["name"]))) {

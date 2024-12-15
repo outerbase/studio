@@ -270,6 +270,7 @@ export abstract class BaseDriver {
   abstract getFlags(): DriverFlags;
   abstract getCurrentSchema(): Promise<string | null>;
   abstract columnTypeSelector: ColumnTypeSelector;
+  abstract getCollationList(): string[];
 
   // Helper class
   abstract escapeId(id: string): string;

@@ -170,7 +170,6 @@ export default function ColumnTypeSelector({
         onFocus={() => setShowSuggestion(true)}
         onBlur={() => {
           setShowSuggestion(false);
-          console.log("blur");
         }}
         value={value}
         onChange={(e) => {

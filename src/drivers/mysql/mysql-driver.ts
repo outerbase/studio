@@ -13,7 +13,10 @@ import {
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
 import { generateMySqlSchemaChange } from "./generate-schema";
-import { MYSQL_DATA_TYPE_SUGGESTION } from "./mysql-data-type";
+import {
+  MYSQL_COLLATION_LIST,
+  MYSQL_DATA_TYPE_SUGGESTION,
+} from "./mysql-data-type";
 
 interface MySqlDatabase {
   SCHEMA_NAME: string;
@@ -33,6 +36,7 @@ interface MySqlColumn {
   NUMERIC_SCALE: number;
   COLUMN_DEFAULT: string | null;
   COLUMN_TYPE: string;
+  COLLATION_NAME: string | null;
 }
 
 interface MySqlTable {
@@ -91,6 +95,13 @@ function mapColumn(column: MySqlColumn): DatabaseTableColumn {
     };
   }
 
+  if (column.COLLATION_NAME) {
+    result.constraint = {
+      ...result.constraint,
+      collate: column.COLLATION_NAME,
+    };
+  }
+
   return result;
 }
 
@@ -120,6 +131,10 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       supportInsertReturning: false,
       supportUpdateReturning: false,
     };
+  }
+
+  getCollationList(): string[] {
+    return MYSQL_COLLATION_LIST;
   }
 
   async getCurrentSchema(): Promise<string | null> {
@@ -276,7 +291,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)} ORDER BY ORDINAL_POSITION`;
+    const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT, COLLATION_NAME FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)} ORDER BY ORDINAL_POSITION`;
     const columnResult = (await this.query(columnSql))
       .rows as unknown as MySqlColumn[];
 

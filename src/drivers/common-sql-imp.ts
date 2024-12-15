@@ -28,6 +28,10 @@ export default abstract class CommonSQLImplement extends BaseDriver {
     return null;
   }
 
+  getCollationList(): string[] {
+    return [];
+  }
+
   async updateTableData(
     schemaName: string,
     tableName: string,
