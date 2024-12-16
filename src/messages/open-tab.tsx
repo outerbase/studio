@@ -91,7 +91,7 @@ function generateKeyFromTab(tab: OpenTabsProps) {
     return "trigger-" + (tab.name ?? "");
   }
 
-  if (tab.type === 'database') return !tab.schemaName ? 'create-database' : 'database-' + tab.schemaName
+  if (tab.type === 'database') return !tab.schemaName ? 'create-database' : 'Edit ' + tab.schemaName
 
   return "Unnamed";
 }
@@ -122,7 +122,7 @@ function generateTitle(tab: OpenTabsProps) {
   if (tab.type === 'erd') return 'Relational Diagram';
   if (tab.type === "mass-drop-table") return "Mass Drop Tables";
   if (tab.type === "trigger") return tab.name ?? "";
-  if (tab.type === 'database') return tab.schemaName ? tab.schemaName : 'New Schema/Database';
+  if (tab.type === 'database') return tab.schemaName ? "Edit " + tab.schemaName : 'New Schema/Database';
   return "Unnamed";
 }
 

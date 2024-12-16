@@ -82,7 +82,7 @@ export default function SchemaDatabase({ schemaName }: { schemaName?: string; })
   return (
     <div className="flex h-full flex-col overflow-hidden relative">
       {
-        isSaving && <SchemaDatabaseDialog onClose={toggleSave} previewScript={previewScript} />
+        isSaving && <SchemaDatabaseDialog onClose={toggleSave} previewScript={previewScript} schema={value} />
       }
       <div className="border-b pb-1">
         <h1 className="text-lg font-semibold text-primary p-4 mb-1">
