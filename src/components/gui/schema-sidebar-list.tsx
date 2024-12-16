@@ -119,6 +119,15 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       const isTable = item?.type === "table";
 
       return [
+        item?.type === 'schema' && {
+          title: 'Edit',
+          onClick: () => {
+            openTab({
+              type: 'database',
+              schemaName: item?.schemaName,
+            })
+          }
+        },
         {
           title: "Copy Name",
           disabled: !selectedName,

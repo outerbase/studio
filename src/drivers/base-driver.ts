@@ -265,6 +265,15 @@ export interface DatabaseTableSchemaChange {
   createScript?: string;
 }
 
+export interface DatabaseSchemaChange {
+  name: {
+    old?: string;
+    new?: string;
+  };
+  createScript?: string;
+  collate?: string;
+}
+
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
@@ -323,4 +332,5 @@ export abstract class BaseDriver {
   abstract emptyTable(schemaName: string, tableName: string): Promise<void>;
 
   abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
+  abstract createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[];
 }

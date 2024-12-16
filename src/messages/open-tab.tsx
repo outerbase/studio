@@ -8,9 +8,10 @@ import TableDataWindow from "@/components/gui/tabs/table-data-tab";
 import UsersTab from "@/components/gui/tabs/users-tabs";
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
 import { Binoculars } from "@phosphor-icons/react/dist/ssr";
-import { StackMinus, Table, TreeStructure } from "@phosphor-icons/react";
+import { Database, StackMinus, Table, TreeStructure } from "@phosphor-icons/react";
 import MassDropTableTab from "@/components/gui/tabs/mass-drop-table";
 import RelationalDiagramTab from "@/components/gui/tabs/relational-diagram-tab";
+import SchemaDatabase from "@/components/gui/tabs/schema-database-tab";
 
 interface OpenTableTab {
   type: "table";
@@ -29,7 +30,7 @@ interface OpenQueryTab {
 }
 
 interface OpenTableSchemaTab {
-  type: "schema";
+  type: "schema" | 'database';
   schemaName?: string;
   tableName?: string;
 }
@@ -90,6 +91,8 @@ function generateKeyFromTab(tab: OpenTabsProps) {
     return "trigger-" + (tab.name ?? "");
   }
 
+  if (tab.type === 'database') return !tab.schemaName ? 'create-database' : 'database-' + tab.schemaName
+
   return "Unnamed";
 }
 
@@ -100,6 +103,7 @@ function generateIconFromTab(tab: OpenTabsProps) {
   if (tab.type === "user") return LucideUser;
   if (tab.type === 'erd') return TreeStructure;
   if (tab.type === "mass-drop-table") return StackMinus;
+  if (tab.type === 'database') return Database;
 
   return LucideCog;
 }
@@ -118,6 +122,7 @@ function generateTitle(tab: OpenTabsProps) {
   if (tab.type === 'erd') return 'Relational Diagram';
   if (tab.type === "mass-drop-table") return "Mass Drop Tables";
   if (tab.type === "trigger") return tab.name ?? "";
+  if (tab.type === 'database') return tab.schemaName ? tab.schemaName : 'New Schema/Database';
   return "Unnamed";
 }
 
@@ -148,6 +153,7 @@ function generateComponent(tab: OpenTabsProps, title: string) {
   if (tab.type === "mass-drop-table") return <MassDropTableTab />;
   if (tab.type === "trigger")
     return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
+  if (tab.type === 'database') return <SchemaDatabase schemaName={tab.schemaName} />;
 
   return <div>Unknown Tab</div>;
 }

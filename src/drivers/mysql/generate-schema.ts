@@ -1,5 +1,6 @@
 import {
   BaseDriver,
+  DatabaseSchemaChange,
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
   DatabaseTableSchemaChange,
@@ -124,6 +125,24 @@ function generateConstraintScript(
       `REFERENCES ${driver.escapeId(con.foreignKey.foreignTableName ?? "")} ` +
       `(${con.foreignKey.foreignColumns?.map(driver.escapeId).join(", ")})`
     );
+  }
+}
+
+export function generateMysqlDatabaseSchema(
+  driver: BaseDriver,
+  change: DatabaseSchemaChange
+): string[] {
+  const isCreateScript = !change.name.old;
+  let line = "";
+
+  if (change.collate) {
+    line = ` COLLATE \`${change.collate}\``;
+  }
+
+  if (isCreateScript) {
+    return [`CREATE DATABASE \`${change.name.new}\`${line}`];
+  } else {
+    return [`ALTER DATABASE \`${change.name.old}\`${line}`];
   }
 }
 

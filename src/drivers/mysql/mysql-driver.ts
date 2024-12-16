@@ -9,10 +9,14 @@ import {
   DatabaseTableSchemaChange,
   ColumnTypeSelector,
   DatabaseTableColumnConstraint,
+  DatabaseSchemaChange,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
-import { generateMySqlSchemaChange } from "./generate-schema";
+import {
+  generateMysqlDatabaseSchema,
+  generateMySqlSchemaChange,
+} from "./generate-schema";
 import {
   MYSQL_COLLATION_LIST,
   MYSQL_DATA_TYPE_SUGGESTION,
@@ -372,6 +376,10 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
     return generateMySqlSchemaChange(this, change);
+  }
+
+  createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[] {
+    return generateMysqlDatabaseSchema(this, change);
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {
