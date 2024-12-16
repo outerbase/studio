@@ -128,6 +128,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       supportModifyColumn: true,
       mismatchDetection: false,
       supportCreateUpdateTable: true,
+      suppoerCreateUpdateDatabase: true,
       dialect: "mysql",
 
       supportUseStatement: true,

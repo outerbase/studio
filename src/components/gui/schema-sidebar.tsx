@@ -29,7 +29,12 @@ export default function SchemaView() {
   }, [])
 
   const ActivatorButton = () => {
-    if (databaseDriver.getFlags().dialect === 'sqlite') {
+
+    if (!databaseDriver.getFlags().suppoerCreateUpdateDatabase && !databaseDriver.getFlags().supportCreateUpdateTable) {
+      return <></>
+    }
+
+    if (databaseDriver.getFlags().dialect === 'sqlite' && databaseDriver.getFlags().supportCreateUpdateTable) {
       return (
         <button
           className={cn(
@@ -62,8 +67,12 @@ export default function SchemaView() {
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>
-              <CommandItem onSelect={() => onNewDatabase()}>New schema/database</CommandItem>
-              <CommandItem onSelect={() => onNewTable()}>New table</CommandItem>
+              {
+                databaseDriver.getFlags().suppoerCreateUpdateDatabase && <CommandItem onSelect={() => onNewDatabase()}>New schema/database</CommandItem>
+              }
+              {
+                databaseDriver.getFlags().supportCreateUpdateTable && <CommandItem onSelect={() => onNewTable()}>New table</CommandItem>
+              }
             </CommandList>
           </Command>
         </PopoverContent>
@@ -76,7 +85,7 @@ export default function SchemaView() {
       <div className="p-4 pb-2 flex flex-col">
         <div className="flex justify-between mb-5 items-center">
           <h1 className="text-xl font-medium text-primary">Tables</h1>
-          {databaseDriver.getFlags().supportCreateUpdateTable && <ActivatorButton />}
+          <ActivatorButton />
         </div>
 
         <div className="overflow-hidden cursor-text items-center has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 has-[:focus]:outline-neutral-400/70 has-[:enabled]:active:outline-neutral-400/70 dark:has-[:focus]:outline-neutral-600 dark:has-[:enabled]:active:outline-neutral-600 flex w-full rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600 h-[32px]">
