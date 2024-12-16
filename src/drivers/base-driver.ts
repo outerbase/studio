@@ -240,7 +240,7 @@ export interface DriverFlags {
   supportInsertReturning: boolean;
   supportUpdateReturning: boolean;
   supportRowId: boolean;
-  suppoerCreateUpdateDatabase: boolean;
+  supportCreateUpdateDatabase: boolean;
 }
 
 export interface DatabaseTableColumnChange {

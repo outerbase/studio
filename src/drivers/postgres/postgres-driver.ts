@@ -1,6 +1,5 @@
 import {
   ColumnTypeSelector,
-  DatabaseSchemaChange,
   DatabaseSchemaItem,
   DatabaseSchemas,
   DatabaseTableColumn,
@@ -78,7 +77,7 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
       supportModifyColumn: false,
       mismatchDetection: false,
       supportCreateUpdateTable: false,
-      suppoerCreateUpdateDatabase: false,
+      supportCreateUpdateDatabase: false,
       supportInsertReturning: true,
       supportUpdateReturning: true,
     };
@@ -352,7 +351,7 @@ WHERE
     throw new Error("Not implemented");
   }
 
-  createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[] {
+  createUpdateDatabaseSchema(): string[] {
     throw new Error("Not implemented");
   }
 

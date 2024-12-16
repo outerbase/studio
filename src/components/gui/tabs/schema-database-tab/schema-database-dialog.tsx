@@ -42,7 +42,7 @@ export function SchemaDatabaseDialog({ previewScript, onClose, schema }: Props) 
         setIsExecuting(false);
       })
     }
-  }, [databaseDriver, onClose, previewScript, refreshSchema])
+  }, [databaseDriver, onClose, previewScript, refreshSchema, replaceCurrentTab, schema.name.new])
 
   return (
     <AlertDialog open onOpenChange={onClose}>

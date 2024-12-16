@@ -30,7 +30,7 @@ export default function SchemaView() {
 
   const ActivatorButton = () => {
 
-    if (!databaseDriver.getFlags().suppoerCreateUpdateDatabase && !databaseDriver.getFlags().supportCreateUpdateTable) {
+    if (!databaseDriver.getFlags().supportCreateUpdateDatabase && !databaseDriver.getFlags().supportCreateUpdateTable) {
       return <></>
     }
 
@@ -68,7 +68,7 @@ export default function SchemaView() {
           <Command>
             <CommandList>
               {
-                databaseDriver.getFlags().suppoerCreateUpdateDatabase && <CommandItem onSelect={() => onNewDatabase()}>New schema/database</CommandItem>
+                databaseDriver.getFlags().supportCreateUpdateDatabase && <CommandItem onSelect={() => onNewDatabase()}>New schema/database</CommandItem>
               }
               {
                 databaseDriver.getFlags().supportCreateUpdateTable && <CommandItem onSelect={() => onNewTable()}>New table</CommandItem>
