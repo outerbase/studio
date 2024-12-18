@@ -9,11 +9,13 @@ import { Plus } from "@phosphor-icons/react";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Command, CommandItem, CommandList } from "../ui/command";
+import SchemaCreateDialog from "./schema-editor/schema-create";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
   const { databaseDriver } = useDatabaseDriver();
   const { currentSchemaName } = useSchema();
+  const [isCreateSchema, setIsCreateSchema] = useState(false);
 
   const onNewTable = useCallback(() => {
     openTab({
@@ -22,11 +24,7 @@ export default function SchemaView() {
     });
   }, [currentSchemaName]);
 
-  const onNewDatabase = useCallback(() => {
-    openTab({
-      type: 'database',
-    })
-  }, [])
+  const toggleNewDate = useCallback(() => setIsCreateSchema(!isCreateSchema), [isCreateSchema])
 
   const ActivatorButton = () => {
 
@@ -68,7 +66,7 @@ export default function SchemaView() {
           <Command>
             <CommandList>
               {
-                databaseDriver.getFlags().supportCreateUpdateDatabase && <CommandItem onSelect={() => onNewDatabase()}>New schema/database</CommandItem>
+                databaseDriver.getFlags().supportCreateUpdateDatabase && <CommandItem onSelect={toggleNewDate}>New schema/database</CommandItem>
               }
               {
                 databaseDriver.getFlags().supportCreateUpdateTable && <CommandItem onSelect={() => onNewTable()}>New table</CommandItem>
@@ -82,6 +80,7 @@ export default function SchemaView() {
 
   return (
     <div className="flex flex-col overflow-hidden grow">
+      {isCreateSchema && <SchemaCreateDialog onClose={toggleNewDate} />}
       <div className="p-4 pb-2 flex flex-col">
         <div className="flex justify-between mb-5 items-center">
           <h1 className="text-xl font-medium text-primary">Tables</h1>

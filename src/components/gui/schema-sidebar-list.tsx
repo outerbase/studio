@@ -7,6 +7,7 @@ import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { Table } from "@phosphor-icons/react";
+import SchemaCreateDialog from "./schema-editor/schema-create";
 
 interface SchemaListProps {
   search: string;
@@ -104,6 +105,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const { databaseDriver } = useDatabaseDriver();
   const [selected, setSelected] = useState("");
   const { refresh, schema, currentSchemaName } = useSchema();
+  const [editSchema, setEditSchema] = useState<string | null>(null);
 
   const [collapsed, setCollapsed] = useState(() => {
     return new Set<string>();
@@ -122,10 +124,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         item?.type === 'schema' && {
           title: 'Edit',
           onClick: () => {
-            openTab({
-              type: 'database',
-              schemaName: item?.schemaName,
-            })
+            setEditSchema(item.schemaName);
           }
         },
         {
@@ -199,39 +198,42 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   );
 
   return (
-    <ListView
-      full
-      filter={filterCallback}
-      highlight={search}
-      items={listViewItems}
-      collapsedKeys={collapsed}
-      onCollapsedChange={setCollapsed}
-      onContextMenu={(item) => prepareContextMenu(item?.data)}
-      selectedKey={selected}
-      onSelectChange={setSelected}
-      onDoubleClick={(item) => {
-        if (item.data.type === "table" || item.data.type === "view") {
-          openTab({
-            type: "table",
-            schemaName: item.data.schemaName ?? "",
-            tableName: item.data.name,
-          });
-        } else if (item.data.type === "trigger") {
-          openTab({
-            type: "trigger",
-            schemaName: item.data.schemaName,
-            name: item.name,
-          });
-        } else if (item.data.type === "schema") {
-          if (databaseDriver.getFlags().supportUseStatement) {
-            databaseDriver
-              .query("USE " + databaseDriver.escapeId(item.name))
-              .then(() => {
-                refresh();
-              });
+    <>
+      {editSchema && <SchemaCreateDialog schemaName={editSchema} onClose={() => setEditSchema(null)} />}
+      <ListView
+        full
+        filter={filterCallback}
+        highlight={search}
+        items={listViewItems}
+        collapsedKeys={collapsed}
+        onCollapsedChange={setCollapsed}
+        onContextMenu={(item) => prepareContextMenu(item?.data)}
+        selectedKey={selected}
+        onSelectChange={setSelected}
+        onDoubleClick={(item) => {
+          if (item.data.type === "table" || item.data.type === "view") {
+            openTab({
+              type: "table",
+              schemaName: item.data.schemaName ?? "",
+              tableName: item.data.name,
+            });
+          } else if (item.data.type === "trigger") {
+            openTab({
+              type: "trigger",
+              schemaName: item.data.schemaName,
+              name: item.name,
+            });
+          } else if (item.data.type === "schema") {
+            if (databaseDriver.getFlags().supportUseStatement) {
+              databaseDriver
+                .query("USE " + databaseDriver.escapeId(item.name))
+                .then(() => {
+                  refresh();
+                });
+            }
           }
-        }
-      }}
-    />
+        }}
+      />
+    </>
   );
 }

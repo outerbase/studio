@@ -11,7 +11,7 @@ import CodePreview from "../../code-preview";
 import { SchemaDatabaseDialog } from "./schema-database-dialog";
 import { SchemaDatabaseCollation } from "./schema-database-collation";
 
-export default function SchemaDatabase({ schemaName }: { schemaName?: string; }) {
+export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?: string; onClose: () => void; }) {
   const { databaseDriver } = useDatabaseDriver();
   const { schema } = useSchema();
   const [isSaving, setSaving] = useState(false);
@@ -82,16 +82,55 @@ export default function SchemaDatabase({ schemaName }: { schemaName?: string; })
   return (
     <div className="flex h-full flex-col overflow-hidden relative">
       {
-        isSaving && <SchemaDatabaseDialog onClose={toggleSave} previewScript={previewScript} schema={value} />
+        isSaving &&
+        <SchemaDatabaseDialog
+          onCloseSave={() => {
+            toggleSave();
+            onClose();
+          }}
+          previewScript={previewScript}
+          schema={value}
+          onCloseCancel={toggleSave}
+        />
       }
-      <div className="border-b pb-1">
-        <h1 className="text-lg font-semibold text-primary p-4 mb-1">
-          {!schemaName ? 'New Schema/Database' : schemaName + "-Schema"}
-        </h1>
+      <div className="flex gap-2 shrink-0 grow-0 py-4 px-1 border-neutral-200 dark:border-neutral-800">
+        <div>
+          <div className="text-xs font-medium mb-1">Schema Name</div>
+          <Input
+            placeholder="Schema Name"
+            value={value.name.new || value.name.old || ''}
+            onChange={(e) => {
+              setValue({
+                ...value,
+                name: {
+                  ...value.name,
+                  new: e.currentTarget.value
+                }
+              })
+            }}
+            disabled={loading || !!schemaName}
+            className={`w-[200px] ${schemaNameExists ? 'border-red-600' : ''}`}
+          />
+          {
+            schemaNameExists && <small className="text-xs text-red-500">The schema name `{value.name.new}` already exists.</small>
+          }
+        </div>
+        <div>
+          <div className="text-xs font-medium mb-1">Collation</div>
+          <SchemaDatabaseCollation
+            value={value.collate}
+            onChange={(selectedSchema) => {
+              setValue({
+                ...value,
+                collate: selectedSchema
+              })
+            }}
+          />
+        </div>
       </div>
-      <div className="w-full flex flex-col border-b">
+      <div className="w-full flex flex-col pt-3">
         <div className="grow-0 shrink-0">
-          <div className="p-1 flex gap-2">
+          <div className="p-1 flex gap-2 justify-end">
             <Button
               variant="ghost"
               disabled={!!schemaNameExists || loading || !isChange}
@@ -128,41 +167,6 @@ export default function SchemaDatabase({ schemaName }: { schemaName?: string; })
               </PopoverContent>
             </Popover>
           </div>
-        </div>
-      </div>
-      <div className="flex gap-2 shrink-0 grow-0 border-b p-4 border-neutral-200 dark:border-neutral-800">
-        <div>
-          <div className="text-xs font-medium mb-1">Schema Name</div>
-          <Input
-            placeholder="Schema Name"
-            value={value.name.new || value.name.old || ''}
-            onChange={(e) => {
-              setValue({
-                ...value,
-                name: {
-                  ...value.name,
-                  new: e.currentTarget.value
-                }
-              })
-            }}
-            disabled={loading || !!schemaName}
-            className={`w-[200px] ${schemaNameExists ? 'border-red-600' : ''}`}
-          />
-          {
-            schemaNameExists && <small className="text-xs text-red-500">The schema name `{value.name.new}` already exists.</small>
-          }
-        </div>
-        <div>
-          <div className="text-xs font-medium mb-1">Collation</div>
-          <SchemaDatabaseCollation
-            value={value.collate}
-            onChange={(selectedSchema) => {
-              setValue({
-                ...value,
-                collate: selectedSchema
-              })
-            }}
-          />
         </div>
       </div>
     </div>

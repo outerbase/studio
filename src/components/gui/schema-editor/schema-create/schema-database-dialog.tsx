@@ -5,47 +5,36 @@ import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
 import { useCallback, useState } from "react";
 import CodePreview from "../../code-preview";
 import { Button } from "@/components/ui/button";
-import { useTabsContext } from "../../windows-tab";
 import { DatabaseSchemaChange } from "@/drivers/base-driver";
-import SchemaDatabase from ".";
-import { Database } from "@phosphor-icons/react";
+// import { Database } from "@phosphor-icons/react";
 
 interface Props {
   schema: DatabaseSchemaChange;
   previewScript: string;
-  onClose: () => void;
+  onCloseCancel: () => void;
+  onCloseSave: () => void;
 }
 
-export function SchemaDatabaseDialog({ previewScript, onClose, schema }: Props) {
+export function SchemaDatabaseDialog({ previewScript, onCloseCancel, onCloseSave }: Props) {
   const { databaseDriver } = useDatabaseDriver();
   const { refresh: refreshSchema } = useSchema();
   const [isExecuting, setIsExecuting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { replaceCurrentTab } = useTabsContext();
 
   const onSave = useCallback(() => {
     {
       setIsExecuting(true);
       databaseDriver.transaction([previewScript]).then(() => {
         refreshSchema();
-        replaceCurrentTab({
-          component: (
-            <SchemaDatabase schemaName={schema.name.new} />
-          ),
-          key: "_database_" + schema.name.new,
-          identifier: "_database_" + schema.name.new,
-          title: "Edit " + schema.name.new,
-          icon: Database,
-        });
-        onClose();
+        onCloseSave();
       }).catch((err) => setErrorMessage((err as Error).message)).finally(() => {
         setIsExecuting(false);
       })
     }
-  }, [databaseDriver, onClose, previewScript, refreshSchema, replaceCurrentTab, schema.name.new])
+  }, [databaseDriver, onCloseSave, previewScript, refreshSchema])
 
   return (
-    <AlertDialog open onOpenChange={onClose}>
+    <AlertDialog open onOpenChange={onCloseCancel}>
       <AlertDialogContent>
         <AlertDialogTitle>Preview</AlertDialogTitle>
         {errorMessage && (
