@@ -51,6 +51,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       optionalSchema: true,
       mismatchDetection: false,
       supportCreateUpdateTable: true,
+      supportCreateUpdateDatabase: false,
       dialect: "sqlite",
     };
   }
@@ -228,6 +229,10 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
     return generateSqlSchemaChange(change);
+  }
+
+  createUpdateDatabaseSchema(): string[] {
+    throw new Error("Not implemented");
   }
 
   override async findFirst(

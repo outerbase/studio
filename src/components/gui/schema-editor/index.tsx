@@ -34,17 +34,17 @@ export default function SchemaEditor({
     const newColumn =
       value.columns.length === 0
         ? {
-            name: "id",
-            type: databaseDriver.columnTypeSelector.idTypeName ?? "INTEGER",
-            constraint: {
-              primaryKey: true,
-            },
-          }
+          name: "id",
+          type: databaseDriver.columnTypeSelector.idTypeName ?? "INTEGER",
+          constraint: {
+            primaryKey: true,
+          },
+        }
         : {
-            name: "column",
-            type: databaseDriver.columnTypeSelector.textTypeName ?? "TEXT",
-            constraint: {},
-          };
+          name: "column",
+          type: databaseDriver.columnTypeSelector.textTypeName ?? "TEXT",
+          constraint: {},
+        };
 
     onChange({
       ...value,
