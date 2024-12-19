@@ -115,7 +115,15 @@ export default function QueryWindow({
         explained &&
         statement.toLowerCase().indexOf("explain query plan") !== 0
       ) {
-        statement = "explain query plan " + statement;
+        if (databaseDriver.getFlags().dialect === 'sqlite') {
+          statement = "explain query plan " + statement;
+        }
+        else if (databaseDriver.getFlags().dialect === 'mysql') {
+          statement = "explain format=json " + statement
+        }
+        else if (databaseDriver.getFlags().dialect === 'postgres') {
+          statement = 'explain (format json) ' + statement
+        }
       }
 
       if (statement) {
@@ -153,7 +161,7 @@ export default function QueryWindow({
             } else if (
               databaseDriver.getFlags().supportUseStatement &&
               log.sql.trim().substring(0, "use ".length).toLowerCase() ===
-                "use "
+              "use "
             ) {
               hasAlterSchema = true;
               break;
@@ -186,7 +194,7 @@ export default function QueryWindow({
       <WindowTabs
         key="main-window-tab"
         onSelectChange={setQueryTabIndex}
-        onTabsChange={() => {}}
+        onTabsChange={() => { }}
         hideCloseButton
         selected={queryTabIndex}
         tabs={[
@@ -203,18 +211,18 @@ export default function QueryWindow({
           })),
           ...(progress
             ? [
-                {
-                  key: "summary",
-                  identifier: "summary",
-                  title: "Summary",
-                  icon: LucideMessageSquareWarning,
-                  component: (
-                    <div className="w-full h-full overflow-y-auto overflow-x-hidden">
-                      <QueryProgressLog progress={progress} />
-                    </div>
-                  ),
-                },
-              ]
+              {
+                key: "summary",
+                identifier: "summary",
+                title: "Summary",
+                icon: LucideMessageSquareWarning,
+                component: (
+                  <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+                    <QueryProgressLog progress={progress} />
+                  </div>
+                ),
+              },
+            ]
             : []),
         ]}
       />
