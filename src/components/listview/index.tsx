@@ -30,6 +30,9 @@ export interface ListViewItem<T = unknown> {
   badgeContent?: string;
   badgeClassName?: string;
   children?: ListViewItem<T>[];
+  progressBarValue?: number;
+  progressBarMax?: number;
+  progressBarLabel?: string;
 }
 
 interface ListViewProps<T> {
@@ -224,7 +227,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                     </div>
                   )}
 
-                  <div className="text-xs line-clamp-1">
+                  <div className="text-xs line-clamp-1 flex-1">
                     <Highlight text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span
@@ -237,6 +240,27 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                       </span>
                     )}
                   </div>
+
+                  {item.progressBarValue && item.progressBarMax && (
+                    <div className="w-[50px] h-full flex items-center relative text-muted-foreground">
+                      <div
+                        className="dark:bg-gray-800 dark:border-gray-700 bg-gray-100 rounded-sm h-[20px] border border-gray-200"
+                        style={{
+                          width:
+                            Math.max(
+                              Math.ceil(
+                                (item.progressBarValue / item.progressBarMax) *
+                                  100
+                              ),
+                              5
+                            ) + "%",
+                        }}
+                      ></div>
+                      <span className="absolute right-0">
+                        {item.progressBarLabel}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               {isCollapsed &&
