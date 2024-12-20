@@ -4,6 +4,23 @@ import { Position } from "@xyflow/react";
 import { ExplainNodeProps, formatCost } from "../buildQueryExplanationFlow";
 
 export function TableBlock(props: ExplainNodeProps) {
+  let bgColor = 'bg-emerald-700';
+  let label = 'Unique Key Lookup';
+
+  if (props.data.access_type === 'ALL') {
+    bgColor = 'bg-rose-700';
+    label = 'Full Table Scan'
+  }
+
+  if (props.data.access_type === 'range') {
+    bgColor = 'bg-yellow-700';
+    label = 'Index Range Scan';
+  }
+
+  if (props.data.access_type === 'ref') {
+    label = 'Non-Unique Key Lookup'
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -18,8 +35,8 @@ export function TableBlock(props: ExplainNodeProps) {
             <div><small>{formatCost(Number(props.data.cost_info.read_cost) + Number(props.data.cost_info.eval_cost))}</small></div>
             <div><small>{formatCost(Number(props.data.rows_examined_per_scan))} rows</small></div>
           </div>
-          <div className={`p-2 text-white text-[9pt] border-b rounded-md text-center ${props.data.access_type === 'ALL' ? 'bg-rose-700' : 'bg-emerald-700'}`}>
-            <small>{props.data.access_type === 'ALL' ? 'Full Table Scan' : props.data.access_type === 'eq_ref' ? 'Unique Key Lookup' : 'Non-Unique Key Lookup'}</small>
+          <div className={`p-2 text-white text-[9pt] border-b rounded-md text-center ${bgColor}`}>
+            <small>{label}</small>
           </div>
           <div className="flex flex-col justify-center text-[8pt] items-center">
             <div>
