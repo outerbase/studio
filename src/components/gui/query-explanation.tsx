@@ -1,9 +1,11 @@
-import { DatabaseResultSet } from "@/drivers/base-driver";
+import { DatabaseResultSet, SupportedDialect } from "@/drivers/base-driver";
 import { useMemo } from "react";
 import { z } from "zod";
+import QueryExplanationDiagram from "./query-explanation-diagram";
 
 interface QueryExplanationProps {
   data: DatabaseResultSet;
+  dialect?: SupportedDialect
 }
 
 interface ExplanationRow {
@@ -25,7 +27,19 @@ const queryExplanationRowSchema = z.object({
 });
 
 export function isExplainQueryPlan(sql: string) {
-  return sql.toLowerCase().startsWith("explain query plan");
+  if (sql.toLowerCase().startsWith("explain query plan")) {
+    return true
+  }
+
+  if (sql.toLowerCase().startsWith("explain format=json")) {
+    return true
+  }
+
+  if (sql.toLowerCase().startsWith("explain (format json)")) {
+    return true
+  }
+
+  return false
 }
 
 function buildQueryExplanationTree(nodes: ExplanationRow[]) {
@@ -47,9 +61,11 @@ function buildQueryExplanationTree(nodes: ExplanationRow[]) {
   return tree;
 }
 
-export function QueryExplanation(props: QueryExplanationProps) {
-  const tree = useMemo(() => {
-    const isExplanationRows = z.array(queryExplanationRowSchema).safeParse(
+function mapExplanationRows(props: QueryExplanationProps) {
+  let isExplanationRows = null;
+
+  if (props.dialect === 'sqlite') {
+    isExplanationRows = z.array(queryExplanationRowSchema).safeParse(
       props.data.rows.map((r) => ({
         ...r,
         id: Number(r.id),
@@ -57,16 +73,33 @@ export function QueryExplanation(props: QueryExplanationProps) {
         notused: Number(r.notused),
       }))
     );
+  }
 
-    if (isExplanationRows.error) {
-      return { _tag: "ERROR" as const, value: isExplanationRows.error };
-    }
-
+  if (props.dialect === 'mysql') {
+    const row = (props.data.rows || [])[0]
+    const explain = String(row.EXPLAIN)
     return {
-      _tag: "SUCCESS" as const,
-      value: buildQueryExplanationTree(isExplanationRows.data),
-    };
-  }, [props.data]);
+      _tag: "SUCCESS",
+      value: JSON.parse(explain)
+    }
+  }
+
+  if (props.dialect === 'postgres') {
+    return { _tag: "SUCCESS" as const, value: 'Postgres dialect is not supported yet' };
+  }
+
+  if (isExplanationRows?.error) {
+    return { _tag: "ERROR" as const, value: isExplanationRows.error };
+  }
+
+  return {
+    _tag: "SUCCESS" as const,
+    value: buildQueryExplanationTree(isExplanationRows?.data || []),
+  };
+}
+
+export function QueryExplanation(props: QueryExplanationProps) {
+  const tree = useMemo(() => mapExplanationRows(props), [props]);
 
   if (tree._tag === "ERROR") {
     // The row structure doesn't match the explanation structure
@@ -79,10 +112,24 @@ export function QueryExplanation(props: QueryExplanationProps) {
     );
   }
 
+  if (props.dialect !== 'sqlite') {
+    return (
+      <div className="p-5 font-mono h-full overflow-y-auto">
+        {
+          props.dialect === 'mysql' ? (
+            <QueryExplanationDiagram items={tree.value} />
+          ) : (
+            <p className="text-destructive">{tree.value}</p>
+          )
+        }
+      </div>
+    )
+  }
+
   return (
     <div className="p-5 font-mono h-full overflow-y-auto">
       <ul>
-        {tree.value.map((node) => (
+        {tree.value.map((node: ExplanationRowWithChildren) => (
           <li key={`query-explanation-p-${node.parent}-${node.id}`}>
             <RenderQueryExplanationItem item={node} />
           </li>

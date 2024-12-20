@@ -36,7 +36,7 @@ export default function QueryResult({
         {data._tag === "QUERY" ? (
           <ResultTable data={data.value} />
         ) : (
-          <QueryExplanation data={data.value} />
+          <QueryExplanation data={data.value} dialect={databaseDriver.getFlags().dialect} />
         )}
       </div>
       {stats && (
