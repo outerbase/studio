@@ -13,8 +13,25 @@ interface SchemaListProps {
   search: string;
 }
 
+function formatTableSize(byteCount?: number) {
+  const byteInKb = 1024;
+  const byteInMb = byteInKb * 1024;
+  const byteInGb = byteInMb * 1024;
+
+  if (!byteCount) return undefined;
+  if (byteInMb * 999 < byteCount)
+    return (byteCount / byteInGb).toFixed(1) + " GB";
+  if (byteInMb * 100 < byteCount)
+    return (byteCount / byteInMb).toFixed(0) + " MB";
+  if (byteInKb * 100 < byteCount)
+    return (byteCount / byteInMb).toFixed(1) + " MB";
+  if (byteInKb < byteCount) return Math.floor(byteCount / byteInKb) + " KB";
+  return "1 KB";
+}
+
 function prepareListViewItem(
-  schema: DatabaseSchemaItem[]
+  schema: DatabaseSchemaItem[],
+  maxTableSize: number
 ): ListViewItem<DatabaseSchemaItem>[] {
   return schema.map((s) => {
     let icon = Table;
@@ -34,6 +51,9 @@ function prepareListViewItem(
       iconColor: iconClassName,
       key: s.schemaName + "." + s.name,
       name: s.name,
+      progressBarMax: maxTableSize,
+      progressBarValue: s.tableSchema?.stats?.sizeInByte,
+      progressBarLabel: formatTableSize(s.tableSchema?.stats?.sizeInByte),
     };
   });
 }
@@ -121,11 +141,11 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       const isTable = item?.type === "table";
 
       return [
-        item?.type === 'schema' && {
-          title: 'Edit',
+        item?.type === "schema" && {
+          title: "Edit",
           onClick: () => {
             setEditSchema(item.schemaName);
-          }
+          },
         },
         {
           title: "Copy Name",
@@ -146,15 +166,15 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         },
         isTable && databaseDriver.getFlags().supportCreateUpdateTable
           ? {
-            title: "Edit Table",
-            onClick: () => {
-              openTab({
-                tableName: item?.name,
-                type: "schema",
-                schemaName: item?.schemaName ?? "",
-              });
-            },
-          }
+              title: "Edit Table",
+              onClick: () => {
+                openTab({
+                  tableName: item?.name,
+                  type: "schema",
+                  schemaName: item?.schemaName ?? "",
+                });
+              },
+            }
           : undefined,
         databaseDriver.getFlags().supportCreateUpdateTable
           ? { separator: true }
@@ -168,6 +188,10 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const listViewItems = useMemo(() => {
     const r = sortTable(
       Object.entries(schema).map(([s, tables]) => {
+        const maxTableSize = Math.max(
+          ...tables.map((t) => t.tableSchema?.stats?.sizeInByte ?? 0)
+        );
+
         return {
           data: { type: "schema", schemaName: s },
           icon: LucideDatabase,
@@ -175,7 +199,9 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           iconBadgeColor: s === currentSchemaName ? "bg-green-600" : undefined,
           key: s.toString(),
           children: sortTable(
-            groupByFtsTable(groupTriggerByTable(prepareListViewItem(tables)))
+            groupByFtsTable(
+              groupTriggerByTable(prepareListViewItem(tables, maxTableSize))
+            )
           ),
         } as ListViewItem<DatabaseSchemaItem>;
       })
@@ -199,7 +225,12 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
 
   return (
     <>
-      {editSchema && <SchemaCreateDialog schemaName={editSchema} onClose={() => setEditSchema(null)} />}
+      {editSchema && (
+        <SchemaCreateDialog
+          schemaName={editSchema}
+          onClose={() => setEditSchema(null)}
+        />
+      )}
       <ListView
         full
         filter={filterCallback}
