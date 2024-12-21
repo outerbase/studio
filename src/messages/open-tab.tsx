@@ -148,7 +148,6 @@ function generateComponent(tab: OpenTabsProps, title: string) {
   if (tab.type === "mass-drop-table") return <MassDropTableTab />;
   if (tab.type === "trigger")
     return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} />;
-
   return <div>Unknown Tab</div>;
 }
 

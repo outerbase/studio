@@ -144,6 +144,10 @@ export interface DatabaseTableFts5 {
   contentRowId?: string;
 }
 
+export interface DatabaseTableSchemaStats {
+  sizeInByte?: number;
+  estimateRowCount?: number;
+}
 export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
@@ -156,6 +160,7 @@ export interface DatabaseTableSchema {
   type?: "table" | "view";
   withoutRowId?: boolean;
   strict?: boolean;
+  stats?: DatabaseTableSchemaStats
 }
 
 export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
@@ -240,6 +245,7 @@ export interface DriverFlags {
   supportInsertReturning: boolean;
   supportUpdateReturning: boolean;
   supportRowId: boolean;
+  supportCreateUpdateDatabase: boolean;
 }
 
 export interface DatabaseTableColumnChange {
@@ -263,6 +269,15 @@ export interface DatabaseTableSchemaChange {
   columns: DatabaseTableColumnChange[];
   constraints: DatabaseTableConstraintChange[];
   createScript?: string;
+}
+
+export interface DatabaseSchemaChange {
+  name: {
+    old?: string;
+    new?: string;
+  };
+  createScript?: string;
+  collate?: string;
 }
 
 export abstract class BaseDriver {
@@ -323,4 +338,5 @@ export abstract class BaseDriver {
   abstract emptyTable(schemaName: string, tableName: string): Promise<void>;
 
   abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
+  abstract createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[];
 }
