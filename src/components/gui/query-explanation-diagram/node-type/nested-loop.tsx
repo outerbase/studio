@@ -4,7 +4,6 @@ import { BaseHandle } from "@/components/base-handle";
 import { ExplainNodeProps, formatCost } from "../buildQueryExplanationFlow";
 
 export function NestedLoop(props: ExplainNodeProps) {
-  console.log(props.data)
   return (
     <Tooltip>
       <TooltipTrigger asChild>

@@ -150,6 +150,8 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       },
       animated: true,
     });
+
+    return getLayoutedExplanationElements(nodes, edges, "RL");
   }
 
   if (!table && nested_reverse.length > 0) {
