@@ -5,7 +5,7 @@ import QueryExplanationDiagram from "./query-explanation-diagram";
 
 interface QueryExplanationProps {
   data: DatabaseResultSet;
-  dialect?: SupportedDialect
+  dialect?: SupportedDialect;
 }
 
 interface ExplanationRow {
@@ -26,20 +26,22 @@ const queryExplanationRowSchema = z.object({
   detail: z.string(),
 });
 
-export function isExplainQueryPlan(sql: string) {
+export function isExplainQueryPlan(sql: string, dialect: SupportedDialect) {
+  if (!["sqlite", "mysql"].includes(dialect)) return false;
+
   if (sql.toLowerCase().startsWith("explain query plan")) {
-    return true
+    return true;
   }
 
   if (sql.toLowerCase().startsWith("explain format=json")) {
-    return true
+    return true;
   }
 
   if (sql.toLowerCase().startsWith("explain (format json)")) {
-    return true
+    return true;
   }
 
-  return false
+  return false;
 }
 
 function buildQueryExplanationTree(nodes: ExplanationRow[]) {
@@ -64,7 +66,7 @@ function buildQueryExplanationTree(nodes: ExplanationRow[]) {
 function mapExplanationRows(props: QueryExplanationProps) {
   let isExplanationRows = null;
 
-  if (props.dialect === 'sqlite') {
+  if (props.dialect === "sqlite") {
     isExplanationRows = z.array(queryExplanationRowSchema).safeParse(
       props.data.rows.map((r) => ({
         ...r,
@@ -75,17 +77,20 @@ function mapExplanationRows(props: QueryExplanationProps) {
     );
   }
 
-  if (props.dialect === 'mysql') {
-    const row = (props.data.rows || [])[0]
-    const explain = String(row.EXPLAIN)
+  if (props.dialect === "mysql") {
+    const row = (props.data.rows || [])[0];
+    const explain = String(row.EXPLAIN);
     return {
       _tag: "SUCCESS",
-      value: JSON.parse(explain)
-    }
+      value: JSON.parse(explain),
+    };
   }
 
-  if (props.dialect === 'postgres') {
-    return { _tag: "SUCCESS" as const, value: 'Postgres dialect is not supported yet' };
+  if (props.dialect === "postgres") {
+    return {
+      _tag: "SUCCESS" as const,
+      value: "Postgres dialect is not supported yet",
+    };
   }
 
   if (isExplanationRows?.error) {
@@ -112,18 +117,16 @@ export function QueryExplanation(props: QueryExplanationProps) {
     );
   }
 
-  if (props.dialect !== 'sqlite') {
+  if (props.dialect !== "sqlite") {
     return (
       <div className="p-5 font-mono h-full overflow-y-auto">
-        {
-          props.dialect === 'mysql' ? (
-            <QueryExplanationDiagram items={tree.value} />
-          ) : (
-            <p className="text-destructive">{tree.value}</p>
-          )
-        }
+        {props.dialect === "mysql" ? (
+          <QueryExplanationDiagram items={tree.value} />
+        ) : (
+          <p className="text-destructive">{tree.value}</p>
+        )}
       </div>
-    )
+    );
   }
 
   return (
