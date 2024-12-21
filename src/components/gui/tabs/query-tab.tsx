@@ -21,8 +21,8 @@ import {
   MultipleQueryResult,
   multipleQuery,
 } from "@/components/lib/multiple-query";
-import WindowTabs, { useTabsContext } from "../windows-tab";
-import QueryResult from "../query-result";
+import WindowTabs, { useTabsContext, WindowTabItemProps } from "../windows-tab";
+import QueryResult from "../tabs-result/query-result-tab";
 import { useSchema } from "@/context/schema-provider";
 import SaveDocButton from "../save-doc-button";
 import {
@@ -49,6 +49,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isExplainQueryPlan } from "../query-explanation";
+import ExplainResultTab from "../tabs-result/explain-result-tab";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -115,14 +117,12 @@ export default function QueryWindow({
         explained &&
         statement.toLowerCase().indexOf("explain query plan") !== 0
       ) {
-        if (databaseDriver.getFlags().dialect === 'sqlite') {
+        if (databaseDriver.getFlags().dialect === "sqlite") {
           statement = "explain query plan " + statement;
-        }
-        else if (databaseDriver.getFlags().dialect === 'mysql') {
-          statement = "explain format=json " + statement
-        }
-        else if (databaseDriver.getFlags().dialect === 'postgres') {
-          statement = 'explain (format json) ' + statement
+        } else if (databaseDriver.getFlags().dialect === "mysql") {
+          statement = "explain format=json " + statement;
+        } else if (databaseDriver.getFlags().dialect === "postgres") {
+          statement = "explain (format json) " + statement;
         }
       }
 
@@ -161,7 +161,7 @@ export default function QueryWindow({
             } else if (
               databaseDriver.getFlags().supportUseStatement &&
               log.sql.trim().substring(0, "use ".length).toLowerCase() ===
-              "use "
+                "use "
             ) {
               hasAlterSchema = true;
               break;
@@ -190,44 +190,57 @@ export default function QueryWindow({
   }, [code, name]);
 
   const windowTab = useMemo(() => {
+    const queryTabs: WindowTabItemProps[] = [];
+
+    for (const queryResult of data ?? []) {
+      if (
+        isExplainQueryPlan(queryResult.sql, databaseDriver.getFlags().dialect)
+      ) {
+        queryTabs.push({
+          component: <ExplainResultTab data={queryResult.result} />,
+          key: "explain_" + queryResult.order,
+          identifier: "explain_" + queryResult.order,
+          title: "Explain (Visual)",
+          icon: LucideMessageSquareWarning,
+        });
+      }
+
+      queryTabs.push({
+        component: <QueryResult result={queryResult} key={queryResult.order} />,
+        key: "query_" + queryResult.order,
+        identifier: "query_" + queryResult.order,
+        title:
+          `${getSingleTableName(queryResult.sql) ?? "Query " + (queryResult.order + 1)}` +
+          ` (${queryResult.result.rows.length}x${queryResult.result.headers.length})`,
+        icon: LucideGrid,
+      });
+    }
+
+    if (progress) {
+      queryTabs.push({
+        key: "summary",
+        identifier: "summary",
+        title: "Summary",
+        icon: LucideMessageSquareWarning,
+        component: (
+          <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+            <QueryProgressLog progress={progress} />
+          </div>
+        ),
+      });
+    }
+
     return (
       <WindowTabs
         key="main-window-tab"
         onSelectChange={setQueryTabIndex}
-        onTabsChange={() => { }}
+        onTabsChange={() => {}}
         hideCloseButton
         selected={queryTabIndex}
-        tabs={[
-          ...(data ?? []).map((queryResult, queryIdx) => ({
-            component: (
-              <QueryResult result={queryResult} key={queryResult.order} />
-            ),
-            key: "query_" + queryResult.order,
-            identifier: "query_" + queryResult.order,
-            title:
-              `${getSingleTableName(queryResult.sql) ?? "Query " + (queryIdx + 1)}` +
-              ` (${queryResult.result.rows.length}x${queryResult.result.headers.length})`,
-            icon: LucideGrid,
-          })),
-          ...(progress
-            ? [
-              {
-                key: "summary",
-                identifier: "summary",
-                title: "Summary",
-                icon: LucideMessageSquareWarning,
-                component: (
-                  <div className="w-full h-full overflow-y-auto overflow-x-hidden">
-                    <QueryProgressLog progress={progress} />
-                  </div>
-                ),
-              },
-            ]
-            : []),
-        ]}
+        tabs={queryTabs}
       />
     );
-  }, [progress, queryTabIndex, data]);
+  }, [progress, queryTabIndex, data, databaseDriver]);
 
   return (
     <ResizablePanelGroup direction="vertical">
