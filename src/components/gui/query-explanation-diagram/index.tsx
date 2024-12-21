@@ -4,6 +4,7 @@ import { buildQueryExplanationFlow, ExplanationMysql } from "./buildQueryExplana
 import { QueryBlock } from "./node-type/query-block";
 import { NestedLoop } from "./node-type/nested-loop";
 import { TableBlock } from "./node-type/table-block";
+import { OperationBlock } from "./node-type/operation-block";
 
 interface LayoutFlowProps {
   items: ExplanationMysql;
@@ -17,7 +18,9 @@ function QueryExplanationFlow(props: LayoutFlowProps) {
   const nodeTypes = useMemo(() => ({
     QUERY_BLOCK: QueryBlock,
     NESTED_LOOP: NestedLoop,
-    TABLE: TableBlock
+    TABLE: TableBlock,
+    ORDERING_OPERATION: OperationBlock,
+    GROUP_OPERATION: OperationBlock
   }), [])
 
   useEffect(() => {
@@ -43,6 +46,8 @@ function QueryExplanationFlow(props: LayoutFlowProps) {
       nodeTypes={nodeTypes}
       maxZoom={1}
       minZoom={1}
+      nodesDraggable={false}
+      className="nopan"
     >
 
     </ReactFlow>
