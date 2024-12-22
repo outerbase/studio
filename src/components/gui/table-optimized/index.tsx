@@ -136,9 +136,9 @@ function renderCellList({
 }: RenderCellListProps) {
   const headerSizes = internalState.getHeaderWidth();
 
-  const templateSizes = headers
-    .map((header) => headerSizes[header.index] + "px")
-    .join(" ");
+  const templateSizes =
+    `${internalState.gutterColumnWidth}px ` +
+    headers.map((header) => headerSizes[header.index] + "px").join(" ");
 
   const onHeaderSizeWithRemap = (idx: number, newWidth: number) => {
     onHeaderResize(headerSizes[headers[idx]?.index ?? 0] ?? 150, newWidth);
@@ -181,10 +181,19 @@ function renderCellList({
         data-row={absoluteRowIndex}
         className={rowClass}
       >
+        <td
+          className="sticky left-0 !bg-zinc-100 !dark:bg-zinc-900"
+          style={{ zIndex: 15 }}
+        >
+          <div className="libsql-table-cell flex items-center justify-end h-full pr-2 font-mono">
+            {absoluteRowIndex + 1}
+          </div>
+        </td>
+
         {hasSticky && (
           <td
-            style={{ zIndex: 15 }}
-            className={cn("sticky left-0", "bg-background")}
+            style={{ zIndex: 15, left: internalState.gutterColumnWidth + "px" }}
+            className={cn("sticky", "bg-background")}
             onMouseDown={handleCellClicked(
               absoluteRowIndex,
               headers[0]?.index ?? -1
@@ -238,6 +247,7 @@ function renderCellList({
   return (
     <table style={{ ...customStyles, gridTemplateColumns: templateSizes }}>
       <TableHeaderList
+        state={internalState}
         renderHeader={renderHeader}
         sticky={hasSticky}
         headers={headers}

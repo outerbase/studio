@@ -24,8 +24,14 @@ export default class OptimizeTableState {
   protected focus: [number, number] | null = null;
   protected selectedRows = new Set<number>();
   protected data: OptimizeTableRowValue[] = [];
+
+  // Gutter is a sticky column on the left side of the table
+  // We primary use it to display row number at the moment
+  public gutterColumnWidth = 40;
+
   protected headers: OptimizeTableHeaderProps[] = [];
   protected headerWidth: number[] = [];
+
   protected editMode = false;
   protected readOnlyMode = false;
   public mismatchDetection = false;
@@ -42,7 +48,7 @@ export default class OptimizeTableState {
     dataResult: DatabaseResultSet,
     schemaResult?: DatabaseTableSchema
   ) {
-    return new OptimizeTableState(
+    const r = new OptimizeTableState(
       dataResult.headers.map((header) => {
         const headerData = schemaResult
           ? schemaResult.columns.find((c) => c.name === header.name)
@@ -115,6 +121,16 @@ export default class OptimizeTableState {
       }),
       dataResult.rows.map((r) => ({ ...r }))
     );
+
+    if (r.getRowsCount() >= 1000) {
+      r.gutterColumnWidth = 50;
+    }
+
+    if (r.getRowsCount() >= 10000) {
+      r.gutterColumnWidth = 60;
+    }
+
+    return r;
   }
 
   constructor(
