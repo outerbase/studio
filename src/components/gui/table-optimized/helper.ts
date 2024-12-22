@@ -13,7 +13,8 @@ export function getVisibleCellRange(
   headerSizes: number[],
   totalRowCount: number,
   rowHeight: number,
-  renderAhead: number
+  renderAhead: number,
+  gutterWidth: number
 ) {
   const currentRowStart = Math.max(
     0,
@@ -27,7 +28,7 @@ export function getVisibleCellRange(
   );
 
   let currentColStart = -1;
-  let currentColAccumulateSize = 0;
+  let currentColAccumulateSize = gutterWidth;
   let currentColEnd = -1;
 
   const visibleXStart = e.scrollLeft;

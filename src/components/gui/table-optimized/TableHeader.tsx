@@ -2,6 +2,7 @@ import React, { type ReactElement } from "react";
 import type { OptimizeTableHeaderWithIndexProps } from ".";
 import TableHeaderResizeHandler from "./TableHeaderResizeHandler";
 import { cn } from "../../lib/utils";
+import OptimizeTableState from "./OptimizeTableState";
 
 export default function TableHeader({
   idx,
@@ -10,10 +11,12 @@ export default function TableHeader({
   onContextMenu,
   sticky,
   renderHeader,
+  state,
 }: {
   idx: number;
   sticky: boolean;
   header: OptimizeTableHeaderWithIndexProps;
+  state: OptimizeTableState;
   onHeaderResize: (idx: number, newWidth: number) => void;
   onContextMenu?: React.MouseEventHandler;
   renderHeader: (
@@ -21,10 +24,7 @@ export default function TableHeader({
     idx: number
   ) => ReactElement;
 }) {
-  const className = cn(
-    sticky ? "sticky left-0 z-30" : undefined,
-    "bg-background"
-  );
+  const className = cn(sticky ? "sticky z-30" : undefined, "bg-background");
 
   return (
     <th
@@ -32,10 +32,13 @@ export default function TableHeader({
       title={header.tooltip}
       className={className}
       onContextMenu={onContextMenu}
+      style={{
+        left: sticky ? state.gutterColumnWidth : undefined,
+      }}
     >
       {renderHeader(header, idx)}
       {header.resizable && (
-        <TableHeaderResizeHandler idx={idx} onResize={onHeaderResize} />
+        <TableHeaderResizeHandler idx={idx + 1} onResize={onHeaderResize} />
       )}
     </th>
   );
