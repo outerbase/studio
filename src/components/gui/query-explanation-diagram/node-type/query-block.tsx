@@ -9,7 +9,7 @@ export function QueryBlock(props: ExplainNodeProps) {
       <TooltipTrigger asChild>
         <div>
           <BaseHandle
-            type="source"
+            type="target"
             position={Position.Left}
             id={props.id}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"

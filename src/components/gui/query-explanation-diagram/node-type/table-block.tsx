@@ -21,14 +21,25 @@ export function TableBlock(props: ExplainNodeProps) {
     label = 'Non-Unique Key Lookup'
   }
 
+  if (props.data.access_type === 'index') {
+    bgColor = 'bg-rose-700';
+    label = "Full Index Scan";
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div>
           <BaseHandle
-            type="target"
+            type="source"
             position={Position.Top}
             id={props.id}
+            className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          />
+          <BaseHandle
+            type="source"
+            position={Position.Right}
+            id={'right'}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
           />
           <div className={`flex flex-row justify-between items-center text-[8pt]`}>
