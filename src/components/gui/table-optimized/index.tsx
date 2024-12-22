@@ -117,14 +117,8 @@ function renderCellList({
   const cells = windowArray.map((row, rowIndex) => {
     const absoluteRowIndex = rowIndex + rowStart;
 
-    let rowClass = undefined;
-
     return (
-      <tr
-        key={absoluteRowIndex}
-        data-row={absoluteRowIndex}
-        className={rowClass}
-      >
+      <tr key={absoluteRowIndex} data-row={absoluteRowIndex}>
         <td
           className="sticky left-0 bg-zinc-100 dark:bg-zinc-900"
           style={{ zIndex: 15 }}

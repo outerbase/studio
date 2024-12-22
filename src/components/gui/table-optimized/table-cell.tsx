@@ -3,7 +3,6 @@ import { OptimizeTableHeaderWithIndexProps } from ".";
 import tableResultCellRenderer from "../table-result/render-cell";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { is } from "drizzle-orm";
 
 export default function OptimizeTableCell({
   state,
