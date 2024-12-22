@@ -34,7 +34,6 @@ export default class OptimizeTableState {
 
   protected editMode = false;
   protected readOnlyMode = false;
-  public mismatchDetection = false;
   protected container: HTMLDivElement | null = null;
 
   protected changeCallback: TableChangeEventCallback[] = [];
