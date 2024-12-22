@@ -27,7 +27,7 @@ export default function TableHeaderList({
   return (
     <thead>
       <tr>
-        <th className="sticky left-0 !bg-zinc-100 !dark:bg-zinc-900 z-30">
+        <th className="sticky left-0 bg-zinc-100 dark:bg-zinc-900 z-30">
           <div className="libsql-table-cell flex items-center justify-end h-full pr-2 font-mono font-bold">
             #
           </div>
