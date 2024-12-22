@@ -19,7 +19,6 @@ export default function QueryResult({
       result.result
     );
     state.setReadOnlyMode(true);
-    state.mismatchDetection = databaseDriver.getFlags().mismatchDetection;
 
     return state;
   }, [result, databaseDriver]);

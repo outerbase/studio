@@ -128,7 +128,6 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       optionalSchema: false,
       supportBigInt: false,
       supportModifyColumn: true,
-      mismatchDetection: false,
       supportCreateUpdateTable: true,
       supportCreateUpdateDatabase: true,
       dialect: "mysql",
@@ -194,7 +193,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
         schemaName: t.TABLE_SCHEMA,
         tableSchema: {
           stats: {
-            sizeInByte: t.DATA_LENGTH + t.INDEX_LENGTH
+            sizeInByte: t.DATA_LENGTH + t.INDEX_LENGTH,
           },
           autoIncrement: false,
           pk: [],
@@ -350,13 +349,13 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
           foreignKey:
             constraint.CONSTRAINT_TYPE === "FOREIGN KEY"
               ? {
-                columns: columnList.map((c) => c.COLUMN_NAME),
-                foreignColumns: columnList.map(
-                  (c) => c.REFERENCED_COLUMN_NAME
-                ),
-                foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
-                foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
-              }
+                  columns: columnList.map((c) => c.COLUMN_NAME),
+                  foreignColumns: columnList.map(
+                    (c) => c.REFERENCED_COLUMN_NAME
+                  ),
+                  foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
+                  foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
+                }
               : undefined,
         };
       }

@@ -93,8 +93,7 @@ export default function TableDataWindow({
           dataResult,
           schemaResult
         );
-        tableState.mismatchDetection =
-          databaseDriver.getFlags().mismatchDetection;
+
         setData(tableState);
 
         setStat(dataResult.stat);

@@ -12,16 +12,10 @@ import {
 import {
   DatabaseResultSet,
   DatabaseValue,
-  describeTableColumnType,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
@@ -32,7 +26,6 @@ interface TableCellProps<T = unknown> {
   onFocus?: () => void;
   onDoubleClick?: () => void;
   header: OptimizeTableHeaderWithIndexProps;
-  mismatchDetection?: boolean;
 }
 
 interface SneakpeakProps {
@@ -184,14 +177,12 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
-  valueType,
   onFocus,
   isChanged,
   focus,
   align,
   onDoubleClick,
   header,
-  mismatchDetection,
 }: TableCellProps) {
   const className = cn(
     "libsql-cell font-mono flex",
@@ -292,39 +283,13 @@ export default function GenericCell({
   }, [value, textBaseStyle, isChanged, header]);
 
   return (
-    <div className="relative">
-      {mismatchDetection &&
-        valueType &&
-        header.dataType &&
-        valueType !== header.dataType && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="w-0 h-0 border-transparent border-r-8 border-b-8 border-r-red-400 dark:border-r-red-600 absolute right-0 top-0"></div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <strong>Mismatched type:</strong>
-              <ul>
-                <li>
-                  <strong>- Expected by column:</strong>{" "}
-                  <code>{describeTableColumnType(header.dataType)}</code>
-                </li>
-                <li>
-                  <strong>- But stored as:</strong>{" "}
-                  <code>{describeTableColumnType(valueType)}</code>
-                </li>
-              </ul>
-            </TooltipContent>
-          </Tooltip>
-        )}
-
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
-        <div className="flex flex-grow overflow-hidden">{content}</div>
-        {fkContent}
-      </div>
+    <div
+      className={className}
+      onMouseDown={onFocus}
+      onDoubleClick={onDoubleClick}
+    >
+      <div className="flex flex-grow overflow-hidden">{content}</div>
+      {fkContent}
     </div>
   );
 }

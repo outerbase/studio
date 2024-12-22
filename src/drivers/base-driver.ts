@@ -160,7 +160,7 @@ export interface DatabaseTableSchema {
   type?: "table" | "view";
   withoutRowId?: boolean;
   strict?: boolean;
-  stats?: DatabaseTableSchemaStats
+  stats?: DatabaseTableSchemaStats;
 }
 
 export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
@@ -234,7 +234,6 @@ export interface DriverFlags {
   supportBigInt: boolean;
   supportCreateUpdateTable: boolean;
   supportModifyColumn: boolean;
-  mismatchDetection: boolean;
   dialect: SupportedDialect;
 
   supportUseStatement?: boolean;
