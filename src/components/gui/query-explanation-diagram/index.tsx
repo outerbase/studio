@@ -34,7 +34,7 @@ function QueryExplanationFlow(props: LayoutFlowProps) {
       setEdges(build.edges as Edge[])
       setLoading(false)
     }
-  }, [props, loading])
+  }, [props, loading, setEdges, setNodes])
 
   return (
     <ReactFlow

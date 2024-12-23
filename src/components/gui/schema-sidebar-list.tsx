@@ -141,12 +141,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       const isTable = item?.type === "table";
 
       return [
-        item?.type === "schema" && {
-          title: "Edit",
-          onClick: () => {
-            setEditSchema(item.schemaName);
-          },
-        },
         {
           title: "Copy Name",
           disabled: !selectedName,

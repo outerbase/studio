@@ -2,16 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSchema } from "@/context/schema-provider";
 import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { DatabaseSchemaChange } from "@/drivers/base-driver";
-import { SchemaDatabaseCollation } from "./schema-database-collation";
 
 export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?: string; onClose: () => void; }) {
   const { databaseDriver } = useDatabaseDriver();
   const { schema, refresh: refreshSchema } = useSchema();
-  const [loading, setLoading] = useState(false);
-  const [currentCollate, setCurrentCollate] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [value, setValue] = useState<DatabaseSchemaChange>({
@@ -27,40 +24,6 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
     return databaseDriver.createUpdateDatabaseSchema(value).join(";\n");
   }, [databaseDriver, value]);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-
-    try {
-      const { rows } = await databaseDriver.query(`
-        SELECT \`DEFAULT_COLLATION_NAME\` FROM \`information_schema\`.\`SCHEMATA\` WHERE \`SCHEMA_NAME\`='${schemaName}';
-        `)
-
-      if (rows.length > 0) {
-        setValue({
-          ...value,
-          name: {
-            new: schemaName,
-            old: schemaName
-          },
-          collate: String(rows[0].DEFAULT_COLLATION_NAME)
-        })
-        setCurrentCollate(String(rows[0].DEFAULT_COLLATION_NAME))
-      }
-    } catch (error) {
-      //
-    } finally {
-      setLoading(false);
-    }
-  }, [databaseDriver, schemaName, value])
-
-  useEffect(() => {
-    if (schemaName) {
-      fetchData().then().catch(console.error);
-    }
-  }, [])
-
-  // const toggleSave = useCallback(() => setSaving(!isSaving), [isSaving])
-
   const onSave = useCallback(() => {
     {
       setIsExecuting(true);
@@ -75,7 +38,6 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
 
   const schemaNames = Object.keys(schema).filter(s => s !== schemaName).map(s => s);
   const schemaNameExists = schemaNames.includes(value.name.new || '');
-  const isChange = value.name.new !== value.name.old || currentCollate !== value.collate
 
   return (
     <div className="flex h-full flex-col overflow-hidden relative">
@@ -100,24 +62,12 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
                 }
               })
             }}
-            disabled={loading || !!schemaName}
+            disabled={!!schemaName}
             className={`w-full ${schemaNameExists ? 'border-red-600' : ''}`}
           />
           {
             schemaNameExists && <small className="text-xs text-red-500">The schema name `{value.name.new}` already exists.</small>
           }
-        </div>
-        <div>
-          <div className="text-xs font-medium mb-1">Collation</div>
-          <SchemaDatabaseCollation
-            value={value.collate}
-            onChange={(selectedSchema) => {
-              setValue({
-                ...value,
-                collate: selectedSchema
-              })
-            }}
-          />
         </div>
       </div>
       <div className="w-full flex flex-col pt-3">
@@ -125,7 +75,7 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
           <div className="p-1 flex gap-2 justify-end">
             <Button
               variant="ghost"
-              disabled={!!schemaNameExists || loading || !isChange}
+              disabled={!!schemaNameExists}
               size={"sm"}
               onClick={onSave}
             >
