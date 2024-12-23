@@ -20,15 +20,30 @@ export interface OptimizeTableRowValue {
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
 
+interface TableSelectionRange {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
 export default class OptimizeTableState {
   protected focus: [number, number] | null = null;
-  protected selectedRows = new Set<number>();
   protected data: OptimizeTableRowValue[] = [];
+
+  // Selelection range will be replaced our old selected rows implementation
+  // It offers better flexiblity and allow us to implement more features
+  protected selectionRanges: TableSelectionRange[] = [];
+
+  // Gutter is a sticky column on the left side of the table
+  // We primary use it to display row number at the moment
+  public gutterColumnWidth = 40;
+
   protected headers: OptimizeTableHeaderProps[] = [];
   protected headerWidth: number[] = [];
+
   protected editMode = false;
   protected readOnlyMode = false;
-  public mismatchDetection = false;
   protected container: HTMLDivElement | null = null;
 
   protected changeCallback: TableChangeEventCallback[] = [];
@@ -42,7 +57,7 @@ export default class OptimizeTableState {
     dataResult: DatabaseResultSet,
     schemaResult?: DatabaseTableSchema
   ) {
-    return new OptimizeTableState(
+    const r = new OptimizeTableState(
       dataResult.headers.map((header) => {
         const headerData = schemaResult
           ? schemaResult.columns.find((c) => c.name === header.name)
@@ -115,6 +130,16 @@ export default class OptimizeTableState {
       }),
       dataResult.rows.map((r) => ({ ...r }))
     );
+
+    if (r.getRowsCount() >= 1000) {
+      r.gutterColumnWidth = 50;
+    }
+
+    if (r.getRowsCount() >= 10000) {
+      r.gutterColumnWidth = 60;
+    }
+
+    return r;
   }
 
   constructor(
@@ -471,16 +496,22 @@ export default class OptimizeTableState {
     }
   }
 
-  // ------------------------------------------------
-  // Handle select row logic
-  // ------------------------------------------------
   clearSelect() {
-    this.selectedRows.clear();
+    this.selectionRanges = [];
+    this.broadcastChange();
+  }
+
+  getSelectionRanges() {
+    return this.selectionRanges;
+  }
+
+  setSelectionRanges(ranges: TableSelectionRange[]) {
+    this.selectionRanges = ranges;
     this.broadcastChange();
   }
 
   getSelectedRowCount() {
-    return this.selectedRows.size;
+    return this.getSelectedRowIndex().length;
   }
 
   getSelectedRowsArray(): unknown[][] {
@@ -490,35 +521,93 @@ export default class OptimizeTableState {
   }
 
   getSelectedRowIndex() {
-    return Array.from(this.selectedRows.values());
+    const selectedRows = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      for (let i = range.y1; i <= range.y2; i++) {
+        selectedRows.add(i);
+      }
+    }
+
+    return Array.from(selectedRows.values());
   }
 
-  selectRow(y: number, toggle?: boolean) {
-    if (toggle) {
-      if (this.selectedRows.has(y)) {
-        this.selectedRows.delete(y);
-      } else {
-        this.selectedRows.add(y);
-      }
-    } else {
-      this.selectedRows.add(y);
-    }
+  selectRow(y: number) {
+    this.selectionRanges = [
+      { x1: 0, y1: y, x2: this.headers.length - 1, y2: y },
+    ];
+
     this.broadcastChange();
   }
 
-  selectRange(y1: number, y2: number) {
-    const maxY = Math.max(y1, y2);
-    const minY = Math.min(y1, y2);
+  selectCell(y: number, x: number, focus = true) {
+    this.selectionRanges = [{ x1: x, y1: y, x2: x, y2: y }];
 
-    this.selectedRows.clear();
-    for (let i = minY; i <= maxY; i++) {
-      this.selectedRows.add(i);
-    }
+    if (focus) this.setFocus(y, x);
+    else this.broadcastChange();
+  }
 
+  selectCellRange(y1: number, x1: number, y2: number, x2: number) {
+    this.selectionRanges = [
+      {
+        x1: Math.min(x1, x2),
+        y1: Math.min(y1, y2),
+        x2: Math.max(x1, x2),
+        y2: Math.max(y1, y2),
+      },
+    ];
+    this.broadcastChange();
+  }
+
+  selectRowRange(y1: number, y2: number) {
+    this.selectionRanges = [{ x1: 0, y1, x2: this.headers.length - 1, y2 }];
     this.broadcastChange();
   }
 
   isRowSelected(y: number) {
-    return this.selectedRows.has(y);
+    for (const range of this.selectionRanges) {
+      if (y >= range.y1 && y <= range.y2) return true;
+    }
+    return false;
+  }
+
+  getSelectionRange(y: number, x: number) {
+    for (const range of this.selectionRanges) {
+      if (y >= range.y1 && y <= range.y2 && x >= range.x1 && x <= range.x2) {
+        return range;
+      }
+    }
+
+    return null;
+  }
+
+  getCellStatus(y: number, x: number) {
+    const focus = this.getFocus();
+    const isFocus = !!focus && focus.y === y && focus.x === x;
+
+    // Finding the selection range
+    let isSelected = false;
+    let isBorderRight = false;
+    let isBorderBottom = false;
+
+    for (const range of this.selectionRanges) {
+      if (y >= range.y1 && y <= range.y2) {
+        if (x >= range.x1 && x <= range.x2) {
+          isSelected = true;
+        }
+
+        if (x === range.x2 || x + 1 === range.x1) {
+          isBorderRight = true;
+        }
+      }
+
+      if (x >= range.x1 && x <= range.x2) {
+        if (y === range.y2 || y + 1 === range.y1) {
+          isBorderBottom = true;
+        }
+      }
+    }
+
+    return { isFocus, isSelected, isBorderBottom, isBorderRight };
   }
 }

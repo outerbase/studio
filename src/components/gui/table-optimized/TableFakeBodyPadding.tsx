@@ -24,7 +24,7 @@ export default function TableFakeBodyPadding({
           <td
             style={{
               height: paddingTop,
-              gridColumn: `span ${colCount}`,
+              gridColumn: `span ${colCount + 1}`,
             }}
           />
         </tr>
@@ -37,7 +37,7 @@ export default function TableFakeBodyPadding({
           <td
             style={{
               height: paddingBottom,
-              gridColumn: `span ${colCount}`,
+              gridColumn: `span ${colCount + 1}`,
             }}
           ></td>
         </tr>

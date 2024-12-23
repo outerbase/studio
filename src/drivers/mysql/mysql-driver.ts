@@ -47,6 +47,8 @@ interface MySqlTable {
   TABLE_SCHEMA: string;
   TABLE_NAME: string;
   TABLE_TYPE: string;
+  INDEX_LENGTH: number;
+  DATA_LENGTH: number;
 }
 
 interface MySQLConstraintResult {
@@ -126,7 +128,6 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       optionalSchema: false,
       supportBigInt: false,
       supportModifyColumn: true,
-      mismatchDetection: false,
       supportCreateUpdateTable: true,
       supportCreateUpdateDatabase: true,
       dialect: "mysql",
@@ -157,7 +158,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       .rows as unknown as MySqlDatabase[];
 
     const tableSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.tables WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+      "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, DATA_LENGTH, INDEX_LENGTH FROM information_schema.tables WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
     const tableResult = (await this.query(tableSql))
       .rows as unknown as MySqlTable[];
 
@@ -191,6 +192,9 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
         tableName: t.TABLE_NAME,
         schemaName: t.TABLE_SCHEMA,
         tableSchema: {
+          stats: {
+            sizeInByte: t.DATA_LENGTH + t.INDEX_LENGTH,
+          },
           autoIncrement: false,
           pk: [],
           columns: [],

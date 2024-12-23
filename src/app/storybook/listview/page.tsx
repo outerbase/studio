@@ -29,12 +29,18 @@ function Demo1() {
             name: "movies",
             key: "movies.movies",
             icon: LucideTable,
+            progressBarLabel: "1.3GB",
+            progressBarValue: 9050,
+            progressBarMax: 10000,
           },
           {
             name: "users",
             badgeContent: "fts5",
             badgeClassName: "bg-red-500 text-white",
             key: "movies.users",
+            progressBarLabel: "1.5KB",
+            progressBarValue: 1500,
+            progressBarMax: 10000,
             icon: LucideTable,
             children: [
               {
@@ -54,7 +60,14 @@ function Demo1() {
               },
             ],
           },
-          { name: "reviews", key: "movies.reviews", icon: LucideTable },
+          {
+            name: "reviews",
+            key: "movies.reviews",
+            icon: LucideTable,
+            progressBarLabel: "256KB",
+            progressBarValue: 5550,
+            progressBarMax: 10000,
+          },
         ],
       },
       {

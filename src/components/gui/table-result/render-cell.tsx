@@ -45,8 +45,8 @@ export default function tableResultCellRenderer({
   x,
   state,
   header,
+  isFocus,
 }: OptimizeTableCellRenderProps) {
-  const isFocus = state.hasFocus(y, x);
   const editMode = isFocus && state.isInEditMode();
   const value = state.getValue(y, x);
   const valueType = determineCellType(value);
@@ -61,7 +61,6 @@ export default function tableResultCellRenderer({
           value={value as DatabaseValue<bigint>}
           valueType={valueType}
           focus={isFocus}
-          isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
             state.changeValue(y, x, newValue);
           }}
@@ -77,7 +76,6 @@ export default function tableResultCellRenderer({
           value={value as DatabaseValue<number>}
           valueType={valueType}
           focus={isFocus}
-          isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
             state.changeValue(y, x, newValue);
           }}
@@ -94,7 +92,6 @@ export default function tableResultCellRenderer({
           value={value as DatabaseValue<string>}
           valueType={valueType}
           focus={isFocus}
-          isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
             state.changeValue(y, x, newValue);
           }}
@@ -110,7 +107,6 @@ export default function tableResultCellRenderer({
           valueType={valueType}
           value={value as DatabaseValue<number[]>}
           focus={isFocus}
-          isChanged={state.hasCellChange(y, x)}
           onChange={(newValue) => {
             state.changeValue(y, x, newValue);
           }}

@@ -144,6 +144,10 @@ export interface DatabaseTableFts5 {
   contentRowId?: string;
 }
 
+export interface DatabaseTableSchemaStats {
+  sizeInByte?: number;
+  estimateRowCount?: number;
+}
 export interface DatabaseTableSchema {
   columns: DatabaseTableColumn[];
   pk: string[];
@@ -156,6 +160,7 @@ export interface DatabaseTableSchema {
   type?: "table" | "view";
   withoutRowId?: boolean;
   strict?: boolean;
+  stats?: DatabaseTableSchemaStats;
 }
 
 export type TriggerWhen = "BEFORE" | "AFTER" | "INSTEAD_OF";
@@ -229,7 +234,6 @@ export interface DriverFlags {
   supportBigInt: boolean;
   supportCreateUpdateTable: boolean;
   supportModifyColumn: boolean;
-  mismatchDetection: boolean;
   dialect: SupportedDialect;
 
   supportUseStatement?: boolean;

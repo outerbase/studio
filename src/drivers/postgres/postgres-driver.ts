@@ -22,6 +22,7 @@ interface PostgresTableRow {
   table_schema: string;
   table_name: string;
   table_type: string;
+  table_size: number;
 }
 
 interface PostgresColumnRow {
@@ -75,7 +76,6 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
       supportRowId: false,
       supportBigInt: false,
       supportModifyColumn: false,
-      mismatchDetection: false,
       supportCreateUpdateTable: false,
       supportCreateUpdateDatabase: false,
       supportInsertReturning: true,
@@ -92,7 +92,7 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
 
     const tableResult = (
       await this.query(
-        "SELECT * FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast') AND table_type = 'BASE TABLE';"
+        "SELECT *, pg_total_relation_size(quote_ident(table_schema) || '.' || quote_ident(table_name)) AS table_size FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast') AND table_type = 'BASE TABLE';"
       )
     ).rows as unknown as PostgresTableRow[];
 
@@ -145,6 +145,9 @@ WHERE
         type: table.table_type === "BASE TABLE" ? "table" : "view",
         tableName: table.table_name,
         tableSchema: {
+          stats: {
+            sizeInByte: table.table_size,
+          },
           columns: [],
           constraints: [],
           pk: [],
