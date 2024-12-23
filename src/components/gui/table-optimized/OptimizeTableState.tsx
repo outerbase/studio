@@ -31,6 +31,9 @@ export default class OptimizeTableState {
   protected focus: [number, number] | null = null;
   protected data: OptimizeTableRowValue[] = [];
 
+  // last move is used to track cell where user use arrow key to move on using shift key
+  protected lastMove: [number, number] | null = null;
+
   // Selelection range will be replaced our old selected rows implementation
   // It offers better flexiblity and allow us to implement more features
   protected selectionRanges: TableSelectionRange[] = [];
@@ -383,6 +386,23 @@ export default class OptimizeTableState {
     return this.data[idx];
   }
 
+  getLastMove() {
+    return this.lastMove
+      ? {
+          x: this.lastMove[1],
+          y: this.lastMove[0],
+        }
+      : null;
+  }
+
+  setLastMove(y: number, x: number) {
+    this.lastMove = [y, x];
+  }
+
+  clearLastMove() {
+    this.lastMove = null;
+  }
+
   // ------------------------------------------------
   // Handle focus logic
   // ------------------------------------------------
@@ -418,6 +438,7 @@ export default class OptimizeTableState {
 
   setFocus(y: number, x: number) {
     this.focus = [y, x];
+    this.clearLastMove();
     this.broadcastChange();
   }
 
@@ -453,11 +474,15 @@ export default class OptimizeTableState {
     return this.headerWidth;
   }
 
-  scrollToFocusCell(horizontal: "left" | "right", vertical: "top" | "bottom") {
-    if (this.container && this.focus) {
-      const cellX = this.focus[1];
-      const cellY = this.focus[0];
-      let cellLeft = 0;
+  scrollToCell(
+    horizontal: "left" | "right",
+    vertical: "top" | "bottom",
+    cell: { x: number; y: number }
+  ) {
+    if (this.container && cell) {
+      const cellX = cell.x;
+      const cellY = cell.y;
+      let cellLeft = 38;
       let cellRight = 0;
       const cellTop = (cellY + 1) * 38;
       const cellBottom = cellTop + 38;
@@ -475,7 +500,7 @@ export default class OptimizeTableState {
       const containerBottom = containerTop + height;
 
       if (horizontal === "right") {
-        if (cellRight > containerRight) {
+        if (cellRight - 38 > containerRight) {
           this.container.scrollLeft = Math.max(0, cellRight - width);
         }
       } else {
@@ -532,9 +557,53 @@ export default class OptimizeTableState {
     return Array.from(selectedRows.values());
   }
 
+  getSelectedColIndex() {
+    const selectedCols = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      for (let i = range.x1; i <= range.x2; i++) {
+        selectedCols.add(i);
+      }
+    }
+
+    return Array.from(selectedCols.values());
+  }
+
+  isFullSelectionRow(y: number) {
+    for (const range of this.selectionRanges) {
+      for (let i = range.y1; i <= range.y2; i++) {
+        if (
+          i === y &&
+          range.x1 === 0 &&
+          range.x2 === this.getHeaderCount() - 1
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+
+  isFullSelectionCol(x: number) {
+    for (const range of this.selectionRanges) {
+      for (let i = range.x1; i <= range.x2; i++) {
+        if (i === x && range.y1 === 0 && range.y2 === this.getRowsCount() - 1) {
+          return true;
+        }
+      }
+    }
+  }
+
   selectRow(y: number) {
     this.selectionRanges = [
       { x1: 0, y1: y, x2: this.headers.length - 1, y2: y },
+    ];
+
+    this.broadcastChange();
+  }
+
+  selectColumn(x: number) {
+    this.selectionRanges = [
+      { x1: x, y1: 0, x2: x, y2: this.getRowsCount() - 1 },
     ];
 
     this.broadcastChange();
@@ -559,8 +628,77 @@ export default class OptimizeTableState {
     this.broadcastChange();
   }
 
+  findSelectionRange(range: TableSelectionRange) {
+    return this.selectionRanges.find(
+      (r) =>
+        r.x1 === range.x1 &&
+        r.x2 === range.x2 &&
+        r.y1 === range.y1 &&
+        r.y2 === range.y2
+    );
+  }
+
+  addSelectionRange(y1: number, x1: number, y2: number, x2: number) {
+    const newRange = {
+      x1: Math.min(x1, x2),
+      y1: Math.min(y1, y2),
+      x2: Math.max(x1, x2),
+      y2: Math.max(y1, y2),
+    };
+
+    if (!this.findSelectionRange(newRange)) {
+      this.selectionRanges.push(newRange);
+      this.broadcastChange();
+    }
+  }
+
+  addSelectionRow(y: number) {
+    const newRange = {
+      x1: 0,
+      y1: y,
+      x2: this.headers.length - 1,
+      y2: y,
+    };
+
+    if (!this.findSelectionRange(newRange)) {
+      this.selectionRanges.push(newRange);
+      this.broadcastChange();
+    }
+  }
+
+  addSelectionCol(x: number) {
+    const newRange = {
+      x1: x,
+      y1: 0,
+      x2: x,
+      y2: this.getRowsCount() - 1,
+    };
+
+    if (!this.findSelectionRange(newRange)) {
+      this.selectionRanges.push(newRange);
+      this.broadcastChange();
+    }
+  }
+
   selectRowRange(y1: number, y2: number) {
-    this.selectionRanges = [{ x1: 0, y1, x2: this.headers.length - 1, y2 }];
+    const newRange = {
+      x1: 0,
+      y1: Math.min(y1, y2),
+      x2: this.headers.length - 1,
+      y2: Math.max(y1, y2),
+    };
+    this.selectionRanges = [newRange];
+    this.broadcastChange();
+  }
+
+  selectColRange(x1: number, x2: number) {
+    const newRange = {
+      x1: Math.min(x1, x2),
+      y1: 0,
+      x2: Math.max(x1, x2),
+      y2: this.getRowsCount() - 1,
+    };
+    this.selectionRanges = [newRange];
     this.broadcastChange();
   }
 
@@ -609,5 +747,38 @@ export default class OptimizeTableState {
     }
 
     return { isFocus, isSelected, isBorderBottom, isBorderRight };
+  }
+
+  getSelectionAggregatedResult() {
+    let sum = undefined;
+    let avg = undefined;
+    let min = undefined;
+    let max = undefined;
+    let count = 0;
+    for (const range of this.selectionRanges) {
+      for (let x = range.x1; x <= range.x2; x++) {
+        for (let y = range.y1; y <= range.y2; y++) {
+          const value = this.getValue(y, x);
+          const parsed = Number(value);
+
+          if (!isNaN(parsed)) {
+            sum = sum !== undefined ? sum + parsed : parsed;
+            min = min !== undefined ? (min < parsed ? min : parsed) : parsed;
+            max = max !== undefined ? (max > parsed ? max : parsed) : parsed;
+          }
+          count = count + 1;
+        }
+      }
+    }
+    if (sum !== undefined && count > 0) {
+      avg = sum / count;
+    }
+    return {
+      sum,
+      avg,
+      min,
+      max,
+      count,
+    };
   }
 }

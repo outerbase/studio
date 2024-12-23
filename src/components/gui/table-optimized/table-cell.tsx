@@ -76,6 +76,8 @@ export default function OptimizeTableCell({
             rowIndex,
             colIndex
           );
+        } else if (e.ctrlKey) {
+          state.addSelectionRange(rowIndex, colIndex, rowIndex, colIndex);
         } else {
           state.selectCell(rowIndex, colIndex);
         }

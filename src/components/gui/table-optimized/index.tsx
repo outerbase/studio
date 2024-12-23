@@ -19,6 +19,7 @@ import {
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import OptimizeTableCell from "./table-cell";
+import { cn } from "@/lib/utils";
 
 export interface OptimizeTableHeaderProps {
   name: string;
@@ -117,18 +118,43 @@ function renderCellList({
   const cells = windowArray.map((row, rowIndex) => {
     const absoluteRowIndex = rowIndex + rowStart;
 
+    let textClass =
+      "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono";
+    let tdClass = "sticky left-0 bg-zinc-100 dark:bg-zinc-900";
+
+    if (internalState.getSelectedRowIndex().includes(absoluteRowIndex)) {
+      if (internalState.isFullSelectionRow(absoluteRowIndex)) {
+        textClass = cn(
+          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono",
+          "bg-blue-600 border-red-900  text-white font-bold"
+        );
+        tdClass = "sticky left-0 bg-blue-600 dark:bg-blue-800";
+      } else {
+        textClass =
+          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono text-white font-bold";
+        tdClass = "sticky left-0 bg-blue-200 dark:bg-blue-400";
+      }
+    }
+
     return (
       <tr key={absoluteRowIndex} data-row={absoluteRowIndex}>
         <td
-          className="sticky left-0 bg-zinc-100 dark:bg-zinc-900"
+          className={tdClass}
           style={{ zIndex: 15 }}
-          onMouseDown={() => {
-            internalState.selectRow(absoluteRowIndex);
+          onMouseDown={(e) => {
+            const focusCell = internalState.getFocus();
+            if (e.shiftKey && focusCell) {
+              internalState.selectRowRange(focusCell.y, absoluteRowIndex);
+            } else if (e.ctrlKey && focusCell) {
+              internalState.addSelectionRow(absoluteRowIndex);
+              internalState.setFocus(absoluteRowIndex, 0);
+            } else {
+              internalState.selectRow(absoluteRowIndex);
+              internalState.setFocus(absoluteRowIndex, 0);
+            }
           }}
         >
-          <div className="libsql-table-cell flex items-center justify-end h-full pr-2 font-mono">
-            {absoluteRowIndex + 1}
-          </div>
+          <div className={textClass}>{absoluteRowIndex + 1}</div>
         </td>
 
         {hasSticky && (
