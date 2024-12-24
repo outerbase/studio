@@ -34,12 +34,12 @@ import OpacityLoading from "../loading-opacity";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import ResultStats from "../result-stat";
-import isEmptyResultStats from "@/components/lib/empty-stats";
 import useTableResultColumnFilter from "../table-result/filter-column";
 import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 import { useCurrentTab } from "../windows-tab";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { Toolbar, ToolbarButton } from "../toolbar";
+import AggregateResultButton from "../aggregate-result/aggregate-result-button";
 
 interface TableDataContentProps {
   tableName: string;
@@ -368,10 +368,14 @@ export default function TableDataWindow({
           />
         ) : null}
       </div>
-      {stat && !isEmptyResultStats(stat) && (
-        <div className="shrink-0 grow-0">
-          <Separator />
-          <ResultStats stats={stat} />
+      {stat && data && (
+        <div className="flex justify-between border-t shrink-0">
+          <div className="p-1">
+            <ResultStats stats={stat} />
+          </div>
+          <div className="p-1 pr-3">
+            <AggregateResultButton data={data} />
+          </div>
         </div>
       )}
     </div>

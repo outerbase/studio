@@ -9,6 +9,7 @@ import {
 } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import deepEqual from "deep-equal";
+import { formatNumber } from "@/lib/convertNumber";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -17,6 +18,8 @@ export interface OptimizeTableRowValue {
   isNewRow?: boolean;
   isRemoved?: boolean;
 }
+
+export type AggregateFunction = "sum" | "avg" | "min" | "max" | "count";
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
 
@@ -54,6 +57,7 @@ export default class OptimizeTableState {
 
   protected changeCounter = 1;
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
+  protected defaultAggregateFunction: AggregateFunction = "sum";
 
   static createFromResult(
     driver: BaseDriver,
@@ -192,6 +196,36 @@ export default class OptimizeTableState {
     }, 5);
 
     return true;
+  }
+
+  protected mergeSelectionRanges() {
+    // Sort ranges to simplify merging
+    this.selectionRanges.sort((a, b) => a.y1 - b.y1 || a.x1 - b.x1);
+
+    const merged: TableSelectionRange[] = [];
+    let isLastMoveMerged = false;
+
+    for (const range of this.selectionRanges) {
+      const last = merged[merged.length - 1];
+      if (
+        last &&
+        ((last.y1 === range.y1 &&
+          last.y2 === range.y2 &&
+          last.x2 + 1 === range.x1) ||
+          (last.x1 === range.x1 &&
+            last.x2 === range.x2 &&
+            last.y2 + 1 === range.y1))
+      ) {
+        last.x2 = Math.max(last.x2, range.x2);
+        last.y2 = Math.max(last.y2, range.y2);
+        isLastMoveMerged = true;
+      } else {
+        merged.push({ ...range });
+        isLastMoveMerged = false;
+      }
+    }
+    this.selectionRanges = merged;
+    if (isLastMoveMerged) this.mergeSelectionRanges();
   }
 
   // ------------------------------------------------
@@ -571,26 +605,28 @@ export default class OptimizeTableState {
 
   isFullSelectionRow(y: number) {
     for (const range of this.selectionRanges) {
-      for (let i = range.y1; i <= range.y2; i++) {
-        if (
-          i === y &&
-          range.x1 === 0 &&
-          range.x2 === this.getHeaderCount() - 1
-        ) {
-          return true;
-        }
-      }
+      if (
+        range.y1 <= y &&
+        range.y2 >= y &&
+        range.x1 === 0 &&
+        range.x2 === this.getHeaderCount() - 1
+      )
+        return true;
     }
+    return false;
   }
 
   isFullSelectionCol(x: number) {
     for (const range of this.selectionRanges) {
-      for (let i = range.x1; i <= range.x2; i++) {
-        if (i === x && range.y1 === 0 && range.y2 === this.getRowsCount() - 1) {
-          return true;
-        }
-      }
+      if (
+        range.x1 <= x &&
+        range.x2 >= x &&
+        range.y1 === 0 &&
+        range.y2 === this.getRowsCount() - 1
+      )
+        return true;
     }
+    return false;
   }
 
   selectRow(y: number) {
@@ -648,6 +684,7 @@ export default class OptimizeTableState {
 
     if (!this.findSelectionRange(newRange)) {
       this.selectionRanges.push(newRange);
+      this.mergeSelectionRanges();
       this.broadcastChange();
     }
   }
@@ -662,6 +699,7 @@ export default class OptimizeTableState {
 
     if (!this.findSelectionRange(newRange)) {
       this.selectionRanges.push(newRange);
+      this.mergeSelectionRanges();
       this.broadcastChange();
     }
   }
@@ -676,6 +714,7 @@ export default class OptimizeTableState {
 
     if (!this.findSelectionRange(newRange)) {
       this.selectionRanges.push(newRange);
+      this.mergeSelectionRanges();
       this.broadcastChange();
     }
   }
@@ -755,9 +794,17 @@ export default class OptimizeTableState {
     let min = undefined;
     let max = undefined;
     let count = 0;
+
+    const selectedCell = new Set<string>();
     for (const range of this.selectionRanges) {
       for (let x = range.x1; x <= range.x2; x++) {
         for (let y = range.y1; y <= range.y2; y++) {
+          const key = `${x}-${y}`;
+          if (selectedCell.has(key)) {
+            continue;
+          }
+          selectedCell.add(key);
+
           const value = this.getValue(y, x);
           const parsed = Number(value);
 
@@ -774,11 +821,18 @@ export default class OptimizeTableState {
       avg = sum / count;
     }
     return {
-      sum,
-      avg,
-      min,
-      max,
-      count,
+      sum: formatNumber(sum),
+      avg: formatNumber(avg),
+      min: formatNumber(min),
+      max: formatNumber(max),
+      count: formatNumber(count),
     };
+  }
+
+  setDefaultAggregateFunction(functionName: AggregateFunction) {
+    this.defaultAggregateFunction = functionName;
+  }
+  getDefaultAggregateFunction() {
+    return this.defaultAggregateFunction;
   }
 }
