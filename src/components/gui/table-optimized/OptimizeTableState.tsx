@@ -228,6 +228,50 @@ export default class OptimizeTableState {
     if (isLastMoveMerged) this.mergeSelectionRanges();
   }
 
+  protected splitSelectionRange(
+    selection: TableSelectionRange,
+    deselection: TableSelectionRange
+  ): TableSelectionRange[] {
+    const result: TableSelectionRange[] = [];
+
+    if (deselection.y1 > selection.y1) {
+      result.push({
+        x1: selection.x1,
+        y1: selection.y1,
+        x2: selection.x2,
+        y2: deselection.y1 - 1,
+      });
+    }
+
+    if (deselection.y2 < selection.y2) {
+      result.push({
+        x1: selection.x1,
+        y1: deselection.y2 + 1,
+        x2: selection.x2,
+        y2: selection.y2,
+      });
+    }
+
+    if (deselection.x1 > selection.x1) {
+      result.push({
+        x1: selection.x1,
+        y1: Math.max(selection.y1, deselection.y1),
+        x2: deselection.x1 - 1,
+        y2: Math.min(selection.y2, deselection.y2),
+      });
+    }
+
+    if (deselection.x2 < selection.x2) {
+      result.push({
+        x1: deselection.x2 + 1,
+        y1: Math.max(selection.y1, deselection.y1),
+        x2: selection.x2,
+        y2: Math.min(selection.y2, deselection.y2),
+      });
+    }
+    return result;
+  }
+
   // ------------------------------------------------
   // Handle headers and data
   // ------------------------------------------------
@@ -665,12 +709,12 @@ export default class OptimizeTableState {
   }
 
   findSelectionRange(range: TableSelectionRange) {
-    return this.selectionRanges.find(
+    return this.selectionRanges.findIndex(
       (r) =>
-        r.x1 === range.x1 &&
-        r.x2 === range.x2 &&
-        r.y1 === range.y1 &&
-        r.y2 === range.y2
+        r.x1 <= range.x1 &&
+        r.x2 >= range.x2 &&
+        r.y1 <= range.y1 &&
+        r.y2 >= range.y2
     );
   }
 
@@ -682,11 +726,20 @@ export default class OptimizeTableState {
       y2: Math.max(y1, y2),
     };
 
-    if (!this.findSelectionRange(newRange)) {
+    const selectedRangeIndex = this.findSelectionRange(newRange);
+    if (selectedRangeIndex < 0) {
       this.selectionRanges.push(newRange);
       this.mergeSelectionRanges();
-      this.broadcastChange();
+    } else {
+      const selectedRange = this.selectionRanges[selectedRangeIndex];
+      const splitedRanges = this.splitSelectionRange(selectedRange, newRange);
+      if (splitedRanges.length >= 0) {
+        this.selectionRanges.splice(selectedRangeIndex, 1);
+        this.selectionRanges = [...this.selectionRanges, ...splitedRanges];
+        this.mergeSelectionRanges();
+      }
     }
+    this.broadcastChange();
   }
 
   addSelectionRow(y: number) {
@@ -697,11 +750,7 @@ export default class OptimizeTableState {
       y2: y,
     };
 
-    if (!this.findSelectionRange(newRange)) {
-      this.selectionRanges.push(newRange);
-      this.mergeSelectionRanges();
-      this.broadcastChange();
-    }
+    this.addSelectionRange(newRange.y1, newRange.x1, newRange.y2, newRange.x2);
   }
 
   addSelectionCol(x: number) {
@@ -712,11 +761,7 @@ export default class OptimizeTableState {
       y2: this.getRowsCount() - 1,
     };
 
-    if (!this.findSelectionRange(newRange)) {
-      this.selectionRanges.push(newRange);
-      this.mergeSelectionRanges();
-      this.broadcastChange();
-    }
+    this.addSelectionRange(newRange.y1, newRange.x1, newRange.y2, newRange.x2);
   }
 
   selectRowRange(y1: number, y2: number) {
