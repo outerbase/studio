@@ -69,6 +69,12 @@ export default function OptimizeTableCell({
         const shiftKey = e.shiftKey;
         const focusedCell = state.getFocus();
 
+        if (e.button === 2) {
+          if (state.getCellStatus(rowIndex, colIndex).isSelected) {
+            return;
+          }
+        }
+
         if (shiftKey && focusedCell) {
           state.selectCellRange(
             focusedCell.y,
