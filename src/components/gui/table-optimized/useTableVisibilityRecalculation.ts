@@ -40,7 +40,8 @@ export default function useTableVisibilityRecalculation({
           headers.map((header) => headerSizes[header.index]) as number[],
           totalRowCount,
           rowHeight,
-          renderAhead
+          renderAhead,
+          state.gutterColumnWidth
         )
       );
     },

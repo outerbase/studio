@@ -18,8 +18,8 @@ import {
   DatabaseTableColumn,
   TableColumnDataType,
 } from "@/drivers/base-driver";
+import OptimizeTableCell from "./table-cell";
 import { cn } from "@/lib/utils";
-import tableResultCellRenderer from "@/components/gui/table-result/render-cell";
 
 export interface OptimizeTableHeaderProps {
   name: string;
@@ -48,6 +48,7 @@ export interface OptimizeTableCellRenderProps {
   x: number;
   state: OptimizeTableState;
   header: OptimizeTableHeaderWithIndexProps;
+  isFocus: boolean;
 }
 
 interface TableCellListCommonProps {
@@ -85,41 +86,6 @@ interface RenderCellListProps extends TableCellListCommonProps {
   colStart: number;
 }
 
-function handleTableCellMouseDown({
-  internalState,
-  y,
-  x,
-  rightClick,
-  shift,
-  ctrl,
-}: {
-  y: number;
-  x: number;
-  rightClick: boolean;
-  ctrl?: boolean;
-  shift?: boolean;
-  internalState: OptimizeTableState;
-}) {
-  if (rightClick) {
-    if (internalState.getSelectedRowIndex().includes(y)) return;
-  }
-
-  if (ctrl) {
-    internalState.selectRow(y, true);
-  } else if (shift) {
-    const focus = internalState.getFocus();
-    if (focus) {
-      internalState.selectRange(focus.y, y);
-    }
-  } else {
-    // Single select
-    internalState.clearSelect();
-    internalState.selectRow(y);
-  }
-
-  internalState.setFocus(y, x);
-}
-
 function renderCellList({
   hasSticky,
   customStyles,
@@ -136,25 +102,12 @@ function renderCellList({
 }: RenderCellListProps) {
   const headerSizes = internalState.getHeaderWidth();
 
-  const templateSizes = headers
-    .map((header) => headerSizes[header.index] + "px")
-    .join(" ");
+  const templateSizes =
+    `${internalState.gutterColumnWidth}px ` +
+    headers.map((header) => headerSizes[header.index] + "px").join(" ");
 
   const onHeaderSizeWithRemap = (idx: number, newWidth: number) => {
     onHeaderResize(headerSizes[headers[idx]?.index ?? 0] ?? 150, newWidth);
-  };
-
-  const handleCellClicked = (y: number, x: number) => {
-    return (e: React.MouseEvent) => {
-      handleTableCellMouseDown({
-        y,
-        x,
-        rightClick: e.button === 2,
-        internalState,
-        ctrl: e.ctrlKey || e.metaKey,
-        shift: e.shiftKey,
-      });
-    };
   };
 
   const windowArray = new Array(rowEnd - rowStart)
@@ -165,41 +118,53 @@ function renderCellList({
   const cells = windowArray.map((row, rowIndex) => {
     const absoluteRowIndex = rowIndex + rowStart;
 
-    let rowClass = undefined;
+    let textClass =
+      "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono";
+    let tdClass = "sticky left-0 bg-zinc-100 dark:bg-zinc-900";
 
-    if (internalState.isRemovedRow(absoluteRowIndex)) {
-      rowClass = "libsql-removed-row";
-    } else if (internalState.isNewRow(absoluteRowIndex)) {
-      rowClass = "libsql-new-row";
-    } else if (internalState.isRowSelected(absoluteRowIndex)) {
-      rowClass = "libsql-selected-row";
+    if (internalState.getSelectedRowIndex().includes(absoluteRowIndex)) {
+      if (internalState.isFullSelectionRow(absoluteRowIndex)) {
+        textClass = cn(
+          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono",
+          "bg-blue-600 border-red-900  text-white font-bold"
+        );
+        tdClass = "sticky left-0 bg-blue-600 dark:bg-blue-800";
+      } else {
+        textClass =
+          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono text-white font-bold";
+        tdClass = "sticky left-0 bg-blue-200 dark:bg-blue-400";
+      }
     }
 
     return (
-      <tr
-        key={absoluteRowIndex}
-        data-row={absoluteRowIndex}
-        className={rowClass}
-      >
+      <tr key={absoluteRowIndex} data-row={absoluteRowIndex}>
+        <td
+          className={tdClass}
+          style={{ zIndex: 15 }}
+          onMouseDown={(e) => {
+            const focusCell = internalState.getFocus();
+            if (e.shiftKey && focusCell) {
+              internalState.selectRowRange(focusCell.y, absoluteRowIndex);
+            } else if (e.ctrlKey && focusCell) {
+              internalState.addSelectionRow(absoluteRowIndex);
+              internalState.setFocus(absoluteRowIndex, 0);
+            } else {
+              internalState.selectRow(absoluteRowIndex);
+              internalState.setFocus(absoluteRowIndex, 0);
+            }
+          }}
+        >
+          <div className={textClass}>{absoluteRowIndex + 1}</div>
+        </td>
+
         {hasSticky && (
-          <td
-            style={{ zIndex: 15 }}
-            className={cn("sticky left-0", "bg-background")}
-            onMouseDown={handleCellClicked(
-              absoluteRowIndex,
-              headers[0]?.index ?? -1
-            )}
-          >
-            <div className={"libsql-table-cell"}>
-              {headers[0] &&
-                tableResultCellRenderer({
-                  y: absoluteRowIndex,
-                  x: headers[0].index,
-                  state: internalState,
-                  header: headers[0],
-                })}
-            </div>
-          </td>
+          <OptimizeTableCell
+            key={-1}
+            state={internalState}
+            colIndex={headers[0].index}
+            rowIndex={absoluteRowIndex}
+            header={headers[0]}
+          />
         )}
 
         <TableFakeRowPadding
@@ -212,22 +177,19 @@ function renderCellList({
           const header = headers[actualIndex];
 
           if (!header) return null;
+
+          // Ignore the sticky column.
+          // It is already rendered at the left-most side
           if (header.sticky) return null;
 
           return (
-            <td
+            <OptimizeTableCell
               key={actualIndex}
-              onMouseDown={handleCellClicked(absoluteRowIndex, header.index)}
-            >
-              <div className={"libsql-table-cell"}>
-                {tableResultCellRenderer({
-                  y: absoluteRowIndex,
-                  x: header.index,
-                  state: internalState,
-                  header,
-                })}
-              </div>
-            </td>
+              state={internalState}
+              colIndex={header.index}
+              rowIndex={absoluteRowIndex}
+              header={header}
+            />
           );
         })}
         <TableFakeRowPadding colStart={colEnd} colEnd={headers.length - 1} />
@@ -238,6 +200,7 @@ function renderCellList({
   return (
     <table style={{ ...customStyles, gridTemplateColumns: templateSizes }}>
       <TableHeaderList
+        state={internalState}
         renderHeader={renderHeader}
         sticky={hasSticky}
         headers={headers}

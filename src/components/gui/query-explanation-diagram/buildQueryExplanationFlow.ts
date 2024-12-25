@@ -1,6 +1,26 @@
 import { Edge, NodeProps, Node, MarkerType, Position } from "@xyflow/react";
 import Dagre from "@dagrejs/dagre";
 
+interface ExplanationMysqlTable {
+  id: string;
+  table_name: string;
+  cost_info: {
+    query_cost: number;
+    prefix_cost: number;
+  };
+  rows_produced_per_join: string;
+}
+
+interface ExplanationMysqlGroupOperation {
+  id: string;
+  cost_info: {
+    query_cost: number;
+    prefix_cost: number;
+  };
+  nested_loop: { table: ExplanationMysqlTable }[];
+  table: ExplanationMysqlTable;
+}
+
 export interface ExplanationMysql {
   query_block: {
     id: string;
@@ -8,25 +28,19 @@ export interface ExplanationMysql {
       query_cost: number;
       prefix_cost: number;
     };
-    table?: {
+    ordering_operation?: {
       id: string;
-      table_name: string;
       cost_info: {
         query_cost: number;
         prefix_cost: number;
       };
+      nested_loop: { table: ExplanationMysqlTable }[];
+      table: ExplanationMysqlTable;
+      grouping_operation?: ExplanationMysqlGroupOperation;
     };
-    nested_loop?: {
-      table: {
-        id: string;
-        table_name: string;
-        cost_info: {
-          query_cost: number;
-          prefix_cost: number;
-        };
-        rows_produced_per_join: string;
-      };
-    }[];
+    grouping_operation?: ExplanationMysqlGroupOperation;
+    table?: ExplanationMysqlTable;
+    nested_loop?: { table: ExplanationMysqlTable }[];
   };
 }
 
@@ -47,6 +61,8 @@ export interface ExplainNodeProps extends NodeProps {
     rows_produced_per_join: string;
     access_type: string;
     table_name: string;
+    using_filesort: boolean;
+    using_temporary_table: boolean;
   };
 }
 
@@ -111,10 +127,15 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
   // Keep all tables
   const nodesTables = new Set();
   const edgesTable = new Set();
+  let keyNestedloopAndTableShouldConnected = "query_block";
 
-  const table = item.query_block.table || null;
-  const nested_loop = item.query_block.nested_loop || [];
-  const nested_reverse = (nested_loop || []).reverse();
+  let table = item.query_block.table || null;
+  const ordering_operation = item.query_block.ordering_operation || null;
+  const group_operation =
+    item.query_block.grouping_operation ||
+    item.query_block.ordering_operation?.grouping_operation ||
+    null;
+  let nested_loop = item.query_block.nested_loop || [];
 
   if (item.query_block) {
     nodes.push({
@@ -125,22 +146,149 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
     });
   }
 
+  if (ordering_operation && group_operation) {
+    keyNestedloopAndTableShouldConnected = "group_operation";
+    nested_loop =
+      item.query_block.ordering_operation?.grouping_operation?.nested_loop ||
+      [];
+    table =
+      item.query_block.ordering_operation?.grouping_operation?.table || null;
+    nodes.push({
+      id: "ordering_operation",
+      data: { ...item.query_block.ordering_operation },
+      type: "ORDERING_OPERATION",
+      position,
+      measured: {
+        width: 100,
+      },
+    });
+    nodes.push({
+      id: "group_operation",
+      data: { ...item.query_block.ordering_operation?.grouping_operation },
+      type: "GROUP_OPERATION",
+      position,
+      measured: {
+        width: 100,
+      },
+    });
+    edges.push({
+      id: `query_block-ordering_operation`,
+      target: "query_block",
+      source: "ordering_operation",
+      targetHandle: "query_block",
+      sourceHandle: "ordering_operation",
+      type: "smoothstep",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+      },
+      style: {
+        strokeWidth: 2,
+      },
+      animated: true,
+    });
+    edges.push({
+      id: `ordering_operation-group_operation`,
+      target: "ordering_operation",
+      source: "group_operation",
+      targetHandle: "ordering_operation",
+      sourceHandle: "group_operation",
+      type: "smoothstep",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+      },
+      style: {
+        strokeWidth: 2,
+      },
+      animated: true,
+    });
+  }
+
+  if (ordering_operation && !group_operation) {
+    keyNestedloopAndTableShouldConnected = "ordering_operation";
+    nested_loop = item.query_block.ordering_operation?.nested_loop || [];
+    table = item.query_block.ordering_operation?.table || null;
+    nodes.push({
+      id: "ordering_operation",
+      data: { ...item.query_block.ordering_operation },
+      type: "ORDERING_OPERATION",
+      position,
+      measured: {
+        width: 100,
+      },
+    });
+    edges.push({
+      id: `query_block-ordering_operation`,
+      target: "query_block",
+      source: "ordering_operation",
+      targetHandle: "query_block",
+      sourceHandle: "ordering_operation",
+      type: "smoothstep",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+      },
+      style: {
+        strokeWidth: 2,
+      },
+      animated: true,
+    });
+  }
+
+  if (!ordering_operation && group_operation) {
+    keyNestedloopAndTableShouldConnected = "group_operation";
+    nested_loop = item.query_block.grouping_operation?.nested_loop || [];
+    table = item.query_block.grouping_operation?.table || null;
+    nodes.push({
+      id: "group_operation",
+      data: { ...item.query_block.grouping_operation },
+      type: "GROUP_OPERATION",
+      position,
+      measured: {
+        width: 100,
+      },
+    });
+    edges.push({
+      id: `query_block-group_operation`,
+      target: "query_block",
+      source: "group_operation",
+      targetHandle: "query_block",
+      sourceHandle: "group_operation",
+      type: "smoothstep",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+      },
+      style: {
+        strokeWidth: 2,
+      },
+      animated: true,
+    });
+  }
+
+  const nested_reverse = (nested_loop || []).reverse();
+
   if (table) {
     nodes.push({
       id: table.table_name,
-      data: table,
+      data: { ...table },
       type: "TABLE",
       position,
     });
 
     edges.push({
-      id: `query_block-${table.table_name}`,
-      source: "query_block",
-      target: table.table_name,
-      sourceHandle: "query_block",
-      targetHandle: table.table_name,
+      id: `${keyNestedloopAndTableShouldConnected}-${table.table_name}`,
+      target: keyNestedloopAndTableShouldConnected,
+      source: table.table_name,
+      targetHandle: keyNestedloopAndTableShouldConnected,
+      sourceHandle: "right",
       type: "smoothstep",
-      markerStart: {
+      markerEnd: {
         type: MarkerType.ArrowClosed,
         width: 14,
         height: 14,
@@ -151,7 +299,7 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       animated: true,
     });
 
-    return getLayoutedExplanationElements(nodes, edges, "RL");
+    return getLayoutedExplanationElements(nodes, edges, "LR");
   }
 
   if (!table && nested_reverse.length > 0) {
@@ -176,14 +324,18 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       edges.push({
         id:
           index === 0
-            ? "query_block-nested_loop_0"
+            ? `${keyNestedloopAndTableShouldConnected}-nested_loop_0`
             : `nested_loop_${index - 1}-nested_loop_${index}`,
-        source: index === 0 ? "query_block" : "nested_loop_" + (index - 1),
-        target: index === 0 ? "nested_loop_0" : "nested_loop_" + index,
-        sourceHandle: index === 0 ? "query_block" : "left",
-        targetHandle: index === 0 ? "nested_loop_0" : "nested_loop_" + index,
+        target:
+          index === 0
+            ? keyNestedloopAndTableShouldConnected
+            : "nested_loop_" + (index - 1),
+        source: index === 0 ? "nested_loop_0" : "nested_loop_" + index,
+        targetHandle:
+          index === 0 ? keyNestedloopAndTableShouldConnected : "left",
+        sourceHandle: index === 0 ? "nested_loop_0" : "nested_loop_" + index,
         type: "smoothstep",
-        markerStart: {
+        markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 14,
           height: 14,
@@ -202,7 +354,7 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       });
     }
 
-    const layout = getLayoutedExplanationElements(nodes, edges, "RL");
+    const layout = getLayoutedExplanationElements(nodes, edges, "LR");
 
     for (const [index, value] of nested_reverse.entries()) {
       const key = index === nested_reverse.length - 1 ? index - 1 : index;
@@ -222,12 +374,12 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       });
       edgesTable.add({
         id: `nested_loop_${key}-${value.table.table_name}`,
-        source: "nested_loop_" + key,
-        target: value.table.table_name,
-        sourceHandle: index === nested_reverse.length - 1 ? "left" : "bottom",
-        targetHandle: value.table.table_name,
+        target: "nested_loop_" + key,
+        source: value.table.table_name,
+        targetHandle: index === nested_reverse.length - 1 ? "left" : "bottom",
+        sourceHandle: value.table.table_name,
         type: "smoothstep",
-        markerStart: {
+        markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 14,
           height: 14,

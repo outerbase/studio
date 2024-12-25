@@ -9,19 +9,19 @@ export function NestedLoop(props: ExplainNodeProps) {
       <TooltipTrigger asChild>
         <div>
           <BaseHandle
-            type="target"
+            type="source"
             position={Position.Right}
             id={props.id}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
           />
           <BaseHandle
-            type="source"
+            type="target"
             position={Position.Left}
             id={'left'}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
           />
           <BaseHandle
-            type="source"
+            type="target"
             position={Position.Bottom}
             id={'bottom'}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"

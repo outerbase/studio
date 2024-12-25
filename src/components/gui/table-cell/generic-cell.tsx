@@ -12,27 +12,19 @@ import {
 import {
   DatabaseResultSet,
   DatabaseValue,
-  describeTableColumnType,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
   value: T;
   valueType?: TableColumnDataType;
   focus?: boolean;
-  isChanged?: boolean;
   onFocus?: () => void;
   onDoubleClick?: () => void;
   header: OptimizeTableHeaderWithIndexProps;
-  mismatchDetection?: boolean;
 }
 
 interface SneakpeakProps {
@@ -184,21 +176,12 @@ function BlobCellValue({
 
 export default function GenericCell({
   value,
-  valueType,
   onFocus,
-  isChanged,
-  focus,
   align,
   onDoubleClick,
   header,
-  mismatchDetection,
 }: TableCellProps) {
-  const className = cn(
-    "libsql-cell font-mono flex",
-    focus ? "libsql-focus" : "",
-    "pl-2 pr-2",
-    isChanged ? "libsql-change" : ""
-  );
+  const className = cn("libsql-cell font-mono flex", "pl-2 pr-2");
   const isAlignRight = align === "right";
 
   const textBaseStyle = cn(
@@ -249,7 +232,7 @@ export default function GenericCell({
         <span
           className={cn(
             "flex-1 text-ellipsis overflow-hidden whitespace-nowrap",
-            isChanged ? "text-black" : "text-green-600 dark:text-green-500"
+            "text-green-600 dark:text-green-500"
           )}
         >
           {value}
@@ -262,9 +245,7 @@ export default function GenericCell({
         <span
           className={cn(
             "flex-1 text-ellipsis overflow-hidden whitespace-nowrap",
-            isChanged
-              ? "text-black block text-right flex-grow"
-              : "text-blue-700 dark:text-blue-300 block text-right flex-grow"
+            "text-blue-700 dark:text-blue-300 block text-right flex-grow"
           )}
         >
           {value.toString()}
@@ -289,42 +270,16 @@ export default function GenericCell({
     }
 
     return <span>{value.toString()}</span>;
-  }, [value, textBaseStyle, isChanged, header]);
+  }, [value, textBaseStyle, header]);
 
   return (
-    <div className="relative">
-      {mismatchDetection &&
-        valueType &&
-        header.dataType &&
-        valueType !== header.dataType && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="w-0 h-0 border-transparent border-r-8 border-b-8 border-r-red-400 dark:border-r-red-600 absolute right-0 top-0"></div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <strong>Mismatched type:</strong>
-              <ul>
-                <li>
-                  <strong>- Expected by column:</strong>{" "}
-                  <code>{describeTableColumnType(header.dataType)}</code>
-                </li>
-                <li>
-                  <strong>- But stored as:</strong>{" "}
-                  <code>{describeTableColumnType(valueType)}</code>
-                </li>
-              </ul>
-            </TooltipContent>
-          </Tooltip>
-        )}
-
-      <div
-        className={className}
-        onMouseDown={onFocus}
-        onDoubleClick={onDoubleClick}
-      >
-        <div className="flex flex-grow overflow-hidden">{content}</div>
-        {fkContent}
-      </div>
+    <div
+      className={className}
+      onMouseDown={onFocus}
+      onDoubleClick={onDoubleClick}
+    >
+      <div className="flex flex-grow overflow-hidden">{content}</div>
+      {fkContent}
     </div>
   );
 }

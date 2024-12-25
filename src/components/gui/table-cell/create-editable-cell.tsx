@@ -82,7 +82,7 @@ function InputCellEditor({
             applyChange(value, false);
 
             state.setFocus(y, x);
-            state.scrollToFocusCell(x === 0 ? "left" : "right", "bottom");
+            state.scrollToCell(x === 0 ? "left" : "right", "bottom", focus);
             e.preventDefault();
             e.stopPropagation();
           }
@@ -91,8 +91,8 @@ function InputCellEditor({
       type="text"
       className={
         align === "right"
-          ? "font-mono bg-background w-full h-full outline-none pl-2 pr-2 border-0 text-right"
-          : "font-mono bg-background w-full h-full outline-none pl-2 pr-2 border-0"
+          ? "font-mono bg-inherit w-full h-full outline-none pl-2 pr-2 border-0 text-right"
+          : "font-mono bg-inherit w-full h-full outline-none pl-2 pr-2 border-0"
       }
       value={value ?? ""}
     />
@@ -107,7 +107,6 @@ export default function createEditableCell<T = unknown>({
   return function GenericEditableCell({
     value,
     valueType,
-    isChanged,
     focus,
     onChange,
     state,
@@ -148,13 +147,7 @@ export default function createEditableCell<T = unknown>({
       (editor === undefined || editor === "input")
     ) {
       return (
-        <div
-          className={cn(
-            "libsql-cell flex",
-            focus && "libsql-focus",
-            isChanged && "libsql-change"
-          )}
-        >
+        <div className={cn("libsql-cell flex")}>
           <InputCellEditor
             state={state}
             readOnly={state.getReadOnlyMode()}
@@ -174,9 +167,7 @@ export default function createEditableCell<T = unknown>({
         value={toValue(editValue)}
         valueType={valueType}
         focus={focus}
-        isChanged={isChanged}
         align={align}
-        mismatchDetection={state.mismatchDetection}
         onDoubleClick={() => {
           if (
             typeof editValue === "string" &&
