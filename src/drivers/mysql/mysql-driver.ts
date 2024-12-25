@@ -150,6 +150,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       supportRowId: false,
       supportInsertReturning: false,
       supportUpdateReturning: false,
+      supportCreateUpdateTrigger: true,
     };
   }
 

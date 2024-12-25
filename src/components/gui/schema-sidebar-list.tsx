@@ -171,8 +171,8 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             },
           }
           : undefined,
-        { separator: true },
-        {
+        databaseDriver.getFlags().supportCreateUpdateTrigger ? { separator: true } : undefined,
+        databaseDriver.getFlags().supportCreateUpdateTrigger ? {
           title: isTrigger ? "Edit Trigger" : "Create New Trigger",
           onClick: () => {
             openTab({
@@ -182,7 +182,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               tableName: item?.tableSchema?.tableName
             });
           }
-        },
+        } : undefined,
         databaseDriver.getFlags().supportCreateUpdateTable
           ? { separator: true }
           : undefined,

@@ -52,6 +52,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       optionalSchema: true,
       supportCreateUpdateTable: true,
       supportCreateUpdateDatabase: false,
+      supportCreateUpdateTrigger: true,
       dialect: "sqlite",
     };
   }

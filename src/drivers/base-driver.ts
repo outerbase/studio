@@ -245,6 +245,7 @@ export interface DriverFlags {
   supportUpdateReturning: boolean;
   supportRowId: boolean;
   supportCreateUpdateDatabase: boolean;
+  supportCreateUpdateTrigger: boolean;
 }
 
 export interface DatabaseTableColumnChange {
