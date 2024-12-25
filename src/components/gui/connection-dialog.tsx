@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import LogoLoading from "./logo-loading";
 import { useConfig } from "@/context/config-provider";
 import { useMemo } from "react";
+import ServerLoadingAnimation from "../icons/server-loading";
 
 export default function ConnectingDialog({
   message,
@@ -28,11 +28,9 @@ export default function ConnectingDialog({
   };
 
   let body = (
-    <div>
-      <p className="mt-4 flex gap-4">
-        Connecting to <strong>{name}</strong>
-      </p>
-    </div>
+    <p>
+      Connecting to <strong>{name}</strong>
+    </p>
   );
 
   if (message) {
@@ -58,8 +56,8 @@ export default function ConnectingDialog({
   }
 
   return (
-    <div className="p-8">
-      <LogoLoading />
+    <div className="w-screen h-screen flex items-center justify-center flex-col gap-4">
+      <ServerLoadingAnimation />
       {body}
     </div>
   );
