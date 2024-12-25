@@ -82,7 +82,7 @@ function InputCellEditor({
             applyChange(value, false);
 
             state.setFocus(y, x);
-            state.scrollToFocusCell(x === 0 ? "left" : "right", "bottom");
+            state.scrollToCell(x === 0 ? "left" : "right", "bottom", focus);
             e.preventDefault();
             e.stopPropagation();
           }

@@ -10,7 +10,7 @@ export default function ListButtonItem({
 }: Readonly<{
   selected?: boolean;
   text: string;
-  icon: Icon;
+  icon?: Icon;
   onClick: () => void;
 }>) {
   return (
@@ -25,7 +25,11 @@ export default function ListButtonItem({
         "cursor-pointer"
       )}
     >
-      <Icon className="w-4 h-4 mr-2" />
+      {Icon ? (
+        <Icon className="w-4 h-4 mr-2" />
+      ) : (
+        <div className="w-4 h-4 mr-2"></div>
+      )}
       {text}
     </button>
   );
