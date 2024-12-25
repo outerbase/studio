@@ -7,6 +7,7 @@ import type {
   DatabaseTableSchema,
   DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
+  DatabaseTriggerSchemaChange,
   DatabaseValue,
   DriverFlags,
   SelectFromTableOptions,
@@ -227,11 +228,28 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   }
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
-    return generateSqlSchemaChange(change);
+    const value: DatabaseTableSchemaChange & DatabaseTriggerSchemaChange = {
+      ...change,
+      operation: "INSERT",
+      statement: "",
+      tableName: change.schemaName || "",
+      when: "AFTER",
+      whenExpression: "",
+    };
+    return generateSqlSchemaChange(value);
   }
 
   createUpdateDatabaseSchema(): string[] {
     throw new Error("Not implemented");
+  }
+
+  createUpdateTriggerSchema(change: DatabaseTriggerSchemaChange): string[] {
+    const value: DatabaseTableSchemaChange & DatabaseTriggerSchemaChange = {
+      ...change,
+      columns: [],
+      constraints: [],
+    };
+    return generateSqlSchemaChange(value, "trigger");
   }
 
   override async findFirst(

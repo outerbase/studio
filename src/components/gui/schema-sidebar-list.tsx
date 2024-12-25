@@ -139,6 +139,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
+      const isTrigger = item?.type === "trigger";
 
       return [
         {
@@ -170,6 +171,18 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             },
           }
           : undefined,
+        { separator: true },
+        {
+          title: isTrigger ? "Edit Trigger" : "Create New Trigger",
+          onClick: () => {
+            openTab({
+              type: "trigger",
+              schemaName: item?.schemaName ?? currentSchemaName,
+              name: isTrigger ? item.name : 'create',
+              tableName: item?.tableSchema?.tableName
+            });
+          }
+        },
         databaseDriver.getFlags().supportCreateUpdateTable
           ? { separator: true }
           : undefined,
