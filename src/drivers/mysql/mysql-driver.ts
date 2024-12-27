@@ -10,7 +10,6 @@ import {
   ColumnTypeSelector,
   DatabaseTableColumnConstraint,
   DatabaseSchemaChange,
-  DatabaseTriggerSchemaChange,
   TriggerOperation,
   TriggerWhen,
 } from "../base-driver";
@@ -19,7 +18,6 @@ import { escapeSqlValue } from "../sqlite/sql-helper";
 import {
   generateMysqlDatabaseSchema,
   generateMySqlSchemaChange,
-  generateMysqlTriggerSchema,
 } from "./generate-schema";
 import {
   MYSQL_COLLATION_LIST,
@@ -389,13 +387,13 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
           foreignKey:
             constraint.CONSTRAINT_TYPE === "FOREIGN KEY"
               ? {
-                columns: columnList.map((c) => c.COLUMN_NAME),
-                foreignColumns: columnList.map(
-                  (c) => c.REFERENCED_COLUMN_NAME
-                ),
-                foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
-                foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
-              }
+                  columns: columnList.map((c) => c.COLUMN_NAME),
+                  foreignColumns: columnList.map(
+                    (c) => c.REFERENCED_COLUMN_NAME
+                  ),
+                  foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
+                  foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
+                }
               : undefined,
         };
       }
@@ -453,7 +451,11 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
   }
 
   createTrigger(change: DatabaseTriggerSchema): string {
-    return `CREATE TRIGGER ${this.escapeId(change.schemaName || "")}.${this.escapeId(change.name.new ?? "")} \n${change.when} ${change.operation} ON ${this.escapeId(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
+    return `CREATE TRIGGER ${this.escapeId(change.schemaName || "")}.${this.escapeId(change.name ?? "")} \n${change.when} ${change.operation} ON ${this.escapeId(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`;
+  }
+
+  dropTrigger(schemaName: string, name: string): string {
+    return `DROP TRIGGER IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {

@@ -5,52 +5,57 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
-import { useState } from "react";
+import { LucideAlertCircle, LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
+import { useCallback, useState } from "react";
 import CodePreview from "../code-preview";
 import { Button } from "@/components/ui/button";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import { DatabaseTriggerSchemaChange } from "@/drivers/base-driver";
+import TriggerTab from "../tabs/trigger-tab";
+import { useTabsContext } from "../windows-tab";
+import { useSchema } from "@/context/schema-provider";
+import { DatabaseTriggerSchema } from "@/drivers/base-driver";
 
 interface Props {
   onClose: () => void;
   previewScript: string[];
-  onSave: (trigger: TriggerEditorProps) => void;
-  trigger: DatabaseTriggerSchemaChange;
-  schemaName: string;
-  tableName?: string;
+  trigger: DatabaseTriggerSchema;
 }
 
 export function TriggerSaveDialog(props: Props) {
+  const { replaceCurrentTab } = useTabsContext();
+  const { refresh: refreshSchema } = useSchema();
   const { databaseDriver } = useDatabaseDriver();
   const [isExecuting, setIsExecuting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const onSave = () => {
+  const onSave = useCallback(() => {
     setIsExecuting(true);
-    const isCreated = !props.trigger.name.old;
-    databaseDriver;
     databaseDriver
       .transaction(
-        isCreated
-          ? props.previewScript
-          : [
-              `DROP TRIGGER IF EXISTS \`${props.schemaName}\`.\`${props.trigger.name.old}\``,
-              ...props.previewScript,
-            ]
+        props.previewScript
       )
       .then(() => {
-        props.onSave({
-          tableName: props.tableName,
-          schemaName: props.schemaName,
-          name: props.trigger.name.new ?? "",
+        refreshSchema();
+        replaceCurrentTab({
+          component: (
+            <TriggerTab
+              tableName={props.trigger.tableName}
+              schemaName={props.trigger.schemaName}
+              name={props.trigger.name ?? ""}
+            />
+          ),
+          key: "trigger-" + props.trigger.name || "",
+          identifier: "trigger-" + props.trigger.name || "",
+          title: props.trigger.name || "",
+          icon: LucideTableProperties,
         });
+        props.onClose();
       })
       .catch((err) => setErrorMessage((err as Error).message))
       .finally(() => {
         setIsExecuting(false);
       });
-  };
+  }, [databaseDriver, props, refreshSchema, replaceCurrentTab])
 
   return (
     <AlertDialog open onOpenChange={props.onClose}>

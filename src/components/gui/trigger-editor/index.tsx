@@ -16,7 +16,7 @@ import {
 import SqlEditor from "../sql-editor";
 import { produce } from "immer";
 
-interface TriggerEditorProps {
+export interface TriggerEditorProps {
   onChange: (value: DatabaseTriggerSchema) => void;
   value: DatabaseTriggerSchema;
 }

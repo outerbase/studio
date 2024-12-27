@@ -1,8 +1,5 @@
-import { useSchema } from "@/context/schema-provider";
 import TriggerEditor from "../trigger-editor";
-import { useTabsContext } from "../windows-tab";
-import { LucideTableProperties } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatabaseTriggerSchema } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import OpacityLoading from "../loading-opacity";
@@ -10,6 +7,7 @@ import { produce } from "immer";
 import { TriggerController } from "../trigger-editor/trigger-controller";
 
 import { isEqual } from "lodash";
+import { TriggerSaveDialog } from "../trigger-editor/trigger-save-dialog";
 
 export interface TriggerTabProps {
   name: string;
@@ -33,8 +31,7 @@ export default function TriggerTab({
   tableName,
 }: TriggerTabProps) {
   const { databaseDriver } = useDatabaseDriver();
-  const { refresh: refreshSchema } = useSchema();
-  const { replaceCurrentTab } = useTabsContext();
+  const [isSaving, setIsSaving] = useState(false);
 
   // If name is specified, it means the trigger is already exist
   const [loading, setLoading] = useState(!!name);
@@ -52,9 +49,18 @@ export default function TriggerTab({
 
   const hasChanged = !isEqual(initialValue, value);
 
+  const previewScript = useMemo(() => {
+    const drop = databaseDriver.dropTrigger(value.schemaName, name);
+    const create = databaseDriver.createTrigger(value);
+    return name !== 'create' ? [drop, create] : [create];
+  }, [value, databaseDriver, name]);
+
   // Loading the trigger
   useEffect(() => {
     if (name && schemaName) {
+      if (name === 'create') {
+        return setLoading(false)
+      }
       databaseDriver
         .trigger(schemaName, name)
         .then((triggerValue) => {
@@ -65,22 +71,9 @@ export default function TriggerTab({
     }
   }, [name, schemaName, databaseDriver]);
 
-  const onSave = () => {
-    refreshSchema();
-    replaceCurrentTab({
-      component: (
-        <TriggerTab
-          tableName={value.tableName}
-          schemaName={value.schemaName}
-          name={value.name ?? ""}
-        />
-      ),
-      key: "trigger-" + value.name || "",
-      identifier: "trigger-" + value.name || "",
-      title: value.name || "",
-      icon: LucideTableProperties,
-    });
-  };
+  const toggleSaving = useCallback(() => {
+    setIsSaving(!isSaving);
+  }, [isSaving]);
 
   if (loading) {
     return <OpacityLoading />;
@@ -88,13 +81,24 @@ export default function TriggerTab({
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
+      {
+        isSaving &&
+        <TriggerSaveDialog
+          onClose={toggleSaving}
+          previewScript={previewScript}
+          trigger={value}
+        />
+      }
       <TriggerController
         onSave={() => {
           // @adam do something here
+          toggleSaving();
         }}
         onDiscard={() => {
           setValue(initialValue);
         }}
+        disabled={!hasChanged}
+        previewScript={previewScript.join(';\n')}
       />
 
       <TriggerEditor value={value} onChange={setValue} />

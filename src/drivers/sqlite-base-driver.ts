@@ -7,7 +7,6 @@ import type {
   DatabaseTableSchema,
   DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
-  DatabaseTriggerSchemaChange,
   DatabaseValue,
   DriverFlags,
   SelectFromTableOptions,
@@ -233,25 +232,19 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   }
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
-    const value: DatabaseTableSchemaChange & DatabaseTriggerSchemaChange = {
-      ...change,
-      operation: "INSERT",
-      statement: "",
-      tableName: change.schemaName || "",
-      when: "AFTER",
-      whenExpression: "",
-    };
-    return generateSqlSchemaChange(value);
+    return generateSqlSchemaChange(change);
   }
 
   createUpdateDatabaseSchema(): string[] {
     throw new Error("Not implemented");
   }
 
-  createUpdateTriggerSchema(change: DatabaseTriggerSchemaChange): string[] {
-    return [
-      `CREATE TRIGGER ${escapeIdentity(change.name.new ?? "")} \n${change.when} ${change.operation} ON ${escapeIdentity(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
-    ];
+  createTrigger(change: DatabaseTriggerSchema): string {
+    return `CREATE TRIGGER ${escapeIdentity(change.name ?? "")} \n${change.when} ${change.operation} ON ${escapeIdentity(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`;
+  }
+
+  dropTrigger(schemaName: string, name: string): string {
+    return `DROP TRIGGER IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   override async findFirst(
@@ -310,12 +303,13 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const orderPart =
       options.orderBy && options.orderBy.length > 0
         ? options.orderBy
-          .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-          .join(", ")
+            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+            .join(", ")
         : "";
 
-    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${whereRaw ? ` WHERE ${whereRaw} ` : ""
-      } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
+      whereRaw ? ` WHERE ${whereRaw} ` : ""
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
     return {
       data: await this.query(sql),
