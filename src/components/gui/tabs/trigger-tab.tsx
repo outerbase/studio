@@ -9,6 +9,7 @@ export default function TriggerTab(props: TriggerEditorProps) {
 
   const onSave = (trigger: TriggerEditorProps) => {
     refreshSchema();
+    console.log(trigger)
     replaceCurrentTab({
       component: (
         <TriggerTab

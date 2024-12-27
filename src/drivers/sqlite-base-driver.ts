@@ -13,7 +13,11 @@ import type {
   SelectFromTableOptions,
   TableColumnDataType,
 } from "./base-driver";
-import { convertSqliteType, escapeSqlValue } from "@/drivers/sqlite/sql-helper";
+import {
+  convertSqliteType,
+  escapeIdentity,
+  escapeSqlValue,
+} from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
@@ -245,12 +249,9 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   }
 
   createUpdateTriggerSchema(change: DatabaseTriggerSchemaChange): string[] {
-    const value: DatabaseTableSchemaChange & DatabaseTriggerSchemaChange = {
-      ...change,
-      columns: [],
-      constraints: [],
-    };
-    return generateSqlSchemaChange(value, "trigger");
+    return [
+      `CREATE TRIGGER ${escapeIdentity(change.name.new ?? "")} \n${change.when} ${change.operation} ON ${escapeIdentity(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
+    ];
   }
 
   override async findFirst(

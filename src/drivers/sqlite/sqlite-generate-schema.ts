@@ -3,7 +3,6 @@ import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
   DatabaseTableSchemaChange,
-  DatabaseTriggerSchemaChange,
 } from "@/drivers/base-driver";
 import { omit, isEqual } from "lodash";
 
@@ -117,18 +116,11 @@ function generateConstraintScript(con: DatabaseTableColumnConstraint) {
 }
 
 export default function generateSqlSchemaChange(
-  change: DatabaseTableSchemaChange & DatabaseTriggerSchemaChange,
-  type: "table" | "trigger" = "table"
+  change: DatabaseTableSchemaChange
 ): string[] {
   const isCreateScript = !change.name.old;
 
   const lines = [];
-
-  if (type === "trigger") {
-    return [
-      `CREATE TRIGGER ${escapeIdentity(change.name.new ?? "")} \n${change.when} ${change.operation} ON ${escapeIdentity(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
-    ];
-  }
 
   for (const col of change.columns) {
     if (col.new === null) lines.push(`DROP COLUMN ${col.old?.name}`);

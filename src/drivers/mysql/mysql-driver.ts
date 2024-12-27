@@ -420,7 +420,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     name: string
   ): Promise<DatabaseTriggerSchema> {
     const result = await this.query(
-      `SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA="${schemaName}" AND TRIGGER_NAME="${name}"`
+      `SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA=${this.escapeValue(schemaName)} AND TRIGGER_NAME=${this.escapeValue(name)}`
     );
 
     const triggerRow = result.rows[0] as unknown as
