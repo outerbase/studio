@@ -25,7 +25,7 @@ export default function ResultStats({ stats }: { stats: DatabaseResultStat }) {
 
       {!!stats.rowsAffected && (
         <div className="px-2 border-r">
-          <span className="font-semibold">Affected Rows</span>:{" "}
+          <span className="font-semibold text-xs">Affected Rows</span>:{" "}
           {stats.rowsAffected}
         </div>
       )}

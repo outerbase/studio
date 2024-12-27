@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
+import { cn } from "@/lib/utils";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -36,34 +37,64 @@ interface ResultTableProps {
 function Header({
   children,
   header,
-}: PropsWithChildren<{ header: OptimizeTableHeaderWithIndexProps }>) {
+  internalState,
+}: PropsWithChildren<{
+  header: OptimizeTableHeaderWithIndexProps;
+  internalState: OptimizeTableState;
+}>) {
   const [open, setOpen] = useState(false);
+  const colIndex = header.index;
+
+  let textClass = "grow line-clamp-1 font-mono font-bold";
+  let thClass = "flex grow items-center px-2 overflow-hidden";
+
+  if (internalState.getSelectedColIndex().includes(colIndex)) {
+    if (internalState.isFullSelectionCol(colIndex)) {
+      textClass = cn(
+        "grow line-clamp-1 font-mono font-bold",
+        "bg-blue-600 border-red-900  text-white font-bold"
+      );
+      thClass =
+        "flex grow items-center px-2 overflow-hidden bg-blue-600 dark:bg-blue-800";
+    } else {
+      textClass = "grow line-clamp-1 font-mono font-bold text-white font-bold";
+      thClass =
+        "flex grow items-center px-2 overflow-hidden bg-blue-200 dark:bg-blue-400";
+    }
+  }
 
   return (
-    <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
-      <DropdownMenuTrigger asChild>
-        <div
-          className="flex grow items-center px-2 overflow-hidden"
-          onContextMenu={() => {
-            setOpen(true);
-          }}
-        >
-          {header.icon ? <div className="mr-2">{header.icon}</div> : null}
-          <div className="grow line-clamp-1 font-mono font-bold">
-            {header.displayName}
-          </div>
+    <div
+      className={thClass}
+      onMouseDown={(e) => {
+        const focusCell = internalState.getFocus();
+        if (e.shiftKey && focusCell) {
+          internalState.selectColRange(focusCell.x, colIndex);
+        } else if (e.ctrlKey && focusCell) {
+          internalState.addSelectionCol(colIndex);
+          internalState.setFocus(0, colIndex);
+        } else {
+          internalState.selectColumn(colIndex);
+          internalState.setFocus(0, colIndex);
+        }
+      }}
+    >
+      {header.icon ? <div className="mr-2">{header.icon}</div> : null}
+      <div className={textClass}>{header.displayName}</div>
+      <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
+        <DropdownMenuTrigger asChild>
           <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer flex-shrink-0" />
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className={"w-[300px]"}
-        side="bottom"
-        align="start"
-        sideOffset={0}
-      >
-        {children}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className={"w-[300px]"}
+          side="bottom"
+          align="start"
+          sideOffset={0}
+        >
+          {children}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
@@ -108,7 +139,7 @@ export default function ResultTable({
       ) : undefined;
 
       return (
-        <Header header={header}>
+        <Header header={header} internalState={data}>
           {foreignKeyInfo}
           {generatedInfo}
           <DropdownMenuItem
@@ -147,7 +178,7 @@ export default function ResultTable({
         </Header>
       );
     },
-    [stickyHeaderIndex, tableName, onSortColumnChange]
+    [data, tableName, stickyHeaderIndex, onSortColumnChange]
   );
 
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
@@ -182,6 +213,56 @@ export default function ResultTable({
     pasteCallback,
   });
 
+  const onShiftKeyDownCallBack = useCallback(
+    (state: OptimizeTableState, e: React.KeyboardEvent) => {
+      const focus = state.getFocus();
+      if (e.shiftKey && focus) {
+        let lastMove = null;
+        if (state.getLastMove()) {
+          lastMove = state.getLastMove();
+        } else {
+          const selectedRange = state.getSelectionRange(focus.y, focus.x);
+          if (selectedRange)
+            lastMove = { x: selectedRange.x2, y: selectedRange.y2 };
+        }
+
+        if (lastMove) {
+          const rows = state.getRowsCount();
+          const cols = state.getHeaderCount();
+          let newRow = lastMove.y;
+          let newCol = lastMove.x;
+          let horizontal: "right" | "left" = "left";
+          let vertical: "top" | "bottom" = "bottom";
+          if (e.key === "ArrowUp") {
+            newRow = Math.max(lastMove.y - 1, 0);
+            horizontal = "left";
+            vertical = "top";
+          }
+          if (e.key === "ArrowDown") {
+            horizontal = "left";
+            vertical = "bottom";
+            newRow = Math.min(lastMove.y + 1, rows - 1);
+          }
+          if (e.key === "ArrowLeft") {
+            horizontal = "left";
+            vertical = "top";
+            newCol = Math.max(lastMove.x - 1, 0);
+          }
+          if (e.key === "ArrowRight") {
+            horizontal = "right";
+            vertical = "top";
+            newCol = Math.min(lastMove.x + 1, cols - 1);
+          }
+
+          state.selectCellRange(focus.y, focus.x, newRow, newCol);
+          state.setLastMove(newRow, newCol);
+          state.scrollToCell(horizontal, vertical, { x: newCol, y: newRow });
+        }
+      }
+    },
+    []
+  );
+
   const onKeyDown = useCallback(
     (state: OptimizeTableState, e: React.KeyboardEvent) => {
       if (state.isInEditMode()) return;
@@ -193,28 +274,47 @@ export default function ResultTable({
       ) {
         pasteCallback(state);
       } else if (e.key === "ArrowRight") {
-        const focus = state.getFocus();
-        if (focus && focus.x + 1 < state.getHeaderCount()) {
-          state.setFocus(focus.y, focus.x + 1);
-          state.scrollToFocusCell("right", "top");
+        if (e.shiftKey) {
+          onShiftKeyDownCallBack(state, e);
+        } else {
+          const focus = state.getFocus();
+          if (focus && focus.x + 1 < state.getHeaderCount()) {
+            state.setFocus(focus.y, focus.x + 1);
+            state.scrollToCell("right", "top", { y: focus.y, x: focus.x + 1 });
+          }
         }
       } else if (e.key === "ArrowLeft") {
-        const focus = state.getFocus();
-        if (focus && focus.x - 1 >= 0) {
-          state.setFocus(focus.y, focus.x - 1);
-          state.scrollToFocusCell("left", "top");
+        if (e.shiftKey) {
+          onShiftKeyDownCallBack(state, e);
+        } else {
+          const focus = state.getFocus();
+          if (focus && focus.x - 1 >= 0) {
+            state.setFocus(focus.y, focus.x - 1);
+            state.scrollToCell("left", "top", { y: focus.y, x: focus.x - 1 });
+          }
         }
       } else if (e.key === "ArrowUp") {
-        const focus = state.getFocus();
-        if (focus && focus.y - 1 >= 0) {
-          state.setFocus(focus.y - 1, focus.x);
-          state.scrollToFocusCell("left", "top");
+        if (e.shiftKey) {
+          onShiftKeyDownCallBack(state, e);
+        } else {
+          const focus = state.getFocus();
+          if (focus && focus.y - 1 >= 0) {
+            state.setFocus(focus.y - 1, focus.x);
+            state.scrollToCell("left", "top", { y: focus.y - 1, x: focus.x });
+          }
         }
       } else if (e.key === "ArrowDown") {
-        const focus = state.getFocus();
-        if (focus && focus.y + 1 < state.getRowsCount()) {
-          state.setFocus(focus.y + 1, focus.x);
-          state.scrollToFocusCell("left", "bottom");
+        if (e.shiftKey) {
+          onShiftKeyDownCallBack(state, e);
+        } else {
+          const focus = state.getFocus();
+          if (focus && focus.y + 1 < state.getRowsCount()) {
+            state.setFocus(focus.y + 1, focus.x);
+            state.scrollToCell("left", "bottom", {
+              y: focus.y + 1,
+              x: focus.x,
+            });
+          }
         }
       } else if (e.key === "Tab") {
         const focus = state.getFocus();
@@ -225,7 +325,10 @@ export default function ResultTable({
           const y = Math.floor(n / colCount);
           if (y >= state.getRowsCount()) return;
           state.setFocus(y, x);
-          state.scrollToFocusCell(x === 0 ? "left" : "right", "bottom");
+          state.scrollToCell(x === 0 ? "left" : "right", "bottom", {
+            y: y,
+            x: x,
+          });
         }
       } else if (e.key === "Enter") {
         state.enterEditMode();
@@ -233,7 +336,7 @@ export default function ResultTable({
 
       e.preventDefault();
     },
-    [copyCallback, pasteCallback]
+    [copyCallback, onShiftKeyDownCallBack, pasteCallback]
   );
 
   return (

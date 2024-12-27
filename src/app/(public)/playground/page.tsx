@@ -1,3 +1,4 @@
+import { SQLiteIcon } from "@/components/icons/outerbase-icon";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import WebsiteLayout from "@/components/website-layout";
@@ -5,6 +6,7 @@ import { get_database } from "@/db";
 import { dbDataset } from "@/db/schema-dataset";
 import { Metadata } from "next";
 import Link from "next/link";
+import MySQLPlaygroundButton from "./mysql-playground-button";
 
 export const metadata: Metadata = {
   title: "SQLite Online Editor",
@@ -32,9 +34,32 @@ export default async function PlaygroundPage() {
           a selection of sample datasets.
         </p>
 
-        <Link passHref href="/playground/client" className={buttonVariants()}>
-          Open Database Viewer
-        </Link>
+        <div className="flex gap-2 mt-8">
+          <Link
+            passHref
+            href="/playground/client"
+            className={
+              "bg-primary text-primary-foreground p-3 px-4 rounded-lg text-sm gap-2 flex flex-col hover:bg-gray-300 w-[200px]"
+            }
+            prefetch={false}
+          >
+            <div className="flex gap-2">
+              <SQLiteIcon className="w-10 h-10" />
+              <div className="flex flex-col justify-center">
+                <div className="font-bold text-md">SQLite</div>
+                <div className="text-xs">Playground</div>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              Launch in-memory SQLite
+              <br />
+              inside the browser
+            </p>
+          </Link>
+
+          <MySQLPlaygroundButton />
+        </div>
       </div>
 
       <Separator />
