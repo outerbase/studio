@@ -6,7 +6,7 @@ import {
   TriggerOperation,
 } from "@/drivers/base-driver";
 
-export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
+export function parseCreateTriggerScript(schemaName: string, sql: string): DatabaseTriggerSchema {
   const tree = sqliteDialect.language.parser.parse(sql);
   const ptr = tree.cursor();
   ptr.firstChild();
@@ -96,6 +96,7 @@ export function parseCreateTriggerScript(sql: string): DatabaseTriggerSchema {
     operation,
     when,
     tableName,
+    schemaName,
     columnNames,
     whenExpression,
     statement,

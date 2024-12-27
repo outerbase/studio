@@ -1,66 +1,57 @@
 import { useDatabaseDriver } from "@/context/driver-provider";
-import { DatabaseTriggerSchemaChange } from "@/drivers/base-driver";
-import { LucideAlertCircle } from "lucide-react";
-import { useState } from "react";
+import {
+  DatabaseTriggerSchema,
+  TriggerOperation,
+  TriggerWhen,
+} from "@/drivers/base-driver";
 import TableCombobox from "../table-combobox/TableCombobox";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import SqlEditor from "../sql-editor";
-import { TriggerController } from "./trigger-controller";
-import { TriggerSaveDialog } from "./trigger-save-dialog";
-import { useTriggerState } from "./trigger-state";
+import { produce } from "immer";
 
-export interface TriggerEditorProps {
-  name: string;
-  tableName?: string;
-  schemaName: string;
+interface TriggerEditorProps {
+  onChange: (value: DatabaseTriggerSchema) => void;
+  value: DatabaseTriggerSchema;
 }
 
-interface Props extends TriggerEditorProps {
-  onSave: (trigger: TriggerEditorProps) => void;
-}
-
-export default function TriggerEditor(props: Props) {
-  const { name, tableName, schemaName } = props;
+export default function TriggerEditor({ value, onChange }: TriggerEditorProps) {
   const { databaseDriver } = useDatabaseDriver();
-  const { trigger, setTriggerField, error, onDiscard, previewScript } = useTriggerState(schemaName, name, tableName ?? '');
-  const [isExecuting, setIsExecuting] = useState(false);
 
   return (
-    <div className="flex flex-col overflow-hidden w-full h-full">
-      {
-        isExecuting && (
-          <TriggerSaveDialog
-            onSave={(value) => {
-              props.onSave(value);
-              setIsExecuting(false);
-            }}
-            onClose={() => setIsExecuting(false)}
-            previewScript={previewScript}
-            schemaName={schemaName}
-            trigger={trigger as DatabaseTriggerSchemaChange}
-            tableName={tableName}
-          />
-        )
-      }
-      <TriggerController
-        onSave={() => setIsExecuting(true)}
-        onDiscard={onDiscard}
-        previewScript={previewScript.join('\n')}
-        disabled={!trigger.name?.new || !schemaName || !trigger.isChange}
-        isExecuting={isExecuting}
-      />
+    <>
       <div className="p-4 flex flex-row gap-2">
         <div className="w-full">
           <div className="text-xs mb-2">Trigger Name</div>
-          <Input value={trigger?.name.new ?? trigger?.name.old ?? ""} onChange={e => setTriggerField('name', { ...trigger.name, new: e.currentTarget.value })} />
+          <Input
+            value={value.name}
+            onChange={(e) =>
+              onChange(
+                produce(value, (draft) => {
+                  draft.name = e.currentTarget.value;
+                })
+              )
+            }
+          />
         </div>
         <div className="w-[200px]">
           <div className="text-xs mb-2">On Table</div>
           <TableCombobox
-            schemaName={schemaName}
-            value={trigger?.tableName}
-            onChange={value => setTriggerField('tableName', value)}
+            schemaName={value.schemaName}
+            value={value.tableName}
+            onChange={(newTableName) => {
+              onChange(
+                produce(value, (draft) => {
+                  draft.tableName = newTableName;
+                })
+              );
+            }}
           />
         </div>
       </div>
@@ -68,7 +59,16 @@ export default function TriggerEditor(props: Props) {
         <div className="text-xs">Event</div>
         <div className="flex gap-2">
           <div className="w-[200px]">
-            <Select value={trigger?.when ?? "BEFORE"} onValueChange={value => setTriggerField('when', value)}>
+            <Select
+              value={value?.when ?? "BEFORE"}
+              onValueChange={(e) =>
+                onChange(
+                  produce(value, (draft) => {
+                    draft.when = e as TriggerWhen;
+                  })
+                )
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="When" />
               </SelectTrigger>
@@ -80,7 +80,16 @@ export default function TriggerEditor(props: Props) {
             </Select>
           </div>
           <div className="w-[200px]">
-            <Select value={trigger?.operation} onValueChange={value => setTriggerField('operation', value)}>
+            <Select
+              value={value?.operation}
+              onValueChange={(newOperation: TriggerOperation) => {
+                onChange(
+                  produce(value, (draft) => {
+                    draft.operation = newOperation;
+                  })
+                );
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Operation" />
               </SelectTrigger>
@@ -93,22 +102,27 @@ export default function TriggerEditor(props: Props) {
           </div>
         </div>
       </div>
-      {error && (
-        <div className="text-sm text-red-500 font-mono flex gap-4 justify-start items-end">
-          <LucideAlertCircle />
-          <p>{error}</p>
-        </div>
-      )}
+
       <div className="grow overflow-hidden">
         <div className="h-full">
-          <div className="text-xs my-2 mx-4">Trigger statement: (eg: &quot;SET NEW.columnA = TRIM(OLD.columnA)&quot;)</div>
+          <div className="text-xs my-2 mx-4">
+            Trigger statement: (eg: &quot;SET NEW.columnA =
+            TRIM(OLD.columnA)&quot;)
+          </div>
+
           <SqlEditor
-            value={trigger?.statement ?? ""}
+            value={value?.statement ?? ""}
             dialect={databaseDriver.getFlags().dialect}
-            onChange={value => setTriggerField('statement', value)}
+            onChange={(newStatement) =>
+              onChange(
+                produce(value, (draft) => {
+                  draft.statement = newStatement;
+                })
+              )
+            }
           />
         </div>
       </div>
-    </div >
-  )
+    </>
+  );
 }

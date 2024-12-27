@@ -389,13 +389,13 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
           foreignKey:
             constraint.CONSTRAINT_TYPE === "FOREIGN KEY"
               ? {
-                  columns: columnList.map((c) => c.COLUMN_NAME),
-                  foreignColumns: columnList.map(
-                    (c) => c.REFERENCED_COLUMN_NAME
-                  ),
-                  foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
-                  foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
-                }
+                columns: columnList.map((c) => c.COLUMN_NAME),
+                foreignColumns: columnList.map(
+                  (c) => c.REFERENCED_COLUMN_NAME
+                ),
+                foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
+                foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
+              }
               : undefined,
         };
       }
@@ -435,6 +435,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     return {
       name: triggerRow.TRIGGER_NAME,
       tableName: triggerRow.EVENT_OBJECT_TABLE,
+      schemaName: triggerRow.TRIGGER_SCHEMA,
       operation: triggerRow.EVENT_MANIPULATION,
       statement,
       when: triggerRow.ACTION_TIMING,
@@ -451,8 +452,8 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     return generateMysqlDatabaseSchema(this, change);
   }
 
-  createUpdateTriggerSchema(change: DatabaseTriggerSchemaChange): string[] {
-    return generateMysqlTriggerSchema(this, change);
+  createTrigger(change: DatabaseTriggerSchema): string {
+    return `CREATE TRIGGER ${this.escapeId(change.schemaName || "")}.${this.escapeId(change.name.new ?? "")} \n${change.when} ${change.operation} ON ${this.escapeId(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {

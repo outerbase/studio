@@ -184,7 +184,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const triggerRow = result.rows[0] as { sql: string } | undefined;
     if (!triggerRow) throw new Error("Trigger does not exist");
 
-    return parseCreateTriggerScript(triggerRow.sql);
+    return parseCreateTriggerScript(schemaName, triggerRow.sql);
   }
 
   close(): void {
@@ -310,13 +310,12 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const orderPart =
       options.orderBy && options.orderBy.length > 0
         ? options.orderBy
-            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-            .join(", ")
+          .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+          .join(", ")
         : "";
 
-    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
-      whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${whereRaw ? ` WHERE ${whereRaw} ` : ""
+      } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
     return {
       data: await this.query(sql),

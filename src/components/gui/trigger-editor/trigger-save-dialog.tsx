@@ -1,10 +1,15 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
 import { useState } from "react";
 import CodePreview from "../code-preview";
 import { Button } from "@/components/ui/button";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import { TriggerEditorProps } from ".";
 import { DatabaseTriggerSchemaChange } from "@/drivers/base-driver";
 
 interface Props {
@@ -23,21 +28,29 @@ export function TriggerSaveDialog(props: Props) {
 
   const onSave = () => {
     setIsExecuting(true);
-    const isCreated = !props.trigger.name.old
+    const isCreated = !props.trigger.name.old;
+    databaseDriver;
     databaseDriver
-    databaseDriver.transaction(
-      isCreated ? props.previewScript : [`DROP TRIGGER IF EXISTS \`${props.schemaName}\`.\`${props.trigger.name.old}\``, ...props.previewScript],
-    ).then(() => {
-      props.onSave({
-        tableName: props.tableName,
-        schemaName: props.schemaName,
-        name: props.trigger.name.new ?? ""
+      .transaction(
+        isCreated
+          ? props.previewScript
+          : [
+              `DROP TRIGGER IF EXISTS \`${props.schemaName}\`.\`${props.trigger.name.old}\``,
+              ...props.previewScript,
+            ]
+      )
+      .then(() => {
+        props.onSave({
+          tableName: props.tableName,
+          schemaName: props.schemaName,
+          name: props.trigger.name.new ?? "",
+        });
       })
-    }).catch((err) => setErrorMessage((err as Error).message))
+      .catch((err) => setErrorMessage((err as Error).message))
       .finally(() => {
         setIsExecuting(false);
       });
-  }
+  };
 
   return (
     <AlertDialog open onOpenChange={props.onClose}>
@@ -66,5 +79,5 @@ export function TriggerSaveDialog(props: Props) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

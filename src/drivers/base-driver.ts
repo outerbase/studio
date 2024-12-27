@@ -171,6 +171,7 @@ export interface DatabaseTriggerSchema {
   name: string;
   operation: TriggerOperation;
   when: TriggerWhen;
+  schemaName: string;
   tableName: string;
   columnNames?: string[];
   whenExpression: string;
@@ -280,19 +281,6 @@ export interface DatabaseSchemaChange {
   collate?: string;
 }
 
-export interface DatabaseTriggerSchemaChange {
-  name: {
-    old?: string;
-    new?: string;
-  };
-  operation: TriggerOperation;
-  when: TriggerWhen;
-  tableName: string;
-  whenExpression: string;
-  statement: string;
-  schemaName?: string;
-}
-
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;
@@ -352,7 +340,7 @@ export abstract class BaseDriver {
 
   abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
   abstract createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[];
-  abstract createUpdateTriggerSchema(
-    change: DatabaseTriggerSchemaChange
-  ): string[];
+
+  abstract createTrigger(trigger: DatabaseTriggerSchema): string;
+  abstract dropTrigger(schemaName: string, name: string): string;
 }
