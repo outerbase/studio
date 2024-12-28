@@ -161,28 +161,32 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         },
         isTable && databaseDriver.getFlags().supportCreateUpdateTable
           ? {
-            title: "Edit Table",
-            onClick: () => {
-              openTab({
-                tableName: item?.name,
-                type: "schema",
-                schemaName: item?.schemaName ?? "",
-              });
-            },
-          }
+              title: "Edit Table",
+              onClick: () => {
+                openTab({
+                  tableName: item?.name,
+                  type: "schema",
+                  schemaName: item?.schemaName ?? "",
+                });
+              },
+            }
           : undefined,
-        databaseDriver.getFlags().supportCreateUpdateTrigger ? { separator: true } : undefined,
-        databaseDriver.getFlags().supportCreateUpdateTrigger ? {
-          title: isTrigger ? "Edit Trigger" : "Create New Trigger",
-          onClick: () => {
-            openTab({
-              type: "trigger",
-              schemaName: item?.schemaName ?? currentSchemaName,
-              name: isTrigger ? item.name : 'create',
-              tableName: item?.tableSchema?.tableName
-            });
-          }
-        } : undefined,
+        databaseDriver.getFlags().supportCreateUpdateTrigger
+          ? { separator: true }
+          : undefined,
+        databaseDriver.getFlags().supportCreateUpdateTrigger
+          ? {
+              title: isTrigger ? "Edit Trigger" : "Create New Trigger",
+              onClick: () => {
+                openTab({
+                  type: "trigger",
+                  schemaName: item?.schemaName ?? currentSchemaName,
+                  name: isTrigger ? item.name : "",
+                  tableName: item?.tableSchema?.tableName,
+                });
+              },
+            }
+          : undefined,
         databaseDriver.getFlags().supportCreateUpdateTable
           ? { separator: true }
           : undefined,

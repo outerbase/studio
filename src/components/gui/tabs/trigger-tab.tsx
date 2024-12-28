@@ -52,15 +52,12 @@ export default function TriggerTab({
   const previewScript = useMemo(() => {
     const drop = databaseDriver.dropTrigger(value.schemaName, name);
     const create = databaseDriver.createTrigger(value);
-    return name !== 'create' ? [drop, create] : [create];
+    return name ? [drop, create] : [create];
   }, [value, databaseDriver, name]);
 
   // Loading the trigger
   useEffect(() => {
     if (name && schemaName) {
-      if (name === 'create') {
-        return setLoading(false)
-      }
       databaseDriver
         .trigger(schemaName, name)
         .then((triggerValue) => {
@@ -81,24 +78,20 @@ export default function TriggerTab({
 
   return (
     <div className="flex flex-col overflow-hidden w-full h-full">
-      {
-        isSaving &&
+      {isSaving && (
         <TriggerSaveDialog
           onClose={toggleSaving}
           previewScript={previewScript}
           trigger={value}
         />
-      }
+      )}
       <TriggerController
-        onSave={() => {
-          // @adam do something here
-          toggleSaving();
-        }}
+        onSave={toggleSaving}
         onDiscard={() => {
           setValue(initialValue);
         }}
         disabled={!hasChanged}
-        previewScript={previewScript.join(';\n')}
+        previewScript={previewScript.join(";\n")}
       />
 
       <TriggerEditor value={value} onChange={setValue} />
