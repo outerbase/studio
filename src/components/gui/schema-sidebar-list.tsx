@@ -139,14 +139,9 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
+      const isTrigger = item?.type === "trigger";
 
       return [
-        item?.type === "schema" && {
-          title: "Edit",
-          onClick: () => {
-            setEditSchema(item.schemaName);
-          },
-        },
         {
           title: "Copy Name",
           disabled: !selectedName,
@@ -172,6 +167,22 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
                   tableName: item?.name,
                   type: "schema",
                   schemaName: item?.schemaName ?? "",
+                });
+              },
+            }
+          : undefined,
+        databaseDriver.getFlags().supportCreateUpdateTrigger
+          ? { separator: true }
+          : undefined,
+        databaseDriver.getFlags().supportCreateUpdateTrigger
+          ? {
+              title: isTrigger ? "Edit Trigger" : "Create New Trigger",
+              onClick: () => {
+                openTab({
+                  type: "trigger",
+                  schemaName: item?.schemaName ?? currentSchemaName,
+                  name: isTrigger ? item.name : "",
+                  tableName: item?.tableSchema?.tableName,
                 });
               },
             }

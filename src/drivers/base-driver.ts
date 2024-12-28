@@ -171,6 +171,7 @@ export interface DatabaseTriggerSchema {
   name: string;
   operation: TriggerOperation;
   when: TriggerWhen;
+  schemaName: string;
   tableName: string;
   columnNames?: string[];
   whenExpression: string;
@@ -245,6 +246,7 @@ export interface DriverFlags {
   supportUpdateReturning: boolean;
   supportRowId: boolean;
   supportCreateUpdateDatabase: boolean;
+  supportCreateUpdateTrigger: boolean;
 }
 
 export interface DatabaseTableColumnChange {
@@ -338,4 +340,7 @@ export abstract class BaseDriver {
 
   abstract createUpdateTableSchema(change: DatabaseTableSchemaChange): string[];
   abstract createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[];
+
+  abstract createTrigger(trigger: DatabaseTriggerSchema): string;
+  abstract dropTrigger(schemaName: string, name: string): string;
 }

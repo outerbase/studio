@@ -12,7 +12,11 @@ import type {
   SelectFromTableOptions,
   TableColumnDataType,
 } from "./base-driver";
-import { convertSqliteType, escapeSqlValue } from "@/drivers/sqlite/sql-helper";
+import {
+  convertSqliteType,
+  escapeIdentity,
+  escapeSqlValue,
+} from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
@@ -51,6 +55,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       optionalSchema: true,
       supportCreateUpdateTable: true,
       supportCreateUpdateDatabase: false,
+      supportCreateUpdateTrigger: true,
       dialect: "sqlite",
     };
   }
@@ -178,7 +183,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const triggerRow = result.rows[0] as { sql: string } | undefined;
     if (!triggerRow) throw new Error("Trigger does not exist");
 
-    return parseCreateTriggerScript(triggerRow.sql);
+    return parseCreateTriggerScript(schemaName, triggerRow.sql);
   }
 
   close(): void {
@@ -232,6 +237,14 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   createUpdateDatabaseSchema(): string[] {
     throw new Error("Not implemented");
+  }
+
+  createTrigger(change: DatabaseTriggerSchema): string {
+    return `CREATE TRIGGER ${escapeIdentity(change.name ?? "")} \n${change.when} ${change.operation} ON ${escapeIdentity(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`;
+  }
+
+  dropTrigger(schemaName: string, name: string): string {
+    return `DROP TRIGGER IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   override async findFirst(

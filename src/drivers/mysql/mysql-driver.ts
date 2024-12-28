@@ -10,6 +10,8 @@ import {
   ColumnTypeSelector,
   DatabaseTableColumnConstraint,
   DatabaseSchemaChange,
+  TriggerOperation,
+  TriggerWhen,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -66,6 +68,16 @@ export interface MySQLConstraintColumnResult {
   REFERENCED_TABLE_SCHEMA: string;
   REFERENCED_TABLE_NAME: string;
   REFERENCED_COLUMN_NAME: string;
+}
+
+export interface MySQLTriggerResult {
+  TRIGGER_NAME: string;
+  EVENT_OBJECT_SCHEMA: string;
+  EVENT_OBJECT_TABLE: string;
+  ACTION_TIMING: TriggerWhen;
+  ACTION_STATEMENT: string;
+  TRIGGER_SCHEMA: string;
+  EVENT_MANIPULATION: TriggerOperation;
 }
 
 function mapColumn(column: MySqlColumn): DatabaseTableColumn {
@@ -136,6 +148,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       supportRowId: false,
       supportInsertReturning: false,
       supportUpdateReturning: false,
+      supportCreateUpdateTrigger: true,
     };
   }
 
@@ -175,6 +188,11 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     const constraintColumnsSql = `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')`;
     const constraintColumnsResult = (await this.query(constraintColumnsSql))
       .rows as unknown as MySQLConstraintColumnResult[];
+
+    const triggerSql =
+      "SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+    const triggerResult = (await this.query(triggerSql))
+      .rows as unknown as MySQLTriggerResult[];
 
     // Hash table of schema
     const schemaRecord: Record<string, DatabaseSchemaItem[]> = {};
@@ -293,6 +311,26 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       }
     }
 
+    // Add triggers
+    for (const schema of schemaResult) {
+      const triggers = triggerResult
+        .filter((f) => f.TRIGGER_SCHEMA === schema.SCHEMA_NAME)
+        .map((t) => {
+          return {
+            name: t.TRIGGER_NAME,
+            tableName: t.EVENT_OBJECT_TABLE,
+            schemaName: t.EVENT_OBJECT_SCHEMA,
+            timing: t.ACTION_TIMING,
+            statement: t.ACTION_STATEMENT,
+            type: "trigger",
+          };
+        });
+
+      schemaRecord[schema.SCHEMA_NAME] = schemaRecord[
+        schema.SCHEMA_NAME
+      ].concat(triggers as DatabaseSchemaItem[]);
+    }
+
     return schemaRecord;
   }
 
@@ -375,8 +413,33 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     };
   }
 
-  trigger(): Promise<DatabaseTriggerSchema> {
-    throw new Error("Not implemented");
+  async trigger(
+    schemaName: string,
+    name: string
+  ): Promise<DatabaseTriggerSchema> {
+    const result = await this.query(
+      `SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA=${this.escapeValue(schemaName)} AND TRIGGER_NAME=${this.escapeValue(name)}`
+    );
+
+    const triggerRow = result.rows[0] as unknown as
+      | MySQLTriggerResult
+      | undefined;
+    if (!triggerRow) throw new Error("Trigger does not exist");
+
+    const statement = triggerRow.ACTION_STATEMENT.replace(/begin/i, "")
+      .replace(/end/i, "")
+      .trim();
+
+    return {
+      name: triggerRow.TRIGGER_NAME,
+      tableName: triggerRow.EVENT_OBJECT_TABLE,
+      schemaName: triggerRow.TRIGGER_SCHEMA,
+      operation: triggerRow.EVENT_MANIPULATION,
+      statement,
+      when: triggerRow.ACTION_TIMING,
+      whenExpression: "",
+      columnNames: [],
+    };
   }
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
@@ -385,6 +448,14 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
 
   createUpdateDatabaseSchema(change: DatabaseSchemaChange): string[] {
     return generateMysqlDatabaseSchema(this, change);
+  }
+
+  createTrigger(change: DatabaseTriggerSchema): string {
+    return `CREATE TRIGGER ${this.escapeId(change.schemaName || "")}.${this.escapeId(change.name ?? "")} \n${change.when} ${change.operation} ON ${this.escapeId(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`;
+  }
+
+  dropTrigger(schemaName: string, name: string): string {
+    return `DROP TRIGGER IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {
