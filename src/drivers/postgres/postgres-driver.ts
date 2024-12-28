@@ -359,6 +359,14 @@ WHERE
     throw new Error("Not implemented");
   }
 
+  createTrigger(): string {
+    throw new Error("Not implemented")
+  }
+
+  dropTrigger(): string {
+    throw new Error("Not implemented")
+  }
+
   inferTypeFromHeader(): TableColumnDataType | undefined {
     return undefined;
   }

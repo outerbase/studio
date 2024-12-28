@@ -31,6 +31,7 @@ describe("parse trigger", () => {
   const statement = `UPDATE customer SET cust_addr=NEW.cust_addr WHERE cust_id=NEW.cust_id;`;
   it("when: BEFORE", () => {
     const deleteOutput = parseCreateTriggerScript(
+      "main",
       generateSql({ name, operation: "DELETE", tableName, statement })
     );
     expect(deleteOutput).toMatchObject({
@@ -42,6 +43,7 @@ describe("parse trigger", () => {
     });
 
     const insert = parseCreateTriggerScript(
+      "main",
       generateSql({ name, operation: "INSERT", tableName, statement })
     );
     expect(insert).toMatchObject({
@@ -53,6 +55,7 @@ describe("parse trigger", () => {
     });
 
     const updateOf = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         operation: "UPDATE OF",
@@ -73,6 +76,7 @@ describe("parse trigger", () => {
 
   it("when: AFTER", () => {
     const deleteOutput = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         when: "AFTER",
@@ -90,6 +94,7 @@ describe("parse trigger", () => {
     });
 
     const insert = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         when: "AFTER",
@@ -107,6 +112,7 @@ describe("parse trigger", () => {
     });
 
     const updateOf = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         when: "AFTER",
@@ -128,6 +134,7 @@ describe("parse trigger", () => {
 
   it("when: INSTEAD OF", () => {
     const deleteOutput = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         when: "INSTEAD OF",
@@ -145,6 +152,7 @@ describe("parse trigger", () => {
     });
 
     const insert = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         when: "INSTEAD OF",
@@ -162,6 +170,7 @@ describe("parse trigger", () => {
     });
 
     const updateOf = parseCreateTriggerScript(
+      "main",
       generateSql({
         name,
         when: "INSTEAD OF",

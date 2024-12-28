@@ -4,7 +4,7 @@ import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
   DatabaseTableSchemaChange,
-  DatabaseTriggerSchemaChange,
+  DatabaseTriggerSchema,
 } from "../base-driver";
 
 import { omit, isEqual } from "lodash";
@@ -102,7 +102,7 @@ function generateCreateColumn(
       [
         "REFERENCES",
         driver.escapeId(foreignTableName) +
-          `(${driver.escapeId(foreignColumnName)})`,
+        `(${driver.escapeId(foreignColumnName)})`,
       ].join(" ")
     );
   }
@@ -131,10 +131,10 @@ function generateConstraintScript(
 
 export function generateMysqlTriggerSchema(
   driver: BaseDriver,
-  change: DatabaseTriggerSchemaChange
+  change: DatabaseTriggerSchema
 ): string[] {
   return [
-    `CREATE TRIGGER ${driver.escapeId(change.schemaName || "")}.${driver.escapeId(change.name.new ?? "")} \n${change.when} ${change.operation} ON ${driver.escapeId(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
+    `CREATE TRIGGER ${driver.escapeId(change.schemaName || "")}.${driver.escapeId(change.name ?? "")} \n${change.when} ${change.operation} ON ${driver.escapeId(change.tableName)} \nFOR EACH ROW \nBEGIN \n\t${change.statement} \nEND`,
   ];
 }
 
