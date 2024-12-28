@@ -1,5 +1,5 @@
 import { LucideSearch } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 import SchemaList from "./schema-sidebar-list";
 import { openTab } from "@/messages/open-tab";
 import { useSchema } from "@/context/schema-provider";
@@ -7,9 +7,13 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
 import { Plus } from "@phosphor-icons/react";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Command, CommandItem, CommandList } from "../ui/command";
 import SchemaCreateDialog from "./schema-editor/schema-create";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
@@ -17,22 +21,54 @@ export default function SchemaView() {
   const { currentSchemaName } = useSchema();
   const [isCreateSchema, setIsCreateSchema] = useState(false);
 
-  const onNewTable = useCallback(() => {
-    openTab({
-      type: "schema",
-      schemaName: currentSchemaName,
-    });
-  }, [currentSchemaName]);
+  const contentMenu = useMemo(() => {
+    const items: {
+      name: string;
+      onClick: () => void;
+    }[] = [];
 
-  const toggleNewDate = useCallback(() => setIsCreateSchema(!isCreateSchema), [isCreateSchema])
+    const flags = databaseDriver.getFlags();
 
-  const ActivatorButton = () => {
-
-    if (!databaseDriver.getFlags().supportCreateUpdateDatabase && !databaseDriver.getFlags().supportCreateUpdateTable) {
-      return <></>
+    if (flags.supportCreateUpdateTable) {
+      items.push({
+        name: "Create Table",
+        onClick: () => {
+          openTab({
+            type: "schema",
+            schemaName: currentSchemaName,
+          });
+        },
+      });
     }
 
-    if (databaseDriver.getFlags().dialect === 'sqlite' && databaseDriver.getFlags().supportCreateUpdateTable) {
+    if (flags.supportCreateUpdateDatabase) {
+      items.push({
+        name: "Create Database/Schema",
+        onClick: () => {
+          setIsCreateSchema(true);
+        },
+      });
+    }
+
+    if (flags.supportCreateUpdateTrigger) {
+      items.push({
+        name: "Create Trigger",
+        onClick: () => {
+          openTab({
+            type: "trigger",
+            schemaName: currentSchemaName,
+          });
+        },
+      });
+    }
+
+    return items;
+  }, [databaseDriver, currentSchemaName]);
+
+  const activatorButton = useMemo(() => {
+    if (contentMenu.length === 0) return null;
+
+    if (contentMenu.length === 1) {
       return (
         <button
           className={cn(
@@ -41,16 +77,16 @@ export default function SchemaView() {
             }),
             "rounded-full h-8 w-8 bg-neutral-800 dark:bg-neutral-200"
           )}
-          onClick={onNewTable}
+          onClick={contentMenu[0].onClick}
         >
           <Plus size={16} weight="bold" />
         </button>
-      )
+      );
     }
 
     return (
-      <Popover>
-        <PopoverTrigger asChild>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
             className={cn(
               buttonVariants({
@@ -61,30 +97,33 @@ export default function SchemaView() {
           >
             <Plus size={16} weight="bold" />
           </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandList>
-              {
-                databaseDriver.getFlags().supportCreateUpdateDatabase && <CommandItem onSelect={toggleNewDate}>New schema/database</CommandItem>
-              }
-              {
-                databaseDriver.getFlags().supportCreateUpdateTable && <CommandItem onSelect={() => onNewTable()}>New table</CommandItem>
-              }
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    )
-  }
-
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="bottom" align="start">
+          {contentMenu.map((menu) => {
+            return (
+              <DropdownMenuItem key={menu.name} onClick={menu.onClick}>
+                {menu.name}
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }, [contentMenu]);
   return (
     <div className="flex flex-col overflow-hidden grow">
-      {isCreateSchema && <SchemaCreateDialog onClose={toggleNewDate} />}
+      {isCreateSchema && (
+        <SchemaCreateDialog
+          onClose={() => {
+            setIsCreateSchema(false);
+          }}
+        />
+      )}
+
       <div className="p-4 pb-2 flex flex-col">
         <div className="flex justify-between mb-5 items-center">
           <h1 className="text-xl font-medium text-primary">Tables</h1>
-          <ActivatorButton />
+          {activatorButton}
         </div>
 
         <div className="overflow-hidden cursor-text items-center has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 has-[:focus]:outline-neutral-400/70 has-[:enabled]:active:outline-neutral-400/70 dark:has-[:focus]:outline-neutral-600 dark:has-[:enabled]:active:outline-neutral-600 flex w-full rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600 h-[32px]">

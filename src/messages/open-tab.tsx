@@ -39,7 +39,7 @@ interface OpenUserTab {
 }
 
 interface ToolsTab {
-  type: "mass-drop-table" | "import-sqlite" | "import-csv" | 'erd';
+  type: "mass-drop-table" | "import-sqlite" | "import-csv" | "erd";
 }
 
 interface OpenTriggerTab {
@@ -81,7 +81,7 @@ function generateKeyFromTab(tab: OpenTabsProps) {
       : "schema-" + tab.schemaName + "-" + tab.tableName;
   if (tab.type === "user") return "user";
 
-  if (tab.type === 'erd') return 'erd';
+  if (tab.type === "erd") return "erd";
   if (tab.type === "mass-drop-table") return "mass-drop-table";
   if (tab.type === "import-sqlite") return "import-sqlite";
   if (tab.type === "import-csv") return "import-csv";
@@ -98,7 +98,7 @@ function generateIconFromTab(tab: OpenTabsProps) {
   if (tab.type === "table") return Table;
   if (tab.type === "schema") return LucideTableProperties;
   if (tab.type === "user") return LucideUser;
-  if (tab.type === 'erd') return TreeStructure;
+  if (tab.type === "erd") return TreeStructure;
   if (tab.type === "mass-drop-table") return StackMinus;
 
   return LucideCog;
@@ -115,9 +115,9 @@ function generateTitle(tab: OpenTabsProps) {
   if (tab.type === "user") return "User & Permission";
   if (tab.type === "import-csv") return "Import from CSV";
   if (tab.type === "import-sqlite") return "Import from SQLite";
-  if (tab.type === 'erd') return 'Relational Diagram';
+  if (tab.type === "erd") return "Relational Diagram";
   if (tab.type === "mass-drop-table") return "Mass Drop Tables";
-  if (tab.type === "trigger") return tab.name ?? "";
+  if (tab.type === "trigger") return tab.name ?? "New Trigger";
   return "Unnamed";
 }
 
@@ -147,7 +147,13 @@ function generateComponent(tab: OpenTabsProps, title: string) {
   if (tab.type === "erd") return <RelationalDiagramTab />;
   if (tab.type === "mass-drop-table") return <MassDropTableTab />;
   if (tab.type === "trigger")
-    return <TriggerTab schemaName={tab.schemaName} name={tab.name ?? ""} tableName={tab.tableName ?? ''} />;
+    return (
+      <TriggerTab
+        schemaName={tab.schemaName}
+        name={tab.name ?? ""}
+        tableName={tab.tableName ?? ""}
+      />
+    );
   return <div>Unknown Tab</div>;
 }
 
