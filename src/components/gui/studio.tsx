@@ -9,6 +9,7 @@ import { StudioContextMenuItem } from "@/messages/open-context-menu";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { FullEditorProvider } from "./providers/full-editor-provider";
+import { CommonDialogProvider } from "../common-dialog";
 
 export interface StudioExtension {
   contextMenu?: (state: OptimizeTableState) => StudioContextMenuItem[];
@@ -75,9 +76,11 @@ export function Studio({
         onBack={onBack}
         sideBarFooterComponent={sideBarFooterComponent}
       >
-        <FullEditorProvider>
-          <MainScreen />
-        </FullEditorProvider>
+        <CommonDialogProvider>
+          <FullEditorProvider>
+            <MainScreen />
+          </FullEditorProvider>
+        </CommonDialogProvider>
       </ConfigProvider>
     </DriverProvider>
   );
