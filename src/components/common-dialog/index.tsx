@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   ReactElement,
   createContext,
+  useCallback,
   useContext,
   useState,
 } from "react";
@@ -45,7 +46,13 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
     null
   );
 
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const hideDialog = useCallback(() => {
+    setErrorMessage("");
+    setDialogOption(null);
+  }, []);
 
   return (
     <CommonDialogContext.Provider value={{ showDialog: setDialogOption }}>
@@ -55,7 +62,7 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
           open={dialogOption !== null}
           onOpenChange={(openState) => {
             if (!openState) {
-              setDialogOption(null);
+              hideDialog();
             }
           }}
         >
@@ -66,6 +73,12 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
               {dialogOption.title}
             </DialogHeader>
             <DialogDescription className="flex flex-col gap-2">
+              {errorMessage && (
+                <div className="text-sm text-red-500 font-mono flex gap-4 items-end">
+                  <p>{errorMessage}</p>
+                </div>
+              )}
+
               <div>{dialogOption.content}</div>
               {dialogOption.previewCode && (
                 <CodePreview code={dialogOption.previewCode} />
@@ -85,12 +98,18 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
                     action
                       .onClick()
                       .then(() => {
-                        setDialogOption(null);
+                        hideDialog();
                         if (action.onComplete) {
                           action.onComplete();
                         }
                       })
-                      .catch(console.error)
+                      .catch((e) => {
+                        if (e instanceof Error) {
+                          setErrorMessage(e.message);
+                        } else {
+                          setErrorMessage("An error occurred");
+                        }
+                      })
                       .finally(() => {
                         setLoading(false);
                       });
@@ -108,7 +127,7 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
                 disabled={loading}
                 variant={"secondary"}
                 onClick={() => {
-                  setDialogOption(null);
+                  hideDialog();
                 }}
               >
                 Close
