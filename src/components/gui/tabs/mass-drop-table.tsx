@@ -225,7 +225,7 @@ export default function MassDropTableTab() {
           <Toolbar>
             <ToolbarButton
               disabled={selectedItems.length === 0 || completed}
-              icon={<Trash size={16} className="text-red-500" />}
+              icon={Trash}
               text="Drop Selected Table"
               onClick={dropSelectedTableClicked}
               destructive

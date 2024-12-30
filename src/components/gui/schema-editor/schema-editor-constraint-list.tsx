@@ -1,3 +1,4 @@
+import { useSchema } from "@/context/schema-provider";
 import {
   DatabaseTableColumnConstraint,
   DatabaseTableConstraintChange,
@@ -12,14 +13,6 @@ import {
   LucideShieldPlus,
   LucideTrash2,
 } from "lucide-react";
-import TableCombobox from "../table-combobox/TableCombobox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { Button } from "../../ui/button";
 import {
   Dispatch,
   PropsWithChildren,
@@ -27,9 +20,16 @@ import {
   useCallback,
   useMemo,
 } from "react";
+import { Button } from "../../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
 import ColumnListEditor from "../column-list-editor";
-import { useColumnList } from "./column-provider";
-import { useSchema } from "@/context/schema-provider";
+import TableCombobox from "../table-combobox/TableCombobox";
+import { useSchemaEditorContext } from "./schema-editor-prodiver";
 
 type ConstraintChangeHandler = (
   constraint: DatabaseTableColumnConstraint
@@ -77,7 +77,7 @@ function ColumnForeignKey({
   disabled?: boolean;
   schemaName: string;
 }>) {
-  const { columns } = useColumnList();
+  const { columns } = useSchemaEditorContext();
   const { schema } = useSchema();
 
   const columnMemo = useMemo(() => {
@@ -175,7 +175,7 @@ function ColumnPrimaryKey({
   onChange: ConstraintChangeHandler;
   disabled?: boolean;
 }>) {
-  const { columns } = useColumnList();
+  const { columns } = useSchemaEditorContext();
 
   const columnMemo = useMemo(() => {
     return [...new Set(columns.map((c) => c.new?.name ?? c.old?.name ?? ""))];
@@ -217,7 +217,7 @@ function ColumnUnique({
   onChange: ConstraintChangeHandler;
   disabled?: boolean;
 }>) {
-  const { columns } = useColumnList();
+  const { columns } = useSchemaEditorContext();
 
   const columnMemo = useMemo(() => {
     return [...new Set(columns.map((c) => c.new?.name ?? c.old?.name ?? ""))];

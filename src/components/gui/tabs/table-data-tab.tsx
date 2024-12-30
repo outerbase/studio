@@ -212,7 +212,7 @@ export default function TableDataWindow({
         <Toolbar>
           <ToolbarButton
             text="Commit"
-            icon={<LucideSaveAll className="w-4 h-4" />}
+            icon={LucideSaveAll}
             tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
             disabled={!changeNumber || isExecuting}
             loading={isExecuting}
