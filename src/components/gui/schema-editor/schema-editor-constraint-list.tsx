@@ -1,3 +1,4 @@
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSchema } from "@/context/schema-provider";
 import {
   DatabaseTableColumnConstraint,
@@ -5,12 +6,12 @@ import {
   DatabaseTableSchemaChange,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
+import { Plus } from "@phosphor-icons/react";
 import {
   LucideArrowUpRight,
   LucideCheck,
   LucideFingerprint,
   LucideKeySquare,
-  LucideShieldPlus,
   LucideTrash2,
 } from "lucide-react";
 import {
@@ -20,15 +21,12 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { Button } from "../../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
+import { DropdownMenuItem } from "../../ui/dropdown-menu";
 import ColumnListEditor from "../column-list-editor";
 import TableCombobox from "../table-combobox/TableCombobox";
+import { Toolbar, ToolbarDropdown } from "../toolbar";
+import ConstraintForeignKeyEditor from "./constraint-foreign-key";
+import ConstraintPrimaryKeyEditor from "./constraint-primary-key";
 import { useSchemaEditorContext } from "./schema-editor-prodiver";
 
 type ConstraintChangeHandler = (
@@ -390,6 +388,22 @@ function ColumnItem({
   );
 }
 
+function ConstraintListItem({
+  value,
+  onChange,
+}: {
+  value: DatabaseTableConstraintChange;
+  onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
+}) {
+  if (value.new?.primaryKey) {
+    return <ConstraintPrimaryKeyEditor value={value} onChange={onChange} />;
+  } else if (value.new?.foreignKey) {
+    return <ConstraintForeignKeyEditor value={value} onChange={onChange} />;
+  }
+
+  return <div>Not implemented</div>;
+}
+
 export default function SchemaEditorConstraintList({
   constraints,
   onChange,
@@ -401,7 +415,7 @@ export default function SchemaEditorConstraintList({
   schemaName?: string;
   disabled?: boolean;
 }>) {
-  const headerClassName = "text-xs p-2 text-left bg-secondary border";
+  const headerClassName = "text-xs p-2 text-left border-l";
 
   const newConstraint = useCallback(
     (con: DatabaseTableColumnConstraint) => {
@@ -420,82 +434,83 @@ export default function SchemaEditorConstraintList({
     [onChange]
   );
 
+  const hasPrimaryKey = constraints.some((c) => c.new?.primaryKey);
+
   return (
-    <div className="px-4 py-2">
-      <table className="w-full">
+    <div>
+      <div className="p-1 border-b">
+        <Toolbar>
+          <ToolbarDropdown text="Add Constraint" icon={Plus}>
+            <DropdownMenuItem
+              inset
+              disabled={hasPrimaryKey}
+              onClick={() => {
+                newConstraint({ primaryKey: true });
+              }}
+            >
+              Primary Key
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              inset
+              onClick={() => {
+                newConstraint({ unique: true });
+              }}
+            >
+              Unique
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              inset
+              onClick={() => {
+                newConstraint({ checkExpression: "" });
+              }}
+            >
+              Check Constraint
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              inset
+              onClick={() => {
+                newConstraint({
+                  foreignKey: {
+                    columns: [],
+                  },
+                });
+              }}
+            >
+              Foreign Key
+            </DropdownMenuItem>
+          </ToolbarDropdown>
+        </Toolbar>
+      </div>
+      <table className="w-full font-mono">
         <thead>
           <tr>
-            <th className={cn(headerClassName, "w-[175px]")}>Constraints</th>
-            <th className={cn(headerClassName, "w-[200px]")}></th>
-            <th className={headerClassName}></th>
-            <th className={cn(headerClassName, "w-[30px]")}></th>
+            <th className={cn(headerClassName, "w-[40px] bg-muted text-right")}>
+              #
+            </th>
+            <th className={cn(headerClassName, "w-[40px]")}></th>
+            <th className={cn(headerClassName)}>Constraint</th>
           </tr>
         </thead>
         <tbody>
           {constraints.map((constraint, idx) => {
             return (
-              <ColumnItem
-                key={idx}
-                idx={idx}
-                constraint={constraint}
-                onChange={onChange}
-                disabled={disabled}
-                schemaName={schemaName}
-              />
+              <tr key={constraint.id}>
+                <td className="border-r border-t border-b text-sm text-right bg-muted p-2 align-top">
+                  {idx + 1}
+                </td>
+                <td className="border-r border-t border-b text-sm align-top pt-2 text-center">
+                  <Checkbox />
+                </td>
+                <td className="border-r border-t border-b text-sm p-2">
+                  <ConstraintListItem
+                    key={constraint.id}
+                    value={constraint}
+                    onChange={onChange}
+                  />
+                </td>
+              </tr>
             );
           })}
-          {!disabled && (
-            <tr>
-              <td colSpan={4} className="px-4 py-2 border">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size={"sm"}>
-                      <LucideShieldPlus className="w-4 h-4 mr-1" />
-                      Add Constraint
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      inset
-                      onClick={() => {
-                        newConstraint({ primaryKey: true });
-                      }}
-                    >
-                      Primary Key
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      inset
-                      onClick={() => {
-                        newConstraint({ unique: true });
-                      }}
-                    >
-                      Unique
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      inset
-                      onClick={() => {
-                        newConstraint({ checkExpression: "" });
-                      }}
-                    >
-                      Check Constraint
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      inset
-                      onClick={() => {
-                        newConstraint({
-                          foreignKey: {
-                            columns: [],
-                          },
-                        });
-                      }}
-                    >
-                      Foreign Key
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>
