@@ -9,6 +9,7 @@ interface ExplanationMysqlTable {
     prefix_cost: number;
   };
   rows_produced_per_join: string;
+  lable?: string | null;
 }
 
 interface ExplanationMysqlGroupOperation {
@@ -23,6 +24,7 @@ interface ExplanationMysqlGroupOperation {
 
 export interface ExplanationMysql {
   query_block: {
+    select_id: number;
     id: string;
     cost_info: {
       query_cost: number;
@@ -77,6 +79,72 @@ export function formatCost(cost: number) {
     notation: "compact",
     compactDisplay: "short",
   });
+}
+
+function parseDetailLiteToMysql(detail: string) {
+  let table = null;
+  let type = null;
+  let extra = null;
+  let key = null;
+
+  if (detail.includes("SCAN")) {
+    table = detail.match(/SCAN (\w+)/)?.[1] || null;
+    type = "ALL"; // Full table scan
+  } else if (detail.includes("SEARCH")) {
+    table = detail.match(/SEARCH (\w+)/)?.[1] || null;
+    extra = detail.match(/\((.+)\)/)?.[1] || null;
+    key = detail.match(/USING (\w+) (\w+)/)?.[2] || null;
+    type = "range"; // Range-based search
+  } else if (detail.includes("USING INDEX")) {
+    extra = "Using index";
+  }
+
+  return { table, type, extra, key };
+}
+
+export function convertSQLiteRowToMySQL(rows: any[]): ExplanationMysql {
+  const tables = [];
+  for (const row of rows) {
+    const parsedDetail = parseDetailLiteToMysql(row.detail);
+
+    if (parsedDetail.table) {
+      tables.push({
+        table: {
+          id: parsedDetail.table || "",
+          table_name: parsedDetail.table || "",
+          cost_info: {
+            prefix_cost: 0,
+            query_cost: 0,
+            read_cost: 0,
+            eval_cost: 0,
+          },
+          rows_produced_per_join: "0",
+          rows_examined_per_scan: "0",
+          access_type: parsedDetail.type,
+          key: parsedDetail.key,
+          lable: parsedDetail.extra,
+        },
+      });
+    }
+  }
+
+  return {
+    query_block: {
+      select_id: 1,
+      cost_info: {
+        prefix_cost: 0,
+        query_cost: 0,
+      },
+      id: "query_info",
+      table:
+        tables.length === 1
+          ? {
+              ...tables[0].table,
+            }
+          : undefined,
+      nested_loop: tables.length > 1 ? tables : undefined,
+    },
+  };
 }
 
 function getLayoutedExplanationElements(
@@ -344,7 +412,10 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
           strokeWidth: 2,
         },
         animated: true,
-        label: formatCost(Number(value.table.rows_produced_per_join)) + " rows",
+        label:
+          value.table.rows_produced_per_join === "0"
+            ? ""
+            : formatCost(Number(value.table.rows_produced_per_join)) + " rows",
         labelShowBg: false,
         labelStyle: {
           fill: "#AAAAAA",
@@ -372,6 +443,7 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
         targetPosition: Position.Top,
         sourcePosition: Position.Bottom,
       });
+      console.log(value.table.lable);
       edgesTable.add({
         id: `nested_loop_${key}-${value.table.table_name}`,
         target: "nested_loop_" + key,
@@ -388,6 +460,13 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
           strokeWidth: 2,
         },
         animated: true,
+        label: value.table.lable ? value.table.lable : "",
+        labelShowBg: false,
+        labelStyle: {
+          fill: "#AAAAAA",
+          color: "#AAAAAA",
+          transform: "translate(-5%, -5%)",
+        },
       });
     }
     return {

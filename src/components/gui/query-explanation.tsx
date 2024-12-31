@@ -2,6 +2,7 @@ import { DatabaseResultSet, SupportedDialect } from "@/drivers/base-driver";
 import { useMemo } from "react";
 import { z } from "zod";
 import QueryExplanationDiagram from "./query-explanation-diagram";
+import { convertSQLiteRowToMySQL } from "./query-explanation-diagram/buildQueryExplanationFlow";
 
 interface QueryExplanationProps {
   data: DatabaseResultSet;
@@ -15,7 +16,7 @@ interface ExplanationRow {
   detail: string;
 }
 
-type ExplanationRowWithChildren = ExplanationRow & {
+export type ExplanationRowWithChildren = ExplanationRow & {
   children: ExplanationRowWithChildren[];
 };
 
@@ -117,27 +118,19 @@ export function QueryExplanation(props: QueryExplanationProps) {
     );
   }
 
-  if (props.dialect !== "sqlite") {
-    return (
-      <div className="p-5 font-mono h-full overflow-y-auto">
-        {props.dialect === "mysql" ? (
-          <QueryExplanationDiagram items={tree.value} />
-        ) : (
-          <p className="text-destructive">{tree.value}</p>
-        )}
-      </div>
-    );
+  let value = tree.value;
+
+  if (props.dialect === "sqlite") {
+    value = convertSQLiteRowToMySQL(tree.value);
   }
 
   return (
     <div className="p-5 font-mono h-full overflow-y-auto">
-      <ul>
-        {tree.value.map((node: ExplanationRowWithChildren) => (
-          <li key={`query-explanation-p-${node.parent}-${node.id}`}>
-            <RenderQueryExplanationItem item={node} />
-          </li>
-        ))}
-      </ul>
+      {["mysql", "sqlite"].includes(props.dialect as string) ? (
+        <QueryExplanationDiagram items={value} />
+      ) : (
+        <p className="text-destructive">{value}</p>
+      )}
     </div>
   );
 }

@@ -1,33 +1,42 @@
 import { BaseHandle } from "@/components/base-handle";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Position } from "@xyflow/react";
 import { ExplainNodeProps, formatCost } from "../buildQueryExplanationFlow";
 
 export function TableBlock(props: ExplainNodeProps) {
-  let bgColor = 'bg-emerald-700';
-  let label = 'Unique Key Lookup';
+  let bgColor = "bg-emerald-700";
+  let label = "Unique Key Lookup";
 
-  if (props.data.access_type === 'ALL') {
-    bgColor = 'bg-rose-700';
-    label = 'Full Table Scan'
+  if (props.data.access_type === "ALL") {
+    bgColor = "bg-rose-700";
+    label = "Full Table Scan";
   }
 
-  if (props.data.access_type === 'range') {
-    bgColor = 'bg-yellow-700';
-    label = 'Index Range Scan';
+  if (props.data.access_type === "range") {
+    bgColor = "bg-yellow-700";
+    label = "Index Range Scan";
   }
 
-  if (props.data.access_type === 'ref') {
-    label = 'Non-Unique Key Lookup'
+  if (props.data.access_type === "ref") {
+    label = "Non-Unique Key Lookup";
   }
 
-  if (props.data.access_type === 'index') {
-    bgColor = 'bg-rose-700';
+  if (props.data.access_type === "index") {
+    bgColor = "bg-rose-700";
     label = "Full Index Scan";
   }
 
+  if (props.data.access_type === "const") {
+    label = "Single Row (constant)";
+    bgColor = "bg-sky-700";
+  }
+
   return (
-    <Tooltip>
+    <Tooltip open={props.data.cost_info.prefix_cost > 0}>
       <TooltipTrigger asChild>
         <div>
           <BaseHandle
@@ -39,14 +48,33 @@ export function TableBlock(props: ExplainNodeProps) {
           <BaseHandle
             type="source"
             position={Position.Right}
-            id={'right'}
+            id={"right"}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
           />
-          <div className={`flex flex-row justify-between items-center text-[8pt]`}>
-            <div><small>{formatCost(Number(props.data.cost_info.read_cost) + Number(props.data.cost_info.eval_cost))}</small></div>
-            <div><small>{formatCost(Number(props.data.rows_examined_per_scan))} rows</small></div>
+          <div
+            className={`flex flex-row justify-between items-center text-[8pt]`}
+          >
+            <div
+              className={`${props.data.cost_info.read_cost === 0 ? "hidden" : ""}`}
+            >
+              <small>
+                {formatCost(
+                  Number(props.data.cost_info.read_cost) +
+                    Number(props.data.cost_info.eval_cost)
+                )}
+              </small>
+            </div>
+            <div
+              className={`${props.data.rows_examined_per_scan === "0" ? "hidden" : ""}`}
+            >
+              <small>
+                {formatCost(Number(props.data.rows_examined_per_scan))} rows
+              </small>
+            </div>
           </div>
-          <div className={`p-2 text-white text-[9pt] border-b rounded-md text-center ${bgColor}`}>
+          <div
+            className={`p-2 text-white text-[9pt] border-b rounded-md text-center ${bgColor}`}
+          >
             <small>{label}</small>
           </div>
           <div className="flex flex-col justify-center text-[8pt] items-center">
@@ -61,9 +89,11 @@ export function TableBlock(props: ExplainNodeProps) {
       </TooltipTrigger>
       <TooltipContent>
         <div>
-          <p className="!text-[9pt]">Prefix Cost: {props.data.cost_info.prefix_cost}</p>
+          <p className="!text-[9pt]">
+            Prefix Cost: {props.data.cost_info.prefix_cost}
+          </p>
         </div>
       </TooltipContent>
     </Tooltip>
-  )
+  );
 }
