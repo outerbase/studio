@@ -866,6 +866,7 @@ export default class OptimizeTableState {
     let min = undefined;
     let max = undefined;
     let count = 0;
+    let detectedDataType = undefined;
 
     const selectedCell = new Set<string>();
     for (const range of this.selectionRanges) {
@@ -878,12 +879,57 @@ export default class OptimizeTableState {
           selectedCell.add(key);
 
           const value = this.getValue(y, x);
-          const parsed = Number(value);
 
-          if (!isNaN(parsed)) {
-            sum = sum !== undefined ? sum + parsed : parsed;
-            min = min !== undefined ? (min < parsed ? min : parsed) : parsed;
-            max = max !== undefined ? (max > parsed ? max : parsed) : parsed;
+          if (value !== null && value !== undefined && value !== "") {
+            // detect first valid element data type
+            if (detectedDataType === undefined) {
+              if (!isNaN(Number(value))) {
+                detectedDataType = "number";
+              } else if (
+                typeof value === "string" &&
+                !isNaN(Date.parse(value))
+              ) {
+                detectedDataType = "date";
+              }
+            }
+
+            if (detectedDataType === "number") {
+              const parsed = Number(value);
+              if (!isNaN(parsed)) {
+                sum = sum !== undefined ? sum + parsed : parsed;
+                min =
+                  min !== undefined
+                    ? (min as number) < parsed
+                      ? min
+                      : parsed
+                    : parsed;
+                max =
+                  max !== undefined
+                    ? (max as number) > parsed
+                      ? max
+                      : parsed
+                    : parsed;
+              }
+            } else if (
+              detectedDataType === "date" &&
+              (isValidDate(value as string) || isValidDateTime(value as string))
+            ) {
+              const parsed = Date.parse(value as string);
+              if (!isNaN(parsed)) {
+                min =
+                  min !== undefined
+                    ? Date.parse(min as string) < parsed
+                      ? min
+                      : value
+                    : value;
+                max =
+                  max !== undefined
+                    ? Date.parse(max as string) > parsed
+                      ? max
+                      : value
+                    : value;
+              }
+            }
           }
           count = count + 1;
         }
@@ -892,12 +938,19 @@ export default class OptimizeTableState {
     if (sum !== undefined && count > 0) {
       avg = sum / count;
     }
+    if (detectedDataType === "number") {
+      return {
+        sum: formatNumber(sum),
+        avg: formatNumber(avg),
+        min: formatNumber(min as number),
+        max: formatNumber(max as number),
+        count: formatNumber(count),
+      };
+    }
     return {
-      sum: formatNumber(sum),
-      avg: formatNumber(avg),
-      min: formatNumber(min),
-      max: formatNumber(max),
-      count: formatNumber(count),
+      min,
+      max,
+      count,
     };
   }
 
@@ -913,4 +966,20 @@ export default class OptimizeTableState {
   getSql() {
     return this.sql;
   }
+}
+
+function isValidDate(value: string): boolean {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(value)) return false;
+
+  const parsedDate = new Date(value);
+  return !isNaN(parsedDate.getTime());
+}
+
+function isValidDateTime(value: string): boolean {
+  const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  if (!dateTimeRegex.test(value)) return false;
+
+  const parsedDate = new Date(value);
+  return !isNaN(parsedDate.getTime());
 }
