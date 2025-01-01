@@ -40,6 +40,7 @@ import { useCurrentTab } from "../windows-tab";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { Toolbar, ToolbarButton } from "../toolbar";
 import AggregateResultButton from "../aggregate-result/aggregate-result-button";
+import ExportResultButton from "../export/export-result-button";
 
 interface TableDataContentProps {
   tableName: string;
@@ -93,6 +94,7 @@ export default function TableDataWindow({
           dataResult,
           schemaResult
         );
+        tableState.setSql("SELECT * FROM " + tableName + ";");
 
         setData(tableState);
 
@@ -370,8 +372,11 @@ export default function TableDataWindow({
       </div>
       {stat && data && (
         <div className="flex justify-between border-t shrink-0">
-          <div className="p-1">
+          <div className="flex p-1">
             <ResultStats stats={stat} />
+            <div>
+              <ExportResultButton data={data} />
+            </div>
           </div>
           <div className="p-1 pr-3">
             <AggregateResultButton data={data} />

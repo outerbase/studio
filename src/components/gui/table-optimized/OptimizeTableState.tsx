@@ -23,7 +23,7 @@ export type AggregateFunction = "sum" | "avg" | "min" | "max" | "count";
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
 
-interface TableSelectionRange {
+export interface TableSelectionRange {
   x1: number;
   y1: number;
   x2: number;
@@ -58,6 +58,7 @@ export default class OptimizeTableState {
   protected changeCounter = 1;
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
   protected defaultAggregateFunction: AggregateFunction = "sum";
+  protected sql: string = "";
 
   static createFromResult(
     driver: BaseDriver,
@@ -660,6 +661,32 @@ export default class OptimizeTableState {
     return false;
   }
 
+  getFullSelectionRowsIndex() {
+    const selectedRows = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      if (range.x1 === 0 && range.x2 === this.getHeaderCount() - 1) {
+        for (let i = range.y1; i <= range.y2; i++) {
+          if (!selectedRows.has(i)) selectedRows.add(i);
+        }
+      }
+    }
+    return Array.from(selectedRows.values());
+  }
+
+  getFullSelectionColsIndex() {
+    const selectedCols = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      if (range.y1 === 0 && range.y2 === this.getRowsCount() - 1) {
+        for (let i = range.x1; i <= range.x2; i++) {
+          if (!selectedCols.has(i)) selectedCols.add(i);
+        }
+      }
+    }
+    return Array.from(selectedCols.values());
+  }
+
   isFullSelectionCol(x: number) {
     for (const range of this.selectionRanges) {
       if (
@@ -879,5 +906,11 @@ export default class OptimizeTableState {
   }
   getDefaultAggregateFunction() {
     return this.defaultAggregateFunction;
+  }
+  setSql(sql: string) {
+    this.sql = sql;
+  }
+  getSql() {
+    return this.sql;
   }
 }

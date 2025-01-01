@@ -62,19 +62,24 @@ export function convertSqliteType(
   return TableColumnDataType.TEXT;
 }
 
-export function escapeCsvValue(value: unknown): string {
+export function escapeDelimitedValue(
+  value: unknown,
+  fieldSeparator: string,
+  lineTerminator: string,
+  encloser: string
+): string {
   if (value === null || value === undefined) {
     return "";
   }
 
   const stringValue = value.toString();
   const needsEscaping =
-    stringValue.includes(",") ||
-    stringValue.includes('"') ||
-    stringValue.includes("\n");
+    stringValue.includes(fieldSeparator) ||
+    stringValue.includes(lineTerminator) ||
+    stringValue.includes(encloser);
 
   if (needsEscaping) {
-    return `"${stringValue.replace(/"/g, '""')}"`;
+    return `${encloser}${stringValue.replace(new RegExp(encloser, "g"), encloser + encloser)}${encloser}`;
   }
 
   return stringValue;
