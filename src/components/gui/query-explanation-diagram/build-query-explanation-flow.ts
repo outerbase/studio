@@ -204,6 +204,7 @@ function getLayoutedExplanationElements(
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, {
       width: node.measured?.width || nodeWidth,
+      height: node.measured?.height || nodeHeight,
     });
   });
 
@@ -463,7 +464,15 @@ export function buildQueryExplanationFlow(item: ExplanationMysql, id?: number) {
     );
 
     return {
-      nodes: layout.nodes,
+      nodes: layout.nodes.map((node) => {
+        return {
+          ...node,
+          position: {
+            ...node.position,
+            x: node.position.x,
+          },
+        };
+      }),
       edges: layout.edges,
     };
   }
