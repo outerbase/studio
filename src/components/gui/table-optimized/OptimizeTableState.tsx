@@ -23,7 +23,7 @@ export type AggregateFunction = "sum" | "avg" | "min" | "max" | "count";
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
 
-interface TableSelectionRange {
+export interface TableSelectionRange {
   x1: number;
   y1: number;
   x2: number;
@@ -58,6 +58,7 @@ export default class OptimizeTableState {
   protected changeCounter = 1;
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
   protected defaultAggregateFunction: AggregateFunction = "sum";
+  protected sql: string = "";
 
   static createFromResult(
     driver: BaseDriver,
@@ -660,6 +661,32 @@ export default class OptimizeTableState {
     return false;
   }
 
+  getFullSelectionRowsIndex() {
+    const selectedRows = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      if (range.x1 === 0 && range.x2 === this.getHeaderCount() - 1) {
+        for (let i = range.y1; i <= range.y2; i++) {
+          if (!selectedRows.has(i)) selectedRows.add(i);
+        }
+      }
+    }
+    return Array.from(selectedRows.values());
+  }
+
+  getFullSelectionColsIndex() {
+    const selectedCols = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      if (range.y1 === 0 && range.y2 === this.getRowsCount() - 1) {
+        for (let i = range.x1; i <= range.x2; i++) {
+          if (!selectedCols.has(i)) selectedCols.add(i);
+        }
+      }
+    }
+    return Array.from(selectedCols.values());
+  }
+
   isFullSelectionCol(x: number) {
     for (const range of this.selectionRanges) {
       if (
@@ -839,6 +866,7 @@ export default class OptimizeTableState {
     let min = undefined;
     let max = undefined;
     let count = 0;
+    let detectedDataType = undefined;
 
     const selectedCell = new Set<string>();
     for (const range of this.selectionRanges) {
@@ -851,12 +879,57 @@ export default class OptimizeTableState {
           selectedCell.add(key);
 
           const value = this.getValue(y, x);
-          const parsed = Number(value);
 
-          if (!isNaN(parsed)) {
-            sum = sum !== undefined ? sum + parsed : parsed;
-            min = min !== undefined ? (min < parsed ? min : parsed) : parsed;
-            max = max !== undefined ? (max > parsed ? max : parsed) : parsed;
+          if (value !== null && value !== undefined && value !== "") {
+            // detect first valid element data type
+            if (detectedDataType === undefined) {
+              if (!isNaN(Number(value))) {
+                detectedDataType = "number";
+              } else if (
+                typeof value === "string" &&
+                !isNaN(Date.parse(value))
+              ) {
+                detectedDataType = "date";
+              }
+            }
+
+            if (detectedDataType === "number") {
+              const parsed = Number(value);
+              if (!isNaN(parsed)) {
+                sum = sum !== undefined ? sum + parsed : parsed;
+                min =
+                  min !== undefined
+                    ? (min as number) < parsed
+                      ? min
+                      : parsed
+                    : parsed;
+                max =
+                  max !== undefined
+                    ? (max as number) > parsed
+                      ? max
+                      : parsed
+                    : parsed;
+              }
+            } else if (
+              detectedDataType === "date" &&
+              (isValidDate(value as string) || isValidDateTime(value as string))
+            ) {
+              const parsed = Date.parse(value as string);
+              if (!isNaN(parsed)) {
+                min =
+                  min !== undefined
+                    ? Date.parse(min as string) < parsed
+                      ? min
+                      : value
+                    : value;
+                max =
+                  max !== undefined
+                    ? Date.parse(max as string) > parsed
+                      ? max
+                      : value
+                    : value;
+              }
+            }
           }
           count = count + 1;
         }
@@ -865,12 +938,19 @@ export default class OptimizeTableState {
     if (sum !== undefined && count > 0) {
       avg = sum / count;
     }
+    if (detectedDataType === "number") {
+      return {
+        sum: formatNumber(sum),
+        avg: formatNumber(avg),
+        min: formatNumber(min as number),
+        max: formatNumber(max as number),
+        count: formatNumber(count),
+      };
+    }
     return {
-      sum: formatNumber(sum),
-      avg: formatNumber(avg),
-      min: formatNumber(min),
-      max: formatNumber(max),
-      count: formatNumber(count),
+      min,
+      max,
+      count,
     };
   }
 
@@ -880,4 +960,26 @@ export default class OptimizeTableState {
   getDefaultAggregateFunction() {
     return this.defaultAggregateFunction;
   }
+  setSql(sql: string) {
+    this.sql = sql;
+  }
+  getSql() {
+    return this.sql;
+  }
+}
+
+function isValidDate(value: string): boolean {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(value)) return false;
+
+  const parsedDate = new Date(value);
+  return !isNaN(parsedDate.getTime());
+}
+
+function isValidDateTime(value: string): boolean {
+  const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  if (!dateTimeRegex.test(value)) return false;
+
+  const parsedDate = new Date(value);
+  return !isNaN(parsedDate.getTime());
 }
