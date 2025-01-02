@@ -18,6 +18,12 @@ export function QueryBlock(props: ExplainNodeProps) {
             id={props.id}
             className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
           />
+          <BaseHandle
+            type="source"
+            position={Position.Right}
+            id={props.id}
+            className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          />
           <div className="flex flex-row justify-between items-center text-[8pt]">
             <div
               className={`${props.data.cost_info.query_cost === 0 ? "hidden" : ""}`}
@@ -31,7 +37,8 @@ export function QueryBlock(props: ExplainNodeProps) {
             <div className="max-w-[200px] p-2 bg-gray-300 text-gray-900 border-gray-900 text-[9pt] border-b rounded-md py-4">
               <div>
                 <small>
-                  {props.id} #{props.data.select_id}
+                  {props.id.split("-")?.[0] || null}{" "}
+                  {props.data.select_id ? `#${props.data.select_id}` : ""}
                 </small>
               </div>
             </div>
