@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildQueryExplanationFlow,
   ExplanationMysql,
-} from "./buildQueryExplanationFlow";
+} from "./build-query-explanation-flow";
 import { QueryBlock } from "./node-type/query-block";
 import { NestedLoop } from "./node-type/nested-loop";
 import { TableBlock } from "./node-type/table-block";

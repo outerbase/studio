@@ -1,5 +1,5 @@
 import { BaseHandle } from "@/components/base-handle";
-import { ExplainNodeProps } from "../buildQueryExplanationFlow";
+import { ExplainNodeProps } from "../build-query-explanation-flow";
 import { Position } from "@xyflow/react";
 
 export function UnionBlock(props: ExplainNodeProps) {

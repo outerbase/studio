@@ -2,7 +2,7 @@ import { DatabaseResultSet, SupportedDialect } from "@/drivers/base-driver";
 import { useMemo } from "react";
 import { z } from "zod";
 import QueryExplanationDiagram from "./query-explanation-diagram";
-import { convertSQLiteRowToMySQL } from "./query-explanation-diagram/buildQueryExplanationFlow";
+import { convertSQLiteRowToMySQL } from "./query-explanation-diagram/build-query-explanation-flow";
 
 interface QueryExplanationProps {
   data: DatabaseResultSet;

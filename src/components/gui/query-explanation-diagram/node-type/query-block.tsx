@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Position } from "@xyflow/react";
 import { BaseHandle } from "@/components/base-handle";
-import { ExplainNodeProps, formatCost } from "../buildQueryExplanationFlow";
+import { ExplainNodeProps, formatCost } from "../build-query-explanation-flow";
 
 export function QueryBlock(props: ExplainNodeProps) {
   return (
