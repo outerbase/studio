@@ -13,12 +13,12 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Icon } from "@phosphor-icons/react";
 import { Loader } from "lucide-react";
 import CodePreview from "../gui/code-preview";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ShowDialogProps {
   title: string;
@@ -54,8 +54,13 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
     setDialogOption(null);
   }, []);
 
+  const showDialog = useCallback((option: ShowDialogProps) => {
+    setDialogOption(option);
+    setErrorMessage("");
+  }, []);
+
   return (
-    <CommonDialogContext.Provider value={{ showDialog: setDialogOption }}>
+    <CommonDialogContext.Provider value={{ showDialog }}>
       {children}
       {dialogOption && (
         <Dialog
@@ -67,23 +72,28 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
           }}
         >
           <DialogContent>
-            <DialogHeader
+            <DialogTitle
               className={dialogOption?.destructive ? "text-red-500" : ""}
             >
               {dialogOption.title}
-            </DialogHeader>
-            <DialogDescription className="flex flex-col gap-2">
-              {errorMessage && (
-                <div className="text-sm text-red-500 font-mono flex gap-4 items-end">
-                  <p>{errorMessage}</p>
-                </div>
-              )}
+            </DialogTitle>
 
-              <div>{dialogOption.content}</div>
-              {dialogOption.previewCode && (
-                <CodePreview code={dialogOption.previewCode} />
-              )}
+            <DialogDescription className="flex flex-col gap-2" asChild>
+              <div>
+                {errorMessage && (
+                  <div className="text-sm text-red-500 font-mono flex gap-4 items-end">
+                    <p>{errorMessage}</p>
+                  </div>
+                )}
+
+                <div>{dialogOption.content}</div>
+              </div>
             </DialogDescription>
+
+            {dialogOption.previewCode && (
+              <CodePreview code={dialogOption.previewCode} />
+            )}
+
             <DialogFooter>
               {dialogOption.actions?.map((action) => (
                 <Button
