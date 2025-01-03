@@ -1,8 +1,16 @@
 import {
-  escapeCsvValue,
+  escapeDelimitedValue,
   escapeIdentity,
   escapeSqlValue,
 } from "@/drivers/sqlite/sql-helper";
+import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
+import {
+  ExportOptions,
+  ExportSelection,
+  ExportTarget,
+} from "../gui/export/export-result-button";
+import { toast } from "sonner";
+import { getSingleTableName } from "../gui/tabs/query-tab";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],
@@ -14,7 +22,8 @@ export function selectArrayFromIndexList<T = unknown>(
 export function exportRowsToSqlInsert(
   tableName: string,
   headers: string[],
-  records: unknown[][]
+  records: unknown[][],
+  exportTarget?: ExportTarget
 ): string {
   const result: string[] = [];
 
@@ -29,7 +38,12 @@ export function exportRowsToSqlInsert(
     result.push(line);
   }
 
-  return result.join("\r\n");
+  const content = result.join("\n");
+  if (exportTarget === "clipboard") {
+    copyToClipboard(content);
+    return "";
+  }
+  return content;
 }
 
 function cellToExcelValue(value: unknown) {
@@ -53,8 +67,14 @@ export function exportRowsToExcel(records: unknown[][]) {
 export function exportToExcel(
   records: unknown[][],
   headers: string[],
-  tablename: string
+  tablename: string,
+  exportTarget: ExportTarget
 ) {
+  if (exportTarget === "clipboard") {
+    exportDataAsDelimitedText(headers, records, "\t", "\r\n", '"', "clipboard");
+    return "";
+  }
+
   const processedData = records.map((row) =>
     row.map((cell) => {
       return cellToExcelValue(cell);
@@ -62,7 +82,6 @@ export function exportToExcel(
   );
 
   const data = [headers, ...processedData];
-  console.log(data);
 
   import("xlsx").then((module) => {
     const XLSX = module;
@@ -77,7 +96,8 @@ export function exportToExcel(
 
 export function exportRowsToJson(
   headers: string[],
-  records: unknown[][]
+  records: unknown[][],
+  exportTarget?: ExportTarget
 ): string {
   const recordsWithBigIntAsString = records.map((record) =>
     record.map((value) =>
@@ -95,39 +115,128 @@ export function exportRowsToJson(
     }, {})
   );
 
-  return JSON.stringify(recordsAsObjects, null, 2);
+  const content = JSON.stringify(recordsAsObjects, null, 2);
+
+  if (exportTarget === "clipboard") {
+    copyToClipboard(content);
+    return "";
+  }
+
+  return content;
 }
 
-export function exportRowsToCsv(
+export function exportDataAsDelimitedText(
   headers: string[],
-  records: unknown[][]
+  records: unknown[][],
+  fieldSeparator: string,
+  lineTerminator: string,
+  textEncloser: string,
+  exportTarget: ExportTarget
 ): string {
   const result: string[] = [];
 
   // Add headers
-  const escapedHeaders = headers.map(escapeCsvValue);
-  const headerLine = escapedHeaders.join(",");
+  const escapedHeaders = headers.map((v) =>
+    escapeDelimitedValue(v, fieldSeparator, lineTerminator, textEncloser)
+  );
+  const headerLine = escapedHeaders.join(fieldSeparator);
   result.push(headerLine);
 
   // Add records
   for (const record of records) {
-    const escapedRecord = record.map(escapeCsvValue);
-    const recordLine = escapedRecord.join(",");
+    const escapedRecord = record.map((v) =>
+      escapeDelimitedValue(v, fieldSeparator, lineTerminator, textEncloser)
+    );
+    const recordLine = escapedRecord.join(fieldSeparator);
     result.push(recordLine);
   }
 
-  return result.join("\n");
+  const content = result.join(lineTerminator);
+
+  if (exportTarget === "clipboard") {
+    copyToClipboard(content);
+    return "";
+  }
+  return content;
 }
 
 export function getFormatHandlers(
-  records: unknown[][],
-  headers: string[],
-  tableName: string
+  data: OptimizeTableState,
+  exportTarget: ExportTarget,
+  exportSelection: ExportSelection,
+  exportOptions: ExportOptions | null,
+  selectedRangeIndex: number
 ): Record<string, (() => string) | undefined> {
+  const tableName = getSingleTableName(data.getSql()) || "UnknownTable";
+  let headers: string[] = [];
+  let records: unknown[][] = [];
+
+  // Handle export selection
+  if (exportSelection === "complete") {
+    headers = data.getHeaders().map((header) => header.name);
+    records = data
+      .getAllRows()
+      .map((row) => headers.map((header) => row.raw[header]));
+  } else if (exportSelection === "selected_row") {
+    headers = data.getHeaders().map((header) => header.name);
+    records = selectArrayFromIndexList(
+      data.getAllRows(),
+      data.getSelectedRowIndex()
+    ).map((row) => headers.map((header) => row.raw[header]));
+  } else if (exportSelection === "selected_col") {
+    headers = data
+      .getHeaders()
+      .filter((_, index) => data.getFullSelectionColsIndex().includes(index))
+      .map((header) => header.name);
+    records = data
+      .getAllRows()
+      .map((row) => headers.map((header) => row.raw[header]));
+  } else if (exportSelection === "selected_range" && selectedRangeIndex >= 0) {
+    const selectedRange = data.getSelectionRanges()[selectedRangeIndex];
+    headers = data
+      .getHeaders()
+      .filter(
+        (_, index) => index >= selectedRange.x1 && index <= selectedRange.x2
+      )
+      .map((header) => header.name);
+    records = data
+      .getAllRows()
+      .filter(
+        (_, index) => index >= selectedRange.y1 && index <= selectedRange.y2
+      )
+      .map((row) => headers.map((header) => row.raw[header]));
+  }
+
   return {
-    csv: () => exportRowsToCsv(headers, records),
-    json: () => exportRowsToJson(headers, records),
-    sql: () => exportRowsToSqlInsert(tableName, headers, records),
-    xlsx: () => exportToExcel(records, headers, tableName),
+    csv: () =>
+      exportDataAsDelimitedText(headers, records, ",", "\n", '"', exportTarget),
+    json: () => exportRowsToJson(headers, records, exportTarget),
+    sql: () => exportRowsToSqlInsert(tableName, headers, records, exportTarget),
+    xlsx: () => exportToExcel(records, headers, tableName, exportTarget),
+    delimited: () =>
+      exportDataAsDelimitedText(
+        headers,
+        records,
+        parseUserInput(exportOptions?.fieldSeparator || "") || ",",
+        parseUserInput(exportOptions?.lineTerminator || "") || "\n",
+        parseUserInput(exportOptions?.encloser || "") || '"',
+        exportTarget
+      ),
   };
+}
+
+function parseUserInput(input: string): string {
+  return input
+    .replace(/^"|"$/g, "")
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\\\/g, "\\")
+    .replace(/\\r/g, "\r");
+}
+
+function copyToClipboard(content: string) {
+  navigator.clipboard
+    .writeText(content)
+    .then(() => toast.success("Copied to clipboard"))
+    .catch(() => toast.error("Failed to copy to clipboard"));
 }

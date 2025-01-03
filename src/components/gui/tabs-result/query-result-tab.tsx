@@ -19,8 +19,9 @@ export default function QueryResult({
       databaseDriver,
       result.result
     );
-    state.setReadOnlyMode(true);
 
+    state.setReadOnlyMode(true);
+    state.setSql(result.sql);
     return state;
   }, [result, databaseDriver]);
 

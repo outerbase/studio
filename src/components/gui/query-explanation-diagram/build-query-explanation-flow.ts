@@ -1,5 +1,6 @@
 import { Edge, NodeProps, Node, MarkerType, Position } from "@xyflow/react";
 import Dagre from "@dagrejs/dagre";
+import { ExplanationRow } from "../query-explanation";
 
 interface ExplanationMysqlTable {
   id: string;
@@ -9,6 +10,7 @@ interface ExplanationMysqlTable {
     prefix_cost: number;
   };
   rows_produced_per_join: string;
+  lable?: string | null;
 }
 
 interface ExplanationMysqlGroupOperation {
@@ -23,6 +25,10 @@ interface ExplanationMysqlGroupOperation {
 
 export interface ExplanationMysql {
   query_block: {
+    union_result?: {
+      query_specifications: { query_block: ExplanationMysql }[];
+    };
+    select_id: number;
     id: string;
     cost_info: {
       query_cost: number;
@@ -79,6 +85,113 @@ export function formatCost(cost: number) {
   });
 }
 
+function parseDetailLiteToMysql(detail: string) {
+  let table = null;
+  let type = null;
+  let extra = null;
+  let key = null;
+
+  if (detail.includes("SCAN")) {
+    table = detail.match(/SCAN (\w+)/)?.[1] || null;
+    type = "ALL"; // Full table scan
+  } else if (detail.includes("SEARCH")) {
+    table = detail.match(/SEARCH (\w+)/)?.[1] || null;
+    extra = detail.match(/\((.+)\)/)?.[1] || null;
+    key = detail.match(/USING (\w+) (\w+)/)?.[2] || null;
+    type = "range"; // Range-based search
+  } else if (detail.includes("USING INDEX")) {
+    extra = "Using index";
+  }
+
+  return { table, type, extra, key };
+}
+
+export function convertSQLiteRowToMySQL(
+  rows: ExplanationRow[]
+): ExplanationMysql {
+  const haveUnion = rows.some((row) => row.detail.includes("UNION"));
+  const tables: { table: ExplanationMysqlTable }[] = [];
+  const cost_info = {
+    prefix_cost: 0,
+    query_cost: 0,
+  };
+  const query_specifications: { query_block: ExplanationMysql }[] = [];
+
+  if (haveUnion) {
+    const main_query_block = rows.find((r) => r.parent === 0);
+    const query_blocks = rows.filter((r) => r.parent === main_query_block?.id);
+    for (const block of query_blocks) {
+      const blockRows = rows.filter((r) => r.parent === block.id);
+      const convert = convertSQLiteRowToMySQL(blockRows);
+      (query_specifications as unknown[]).push({
+        query_block: {
+          select_id: Number(block.id || 0),
+          cost_info,
+          id: block.id,
+          table: convert.query_block.table,
+          nested_loop: convert.query_block.nested_loop,
+          label: block.detail,
+        },
+      });
+    }
+  }
+
+  for (const row of rows) {
+    const parsedDetail = parseDetailLiteToMysql(row.detail);
+    if (parsedDetail.table) {
+      const table = {
+        table: {
+          id: String(row.id || ""),
+          table_name: parsedDetail.table || "",
+          cost_info: {
+            prefix_cost: 0,
+            query_cost: 0,
+            read_cost: 0,
+            eval_cost: 0,
+          },
+          rows_produced_per_join: "0",
+          rows_examined_per_scan: "0",
+          access_type: parsedDetail.type,
+          key: parsedDetail.key,
+          lable: parsedDetail.extra,
+        },
+      };
+      tables.push(table);
+    }
+  }
+
+  if (haveUnion) {
+    return {
+      query_block: {
+        select_id: 1,
+        cost_info,
+        id: "query_info",
+        union_result: {
+          query_specifications,
+        },
+      },
+    };
+  }
+
+  return {
+    query_block: {
+      select_id: 1,
+      cost_info: {
+        prefix_cost: 0,
+        query_cost: 0,
+      },
+      id: "query_info",
+      table:
+        tables.length === 1
+          ? {
+              ...tables[0].table,
+            }
+          : undefined,
+      nested_loop: tables.length > 1 ? tables : undefined,
+    },
+  };
+}
+
 function getLayoutedExplanationElements(
   nodes: Node[],
   edges: Edge[],
@@ -121,13 +234,13 @@ function getLayoutedExplanationElements(
   return { nodes: newNodes, edges };
 }
 
-export function buildQueryExplanationFlow(item: ExplanationMysql) {
+export function buildQueryExplanationFlow(item: ExplanationMysql, id?: number) {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   // Keep all tables
   const nodesTables = new Set();
   const edgesTable = new Set();
-  let keyNestedloopAndTableShouldConnected = "query_block";
+  let keyNestedloopAndTableShouldConnected = `query_block${id ? `-${id}` : ""}`;
 
   let table = item.query_block.table || null;
   const ordering_operation = item.query_block.ordering_operation || null;
@@ -135,15 +248,35 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
     item.query_block.grouping_operation ||
     item.query_block.ordering_operation?.grouping_operation ||
     null;
+  const union_result = item.query_block?.union_result || null;
   let nested_loop = item.query_block.nested_loop || [];
 
   if (item.query_block) {
     nodes.push({
-      id: "query_block",
+      id: `query_block${id ? `-${id}` : ""}`,
       data: { ...item.query_block },
       type: "QUERY_BLOCK",
       position,
     });
+    if (id) {
+      edges.push({
+        id: `union_result-query_block${id ? `-${id}` : ""}`,
+        target: "union_result",
+        source: `query_block-${id}`,
+        targetHandle: "union_result",
+        sourceHandle: `query_block-${id}`,
+        type: "smoothstep",
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 14,
+          height: 14,
+        },
+        style: {
+          strokeWidth: 2,
+        },
+        animated: true,
+      });
+    }
   }
 
   if (ordering_operation && group_operation) {
@@ -157,7 +290,7 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       id: "ordering_operation",
       data: { ...item.query_block.ordering_operation },
       type: "ORDERING_OPERATION",
-      position,
+      position: position,
       measured: {
         width: 100,
       },
@@ -166,13 +299,13 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       id: "group_operation",
       data: { ...item.query_block.ordering_operation?.grouping_operation },
       type: "GROUP_OPERATION",
-      position,
+      position: position,
       measured: {
         width: 100,
       },
     });
     edges.push({
-      id: `query_block-ordering_operation`,
+      id: `query_block${id ? `-${id}` : ""}-ordering_operation`,
       target: "query_block",
       source: "ordering_operation",
       targetHandle: "query_block",
@@ -215,13 +348,13 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       id: "ordering_operation",
       data: { ...item.query_block.ordering_operation },
       type: "ORDERING_OPERATION",
-      position,
+      position: position,
       measured: {
         width: 100,
       },
     });
     edges.push({
-      id: `query_block-ordering_operation`,
+      id: `query_block${id ? `-${id}` : ""}-ordering_operation`,
       target: "query_block",
       source: "ordering_operation",
       targetHandle: "query_block",
@@ -247,13 +380,13 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       id: "group_operation",
       data: { ...item.query_block.grouping_operation },
       type: "GROUP_OPERATION",
-      position,
+      position: position,
       measured: {
         width: 100,
       },
     });
     edges.push({
-      id: `query_block-group_operation`,
+      id: `query_block${id ? `-${id}` : ""}-group_operation`,
       target: "query_block",
       source: "group_operation",
       targetHandle: "query_block",
@@ -271,20 +404,93 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
     });
   }
 
+  if (union_result) {
+    const union_flow: any[] = [];
+    nodes.push({
+      id: "query_block",
+      data: {
+        ...item.query_block,
+        cost_info: {
+          query_cost: 0,
+        },
+      },
+      type: "QUERY_BLOCK",
+      position: {
+        x: 300,
+        y: -100,
+      },
+    });
+    nodes.push({
+      id: "union_result",
+      data: { label: "UNION" },
+      type: "UNION_RESULT",
+      position: {
+        x: 150,
+        y: -100,
+      },
+    });
+    edges.push({
+      id: "query_block-union_result",
+      target: "query_block",
+      source: "union_result",
+      targetHandle: "query_block",
+      sourceHandle: "union_result",
+      type: "smoothstep",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+      },
+      style: {
+        strokeWidth: 2,
+      },
+      animated: true,
+    });
+    for (const union of union_result.query_specifications) {
+      const unionNodeEdge: {
+        nodes: Node[] | unknown[];
+        edges: Edge[] | unknown[];
+      } = buildQueryExplanationFlow(
+        union as unknown as ExplanationMysql,
+        (union as unknown as ExplanationMysql).query_block.select_id || 0
+      );
+      union_flow.push(unionNodeEdge);
+    }
+
+    const layout = getLayoutedExplanationElements(
+      [...nodes, ...union_flow.map((x) => x.nodes).flat()],
+      [...edges, ...union_flow.map((x) => x.edges).flat()],
+      "LR"
+    );
+
+    return {
+      nodes: layout.nodes.map((node) => {
+        return {
+          ...node,
+          position: {
+            ...node.position,
+            x: node.position.x,
+          },
+        };
+      }),
+      edges: layout.edges,
+    };
+  }
+
   const nested_reverse = (nested_loop || []).reverse();
 
   if (table) {
     nodes.push({
-      id: table.table_name,
+      id: `${table.table_name}${id}`,
       data: { ...table },
       type: "TABLE",
-      position,
+      position: position,
     });
 
     edges.push({
-      id: `${keyNestedloopAndTableShouldConnected}-${table.table_name}`,
+      id: `${keyNestedloopAndTableShouldConnected}-${table.table_name}${id}`,
       target: keyNestedloopAndTableShouldConnected,
-      source: table.table_name,
+      source: `${table.table_name}${id}`,
       targetHandle: keyNestedloopAndTableShouldConnected,
       sourceHandle: "right",
       type: "smoothstep",
@@ -315,7 +521,7 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
           rows_produced_per_join: value.table.rows_produced_per_join,
         },
         type: "NESTED_LOOP",
-        position,
+        position: position,
         measured: {
           width: 100,
           height: 50,
@@ -344,7 +550,10 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
           strokeWidth: 2,
         },
         animated: true,
-        label: formatCost(Number(value.table.rows_produced_per_join)) + " rows",
+        label:
+          value.table.rows_produced_per_join === "0"
+            ? ""
+            : formatCost(Number(value.table.rows_produced_per_join)) + " rows",
         labelShowBg: false,
         labelStyle: {
           fill: "#AAAAAA",
@@ -360,7 +569,7 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
       const key = index === nested_reverse.length - 1 ? index - 1 : index;
       const nested = layout.nodes.find((f) => f.id === `nested_loop_${index}`);
       nodesTables.add({
-        id: value.table.table_name,
+        id: `${value.table.table_name}${id}`,
         data: {
           ...value.table,
         },
@@ -373,11 +582,12 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
         sourcePosition: Position.Bottom,
       });
       edgesTable.add({
-        id: `nested_loop_${key}-${value.table.table_name}`,
+        id: `nested_loop_${key}-${value.table.table_name}${id}`,
         target: "nested_loop_" + key,
-        source: value.table.table_name,
-        targetHandle: index === nested_reverse.length - 1 ? "left" : "bottom",
-        sourceHandle: value.table.table_name,
+        source: `${value.table.table_name}${id}`,
+        targetHandle:
+          index === nested_reverse.length - 1 || id ? "left" : "bottom",
+        sourceHandle: id ? "right" : `${value.table.table_name}${id}`,
         type: "smoothstep",
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -388,6 +598,13 @@ export function buildQueryExplanationFlow(item: ExplanationMysql) {
           strokeWidth: 2,
         },
         animated: true,
+        label: value.table.lable ? value.table.lable : "",
+        labelShowBg: false,
+        labelStyle: {
+          fill: "#AAAAAA",
+          color: "#AAAAAA",
+          transform: "translate(-5%, -5%)",
+        },
       });
     }
     return {

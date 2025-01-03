@@ -2,20 +2,21 @@ import { DatabaseResultSet, SupportedDialect } from "@/drivers/base-driver";
 import { useMemo } from "react";
 import { z } from "zod";
 import QueryExplanationDiagram from "./query-explanation-diagram";
+import { convertSQLiteRowToMySQL } from "./query-explanation-diagram/build-query-explanation-flow";
 
 interface QueryExplanationProps {
   data: DatabaseResultSet;
   dialect?: SupportedDialect;
 }
 
-interface ExplanationRow {
+export interface ExplanationRow {
   id: number;
   parent: number;
   notused: number;
   detail: string;
 }
 
-type ExplanationRowWithChildren = ExplanationRow & {
+export type ExplanationRowWithChildren = ExplanationRow & {
   children: ExplanationRowWithChildren[];
 };
 
@@ -117,55 +118,20 @@ export function QueryExplanation(props: QueryExplanationProps) {
     );
   }
 
-  if (props.dialect !== "sqlite") {
-    return (
-      <div className="p-5 font-mono h-full overflow-y-auto">
-        {props.dialect === "mysql" ? (
-          <QueryExplanationDiagram items={tree.value} />
-        ) : (
-          <p className="text-destructive">{tree.value}</p>
-        )}
-      </div>
+  let value = tree.value;
+
+  if (props.dialect === "sqlite") {
+    value = convertSQLiteRowToMySQL(
+      props.data.rows as unknown as ExplanationRow[]
     );
   }
 
   return (
     <div className="p-5 font-mono h-full overflow-y-auto">
-      <ul>
-        {tree.value.map((node: ExplanationRowWithChildren) => (
-          <li key={`query-explanation-p-${node.parent}-${node.id}`}>
-            <RenderQueryExplanationItem item={node} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function RenderQueryExplanationItem(props: {
-  item: ExplanationRowWithChildren;
-}) {
-  return (
-    <div key={props.item.id} className="[--circle-width:16px]">
-      <div className="py-1 flex items-center gap-x-4">
-        <span className="size-[--circle-width] bg-gray-200 rounded-full" />
-        <p className="py-1.5">{props.item.detail}</p>
-      </div>
-
-      {props.item.children.length > 0 && (
-        <ul className="ml-7">
-          {props.item.children.map((child) => {
-            return (
-              <li
-                className="relative"
-                key={`query-explanation-p-${child.parent}-${child.id}`}
-              >
-                <span className="absolute left-[calc(var(--circle-width)/2)] -translate-x-1/2 z-[-1] h-full border-l-2 border-gray-200" />
-                <RenderQueryExplanationItem key={child.id} item={child} />
-              </li>
-            );
-          })}
-        </ul>
+      {["mysql", "sqlite"].includes(props.dialect as string) ? (
+        <QueryExplanationDiagram items={value} />
+      ) : (
+        <p className="text-destructive">{value}</p>
       )}
     </div>
   );

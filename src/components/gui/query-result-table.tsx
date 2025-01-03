@@ -24,7 +24,6 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
-import { cn } from "@/lib/utils";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -50,14 +49,12 @@ function Header({
 
   if (internalState.getSelectedColIndex().includes(colIndex)) {
     if (internalState.isFullSelectionCol(colIndex)) {
-      textClass = cn(
-        "grow line-clamp-1 font-mono font-bold",
-        "bg-blue-600 border-red-900  text-white font-bold"
-      );
-      thClass =
-        "flex grow items-center px-2 overflow-hidden bg-blue-600 dark:bg-blue-800";
-    } else {
       textClass = "grow line-clamp-1 font-mono font-bold text-white font-bold";
+      thClass =
+        "flex grow items-center px-2 overflow-hidden bg-blue-600 dark:bg-blue-900";
+    } else {
+      textClass =
+        "grow line-clamp-1 font-mono font-bold dark:text-white font-bold";
       thClass =
         "flex grow items-center px-2 overflow-hidden bg-blue-200 dark:bg-blue-400";
     }
