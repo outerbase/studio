@@ -1,6 +1,6 @@
 {
   "name": "@libsqlstudio/studio",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3008",
@@ -132,7 +132,6 @@
     "showdown": "^2.1.0",
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
-    "tsup": "^8.1.0",
     "tsx": "^4.7.1",
     "typescript": "^5"
   }
