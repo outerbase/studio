@@ -8,7 +8,6 @@ export default function ExplainResultTab({
   data: DatabaseResultSet;
 }) {
   const { databaseDriver } = useDatabaseDriver();
-
   return (
     <div className="flex flex-col h-full w-full border-t">
       <div className="grow overflow-hidden">
