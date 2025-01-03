@@ -53,7 +53,8 @@ function Header({
       thClass =
         "flex grow items-center px-2 overflow-hidden bg-blue-600 dark:bg-blue-900";
     } else {
-      textClass = "grow line-clamp-1 font-mono font-bold text-white font-bold";
+      textClass =
+        "grow line-clamp-1 font-mono font-bold dark:text-white font-bold";
       thClass =
         "flex grow items-center px-2 overflow-hidden bg-blue-200 dark:bg-blue-400";
     }

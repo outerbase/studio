@@ -131,7 +131,7 @@ function renderCellList({
         tdClass = "sticky left-0 bg-blue-600 dark:bg-blue-800";
       } else {
         textClass =
-          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono text-white font-bold";
+          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono dark:text-white font-bold";
         tdClass = "sticky left-0 bg-blue-200 dark:bg-blue-400";
       }
     }
