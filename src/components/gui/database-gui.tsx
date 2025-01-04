@@ -19,6 +19,7 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
 import { useSchema } from "@/context/schema-provider";
 import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
+import DoltSidebar from "./database-specified/dolt/dolt-sidebar";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -30,6 +31,8 @@ export default function DatabaseGui() {
   }, []);
 
   const { databaseDriver, docDriver } = useDatabaseDriver();
+  const databaseDriverDialect = databaseDriver.getFlags().dialect;
+
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const { currentSchemaName } = useSchema();
   const [tabs, setTabs] = useState<WindowTabItemProps[]>(() => [
@@ -91,11 +94,11 @@ export default function DatabaseGui() {
       },
       docDriver
         ? {
-          key: "saved",
-          name: "Queries",
-          content: <SavedDocTab />,
-          icon: <Binoculars weight="light" size={24} />,
-        }
+            key: "saved",
+            name: "Queries",
+            content: <SavedDocTab />,
+            icon: <Binoculars weight="light" size={24} />,
+          }
         : undefined,
       {
         key: "tools",
@@ -103,8 +106,20 @@ export default function DatabaseGui() {
         content: <ToolSidebar />,
         icon: <GearSix weight="light" size={24} />,
       },
+      databaseDriverDialect
+        ? {
+            key: "dolt",
+            name: "Dolt",
+            content: <DoltSidebar />,
+            icon: (
+              <div className="font-mono text-3xl font-bold text-green-500">
+                d
+              </div>
+            ),
+          }
+        : undefined,
     ].filter(Boolean) as SidebarTabItem[];
-  }, [docDriver]);
+  }, [docDriver, databaseDriverDialect]);
 
   const tabSideMenu = useMemo(() => {
     return [
@@ -116,11 +131,11 @@ export default function DatabaseGui() {
       },
       databaseDriver.getFlags().supportCreateUpdateTable
         ? {
-          text: "New Table",
-          onClick: () => {
-            openTab({ type: "schema", schemaName: currentSchemaName });
-          },
-        }
+            text: "New Table",
+            onClick: () => {
+              openTab({ type: "schema", schemaName: currentSchemaName });
+            },
+          }
         : undefined,
     ].filter(Boolean) as { text: string; onClick: () => void }[];
   }, [currentSchemaName, databaseDriver]);

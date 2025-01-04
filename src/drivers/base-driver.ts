@@ -31,7 +31,7 @@ export function describeTableColumnType(type: TableColumnDataType) {
   }
 }
 
-export type SupportedDialect = "sqlite" | "mysql" | "postgres";
+export type SupportedDialect = "sqlite" | "mysql" | "postgres" | "dolt";
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 

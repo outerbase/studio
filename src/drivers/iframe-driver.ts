@@ -1,5 +1,5 @@
 "use client";
-import { DatabaseResultSet } from "./base-driver";
+import { DatabaseResultSet, DriverFlags } from "./base-driver";
 import MySQLLikeDriver from "./mysql/mysql-driver";
 import PostgresLikeDriver from "./postgres/postgres-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
@@ -139,6 +139,15 @@ export class IframeMySQLDriver extends MySQLLikeDriver {
   transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = this.conn.transaction(stmts);
     return r;
+  }
+}
+
+export class IframeDoltDriver extends IframeMySQLDriver {
+  getFlags(): DriverFlags {
+    return {
+      ...super.getFlags(),
+      dialect: "dolt",
+    };
   }
 }
 
