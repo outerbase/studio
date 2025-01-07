@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Icon } from "@phosphor-icons/react";
@@ -70,20 +71,22 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
             <DialogHeader
               className={dialogOption?.destructive ? "text-red-500" : ""}
             >
-              {dialogOption.title}
+              <DialogTitle>{dialogOption.title}</DialogTitle>
             </DialogHeader>
-            <DialogDescription className="flex flex-col gap-2">
-              {errorMessage && (
-                <div className="text-sm text-red-500 font-mono flex gap-4 items-end">
-                  <p>{errorMessage}</p>
-                </div>
-              )}
 
-              <div>{dialogOption.content}</div>
-              {dialogOption.previewCode && (
-                <CodePreview code={dialogOption.previewCode} />
-              )}
-            </DialogDescription>
+            {errorMessage && (
+              <div className="text-sm text-red-500 font-mono flex gap-4 items-end">
+                <p>{errorMessage}</p>
+              </div>
+            )}
+
+            <div>{dialogOption.content}</div>
+            {dialogOption.previewCode && (
+              <CodePreview code={dialogOption.previewCode} />
+            )}
+
+            <DialogDescription className="flex flex-col gap-2"></DialogDescription>
+
             <DialogFooter>
               {dialogOption.actions?.map((action) => (
                 <Button
