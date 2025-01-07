@@ -1,6 +1,6 @@
 {
   "name": "@libsqlstudio/studio",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3008",
