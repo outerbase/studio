@@ -107,7 +107,7 @@ export default function DatabaseGui() {
         content: <ToolSidebar />,
         icon: <GearSix weight="light" size={24} />,
       },
-      databaseDriverDialect
+      databaseDriverDialect === "dolt"
         ? {
             key: "dolt",
             name: "Dolt",
