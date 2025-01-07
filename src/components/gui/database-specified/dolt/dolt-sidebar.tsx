@@ -1,8 +1,8 @@
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { useCallback, useEffect, useState } from "react";
-import { Toolbar, ToolbarButton } from "../../toolbar";
-import { RefreshCcw } from "lucide-react";
+import { Toolbar, ToolbarButton, ToolbarSeparator } from "../../toolbar";
+import { ChevronDown, Loader, MoreHorizontal, RefreshCcw } from "lucide-react";
 import { GitBranch, Minus, Plus, Table } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import useDoltCreateBranchModal from "./dolt-create-branch";
+import { toast } from "sonner";
+import { useCommonDialog } from "@/components/common-dialog";
+import { DoltIcon } from "@/components/icons/outerbase-icon";
 
 interface DoltStatusResultItem {
   table_name: string;
@@ -25,26 +34,121 @@ interface DoltCommitResultItem {
   commit_hash: string;
   committer: string;
   message: string;
+  date: string;
 }
 
-function DoltCommitLog({ commitList }: { commitList: DoltCommitResultItem[] }) {
+function DoltCommitLog({
+  commitList,
+  refreshStatus,
+}: {
+  commitList: DoltCommitResultItem[];
+  refreshStatus: () => void;
+}) {
+  const { modal: createBranchModal, openModal: openCreateBranch } =
+    useDoltCreateBranchModal(refreshStatus);
+
+  const { databaseDriver } = useDatabaseDriver();
+  const { showDialog: showCommonDialog } = useCommonDialog();
+
+  const onResetClicked = useCallback(
+    (commit: DoltCommitResultItem) => {
+      showCommonDialog({
+        title: "Soft Reset",
+        content: (
+          <div className="flex flex-col gap-2">
+            <p>Are you sure you want to reset to this commit?</p>
+            <div className="p-4 border shadow rounded text-sm flex flex-col gap-1">
+              <div className="font-semibold">{commit.message}</div>
+              <div className="font-mono">{commit.commit_hash}</div>
+            </div>
+          </div>
+        ),
+        destructive: true,
+        actions: [
+          {
+            text: "Reset",
+            onClick: async () => {
+              await databaseDriver.query(
+                `CALL DOLT_RESET(${databaseDriver.escapeValue(commit.commit_hash)});`
+              );
+            },
+            onComplete: () => {
+              refreshStatus();
+            },
+          },
+        ],
+      });
+    },
+    [refreshStatus, showCommonDialog, databaseDriver]
+  );
+
   return (
-    <div className="flex-1 border-t mt-4">
-      <div className="p-4 text-sm">Commits</div>
-      <div className="px-4 flex flex-col">
+    <div className="w-full overflow-y-auto overflow-x-hidden">
+      {createBranchModal}
+
+      <div className="pl-4 flex flex-col w-full py-4">
         {commitList.map((commit) => (
           <div
             key={commit.commit_hash}
-            className="relative flex flex-col gap-1 border-l-2 border-blue-500 p-2 pl-4 ml-2"
+            className="relative flex fgap-1 border-l-2 border-blue-500 p-2 pl-4 ml-2"
           >
-            <div className="w-4 h-4 bg-background border-4 border-blue-500 rounded-full absolute -left-[10px] top-[10px]"></div>
+            <div className="w-4 h-4 bg-background border-4 border-blue-500 rounded-full absolute -left-[9px] top-[10px]"></div>
 
-            <span className="flex-1 text-sm line-clamp-1">
-              {commit.message}
-            </span>
-            <span className="flex-1 text-xs font-mono line-clamp-1">
-              {commit.commit_hash}
-            </span>
+            <div className="flex-1 overflow-hidden">
+              <span className="flex-1 text-xs line-clamp-1 font-semibold">
+                {commit.message}
+              </span>
+
+              <span className="flex-1 text-xs font-mono line-clamp-1">
+                {commit.commit_hash}
+              </span>
+
+              <div className="text-xs mt-1 flex gap-2 overflow-hidden">
+                <div className="text-muted-foreground line-clamp-1">
+                  {commit.date}
+                </div>
+                <div className="text-blue-700 dark:text-blue-400 line-clamp-1">
+                  {commit.committer}
+                </div>
+              </div>
+            </div>
+
+            <div className="ml-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" align="end">
+                  <DropdownMenuItem
+                    inset
+                    onClick={() => {
+                      navigator.clipboard.writeText(commit.commit_hash);
+                      toast("Copied commit hash");
+                    }}
+                  >
+                    Copy Commit Hash
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => openCreateBranch(commit.commit_hash)}
+                  >
+                    <GitBranch className="w-4 h-4 mr-2" />
+                    Create Branch
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    inset
+                    className="text-red-500 focus:bg-red-500 focus:text-white"
+                    onClick={() => {
+                      onResetClicked(commit);
+                    }}
+                  >
+                    Reset (Soft)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         ))}
       </div>
@@ -60,50 +164,78 @@ function DoltChangeItem({
   refreshStatus: () => void;
 }) {
   const { databaseDriver } = useDatabaseDriver();
+  const [loading, setLoading] = useState(false);
 
   const onStageClicked = useCallback(
     (tableName: string) => {
+      setLoading(true);
       databaseDriver
         .query(`CALL DOLT_ADD(${databaseDriver.escapeValue(tableName)});`)
-        .then(refreshStatus);
+        .then(refreshStatus)
+        .finally(() => setLoading(false));
     },
     [databaseDriver, refreshStatus]
   );
 
   const onResetClicked = useCallback(
     (tableName: string) => {
+      setLoading(true);
       databaseDriver
         .query(`CALL DOLT_RESET(${databaseDriver.escapeValue(tableName)});`)
-        .then(refreshStatus);
+        .then(refreshStatus)
+        .finally(() => setLoading(false));
     },
     [databaseDriver, refreshStatus]
   );
 
   let itemClassName = "";
+  let action = <></>;
+  let actionShortDescription = "";
 
   if (status.status === "new table") {
     itemClassName = "text-green-500";
+    actionShortDescription = status.staged > 0 ? "A" : "U";
   } else if (status.status === "deleted") {
+    actionShortDescription = "D";
     itemClassName = "text-red-500";
   } else if (status.status === "modified") {
+    actionShortDescription = "M";
     itemClassName = "text-yellow-500";
+  }
+
+  if (loading) {
+    action = <Loader className="w-4 h-4 animate-spin cursor-pointer" />;
+  } else if (status.staged > 0) {
+    action = (
+      <Minus
+        className="w-4 h-4 cursor-pointer"
+        onClick={() => onResetClicked(status.table_name)}
+      />
+    );
+  } else {
+    action = (
+      <Plus
+        className="w-4 h-4 cursor-pointer"
+        onClick={() => onStageClicked(status.table_name)}
+      />
+    );
   }
 
   return (
     <div key={status.table_name} className="flex items-center gap-2 font-mono">
       <Table />
-      <span className={cn(itemClassName, "flex-1 text-sm")}>
+      <span
+        className={cn(
+          "flex-1 text-sm",
+          status.status === "deleted" ? "line-through" : ""
+        )}
+      >
         {status.table_name}
       </span>
-      {status.staged > 0 ? (
-        <Minus
-          onClick={() => {
-            onResetClicked(status.table_name);
-          }}
-        />
-      ) : (
-        <Plus onClick={() => onStageClicked(status.table_name)} />
-      )}
+      {action}
+      <span className={cn(itemClassName, "text-md font-bold")}>
+        {actionShortDescription}
+      </span>
     </div>
   );
 }
@@ -134,6 +266,12 @@ function DoltChanges({
       setCommitMessage("");
 
       refreshStatus();
+    } catch (e) {
+      if (e instanceof Error) {
+        toast(e.message);
+      } else {
+        toast("An error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -158,14 +296,15 @@ function DoltChanges({
           size={"sm"}
           onClick={onCommitClicked}
         >
+          {loading && <Loader className="w-4 h-4 animate-spin mr-2" />}
           Commit
         </Button>
       </div>
 
       {stagedItems.length > 0 && (
         <>
-          <div className="p-4 text-sm">Staged</div>
-          <div className="px-4 flex flex-col gap-2">
+          <div className="p-4 py-0 text-xs font-semibold mb-1">STAGES</div>
+          <div className="px-4 pb-2 flex flex-col">
             {stagedItems.map((status) => {
               return (
                 <DoltChangeItem
@@ -181,8 +320,8 @@ function DoltChanges({
 
       {changedItems.length > 0 && (
         <>
-          <div className="p-4 text-sm">Changes</div>
-          <div className="px-4 flex flex-col gap-2">
+          <div className="p-4 py-0 text-xs font-semibold mb-1">CHANGES</div>
+          <div className="px-4 flex flex-col">
             {changedItems.map((status) => {
               return (
                 <DoltChangeItem
@@ -222,7 +361,7 @@ export default function DoltSidebar() {
       );
 
       setCommitList(
-        (await databaseDriver.query(`SELECT * FROM dolt_log;`))
+        (await databaseDriver.query(`SELECT * FROM dolt_log LIMIT 30;`))
           .rows as unknown as DoltCommitResultItem[]
       );
 
@@ -234,6 +373,9 @@ export default function DoltSidebar() {
       setBranchList([]);
     }
   }, [databaseDriver, setBranchList, currentSchemaName]);
+
+  const { modal: createBranchModal, openModal: openCreateBranchModal } =
+    useDoltCreateBranchModal(refreshDoltSchema);
 
   const onCheckoutBranch = useCallback(
     (branchName: string) => {
@@ -248,24 +390,40 @@ export default function DoltSidebar() {
     refreshDoltSchema().then().catch();
   }, [refreshDoltSchema, currentSchemaName]);
 
+  if (!currentSchemaName) {
+    return (
+      <div className="flex flex-col w-full p-4 justify-center items-center text-muted-foreground text-sm gap-4">
+        <DoltIcon className="text-green-500" />
+
+        <p className="text-center">
+          No schema or database is currently selected.
+        </p>
+        <p className="text-center">
+          Double-click on a database to set it as the active one.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 overflow-hidden overflow-y-auto">
+    <div className="flex flex-col overflow-hidden w-full">
+      {createBranchModal}
       <div className="p-1 border-b">
         <Toolbar>
-          <ToolbarButton
-            onClick={refreshDoltSchema}
-            text="Refresh"
-            icon={<RefreshCcw className="w-4 h-4" />}
-          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant={"ghost"}>
+              <Button size="sm" variant={"outline"}>
                 <GitBranch className="w-4 h-4 mr-2" />
-                Checkout
+                {selectedBranch}
+                <ChevronDown className="w-3 h-3 ml-2" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" align="start">
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  openCreateBranchModal();
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 New Branch
               </DropdownMenuItem>
@@ -286,11 +444,30 @@ export default function DoltSidebar() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <ToolbarSeparator />
+          <ToolbarButton
+            onClick={refreshDoltSchema}
+            text="Refresh"
+            icon={<RefreshCcw className="w-4 h-4" />}
+          />
         </Toolbar>
       </div>
 
-      <DoltChanges statusList={statusList} refreshStatus={refreshDoltSchema} />
-      <DoltCommitLog commitList={commitList} />
+      <ResizablePanelGroup direction="vertical" className="flex-1">
+        <ResizablePanel>
+          <DoltChanges
+            statusList={statusList}
+            refreshStatus={refreshDoltSchema}
+          />
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel className="flex">
+          <DoltCommitLog
+            commitList={commitList}
+            refreshStatus={refreshDoltSchema}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

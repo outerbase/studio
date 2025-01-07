@@ -20,6 +20,7 @@ import SavedDocTab from "./sidebar/saved-doc-tab";
 import { useSchema } from "@/context/schema-provider";
 import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 import DoltSidebar from "./database-specified/dolt/dolt-sidebar";
+import { DoltIcon } from "../icons/outerbase-icon";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -111,11 +112,7 @@ export default function DatabaseGui() {
             key: "dolt",
             name: "Dolt",
             content: <DoltSidebar />,
-            icon: (
-              <div className="font-mono text-3xl font-bold text-green-500">
-                d
-              </div>
-            ),
+            icon: <DoltIcon className="w-7 h-7 text-green-500" />,
           }
         : undefined,
     ].filter(Boolean) as SidebarTabItem[];
