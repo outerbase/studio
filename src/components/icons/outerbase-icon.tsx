@@ -521,3 +521,24 @@ export function SQLiteIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function DoltIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("h-12 w-12 flex-shrink-0", className)}
+      width="64"
+      height="64"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M42.87 11V49.8173C42.8654 50.7538 42.498 51.6506 41.8476 52.3132C41.1971 52.9758 40.316 53.3505 39.3957 53.3561H24.4953C23.5713 53.3561 22.6849 52.9839 22.0299 52.3207C21.3749 51.6576 21.0046 50.7575 21 49.8173V28.7263C21.0046 27.7861 21.3749 26.886 22.0299 26.2229C22.6849 25.5597 23.5713 25.1875 24.4953 25.1875H36.2115"
+        stroke="currentColor"
+        strokeWidth="12.6599"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
