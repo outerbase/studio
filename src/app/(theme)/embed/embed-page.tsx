@@ -22,7 +22,7 @@ export function createEmbedPage(render: () => ReactElement) {
 
     const overrideThemeVariables: Record<string, string> = {};
 
-    for (const key in props.searchParams) {
+    for (const key in searchParams) {
       if (!key.startsWith("themeVariables[")) {
         continue;
       }
