@@ -15,7 +15,8 @@ export const save = async (data: UserAuth, provider: Provider) => {
   if (!lucia) return;
 
   const { id, name, email } = data;
-  const headerStore = headers();
+  const headerStore = await headers();
+  const cookieStore = await cookies();
   const db = get_database();
 
   const existingUser = await db.query.user_oauth.findFirst({
@@ -31,7 +32,7 @@ export const save = async (data: UserAuth, provider: Provider) => {
 
     const sessionCookie = lucia.createSessionCookie(session.id);
 
-    cookies().set(
+    cookieStore.set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
@@ -63,7 +64,7 @@ export const save = async (data: UserAuth, provider: Provider) => {
 
   const sessionCookie = lucia.createSessionCookie(session.id);
 
-  cookies().set(
+  cookieStore.set(
     sessionCookie.name,
     sessionCookie.value,
     sessionCookie.attributes

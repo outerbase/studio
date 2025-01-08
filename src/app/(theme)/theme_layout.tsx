@@ -19,7 +19,7 @@ export default async function ThemeLayout({
   disableToggle?: boolean;
   overrideThemeVariables?: Record<string, string>;
 }>) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const theme =
     overrideTheme ??
     (cookieStore.get("theme")?.value === "dark" ? "dark" : "light");

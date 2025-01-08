@@ -24,11 +24,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function MySQLPlaygroundEditor({
-  params: { roomName },
-}: {
-  params: { roomName: string };
-}) {
+interface MySQLPlaygroundProps {
+  params: Promise<{ roomName: string }>;
+}
+
+export default async function MySQLPlaygroundEditor(
+  props: MySQLPlaygroundProps
+) {
+  const { roomName } = await props.params;
+
   return (
     <ThemeLayout>
       <MySQLPlaygroundPageClient roomName={roomName} />

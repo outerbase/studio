@@ -1,10 +1,4 @@
-import ThemeLayout from "../../theme_layout";
+import { createEmbedPage } from "../embed-page";
 import EmbedPageClient from "./page-client";
 
-export default async function EmbedPage() {
-  return (
-    <ThemeLayout overrideTheme={"dark"} disableToggle={true}>
-      <EmbedPageClient />
-    </ThemeLayout>
-  );
-}
+export default createEmbedPage(() => <EmbedPageClient />);

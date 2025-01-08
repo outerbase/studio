@@ -146,7 +146,7 @@ export default abstract class CommonSQLImplement extends BaseDriver {
       .map(([colName, colValue]) => {
         return `${this.escapeId(colName)} = ${escapeSqlValue(colValue)}`;
       })
-      .join(", ");
+      .join(" AND ");
 
     const sql = `SELECT * FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)} ${wherePart ? "WHERE " + wherePart : ""} LIMIT 1 OFFSET 0`;
     return this.query(sql);

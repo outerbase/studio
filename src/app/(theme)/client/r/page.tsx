@@ -3,17 +3,14 @@ import { get_database } from "@/db";
 import { database } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";
 import { and, eq, isNotNull } from "drizzle-orm";
-import dynamic from "next/dynamic";
+import ClientPageBody from "./page-client";
 
-const ClientPageBody = dynamic(() => import("./page-client"), {
-  ssr: false,
-});
+interface RemoteSessionPageProps {
+  searchParams: Promise<{ p: string }>;
+}
 
-export default async function SessionPage({
-  searchParams,
-}: {
-  searchParams: { p: string };
-}) {
+export default async function RemoteSessionPage(props: RemoteSessionPageProps) {
+  const searchParams = await props.searchParams;
   const { session } = await getSessionFromCookie();
 
   if (!session) {

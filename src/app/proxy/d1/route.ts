@@ -5,9 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
+  const headerStore = await headers();
+
   // Get the account id and database id from header
-  const accountId = headers().get("x-account-id");
-  const databaseId = headers().get("x-database-id");
+  const accountId = headerStore.get("x-account-id");
+  const databaseId = headerStore.get("x-database-id");
 
   if (!accountId || !databaseId) {
     return NextResponse.json(
@@ -18,7 +20,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const authorizationHeader = headers().get("Authorization");
+  const authorizationHeader = headerStore.get("Authorization");
   if (!authorizationHeader) {
     return NextResponse.json(
       {
