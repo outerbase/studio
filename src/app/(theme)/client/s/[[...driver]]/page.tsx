@@ -1,8 +1,4 @@
-import dynamic from "next/dynamic";
-
-const ClientPageBody = dynamic(() => import("./page-client"), {
-  ssr: false,
-});
+import ClientPageBody from "./page-client";
 
 export default function SessionPage() {
   return <ClientPageBody />;

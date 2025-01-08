@@ -5,8 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
+  const headerStore = await headers();
+
   // Get the account id and database id from header
-  const endpoint = headers().get("x-starbase-url");
+  const endpoint = headerStore.get("x-starbase-url");
 
   if (!endpoint) {
     return NextResponse.json(
@@ -17,7 +19,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const authorizationHeader = headers().get("Authorization");
+  const authorizationHeader = headerStore.get("Authorization");
   if (!authorizationHeader) {
     return NextResponse.json(
       {

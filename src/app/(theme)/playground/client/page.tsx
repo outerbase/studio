@@ -27,11 +27,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function PlaygroundEditor({
-  searchParams,
-}: {
-  searchParams: { template?: string; url?: string };
-}) {
+interface PlaygroundEditorProps {
+  searchParams: Promise<{ template?: string; url?: string }>;
+}
+
+export default async function PlaygroundEditor(props: PlaygroundEditorProps) {
+  const searchParams = await props.searchParams;
   const templateName = searchParams.template;
   let templateFile: string | null = null;
 

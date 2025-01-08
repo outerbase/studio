@@ -63,9 +63,9 @@ export type DatabaseOperationHandler<BodyType = unknown> = (props: {
 export default function withDatabaseOperation<T = unknown>(
   handler: DatabaseOperationHandler<T>
 ) {
-  return withUser<{ params: { database_id: string } }>(
+  return withUser<{ params: Promise<{ database_id: string }> }>(
     async ({ user, req, params }) => {
-      const databaseId = params.params.database_id;
+      const databaseId = (await params.params).database_id;
       const db = get_database();
 
       if (!databaseId) {
@@ -93,7 +93,7 @@ export default function withDatabaseOperation<T = unknown>(
       return await handler({
         user,
         body:
-          headers().get("Content-Type") === "application/json"
+          (await headers()).get("Content-Type") === "application/json"
             ? await req.json()
             : {},
         database: databaseInfo,
