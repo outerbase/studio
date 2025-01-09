@@ -3,10 +3,13 @@ import {
   DatabaseResultSet,
   DatabaseResultStat,
 } from "@/drivers/base-driver";
+import { getSQLStatementType, SQLStatementType } from "@/drivers/sql-helper";
+import { sendAnalyticEvents } from "@/lib/tracking";
 
 export interface MultipleQueryProgressItem {
   order: number;
   sql: string;
+  statementType?: SQLStatementType;
   start: number;
   end?: number;
   stats?: DatabaseResultStat;
@@ -39,14 +42,17 @@ export async function multipleQuery(
 
   for (let i = 0; i < statements.length; i++) {
     const statement = statements[i] as string;
+    const statementType = statement ? getSQLStatementType(statement) : "OTHER";
 
     const log: MultipleQueryProgressItem = {
       order: i,
       sql: statement,
       start: Date.now(),
+      statementType,
     };
 
     logs.push(log);
+
     if (onProgress) {
       onProgress({ logs, progress: i, total: statements.length });
     }
@@ -84,6 +90,26 @@ export async function multipleQuery(
       break;
     }
   }
+
+  sendAnalyticEvents([
+    ...logs.map((entry) => {
+      return {
+        name: "evt_query_execute",
+        data: {
+          sql: entry.statementType ?? "OTHER",
+          type: entry.statementType ?? "OTHER",
+        },
+      };
+    }),
+    ...result.map((entry) => {
+      return {
+        name: "evt_rows_queried",
+        data: {
+          count: entry.result.rows.length,
+        },
+      };
+    }),
+  ]);
 
   return { result, logs };
 }

@@ -30,6 +30,7 @@ export interface WindowTabItemProps {
   title: string;
   identifier: string;
   key: string;
+  type?: string;
 }
 
 interface WindowTabsProps {
@@ -167,18 +168,18 @@ export default function WindowTabs({
                       hideCloseButton
                         ? undefined
                         : () => {
-                          const newTabs = tabs.filter(
-                            (t) => t.key !== tab.key
-                          );
+                            const newTabs = tabs.filter(
+                              (t) => t.key !== tab.key
+                            );
 
-                          if (selected >= idx) {
-                            onSelectChange(newTabs.length - 1);
-                          }
+                            if (selected >= idx) {
+                              onSelectChange(newTabs.length - 1);
+                            }
 
-                          if (onTabsChange) {
-                            onTabsChange(newTabs);
+                            if (onTabsChange) {
+                              onTabsChange(newTabs);
+                            }
                           }
-                        }
                     }
                   />
                 ))}
@@ -220,7 +221,7 @@ export default function WindowTabs({
                 <div
                   className="absolute left-0 right-0 top-0 bottom-0"
                   style={{
-                    display: tabIndex === selected ? 'inherit' : 'none'
+                    display: tabIndex === selected ? "inherit" : "none",
                   }}
                 >
                   {tab.component}

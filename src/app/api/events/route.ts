@@ -4,9 +4,9 @@
 //
 // All recorded data will be stored in the Starbase Database.
 
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import zod from "zod";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { insertTrackingRecord } from "@/lib/api/insert-tracking-record";
 
 const eventBodySchema = zod.object({
@@ -20,17 +20,26 @@ const eventBodySchema = zod.object({
     .min(1),
 });
 
+export async function OPTIONS() {
+  // Handle preflight requests
+  return new NextResponse(null, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-ob-id",
+    },
+  });
+}
+
 export const POST = async (req: NextRequest) => {
   // Getting the device id
-  const cookieStore = await cookies();
-
-  let deviceId = cookieStore.get("od-id")?.value;
+  const headerStore = await headers();
+  const deviceId = headerStore.get("x-od-id");
 
   if (!deviceId) {
-    deviceId = crypto.randomUUID();
-
-    cookieStore.set("od-id", deviceId, {
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+    return NextResponse.json({
+      success: false,
+      error: "Device ID is required",
     });
   }
 
@@ -46,7 +55,11 @@ export const POST = async (req: NextRequest) => {
   }
 
   // Save the event
-  await insertTrackingRecord(deviceId, validate.data.events.slice(0, 50));
+  after(() => {
+    insertTrackingRecord(deviceId, validate.data.events.slice(0, 50))
+      .then()
+      .catch();
+  });
 
   return NextResponse.json({
     success: true,

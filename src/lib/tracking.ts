@@ -17,17 +17,29 @@ export function normalizedPathname(pathname: string) {
   return pathname;
 }
 
-export function addTrackEvent(eventName: string, data?: unknown) {
+export function sendAnalyticEvents(events: TrackEventItem[]) {
   if (typeof window === "undefined") {
     return;
   }
 
   if (!process.env.NEXT_PUBLIC_ANALYTIC_ENABLED) return;
 
-  window.navigator.sendBeacon(
-    "/api/events",
-    JSON.stringify({
-      events: [{ name: eventName, data }],
-    })
-  );
+  let deviceId = localStorage.getItem("od-id");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("od-id", deviceId);
+  }
+
+  fetch("/api/events", {
+    method: "POST",
+    body: JSON.stringify({
+      events,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      "x-od-id": deviceId,
+    },
+  })
+    .then()
+    .catch();
 }

@@ -185,6 +185,7 @@ export function receiveOpenTabMessage({
         key,
         identifier: key,
         component: generateComponent(newTab, title),
+        type: newTab.type,
       },
     ];
   });
