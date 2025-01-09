@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ThemeLayout from "../../../theme_layout";
 import MySQLPlaygroundPageClient from "./page-client";
+import ClientOnly from "@/components/client-only";
 
 export const metadata: Metadata = {
   title:
@@ -35,7 +36,9 @@ export default async function MySQLPlaygroundEditor(
 
   return (
     <ThemeLayout>
-      <MySQLPlaygroundPageClient roomName={roomName} />
+      <ClientOnly>
+        <MySQLPlaygroundPageClient roomName={roomName} />
+      </ClientOnly>
     </ThemeLayout>
   );
 }

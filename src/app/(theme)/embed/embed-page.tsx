@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import ThemeLayout from "../theme_layout";
+import ClientOnly from "@/components/client-only";
 
 export interface EmbedPageProps {
   searchParams: Promise<{
@@ -36,7 +37,7 @@ export function createEmbedPage(render: () => ReactElement) {
         disableToggle={disableToggle}
         overrideThemeVariables={overrideThemeVariables}
       >
-        {render()}
+        <ClientOnly>{render()}</ClientOnly>
       </ThemeLayout>
     );
   };

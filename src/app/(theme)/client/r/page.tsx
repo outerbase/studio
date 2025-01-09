@@ -4,6 +4,7 @@ import { database } from "@/db/schema";
 import { getSessionFromCookie } from "@/lib/auth";
 import { and, eq, isNotNull } from "drizzle-orm";
 import ClientPageBody from "./page-client";
+import ClientOnly from "@/components/client-only";
 
 interface RemoteSessionPageProps {
   searchParams: Promise<{ p: string }>;
@@ -28,15 +29,17 @@ export default async function RemoteSessionPage(props: RemoteSessionPageProps) {
   }
 
   return (
-    <ClientPageBody
-      token={session.id}
-      config={{
-        id: databaseId,
-        name: databaseInfo.name ?? "",
-        storage: "remote",
-        description: databaseInfo.description ?? "",
-        label: (databaseInfo.color ?? "blue") as SavedConnectionLabel,
-      }}
-    />
+    <ClientOnly>
+      <ClientPageBody
+        token={session.id}
+        config={{
+          id: databaseId,
+          name: databaseInfo.name ?? "",
+          storage: "remote",
+          description: databaseInfo.description ?? "",
+          label: (databaseInfo.color ?? "blue") as SavedConnectionLabel,
+        }}
+      />
+    </ClientOnly>
   );
 }

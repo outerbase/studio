@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { dbDataset } from "@/db/schema-dataset";
 import { Metadata } from "next";
 import ThemeLayout from "../../theme_layout";
+import ClientOnly from "@/components/client-only";
 
 export const metadata: Metadata = {
   title:
@@ -59,7 +60,9 @@ export default async function PlaygroundEditor(props: PlaygroundEditorProps) {
 
   return (
     <ThemeLayout>
-      <PlaygroundEditorBody preloadDatabase={templateFile} />
+      <ClientOnly>
+        <PlaygroundEditorBody preloadDatabase={templateFile} />
+      </ClientOnly>
     </ThemeLayout>
   );
 }

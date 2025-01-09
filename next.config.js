@@ -9,6 +9,20 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_STUDIO_VERSION: pkg.version,
   },
+  headers: async () => {
+    return [
+      {
+        source: "/api/events",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,DELETE,PATCH,POST,PUT",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = withMDX(nextConfig);
