@@ -10,7 +10,8 @@ export const GET = async (request: NextRequest) => {
   const state = url.searchParams.get("state");
   const GITHUB_API_URL = "https://api.github.com";
 
-  const storedState = cookies().get("github_oauth_state")?.value ?? null;
+  const storedState =
+    (await cookies()).get("github_oauth_state")?.value ?? null;
   if (!code || !state || !storedState || state !== storedState) {
     return new Response(null, {
       status: 400,

@@ -4,7 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { openTab } from "@/messages/open-tab";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 import useMessageListener from "@/components/hooks/useMessageListener";
@@ -21,6 +21,7 @@ import { useSchema } from "@/context/schema-provider";
 import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 import DoltSidebar from "./database-specified/dolt/dolt-sidebar";
 import { DoltIcon } from "../icons/outerbase-icon";
+import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -43,6 +44,7 @@ export default function DatabaseGui() {
       key: "query",
       component: <QueryWindow initialName="Query" />,
       icon: Binoculars,
+      type: "query",
     },
   ]);
 
@@ -136,6 +138,29 @@ export default function DatabaseGui() {
         : undefined,
     ].filter(Boolean) as { text: string; onClick: () => void }[];
   }, [currentSchemaName, databaseDriver]);
+
+  // Send to analytic when tab changes.
+  const previousLogTabKey = useRef<string>("");
+  useEffect(() => {
+    const currentTab = tabs[selectedTabIndex];
+    if (currentTab && currentTab.key !== previousLogTabKey.current) {
+      // We don't log the first tab because it's already logged in the main screen.
+      if (previousLogTabKey.current) {
+        sendAnalyticEvents([
+          {
+            name: "page_view",
+            data: {
+              path: normalizedPathname(window.location.pathname),
+              tab: currentTab.type,
+              tab_key: currentTab.key,
+            },
+          },
+        ]);
+      }
+
+      previousLogTabKey.current = currentTab.key;
+    }
+  }, [tabs, selectedTabIndex, previousLogTabKey]);
 
   return (
     <div className="h-screen w-screen flex flex-col">

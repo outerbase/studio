@@ -91,11 +91,11 @@ export const getSession = cache(async function () {
     };
   }
 
-  const authorizationHeader = headers().get("authorization");
+  const authorizationHeader = (await headers()).get("authorization");
   let sessionId = lucia.readBearerToken(authorizationHeader ?? "");
 
   if (!sessionId) {
-    sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+    sessionId = (await cookies()).get(lucia.sessionCookieName)?.value ?? null;
   }
 
   if (!sessionId) {
@@ -117,7 +117,7 @@ export const getSessionFromBearer = cache(async function () {
     };
   }
 
-  const authorizationHeader = headers().get("authorization");
+  const authorizationHeader = (await headers()).get("authorization");
   const sessionId = lucia.readBearerToken(authorizationHeader ?? "");
 
   if (!sessionId) {
@@ -132,6 +132,7 @@ export const getSessionFromBearer = cache(async function () {
 
 export const getSessionFromCookie = cache(async function () {
   const lucia = LuciaAuth.get();
+
   if (!lucia) {
     return {
       user: null,
@@ -139,7 +140,9 @@ export const getSessionFromCookie = cache(async function () {
     };
   }
 
-  const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+  const cookieStore = await cookies();
+
+  const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null;
   if (!sessionId) {
     return {
       user: null,
@@ -152,7 +155,7 @@ export const getSessionFromCookie = cache(async function () {
   try {
     if (result.session && result.session.fresh) {
       const sessionCookie = lucia.createSessionCookie(result.session.id);
-      cookies().set(
+      cookieStore.set(
         sessionCookie.name,
         sessionCookie.value,
         sessionCookie.attributes
@@ -160,7 +163,7 @@ export const getSessionFromCookie = cache(async function () {
     }
     if (!result.session) {
       const sessionCookie = lucia.createBlankSessionCookie();
-      cookies().set(
+      cookieStore.set(
         sessionCookie.name,
         sessionCookie.value,
         sessionCookie.attributes
