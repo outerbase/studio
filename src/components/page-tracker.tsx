@@ -87,4 +87,6 @@ export default function PageTracker() {
       window.removeEventListener("error", handler);
     };
   }, []);
+
+  return null;
 }
