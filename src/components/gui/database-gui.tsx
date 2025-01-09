@@ -4,7 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { openTab } from "@/messages/open-tab";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 import useMessageListener from "@/components/hooks/useMessageListener";
@@ -139,12 +139,13 @@ export default function DatabaseGui() {
     ].filter(Boolean) as { text: string; onClick: () => void }[];
   }, [currentSchemaName, databaseDriver]);
 
-  const onTabSelectChange = useCallback(
-    (newTabIndex: number) => {
-      setSelectedTabIndex(newTabIndex);
-
-      const currentTab = tabs[newTabIndex];
-      if (currentTab) {
+  // Send to analytic when tab changes.
+  const previousLogTabKey = useRef<string>("");
+  useEffect(() => {
+    const currentTab = tabs[selectedTabIndex];
+    if (currentTab && currentTab.key !== previousLogTabKey.current) {
+      // We don't log the first tab because it's already logged in the main screen.
+      if (previousLogTabKey.current) {
         sendAnalyticEvents([
           {
             name: "page_view",
@@ -156,9 +157,10 @@ export default function DatabaseGui() {
           },
         ]);
       }
-    },
-    [tabs]
-  );
+
+      previousLogTabKey.current = currentTab.key;
+    }
+  }, [tabs, selectedTabIndex, previousLogTabKey]);
 
   return (
     <div className="h-screen w-screen flex flex-col">
@@ -172,7 +174,7 @@ export default function DatabaseGui() {
             menu={tabSideMenu}
             tabs={tabs}
             selected={selectedTabIndex}
-            onSelectChange={onTabSelectChange}
+            onSelectChange={setSelectedTabIndex}
             onTabsChange={setTabs}
           />
         </ResizablePanel>
