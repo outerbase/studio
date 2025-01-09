@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Fragment } from "react";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
+import PageTracker from "@/components/page-tracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,7 @@ export default async function RootLayout({
       <Fragment>{children}</Fragment>
       <Toaster />
       <Analytics />
+      <PageTracker />
       <Script async defer src="https://buttons.github.io/buttons.js" />
     </body>
   );
