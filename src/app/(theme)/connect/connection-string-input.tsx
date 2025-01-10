@@ -6,6 +6,7 @@ import {
 } from "./saved-connection-storage";
 import { Input } from "@/components/ui/input";
 import FileHandlerPicker from "@/components/filehandler-picker";
+import { CommonDialogProvider } from "@/components/common-dialog";
 
 export default function ConnectionStringInput({
   value,
@@ -68,12 +69,14 @@ export default function ConnectionStringInput({
           );
         } else if (field.type === "filehandler") {
           inputDom = (
-            <FileHandlerPicker
-              value={value[field.name]}
-              onChange={(fileId) => {
-                onChange({ ...value, [field.name]: fileId });
-              }}
-            />
+            <CommonDialogProvider>
+              <FileHandlerPicker
+                value={value[field.name]}
+                onChange={(fileId) => {
+                  onChange({ ...value, [field.name]: fileId });
+                }}
+              />
+            </CommonDialogProvider>
           );
         }
 

@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { CommonDialogProvider } from "@/components/common-dialog";
 
 function OverlayAround({
   x,
@@ -324,10 +325,12 @@ export default function PlaygroundEditorBody({
 
   return (
     <>
-      <Script src="/sqljs/sql-wasm.js" onReady={onReady} />
-      <ScreenDropZone onFileDrop={setHandler} />
-      <Onboarding />
-      {dom}
+      <CommonDialogProvider>
+        <Script src="/sqljs/sql-wasm.js" onReady={onReady} />
+        <ScreenDropZone onFileDrop={setHandler} />
+        <Onboarding />
+        {dom}
+      </CommonDialogProvider>
     </>
   );
 }

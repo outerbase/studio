@@ -222,6 +222,7 @@ export interface ColumnTypeSuggestion {
 export interface ColumnTypeSelector {
   type: "dropdown" | "text";
   dropdownOptions?: { value: string; text: string }[];
+  dropdownNormalized?: (value: string) => string;
   typeSuggestions?: ColumnTypeSuggestionGroup[];
 
   // This will use for auto field when create table column
