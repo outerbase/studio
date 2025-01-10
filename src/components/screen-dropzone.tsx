@@ -2,10 +2,60 @@
 
 import { useEffect } from "react";
 import { useCommonDialog } from "./common-dialog";
+import Link from "next/link";
 
 interface Props {
   onFileDrop: (handler: FileSystemFileHandle) => void;
 }
+
+export const unsupportFileHandlerDialogContent = {
+  destructive: true,
+  title: "Unsupported Browser",
+  content: (
+    <p className="text-sm flex flex-col gap-2">
+      <p>
+        Outerbase Studio SQLite client requires the{" "}
+        <span className="bg-muted font-mono px-2 inline-flex">
+          FileSystemHandle
+        </span>{" "}
+        API to function.
+      </p>
+
+      <p>
+        This API is currently supported only by Chromium-based browsers, such as{" "}
+        <strong>Edge, Chrome, and Brave</strong>. Learn more about it here:{" "}
+        <Link
+          target="_blank"
+          href="https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle"
+          className="text-blue-500 underline"
+        >
+          FileSystemHandle API
+        </Link>
+        .
+      </p>
+
+      <p>
+        If you&apos;re encountering this issue in Brave, note that the File
+        System API is disabled by default. To enable it:
+      </p>
+
+      <ul className="list-disc list-inside">
+        <li>
+          Open{" "}
+          <span className="bg-muted font-mono px-2 inline-flex">
+            brave://flags
+          </span>{" "}
+          in the browser.
+        </li>
+        <li>Search for &quot;File System Access API.&quot;</li>
+        <li>Enable the feature.</li>
+        <li>
+          Restart Brave after enabling the API to ensure proper functionality.
+        </li>
+      </ul>
+    </p>
+  ),
+};
 
 export default function ScreenDropZone({ onFileDrop }: Props) {
   const { showDialog } = useCommonDialog();
@@ -23,11 +73,7 @@ export default function ScreenDropZone({ onFileDrop }: Props) {
       try {
         (fileList[0] as any).getAsFileSystemHandle().then(onFileDrop);
       } catch (error) {
-        showDialog({
-          destructive: true,
-          title: "Warning",
-          content: "Your browser are not support. please use another browser.",
-        });
+        showDialog(unsupportFileHandlerDialogContent);
       }
     };
 
