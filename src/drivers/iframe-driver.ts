@@ -95,11 +95,29 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
       ? new ElectronConnection()
       : new IframeConnection();
 
-  constructor(options?: { supportPragmaList: boolean }) {
+  protected supportBigInt = false;
+
+  constructor(options?: {
+    supportPragmaList: boolean;
+    supportBigInt: boolean;
+  }) {
     super();
     if (options?.supportPragmaList !== undefined) {
       this.supportPragmaList = options.supportPragmaList;
     }
+
+    if (options?.supportBigInt !== undefined) {
+      this.supportBigInt = options.supportBigInt;
+    }
+  }
+
+  getFlags(): DriverFlags {
+    return {
+      ...super.getFlags(),
+      supportCreateUpdateTable: true,
+      supportModifyColumn: true,
+      supportBigInt: this.supportBigInt,
+    };
   }
 
   listen() {

@@ -1,4 +1,4 @@
-import type {
+import {
   ColumnTypeSelector,
   DatabaseResultSet,
   DatabaseSchemaItem,
@@ -28,6 +28,14 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   columnTypeSelector: ColumnTypeSelector = {
     type: "dropdown",
+    dropdownNormalized: (typeName: string): string => {
+      const type = convertSqliteType(typeName);
+      if (type === undefined) return "TEXT";
+      if (type === TableColumnDataType.INTEGER) return "INTEGER";
+      if (type === TableColumnDataType.REAL) return "REAL";
+      if (type === TableColumnDataType.BLOB) return "BLOB";
+      return "TEXT";
+    },
     dropdownOptions: [
       { text: "Integer", value: "INTEGER" },
       { text: "Real", value: "REAL" },
