@@ -98,8 +98,8 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
   protected supportBigInt = false;
 
   constructor(options?: {
-    supportPragmaList: boolean;
-    supportBigInt: boolean;
+    supportPragmaList?: boolean;
+    supportBigInt?: boolean;
   }) {
     super();
     if (options?.supportPragmaList !== undefined) {
