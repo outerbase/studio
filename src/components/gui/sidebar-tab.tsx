@@ -1,7 +1,7 @@
 import { useConfig } from "@/context/config-provider";
 import { useTheme } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
-import { ReactElement, useState } from "react";
+import { ReactElement, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
 import {
@@ -35,8 +35,38 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
 
   const config = useConfig();
 
+  /**
+   * Adding color to help identify the database.
+   * Some people have multiple databases open at the same time.
+   * This will help them identify the database they are working on.
+   *
+   * https://github.com/outerbase/studio/issues/234
+   */
+  const databaseColorIndicatorClassName = useMemo(() => {
+    if (config.color === "red") {
+      return `border-l-8 border-red-400 dark:border-red-800`;
+    } else if (config.color === "blue") {
+      return `border-l-8 border-blue-400 dark:border-blue-800`;
+    } else if (config.color === "green") {
+      return `border-l-8 border-green-400 dark:border-green-800`;
+    } else if (config.color === "yellow") {
+      return `border-l-8 border-yellow-400 dark:border-yellow-800`;
+    } else if (config.color === "purple") {
+      return `border-l-8 border-purple-400 dark:border-purple-800`;
+    } else if (config.color === "gray") {
+      return `border-l-8 border-gray-400 dark:border-gray-800`;
+    }
+
+    return "";
+  }, [config.color]);
+
   return (
-    <div className={cn("flex h-full bg-neutral-50 dark:bg-neutral-950")}>
+    <div
+      className={cn(
+        "flex h-full bg-neutral-50 dark:bg-neutral-950",
+        databaseColorIndicatorClassName
+      )}
+    >
       <div className={cn("shrink-0")}>
         <div className="flex flex-col border-r border-neutral-200 dark:border-neutral-800 h-full p-3 gap-4">
           <DropdownMenu modal={false}>
