@@ -1,6 +1,4 @@
-import type { WindowTabItemProps } from "@/components/gui/windows-tab";
-import { MessageChannelName, TAB_PREFIX_SAVED_QUERY } from "../const";
-import type { Dispatch, SetStateAction } from "react";
+import { TAB_PREFIX_SAVED_QUERY } from "../const";
 import { LucideTableProperties, LucideUser, LucideCog } from "lucide-react";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
@@ -58,11 +56,22 @@ export type OpenTabsProps =
   | ToolsTab;
 
 export function openTab(props: OpenTabsProps) {
-  window.internalPubSub.send(MessageChannelName.OPEN_NEW_TAB, props);
+  if (window.outerbaseOpenTab) {
+    window.outerbaseOpenTab({
+      icon: generateIconFromTab(props),
+      title: generateTitle(props),
+      key: generateKeyFromTab(props),
+      identifier: generateKeyFromTab(props),
+      component: generateComponent(props, generateTitle(props)),
+      type: props.type,
+    });
+  }
 }
 
-export function closeTabs(key: string[]) {
-  window.internalPubSub.send(MessageChannelName.CLOSE_TABS, key);
+export function closeTabs(keys: string[]) {
+  if (window.outerbaseCloseTab) {
+    window.outerbaseCloseTab(keys);
+  }
 }
 
 function generateKeyFromTab(tab: OpenTabsProps) {
@@ -155,38 +164,4 @@ function generateComponent(tab: OpenTabsProps, title: string) {
       />
     );
   return <div>Unknown Tab</div>;
-}
-
-export function receiveOpenTabMessage({
-  newTab,
-  setTabs,
-  setSelectedTabIndex,
-}: {
-  newTab: OpenTabsProps;
-  setTabs: Dispatch<SetStateAction<WindowTabItemProps[]>>;
-  setSelectedTabIndex: Dispatch<SetStateAction<number>>;
-}) {
-  setTabs((prev) => {
-    const key = generateKeyFromTab(newTab);
-    const foundIndex = prev.findIndex((tab) => tab.identifier === key);
-
-    if (foundIndex >= 0) {
-      setSelectedTabIndex(foundIndex);
-      return prev;
-    }
-    setSelectedTabIndex(prev.length);
-    const title = generateTitle(newTab);
-
-    return [
-      ...prev,
-      {
-        icon: generateIconFromTab(newTab),
-        title,
-        key,
-        identifier: key,
-        component: generateComponent(newTab, title),
-        type: newTab.type,
-      },
-    ];
-  });
 }

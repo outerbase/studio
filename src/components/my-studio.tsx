@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { ReactElement, useCallback } from "react";
+import { useCallback } from "react";
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio } from "./gui/studio";
@@ -12,7 +12,6 @@ interface MyStudioProps {
   expiredAt?: number;
   collabarator?: CollaborationBaseDriver;
   docDriver?: SavedDocDriver;
-  sideBarFooterComponent?: ReactElement;
 }
 
 function MyStudioInternal({
@@ -21,7 +20,6 @@ function MyStudioInternal({
   driver,
   docDriver,
   collabarator,
-  sideBarFooterComponent,
 }: MyStudioProps) {
   const router = useRouter();
 
@@ -37,7 +35,6 @@ function MyStudioInternal({
       onBack={goBack}
       collaboration={collabarator}
       docDriver={docDriver}
-      sideBarFooterComponent={sideBarFooterComponent}
     />
   );
 }

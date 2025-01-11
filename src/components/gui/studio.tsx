@@ -3,28 +3,26 @@ import MainScreen from "@/components/gui/main-connection";
 import { ConfigProvider } from "@/context/config-provider";
 import { DriverProvider } from "@/context/driver-provider";
 import type { BaseDriver } from "@/drivers/base-driver";
-import { ReactElement, useMemo } from "react";
-import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
-import { StudioContextMenuItem } from "@/messages/open-context-menu";
+import { useEffect, useMemo } from "react";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { FullEditorProvider } from "./providers/full-editor-provider";
 import { CommonDialogProvider } from "../common-dialog";
-
-export interface StudioExtension {
-  contextMenu?: (state: OptimizeTableState) => StudioContextMenuItem[];
-}
+import {
+  BeforeQueryPipeline,
+  StudioExtensionManager,
+} from "@/core/extension-manager";
 
 interface StudioProps {
   driver: BaseDriver;
+  extensions?: StudioExtensionManager;
   collaboration?: CollaborationBaseDriver;
   docDriver?: SavedDocDriver;
   name: string;
   color: string;
   onBack?: () => void;
-  sideBarFooterComponent?: ReactElement;
   theme?: "dark" | "light";
-  extensions?: StudioExtension[];
+  containerClassName?: string;
 }
 
 export function Studio({
@@ -33,9 +31,9 @@ export function Studio({
   docDriver,
   name,
   color,
-  extensions,
-  sideBarFooterComponent,
   onBack,
+  extensions,
+  containerClassName,
 }: Readonly<StudioProps>) {
   const proxyDriver = useMemo(() => {
     return new Proxy(driver, {
@@ -44,24 +42,53 @@ export function Studio({
 
         if (property === "query") {
           return async (statement: string) => {
-            console.group("Query");
-            console.info(`%c${statement}`, "color:#e67e22");
-            console.groupEnd();
-            return await target.query(statement);
+            const beforePipeline = new BeforeQueryPipeline("query", [
+              statement,
+            ]);
+
+            if (extensions) {
+              await extensions.beforeQuery(beforePipeline);
+            }
+
+            return await target.query(beforePipeline.getStatments()[0]);
           };
         } else if (property === "transaction") {
           return async (statements: string[]) => {
-            console.group("Transaction");
-            statements.forEach((s) => console.log(`%c${s}`, "color:#e67e22"));
-            console.groupEnd();
-            return await target.transaction(statements);
+            const beforePipeline = new BeforeQueryPipeline("transaction", [
+              ...statements,
+            ]);
+
+            if (extensions) {
+              await extensions.beforeQuery(beforePipeline);
+            }
+
+            return await target.transaction(beforePipeline.getStatments());
           };
         }
 
         return Reflect.get(...arg);
       },
     });
-  }, [driver]);
+  }, [driver, extensions]);
+
+  const finalExtensionManager = useMemo(() => {
+    return extensions ?? new StudioExtensionManager([]);
+  }, [extensions]);
+
+  useEffect(() => {
+    finalExtensionManager.init();
+    return () => finalExtensionManager.cleanup();
+  });
+
+  const config = useMemo(() => {
+    return {
+      name,
+      color,
+      onBack,
+      extensions: finalExtensionManager,
+      containerClassName,
+    };
+  }, [name, color, onBack, finalExtensionManager, containerClassName]);
 
   return (
     <DriverProvider
@@ -69,13 +96,7 @@ export function Studio({
       collaborationDriver={collaboration}
       docDriver={docDriver}
     >
-      <ConfigProvider
-        extensions={extensions}
-        name={name}
-        color={color}
-        onBack={onBack}
-        sideBarFooterComponent={sideBarFooterComponent}
-      >
+      <ConfigProvider config={config}>
         <CommonDialogProvider>
           <FullEditorProvider>
             <MainScreen />

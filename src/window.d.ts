@@ -1,9 +1,9 @@
-import type InternalPubSub from "@/lib/internal-pubsub";
-
 export {};
 declare global {
   interface Window {
-    internalPubSub: InternalPubSub;
     outerbaseIpc?: any;
+    outerbaseOpenTab?: (openTabOption: WindowTabItemProps) => void;
+    outerbaseCloseTab?: (keys: string[]) => void;
+    outerbaseOpenContextMenu?: (options: OpenContextMenuOptions) => void;
   }
 }

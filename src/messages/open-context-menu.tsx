@@ -1,4 +1,3 @@
-import { MessageChannelName } from "../const";
 import type { LucideIcon } from "lucide-react";
 
 export interface StudioContextMenuItem {
@@ -24,7 +23,9 @@ export interface OpenContextMenuOptions {
 }
 
 export function openContextMenu(options: OpenContextMenuOptions) {
-  window.internalPubSub.send(MessageChannelName.OPEN_CONTEXT_MENU, options);
+  if (window.outerbaseOpenContextMenu) {
+    window.outerbaseOpenContextMenu(options);
+  }
 }
 
 export function openContextMenuFromEvent(contextMenu: OpenContextMenuList) {

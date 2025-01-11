@@ -1,21 +1,22 @@
-import { StudioExtension } from "@/components/gui/studio";
-import type { PropsWithChildren, ReactElement } from "react";
-import { createContext, useContext, useMemo } from "react";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import { noop } from "lodash";
+import type { PropsWithChildren } from "react";
+import { createContext, useContext } from "react";
 
 interface ConfigContextProps {
   color: string;
   name: string;
   onBack?: () => void;
-  sideBarFooterComponent?: ReactElement;
-  extensions?: StudioExtension[];
+  extensions: StudioExtensionManager;
+  containerClassName?: string;
 }
 
 const ConfigContext = createContext<ConfigContextProps>({
   name: "",
   color: "",
-  onBack: () => {
-    throw new Error("Not implemented");
-  },
+  extensions: new StudioExtensionManager([]),
+  onBack: noop,
+  containerClassName: "",
 });
 
 export function useConfig() {
@@ -24,18 +25,9 @@ export function useConfig() {
 
 export function ConfigProvider({
   children,
-  color,
-  name,
-  onBack,
-  extensions,
-  sideBarFooterComponent,
-}: PropsWithChildren<ConfigContextProps>) {
-  const memo = useMemo(
-    () => ({ color, name, onBack, sideBarFooterComponent, extensions }),
-    [name, color, onBack, sideBarFooterComponent, extensions]
-  );
-
+  config,
+}: PropsWithChildren<{ config: ConfigContextProps }>) {
   return (
-    <ConfigContext.Provider value={memo}>{children}</ConfigContext.Provider>
+    <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
   );
 }
