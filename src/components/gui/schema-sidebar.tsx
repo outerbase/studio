@@ -1,7 +1,6 @@
 import { LucideSearch } from "lucide-react";
 import { useMemo, useState } from "react";
 import SchemaList from "./schema-sidebar-list";
-import { openTab } from "@/messages/open-tab";
 import { useSchema } from "@/context/schema-provider";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
@@ -14,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { scc } from "@/core/command";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
@@ -33,10 +33,7 @@ export default function SchemaView() {
       items.push({
         name: "Create Table",
         onClick: () => {
-          openTab({
-            type: "schema",
-            schemaName: currentSchemaName,
-          });
+          scc.tabs.openBuiltinSchema({ schemaName: currentSchemaName });
         },
       });
     }
@@ -54,10 +51,7 @@ export default function SchemaView() {
       items.push({
         name: "Create Trigger",
         onClick: () => {
-          openTab({
-            type: "trigger",
-            schemaName: currentSchemaName,
-          });
+          scc.tabs.openBuiltinTrigger({ schemaName: currentSchemaName });
         },
       });
     }

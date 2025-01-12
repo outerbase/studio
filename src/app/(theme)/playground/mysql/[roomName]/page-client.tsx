@@ -1,6 +1,8 @@
 "use client";
 import { Studio } from "@/components/gui/studio";
 import ServerLoadingAnimation from "@/components/icons/server-loading";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import { createStandardExtensions } from "@/core/standard-extension";
 import MySQLPlaygroundDriver from "@/drivers/mysql/mysql-playground-driver";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -20,6 +22,10 @@ export default function MySQLPlaygroundPageClient({
       onReady: () => setReady(true),
     });
   }, [setReady, roomName]);
+
+  const extensions = useMemo(() => {
+    return new StudioExtensionManager(createStandardExtensions());
+  }, []);
 
   // Create ping useeffect
   useEffect(() => {
@@ -48,6 +54,7 @@ export default function MySQLPlaygroundPageClient({
   return (
     <Studio
       driver={driver}
+      extensions={extensions}
       name={searchParams.get("name") || "Unnamed Connection"}
       color={searchParams.get("color") || "gray"}
     />

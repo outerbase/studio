@@ -4,12 +4,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { openTab } from "@/messages/open-tab";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
-import useMessageListener from "@/components/hooks/useMessageListener";
-import { MessageChannelName } from "@/const";
-import { OpenTabsProps, receiveOpenTabMessage } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
@@ -19,9 +15,10 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 import SavedDocTab from "./sidebar/saved-doc-tab";
 import { useSchema } from "@/context/schema-provider";
 import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
-import DoltSidebar from "./database-specified/dolt/dolt-sidebar";
-import { DoltIcon } from "../icons/outerbase-icon";
 import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
+import { useConfig } from "@/context/config-provider";
+import { cn } from "@/lib/utils";
+import { scc } from "@/core/command";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -33,7 +30,7 @@ export default function DatabaseGui() {
   }, []);
 
   const { databaseDriver, docDriver } = useDatabaseDriver();
-  const databaseDriverDialect = databaseDriver.getFlags().dialect;
+  const { extensions, containerClassName } = useConfig();
 
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const { currentSchemaName } = useSchema();
@@ -48,18 +45,24 @@ export default function DatabaseGui() {
     },
   ]);
 
-  useMessageListener<OpenTabsProps>(
-    MessageChannelName.OPEN_NEW_TAB,
-    (newTab) => {
-      if (newTab) {
-        receiveOpenTabMessage({ newTab, setSelectedTabIndex, setTabs });
-      }
-    }
-  );
+  const openTabInternal = useCallback((tabOption: WindowTabItemProps) => {
+    setTabs((prev) => {
+      const foundIndex = prev.findIndex(
+        (tab) => tab.identifier === tabOption.key
+      );
 
-  useMessageListener<string[]>(
-    MessageChannelName.CLOSE_TABS,
-    (keys) => {
+      if (foundIndex >= 0) {
+        setSelectedTabIndex(foundIndex);
+        return prev;
+      }
+      setSelectedTabIndex(prev.length);
+
+      return [...prev, tabOption];
+    });
+  }, []);
+
+  const closeStudioTab = useCallback(
+    (keys: string[]) => {
       if (keys) {
         setTabs((currentTabs) => {
           const selectedTab = currentTabs[selectedTabIndex];
@@ -87,6 +90,16 @@ export default function DatabaseGui() {
     [selectedTabIndex]
   );
 
+  useEffect(() => {
+    window.outerbaseOpenTab = openTabInternal;
+    window.outerbaseCloseTab = closeStudioTab;
+
+    return () => {
+      window.outerbaseOpenTab = undefined;
+      window.outerbaseCloseTab = undefined;
+    };
+  }, [openTabInternal, closeStudioTab]);
+
   const sidebarTabs = useMemo(() => {
     return [
       {
@@ -109,30 +122,23 @@ export default function DatabaseGui() {
         content: <ToolSidebar />,
         icon: <GearSix weight="light" size={24} />,
       },
-      databaseDriverDialect === "dolt"
-        ? {
-            key: "dolt",
-            name: "Dolt",
-            content: <DoltSidebar />,
-            icon: <DoltIcon className="w-7 h-7 text-green-500" />,
-          }
-        : undefined,
+      ...extensions.getSidebars(),
     ].filter(Boolean) as SidebarTabItem[];
-  }, [docDriver, databaseDriverDialect]);
+  }, [docDriver, extensions]);
 
   const tabSideMenu = useMemo(() => {
     return [
       {
         text: "New Query",
         onClick: () => {
-          openTab({ type: "query" });
+          scc.tabs.openBuiltinQuery({});
         },
       },
       databaseDriver.getFlags().supportCreateUpdateTable
         ? {
             text: "New Table",
             onClick: () => {
-              openTab({ type: "schema", schemaName: currentSchemaName });
+              scc.tabs.openBuiltinSchema({ schemaName: currentSchemaName });
             },
           }
         : undefined,
@@ -163,7 +169,7 @@ export default function DatabaseGui() {
   }, [tabs, selectedTabIndex, previousLogTabKey]);
 
   return (
-    <div className="h-screen w-screen flex flex-col">
+    <div className={cn("h-screen w-screen flex flex-col", containerClassName)}>
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
           <SidebarTab tabs={sidebarTabs} />

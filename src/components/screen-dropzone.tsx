@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useCommonDialog } from "./common-dialog";
 import Link from "next/link";
 
 interface Props {
-  onFileDrop: (handler: FileSystemFileHandle) => void;
+  onFileDrop: (file?: File, handler?: FileSystemFileHandle) => void;
 }
 
 export const unsupportFileHandlerDialogContent = {
@@ -58,8 +57,6 @@ export const unsupportFileHandlerDialogContent = {
 };
 
 export default function ScreenDropZone({ onFileDrop }: Props) {
-  const { showDialog } = useCommonDialog();
-
   useEffect(() => {
     const dropEventHandler = (e: DragEvent) => {
       e.preventDefault();
@@ -71,9 +68,15 @@ export default function ScreenDropZone({ onFileDrop }: Props) {
       if (fileList.length === 0) return;
 
       try {
-        (fileList[0] as any).getAsFileSystemHandle().then(onFileDrop);
+        (fileList[0] as any)
+          .getAsFileSystemHandle()
+          .then((handler: FileSystemFileHandle) => {
+            onFileDrop(undefined, handler);
+          });
       } catch (error) {
-        showDialog(unsupportFileHandlerDialogContent);
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        onFileDrop(file);
       }
     };
 
@@ -90,7 +93,7 @@ export default function ScreenDropZone({ onFileDrop }: Props) {
       window.document.removeEventListener("dragover", dragEventHandler);
       window.document.removeEventListener("drop", dropEventHandler);
     };
-  }, [onFileDrop, showDialog]);
+  }, [onFileDrop]);
 
   return <></>;
 }

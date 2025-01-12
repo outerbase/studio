@@ -13,11 +13,6 @@ export function scoped<T>(fn: () => T): T {
 }
 
 /**
- * Doesn't do anything :)
- */
-export function noop() {}
-
-/**
  * Join everything together into a string
  *
  * @example
