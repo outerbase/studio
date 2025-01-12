@@ -1,9 +1,9 @@
 "use client";
 import { Studio } from "@/components/gui/studio";
 import { StudioExtensionManager } from "@/core/extension-manager";
+import { createStandardExtensions } from "@/core/standard-extension";
 import { IframeDoltDriver } from "@/drivers/iframe-driver";
 import DoltExtension from "@/extensions/dolt";
-import QueryHistoryConsoleLogExtension from "@/extensions/query-console-log";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
@@ -13,7 +13,7 @@ export default function EmbedPageClient() {
 
   const extensions = useMemo(() => {
     return new StudioExtensionManager([
-      new QueryHistoryConsoleLogExtension(),
+      ...createStandardExtensions(),
       new DoltExtension(),
     ]);
   }, []);

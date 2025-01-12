@@ -23,6 +23,8 @@ import {
   ToolbarButton,
   ToolbarSeparator,
 } from "@/components/gui/toolbar";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import { createStandardExtensions } from "@/core/standard-extension";
 
 const SQLITE_FILE_EXTENSIONS =
   ".db,.sdb,.sqlite,.db3,.s3db,.sqlite3,.sl3,.db2,.s2db,.sqlite2,.sl2";
@@ -246,6 +248,10 @@ export default function PlaygroundEditorBody({
     }
   }, [driver, fileName, handler, nativeDriver]);
 
+  const extensions = useMemo(() => {
+    return new StudioExtensionManager(createStandardExtensions());
+  }, []);
+
   const dom = useMemo(() => {
     if (databaseLoading) {
       return (
@@ -264,6 +270,7 @@ export default function PlaygroundEditorBody({
     if (driver) {
       return (
         <Studio
+          extensions={extensions}
           color="gray"
           name="Playground"
           driver={driver}
@@ -273,7 +280,7 @@ export default function PlaygroundEditorBody({
     }
 
     return <div></div>;
-  }, [databaseLoading, preloadDatabase, driver]);
+  }, [databaseLoading, preloadDatabase, driver, extensions]);
 
   return (
     <>

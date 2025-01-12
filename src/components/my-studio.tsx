@@ -1,9 +1,11 @@
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio } from "./gui/studio";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import { createStandardExtensions } from "@/core/standard-extension";
 
 interface MyStudioProps {
   name: string;
@@ -27,8 +29,13 @@ function MyStudioInternal({
     router.push("/connect");
   }, [router]);
 
+  const extensions = useMemo(() => {
+    return new StudioExtensionManager(createStandardExtensions());
+  }, []);
+
   return (
     <Studio
+      extensions={extensions}
       driver={driver}
       name={name}
       color={color ?? "blue"}
