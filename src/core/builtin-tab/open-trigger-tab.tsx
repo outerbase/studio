@@ -18,7 +18,7 @@ export const builtinOpenTriggerTab = createTabExtension<{
     );
   },
   generate: (options) => ({
-    title: options.name ?? "New Trigger",
+    title: options.name || "New Trigger",
     component: (
       <TriggerTab
         schemaName={options.schemaName}
