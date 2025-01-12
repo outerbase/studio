@@ -9,14 +9,14 @@ export default function SettingSidebar() {
       <ListButtonItem
         text="Relational Diagram"
         onClick={() => {
-          scc.tabs.openBuiltinERD();
+          scc.tabs.openBuiltinERD({});
         }}
         icon={TreeStructure}
       />
       <ListButtonItem
         text="Drop & Empty Multiple Tables"
         onClick={() => {
-          scc.tabs.openBuiltinMassDropTable();
+          scc.tabs.openBuiltinMassDropTable({});
         }}
         icon={StackMinus}
       />

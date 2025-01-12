@@ -1,24 +1,29 @@
 import SchemaEditorTab from "@/components/gui/tabs/schema-editor-tab";
 import { LucideTableProperties } from "lucide-react";
-import openUnsafeTab from "./open-tab";
+import { createTabExtension } from "../extension-tab";
 
-export default function builtinOpenSchemaTab(payload: {
-  schemaName?: string;
-  tableName?: string;
-}) {
-  return openUnsafeTab({
-    title: payload.tableName ? payload.tableName : "New Table",
-    identifier: "schema",
-    key: !payload.tableName
-      ? "create-schema"
-      : "schema-" + payload.schemaName + "-" + payload.tableName,
+export const builtinOpenSchemaTab = createTabExtension<
+  | {
+      schemaName?: string;
+      tableName?: string;
+    }
+  | undefined
+>({
+  name: "schema",
+  key: (options) => {
+    if (!options?.tableName) {
+      return "create";
+    }
+    return `${options.schemaName}-${options.tableName}`;
+  },
+  generate: (options) => ({
+    title: options?.tableName ? options.tableName : "New Table",
     component: (
       <SchemaEditorTab
-        tableName={payload.tableName}
-        schemaName={payload.schemaName}
+        tableName={options?.tableName}
+        schemaName={options?.schemaName}
       />
     ),
     icon: LucideTableProperties,
-    type: "schema",
-  });
-}
+  }),
+});

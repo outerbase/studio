@@ -47,7 +47,6 @@ export class BeforeQueryPipeline {
 
 type BeforeQueryHandler = (payload: BeforeQueryPipeline) => Promise<void>;
 type AfterQueryHandler = () => Promise<void>;
-
 export class StudioExtensionManager {
   private sidebars: RegisterSidebarOption[] = [];
   private beforeQueryHandlers: BeforeQueryHandler[] = [];

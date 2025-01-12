@@ -1,14 +1,13 @@
 import MassDropTableTab from "@/components/gui/tabs/mass-drop-table";
 import { StackMinus } from "@phosphor-icons/react";
-import openUnsafeTab from "./open-tab";
+import { createTabExtension } from "../extension-tab";
 
-export default function builtinMassDropTableTab() {
-  return openUnsafeTab({
+export const builtinMassDropTableTab = createTabExtension({
+  name: "mass-drop-table",
+  key: () => "",
+  generate: () => ({
     title: "Mass Drop Tables",
-    identifier: "mass-drop-table",
-    key: "mass-drop-table",
     component: <MassDropTableTab />,
     icon: StackMinus,
-    type: "mass-drop-table",
-  });
-}
+  }),
+});

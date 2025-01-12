@@ -1,24 +1,31 @@
 import TriggerTab from "@/components/gui/tabs/trigger-tab";
 import { LucideCog } from "lucide-react";
-import openUnsafeTab from "./open-tab";
+import { createTabExtension } from "../extension-tab";
 
-export default function builtinOpenTriggerTab(payload: {
+export const builtinOpenTriggerTab = createTabExtension<{
   schemaName: string;
   tableName?: string;
   name?: string;
-}) {
-  return openUnsafeTab({
-    title: payload.name ?? "New Trigger",
-    identifier: "trigger",
-    key: "trigger-" + (payload.name ?? ""),
+}>({
+  name: "trigger",
+  key: (options) => {
+    return (
+      options.schemaName +
+      "-" +
+      (options?.tableName ?? "") +
+      "-" +
+      (options?.name ?? "")
+    );
+  },
+  generate: (options) => ({
+    title: options.name ?? "New Trigger",
     component: (
       <TriggerTab
-        schemaName={payload.schemaName}
-        name={payload.name ?? ""}
-        tableName={payload.tableName ?? ""}
+        schemaName={options.schemaName}
+        name={options.name ?? ""}
+        tableName={options.tableName ?? ""}
       />
     ),
     icon: LucideCog,
-    type: "trigger",
-  });
-}
+  }),
+});

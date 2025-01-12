@@ -1,43 +1,47 @@
 import QueryWindow from "@/components/gui/tabs/query-tab";
-import { TAB_PREFIX_SAVED_QUERY } from "@/const";
 import { Binoculars } from "@phosphor-icons/react";
-import openUnsafeTab from "./open-tab";
+import { createTabExtension } from "../extension-tab";
 
 let QUERY_COUNTER = 2;
 
-export default function builtinOpenQueryTab(payload: {
-  name?: string;
-  saved?: {
-    namespaceName?: string;
-    key: string;
-    sql: string;
-  };
-}) {
-  const title = payload.saved
-    ? payload.name ?? "Query"
-    : "Query " + (QUERY_COUNTER++).toString();
+export const builtinOpenQueryTab = createTabExtension<
+  | {
+      name?: string;
+      saved?: {
+        namespaceName?: string;
+        key: string;
+        sql: string;
+      };
+    }
+  | undefined
+>({
+  name: "query",
+  key: (options) => {
+    if (options?.saved) {
+      return options.saved.key;
+    }
+    return window.crypto.randomUUID();
+  },
+  generate: (options) => {
+    const title = options?.saved
+      ? options.name ?? "Query"
+      : "Query " + (QUERY_COUNTER++).toString();
 
-  const key = payload.saved
-    ? TAB_PREFIX_SAVED_QUERY + payload.saved.key
-    : "query-" + window.crypto.randomUUID();
+    const component = options?.saved ? (
+      <QueryWindow
+        initialName={title}
+        initialCode={options.saved.sql}
+        initialSavedKey={options.saved.key}
+        initialNamespace={options.saved.namespaceName}
+      />
+    ) : (
+      <QueryWindow initialName={title} />
+    );
 
-  const component = payload.saved ? (
-    <QueryWindow
-      initialName={title}
-      initialCode={payload.saved.sql}
-      initialSavedKey={payload.saved.key}
-      initialNamespace={payload.saved.namespaceName}
-    />
-  ) : (
-    <QueryWindow initialName={title} />
-  );
-
-  return openUnsafeTab({
-    title: payload.name ?? "Query",
-    identifier: "query",
-    key,
-    component,
-    icon: Binoculars,
-    type: "query",
-  });
-}
+    return {
+      title: options?.name ?? "Query",
+      component,
+      icon: Binoculars,
+    };
+  },
+});
