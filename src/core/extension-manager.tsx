@@ -25,7 +25,7 @@ export class BeforeQueryPipeline {
   }
 
   getTags() {
-    return this.tags.values().toArray();
+    return this.tags.values();
   }
 
   hasTag(tag: string) {

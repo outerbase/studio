@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/resizable";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WindowTabs, { WindowTabItemProps } from "./windows-tab";
-import { openTab } from "@/messages/open-tab";
 import QueryWindow from "@/components/gui/tabs/query-tab";
 import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
@@ -19,6 +18,7 @@ import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
 import { useConfig } from "@/context/config-provider";
 import { cn } from "@/lib/utils";
+import { scc } from "@/core/command";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -45,7 +45,7 @@ export default function DatabaseGui() {
     },
   ]);
 
-  const openStudioTab = useCallback((tabOption: WindowTabItemProps) => {
+  const openTabInternal = useCallback((tabOption: WindowTabItemProps) => {
     setTabs((prev) => {
       const foundIndex = prev.findIndex(
         (tab) => tab.identifier === tabOption.key
@@ -91,14 +91,14 @@ export default function DatabaseGui() {
   );
 
   useEffect(() => {
-    window.outerbaseOpenTab = openStudioTab;
+    window.outerbaseOpenTab = openTabInternal;
     window.outerbaseCloseTab = closeStudioTab;
 
     return () => {
       window.outerbaseOpenTab = undefined;
       window.outerbaseCloseTab = undefined;
     };
-  }, [openStudioTab, closeStudioTab]);
+  }, [openTabInternal, closeStudioTab]);
 
   const sidebarTabs = useMemo(() => {
     return [
@@ -131,14 +131,14 @@ export default function DatabaseGui() {
       {
         text: "New Query",
         onClick: () => {
-          openTab({ type: "query" });
+          scc.tabs.openBuiltinQuery({});
         },
       },
       databaseDriver.getFlags().supportCreateUpdateTable
         ? {
             text: "New Table",
             onClick: () => {
-              openTab({ type: "schema", schemaName: currentSchemaName });
+              scc.tabs.openBuiltinSchema({ schemaName: currentSchemaName });
             },
           }
         : undefined,
