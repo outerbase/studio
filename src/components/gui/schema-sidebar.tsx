@@ -56,6 +56,13 @@ export default function SchemaView() {
       });
     }
 
+    items.push({
+      name: "Create View",
+      onClick: () => {
+        scc.tabs.openBuildinView({ schemaName: currentSchemaName });
+      },
+    });
+
     return items;
   }, [databaseDriver, currentSchemaName]);
 

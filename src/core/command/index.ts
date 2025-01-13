@@ -9,6 +9,7 @@ import { builtinOpenQueryTab } from "../builtin-tab/open-query-tab";
 import { builtinOpenSchemaTab } from "../builtin-tab/open-schema-tab";
 import { builtinOpenTableTab } from "../builtin-tab/open-table-tab";
 import { builtinOpenTriggerTab } from "../builtin-tab/open-trigger-tab";
+import { buildinOpenViewTab } from "../builtin-tab/open-view-tab";
 
 export const scc = {
   tabs: {
@@ -18,6 +19,7 @@ export const scc = {
     openBuiltinTrigger: builtinOpenTriggerTab.open,
     openBuiltinERD: builtinOpenERDTab.open,
     openBuiltinMassDropTable: builtinMassDropTableTab.open,
+    openBuildinView: buildinOpenViewTab.open,
 
     close: (keys: string[]) => {
       if (window.outerbaseCloseTab) {
