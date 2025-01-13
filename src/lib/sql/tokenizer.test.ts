@@ -7,7 +7,6 @@ test("Select with placeholder and multiple lines comment", () => {
     /* This : is not placeholder */
   `;
   const tokens = tokenizeSql(sql);
-  console.log(tokens);
   expect(tokens).toEqual([
     { type: "WHITESPACE", value: "\n    " },
     { type: "KEYWORD", value: "SELECT" },
@@ -351,7 +350,31 @@ test("Select with multiple placehoder", () => {
 test("try to tokenize invalid sql", () => {
   const sql = "SELECT * FROM customers WHERE id = :id AND name = :123name";
   const tokens = tokenizeSql(sql);
-  expect(tokens).toEqual([{ type: "sql", value: sql }]);
+  expect(tokens).toEqual([
+    { type: "KEYWORD", value: "SELECT" },
+    { type: "WHITESPACE", value: " " },
+    { type: "OPERATOR", value: "*" },
+    { type: "WHITESPACE", value: " " },
+    { type: "KEYWORD", value: "FROM" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "customers" },
+    { type: "WHITESPACE", value: " " },
+    { type: "KEYWORD", value: "WHERE" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "id" },
+    { type: "WHITESPACE", value: " " },
+    { type: "OPERATOR", value: "=" },
+    { type: "WHITESPACE", value: " " },
+    { type: "PLACEHOLDER", value: ":id" },
+    { type: "WHITESPACE", value: " " },
+    { type: "KEYWORD", value: "AND" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "name" },
+    { type: "WHITESPACE", value: " " },
+    { type: "OPERATOR", value: "=" },
+    { type: "WHITESPACE", value: " " },
+    { type: "UNKNOWN", value: ":123name" },
+  ]);
   expect(tokens.map((t) => t.value).join("")).toBe(sql);
 });
 

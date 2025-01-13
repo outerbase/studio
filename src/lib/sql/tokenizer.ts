@@ -20,27 +20,31 @@ const tokenTypes: { type: string; regex: RegExp }[] = [
 ];
 
 export function tokenizeSql(sql: string): Token[] {
-  const tokens: Token[] = [];
-  let cursor = 0;
-  const length = sql.length;
+  try {
+    const tokens: Token[] = [];
+    let cursor = 0;
+    const length = sql.length;
 
-  while (cursor < length) {
-    let matched = false;
-    for (const { type, regex } of tokenTypes) {
-      const subStr = sql.substring(cursor);
-      const match = regex.exec(subStr);
-      if (match) {
-        tokens.push({ type, value: match[0] });
-        cursor += match[0].length;
-        matched = true;
-        break;
+    while (cursor < length) {
+      let matched = false;
+      let subStr = "";
+      for (const { type, regex } of tokenTypes) {
+        subStr = sql.substring(cursor);
+        const match = regex.exec(subStr);
+        if (match) {
+          tokens.push({ type, value: match[0] });
+          cursor += match[0].length;
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        return [...tokens, { type: "UNKNOWN", value: subStr }];
       }
     }
-
-    if (!matched) {
-      return [{ type: "sql", value: sql }];
-    }
+    return tokens;
+  } catch (e) {
+    return [{ type: "SQL", value: sql }];
   }
-
-  return tokens;
 }
