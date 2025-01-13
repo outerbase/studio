@@ -1,6 +1,6 @@
 import ViewTab from "@/components/gui/tabs/view-tab";
 import { createTabExtension } from "../extension-tab";
-import { LucideCog } from "lucide-react";
+import { LucideView } from "lucide-react";
 
 export const buildinOpenViewTab = createTabExtension<{
   schemaName: string;
@@ -26,6 +26,6 @@ export const buildinOpenViewTab = createTabExtension<{
         tableName={options.tableName ?? ""}
       />
     ),
-    icon: LucideCog,
+    icon: LucideView,
   }),
 });

@@ -140,6 +140,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
       const isTrigger = item?.type === "trigger";
+      const isView = item?.type === "view";
 
       return [
         {
@@ -179,6 +180,21 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
                 scc.tabs.openBuiltinTrigger({
                   schemaName: item?.schemaName ?? currentSchemaName,
                   name: isTrigger ? item.name : "",
+                  tableName: item?.tableSchema?.tableName,
+                });
+              },
+            }
+          : undefined,
+        databaseDriver.getFlags().supportCreateUpdateView
+          ? { separator: true }
+          : undefined,
+        databaseDriver.getFlags().supportCreateUpdateView
+          ? {
+              title: isView ? "Edit View" : "Create New View",
+              onClick: () => {
+                scc.tabs.openBuildinView({
+                  schemaName: item?.schemaName ?? currentSchemaName,
+                  name: isView ? item.name : "",
                   tableName: item?.tableSchema?.tableName,
                 });
               },

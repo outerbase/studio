@@ -8,6 +8,7 @@ import {
   DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
   DatabaseValue,
+  DatabaseViewSchema,
   DriverFlags,
   SelectFromTableOptions,
   TableColumnDataType,
@@ -22,6 +23,7 @@ import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
 import CommonSQLImplement from "./common-sql-imp";
 import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
+import { parseCreateViewScript } from "./sqlite/sql-parse-view";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   supportPragmaList = true;
@@ -64,6 +66,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
       supportCreateUpdateTable: true,
       supportCreateUpdateDatabase: false,
       supportCreateUpdateTrigger: true,
+      supportCreateUpdateView: true,
       dialect: "sqlite",
     };
   }
@@ -253,6 +256,24 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   dropTrigger(schemaName: string, name: string): string {
     return `DROP TRIGGER IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
+  }
+
+  async view(schemaName: string, name: string): Promise<DatabaseViewSchema> {
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE type = 'view' AND name = ${this.escapeId(name)};`;
+    const result = await this.query(sql);
+
+    const viewRow = result.rows[0] as { sql: string } | undefined;
+    if (!viewRow) throw new Error("View dose not exist");
+
+    return parseCreateViewScript(schemaName, viewRow.sql);
+  }
+
+  createView(view: DatabaseViewSchema): string {
+    return `CREATE VIEW ${this.escapeId(view.schemaName)}.${this.escapeId(view.name)} AS ${view.statement}`;
+  }
+
+  dropView(schemaName: string, name: string): string {
+    return `DROP VIEW IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   override async findFirst(

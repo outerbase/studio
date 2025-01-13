@@ -81,6 +81,7 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
       supportInsertReturning: true,
       supportUpdateReturning: true,
       supportCreateUpdateTrigger: false,
+      supportCreateUpdateView: false,
     };
   }
 
@@ -360,11 +361,11 @@ WHERE
   }
 
   createTrigger(): string {
-    throw new Error("Not implemented")
+    throw new Error("Not implemented");
   }
 
   dropTrigger(): string {
-    throw new Error("Not implemented")
+    throw new Error("Not implemented");
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {
