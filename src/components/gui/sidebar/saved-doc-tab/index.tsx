@@ -1,4 +1,3 @@
-import { closeTabs, openTab } from "@/messages/open-tab";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import {
   SavedDocData,
@@ -23,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CreateNamespaceDialog from "./create-namespace-button";
+import { scc } from "@/core/command";
 
 type SavedDocListData =
   | {
@@ -103,7 +103,7 @@ export default function SavedDocTab() {
         onComplete={() => {
           if (docDriver) {
             refresh();
-            closeTabs([TAB_PREFIX_SAVED_QUERY + docToRemove.id]);
+            scc.tabs.close([TAB_PREFIX_SAVED_QUERY + docToRemove.id]);
           }
         }}
       />
@@ -133,7 +133,7 @@ export default function SavedDocTab() {
         onClose={() => setNamespaceToRemove(undefined)}
         onComplete={(docs) => {
           if (docDriver) {
-            closeTabs(docs.map((d) => TAB_PREFIX_SAVED_QUERY + d.id));
+            scc.tabs.close(docs.map((d) => TAB_PREFIX_SAVED_QUERY + d.id));
             refresh();
           }
         }}
@@ -178,9 +178,7 @@ export default function SavedDocTab() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  openTab({
-                    type: "query",
-                  });
+                  scc.tabs.openBuiltinQuery({});
                 }}
               >
                 New Query
@@ -197,8 +195,7 @@ export default function SavedDocTab() {
           onCollapsedChange={setCollapsed}
           onDoubleClick={(item: ListViewItem<SavedDocListData>) => {
             if (item.data.type === "doc") {
-              openTab({
-                type: "query",
+              scc.tabs.openBuiltinQuery({
                 name: item.name,
                 saved: {
                   key: item.key,

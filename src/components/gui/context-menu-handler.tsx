@@ -1,5 +1,3 @@
-import useMessageListener from "@/components/hooks/useMessageListener";
-import { MessageChannelName } from "@/const";
 import type {
   OpenContextMenuList,
   OpenContextMenuOptions,
@@ -84,14 +82,12 @@ export default function ContextMenuHandler() {
   const contextRef = useRef<HTMLSpanElement>(null);
   const [menu, setMenu] = useState<OpenContextMenuOptions>();
 
-  useMessageListener<OpenContextMenuOptions>(
-    MessageChannelName.OPEN_CONTEXT_MENU,
-    (options) => {
-      if (options) {
-        setMenu(options);
-      }
-    }
-  );
+  useEffect(() => {
+    window.outerbaseOpenContextMenu = setMenu;
+    return () => {
+      window.outerbaseOpenContextMenu = undefined;
+    };
+  }, []);
 
   useEffect(() => {
     if (menu && contextRef.current) {

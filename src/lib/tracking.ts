@@ -1,3 +1,5 @@
+import { throttleEvent } from "./tracking-throttle";
+
 export interface TrackEventItem {
   name: string;
   data?: unknown;
@@ -24,6 +26,17 @@ export function sendAnalyticEvents(events: TrackEventItem[]) {
 
   if (!process.env.NEXT_PUBLIC_ANALYTIC_ENABLED) return;
 
+  /**
+   * Some error send at very high rate, we need to throttle them
+   * to prevent the server from being overwhelmed.
+   */
+  const finalEvents = events.filter((e) => {
+    if (!["unhandledrejection", "error"].includes(e.name)) return true;
+    return throttleEvent(e.name, 5, 5000);
+  });
+
+  if (finalEvents.length === 0) return;
+
   let deviceId = localStorage.getItem("od-id");
   if (!deviceId) {
     deviceId = crypto.randomUUID();
@@ -33,7 +46,7 @@ export function sendAnalyticEvents(events: TrackEventItem[]) {
   fetch("/api/events", {
     method: "POST",
     body: JSON.stringify({
-      events,
+      events: finalEvents,
     }),
     headers: {
       "Content-Type": "application/json",

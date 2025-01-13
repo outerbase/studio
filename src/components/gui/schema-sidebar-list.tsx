@@ -1,13 +1,13 @@
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
 import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { openTab } from "@/messages/open-tab";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { Table } from "@phosphor-icons/react";
 import SchemaCreateDialog from "./schema-editor/schema-create";
+import { scc } from "@/core/command";
 
 interface SchemaListProps {
   search: string;
@@ -153,8 +153,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         databaseDriver.getFlags().supportCreateUpdateTable && {
           title: "Create New Table",
           onClick: () => {
-            openTab({
-              type: "schema",
+            scc.tabs.openBuiltinSchema({
               schemaName: item?.schemaName ?? currentSchemaName,
             });
           },
@@ -163,10 +162,9 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           ? {
               title: "Edit Table",
               onClick: () => {
-                openTab({
+                scc.tabs.openBuiltinTable({
+                  schemaName: item?.schemaName ?? currentSchemaName,
                   tableName: item?.name,
-                  type: "schema",
-                  schemaName: item?.schemaName ?? "",
                 });
               },
             }
@@ -178,8 +176,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           ? {
               title: isTrigger ? "Edit Trigger" : "Create New Trigger",
               onClick: () => {
-                openTab({
-                  type: "trigger",
+                scc.tabs.openBuiltinTrigger({
                   schemaName: item?.schemaName ?? currentSchemaName,
                   name: isTrigger ? item.name : "",
                   tableName: item?.tableSchema?.tableName,
@@ -254,14 +251,12 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         onSelectChange={setSelected}
         onDoubleClick={(item) => {
           if (item.data.type === "table" || item.data.type === "view") {
-            openTab({
-              type: "table",
+            scc.tabs.openBuiltinTable({
               schemaName: item.data.schemaName ?? "",
               tableName: item.data.name,
             });
           } else if (item.data.type === "trigger") {
-            openTab({
-              type: "trigger",
+            scc.tabs.openBuiltinTrigger({
               schemaName: item.data.schemaName,
               name: item.name,
             });

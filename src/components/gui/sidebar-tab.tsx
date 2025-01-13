@@ -101,8 +101,6 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
                 </div>
               </div>
 
-              {config.sideBarFooterComponent}
-
               {!disableToggle && (
                 <DropdownMenuItem
                   onClick={() => {
