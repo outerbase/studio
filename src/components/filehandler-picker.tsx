@@ -4,6 +4,8 @@ import { localDb } from "@/indexdb";
 import { LucideFile, LucideFolderClosed } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
+import { unsupportFileHandlerDialogContent } from "./screen-dropzone";
+import { useCommonDialog } from "./common-dialog";
 
 /**
  * Cleanup file handler from indexdb database when
@@ -64,6 +66,7 @@ export default function FileHandlerPicker({
   onChange: (file: string) => void;
 }) {
   const [handler, setHandler] = useState<FileSystemHandle>();
+  const { showDialog } = useCommonDialog();
 
   useEffect(() => {
     if (value) {
@@ -76,11 +79,17 @@ export default function FileHandlerPicker({
   }, [value]);
 
   const onChangeFile = useCallback(() => {
-    cleanupFileHandler()
-      .then(openFileHandler)
-      .then(onChange)
-      .catch(console.error);
-  }, [onChange]);
+    try {
+      cleanupFileHandler()
+        .then(openFileHandler)
+        .then(onChange)
+        .catch(() => {
+          showDialog(unsupportFileHandlerDialogContent);
+        });
+    } catch {
+      showDialog(unsupportFileHandlerDialogContent);
+    }
+  }, [onChange, showDialog]);
 
   if (handler) {
     return (

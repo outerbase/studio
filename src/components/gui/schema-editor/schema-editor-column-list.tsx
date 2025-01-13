@@ -110,8 +110,16 @@ function ColumnItemType({
     databaseDriver.columnTypeSelector.type === "dropdown" &&
     databaseDriver.columnTypeSelector.dropdownOptions
   ) {
+    const normalizedValue = databaseDriver.columnTypeSelector.dropdownNormalized
+      ? databaseDriver.columnTypeSelector.dropdownNormalized(value) || value
+      : value;
+
     return (
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <Select
+        value={normalizedValue}
+        onValueChange={onChange}
+        disabled={disabled}
+      >
         <SelectTrigger className="bg-inherit border-0 rounded-none shadow-none text-sm">
           <SelectValue placeholder="Select datatype" />
         </SelectTrigger>

@@ -1,7 +1,6 @@
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { useCallback, useEffect, useState } from "react";
-import { Toolbar, ToolbarButton, ToolbarSeparator } from "../../toolbar";
 import { ChevronDown, Loader, MoreHorizontal, RefreshCcw } from "lucide-react";
 import { GitBranch, Minus, Plus, Table } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
@@ -23,6 +22,11 @@ import useDoltCreateBranchModal from "./dolt-create-branch";
 import { toast } from "sonner";
 import { useCommonDialog } from "@/components/common-dialog";
 import { DoltIcon } from "@/components/icons/outerbase-icon";
+import {
+  Toolbar,
+  ToolbarSeparator,
+  ToolbarButton,
+} from "@/components/gui/toolbar";
 
 interface DoltStatusResultItem {
   table_name: string;

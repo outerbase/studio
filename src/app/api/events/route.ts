@@ -26,7 +26,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-ob-id",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-od-id",
     },
   });
 }
@@ -61,7 +61,16 @@ export const POST = async (req: NextRequest) => {
       .catch();
   });
 
-  return NextResponse.json({
-    success: true,
-  });
+  return NextResponse.json(
+    {
+      success: true,
+    },
+    {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-od-id",
+      },
+    }
+  );
 };

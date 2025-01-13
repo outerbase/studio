@@ -1,6 +1,5 @@
 import React, { PropsWithChildren } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import { openTab } from "@/messages/open-tab";
 
 import {
   ContextMenu,
@@ -8,6 +7,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "../../../ui/context-menu";
+import { scc } from "@/core/command";
 
 export default function ContextMenuERD({
   schemaName,
@@ -17,19 +17,14 @@ export default function ContextMenuERD({
   const { databaseDriver } = useDatabaseDriver();
 
   const handleEditTable = () => {
-    openTab({
-      tableName: tableName,
-      type: "schema",
+    scc.tabs.openBuiltinSchema({
       schemaName: schemaName,
+      tableName: tableName,
     });
   };
 
   const handleOpenTableData = () => {
-    openTab({
-      tableName: tableName,
-      type: "table",
-      schemaName: schemaName,
-    });
+    scc.tabs.openBuiltinTable({ tableName: tableName, schemaName: schemaName });
   };
 
   return (

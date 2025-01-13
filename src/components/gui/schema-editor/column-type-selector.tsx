@@ -98,9 +98,22 @@ export default function ColumnTypeSelector({
       {
         return {
           ...group,
-          suggestions: group.suggestions.filter((type) => {
-            return type.name.toLowerCase().startsWith(parsedType.toLowerCase());
-          }),
+          suggestions: group.suggestions
+            .filter((type) => {
+              return (
+                type.name.toLowerCase().startsWith(parsedType.toLowerCase()) &&
+                type.name !== "uuid"
+              );
+            })
+            .map((x) => {
+              if (["enum", "set"].includes(x.name)) {
+                return {
+                  ...x,
+                  parameters: [{ name: "", default: "'Y','N'" }],
+                };
+              }
+              return x;
+            }),
         };
       }
     })

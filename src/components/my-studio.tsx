@@ -1,9 +1,11 @@
 import { useRouter } from "next/navigation";
-import { ReactElement, useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio } from "./gui/studio";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import { createStandardExtensions } from "@/core/standard-extension";
 
 interface MyStudioProps {
   name: string;
@@ -12,7 +14,6 @@ interface MyStudioProps {
   expiredAt?: number;
   collabarator?: CollaborationBaseDriver;
   docDriver?: SavedDocDriver;
-  sideBarFooterComponent?: ReactElement;
 }
 
 function MyStudioInternal({
@@ -21,7 +22,6 @@ function MyStudioInternal({
   driver,
   docDriver,
   collabarator,
-  sideBarFooterComponent,
 }: MyStudioProps) {
   const router = useRouter();
 
@@ -29,15 +29,19 @@ function MyStudioInternal({
     router.push("/connect");
   }, [router]);
 
+  const extensions = useMemo(() => {
+    return new StudioExtensionManager(createStandardExtensions());
+  }, []);
+
   return (
     <Studio
+      extensions={extensions}
       driver={driver}
       name={name}
       color={color ?? "blue"}
       onBack={goBack}
       collaboration={collabarator}
       docDriver={docDriver}
-      sideBarFooterComponent={sideBarFooterComponent}
     />
   );
 }

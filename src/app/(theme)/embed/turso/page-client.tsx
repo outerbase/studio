@@ -8,7 +8,15 @@ import { useEffect, useMemo } from "react";
 
 export default function EmbedPageClient() {
   const searchParams = useSearchParams();
-  const driver = useMemo(() => new IframeSQLiteDriver(), []);
+
+  const driver = useMemo(
+    () =>
+      new IframeSQLiteDriver({
+        supportPragmaList: false,
+        supportBigInt: true,
+      }),
+    []
+  );
 
   const extensions = useMemo(() => {
     return new StudioExtensionManager(createStandardExtensions());
@@ -20,8 +28,8 @@ export default function EmbedPageClient() {
 
   return (
     <Studio
-      extensions={extensions}
       driver={driver}
+      extensions={extensions}
       name={searchParams.get("name") || "Unnamed Connection"}
       color={searchParams.get("color") || "gray"}
     />
