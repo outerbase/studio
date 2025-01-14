@@ -468,6 +468,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     const viewRow = result.rows[0] as { VIEW_DEFINITION: string } | undefined;
     if (!viewRow) throw new Error("View dose not exist");
 
+    //use sql-format for statement
     const statement = format(viewRow.VIEW_DEFINITION.trim(), {
       language: "mysql",
       keywordCase: "upper",
