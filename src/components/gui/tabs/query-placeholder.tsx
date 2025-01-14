@@ -1,14 +1,10 @@
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { LucideChevronDown } from "lucide-react";
 interface Props {
   placeHolders: Record<string, string>;
   onChange: (placeHolders: Record<string, string>) => void;
 }
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function QueryPlaceholder({
   placeHolders,
@@ -16,7 +12,7 @@ export function QueryPlaceholder({
 }: Props): JSX.Element {
   const placeHolderTable = () => {
     return (
-      <div className="max-h-70  overflow-auto">
+      <div className="overflow-auto p-2">
         <table className="border-separate border-spacing-0 w-full text-sm">
           <thead className="top-0 sticky">
             <tr className="bg-secondary h-[35px] text-xs">
@@ -51,8 +47,8 @@ export function QueryPlaceholder({
     );
   };
   return (
-    <Popover>
-      <PopoverTrigger>
+    <Sheet>
+      <SheetTrigger>
         <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
           {hasPlaceHolderWithEmptyValue(placeHolders) && (
             <div className="flex items-center justify-center h-full pr-2">
@@ -62,9 +58,9 @@ export function QueryPlaceholder({
           Placeholders{" "}
           {!!placeHolders && <LucideChevronDown className="w-4 h-4 ml-2" />}
         </div>
-      </PopoverTrigger>
-      <PopoverContent className="p-0">{placeHolderTable()}</PopoverContent>
-    </Popover>
+      </SheetTrigger>
+      <SheetContent className="p-0">{placeHolderTable()}</SheetContent>
+    </Sheet>
   );
 }
 

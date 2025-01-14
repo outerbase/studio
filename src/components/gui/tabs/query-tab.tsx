@@ -53,7 +53,7 @@ import { isExplainQueryPlan } from "../query-explanation";
 import ExplainResultTab from "../tabs-result/explain-result-tab";
 import { tokenizeSql } from "@/lib/sql/tokenizer";
 import { QueryPlaceholder } from "./query-placeholder";
-import { escapeSqlValue } from "@/drivers/sqlite/sql-helper";
+import { escapeSqlValue, extractInputValue } from "@/drivers/sqlite/sql-helper";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -183,7 +183,7 @@ export default function QueryWindow({
         finalStatements = finalStatements.map((s) =>
           s.replace(
             new RegExp(`:${key}`, "g"),
-            escapeSqlValue(placeHolders[key])
+            escapeSqlValue(extractInputValue(placeHolders[key]))
           )
         );
       }
