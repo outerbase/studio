@@ -134,6 +134,7 @@ export default function DatabaseGui() {
           scc.tabs.openBuiltinQuery({});
         },
       },
+      ...extensions.getWindowTabMenu(),
       databaseDriver.getFlags().supportCreateUpdateTable
         ? {
             text: "New Table",
@@ -143,7 +144,7 @@ export default function DatabaseGui() {
           }
         : undefined,
     ].filter(Boolean) as { text: string; onClick: () => void }[];
-  }, [currentSchemaName, databaseDriver]);
+  }, [currentSchemaName, databaseDriver, extensions]);
 
   // Send to analytic when tab changes.
   const previousLogTabKey = useRef<string>("");
