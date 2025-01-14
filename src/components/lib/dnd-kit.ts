@@ -20,11 +20,9 @@ export const CSS = Object.freeze({
         return;
       }
 
-      const { x, y } = transform;
+      const { x } = transform;
 
-      return `translate3d(${x ? Math.round(x) : 0}px, ${
-        y ? Math.round(y) : 0
-      }px, 0)`;
+      return `translate3d(${x ? Math.round(x) : 0}px, ${0}px, 0)`;
     },
   },
   Scale: {

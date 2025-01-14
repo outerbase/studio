@@ -1,5 +1,13 @@
 import { type LucideIcon, LucidePlus } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   DndContext,
   closestCenter,
@@ -79,6 +87,32 @@ export default function WindowTabs({
       distance: 8,
     },
   });
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  // this is a hack to scroll to the end of the tab container when a new tab is added
+  const [tabCount, setTabCount] = useState(0);
+
+  useEffect(() => {
+    if (tabContainerRef.current && tabCount < tabs.length) {
+      tabContainerRef.current.scrollLeft = tabContainerRef.current.scrollWidth;
+    }
+    setTabCount(tabs.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabs]);
+
+  useEffect(() => {
+    const container = tabContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (event.deltaY !== 0) {
+        container.scrollLeft += event.deltaY;
+        event.preventDefault();
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel);
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, []);
 
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
@@ -149,7 +183,10 @@ export default function WindowTabs({
       >
         <div className="flex flex-col w-full h-full">
           <div className="grow-0 shrink-0 bg-neutral-100 dark:bg-neutral-900 overflow-x-auto no-scrollbar">
-            <div className="flex h-[40px]">
+            <div
+              className="flex h-[40px] window-tab-scrollbar"
+              ref={tabContainerRef}
+            >
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
                 strategy={horizontalListSortingStrategy}
@@ -186,7 +223,10 @@ export default function WindowTabs({
               </SortableContext>
 
               {menu && (
-                <div className="flex h-[40px] items-center border-b">
+                <div
+                  style={{ zIndex: 50, position: "sticky" }}
+                  className={`flex h-[40px] items-center border-b right-0 bg-neutral-100 dark:bg-neutral-900`}
+                >
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger>
                       <div className="ml-1.5 text-xs flex h-7 items-center justify-center gap-1 rounded-lg p-1.5 py-2 text-neutral-600 transition hover:bg-neutral-200 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white">
