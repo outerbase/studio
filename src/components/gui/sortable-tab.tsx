@@ -69,7 +69,7 @@ export const WindowTabItemButton = forwardRef<
       )}
 
       {!selected && (
-        <div className="absolute right-[-1px] top-2 w-[1px] h-6 bg-neutral-800" />
+        <div className="absolute right-[-1px] top-2 w-[1px] h-6 bg-border dark:bg-neutral-800" />
       )}
     </button>
   );
