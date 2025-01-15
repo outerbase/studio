@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
+import { ExtensionMenuItem } from "./extension-menu";
 
 interface RegisterSidebarOption {
   key: string;
@@ -51,6 +52,7 @@ export class StudioExtensionManager {
   private sidebars: RegisterSidebarOption[] = [];
   private beforeQueryHandlers: BeforeQueryHandler[] = [];
   private afterQueryHandlers: AfterQueryHandler[] = [];
+  private windowTabMenu: ExtensionMenuItem[] = [];
 
   constructor(private extensions: IStudioExtension[]) {}
 
@@ -76,6 +78,14 @@ export class StudioExtensionManager {
 
   registerAfterQuery(handler: AfterQueryHandler) {
     this.afterQueryHandlers.push(handler);
+  }
+
+  registerWindowTabMenu(menu: ExtensionMenuItem) {
+    this.windowTabMenu.push(menu);
+  }
+
+  getWindowTabMenu(): Readonly<ExtensionMenuItem[]> {
+    return this.windowTabMenu;
   }
 
   async beforeQuery(payload: BeforeQueryPipeline) {

@@ -27,6 +27,7 @@
     "@libsql/client": "^0.5.3"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-sql": "^6.5.5",
     "@dagrejs/dagre": "^1.1.4",

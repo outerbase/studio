@@ -162,7 +162,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           ? {
               title: "Edit Table",
               onClick: () => {
-                scc.tabs.openBuiltinTable({
+                scc.tabs.openBuiltinSchema({
                   schemaName: item?.schemaName ?? currentSchemaName,
                   tableName: item?.name,
                 });

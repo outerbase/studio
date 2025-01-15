@@ -36,6 +36,7 @@ export default function useCodeEditorTheme({
           { tag: [t.variableName], color: "#006600" },
           { tag: [t.escape], color: "#33CC33" },
           { tag: [t.tagName], color: "#1C02FF" },
+          { tag: t.comment, color: "#bdc3c7" },
           { tag: [t.heading], color: "#0C07FF" },
           { tag: [t.quote], color: "#000000" },
           { tag: [t.list], color: "#B90690" },
