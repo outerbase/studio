@@ -26,7 +26,7 @@ const EMPTY_DEFAULT_VIEW: DatabaseViewSchema = {
 export default function ViewTab(props: ViewTabProps) {
   const { showDialog } = useCommonDialog();
   const { replaceCurrentTab } = useTabsContext();
-  const { refresh: refreshSchema } = useSchema();
+  const { refresh: refreshSchema, currentSchemaName } = useSchema();
   const { databaseDriver } = useDatabaseDriver();
 
   // If name is specified, it means the trigger is already exist
@@ -64,8 +64,24 @@ export default function ViewTab(props: ViewTabProps) {
 
   const onContinue = useCallback(async () => {
     setIsExecuting(true);
-    await databaseDriver.transaction(previewScript);
-  }, [databaseDriver, previewScript]);
+    if (
+      value.schemaName !== currentSchemaName &&
+      databaseDriver.getFlags().supportUseStatement
+    ) {
+      const oldSchemaName = currentSchemaName;
+      await databaseDriver.query(
+        "USE " + databaseDriver.escapeId(value.schemaName)
+      );
+      await databaseDriver.transaction(previewScript);
+      if (oldSchemaName !== "") {
+        await databaseDriver.query(
+          "USE " + databaseDriver.escapeId(oldSchemaName)
+        );
+      }
+    } else {
+      await databaseDriver.transaction(previewScript);
+    }
+  }, [currentSchemaName, databaseDriver, previewScript, value.schemaName]);
 
   const onSave = useCallback(() => {
     showDialog({

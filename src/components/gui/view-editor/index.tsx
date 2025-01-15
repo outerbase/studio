@@ -15,7 +15,7 @@ interface Props {
 export default function ViewEditor(props: Props) {
   const { value, onChange } = props;
   const { databaseDriver } = useDatabaseDriver();
-  const { autoCompleteSchema, schema, refresh } = useSchema();
+  const { autoCompleteSchema, schema } = useSchema();
 
   const extendedAutoCompleteSchema = useMemo(() => {
     const currentSchema = schema[value.schemaName];
@@ -47,13 +47,6 @@ export default function ViewEditor(props: Props) {
                   draft.schemaName = schemaName;
                 })
               );
-              if (databaseDriver.getFlags().supportUseStatement) {
-                databaseDriver
-                  .query("USE " + databaseDriver.escapeId(schemaName))
-                  .then(() => {
-                    refresh();
-                  });
-              }
             }}
           />
         </div>
