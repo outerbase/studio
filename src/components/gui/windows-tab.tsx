@@ -6,7 +6,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import {
   DndContext,
@@ -88,16 +87,30 @@ export default function WindowTabs({
     },
   });
   const tabContainerRef = useRef<HTMLDivElement>(null);
-  // this is a hack to scroll to the end of the tab container when a new tab is added
-  const [tabCount, setTabCount] = useState(0);
+  const tabMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (tabContainerRef.current && tabCount < tabs.length) {
-      tabContainerRef.current.scrollLeft = tabContainerRef.current.scrollWidth;
+    const container = tabContainerRef.current;
+    if (!container) return;
+
+    const selectedTab = container.children[selected];
+    if (!selectedTab) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const selectedTabRect = selectedTab.getBoundingClientRect();
+
+    let menuWidth = 0;
+    if (tabMenuRef.current) {
+      menuWidth = tabMenuRef.current.getBoundingClientRect().width;
     }
-    setTabCount(tabs.length);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabs]);
+
+    if (selectedTabRect.left < containerRect.left) {
+      container.scrollLeft += selectedTabRect.left - containerRect.left;
+    } else if (selectedTabRect.right > containerRect.right) {
+      container.scrollLeft +=
+        selectedTabRect.right - containerRect.right + menuWidth + 1;
+    }
+  }, [selected, tabs]);
 
   useEffect(() => {
     const container = tabContainerRef.current;
@@ -224,6 +237,7 @@ export default function WindowTabs({
 
               {menu && (
                 <div
+                  ref={tabMenuRef}
                   style={{ zIndex: 50, position: "sticky" }}
                   className={`flex h-[40px] items-center border-b right-0 bg-neutral-100 dark:bg-neutral-900`}
                 >
