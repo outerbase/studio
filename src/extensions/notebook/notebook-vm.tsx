@@ -44,7 +44,7 @@ const workerCode = `
         else queryPromise[e.data.id].resolve(e.data.result);
       }
     } catch (error) {
-      self.postMessage({ type: "log", args: [error.toString()] });
+      self.postMessage({ type: "error", args: [error.toString()] });
       self.postMessage({ type: "complete" });
     }
   };
@@ -70,7 +70,7 @@ export class NotebookVM {
     this.vm.onmessage = (e) => {
       const { type } = e.data;
 
-      if (type === "log") {
+      if (type === "log" || type === "error") {
         if (this.onStdOut) {
           this.onStdOut(e.data);
         }

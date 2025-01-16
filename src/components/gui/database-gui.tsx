@@ -19,6 +19,7 @@ import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
 import { useConfig } from "@/context/config-provider";
 import { cn } from "@/lib/utils";
 import { scc } from "@/core/command";
+import { StudioExtensionMenuItem } from "@/core/extension-manager";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -129,7 +130,8 @@ export default function DatabaseGui() {
   const tabSideMenu = useMemo(() => {
     return [
       {
-        text: "New Query",
+        key: "query",
+        title: "New Query",
         onClick: () => {
           scc.tabs.openBuiltinQuery({});
         },
@@ -137,13 +139,14 @@ export default function DatabaseGui() {
       ...extensions.getWindowTabMenu(),
       databaseDriver.getFlags().supportCreateUpdateTable
         ? {
-            text: "New Table",
+            key: "table",
+            title: "New Table",
             onClick: () => {
               scc.tabs.openBuiltinSchema({ schemaName: currentSchemaName });
             },
           }
         : undefined,
-    ].filter(Boolean) as { text: string; onClick: () => void }[];
+    ].filter(Boolean) as StudioExtensionMenuItem[];
   }, [currentSchemaName, databaseDriver, extensions]);
 
   // Send to analytic when tab changes.

@@ -27,21 +27,29 @@ export default function NotebookEditor() {
       id: "initial2",
       type: "markdown",
       value:
-        `# Hello World` +
+        `# Hello Notebook` +
         "\n" +
         `This is the demo notebook editor in Outerbase Studio`,
     },
     {
       id: "initial",
       type: "code",
-      value: `console.log(await query("SELECT 1 + 1"))`,
+      value: `console.log(b.hello)`,
     },
     {
       id: "initial3",
+      type: "markdown",
+      value: `Insert many rows using the power of Javascript`,
+    },
+    {
+      id: "initial4",
       type: "code",
       value: `for(let i = 0; i < 5; i++) {
   await sleep(1000);
-  console.log("This is loop", i)
+  const age = Math.floor(Math.random() * 100));
+  const name = "name \${i}";
+  await query(\`INSERT INTO testing(name, age) VALUES ('\${name}', \${age})\`);
+  console.log("Inserting", name, age);
 }`,
     },
   ]);
@@ -76,8 +84,8 @@ export default function NotebookEditor() {
           <ToolbarButton text="Restart" />
         </Toolbar>
       </div>
-      <div className="flex-1 bg-gray-100 overflow-y-auto p-4">
-        <div className="max-w-[1200px] bg-background mx-auto">
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-[1200px] mx-auto">
           {value.map((block, idx) => {
             if (block.type === "code") {
               return (

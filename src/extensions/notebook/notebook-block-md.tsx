@@ -1,5 +1,4 @@
-import { compile } from "@mdx-js/mdx";
-import { useEffect, useMemo, useState } from "react";
+import Markdown from "react-markdown";
 import { NotebookEditorBlockValue } from "./notebook-editor";
 
 export default function NotebookBlockCode({
@@ -10,8 +9,8 @@ export default function NotebookBlockCode({
   onChange: (value: NotebookEditorBlockValue) => void;
 }) {
   return (
-    <div className="p-3">
-      <textarea className="w-full resize-none" value={value.value} readOnly />
+    <div className="p-3 mdx-content">
+      <Markdown>{value.value}</Markdown>
     </div>
   );
 }

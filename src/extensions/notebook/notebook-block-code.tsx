@@ -3,8 +3,9 @@ import { NotebookEditorBlockValue } from "./notebook-editor";
 import { NotebookVM } from "./notebook-vm";
 import JavascriptEditor from "@/components/editor/javascript-editor";
 import { Button } from "@/components/ui/button";
-import { PlayIcon, Terminal } from "lucide-react";
+import { LucideShieldAlert, PlayIcon, Terminal } from "lucide-react";
 import { produce } from "immer";
+import { cn } from "@/lib/utils";
 
 interface OutputFormat {
   type: "log";
@@ -30,7 +31,7 @@ function OutputArgItem({ value }: { value: unknown }) {
     }
 
     return (value ?? "").toString();
-  }, []);
+  }, [value]);
 
   if (content.length > 500) {
     return (
@@ -42,9 +43,18 @@ function OutputArgItem({ value }: { value: unknown }) {
 }
 
 function OutputItem({ value }: { value: OutputFormat }) {
+  const color = value.type === "log" ? "" : "text-red-400 dark:text-red-300";
+
   return (
-    <div>
-      <pre>
+    <div className={cn(color, "flex")}>
+      {value.type === "log" ? (
+        <div className="w-7"></div>
+      ) : (
+        <div className="w-7">
+          <LucideShieldAlert className="w-5 h-5" />
+        </div>
+      )}
+      <pre className="flex-1">
         {value.args.map((argValue, argIndex) => (
           <OutputArgItem value={argValue} key={argIndex} />
         ))}
@@ -84,7 +94,7 @@ export default function NotebookBlockCode({
   };
 
   return (
-    <div className="flex-1 flex flex-col p-3 gap-2">
+    <div className="flex-1 flex flex-col gap-2">
       <div className="flex gap-2">
         <Button variant={"outline"} onClick={onRunClick}>
           <PlayIcon className="w-4 h-4 mr-2" /> Run
@@ -106,7 +116,7 @@ export default function NotebookBlockCode({
         }}
       />
 
-      <div>
+      <div className="flex flex-col gap-1">
         {output.map((outputContent, outIdx) => (
           <OutputItem key={outIdx} value={outputContent} />
         ))}

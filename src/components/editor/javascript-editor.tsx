@@ -42,9 +42,6 @@ function useJavascriptTheme() {
           { tag: [t.bool, t.null], color: "#696C77" },
           { tag: [t.number], color: "#FF0080" },
           { tag: [t.string], color: "#50A14F" },
-          { tag: [t.separator], color: "#383A42" },
-          { tag: [t.squareBracket], color: "#383A42" },
-          { tag: [t.brace], color: "#A626A4" },
         ],
       });
     } else {
@@ -52,7 +49,7 @@ function useJavascriptTheme() {
         theme: "dark",
         settings: {
           background: "var(--background)",
-          foreground: "#9cdcfe",
+          foreground: "#9cdcfd",
           caret: "#c6c6c6",
           selection: "#6199ff2f",
           selectionMatch: "#72a1ff59",
@@ -64,13 +61,17 @@ function useJavascriptTheme() {
             'Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
         },
         styles: [
-          { tag: [t.propertyName], color: "#9b59b6" },
+          {
+            tag: [t.propertyName, t.function(t.variableName)],
+            color: "#dcdcaa",
+          },
+          { tag: [t.keyword], color: "#c586c0" },
+          { tag: [t.comment, t.blockComment], color: "#95a5a6" },
           { tag: [t.bool, t.null], color: "#696C77" },
-          { tag: [t.number], color: "#f39c12" },
-          { tag: [t.string], color: "#50A14F" },
-          { tag: [t.separator], color: "#383A42" },
-          { tag: [t.squareBracket], color: "#383A42" },
-          { tag: [t.brace], color: "#A626A4" },
+          { tag: [t.number], color: "#b5cea8" },
+          { tag: [t.string], color: "#ce9178" },
+          { tag: [t.paren], color: "#9cdcfd" },
+          { tag: [t.bracket], color: "#da70d6" },
         ],
       });
     }

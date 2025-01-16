@@ -8,7 +8,7 @@ const notebookTab = createTabExtension({
   name: "notebook",
   key: () => "notebook",
   generate: () => ({
-    title: "Notebook",
+    title: "New Notebook",
     component: <NotebookTab />,
     icon: NotebookIcon,
   }),
@@ -19,7 +19,8 @@ export default class NotebookExtension extends StudioExtension {
 
   init(studio: StudioExtensionManager): void {
     studio.registerWindowTabMenu({
-      text: "Notebook",
+      key: "notebook",
+      title: "New Notebook",
       onClick: () => {
         notebookTab.open({});
       },
