@@ -1,8 +1,8 @@
-import { StudioExtensionManager } from "./extension-manager";
+import { StudioExtensionContext } from "./extension-manager";
 
 export abstract class IStudioExtension {
   abstract extensionName: string;
-  abstract init(studio: StudioExtensionManager): void;
+  abstract init(studio: StudioExtensionContext): void;
   abstract cleanup(): void;
 }
 
