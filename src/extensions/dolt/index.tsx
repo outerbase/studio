@@ -1,6 +1,6 @@
 import { DoltIcon } from "@/components/icons/outerbase-icon";
 import { StudioExtension } from "@/core/extension-base";
-import { StudioExtensionManager } from "@/core/extension-manager";
+import { StudioExtensionContext } from "@/core/extension-manager";
 import DoltSidebar from "./dolt-sidebar";
 import { Table } from "lucide-react";
 import { createTabExtension } from "@/core/extension-tab";
@@ -21,7 +21,7 @@ export const doltCommitTab = createTabExtension<{
 export default class DoltExtension extends StudioExtension {
   extensionName = "dolt";
 
-  init(studio: StudioExtensionManager): void {
+  init(studio: StudioExtensionContext): void {
     studio.registerSidebar({
       key: "dolt",
       name: "Dolt",

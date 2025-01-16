@@ -178,6 +178,12 @@ export interface DatabaseTriggerSchema {
   statement: string;
 }
 
+export interface DatabaseViewSchema {
+  name: string;
+  schemaName: string;
+  statement: string;
+}
+
 interface DatabaseTableOperationInsert {
   operation: "INSERT";
   values: Record<string, DatabaseValue>;
@@ -344,4 +350,8 @@ export abstract class BaseDriver {
 
   abstract createTrigger(trigger: DatabaseTriggerSchema): string;
   abstract dropTrigger(schemaName: string, name: string): string;
+  abstract createView(view: DatabaseViewSchema): string;
+  abstract dropView(schemaName: string, name: string): string;
+
+  abstract view(schemaName: string, name: string): Promise<DatabaseViewSchema>;
 }
