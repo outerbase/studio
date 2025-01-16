@@ -96,7 +96,7 @@ export default function QueryWindow({
       const finalStatements = splitSqlQuery(editorState).map((q) => q.text);
       const newPlaceholders: Record<string, string> = {};
       for (const statement of finalStatements) {
-        const token = tokenizeSql(statement);
+        const token = tokenizeSql(statement, databaseDriver.getFlags().dialect);
         const placeholders = token
           .filter((t) => t.type === "PLACEHOLDER")
           .map((t) => t.value.split(":")[1]);
@@ -167,7 +167,7 @@ export default function QueryWindow({
 
       //inject placeholders
       for (const statement of finalStatements) {
-        const token = tokenizeSql(statement);
+        const token = tokenizeSql(statement, databaseDriver.getFlags().dialect);
         const variables = token
           .filter((t) => t.type === "PLACEHOLDER")
           .map((t) => t.value.split(":")[1]);

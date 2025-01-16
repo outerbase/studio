@@ -1,25 +1,85 @@
+import { SupportedDialect } from "@/drivers/base-driver";
+
 interface Token {
   type: string;
   value: string;
 }
 
-const tokenTypes: { type: string; regex: RegExp }[] = [
-  { type: "WHITESPACE", regex: /^\s+/ },
+const tokenTypes: {
+  type: string;
+  findToken: (input: string, dialect?: SupportedDialect) => string | null;
+}[] = [
   {
-    type: "KEYWORD",
-    regex:
-      /^(SELECT|FROM|WHERE|INSERT|INTO|VALUES|UPDATE|SET|DELETE|INNER|OUTER|JOIN|ON|AND|OR|NOT|LIKE|GROUP|BY|HAVING|ORDER|LIMIT|OFFSET|DISTINCT|AS|CASE|WHEN|THEN|ELSE|END|UNION|ALL|ANY|EXISTS|IN|IS|NULL|BETWEEN|WITH|DESC|ASC|COUNT)\b(?!\.)/i,
+    type: "WHITESPACE",
+    findToken: (input) => {
+      const regex = /^\s+/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
   },
-  { type: "IDENTIFIER", regex: /^(`?[a-zA-Z_][a-zA-Z0-9_.]*`?)/ },
-  { type: "STRING", regex: /^(?:'(?:[^']|'')*'|"(?:[^"]|"")*")/ },
-  { type: "NUMBER", regex: /^\d+(\.\d+)?/ },
-  { type: "PLACEHOLDER", regex: /^:[a-zA-Z_][a-zA-Z0-9_]*/ },
-  { type: "COMMENT", regex: /^(--[^\n]*|\/\*[\s\S]*?\*\/)/ },
-  { type: "OPERATOR", regex: /^(=|<>|!=|<|>|<=|>=|\+|-|\*|\/)/ },
-  { type: "PUNCTUATION", regex: /^[`,;()]/ },
+  {
+    type: "IDENTIFIER",
+    findToken: (input) => {
+      const regex =
+        /^(`[^(`\n)]+`|"[^("\n)]+"|\[[^(\]\n)]+\]|[a-zA-Z_][a-zA-Z0-9_]*)/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+  {
+    type: "STRING",
+    findToken: (input) => {
+      const regex = /^(?:'(?:[^('\n)]|'')*'|"(?:[^("\n)]|"")*")/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+
+  {
+    type: "NUMBER",
+    findToken: (input) => {
+      const regex = /^\d+(\.\d+)?/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+  {
+    type: "PLACEHOLDER",
+    findToken: (input) => {
+      const regex = /^:[a-zA-Z_][a-zA-Z0-9_]*/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+  {
+    type: "COMMENT",
+    findToken: (input, dialect) => {
+      let regex = /^(--.*|\/\*[\s\S]*?\*\/)/; // -- comment, /* comment */
+      if (dialect === "mysql") regex = /^(--.*|#.*|\/\*[\s\S]*?\*\/)/; // for mysql, # is also used for comments
+
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+  {
+    type: "OPERATOR",
+    findToken: (input) => {
+      const regex = /^(=|<>|!=|<|>|<=|>=|\+|-|\*|\/)/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+  {
+    type: "PUNCTUATION",
+    findToken: (input) => {
+      const regex = /^[`,;().]/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
 ];
 
-export function tokenizeSql(sql: string): Token[] {
+export function tokenizeSql(sql: string, dialect: SupportedDialect): Token[] {
   try {
     const tokens: Token[] = [];
     let cursor = 0;
@@ -27,20 +87,20 @@ export function tokenizeSql(sql: string): Token[] {
 
     while (cursor < length) {
       let matched = false;
-      let subStr = "";
-      for (const { type, regex } of tokenTypes) {
-        subStr = sql.substring(cursor);
-        const match = regex.exec(subStr);
+      const subStr = sql.substring(cursor);
+      for (const { type, findToken } of tokenTypes) {
+        const match = findToken(subStr, dialect);
         if (match) {
-          tokens.push({ type, value: match[0] });
-          cursor += match[0].length;
+          tokens.push({ type, value: match });
+          cursor += match.length;
           matched = true;
           break;
         }
       }
 
       if (!matched) {
-        return [...tokens, { type: "UNKNOWN", value: subStr }];
+        tokens.push({ type: "UNKNOWN", value: subStr[0] });
+        cursor++;
       }
     }
     return tokens;
