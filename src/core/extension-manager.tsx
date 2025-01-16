@@ -64,6 +64,7 @@ export class StudioExtensionContext {
   protected beforeQueryHandlers: BeforeQueryHandler[] = [];
   protected afterQueryHandlers: AfterQueryHandler[] = [];
   protected resourceCreateMenu: StudioExtensionMenuItem[] = [];
+  protected windowTabMenu: StudioExtensionMenuItem[] = [];
   protected resourceContextMenu: Record<string, CreateResourceMenuHandler[]> =
     {};
 
@@ -82,7 +83,6 @@ export class StudioExtensionContext {
   }
 
   registerCreateResourceMenu(menu: StudioExtensionMenuItem) {
-    console.log("Register", menu);
     this.resourceCreateMenu.push(menu);
   }
 
@@ -95,6 +95,10 @@ export class StudioExtensionContext {
     } else {
       this.resourceContextMenu[group].push(handler);
     }
+  }
+
+  registerWindowTabMenu(menu: StudioExtensionMenuItem) {
+    this.windowTabMenu.push(menu);
   }
 }
 export class StudioExtensionManager extends StudioExtensionContext {
@@ -121,6 +125,10 @@ export class StudioExtensionManager extends StudioExtensionContext {
     return (this.resourceContextMenu[group] ?? [])
       .map((handler) => handler(resource))
       .filter(Boolean) as StudioExtensionMenuItem[];
+  }
+
+  getWindowTabMenu(): Readonly<StudioExtensionMenuItem[]> {
+    return this.windowTabMenu;
   }
 
   async beforeQuery(payload: BeforeQueryPipeline) {

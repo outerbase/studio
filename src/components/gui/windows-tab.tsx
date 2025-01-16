@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { restrictToHorizontalAxis } from "../lib/dnd-kit";
+import { StudioExtensionMenuItem } from "@/core/extension-manager";
 
 export interface WindowTabItemProps {
   component: JSX.Element;
@@ -41,7 +42,7 @@ export interface WindowTabItemProps {
 }
 
 interface WindowTabsProps {
-  menu?: { text: string; onClick: () => void }[];
+  menu?: StudioExtensionMenuItem[];
   tabs: WindowTabItemProps[];
   selected: number;
   hideCloseButton?: boolean;
@@ -254,7 +255,7 @@ export default function WindowTabs({
                             key={menuIdx}
                             onClick={menuItem.onClick}
                           >
-                            {menuItem.text}
+                            {menuItem.title}
                           </DropdownMenuItem>
                         );
                       })}
