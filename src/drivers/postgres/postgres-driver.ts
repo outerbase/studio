@@ -6,6 +6,7 @@ import {
   DatabaseTableColumnConstraint,
   DatabaseTableSchema,
   DatabaseTriggerSchema,
+  DatabaseViewSchema,
   DriverFlags,
   TableColumnDataType,
 } from "../base-driver";
@@ -93,7 +94,7 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
 
     const tableResult = (
       await this.query(
-        "SELECT *, pg_total_relation_size(quote_ident(table_schema) || '.' || quote_ident(table_name)) AS table_size FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast') AND table_type = 'BASE TABLE';"
+        "SELECT *, pg_total_relation_size(quote_ident(table_schema) || '.' || quote_ident(table_name)) AS table_size FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast');"
       )
     ).rows as unknown as PostgresTableRow[];
 
@@ -360,11 +361,35 @@ WHERE
   }
 
   createTrigger(): string {
-    throw new Error("Not implemented")
+    throw new Error("Not implemented");
   }
 
   dropTrigger(): string {
-    throw new Error("Not implemented")
+    throw new Error("Not implemented");
+  }
+
+  async view(schemaName: string, name: string): Promise<DatabaseViewSchema> {
+    const sql = `SELECT * FROM information_schema.views WHERE TABLE_SCHEMA=${this.escapeValue(schemaName)} AND TABLE_NAME=${this.escapeValue(name)}`;
+    const result = await this.query(sql);
+
+    const viewRow = result.rows[0] as { view_definition: string } | undefined;
+    if (!viewRow) throw new Error("View dose not exist");
+
+    const statement = viewRow.view_definition.trim();
+
+    return {
+      schemaName,
+      name,
+      statement,
+    };
+  }
+
+  createView(view: DatabaseViewSchema): string {
+    return `CREATE VIEW ${this.escapeId(view.schemaName)}.${this.escapeId(view.name)} AS ${view.statement}`;
+  }
+
+  dropView(schemaName: string, name: string): string {
+    return `DROP VIEW IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {

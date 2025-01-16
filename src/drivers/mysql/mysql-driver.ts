@@ -1,3 +1,4 @@
+import { format } from "sql-formatter";
 import {
   DatabaseSchemas,
   DatabaseTableSchema,
@@ -12,6 +13,7 @@ import {
   DatabaseSchemaChange,
   TriggerOperation,
   TriggerWhen,
+  DatabaseViewSchema,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -456,6 +458,34 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
 
   dropTrigger(schemaName: string, name: string): string {
     return `DROP TRIGGER IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
+  }
+
+  async view(schemaName: string, name: string): Promise<DatabaseViewSchema> {
+    const sql = `SELECT * FROM information_schema.views WHERE TABLE_SCHEMA=${this.escapeValue(schemaName)} AND TABLE_NAME=${this.escapeValue(name)}`;
+    const result = await this.query(sql);
+
+    const viewRow = result.rows[0] as { VIEW_DEFINITION: string } | undefined;
+    if (!viewRow) throw new Error("View dose not exist");
+
+    //use sql-format for statement
+    const statement = format(viewRow.VIEW_DEFINITION.trim(), {
+      language: "mysql",
+      keywordCase: "upper",
+    });
+
+    return {
+      schemaName,
+      name,
+      statement,
+    };
+  }
+
+  createView(view: DatabaseViewSchema): string {
+    return `CREATE VIEW ${this.escapeId(view.schemaName)}.${this.escapeId(view.name)} AS ${view.statement}`;
+  }
+
+  dropView(schemaName: string, name: string): string {
+    return `DROP VIEW IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
   inferTypeFromHeader(): TableColumnDataType | undefined {
