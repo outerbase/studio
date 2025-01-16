@@ -33,6 +33,23 @@ export function escapeSqlValue(value: unknown) {
   throw new Error(value.toString() + " is unrecongize type of value");
 }
 
+export function extractInputValue(input: string): string | number {
+  const trimmedInput = input.trim();
+  if (
+    (trimmedInput.startsWith('"') && trimmedInput.endsWith('"')) ||
+    (trimmedInput.startsWith("'") && trimmedInput.endsWith("'"))
+  ) {
+    return trimmedInput.slice(1, -1).toString();
+  }
+
+  const parsedNumber = parseFloat(trimmedInput);
+  if (!isNaN(parsedNumber)) {
+    return parsedNumber;
+  }
+
+  return trimmedInput.toString();
+}
+
 export function convertSqliteType(
   type: string | undefined
 ): TableColumnDataType | undefined {
