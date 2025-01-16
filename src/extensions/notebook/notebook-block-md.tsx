@@ -9,7 +9,7 @@ export default function NotebookBlockCode({
   onChange: (value: NotebookEditorBlockValue) => void;
 }) {
   return (
-    <div className="p-3 mdx-content">
+    <div className="mt-4 mdx-content">
       <Markdown>{value.value}</Markdown>
     </div>
   );

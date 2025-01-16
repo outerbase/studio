@@ -94,7 +94,7 @@ export default function NotebookBlockCode({
   };
 
   return (
-    <div className="flex-1 flex flex-col gap-2">
+    <div className="flex-1 flex flex-col gap-2 mt-4">
       <div className="flex gap-2">
         <Button variant={"outline"} onClick={onRunClick}>
           <PlayIcon className="w-4 h-4 mr-2" /> Run
