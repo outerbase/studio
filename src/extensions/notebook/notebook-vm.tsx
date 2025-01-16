@@ -1,5 +1,6 @@
 import { BaseDriver } from "@/drivers/base-driver";
 import { useEffect, useMemo } from "react";
+import { NotebookOutputFormat } from "./notebook-block-code";
 
 const workerCode = `
   let scope = {};
@@ -52,16 +53,14 @@ const workerCode = `
 
 interface RunOpions {
   complete?: () => void;
-  stdOut?: <T = any>(data: T) => void;
-  stdErr?: () => void;
+  stdOut?: (data: NotebookOutputFormat) => void;
 }
 
 export class NotebookVM {
   protected vm: Worker;
   protected driver: BaseDriver;
   protected onComplete?: () => void;
-  protected onStdOut?: <T = any>(data: T) => void;
-  protected onStdErr?: () => void;
+  protected onStdOut?: (data: NotebookOutputFormat) => void;
 
   constructor(vm: Worker, driver: BaseDriver) {
     this.vm = vm;
@@ -71,21 +70,25 @@ export class NotebookVM {
       const { type } = e.data;
 
       if (type === "log" || type === "error") {
-        if (this.onStdOut) {
-          this.onStdOut(e.data);
-        }
+        if (this.onStdOut) this.onStdOut(e.data);
       } else if (type === "query") {
+        if (this.onStdOut) this.onStdOut({ ...e.data, queryStatus: "running" });
+
         this.driver
           .query(e.data.sql)
           .then((result) => {
-            console.log("Got it result", result);
             this.vm.postMessage({
               type: "query_result",
               id: e.data.id,
               result: result,
             });
+            if (this.onStdOut)
+              this.onStdOut({ ...e.data, queryStatus: "success" });
           })
           .catch((error) => {
+            if (this.onStdOut)
+              this.onStdOut({ ...e.data, queryStatus: "error" });
+
             if (error instanceof Error) {
               this.vm.postMessage({
                 type: "query_result",
@@ -111,7 +114,6 @@ export class NotebookVM {
   run(code: string, options: RunOpions): void {
     this.onComplete = options.complete;
     this.onStdOut = options.stdOut;
-    this.onStdErr = options.stdErr;
 
     this.vm.postMessage({
       type: "eval",

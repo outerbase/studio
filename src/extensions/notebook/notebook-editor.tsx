@@ -47,7 +47,7 @@ export default function NotebookEditor() {
       value: `for(let i = 0; i < 5; i++) {
   await sleep(1000);
   const age = Math.floor(Math.random() * 100));
-  const name = "name \${i}";
+  const name = \`name \${i}\`;
   await query(\`INSERT INTO testing(name, age) VALUES ('\${name}', \${age})\`);
   console.log("Inserting", name, age);
 }`,

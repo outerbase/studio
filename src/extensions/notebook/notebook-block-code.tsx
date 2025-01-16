@@ -3,12 +3,21 @@ import { NotebookEditorBlockValue } from "./notebook-editor";
 import { NotebookVM } from "./notebook-vm";
 import JavascriptEditor from "@/components/editor/javascript-editor";
 import { Button } from "@/components/ui/button";
-import { LucideShieldAlert, PlayIcon, Terminal } from "lucide-react";
+import {
+  LucideLoader,
+  LucideShieldAlert,
+  LucideTerminal,
+  PlayIcon,
+  Terminal,
+} from "lucide-react";
 import { produce } from "immer";
 import { cn } from "@/lib/utils";
 
-interface OutputFormat {
-  type: "log";
+export interface NotebookOutputFormat {
+  id?: string;
+  type: "log" | "error" | "query";
+  sql?: string;
+  queryStatus?: "running" | "success" | "error";
   args: unknown[];
 }
 
@@ -42,25 +51,53 @@ function OutputArgItem({ value }: { value: unknown }) {
   return <span className="mr-2">{content}</span>;
 }
 
-function OutputItem({ value }: { value: OutputFormat }) {
-  const color = value.type === "log" ? "" : "text-red-400 dark:text-red-300";
+function OutputItem({ value }: { value: NotebookOutputFormat }) {
+  if (value.type === "query") {
+    let icon = <LucideLoader className="w-5 h-5 animate-spin" />;
+    let color = "";
 
-  return (
-    <div className={cn(color, "flex")}>
-      {value.type === "log" ? (
-        <div className="w-7"></div>
-      ) : (
+    if (value.queryStatus === "success") {
+      icon = <LucideTerminal className="w-5 h-5" />;
+      color = "text-green-600 dark:text-green-400";
+    } else if (value.queryStatus === "error") {
+      icon = <LucideTerminal className="w-5 h-5" />;
+      color = "text-red-400 dark:text-red-300";
+    }
+
+    return (
+      <div className="flex">
+        <div className="w-7">{icon}</div>
+        <pre className={"flex-1"}>
+          <span className={cn(color, "mr-2")}>⬤</span>
+          {value.sql}
+        </pre>
+      </div>
+    );
+  } else if (value.type === "error") {
+    return (
+      <div className="flex text-red-400 dark:text-red-300">
         <div className="w-7">
           <LucideShieldAlert className="w-5 h-5" />
         </div>
-      )}
-      <pre className="flex-1">
-        {value.args.map((argValue, argIndex) => (
-          <OutputArgItem value={argValue} key={argIndex} />
-        ))}
-      </pre>
-    </div>
-  );
+        <pre className="flex-1">
+          {value.args.map((argValue, argIndex) => (
+            <OutputArgItem value={argValue} key={argIndex} />
+          ))}
+        </pre>
+      </div>
+    );
+  } else {
+    return (
+      <div className="flex">
+        <div className="w-7"></div>
+        <pre className="flex-1">
+          {value.args.map((argValue, argIndex) => (
+            <OutputArgItem value={argValue} key={argIndex} />
+          ))}
+        </pre>
+      </div>
+    );
+  }
 }
 
 export default function NotebookBlockCode({
@@ -72,7 +109,7 @@ export default function NotebookBlockCode({
   value: NotebookEditorBlockValue;
   onChange: (value: NotebookEditorBlockValue) => void;
 }) {
-  const [output, setOutput] = useState<OutputFormat[]>([]);
+  const [output, setOutput] = useState<NotebookOutputFormat[]>([]);
 
   const onRunClick = () => {
     setOutput([]);
@@ -80,11 +117,12 @@ export default function NotebookBlockCode({
       complete: () => {
         console.log("Complete");
       },
-      stdOut: (data: any) => {
-        setOutput((prev) => [...prev, data]);
-      },
-      stdErr: () => {
-        console.log("Error");
+      stdOut: (data) => {
+        if (data.id) {
+          setOutput((prev) => [...prev.filter((p) => p.id !== data.id), data]);
+        } else {
+          setOutput((prev) => [...prev, data]);
+        }
       },
     });
   };
