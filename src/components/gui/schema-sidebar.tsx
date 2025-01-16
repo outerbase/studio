@@ -14,24 +14,25 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { scc } from "@/core/command";
+import { StudioExtensionMenuItem } from "@/core/extension-manager";
+import { useConfig } from "@/context/config-provider";
 
 export default function SchemaView() {
   const [search, setSearch] = useState("");
   const { databaseDriver } = useDatabaseDriver();
   const { currentSchemaName } = useSchema();
   const [isCreateSchema, setIsCreateSchema] = useState(false);
+  const { extensions } = useConfig();
 
   const contentMenu = useMemo(() => {
-    const items: {
-      name: string;
-      onClick: () => void;
-    }[] = [];
+    const items: StudioExtensionMenuItem[] = [];
 
     const flags = databaseDriver.getFlags();
 
     if (flags.supportCreateUpdateTable) {
       items.push({
-        name: "Create Table",
+        title: "Create Table",
+        key: "create-table",
         onClick: () => {
           scc.tabs.openBuiltinSchema({ schemaName: currentSchemaName });
         },
@@ -40,7 +41,8 @@ export default function SchemaView() {
 
     if (flags.supportCreateUpdateDatabase) {
       items.push({
-        name: "Create Database/Schema",
+        title: "Create Database/Schema",
+        key: "create-schema",
         onClick: () => {
           setIsCreateSchema(true);
         },
@@ -49,15 +51,16 @@ export default function SchemaView() {
 
     if (flags.supportCreateUpdateTrigger) {
       items.push({
-        name: "Create Trigger",
+        title: "Create Trigger",
+        key: "create-trigger",
         onClick: () => {
           scc.tabs.openBuiltinTrigger({ schemaName: currentSchemaName });
         },
       });
     }
 
-    return items;
-  }, [databaseDriver, currentSchemaName]);
+    return [...items, ...extensions.getResourceCreateMenu()];
+  }, [databaseDriver, currentSchemaName, extensions]);
 
   const activatorButton = useMemo(() => {
     if (contentMenu.length === 0) return null;
@@ -95,8 +98,8 @@ export default function SchemaView() {
         <DropdownMenuContent side="bottom" align="start">
           {contentMenu.map((menu) => {
             return (
-              <DropdownMenuItem key={menu.name} onClick={menu.onClick}>
-                {menu.name}
+              <DropdownMenuItem key={menu.title} onClick={menu.onClick}>
+                {menu.title}
               </DropdownMenuItem>
             );
           })}

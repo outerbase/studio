@@ -4,7 +4,8 @@
 
 import NotebookExtension from "@/extensions/notebook";
 import QueryHistoryConsoleLogExtension from "@/extensions/query-console-log";
+import ViewEditorExtension from "@/extensions/view-editor";
 
 export function createStandardExtensions() {
-  return [new QueryHistoryConsoleLogExtension(), new NotebookExtension()];
+  return [new QueryHistoryConsoleLogExtension(), new ViewEditorExtension()];
 }
