@@ -1,20 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import ViewEditor from "../view-editor";
 import { DatabaseViewSchema } from "@/drivers/base-driver";
 import { produce } from "immer";
-import { ViewController } from "../view-editor/view-controller";
 import { isEqual } from "lodash";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useCommonDialog } from "@/components/common-dialog";
-import { LucideLoader, LucideSave, LucideView } from "lucide-react";
+import { LucideLoader, LucideSave } from "lucide-react";
 import { useSchema } from "@/context/schema-provider";
-import { useTabsContext } from "../windows-tab";
-import OpacityLoading from "../loading-opacity";
+import { useTabsContext } from "@/components/gui/windows-tab";
+import OpacityLoading from "@/components/gui/loading-opacity";
+import { ViewController } from "./view-controller";
+import ViewEditor from "./view-editor";
+import { viewEditorExtensionTab } from ".";
 
 export interface ViewTabProps {
   name: string;
-  tableName?: string;
-  schemaName: string;
+  schemaName?: string;
 }
 
 const EMPTY_DEFAULT_VIEW: DatabaseViewSchema = {
@@ -35,7 +35,7 @@ export default function ViewTab(props: ViewTabProps) {
   // Loading the inital value
   const [initialValue, setInitialValue] = useState<DatabaseViewSchema>(() => {
     return produce(EMPTY_DEFAULT_VIEW, (draft) => {
-      draft.schemaName = props.schemaName ?? "";
+      draft.schemaName = props.schemaName ?? currentSchemaName ?? "";
     });
   });
   const [value, setValue] = useState<DatabaseViewSchema>(initialValue);
@@ -95,19 +95,12 @@ export default function ViewTab(props: ViewTabProps) {
           onClick: onContinue,
           onComplete: () => {
             refreshSchema();
-            replaceCurrentTab({
-              component: (
-                <ViewTab
-                  tableName={props.tableName}
-                  name={value.name}
-                  schemaName={value.schemaName}
-                />
-              ),
-              key: "view-" + value.name || "",
-              identifier: "view-" + value.name || "",
-              title: value.name || "",
-              icon: LucideView,
-            });
+            replaceCurrentTab(
+              viewEditorExtensionTab.generate({
+                schemaName: value.schemaName,
+                name: value.name,
+              })
+            );
             setIsExecuting(false);
           },
         },
@@ -116,7 +109,6 @@ export default function ViewTab(props: ViewTabProps) {
   }, [
     showDialog,
     props.name,
-    props.tableName,
     previewScript,
     isExecuting,
     onContinue,

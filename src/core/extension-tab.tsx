@@ -9,6 +9,7 @@ interface TabExtensionConfig<T> {
 
 interface TabExtensionCommand<T> {
   open: (options: T) => void;
+  generate: (options: T) => WindowTabItemProps;
   close: (options: T) => void;
 }
 
@@ -16,9 +17,22 @@ export function createTabExtension<T>(
   config: TabExtensionConfig<T>
 ): TabExtensionCommand<T> {
   return Object.freeze({
-    open(options: T) {
+    generate: (options: T) => {
       const key = [config.name, config.key(options)].filter(Boolean).join("-");
+      return {
+        ...config.generate(options),
+        key,
+        identifier: key,
+        type: config.name,
+      };
+    },
+
+    open(options: T) {
       if (window.outerbaseOpenTab) {
+        const key = [config.name, config.key(options)]
+          .filter(Boolean)
+          .join("-");
+
         window.outerbaseOpenTab({
           ...config.generate(options),
           key,

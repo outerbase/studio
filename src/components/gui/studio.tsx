@@ -78,7 +78,7 @@ export function Studio({
   useEffect(() => {
     finalExtensionManager.init();
     return () => finalExtensionManager.cleanup();
-  });
+  }, [finalExtensionManager]);
 
   const config = useMemo(() => {
     return {

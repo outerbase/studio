@@ -1,10 +1,10 @@
 import { StudioExtension } from "@/core/extension-base";
-import { StudioExtensionManager } from "@/core/extension-manager";
+import { StudioExtensionContext } from "@/core/extension-manager";
 
 export default class QueryHistoryConsoleLogExtension extends StudioExtension {
   extensionName = "query-history-console-log";
 
-  init(studio: StudioExtensionManager): void {
+  init(studio: StudioExtensionContext): void {
     studio.registerBeforeQuery(async (payload) => {
       const statements = payload.getStatments();
 

@@ -7,7 +7,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { LucideCode, LucideLoader, LucideSave } from "lucide-react";
 import React from "react";
-import CodePreview from "../code-preview";
+import CodePreview from "../../components/gui/code-preview";
 
 interface Props {
   onSave: () => void;

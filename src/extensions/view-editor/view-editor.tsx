@@ -1,11 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { DatabaseViewSchema } from "@/drivers/base-driver";
 import { produce } from "immer";
-import SqlEditor from "../sql-editor";
+import SqlEditor from "../../components/gui/sql-editor";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useMemo } from "react";
 import { useSchema } from "@/context/schema-provider";
-import SchemaNameSelect from "../schema-editor/schema-name-select";
+import SchemaNameSelect from "../../components/gui/schema-editor/schema-name-select";
 
 interface Props {
   value: DatabaseViewSchema;

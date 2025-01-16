@@ -30,6 +30,7 @@ function MyStudioInternal({
   }, [router]);
 
   const extensions = useMemo(() => {
+    console.log("Create standard extensions");
     return new StudioExtensionManager(createStandardExtensions());
   }, []);
 
