@@ -1,18 +1,13 @@
 export function isLinkString(str: string) {
   if (str.length > 200) return false;
 
+  let url;
+
   try {
-    let isUrl = Boolean(new URL(str));
-
-    //Using regex check string is url combining with new URL(str)
-    const regex = /http:|https:|(\.w+)/g;
-
-    if (!str.match(regex)) {
-      isUrl = false;
-    }
-
-    return isUrl;
+    url = new URL(str);
   } catch {
     return false;
   }
+
+  return ["http:", "https:"].includes(url.protocol);
 }
