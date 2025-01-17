@@ -84,6 +84,7 @@ export function tokenizeSql(sql: string, dialect: SupportedDialect): Token[] {
     const tokens: Token[] = [];
     let cursor = 0;
     const length = sql.length;
+    let unknownAcc = "";
 
     while (cursor < length) {
       let matched = false;
@@ -91,6 +92,11 @@ export function tokenizeSql(sql: string, dialect: SupportedDialect): Token[] {
       for (const { type, findToken } of tokenTypes) {
         const match = findToken(subStr, dialect);
         if (match) {
+          if (unknownAcc !== "") {
+            tokens.push({ type: "UNKNOWN", value: unknownAcc });
+            unknownAcc = "";
+          }
+
           tokens.push({ type, value: match });
           cursor += match.length;
           matched = true;
@@ -99,10 +105,11 @@ export function tokenizeSql(sql: string, dialect: SupportedDialect): Token[] {
       }
 
       if (!matched) {
-        tokens.push({ type: "UNKNOWN", value: subStr[0] });
+        unknownAcc += subStr[0];
         cursor++;
       }
     }
+    if (unknownAcc !== "") tokens.push({ type: "UNKNOWN", value: unknownAcc });
     return tokens;
   } catch (e) {
     return [{ type: "SQL", value: sql }];

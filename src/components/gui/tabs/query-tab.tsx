@@ -87,31 +87,30 @@ export default function QueryWindow({
     initialNamespace ?? "Unsaved Query"
   );
   const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
-  const [placeHolders, setPlaceHolders] = useState<Record<string, string>>({});
+  const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const editorState = editorRef.current?.view?.state;
-      if (!editorState) return;
-      const finalStatements = splitSqlQuery(editorState).map((q) => q.text);
-      const newPlaceholders: Record<string, string> = {};
-      for (const statement of finalStatements) {
-        const token = tokenizeSql(statement, databaseDriver.getFlags().dialect);
-        const placeholders = token
+      setPlaceholders((prev) => {
+        const newPlaceholders: Record<string, string> = {};
+        const token = tokenizeSql(code, databaseDriver.getFlags().dialect);
+        const foundPlaceholders = token
           .filter((t) => t.type === "PLACEHOLDER")
-          .map((t) => t.value.split(":")[1]);
-        for (const placeholder of placeholders) {
-          newPlaceholders[placeholder] = "";
+          .map((t) => t.value.slice(1));
+
+        for (const foundPlaceholder of foundPlaceholders) {
+          newPlaceholders[foundPlaceholder] = "";
         }
-      }
-      for (const newKey of Object.keys(newPlaceholders)) {
-        newPlaceholders[newKey] = placeHolders[newKey] ?? "";
-      }
-      setPlaceHolders(newPlaceholders);
+        // write old placeholders value into new placeholders
+        for (const newKey of Object.keys(newPlaceholders)) {
+          newPlaceholders[newKey] = prev[newKey] ?? "";
+        }
+
+        return { ...newPlaceholders };
+      });
     }, 1000);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [code, databaseDriver]);
 
   const onFormatClicked = () => {
     try {
@@ -166,26 +165,33 @@ export default function QueryWindow({
       setQueryTabIndex(0);
 
       //inject placeholders
-      for (const statement of finalStatements) {
-        const token = tokenizeSql(statement, databaseDriver.getFlags().dialect);
+      for (let i = 0; i < finalStatements.length; i++) {
+        const token = tokenizeSql(
+          finalStatements[i],
+          databaseDriver.getFlags().dialect
+        );
+
         const variables = token
           .filter((t) => t.type === "PLACEHOLDER")
-          .map((t) => t.value.split(":")[1]);
+          .map((t) => t.value.slice(1));
         if (
           variables.length > 0 &&
-          variables.some((p) => placeHolders[p] === "")
+          variables.some((p) => placeholders[p] === "")
         ) {
           toast.error("Please fill in all placeholders");
           return;
         }
-      }
-      for (const key of Object.keys(placeHolders)) {
-        finalStatements = finalStatements.map((s) =>
-          s.replace(
-            new RegExp(`:${key}`, "g"),
-            escapeSqlValue(extractInputValue(placeHolders[key]))
-          )
-        );
+
+        finalStatements[i] = token
+          .map((t) => {
+            if (t.type === "PLACEHOLDER") {
+              return escapeSqlValue(
+                extractInputValue(placeholders[t.value.slice(1)])
+              );
+            }
+            return t.value;
+          })
+          .join("");
       }
 
       multipleQuery(databaseDriver, finalStatements, (currentProgress) => {
@@ -400,10 +406,10 @@ export default function QueryWindow({
                 <div>Col {columnNumber + 1}</div>
               </div>
               <div>
-                {Object.keys(placeHolders).length > 0 && (
+                {Object.keys(placeholders).length > 0 && (
                   <QueryPlaceholder
-                    placeHolders={placeHolders}
-                    onChange={setPlaceHolders}
+                    placeHolders={placeholders}
+                    onChange={setPlaceholders}
                   />
                 )}
               </div>

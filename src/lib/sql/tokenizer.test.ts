@@ -406,3 +406,40 @@ test("INNER JOIN", () => {
   ]);
   expect(tokens.map((t) => t.value).join("")).toBe(sql);
 });
+
+test("Accumulate unknown tokens", () => {
+  const sql = `SELECT * FROM customers WHERE name = 'John Doe' ### this # is a comment ##`;
+  const tokens = tokenizeSql(sql, "sqlite");
+  expect(tokens).toEqual([
+    { type: "IDENTIFIER", value: "SELECT" },
+    { type: "WHITESPACE", value: " " },
+    { type: "OPERATOR", value: "*" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "FROM" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "customers" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "WHERE" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "name" },
+    { type: "WHITESPACE", value: " " },
+    { type: "OPERATOR", value: "=" },
+    { type: "WHITESPACE", value: " " },
+    { type: "STRING", value: "'John Doe'" },
+    { type: "WHITESPACE", value: " " },
+    { type: "UNKNOWN", value: "###" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "this" },
+    { type: "WHITESPACE", value: " " },
+    { type: "UNKNOWN", value: "#" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "is" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "a" },
+    { type: "WHITESPACE", value: " " },
+    { type: "IDENTIFIER", value: "comment" },
+    { type: "WHITESPACE", value: " " },
+    { type: "UNKNOWN", value: "##" },
+  ]);
+  expect(tokens.map((t) => t.value).join("")).toBe(sql);
+});
