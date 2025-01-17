@@ -142,7 +142,61 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
       const isTrigger = item?.type === "trigger";
-      const isView = item?.type === "view";
+
+      const createMenuSection = {
+        title: "Create",
+        sub: [
+          databaseDriver.getFlags().supportCreateUpdateTable && {
+            title: "Create Table",
+            onClick: () => {
+              scc.tabs.openBuiltinSchema({
+                schemaName: item?.schemaName ?? currentSchemaName,
+              });
+            },
+          },
+          databaseDriver.getFlags().supportCreateUpdateTrigger
+            ? {
+                title: "Create Trigger",
+                onClick: () => {
+                  scc.tabs.openBuiltinTrigger({
+                    schemaName: item?.schemaName ?? currentSchemaName,
+                    tableName: item?.tableSchema?.tableName,
+                  });
+                },
+              }
+            : undefined,
+          ...extensions.getResourceCreateMenu(),
+        ],
+      };
+
+      const modificationSection = item
+        ? [
+            isTable && databaseDriver.getFlags().supportCreateUpdateTable
+              ? {
+                  title: "Edit Table",
+                  onClick: () => {
+                    scc.tabs.openBuiltinSchema({
+                      schemaName: item?.schemaName ?? currentSchemaName,
+                      tableName: item?.name,
+                    });
+                  },
+                }
+              : undefined,
+            databaseDriver.getFlags().supportCreateUpdateTrigger && isTrigger
+              ? {
+                  title: "Edit Trigger",
+                  onClick: () => {
+                    scc.tabs.openBuiltinTrigger({
+                      schemaName: item?.schemaName ?? currentSchemaName,
+                      name: item.name,
+                      tableName: item?.tableSchema?.tableName,
+                    });
+                  },
+                }
+              : undefined,
+            ...extensions.getResourceContextMenu(item, "modification"),
+          ]
+        : [];
 
       const createMenuSection = {
         title: "Create",
