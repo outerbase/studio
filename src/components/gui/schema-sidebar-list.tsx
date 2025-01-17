@@ -198,61 +198,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           ]
         : [];
 
-      const createMenuSection = {
-        title: "Create",
-        sub: [
-          databaseDriver.getFlags().supportCreateUpdateTable && {
-            title: "Create Table",
-            onClick: () => {
-              scc.tabs.openBuiltinSchema({
-                schemaName: item?.schemaName ?? currentSchemaName,
-              });
-            },
-          },
-          databaseDriver.getFlags().supportCreateUpdateTrigger
-            ? {
-                title: "Create Trigger",
-                onClick: () => {
-                  scc.tabs.openBuiltinTrigger({
-                    schemaName: item?.schemaName ?? currentSchemaName,
-                    tableName: item?.tableSchema?.tableName,
-                  });
-                },
-              }
-            : undefined,
-          ...extensions.getResourceCreateMenu(),
-        ],
-      };
-
-      const modificationSection = item
-        ? [
-            isTable && databaseDriver.getFlags().supportCreateUpdateTable
-              ? {
-                  title: "Edit Table",
-                  onClick: () => {
-                    scc.tabs.openBuiltinSchema({
-                      schemaName: item?.schemaName ?? currentSchemaName,
-                      tableName: item?.name,
-                    });
-                  },
-                }
-              : undefined,
-            databaseDriver.getFlags().supportCreateUpdateTrigger && isTrigger
-              ? {
-                  title: "Edit Trigger",
-                  onClick: () => {
-                    scc.tabs.openBuiltinTrigger({
-                      schemaName: item?.schemaName ?? currentSchemaName,
-                      name: item.name,
-                      tableName: item?.tableSchema?.tableName,
-                    });
-                  },
-                }
-              : undefined,
-            ...extensions.getResourceContextMenu(item, "modification"),
-          ]
-        : [];
-
       return [
         createMenuSection,
         {
