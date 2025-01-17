@@ -1,5 +1,12 @@
 import { type LucideIcon, LucidePlus } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import {
   DndContext,
   closestCenter,
@@ -79,6 +86,46 @@ export default function WindowTabs({
       distance: 8,
     },
   });
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  const tabMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = tabContainerRef.current;
+    if (!container) return;
+
+    const selectedTab = container.children[selected];
+    if (!selectedTab) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const selectedTabRect = selectedTab.getBoundingClientRect();
+
+    let menuWidth = 0;
+    if (tabMenuRef.current) {
+      menuWidth = tabMenuRef.current.getBoundingClientRect().width;
+    }
+
+    if (selectedTabRect.left < containerRect.left) {
+      container.scrollLeft += selectedTabRect.left - containerRect.left;
+    } else if (selectedTabRect.right > containerRect.right) {
+      container.scrollLeft +=
+        selectedTabRect.right - containerRect.right + menuWidth + 1;
+    }
+  }, [selected, tabs]);
+
+  useEffect(() => {
+    const container = tabContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (event.deltaY !== 0) {
+        container.scrollLeft += event.deltaY;
+        event.preventDefault();
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel);
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, []);
 
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
@@ -149,7 +196,10 @@ export default function WindowTabs({
       >
         <div className="flex flex-col w-full h-full">
           <div className="grow-0 shrink-0 bg-neutral-100 dark:bg-neutral-900 overflow-x-auto no-scrollbar">
-            <div className="flex h-[40px]">
+            <div
+              className="flex h-[40px] window-tab-scrollbar"
+              ref={tabContainerRef}
+            >
               <SortableContext
                 items={tabs.map((tab) => tab.key)}
                 strategy={horizontalListSortingStrategy}
@@ -186,7 +236,11 @@ export default function WindowTabs({
               </SortableContext>
 
               {menu && (
-                <div className="flex h-[40px] items-center border-b">
+                <div
+                  ref={tabMenuRef}
+                  style={{ zIndex: 50, position: "sticky" }}
+                  className={`flex h-[40px] items-center border-b right-0 bg-neutral-100 dark:bg-neutral-900`}
+                >
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger>
                       <div className="ml-1.5 text-xs flex h-7 items-center justify-center gap-1 rounded-lg p-1.5 py-2 text-neutral-600 transition hover:bg-neutral-200 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white">
