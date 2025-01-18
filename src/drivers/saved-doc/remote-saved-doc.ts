@@ -81,7 +81,7 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     return t;
   }
 
-  async removeNamespapce(id: string): Promise<void> {
+  async removeNamespace(id: string): Promise<void> {
     await this.getNamespaces();
     await removeDocNamespace(this.databaseId, id);
 
