@@ -118,7 +118,7 @@ describe("Namespace", () => {
     mockToken(CURRENT_USER_TOKEN);
     const remoteDoc = new RemoteSavedDocDriver(CURRENT_DATABASE_ID);
     const firstNamespace = (await remoteDoc.getNamespaces())[0];
-    await remoteDoc.removeNamespapce(firstNamespace.id);
+    await remoteDoc.removeNamespace(firstNamespace.id);
     expect(
       (await remoteDoc.getNamespaces()).find((r) => r.id === firstNamespace.id)
     ).not.toBeTruthy();
