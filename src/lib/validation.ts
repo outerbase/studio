@@ -1,13 +1,9 @@
 export function isLinkString(str: string) {
   if (str.length > 200) return false;
 
-  let url;
-
   try {
-    url = new URL(str);
+    return ["http:", "https:"].includes(new URL(str).protocol);
   } catch {
     return false;
   }
-
-  return ["http:", "https:"].includes(url.protocol);
 }
