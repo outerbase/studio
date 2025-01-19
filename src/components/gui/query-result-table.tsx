@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
+import { cn } from "@/lib/utils";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -61,36 +62,50 @@ function Header({
   }
 
   return (
-    <div
-      className={thClass}
-      onMouseDown={(e) => {
-        const focusCell = internalState.getFocus();
-        if (e.shiftKey && focusCell) {
-          internalState.selectColRange(focusCell.x, colIndex);
-        } else if (e.ctrlKey && focusCell) {
-          internalState.addSelectionCol(colIndex);
-          internalState.setFocus(0, colIndex);
-        } else {
-          internalState.selectColumn(colIndex);
-          internalState.setFocus(0, colIndex);
-        }
-      }}
-    >
-      {header.icon ? <div className="mr-2">{header.icon}</div> : null}
-      <div className={textClass}>{header.displayName}</div>
-      <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
-        <DropdownMenuTrigger asChild>
-          <LucideChevronDown className="text-mute w-4 h-4 cursor-pointer flex-shrink-0" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className={"w-[300px]"}
-          side="bottom"
-          align="start"
-          sideOffset={0}
-        >
-          {children}
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className={thClass}>
+      <div
+        className={thClass}
+        onMouseDown={(e) => {
+          if (e.button === 2) {
+            setOpen(true);
+            e.preventDefault();
+          } else {
+            const focusCell = internalState.getFocus();
+            if (e.shiftKey && focusCell) {
+              internalState.selectColRange(focusCell.x, colIndex);
+            } else if (e.ctrlKey && focusCell) {
+              internalState.addSelectionCol(colIndex);
+              internalState.setFocus(0, colIndex);
+            } else {
+              internalState.selectColumn(colIndex);
+              internalState.setFocus(0, colIndex);
+            }
+          }
+        }}
+      >
+        {header.icon ? <div className="mr-2">{header.icon}</div> : null}
+        <div className={textClass}>{header.displayName}</div>
+      </div>
+      <div>
+        <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
+          <DropdownMenuTrigger asChild>
+            <LucideChevronDown
+              className={cn(
+                "text-mute w-4 h-4 cursor-pointer flex-shrink-0",
+                textClass
+              )}
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className={"w-[300px]"}
+            side="bottom"
+            align="start"
+            sideOffset={0}
+          >
+            {children}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }
