@@ -25,6 +25,7 @@ import {
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
 import { cn } from "@/lib/utils";
+import { exportDataAsDelimitedText } from "../lib/export-helper";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -198,14 +199,47 @@ export default function ResultTable({
     e.stopPropagation();
   }, []);
 
-  const copyCallback = useCallback((state: OptimizeTableState) => {
-    const focus = state.getFocus();
-    if (focus) {
-      const y = focus.y;
-      const x = focus.x;
-      window.navigator.clipboard.writeText(state.getValue(y, x) as string);
-    }
-  }, []);
+  const copyCallback = useCallback(
+    (state: OptimizeTableState) => {
+      const focus = state.getFocus();
+      if (focus) {
+        const y = focus.y;
+        const x = focus.x;
+        const selectedRange = state.getSelectionRange(y, x);
+        if (
+          selectedRange &&
+          (selectedRange.x1 !== selectedRange.x2 ||
+            selectedRange.y1 !== selectedRange.y2)
+        ) {
+          const headers = data
+            .getHeaders()
+            .filter(
+              (_, index) =>
+                index >= selectedRange.x1 && index <= selectedRange.x2
+            )
+            .map((header) => header.name);
+          const records = data
+            .getAllRows()
+            .filter(
+              (_, index) =>
+                index >= selectedRange.y1 && index <= selectedRange.y2
+            )
+            .map((row) => headers.map((header) => row.raw[header]));
+          exportDataAsDelimitedText(
+            [],
+            records,
+            "\t",
+            "\r\n",
+            '"',
+            "clipboard"
+          );
+        } else {
+          window.navigator.clipboard.writeText(state.getValue(y, x) as string);
+        }
+      }
+    },
+    [data]
+  );
 
   const pasteCallback = useCallback((state: OptimizeTableState) => {
     const focus = state.getFocus();
@@ -213,7 +247,18 @@ export default function ResultTable({
       const y = focus.y;
       const x = focus.x;
       window.navigator.clipboard.readText().then((pasteValue) => {
-        state.changeValue(y, x, pasteValue);
+        const data = pasteValue.split("\r\n").map((row) => row.split("\t"));
+
+        for (let row = 0; row < data.length; row++) {
+          for (let col = 0; col < data[row].length; col++) {
+            console.log(row, col, data[row][col]);
+            state.changeValue(
+              y + row,
+              x + col,
+              data[row][col].toLowerCase() === "null" ? null : data[row][col]
+            );
+          }
+        }
       });
     }
   }, []);
