@@ -212,7 +212,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         // Modification Section
         ...modificationSection,
         modificationSection.length > 0 ? { separator: true } : undefined,
-
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
     },
