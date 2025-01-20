@@ -54,6 +54,7 @@ import ExplainResultTab from "../tabs-result/explain-result-tab";
 import { tokenizeSql } from "@/lib/sql/tokenizer";
 import { QueryPlaceholder } from "./query-placeholder";
 import { escapeSqlValue, extractInputValue } from "@/drivers/sqlite/sql-helper";
+import { sendAnalyticEvents } from "@/lib/tracking";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -94,21 +95,19 @@ export default function QueryWindow({
       setPlaceholders((prev) => {
         const newPlaceholders: Record<string, string> = {};
         const token = tokenizeSql(code, databaseDriver.getFlags().dialect);
+
         const foundPlaceholders = token
           .filter((t) => t.type === "PLACEHOLDER")
           .map((t) => t.value.slice(1));
 
         for (const foundPlaceholder of foundPlaceholders) {
-          newPlaceholders[foundPlaceholder] = "";
-        }
-        // write old placeholders value into new placeholders
-        for (const newKey of Object.keys(newPlaceholders)) {
-          newPlaceholders[newKey] = prev[newKey] ?? "";
+          newPlaceholders[foundPlaceholder] = prev[foundPlaceholder] ?? "";
         }
 
-        return { ...newPlaceholders };
+        return newPlaceholders;
       });
     }, 1000);
+
     return () => clearTimeout(timer);
   }, [code, databaseDriver]);
 
@@ -164,16 +163,27 @@ export default function QueryWindow({
       setProgress(undefined);
       setQueryTabIndex(0);
 
-      //inject placeholders
       for (let i = 0; i < finalStatements.length; i++) {
         const token = tokenizeSql(
           finalStatements[i],
           databaseDriver.getFlags().dialect
         );
 
+        // Defensive measurement
+        if (token.join("") === finalStatements[i]) {
+          sendAnalyticEvents([
+            { name: "tokenize_mismatch", data: { token, finalStatements } },
+          ]);
+
+          toast.error("Failed to tokenize SQL statement");
+
+          return;
+        }
+
         const variables = token
           .filter((t) => t.type === "PLACEHOLDER")
           .map((t) => t.value.slice(1));
+
         if (
           variables.length > 0 &&
           variables.some((p) => placeholders[p] === "")
@@ -374,7 +384,7 @@ export default function QueryWindow({
               </div>
             </div>
           </div>
-          <div className="grow overflow-hidden p-2 dark:bg-neutral-950 bg-neutral-50">
+          <div className="grow overflow-hidden p-2">
             <SqlEditor
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
@@ -400,7 +410,7 @@ export default function QueryWindow({
             />
           </div>
           <div className="grow-0 shrink-0">
-            <div className="flex gap-1 pb-2 px-2">
+            <div className="flex gap-1 pb-1 px-2">
               <div className="grow items-center flex text-xs mr-2 gap-2 pl-4">
                 <div>Ln {lineNumber}</div>
                 <div>Col {columnNumber + 1}</div>
@@ -408,7 +418,7 @@ export default function QueryWindow({
               <div>
                 {Object.keys(placeholders).length > 0 && (
                   <QueryPlaceholder
-                    placeHolders={placeholders}
+                    placeholders={placeholders}
                     onChange={setPlaceholders}
                   />
                 )}
