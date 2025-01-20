@@ -1,17 +1,31 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import ConnectionList from "./connection-list";
-import Link from "next/link";
-import { LucideMoon, LucideSun } from "lucide-react";
+import { LucideFolder } from "lucide-react";
 import { User } from "lucia";
 import { useTheme } from "@/context/theme-provider";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+interface HomeSidemenuItemProps {
+  text: string;
+  selected?: boolean;
+}
+
+function HomeSidemenuItem({ text }: HomeSidemenuItemProps) {
+  return (
+    <div className="px-4 p-2 text-xs flex hover:bg-secondary cursor-pointer items-center">
+      <LucideFolder className="w-4 h-4 mr-2" />
+      {text}
+    </div>
+  );
+}
 
 export default function ConnectBody({ user }: Readonly<{ user: User | null }>) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen w-screen bg-zinc-50 dark:bg-background">
-      <div className="sticky top-0 border-b p-2 bg-background flex">
+    <div className="min-h-screen w-screen">
+      {/* <div className="sticky top-0 border-b p-2 bg-background flex">
         <Link className="h-12 w-12 flex justify-center items-center" href="/">
           <svg
             fill="currentColor"
@@ -43,9 +57,41 @@ export default function ConnectBody({ user }: Readonly<{ user: User | null }>) {
             </Link>
           )}
         </div>
-      </div>
+      </div> */}
 
-      <ConnectionList user={user} />
+      <div className="flex min-h-screen">
+        <div className="flex-shrink-0 w-[250px] bg-background border-r flex flex-col">
+          <div className="flex items-center px-4 py-2 h-[50px]"></div>
+
+          <div className="py-2 border-t">
+            <h3 className="px-4 py-2 text-primary font-bold text-xs">
+              Workspaces
+            </h3>
+            <HomeSidemenuItem text="My Personal" />
+            <HomeSidemenuItem text="Workspace 1" />
+            <HomeSidemenuItem text="Workspace 2" />
+          </div>
+
+          <div className="p-4 border-t text-xs flex flex-col gap-4">
+            <h3 className="font-bold">Legacy Login</h3>
+
+            <Button size={"sm"} variant={"secondary"}>
+              Login
+            </Button>
+          </div>
+
+          <div className="py-2 border-t">
+            <h3 className="px-4 py-2 text-primary font-bold text-xs">
+              Migration
+            </h3>
+            <HomeSidemenuItem text="Import Connections" />
+            <HomeSidemenuItem text="Export Connections" />
+          </div>
+        </div>
+        <div className="overflow-y-auto">
+          <ConnectionList user={user} />
+        </div>
+      </div>
     </div>
   );
 }

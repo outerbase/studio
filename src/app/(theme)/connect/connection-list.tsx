@@ -211,8 +211,8 @@ export default function ConnectionList({
   }
 
   return (
-    <div className="flex flex-col flex-1 max-w-[1000px] mx-auto pb-12">
-      <div className="flex mt-12 gap-2">
+    <div className="flex flex-col flex-1 p-8">
+      <div className="flex gap-2">
         <h1 className="flex-1 flex items-center font-semibold text-xl text-primary">
           Bases
         </h1>
