@@ -1,9 +1,8 @@
 "use client";
 import ConnectionList from "./connection-list";
-import { LucideFolder } from "lucide-react";
+import { LucideFolder, LucideMoon, LucideSun } from "lucide-react";
 import { User } from "lucia";
 import { useTheme } from "@/context/theme-provider";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 interface HomeSidemenuItemProps {
@@ -61,9 +60,22 @@ export default function ConnectBody({ user }: Readonly<{ user: User | null }>) {
 
       <div className="flex min-h-screen">
         <div className="flex-shrink-0 w-[250px] bg-background border-r flex flex-col">
-          <div className="flex items-center px-4 py-2 h-[50px]"></div>
+          <div className="flex items-center px-4 py-2 h-[50px] border-b">
+            <div className="text-sm font-bold flex-1">Outerbase</div>
+            <Button
+              size={"icon"}
+              variant={"ghost"}
+              onClick={() => toggleTheme()}
+            >
+              {theme === "dark" ? (
+                <LucideMoon className="w-4 h-4" />
+              ) : (
+                <LucideSun className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
 
-          <div className="py-2 border-t">
+          <div className="py-2">
             <h3 className="px-4 py-2 text-primary font-bold text-xs">
               Workspaces
             </h3>
@@ -88,7 +100,10 @@ export default function ConnectBody({ user }: Readonly<{ user: User | null }>) {
             <HomeSidemenuItem text="Export Connections" />
           </div>
         </div>
-        <div className="overflow-y-auto">
+        <div className="overflow-y-auto flex-1">
+          <div className="flex gap-2 h-[50px] border-b text-sm items-center px-8">
+            Bases
+          </div>
           <ConnectionList user={user} />
         </div>
       </div>
