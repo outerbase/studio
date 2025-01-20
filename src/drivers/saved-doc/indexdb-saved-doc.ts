@@ -38,7 +38,7 @@ export default class IndexdbSavedDoc implements SavedDocDriver {
     };
   }
 
-  async removeNamespapce(id: string): Promise<void> {
+  async removeNamespace(id: string): Promise<void> {
     await localDb.namespace.delete(id);
     await localDb.saved_doc.where({ namespace_id: id }).delete();
     this.triggerChange();
