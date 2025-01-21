@@ -4,6 +4,7 @@ export {};
 
 type OuterbaseIpc = {
   docs?: SavedDocDriver;
+  [key: string]: any;
 }; 
 declare global {
   interface Window {
