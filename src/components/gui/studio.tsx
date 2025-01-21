@@ -8,9 +8,7 @@ import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { FullEditorProvider } from "./providers/full-editor-provider";
 import { CommonDialogProvider } from "../common-dialog";
-import {
-  StudioExtensionManager,
-} from "@/core/extension-manager";
+import { StudioExtensionManager } from "@/core/extension-manager";
 import { BeforeQueryPipeline } from "@/core/query-pipeline";
 
 interface StudioProps {
@@ -28,12 +26,12 @@ interface StudioProps {
 export function Studio({
   driver,
   collaboration,
-  docDriver,
   name,
   color,
   onBack,
   extensions,
   containerClassName,
+  docDriver,
 }: Readonly<StudioProps>) {
   const proxyDriver = useMemo(() => {
     return new Proxy(driver, {
@@ -90,18 +88,11 @@ export function Studio({
     };
   }, [name, color, onBack, finalExtensionManager, containerClassName]);
 
-  const saveDocDriver = useMemo(() => {
-    if (window.outerbaseIpc.docs) {
-      return window.outerbaseIpc.docs;
-    }
-    return docDriver;
-  }, [docDriver]);
-
   return (
     <DriverProvider
       driver={proxyDriver}
       collaborationDriver={collaboration}
-      docDriver={saveDocDriver}
+      docDriver={docDriver}
     >
       <ConfigProvider config={config}>
         <CommonDialogProvider>
