@@ -19,7 +19,11 @@ import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
 import { useConfig } from "@/context/config-provider";
 import { cn } from "@/lib/utils";
 import { scc } from "@/core/command";
-import { tabCloseChannel, tabOpenChannel } from "@/core/extension-tab";
+import {
+  tabCloseChannel,
+  tabOpenChannel,
+  tabReplaceChannel,
+} from "@/core/extension-tab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -62,6 +66,29 @@ export default function DatabaseGui() {
     });
   }, []);
 
+  const replaceTabInternal = useCallback(
+    (tabOption: WindowTabItemProps) => {
+      setTabs((prev) => {
+        const foundIndex = prev.findIndex(
+          (tab) => tab.identifier === tabOption.key
+        );
+
+        if (foundIndex >= 0) {
+          setSelectedTabIndex(foundIndex);
+          return prev;
+        }
+
+        return prev.map((tab, tabIndex) => {
+          if (tabIndex === selectedTabIndex) {
+            return tabOption;
+          }
+          return tab;
+        });
+      });
+    },
+    [selectedTabIndex]
+  );
+
   const closeStudioTab = useCallback(
     (keys: string[]) => {
       if (keys) {
@@ -98,6 +125,10 @@ export default function DatabaseGui() {
   useEffect(() => {
     return tabCloseChannel.listen(closeStudioTab);
   }, [closeStudioTab]);
+
+  useEffect(() => {
+    return tabReplaceChannel.listen(replaceTabInternal);
+  }, [replaceTabInternal]);
 
   const sidebarTabs = useMemo(() => {
     return [

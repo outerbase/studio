@@ -11,10 +11,12 @@ interface TabExtensionConfig<T> {
 interface TabExtensionCommand<T> {
   open: (options: T) => void;
   generate: (options: T) => WindowTabItemProps;
+  replace: (options: T) => void;
   close: (options: T) => void;
 }
 
 export const tabOpenChannel = new CommunicationChannel<WindowTabItemProps>();
+export const tabReplaceChannel = new CommunicationChannel<WindowTabItemProps>();
 export const tabCloseChannel = new CommunicationChannel<string[]>();
 
 export function createTabExtension<T>(
@@ -29,6 +31,17 @@ export function createTabExtension<T>(
         identifier: key,
         type: config.name,
       };
+    },
+
+    replace(options: T) {
+      const key = [config.name, config.key(options)].filter(Boolean).join("-");
+
+      tabReplaceChannel.send({
+        ...config.generate(options),
+        key,
+        identifier: key,
+        type: config.name,
+      });
     },
 
     open(options: T) {
