@@ -67,7 +67,6 @@ function QueryExplanationFlow(props: LayoutFlowProps) {
       maxZoom={1}
       minZoom={1}
       nodesDraggable={false}
-      className="nopan"
     ></ReactFlow>
   );
 }
