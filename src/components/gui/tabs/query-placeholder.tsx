@@ -23,22 +23,22 @@ export function QueryPlaceholder({
 
   const placeholderTable = useMemo(() => {
     return (
-      <div className="overflow-auto max-h-[400px] relative border rounded">
-        <table className="border-separate border-spacing-0 w-full text-sm">
-          <thead className="top-0 sticky">
-            <tr className="bg-secondary h-[35px] text-xs">
-              <th className="border-r text-left px-2">Variables</th>
-              <th className="text-left px-2">Value</th>
+      <div className="relative max-h-[400px] overflow-auto rounded border">
+        <table className="w-full border-separate border-spacing-0 text-sm">
+          <thead className="sticky top-0">
+            <tr className="h-[35px] bg-secondary text-xs">
+              <th className="border-r px-2 text-left">Variables</th>
+              <th className="px-2 text-left">Value</th>
             </tr>
           </thead>
           <tbody>
             {Object.entries(placeholders).map(([key, value]) => (
               <tr key={key}>
-                <td className="px-4 py-2 border-t border-r">{key}</td>
-                <td className="px-4 py-2 border-t">
+                <td className="border-r border-t px-4 py-2">{key}</td>
+                <td className="border-t px-4 py-2">
                   <input
                     type="text"
-                    className="font-mono bg-inherit w-full h-full outline-none border-0"
+                    className="h-full w-full border-0 bg-inherit font-mono outline-none"
                     placeholder="Please fill your value"
                     value={value ?? ""}
                     onChange={(e) => {
@@ -64,11 +64,11 @@ export function QueryPlaceholder({
       <PopoverTrigger>
         <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
           {hasEmptyPlaceholder && (
-            <div className="flex items-center justify-center h-full pr-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+            <div className="flex h-full items-center justify-center pr-2">
+              <div className="h-2 w-2 animate-ping rounded-full bg-red-500"></div>
             </div>
           )}
-          Placeholders
+          Variables
           <span className="ml-1 text-xs">
             {placeholderCount - emptyPlaceholderCount} / {placeholderCount}
           </span>
@@ -77,8 +77,8 @@ export function QueryPlaceholder({
       <PopoverContent className="w-[400px]">
         {placeholderTable}
 
-        <p className="text-sm mt-2">
-          Use <span className="font-mono bg-muted">&apos;&apos;</span> for an
+        <p className="mt-2 text-sm">
+          Use <span className="bg-muted font-mono">&apos;&apos;</span> for an
           empty string. If the value is a number, it will automatically be cast
           to a number. To specify a numeric string, wrap it in single quote.
         </p>
