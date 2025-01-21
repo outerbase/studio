@@ -1,3 +1,7 @@
+/**
+ * Communication channel for sending and receiving data between components.
+ */
+
 type CommunicationChannelReceiver<T = unknown, P = void> = (data: T) => P;
 
 export class CommunicationChannel<T = unknown, P = void> {

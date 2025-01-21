@@ -9,9 +9,9 @@ import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { FullEditorProvider } from "./providers/full-editor-provider";
 import { CommonDialogProvider } from "../common-dialog";
 import {
-  BeforeQueryPipeline,
   StudioExtensionManager,
 } from "@/core/extension-manager";
+import { BeforeQueryPipeline } from "@/core/query-pipeline";
 
 interface StudioProps {
   driver: BaseDriver;
