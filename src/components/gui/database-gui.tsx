@@ -19,6 +19,7 @@ import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
 import { useConfig } from "@/context/config-provider";
 import { cn } from "@/lib/utils";
 import { scc } from "@/core/command";
+import { tabCloseChannel, tabOpenChannel } from "@/core/extension-tab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -91,14 +92,12 @@ export default function DatabaseGui() {
   );
 
   useEffect(() => {
-    window.outerbaseOpenTab = openTabInternal;
-    window.outerbaseCloseTab = closeStudioTab;
+    return tabOpenChannel.listen(openTabInternal);
+  }, [openTabInternal]);
 
-    return () => {
-      window.outerbaseOpenTab = undefined;
-      window.outerbaseCloseTab = undefined;
-    };
-  }, [openTabInternal, closeStudioTab]);
+  useEffect(() => {
+    return tabCloseChannel.listen(closeStudioTab);
+  }, [closeStudioTab]);
 
   const sidebarTabs = useMemo(() => {
     return [
@@ -169,7 +168,7 @@ export default function DatabaseGui() {
   }, [tabs, selectedTabIndex, previousLogTabKey]);
 
   return (
-    <div className={cn("h-screen w-screen flex flex-col", containerClassName)}>
+    <div className={cn("flex h-screen w-screen flex-col", containerClassName)}>
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={5} defaultSize={defaultWidthPercentage}>
           <SidebarTab tabs={sidebarTabs} />

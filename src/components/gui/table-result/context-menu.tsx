@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { openContextMenuFromEvent } from "@/messages/open-context-menu";
 import { useFullEditor } from "../providers/full-editor-provider";
 import {
   exportRowsToExcel,
@@ -10,6 +9,7 @@ import {
 } from "@/components/lib/export-helper";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import TableStateActions from "../table-optimized/table-state-actions";
+import { openContextMenuFromEvent } from "@/core/channel-builtin";
 
 export default function useTableResultContextMenu({
   tableName,

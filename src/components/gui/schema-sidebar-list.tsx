@@ -1,5 +1,4 @@
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
-import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
@@ -9,6 +8,7 @@ import { Table } from "@phosphor-icons/react";
 import SchemaCreateDialog from "./schema-editor/schema-create";
 import { scc } from "@/core/command";
 import { useConfig } from "@/context/config-provider";
+import { OpenContextMenuList } from "@/core/channel-builtin";
 
 interface SchemaListProps {
   search: string;

@@ -9,6 +9,7 @@ import { builtinOpenQueryTab } from "../builtin-tab/open-query-tab";
 import { builtinOpenSchemaTab } from "../builtin-tab/open-schema-tab";
 import { builtinOpenTableTab } from "../builtin-tab/open-table-tab";
 import { builtinOpenTriggerTab } from "../builtin-tab/open-trigger-tab";
+import { tabCloseChannel } from "../extension-tab";
 
 export const scc = {
   tabs: {
@@ -20,9 +21,7 @@ export const scc = {
     openBuiltinMassDropTable: builtinMassDropTableTab.open,
 
     close: (keys: string[]) => {
-      if (window.outerbaseCloseTab) {
-        window.outerbaseCloseTab(keys);
-      }
+      tabCloseChannel.send(keys);
     },
   },
 };
