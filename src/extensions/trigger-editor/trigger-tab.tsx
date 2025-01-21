@@ -1,13 +1,12 @@
-import TriggerEditor from "../trigger-editor";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DatabaseTriggerSchema } from "@/drivers/base-driver";
+import OpacityLoading from "@/components/gui/loading-opacity";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import OpacityLoading from "../loading-opacity";
+import { DatabaseTriggerSchema } from "@/drivers/base-driver";
 import { produce } from "immer";
-import { TriggerController } from "../trigger-editor/trigger-controller";
-
 import { isEqual } from "lodash";
-import { TriggerSaveDialog } from "../trigger-editor/trigger-save-dialog";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { TriggerController } from "./trigger-controller";
+import { TriggerSaveDialog } from "./trigger-save-dialog";
+import TriggerEditor from "./trigger-editor";
 
 export interface TriggerTabProps {
   name: string;

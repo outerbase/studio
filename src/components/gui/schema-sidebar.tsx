@@ -49,16 +49,6 @@ export default function SchemaView() {
       });
     }
 
-    if (flags.supportCreateUpdateTrigger) {
-      items.push({
-        title: "Create Trigger",
-        key: "create-trigger",
-        onClick: () => {
-          scc.tabs.openBuiltinTrigger({ schemaName: currentSchemaName });
-        },
-      });
-    }
-
     return [...items, ...extensions.getResourceCreateMenu()];
   }, [databaseDriver, currentSchemaName, extensions]);
 
