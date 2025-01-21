@@ -142,7 +142,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
-      // const isTrigger = item?.type === "trigger";
 
       const createMenuSection = {
         title: "Create",
@@ -156,7 +155,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             },
           },
           ...extensions.getResourceCreateMenu(),
-        ],
+        ].filter(Boolean),
       };
 
       const modificationSection = item
@@ -173,7 +172,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
                 }
               : undefined,
             ...extensions.getResourceContextMenu(item, "modification"),
-          ]
+          ].filter(Boolean)
         : [];
 
       return [
@@ -261,10 +260,10 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             });
           } else if (item.data.type === "trigger") {
             triggerEditorExtensionTab.open({
-              schemaName: item.data.schemaName ?? '',
-              name: item.name ?? '',
-              tableName: item.data.tableName ?? ''
-            })
+              schemaName: item.data.schemaName ?? "",
+              name: item.name ?? "",
+              tableName: item.data.tableName ?? "",
+            });
           } else if (item.data.type === "schema") {
             if (databaseDriver.getFlags().supportUseStatement) {
               databaseDriver

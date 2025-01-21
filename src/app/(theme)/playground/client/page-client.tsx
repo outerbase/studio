@@ -24,7 +24,7 @@ import {
   ToolbarSeparator,
 } from "@/components/gui/toolbar";
 import { StudioExtensionManager } from "@/core/extension-manager";
-import { createStandardExtensions } from "@/core/standard-extension";
+import { createSQLiteExtensions } from "@/core/standard-extension";
 
 const SQLITE_FILE_EXTENSIONS =
   ".db,.sdb,.sqlite,.db3,.s3db,.sqlite3,.sl3,.db2,.s2db,.sqlite2,.sl2";
@@ -249,15 +249,15 @@ export default function PlaygroundEditorBody({
   }, [driver, fileName, handler, nativeDriver]);
 
   const extensions = useMemo(() => {
-    return new StudioExtensionManager(createStandardExtensions());
+    return new StudioExtensionManager(createSQLiteExtensions());
   }, []);
 
   const dom = useMemo(() => {
     if (databaseLoading) {
       return (
         <div className="p-4">
-          <LucideLoader className="w-12 h-12 animate-spin mb-2" />
-          <h1 className="text-2xl font-bold mb-2">Loading Database</h1>
+          <LucideLoader className="mb-2 h-12 w-12 animate-spin" />
+          <h1 className="mb-2 text-2xl font-bold">Loading Database</h1>
           <p>
             Please wait. We are downloading:
             <br />
@@ -286,12 +286,12 @@ export default function PlaygroundEditorBody({
     <>
       <Script src="/sqljs/sql-wasm.js" onReady={onReady} />
       <ScreenDropZone onFileDrop={onFileDrop} />
-      <div className="w-screen h-screen flex flex-col">
+      <div className="flex h-screen w-screen flex-col">
         <div className="border-b p-1">
           <Toolbar>
             {fileName && (
-              <div className="text-xs rounded bg-yellow-300 text-black flex gap-1 items-center p-2">
-                <LucideFile className="w-4 h-4" />
+              <div className="flex items-center gap-1 rounded bg-yellow-300 p-2 text-xs text-black">
+                <LucideFile className="h-4 w-4" />
                 <span>
                   Editing <strong>{fileName}</strong>
                 </span>
@@ -302,14 +302,14 @@ export default function PlaygroundEditorBody({
               <ToolbarButton
                 text="Save"
                 onClick={onSaveClicked}
-                icon={<Save className="w-4 h-4" />}
+                icon={<Save className="h-4 w-4" />}
               />
             )}
 
             <ToolbarButton
               text="Open"
               onClick={onOpenClicked}
-              icon={<FolderOpenIcon className="w-4 h-4" />}
+              icon={<FolderOpenIcon className="h-4 w-4" />}
             />
 
             {handler && (
@@ -317,7 +317,7 @@ export default function PlaygroundEditorBody({
                 <ToolbarSeparator />
                 <ToolbarButton
                   text="Refresh"
-                  icon={<RefreshCcw className="w-4 h-4" />}
+                  icon={<RefreshCcw className="h-4 w-4" />}
                   onClick={onReloadDatabase}
                 />
               </>

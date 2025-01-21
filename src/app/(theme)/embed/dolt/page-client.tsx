@@ -1,7 +1,7 @@
 "use client";
 import { Studio } from "@/components/gui/studio";
 import { StudioExtensionManager } from "@/core/extension-manager";
-import { createStandardExtensions } from "@/core/standard-extension";
+import { createMySQLExtensions } from "@/core/standard-extension";
 import { IframeDoltDriver } from "@/drivers/iframe-driver";
 import ElectronSavedDocs from "@/drivers/saved-doc/electron-saved-doc";
 import DoltExtension from "@/extensions/dolt";
@@ -14,7 +14,7 @@ export default function EmbedPageClient() {
 
   const extensions = useMemo(() => {
     return new StudioExtensionManager([
-      ...createStandardExtensions(),
+      ...createMySQLExtensions(),
       new DoltExtension(),
     ]);
   }, []);

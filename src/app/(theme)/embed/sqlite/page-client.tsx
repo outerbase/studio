@@ -1,7 +1,7 @@
 "use client";
 import { Studio } from "@/components/gui/studio";
 import { StudioExtensionManager } from "@/core/extension-manager";
-import { createStandardExtensions } from "@/core/standard-extension";
+import { createSQLiteExtensions } from "@/core/standard-extension";
 import { IframeSQLiteDriver } from "@/drivers/iframe-driver";
 import ElectronSavedDocs from "@/drivers/saved-doc/electron-saved-doc";
 import { useSearchParams } from "next/navigation";
@@ -12,7 +12,7 @@ export default function EmbedPageClient() {
   const driver = useMemo(() => new IframeSQLiteDriver(), []);
 
   const extensions = useMemo(() => {
-    return new StudioExtensionManager(createStandardExtensions());
+    return new StudioExtensionManager(createSQLiteExtensions());
   }, []);
 
   const savedDocDriver = useMemo(() => {
