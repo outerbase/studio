@@ -91,7 +91,7 @@ export function Studio({
   }, [name, color, onBack, finalExtensionManager, containerClassName]);
 
   const saveDocDriver = useMemo(() => {
-    if (window.outerbaseIpc.docs) {
+    if (window.outerbaseIpc?.docs) {
       return window.outerbaseIpc.docs;
     }
     return docDriver;
