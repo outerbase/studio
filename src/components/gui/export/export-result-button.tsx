@@ -4,7 +4,6 @@ import OptimizeTableState, {
   TableSelectionRange,
 } from "../table-optimized/OptimizeTableState";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getFormatHandlers } from "@/components/lib/export-helper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { getFormatHandlers } from "@/lib/export-helper";
 
 export type ExportTarget = "clipboard" | "file";
 type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";

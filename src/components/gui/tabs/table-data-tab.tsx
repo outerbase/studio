@@ -16,7 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { commitChange } from "@/components/lib/sql-execute-helper";
+import { commitChange } from "@/lib/sql/sql-execute-helper";
 import {
   AlertDialog,
   AlertDialogAction,

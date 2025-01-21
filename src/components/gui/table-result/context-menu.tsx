@@ -6,7 +6,7 @@ import {
   exportRowsToExcel,
   exportRowsToJson,
   exportRowsToSqlInsert,
-} from "@/components/lib/export-helper";
+} from "@/lib/export-helper";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import TableStateActions from "../table-optimized/table-state-actions";
 import { openContextMenuFromEvent } from "@/core/channel-builtin";

@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { MultipleQueryResult } from "../../lib/multiple-query";
 import ExportResultButton from "../export/export-result-button";
 import ResultTable from "../query-result-table";
 import ResultStats from "../result-stat";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import AggregateResultButton from "../aggregate-result/aggregate-result-button";
+import { MultipleQueryResult } from "@/lib/sql/multiple-query";
 
 export default function QueryResult({
   result,

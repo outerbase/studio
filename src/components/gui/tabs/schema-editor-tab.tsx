@@ -4,7 +4,7 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import SchemaEditor from "../schema-editor";
-import { createTableSchemaDraft } from "@/components/lib/sql-generate.schema";
+import { createTableSchemaDraft } from "@/lib/sql/sql-generate.schema";
 import { cloneDeep } from "lodash";
 
 interface SchemaEditorTabProps {
