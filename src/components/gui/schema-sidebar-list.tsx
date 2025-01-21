@@ -9,6 +9,7 @@ import SchemaCreateDialog from "./schema-editor/schema-create";
 import { scc } from "@/core/command";
 import { useConfig } from "@/context/config-provider";
 import { OpenContextMenuList } from "@/core/channel-builtin";
+import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
 
 interface SchemaListProps {
   search: string;
@@ -141,7 +142,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
-      const isTrigger = item?.type === "trigger";
+      // const isTrigger = item?.type === "trigger";
 
       const createMenuSection = {
         title: "Create",
@@ -154,17 +155,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               });
             },
           },
-          databaseDriver.getFlags().supportCreateUpdateTrigger
-            ? {
-                title: "Create Trigger",
-                onClick: () => {
-                  scc.tabs.openBuiltinTrigger({
-                    schemaName: item?.schemaName ?? currentSchemaName,
-                    tableName: item?.tableSchema?.tableName,
-                  });
-                },
-              }
-            : undefined,
           ...extensions.getResourceCreateMenu(),
         ],
       };
@@ -178,18 +168,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
                     scc.tabs.openBuiltinSchema({
                       schemaName: item?.schemaName ?? currentSchemaName,
                       tableName: item?.name,
-                    });
-                  },
-                }
-              : undefined,
-            databaseDriver.getFlags().supportCreateUpdateTrigger && isTrigger
-              ? {
-                  title: "Edit Trigger",
-                  onClick: () => {
-                    scc.tabs.openBuiltinTrigger({
-                      schemaName: item?.schemaName ?? currentSchemaName,
-                      name: item.name,
-                      tableName: item?.tableSchema?.tableName,
                     });
                   },
                 }
@@ -282,10 +260,11 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               tableName: item.data.name,
             });
           } else if (item.data.type === "trigger") {
-            scc.tabs.openBuiltinTrigger({
-              schemaName: item.data.schemaName,
-              name: item.name,
-            });
+            triggerEditorExtensionTab.open({
+              schemaName: item.data.schemaName ?? '',
+              name: item.name ?? '',
+              tableName: item.data.tableName ?? ''
+            })
           } else if (item.data.type === "schema") {
             if (databaseDriver.getFlags().supportUseStatement) {
               databaseDriver
