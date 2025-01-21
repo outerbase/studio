@@ -4,7 +4,6 @@ import {
   TriggerOperation,
   TriggerWhen,
 } from "@/drivers/base-driver";
-import TableCombobox from "../table-combobox/TableCombobox";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,11 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import SqlEditor from "../sql-editor";
 import { produce } from "immer";
-import SchemaNameSelect from "../schema-editor/schema-name-select";
 import { useSchema } from "@/context/schema-provider";
 import { useMemo } from "react";
+import SchemaNameSelect from "@/components/gui/schema-editor/schema-name-select";
+import TableCombobox from "@/components/gui/table-combobox/TableCombobox";
+import SqlEditor from "@/components/gui/sql-editor";
 
 export interface TriggerEditorProps {
   onChange: (value: DatabaseTriggerSchema) => void;

@@ -8,7 +8,6 @@ import { builtinMassDropTableTab } from "../builtin-tab/open-mass-drop-table";
 import { builtinOpenQueryTab } from "../builtin-tab/open-query-tab";
 import { builtinOpenSchemaTab } from "../builtin-tab/open-schema-tab";
 import { builtinOpenTableTab } from "../builtin-tab/open-table-tab";
-import { builtinOpenTriggerTab } from "../builtin-tab/open-trigger-tab";
 import { tabCloseChannel } from "../extension-tab";
 
 export const scc = {
@@ -16,7 +15,6 @@ export const scc = {
     openBuiltinQuery: builtinOpenQueryTab.open,
     openBuiltinTable: builtinOpenTableTab.open,
     openBuiltinSchema: builtinOpenSchemaTab.open,
-    openBuiltinTrigger: builtinOpenTriggerTab.open,
     openBuiltinERD: builtinOpenERDTab.open,
     openBuiltinMassDropTable: builtinMassDropTableTab.open,
 
