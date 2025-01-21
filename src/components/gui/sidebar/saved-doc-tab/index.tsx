@@ -11,7 +11,6 @@ import RenameNamespaceDialog from "./rename-namespace-dialog";
 import RemoveDocDialog from "./remove-doc-dialog";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
 import RemoveNamespaceDialog from "./remove-namespace-dialog";
-import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Binoculars, Folder, Plus } from "@phosphor-icons/react";
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CreateNamespaceDialog from "./create-namespace-button";
 import { scc } from "@/core/command";
+import { OpenContextMenuList } from "@/core/channel-builtin";
 
 type SavedDocListData =
   | {
@@ -155,8 +155,8 @@ export default function SavedDocTab() {
     <>
       {dialog}
 
-      <div className="flex flex-col grow">
-        <div className="flex justify-between mb-5 items-center mx-2 pt-4 px-2">
+      <div className="flex grow flex-col">
+        <div className="mx-2 mb-5 flex items-center justify-between px-2 pt-4">
           <h1 className="text-xl font-medium text-primary">Queries</h1>
 
           <DropdownMenu modal={false}>
@@ -166,7 +166,7 @@ export default function SavedDocTab() {
                   buttonVariants({
                     size: "icon",
                   }),
-                  "rounded-full h-8 w-8 bg-neutral-800 dark:bg-neutral-200"
+                  "h-8 w-8 rounded-full bg-neutral-800 dark:bg-neutral-200"
                 )}
               >
                 <Plus size={16} weight="bold" />

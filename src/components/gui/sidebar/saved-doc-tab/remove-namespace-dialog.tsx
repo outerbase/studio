@@ -35,7 +35,7 @@ export default function RemoveNamespaceDialog({
         .getDocs()
         .then((docs) => {
           docDriver
-            .removeNamespapce(value.id)
+            .removeNamespace(value.id)
             .then(() => {
               onClose();
               onComplete(

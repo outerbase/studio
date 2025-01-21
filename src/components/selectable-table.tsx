@@ -52,7 +52,7 @@ export function SelectableTable<T>({
     if (showOnlySelected) {
       return (
         <span
-          className="underline text-blue-600 cursor-pointer"
+          className="cursor-pointer text-blue-600 underline"
           onClick={() => setShowOnlySelected(false)}
         >
           Show all items
@@ -62,7 +62,7 @@ export function SelectableTable<T>({
 
     return (
       <span
-        className="underline text-blue-600 cursor-pointer"
+        className="cursor-pointer text-blue-600 underline"
         onClick={() => {
           setShowOnlySelected(true);
         }}
@@ -73,16 +73,16 @@ export function SelectableTable<T>({
   }, [selectedItems, showOnlySelected]);
 
   return (
-    <table className="border-separate border-spacing-0 w-full text-sm">
-      <thead className="top-0 sticky">
-        <tr className="bg-secondary h-[35px] text-xs">
+    <table className="w-full border-separate border-spacing-0 text-sm">
+      <thead className="sticky top-0">
+        <tr className="h-[35px] bg-secondary text-xs">
           {!disabledSelection && (
-            <th className="border-r text-left px-2 border-b"></th>
+            <th className="border-b border-r px-2 text-left"></th>
           )}
           {headers.map((header) => {
             return (
               <th
-                className="border-r text-left px-2 border-b"
+                className="border-b border-r px-2 text-left"
                 style={{ width: header.width }}
                 key={header.key}
               >
@@ -94,7 +94,7 @@ export function SelectableTable<T>({
 
         {!disabledSelection && (
           <tr className="h-[40px] bg-background">
-            <th className="w-[40px] border-r justify-center items-center border-b">
+            <th className="w-[40px] items-center justify-center border-b border-r">
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={toggleAllChecked}
@@ -102,11 +102,11 @@ export function SelectableTable<T>({
               />
             </th>
             <th
-              className="text-left font-normal px-2 border-b"
+              className="border-b px-2 text-left font-normal"
               colSpan={headers.length}
             >
               <div className="flex">
-                <div className="flex-1 flex gap-4 items-center text-xs font-semibold">
+                <div className="flex flex-1 items-center gap-4 text-xs font-semibold">
                   <span>
                     {selectedItems.length} out of {items.length} item
                     {items.length > 1 && "s"} selected
@@ -149,12 +149,12 @@ export function SelectableTable<T>({
                   : undefined
               }
               className={cn(
-                "cursor-pointer h-[40px] hover:bg-accent",
+                "h-[40px] cursor-pointer hover:bg-accent",
                 isSelected ? "text-primary" : "text-gray-400 dark:text-gray-600"
               )}
             >
               {!disabledSelection && (
-                <td className="flex justify-center items-center h-[40px] border-r border-b">
+                <td className="flex h-[40px] items-center justify-center border-b border-r">
                   <Checkbox checked={isSelected} />
                 </td>
               )}
@@ -168,5 +168,5 @@ export function SelectableTable<T>({
 }
 
 export function SelectableTableCell({ children }: PropsWithChildren) {
-  return <td className="py-2 px-2 h-[40px] border-b">{children}</td>;
+  return <td className="h-[40px] border-b px-2 py-2">{children}</td>;
 }

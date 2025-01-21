@@ -1,5 +1,5 @@
 import { format } from "sql-formatter";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LucideGrid,
   LucideMessageSquareWarning,
@@ -51,6 +51,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { isExplainQueryPlan } from "../query-explanation";
 import ExplainResultTab from "../tabs-result/explain-result-tab";
+import { tokenizeSql } from "@/lib/sql/tokenizer";
+import { QueryPlaceholder } from "./query-placeholder";
+import { escapeSqlValue, extractInputValue } from "@/drivers/sqlite/sql-helper";
+import { sendAnalyticEvents } from "@/lib/tracking";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -84,6 +88,28 @@ export default function QueryWindow({
     initialNamespace ?? "Unsaved Query"
   );
   const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
+  const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPlaceholders((prev) => {
+        const newPlaceholders: Record<string, string> = {};
+        const token = tokenizeSql(code, databaseDriver.getFlags().dialect);
+
+        const foundPlaceholders = token
+          .filter((t) => t.type === "PLACEHOLDER")
+          .map((t) => t.value.slice(1));
+
+        for (const foundPlaceholder of foundPlaceholders) {
+          newPlaceholders[foundPlaceholder] = prev[foundPlaceholder] ?? "";
+        }
+
+        return newPlaceholders;
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [code, databaseDriver]);
 
   const onFormatClicked = () => {
     try {
@@ -136,6 +162,47 @@ export default function QueryWindow({
       setData(undefined);
       setProgress(undefined);
       setQueryTabIndex(0);
+
+      for (let i = 0; i < finalStatements.length; i++) {
+        const token = tokenizeSql(
+          finalStatements[i],
+          databaseDriver.getFlags().dialect
+        );
+
+        // Defensive measurement
+        if (token.join("") === finalStatements[i]) {
+          sendAnalyticEvents([
+            { name: "tokenize_mismatch", data: { token, finalStatements } },
+          ]);
+
+          toast.error("Failed to tokenize SQL statement");
+
+          return;
+        }
+
+        const variables = token
+          .filter((t) => t.type === "PLACEHOLDER")
+          .map((t) => t.value.slice(1));
+
+        if (
+          variables.length > 0 &&
+          variables.some((p) => placeholders[p] === "")
+        ) {
+          toast.error("Please fill in all placeholders");
+          return;
+        }
+
+        finalStatements[i] = token
+          .map((t) => {
+            if (t.type === "PLACEHOLDER") {
+              return escapeSqlValue(
+                extractInputValue(placeholders[t.value.slice(1)])
+              );
+            }
+            return t.value;
+          })
+          .join("");
+      }
 
       multipleQuery(databaseDriver, finalStatements, (currentProgress) => {
         setProgress(currentProgress);
@@ -317,7 +384,7 @@ export default function QueryWindow({
               </div>
             </div>
           </div>
-          <div className="grow overflow-hidden p-2 dark:bg-neutral-950 bg-neutral-50">
+          <div className="grow overflow-hidden p-2">
             <SqlEditor
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
@@ -343,10 +410,18 @@ export default function QueryWindow({
             />
           </div>
           <div className="grow-0 shrink-0">
-            <div className="flex gap-1 pb-2 px-2">
+            <div className="flex gap-1 pb-1 px-2">
               <div className="grow items-center flex text-xs mr-2 gap-2 pl-4">
                 <div>Ln {lineNumber}</div>
                 <div>Col {columnNumber + 1}</div>
+              </div>
+              <div>
+                {Object.keys(placeholders).length > 0 && (
+                  <QueryPlaceholder
+                    placeholders={placeholders}
+                    onChange={setPlaceholders}
+                  />
+                )}
               </div>
 
               <Tooltip>

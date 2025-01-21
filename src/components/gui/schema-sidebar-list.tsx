@@ -1,5 +1,4 @@
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
-import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
@@ -9,6 +8,8 @@ import { Table } from "@phosphor-icons/react";
 import SchemaCreateDialog from "./schema-editor/schema-create";
 import { scc } from "@/core/command";
 import { useConfig } from "@/context/config-provider";
+import { OpenContextMenuList } from "@/core/channel-builtin";
+import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
 
 interface SchemaListProps {
   search: string;
@@ -141,7 +142,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
-      const isTrigger = item?.type === "trigger";
 
       const createMenuSection = {
         title: "Create",
@@ -154,19 +154,8 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               });
             },
           },
-          databaseDriver.getFlags().supportCreateUpdateTrigger
-            ? {
-                title: "Create Trigger",
-                onClick: () => {
-                  scc.tabs.openBuiltinTrigger({
-                    schemaName: item?.schemaName ?? currentSchemaName,
-                    tableName: item?.tableSchema?.tableName,
-                  });
-                },
-              }
-            : undefined,
           ...extensions.getResourceCreateMenu(),
-        ],
+        ].filter(Boolean),
       };
 
       const modificationSection = item
@@ -182,20 +171,8 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
                   },
                 }
               : undefined,
-            databaseDriver.getFlags().supportCreateUpdateTrigger && isTrigger
-              ? {
-                  title: "Edit Trigger",
-                  onClick: () => {
-                    scc.tabs.openBuiltinTrigger({
-                      schemaName: item?.schemaName ?? currentSchemaName,
-                      name: item.name,
-                      tableName: item?.tableSchema?.tableName,
-                    });
-                  },
-                }
-              : undefined,
             ...extensions.getResourceContextMenu(item, "modification"),
-          ]
+          ].filter(Boolean)
         : [];
 
       return [
@@ -212,7 +189,6 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         // Modification Section
         ...modificationSection,
         modificationSection.length > 0 ? { separator: true } : undefined,
-
 
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
@@ -283,9 +259,10 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
               tableName: item.data.name,
             });
           } else if (item.data.type === "trigger") {
-            scc.tabs.openBuiltinTrigger({
-              schemaName: item.data.schemaName,
-              name: item.name,
+            triggerEditorExtensionTab.open({
+              schemaName: item.data.schemaName ?? "",
+              name: item.name ?? "",
+              tableName: item.data.tableName ?? "",
             });
           } else if (item.data.type === "schema") {
             if (databaseDriver.getFlags().supportUseStatement) {

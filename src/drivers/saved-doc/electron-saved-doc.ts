@@ -1,13 +1,4 @@
-import {
-  createDocNamespace,
-  getDocNamespaceList,
-  removeDocNamespace,
-  updateDocNamespace,
-  getSavedDocList,
-  createSavedDoc,
-  removeSavedDoc,
-  updateSavedDoc,
-} from "./saved-doc-actions";
+"use client";
 import {
   SavedDocData,
   SavedDocDriver,
@@ -17,83 +8,90 @@ import {
   SavedDocType,
 } from "./saved-doc-driver";
 
-export default class RemoteSavedDocDriver implements SavedDocDriver {
-  protected databaseId: string;
+export default class ElectronSavedDocs implements SavedDocDriver {
   protected cb: (() => void)[] = [];
   protected cacheNamespaceList: SavedDocNamespace[] | null = null;
   protected cacheDocs: Record<string, SavedDocData[]> = {};
-
-  constructor(databaseId: string) {
-    this.databaseId = databaseId;
-  }
 
   async getNamespaces(): Promise<SavedDocNamespace[]> {
     if (this.cacheNamespaceList) {
       return this.cacheNamespaceList;
     }
 
-    const t = await getDocNamespaceList(this.databaseId);
-    const d = await getSavedDocList(this.databaseId);
+    if (!window.outerbaseIpc?.docs) {
+      throw new Error("Docs driver not found");
+    }
 
-    this.cacheDocs = d.reduce(
-      (a, b) => {
-        if (!a[b.namespace.id]) a[b.namespace.id] = [b];
-        else a[b.namespace.id].push(b);
-        return a;
-      },
-      t.reduce(
-        (a, b) => {
-          a[b.id] = [];
-          return a;
-        },
-        {} as Record<string, SavedDocData[]>
-      )
-    );
+    const result = await window.outerbaseIpc.docs.load();
 
-    this.cacheNamespaceList = t;
-    return t;
+    if (!result) {
+      this.cacheNamespaceList = [];
+      return [];
+    } else {
+      this.cacheDocs = result.docs;
+      this.cacheNamespaceList = result.namespace;
+      return result.namespace;
+    }
+  }
+
+  save() {
+    if (!window.outerbaseIpc?.docs) {
+      throw new Error("Docs driver not found");
+    }
+
+    window.outerbaseIpc.docs
+      .save({
+        namespace: this.cacheNamespaceList ?? [],
+        docs: this.cacheDocs,
+      })
+      .then()
+      .catch();
   }
 
   async createNamespace(name: string): Promise<SavedDocNamespace> {
     await this.getNamespaces();
-    const t = await createDocNamespace(this.databaseId, name);
+
+    const now = Math.floor(Date.now() / 1000);
+    const id = window.crypto.randomUUID();
+
+    const namespace = {
+      id,
+      name,
+      createdAt: now,
+      updatedAt: now,
+    };
 
     if (this.cacheNamespaceList) {
-      this.cacheNamespaceList.push(t);
+      this.cacheNamespaceList.push(namespace);
     }
 
-    return t;
+    this.save();
+    return namespace;
   }
 
   async updateNamespace(id: string, name: string): Promise<SavedDocNamespace> {
     await this.getNamespaces();
-    const t = await updateDocNamespace(this.databaseId, id, name);
 
-    if (this.cacheNamespaceList) {
-      this.cacheNamespaceList = this.cacheNamespaceList.map((n) => {
-        if (n.id === t.id) {
-          return t;
-        }
-        return n;
-      });
+    const found = this.cacheNamespaceList?.find((n) => n.id === id);
+    if (!found) {
+      throw new Error("Namespace not found");
     }
 
-    return t;
+    found.updatedAt = Math.floor(Date.now() / 1000);
+    found.name = name;
+
+    this.save();
+    return found;
   }
 
   async removeNamespace(id: string): Promise<void> {
     await this.getNamespaces();
-    await removeDocNamespace(this.databaseId, id);
 
-    if (this.cacheNamespaceList) {
-      this.cacheNamespaceList = this.cacheNamespaceList.filter(
-        (n) => n.id !== id
-      );
+    this.cacheNamespaceList = (this.cacheNamespaceList ?? []).filter(
+      (n) => n.id !== id
+    );
 
-      if (this.cacheNamespaceList.length === 0) {
-        this.cacheNamespaceList = null;
-      }
-    }
+    this.save();
   }
 
   async createDoc(
@@ -102,12 +100,27 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
     data: SavedDocInput
   ): Promise<SavedDocData> {
     await this.getNamespaces();
-    const r = await createSavedDoc(this.databaseId, namespace, type, data);
+
+    const now = Math.floor(Date.now() / 1000);
+    const r: SavedDocData = {
+      content: data.content,
+      name: data.name,
+      createdAt: now,
+      updatedAt: now,
+      namespace: (this.cacheNamespaceList ?? []).find(
+        (n) => n.id === namespace
+      )!,
+      type,
+      id: window.crypto.randomUUID(),
+    };
 
     if (this.cacheDocs[r.namespace.id]) {
       this.cacheDocs[r.namespace.id].unshift(r);
+    } else {
+      this.cacheDocs[r.namespace.id] = [r];
     }
 
+    this.save();
     this.triggerChange();
     return r;
   }
@@ -125,24 +138,26 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
 
   async updateDoc(id: string, data: SavedDocInput): Promise<SavedDocData> {
     await this.getNamespaces();
-    const r = await updateSavedDoc(this.databaseId, id, data);
 
-    if (this.cacheDocs[r.namespace.id]) {
-      this.cacheDocs[r.namespace.id] = this.cacheDocs[r.namespace.id].map(
-        (d) => {
-          if (d.id === r.id) return r;
-          return d;
-        }
-      );
+    const r = Object.values(this.cacheDocs)
+      .flat()
+      .find((d) => d.id === id);
+    if (!r) {
+      throw new Error("Doc not found");
     }
 
+    r.content = data.content;
+    r.name = data.name;
+    r.updatedAt = Math.floor(Date.now() / 1000);
+
+    this.save();
     this.triggerChange();
+
     return r;
   }
 
   async removeDoc(id: string): Promise<void> {
     await this.getNamespaces();
-    const r = await removeSavedDoc(this.databaseId, id);
 
     for (const namespaceId of Object.keys(this.cacheDocs)) {
       this.cacheDocs[namespaceId] = this.cacheDocs[namespaceId].filter(
@@ -150,8 +165,8 @@ export default class RemoteSavedDocDriver implements SavedDocDriver {
       );
     }
 
+    this.save();
     this.triggerChange();
-    return r;
   }
 
   addChangeListener(cb: () => void): void {

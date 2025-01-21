@@ -1,8 +1,8 @@
+import CodePreview from "@/components/gui/code-preview";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { LucideCode, LucideLoader, LucideSave } from "lucide-react";
-import CodePreview from "../code-preview";
 
 interface Props {
   onSave: () => void;
