@@ -4,7 +4,7 @@ import { WindowTabItemProps } from "./windows-tab";
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 import { ButtonProps } from "../ui/button";
-import { CSS } from "../lib/dnd-kit";
+import { CSS } from "@/lib/dnd-kit";
 
 interface SortableTabProps {
   tab: WindowTabItemProps;
