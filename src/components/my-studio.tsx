@@ -5,7 +5,12 @@ import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio } from "./gui/studio";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { StudioExtensionManager } from "@/core/extension-manager";
-import { createStandardExtensions } from "@/core/standard-extension";
+import {
+  createMySQLExtensions,
+  createPostgreSQLExtensions,
+  createSQLiteExtensions,
+  createStandardExtensions,
+} from "@/core/standard-extension";
 
 interface MyStudioProps {
   name: string;
@@ -24,14 +29,23 @@ function MyStudioInternal({
   collabarator,
 }: MyStudioProps) {
   const router = useRouter();
+  const dialet = driver.getFlags().dialect;
 
   const goBack = useCallback(() => {
     router.push("/connect");
   }, [router]);
 
   const extensions = useMemo(() => {
+    if (dialet === "mysql") {
+      return new StudioExtensionManager(createMySQLExtensions());
+    } else if (dialet === "sqlite") {
+      return new StudioExtensionManager(createSQLiteExtensions());
+    } else if (dialet === "postgres") {
+      return new StudioExtensionManager(createPostgreSQLExtensions());
+    }
+
     return new StudioExtensionManager(createStandardExtensions());
-  }, []);
+  }, [dialet]);
 
   return (
     <Studio

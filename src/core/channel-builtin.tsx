@@ -1,4 +1,5 @@
-import type { LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
+import { CommunicationChannel } from "./channel";
 
 export interface StudioContextMenuItem {
   type?: "check";
@@ -22,10 +23,11 @@ export interface OpenContextMenuOptions {
   y: number;
 }
 
+export const contextMenuChannel =
+  new CommunicationChannel<OpenContextMenuOptions>();
+
 export function openContextMenu(options: OpenContextMenuOptions) {
-  if (window.outerbaseOpenContextMenu) {
-    window.outerbaseOpenContextMenu(options);
-  }
+  contextMenuChannel.send(options);
 }
 
 export function openContextMenuFromEvent(contextMenu: OpenContextMenuList) {

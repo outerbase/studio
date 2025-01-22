@@ -2,7 +2,7 @@
 import { Studio } from "@/components/gui/studio";
 import ServerLoadingAnimation from "@/components/icons/server-loading";
 import { StudioExtensionManager } from "@/core/extension-manager";
-import { createStandardExtensions } from "@/core/standard-extension";
+import { createMySQLExtensions } from "@/core/standard-extension";
 import MySQLPlaygroundDriver from "@/drivers/mysql/mysql-playground-driver";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -24,7 +24,7 @@ export default function MySQLPlaygroundPageClient({
   }, [setReady, roomName]);
 
   const extensions = useMemo(() => {
-    return new StudioExtensionManager(createStandardExtensions());
+    return new StudioExtensionManager(createMySQLExtensions());
   }, []);
 
   // Create ping useeffect
@@ -40,7 +40,7 @@ export default function MySQLPlaygroundPageClient({
 
   if (!isReady) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center flex-col gap-4">
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-4">
         <ServerLoadingAnimation />
         <div>Setting up your database</div>
       </div>
