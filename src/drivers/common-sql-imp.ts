@@ -1,4 +1,4 @@
-import { validateOperation } from "@/components/lib/validation";
+import { validateOperation } from "@/lib/validation";
 import {
   BaseDriver,
   DatabaseResultSet,

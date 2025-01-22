@@ -1,16 +1,12 @@
+import { ExportOptions, ExportSelection, ExportTarget } from "@/components/gui/export/export-result-button";
+import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import { getSingleTableName } from "@/components/gui/tabs/query-tab";
 import {
   escapeDelimitedValue,
   escapeIdentity,
   escapeSqlValue,
 } from "@/drivers/sqlite/sql-helper";
-import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
-import {
-  ExportOptions,
-  ExportSelection,
-  ExportTarget,
-} from "../gui/export/export-result-button";
 import { toast } from "sonner";
-import { getSingleTableName } from "../gui/tabs/query-tab";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],

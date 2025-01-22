@@ -20,7 +20,7 @@ import {
   MultipleQueryProgress,
   MultipleQueryResult,
   multipleQuery,
-} from "@/components/lib/multiple-query";
+} from "@/lib/sql/multiple-query";
 import WindowTabs, { useTabsContext, WindowTabItemProps } from "../windows-tab";
 import QueryResult from "../tabs-result/query-result-tab";
 import { useSchema } from "@/context/schema-provider";

@@ -29,7 +29,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { restrictToHorizontalAxis } from "../lib/dnd-kit";
+import { restrictToHorizontalAxis } from "@/lib/dnd-kit";
 
 export interface WindowTabItemProps {
   component: JSX.Element;

@@ -1,4 +1,3 @@
-import { selectArrayFromIndexList } from "@/components/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
 import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 import {
@@ -10,6 +9,7 @@ import {
 import { ReactElement } from "react";
 import deepEqual from "deep-equal";
 import { formatNumber } from "@/lib/convertNumber";
+import { selectArrayFromIndexList } from "@/lib/export-helper";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;

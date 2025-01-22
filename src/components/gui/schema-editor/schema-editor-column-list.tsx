@@ -18,7 +18,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Checkbox } from "@/components/ui/checkbox";
 import ColumnDefaultValueInput from "./column-default-value-input";
-import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnChange,
@@ -43,6 +42,7 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import ColumnTypeSelector from "./column-type-selector";
 import ColumnCollation from "./column-collation";
+import { checkSchemaColumnChange } from "@/lib/sql/sql-generate.schema";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
