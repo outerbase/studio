@@ -1,15 +1,11 @@
-import { OptimizeTableHeaderProps, TableHeaderMetadata } from ".";
-import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
-import {
-  BaseDriver,
-  DatabaseResultSet,
-  DatabaseTableSchema,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
-import { ReactElement } from "react";
+import { OptimizeTableHeaderProps } from ".";
 import deepEqual from "deep-equal";
 import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
+import {
+  buildTableResultHeader,
+  BuildTableResultProps,
+} from "@/lib/build-table-result";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -60,104 +56,10 @@ export default class OptimizeTableState {
   protected defaultAggregateFunction: AggregateFunction = "sum";
   protected sql: string = "";
 
-  static createFromResult(
-    driver: BaseDriver,
-    dataResult: DatabaseResultSet,
-    schemaResult?: DatabaseTableSchema
-  ) {
+  static createFromResult(props: BuildTableResultProps) {
     const r = new OptimizeTableState(
-      dataResult.headers.map((header) => {
-        const headerData = schemaResult
-          ? schemaResult.columns.find((c) => c.name === header.name)
-          : undefined;
-
-        let initialSize = 150;
-
-        const metadata: TableHeaderMetadata = {};
-
-        const headerName = header.name;
-        const dataType = header.type ?? driver.inferTypeFromHeader(headerData);
-
-        metadata.type = dataType;
-        metadata.originalType = headerData?.type;
-
-        if (
-          dataType === TableColumnDataType.INTEGER ||
-          dataType === TableColumnDataType.REAL
-        ) {
-          initialSize = 100;
-        } else if (dataType === TableColumnDataType.TEXT) {
-          // Use 100 first rows to determine the good initial size
-          let maxSize = 0;
-          for (let i = 0; i < Math.min(dataResult.rows.length, 100); i++) {
-            const currentCell = dataResult.rows[i];
-            if (currentCell) {
-              maxSize = Math.max(
-                (currentCell[headerName ?? ""]?.toString() ?? "").length,
-                maxSize
-              );
-            }
-          }
-
-          initialSize = Math.max(150, Math.min(500, maxSize * 8));
-        }
-
-        // --------------------------------------
-        // Matching foreign key
-        // --------------------------------------
-        let foreignKey = headerData?.constraint?.foreignKey;
-        if (!foreignKey && schemaResult?.constraints) {
-          for (const c of schemaResult.constraints) {
-            if (
-              c.foreignKey &&
-              c.foreignKey.columns?.length === 1 &&
-              c.foreignKey.columns[0] === header.name
-            ) {
-              foreignKey = c.foreignKey;
-              metadata.referenceTo = {
-                schema: c.foreignKey.foreignSchemaName!,
-                table: c.foreignKey.foreignTableName!,
-                column: c.foreignKey.columns[0],
-              };
-            }
-          }
-        }
-
-        let icon: ReactElement | undefined = undefined;
-        if (schemaResult?.pk.includes(headerName ?? "")) {
-          icon = <LucideKey className="h-4 w-4 text-red-500" />;
-        } else if (foreignKey) {
-          icon = <LucideKeySquare className="h-4 w-4 text-yellow-500" />;
-        } else if (headerData?.constraint?.generatedExpression) {
-          icon = <LucideSigma className="h-4 w-4 text-blue-500" />;
-        }
-
-        return {
-          initialSize,
-          name: headerName ?? "",
-
-          display: {
-            text: header.displayName,
-            initialSize,
-          },
-          setting: {
-            resizable: true,
-            readonly: true,
-          },
-
-          originalDataType: header.originalType,
-
-          isPrimaryKey: schemaResult
-            ? schemaResult.pk.includes(header.name)
-            : false,
-          headerData,
-          foreignKey,
-          dataType,
-          icon,
-          metadata,
-        };
-      }),
-      dataResult.rows.map((r) => ({ ...r }))
+      buildTableResultHeader(props),
+      props.result.rows.map((r) => ({ ...r }))
     );
 
     if (r.getRowsCount() >= 1000) {

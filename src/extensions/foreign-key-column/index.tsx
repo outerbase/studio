@@ -1,11 +1,12 @@
 import { StudioExtension } from "@/core/extension-base";
 import { StudioExtensionContext } from "@/core/extension-manager";
 
-export default class ForeignKeyColumn extends StudioExtension {
+export default class ForeignKeyColumnExtension extends StudioExtension {
   extensionName = "foreign-key-column";
 
   init(studio: StudioExtensionContext) {
     studio.registerQueryHeaderContextMenu((header) => {
+      console.log(header);
       if (!header.metadata.referenceTo) return;
 
       return {

@@ -213,7 +213,8 @@ export default function GenericCell({
     if (value === undefined) {
       return (
         <span className={textBaseStyle}>
-          {header.headerData?.constraint?.generatedExpression ?? "DEFAULT"}
+          {header.metadata.columnSchema?.constraint?.generatedExpression ??
+            "DEFAULT"}
         </span>
       );
     }
@@ -257,8 +258,8 @@ export default function GenericCell({
         <BlobCellValue
           value={value}
           vector={
-            header.originalDataType?.includes("F32_BLOB") ||
-            header.originalDataType?.includes("FLOAT32 ")
+            header.metadata.originalType?.includes("F32_BLOB") ||
+            header.metadata.originalType?.includes("FLOAT32 ")
           }
         />
       );

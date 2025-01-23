@@ -91,8 +91,8 @@ function InputCellEditor({
       type="text"
       className={
         align === "right"
-          ? "font-mono bg-inherit w-full h-full outline-none pl-2 pr-2 border-0 text-right"
-          : "font-mono bg-inherit w-full h-full outline-none pl-2 pr-2 border-0"
+          ? "h-full w-full border-0 bg-inherit pl-2 pr-2 text-right font-mono outline-none"
+          : "h-full w-full border-0 bg-inherit pl-2 pr-2 font-mono outline-none"
       }
       value={value ?? ""}
     />
@@ -139,7 +139,7 @@ export default function createEditableCell<T = unknown>({
     }, [setEditValue, state, value]);
 
     const uneditableColumn =
-      !!header.headerData?.constraint?.generatedExpression;
+      !!header.metadata.columnSchema?.constraint?.generatedExpression;
 
     if (
       !uneditableColumn &&

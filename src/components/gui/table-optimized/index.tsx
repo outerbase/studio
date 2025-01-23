@@ -22,12 +22,14 @@ import { cn } from "@/lib/utils";
 import { Icon } from "@phosphor-icons/react";
 
 export interface TableHeaderMetadata {
-  // Primary key
-  primaryKey?: {
+  from?: {
     schema: string;
     table: string;
     column: string;
   };
+
+  // Primary key
+  isPrimaryKey: boolean;
 
   // Foreign key reference
   referenceTo?: {
@@ -57,10 +59,6 @@ export interface OptimizeTableHeaderProps {
     readonly: boolean;
   };
 
-  dataType?: TableColumnDataType;
-  originalDataType?: string | null;
-  headerData?: DatabaseTableColumn;
-  isPrimaryKey?: boolean;
   onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
 
   metadata: TableHeaderMetadata;

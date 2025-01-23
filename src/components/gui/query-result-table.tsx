@@ -137,7 +137,7 @@ export default function ResultTable({
       const extensionMenu = extensions.getQueryHeaderContextMenu(header);
       const extensionMenuItems = extensionMenu.map((item) => {
         if (item.component) {
-          return item.component;
+          return <div key={item.key}>{item.component}</div>;
         }
 
         return (
@@ -148,7 +148,7 @@ export default function ResultTable({
       });
 
       return (
-        <Header header={header} internalState={data}>
+        <Header key={header.name} header={header} internalState={data}>
           {extensionMenuItems}
           {/* 
           {foreignKeyInfo}

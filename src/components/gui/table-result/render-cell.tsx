@@ -51,7 +51,7 @@ export default function tableResultCellRenderer({
   const value = state.getValue(y, x);
   const valueType = determineCellType(value);
 
-  switch (valueType ?? header.dataType) {
+  switch (valueType ?? header.metadata.type) {
     case TableColumnDataType.INTEGER:
       return (
         <BigNumberCell
