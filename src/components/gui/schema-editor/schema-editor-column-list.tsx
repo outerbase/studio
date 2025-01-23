@@ -1,4 +1,4 @@
-import { useCommonDialog } from "@/components/common-dialog";
+// import { useCommonDialog } from "@/components/common-dialog";
 import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -388,7 +388,7 @@ export default function SchemaEditorColumnList({
   onAddColumn: () => void;
   disabledEditExistingColumn?: boolean;
 }>) {
-  const { showDialog } = useCommonDialog();
+  // const { showDialog } = useCommonDialog();
   const headerStyle = "text-xs p-2 text-left border-x font-mono";
 
   const columns = value.columns;
@@ -399,6 +399,7 @@ export default function SchemaEditorColumnList({
   const [selectedColumns, setSelectedColumns] = useState<Set<string>>(
     () => new Set()
   );
+  const [showForeignKey, setShowForeignKey] = useState(false);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -487,25 +488,44 @@ export default function SchemaEditorColumnList({
   }, [selectedColumns, onChange, setSelectedColumns]);
 
   const onSetForeignKey = useCallback(() => {
-    showDialog({
-      title: "Foreign Key",
-      noPadding: true,
-      content: (
-        <SchemaEditorForeignKey
-          selectedColumns={selectedColumns}
-          value={columns
-            .filter((c) => selectedColumns.has(c.key))
-            .map((x) => {
-              return {
-                old: x.old,
-                new: x.new,
-                id: x.key,
-              };
-            })}
-        />
-      ),
-    });
-  }, [columns, selectedColumns, showDialog]);
+    // showDialog({
+    //   title: "Foreign Key",
+    //   content: (
+    //     <SchemaEditorForeignKey
+    //       selectedColumns={selectedColumns}
+    //       value={columns
+    //         .filter((c) => selectedColumns.has(c.key))
+    //         .map((x) => {
+    //           return {
+    //             old: x.old,
+    //             new: x.new,
+    //             id: x.key,
+    //           };
+    //         })}
+    //       onChange={onChange}
+    //     />
+    //   ),
+    // });
+    onChange((prev) => ({
+      ...prev,
+      constraints: [
+        ...columns
+          .filter((c) => selectedColumns.has(c.key))
+          .map((c) => ({
+            id: window.crypto.randomUUID(),
+            new: {
+              foreignKey: {
+                columns: [c.new?.name ?? ""],
+                foreignColumns: [""],
+              },
+              name: c.new?.name,
+            } as DatabaseTableColumnConstraint,
+            old: null,
+          })),
+      ],
+    }));
+    setShowForeignKey(true);
+  }, [columns, selectedColumns, onChange]);
 
   return (
     <div>
@@ -515,6 +535,15 @@ export default function SchemaEditorColumnList({
             <option key={collation} value={collation} />
           ))}
         </datalist>
+      )}
+
+      {showForeignKey && (
+        <SchemaEditorForeignKey
+          selectedColumns={selectedColumns}
+          constraints={value.constraints}
+          onChange={onChange}
+          onClose={() => setShowForeignKey(false)}
+        />
       )}
 
       <div className="border-b p-1">
@@ -536,8 +565,13 @@ export default function SchemaEditorColumnList({
             text="Primary Key"
             icon={Key}
             onClick={onSetPrimaryKey}
+            disabled={selectedColumns.size === 0}
           />
-          <ToolbarButton text="Foreign Key" onClick={onSetForeignKey} />
+          <ToolbarButton
+            text="Foreign Key"
+            onClick={onSetForeignKey}
+            disabled={selectedColumns.size === 0}
+          />
         </Toolbar>
       </div>
 

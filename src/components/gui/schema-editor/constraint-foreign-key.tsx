@@ -52,9 +52,36 @@ export default function ConstraintForeignKeyEditor({
 
       <div className="font-semibold">Reference Table</div>
       <div className="flex gap-2">
-        <SchemaNameSelect onChange={() => {}} />
+        <SchemaNameSelect
+          onChange={(e) => {
+            onChange((prev) => {
+              return produce(prev, (draft) => {
+                draft.constraints.forEach((c) => {
+                  if (c.id === value.id && c.new) {
+                    (c.new.foreignKey || {}).foreignSchemaName = e;
+                  }
+                });
+              });
+            });
+          }}
+          value={value.new?.foreignKey?.foreignSchemaName}
+        />
         <div className="w-[250px]">
-          <TableCombobox schemaName="main" onChange={() => {}} />
+          <TableCombobox
+            schemaName="main"
+            onChange={(e) => {
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.constraints.forEach((c) => {
+                    if (c.id === value.id && c.new) {
+                      (c.new.foreignKey || {}).foreignTableName = e;
+                    }
+                  });
+                });
+              });
+            }}
+            value={value.new?.foreignKey?.foreignTableName}
+          />
         </div>
       </div>
 
@@ -63,13 +90,54 @@ export default function ConstraintForeignKeyEditor({
           return (
             <div className="flex items-center gap-2" key={columnIdx}>
               <div className="w-[200px]">
-                <SchemaEditorColumnCombobox onChange={() => {}} value="" />
+                <SchemaEditorColumnCombobox
+                  onChange={(e) => {
+                    onChange((prev) => {
+                      return produce(prev, (draft) => {
+                        draft.constraints.forEach((c) => {
+                          if (c.id === value.id && c.new && c.new.foreignKey) {
+                            if (
+                              c.id === value.id &&
+                              c.new &&
+                              c.new.foreignKey
+                            ) {
+                              if ((c.new.foreignKey.columns || []).length > 0) {
+                                (c.new.foreignKey.columns || [])[columnIdx] = e;
+                              }
+                            }
+                          }
+                        });
+                      });
+                    });
+                  }}
+                  value={column}
+                />
               </div>
               <ArrowRight className="w-4 h-4" />
               <TableColumnCombobox
-                onChange={() => {}}
-                schemaName=""
-                tableName=""
+                onChange={(e) => {
+                  onChange((prev) => {
+                    return produce(prev, (draft) => {
+                      draft.constraints.forEach((c) => {
+                        if (c.id === value.id && c.new && c.new.foreignKey) {
+                          if (
+                            (c.new.foreignKey.foreignColumns || []).length > 0
+                          ) {
+                            (c.new.foreignKey.foreignColumns || [])[columnIdx] =
+                              e;
+                          }
+                        }
+                      });
+                    });
+                  });
+                }}
+                value={
+                  (value.new?.foreignKey?.foreignColumns || [])[columnIdx]
+                    ? (value.new?.foreignKey?.foreignColumns || [])[columnIdx]
+                    : undefined
+                }
+                schemaName={value.new?.foreignKey?.foreignSchemaName ?? ""}
+                tableName={value.new?.foreignKey?.foreignTableName ?? ""}
               />
             </div>
           );
