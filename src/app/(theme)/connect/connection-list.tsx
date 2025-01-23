@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   ComponentType,
   Dispatch,
-  ReactElement,
   SetStateAction,
   useCallback,
   useEffect,
@@ -22,11 +21,10 @@ import ConnectionItemCard from "./saved-connection-card";
 import { getDatabases } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
 import QuickConnect from "./quick-connect";
-import { LucideChevronDown, LucideSearch } from "lucide-react";
+import { LucideChevronDown } from "lucide-react";
 import DriverDropdown from "./driver-dropdown";
 import { cn } from "@/lib/utils";
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
-import { Icon } from "@phosphor-icons/react";
 
 function ConnectionListSection({
   data,
@@ -78,7 +76,7 @@ function ConnectionListSection({
   return (
     <>
       {name && (
-        <h2 className="mt-4 font-semibold text-sm text-primary">{name}</h2>
+        <h2 className="mt-4 text-sm font-semibold text-primary">{name}</h2>
       )}
       {body}
     </>
@@ -95,9 +93,9 @@ function HomeActionButton({
   icon: ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="text-xs p-4 pr-8 bg-secondary hover:bg-blue-100  rounded-lg flex gap-2 items-center cursor-pointer">
-      <div className="w-10 h-10 rounded-full flex items-center justify-center">
-        <IconComponent className="w-6 h-6" />
+    <div className="flex cursor-pointer items-center gap-2 rounded-lg bg-secondary p-4 pr-8 text-xs hover:bg-blue-100">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full">
+        <IconComponent className="h-6 w-6" />
       </div>
       <div className="flex flex-col">
         <div className="font-semibold">{title}</div>
@@ -237,8 +235,8 @@ export default function ConnectionList({
   }
 
   return (
-    <div className="flex flex-col flex-1 p-8">
-      <div className="flex gap-2 mb-6">
+    <div className="flex flex-1 flex-col p-8">
+      <div className="mb-6 flex gap-2">
         {/* <div>
           <div className="border rounded overflow-hidden flex items-center grow bg-background">
             <div className="text-sm px-2 h-full flex items-center">
@@ -257,7 +255,7 @@ export default function ConnectionList({
         <DriverDropdown onSelect={setShowAddConnection}>
           <Button variant={"default"}>
             New Connection
-            <LucideChevronDown className="ml-2 w-4 h-4" />
+            <LucideChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DriverDropdown>
       </div>

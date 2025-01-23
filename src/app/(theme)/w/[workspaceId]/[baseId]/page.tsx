@@ -5,7 +5,7 @@ import ThemeLayout from "@/app/(theme)/theme_layout";
 interface OuterbaseSourcePageProps {
   params: Promise<{
     workspaceId: string;
-    sourceId: string;
+    baseId: string;
   }>;
 }
 
@@ -18,7 +18,7 @@ export default async function OuterbaseSourcePage(
     <ThemeLayout>
       <ClientOnly>
         <OuterbaseSourcePageClient
-          sourceId={params.sourceId}
+          baseId={params.baseId}
           workspaceId={params.workspaceId}
         />
       </ClientOnly>
