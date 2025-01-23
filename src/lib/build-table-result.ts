@@ -1,5 +1,11 @@
 import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
-import { BaseDriver, DatabaseResultSet, DatabaseSchemas, DatabaseTableSchema, TableColumnDataType } from "@/drivers/base-driver";
+import {
+  BaseDriver,
+  DatabaseResultSet,
+  DatabaseSchemas,
+  DatabaseTableSchema,
+  TableColumnDataType,
+} from "@/drivers/base-driver";
 import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 
 export interface BuildTableResultProps {
@@ -9,34 +15,86 @@ export interface BuildTableResultProps {
   schemas: DatabaseSchemas;
 }
 
-function pipeWithTableSchema(headers: OptimizeTableHeaderProps[], { tableSchema, driver }: BuildTableResultProps) {
+function pipeAttachColumnViaSchemas(
+  headers: OptimizeTableHeaderProps[],
+  { tableSchema, schemas, driver }: BuildTableResultProps
+) {
+  // If there is already table schema, we use it instead because it is more accurate.
+  if (tableSchema) return;
+
+  for (const header of headers) {
+    // We got no column information from database
+    if (!header.metadata.from) continue;
+
+    const from = header.metadata.from;
+    const schema = schemas[from.schema];
+    if (!schema) continue;
+
+    const table = schema.find((t) => t.tableName === from.table);
+    if (!table) continue;
+
+    const currentTableSchema = table.tableSchema;
+    if (!currentTableSchema) continue;
+
+    if (currentTableSchema.pk.includes(from.column)) {
+      header.metadata.isPrimaryKey = true;
+    }
+
+    const columnSchema = currentTableSchema.columns.find(
+      (c) => c.name.toLowerCase() === from.column.toLowerCase()
+    );
+
+    if (!columnSchema) continue;
+
+    header.metadata.type =
+      header.metadata.type ?? driver.inferTypeFromHeader(columnSchema);
+
+    header.metadata.columnSchema = columnSchema;
+  }
+}
+
+function pipeWithTableSchema(
+  headers: OptimizeTableHeaderProps[],
+  { tableSchema, driver }: BuildTableResultProps
+) {
   if (!tableSchema) return;
 
   for (const header of headers) {
-    const columnSchema = tableSchema.columns.find((c) => c.name.toLowerCase() === header.name.toLowerCase());
+    const columnSchema = tableSchema.columns.find(
+      (c) => c.name.toLowerCase() === header.name.toLowerCase()
+    );
 
     header.metadata.columnSchema = columnSchema;
     header.metadata.originalType = columnSchema?.type;
-    header.metadata.type = header.metadata.type ?? driver.inferTypeFromHeader(columnSchema)
+    header.metadata.type =
+      header.metadata.type ?? driver.inferTypeFromHeader(columnSchema);
 
     header.metadata.from = {
       schema: tableSchema.schemaName,
       table: tableSchema.tableName!,
-      column: header.name
-    }
+      column: header.name,
+    };
 
     // Attaching the primary key
-    if (tableSchema.pk.map(p => p.toLowerCase()).includes(header.name.toLowerCase())) {
+    if (
+      tableSchema.pk
+        .map((p) => p.toLowerCase())
+        .includes(header.name.toLowerCase())
+    ) {
       header.metadata.isPrimaryKey = true;
     }
 
     // Attaching the foreign key from column constraint
-    if (columnSchema && columnSchema.constraint?.foreignKey && columnSchema.constraint.foreignKey.foreignColumns) {
+    if (
+      columnSchema &&
+      columnSchema.constraint?.foreignKey &&
+      columnSchema.constraint.foreignKey.foreignColumns
+    ) {
       header.metadata.referenceTo = {
         schema: columnSchema.constraint.foreignKey.foreignSchemaName!,
         table: columnSchema.constraint.foreignKey.foreignTableName!,
         column: columnSchema.constraint.foreignKey.foreignColumns[0]!,
-      }
+      };
     }
 
     // Attaching the foreign key from table constraint
@@ -49,7 +107,7 @@ function pipeWithTableSchema(headers: OptimizeTableHeaderProps[], { tableSchema,
               schema: constraint.foreignKey.foreignSchemaName!,
               table: constraint.foreignKey.foreignTableName!,
               column: constraint.foreignKey.columns[foundIndex]!,
-            }
+            };
           }
         }
       }
@@ -58,24 +116,36 @@ function pipeWithTableSchema(headers: OptimizeTableHeaderProps[], { tableSchema,
 }
 
 /**
- * Initially, all columns are set to readonly. We will determine which 
+ * Initially, all columns are set to readonly. We will determine which
  * columns are editable based on the availability of primary key information.
- * Since a query result can contain multiple tables, we need to verify 
+ * Since a query result can contain multiple tables, we need to verify
  * the readonly status of each column according to the table schema.
  */
-function pipeEditableTable(headers: OptimizeTableHeaderProps[], { schemas }: BuildTableResultProps) {
-  const tables: { schema: string, table: string, columns: string[], pkColumns: string[] }[] = [];
+function pipeEditableTable(
+  headers: OptimizeTableHeaderProps[],
+  { schemas }: BuildTableResultProps
+) {
+  const tables: {
+    schema: string;
+    table: string;
+    columns: string[];
+    pkColumns: string[];
+  }[] = [];
 
   for (const header of headers) {
     const from = header.metadata.from;
 
     if (from && header.metadata.isPrimaryKey) {
-      const table = tables.find(t => t.schema === from.schema && t.table === from.table);
+      const table = tables.find(
+        (t) => t.schema === from.schema && t.table === from.table
+      );
 
       if (table) {
         table.columns.push(from.column);
       } else {
-        const pkColumns = schemas[from.schema].find(t => t.tableName === from.table)?.tableSchema?.pk ?? [];
+        const pkColumns =
+          schemas[from.schema].find((t) => t.tableName === from.table)
+            ?.tableSchema?.pk ?? [];
 
         tables.push({
           schema: from.schema,
@@ -89,7 +159,9 @@ function pipeEditableTable(headers: OptimizeTableHeaderProps[], { schemas }: Bui
 
   for (const table of tables) {
     let editable = false;
-    const matchedColumns = table.columns.filter(c => table.pkColumns.includes(c));
+    const matchedColumns = table.columns.filter((c) =>
+      table.pkColumns.includes(c)
+    );
 
     // Mark table as editable if all primary key columns are matched
     if (matchedColumns.length === table.pkColumns.length) {
@@ -97,7 +169,12 @@ function pipeEditableTable(headers: OptimizeTableHeaderProps[], { schemas }: Bui
     }
 
     // In SQLite, we can use rowid as a primary key if there is no primary key
-    if (!editable && table.pkColumns.length === 0 && table.columns.length === 1 && table.columns[0] === "rowid") {
+    if (
+      !editable &&
+      table.pkColumns.length === 0 &&
+      table.columns.length === 1 &&
+      table.columns[0] === "rowid"
+    ) {
       editable = true;
     }
 
@@ -107,7 +184,11 @@ function pipeEditableTable(headers: OptimizeTableHeaderProps[], { schemas }: Bui
       for (const header of headers) {
         const from = header.metadata.from;
 
-        if (from && from.schema === table.schema && from.table === table.table) {
+        if (
+          from &&
+          from.schema === table.schema &&
+          from.table === table.table
+        ) {
           header.setting.readonly = false;
         }
       }
@@ -115,7 +196,9 @@ function pipeEditableTable(headers: OptimizeTableHeaderProps[], { schemas }: Bui
   }
 }
 
-export function pipeVirtualColumnAsReadOnly(headers: OptimizeTableHeaderProps[]) {
+export function pipeVirtualColumnAsReadOnly(
+  headers: OptimizeTableHeaderProps[]
+) {
   for (const header of headers) {
     if (header.metadata.columnSchema?.constraint?.generatedExpression) {
       header.setting.readonly = true;
@@ -123,7 +206,10 @@ export function pipeVirtualColumnAsReadOnly(headers: OptimizeTableHeaderProps[])
   }
 }
 
-export function pipeCalculateInitialSize(headers: OptimizeTableHeaderProps[], { result }: BuildTableResultProps) {
+export function pipeCalculateInitialSize(
+  headers: OptimizeTableHeaderProps[],
+  { result }: BuildTableResultProps
+) {
   for (const header of headers) {
     const dataType = header.metadata.type;
     let initialSize = 100;
@@ -169,10 +255,24 @@ export function pipeColumnIcon(headers: OptimizeTableHeaderProps[]) {
   }
 }
 
-export function buildTableResultHeader(props: BuildTableResultProps): OptimizeTableHeaderProps[] {
+export function buildTableResultHeader(
+  props: BuildTableResultProps
+): OptimizeTableHeaderProps[] {
   const { result } = props;
 
+  console.log(props);
+
   const headers = result.headers.map((column) => {
+    let from: { schema: string; table: string; column: string } | null = null;
+
+    if (column.table && column.schema) {
+      from = {
+        schema: column.schema,
+        table: column.table,
+        column: column.originalName ?? column.name,
+      };
+    }
+
     return {
       name: column.name,
       display: {
@@ -180,14 +280,18 @@ export function buildTableResultHeader(props: BuildTableResultProps): OptimizeTa
       },
       setting: {
         readonly: true,
+        resizable: true,
       },
       metadata: {
         type: column.type,
-      }
-    } as OptimizeTableHeaderProps
+        originalType: column.originalType,
+        ...(from ? { from } : {}),
+      },
+    } as OptimizeTableHeaderProps;
   });
 
   pipeWithTableSchema(headers, props);
+  pipeAttachColumnViaSchemas(headers, props);
   pipeEditableTable(headers, props);
   pipeVirtualColumnAsReadOnly(headers);
   pipeCalculateInitialSize(headers, props);
