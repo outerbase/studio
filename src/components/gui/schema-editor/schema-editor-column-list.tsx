@@ -1,3 +1,4 @@
+import { useCommonDialog } from "@/components/common-dialog";
 import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -42,6 +43,7 @@ import ColumnForeignKeyPopup from "./column-fk-popup";
 import ColumnGeneratingPopup from "./column-generate-popup";
 import ColumnTypeSelector from "./column-type-selector";
 import ColumnUniquePopup from "./column-unique-popup";
+import { SchemaEditorForeignKey } from "./schema-editor-foreign-key";
 import { useSchemaEditorContext } from "./schema-editor-prodiver";
 
 export type ColumnChangeEvent = (
@@ -386,6 +388,7 @@ export default function SchemaEditorColumnList({
   onAddColumn: () => void;
   disabledEditExistingColumn?: boolean;
 }>) {
+  const { showDialog } = useCommonDialog();
   const headerStyle = "text-xs p-2 text-left border-x font-mono";
 
   const columns = value.columns;
@@ -483,6 +486,27 @@ export default function SchemaEditorColumnList({
     setSelectedColumns(new Set());
   }, [selectedColumns, onChange, setSelectedColumns]);
 
+  const onSetForeignKey = useCallback(() => {
+    showDialog({
+      title: "Foreign Key",
+      noPadding: true,
+      content: (
+        <SchemaEditorForeignKey
+          selectedColumns={selectedColumns}
+          value={columns
+            .filter((c) => selectedColumns.has(c.key))
+            .map((x) => {
+              return {
+                old: x.old,
+                new: x.new,
+                id: x.key,
+              };
+            })}
+        />
+      ),
+    });
+  }, [columns, selectedColumns, showDialog]);
+
   return (
     <div>
       {collations.length > 0 && (
@@ -513,7 +537,7 @@ export default function SchemaEditorColumnList({
             icon={Key}
             onClick={onSetPrimaryKey}
           />
-          <ToolbarButton text="Foreign Key" />
+          <ToolbarButton text="Foreign Key" onClick={onSetForeignKey} />
         </Toolbar>
       </div>
 
