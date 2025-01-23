@@ -1,4 +1,4 @@
-import { OptimizeTableHeaderProps } from ".";
+import { OptimizeTableHeaderProps, TableHeaderMetadata } from ".";
 import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 import {
   BaseDriver,
@@ -72,8 +72,14 @@ export default class OptimizeTableState {
           : undefined;
 
         let initialSize = 150;
+
+        const metadata: TableHeaderMetadata = {};
+
         const headerName = header.name;
         const dataType = header.type ?? driver.inferTypeFromHeader(headerData);
+
+        metadata.type = dataType;
+        metadata.originalType = headerData?.type;
 
         if (
           dataType === TableColumnDataType.INTEGER ||
@@ -108,25 +114,39 @@ export default class OptimizeTableState {
               c.foreignKey.columns[0] === header.name
             ) {
               foreignKey = c.foreignKey;
+              metadata.referenceTo = {
+                schema: c.foreignKey.foreignSchemaName!,
+                table: c.foreignKey.foreignTableName!,
+                column: c.foreignKey.columns[0],
+              };
             }
           }
         }
 
         let icon: ReactElement | undefined = undefined;
         if (schemaResult?.pk.includes(headerName ?? "")) {
-          icon = <LucideKey className="w-4 h-4 text-red-500" />;
+          icon = <LucideKey className="h-4 w-4 text-red-500" />;
         } else if (foreignKey) {
-          icon = <LucideKeySquare className="w-4 h-4 text-yellow-500" />;
+          icon = <LucideKeySquare className="h-4 w-4 text-yellow-500" />;
         } else if (headerData?.constraint?.generatedExpression) {
-          icon = <LucideSigma className="w-4 h-4 text-blue-500" />;
+          icon = <LucideSigma className="h-4 w-4 text-blue-500" />;
         }
 
         return {
           initialSize,
           name: headerName ?? "",
+
+          display: {
+            text: header.displayName,
+            initialSize,
+          },
+          setting: {
+            resizable: true,
+            readonly: true,
+          },
+
           originalDataType: header.originalType,
-          displayName: header.displayName,
-          resizable: true,
+
           isPrimaryKey: schemaResult
             ? schemaResult.pk.includes(header.name)
             : false,
@@ -134,6 +154,7 @@ export default class OptimizeTableState {
           foreignKey,
           dataType,
           icon,
+          metadata,
         };
       }),
       dataResult.rows.map((r) => ({ ...r }))
@@ -158,7 +179,7 @@ export default class OptimizeTableState {
     this.data = data.map((row) => ({
       raw: row,
     }));
-    this.headerWidth = headers.map((h) => h.initialSize);
+    this.headerWidth = headers.map((h) => h.display.initialSize);
   }
 
   setReadOnlyMode(readOnly: boolean) {

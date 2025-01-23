@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { BeforeQueryPipeline } from "./query-pipeline";
+import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
 
 interface RegisterSidebarOption {
   key: string;
@@ -17,16 +18,26 @@ export interface StudioExtensionMenuItem {
   key: string;
   title: string;
   icon?: ReactElement;
-  onClick: () => void;
+  onClick?: () => void;
+  component?: ReactElement;
 }
 
 type CreateResourceMenuHandler = (
   resource: DatabaseSchemaItem
 ) => StudioExtensionMenuItem | undefined;
+
+type QueryHeaderResultMenuHandler = (
+  header: OptimizeTableHeaderProps
+) => StudioExtensionMenuItem | undefined;
+
 export class StudioExtensionContext {
   protected sidebars: RegisterSidebarOption[] = [];
+
   protected beforeQueryHandlers: BeforeQueryHandler[] = [];
   protected afterQueryHandlers: AfterQueryHandler[] = [];
+
+  protected queryResultHeaderContextMenu: QueryHeaderResultMenuHandler[] = [];
+
   protected resourceCreateMenu: StudioExtensionMenuItem[] = [];
   protected resourceContextMenu: Record<string, CreateResourceMenuHandler[]> =
     {};
@@ -60,6 +71,10 @@ export class StudioExtensionContext {
       this.resourceContextMenu[group].push(handler);
     }
   }
+
+  registerQueryHeaderContextMenu(handler: QueryHeaderResultMenuHandler) {
+    this.queryResultHeaderContextMenu.push(handler);
+  }
 }
 export class StudioExtensionManager extends StudioExtensionContext {
   init() {
@@ -84,6 +99,12 @@ export class StudioExtensionManager extends StudioExtensionContext {
   ) {
     return (this.resourceContextMenu[group] ?? [])
       .map((handler) => handler(resource))
+      .filter(Boolean) as StudioExtensionMenuItem[];
+  }
+
+  getQueryHeaderContextMenu(header: OptimizeTableHeaderProps) {
+    return this.queryResultHeaderContextMenu
+      .map((handler) => handler(header))
       .filter(Boolean) as StudioExtensionMenuItem[];
   }
 
