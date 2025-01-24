@@ -1,11 +1,12 @@
 import { OptimizeTableCellRenderProps } from "../table-optimized";
-import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
+import { DatabaseValue } from "@/drivers/base-driver";
 import TextCell from "../table-cell/text-cell";
 import parseSafeJson from "@/lib/json-safe";
 import NumberCell from "../table-cell/number-cell";
 import BigNumberCell from "../table-cell/big-number-cell";
 import GenericCell from "../table-cell/generic-cell";
 import BlobCell from "@/components/gui/table-cell/blob-cell";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 function detectTextEditorType(
   value: DatabaseValue<string>
@@ -32,10 +33,10 @@ function detectTextEditorType(
 
 function determineCellType(value: unknown) {
   if (value === null) return undefined;
-  if (typeof value === "bigint") return TableColumnDataType.INTEGER;
-  if (typeof value === "number") return TableColumnDataType.REAL;
-  if (typeof value === "string") return TableColumnDataType.TEXT;
-  if (typeof value === "object") return TableColumnDataType.BLOB;
+  if (typeof value === "bigint") return ColumnType.INTEGER;
+  if (typeof value === "number") return ColumnType.REAL;
+  if (typeof value === "string") return ColumnType.TEXT;
+  if (typeof value === "object") return ColumnType.BLOB;
 
   return undefined;
 }
@@ -52,7 +53,7 @@ export default function tableResultCellRenderer({
   const valueType = determineCellType(value);
 
   switch (valueType ?? header.metadata.type) {
-    case TableColumnDataType.INTEGER:
+    case ColumnType.INTEGER:
       return (
         <BigNumberCell
           header={header}
@@ -67,7 +68,7 @@ export default function tableResultCellRenderer({
         />
       );
 
-    case TableColumnDataType.REAL:
+    case ColumnType.REAL:
       return (
         <NumberCell
           header={header}
@@ -82,7 +83,7 @@ export default function tableResultCellRenderer({
         />
       );
 
-    case TableColumnDataType.TEXT:
+    case ColumnType.TEXT:
       return (
         <TextCell
           header={header}
@@ -98,7 +99,7 @@ export default function tableResultCellRenderer({
         />
       );
 
-    case TableColumnDataType.BLOB:
+    case ColumnType.BLOB:
       return (
         <BlobCell
           header={header}

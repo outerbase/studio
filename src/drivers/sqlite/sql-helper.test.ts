@@ -1,4 +1,4 @@
-import { TableColumnDataType } from "@/drivers/base-driver";
+import { ColumnType } from "@outerbase/sdk-transform";
 import {
   convertSqliteType,
   escapeIdentity,
@@ -51,7 +51,7 @@ describe("Mapping sqlite column type to our table type", () => {
 
   for (const type of integerType) {
     it(`${type} column type should be INTEGER`, () => {
-      expect(convertSqliteType(type)).toBe(TableColumnDataType.INTEGER);
+      expect(convertSqliteType(type)).toBe(ColumnType.INTEGER);
     });
   }
 
@@ -68,18 +68,18 @@ describe("Mapping sqlite column type to our table type", () => {
 
   for (const type of textType) {
     it(`${type} column type should be TEXT`, () => {
-      expect(convertSqliteType(type)).toBe(TableColumnDataType.TEXT);
+      expect(convertSqliteType(type)).toBe(ColumnType.TEXT);
     });
   }
 
   it("BLOB column type", () => {
-    expect(convertSqliteType("BLOB")).toBe(TableColumnDataType.BLOB);
+    expect(convertSqliteType("BLOB")).toBe(ColumnType.BLOB);
   });
 
   const realType = ["REAL", "DOUBLE", "DOUBLE PRECISION", "FLOAT"];
   for (const type of realType) {
     it(`${type} column should be REAL`, () => {
-      expect(convertSqliteType(type)).toBe(TableColumnDataType.REAL);
+      expect(convertSqliteType(type)).toBe(ColumnType.REAL);
     });
   }
 });

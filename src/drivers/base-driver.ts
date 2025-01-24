@@ -1,9 +1,7 @@
 import {
   type ColumnHeader,
-  ColumnType as TableColumnDataType,
+  ColumnType
 } from "@outerbase/sdk-transform";
-
-export { ColumnType as TableColumnDataType } from "@outerbase/sdk-transform";
 
 export type InValue =
   | null
@@ -15,18 +13,18 @@ export type InValue =
   | Uint8Array
   | Date;
 
-export function describeTableColumnType(type: TableColumnDataType) {
+export function describeTableColumnType(type: ColumnType) {
   switch (type) {
-    case TableColumnDataType.TEXT:
+    case ColumnType.TEXT:
       return "TEXT";
 
-    case TableColumnDataType.INTEGER:
+    case ColumnType.INTEGER:
       return "INTEGER";
 
-    case TableColumnDataType.REAL:
+    case ColumnType.REAL:
       return "REAL";
 
-    case TableColumnDataType.BLOB:
+    case ColumnType.BLOB:
       return "BLOB";
   }
 }
@@ -308,7 +306,7 @@ export abstract class BaseDriver {
 
   abstract inferTypeFromHeader(
     header?: DatabaseTableColumn
-  ): TableColumnDataType | undefined;
+  ): ColumnType | undefined;
 
   abstract trigger(
     schemaName: string,

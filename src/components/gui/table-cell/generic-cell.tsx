@@ -9,18 +9,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  DatabaseResultSet,
-  DatabaseValue,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
+import { DatabaseResultSet, DatabaseValue } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
   value: T;
-  valueType?: TableColumnDataType;
+  valueType?: ColumnType;
   focus?: boolean;
   onFocus?: () => void;
   onDoubleClick?: () => void;

@@ -1,5 +1,6 @@
-import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
+import { DatabaseValue } from "@/drivers/base-driver";
 import { hex } from "@/lib/bit-operation";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 export function escapeIdentity(str: string) {
   return `"${str.replace(/"/g, `""`)}"`;
@@ -52,31 +53,31 @@ export function extractInputValue(input: string): string | number {
 
 export function convertSqliteType(
   type: string | undefined
-): TableColumnDataType | undefined {
+): ColumnType | undefined {
   // https://www.sqlite.org/datatype3.html
   if (type === "") return undefined;
-  if (type === undefined) return TableColumnDataType.BLOB;
+  if (type === undefined) return ColumnType.BLOB;
 
   type = type.toUpperCase();
 
-  if (type.includes("CHAR")) return TableColumnDataType.TEXT;
-  if (type.includes("TEXT")) return TableColumnDataType.TEXT;
-  if (type.includes("CLOB")) return TableColumnDataType.TEXT;
-  if (type.includes("STRING")) return TableColumnDataType.TEXT;
+  if (type.includes("CHAR")) return ColumnType.TEXT;
+  if (type.includes("TEXT")) return ColumnType.TEXT;
+  if (type.includes("CLOB")) return ColumnType.TEXT;
+  if (type.includes("STRING")) return ColumnType.TEXT;
 
-  if (type.includes("INT")) return TableColumnDataType.INTEGER;
-  if (type.includes("NUMBER")) return TableColumnDataType.INTEGER;
+  if (type.includes("INT")) return ColumnType.INTEGER;
+  if (type.includes("NUMBER")) return ColumnType.INTEGER;
 
-  if (type.includes("BLOB")) return TableColumnDataType.BLOB;
+  if (type.includes("BLOB")) return ColumnType.BLOB;
 
   if (
     type.includes("REAL") ||
     type.includes("DOUBLE") ||
     type.includes("FLOAT")
   )
-    return TableColumnDataType.REAL;
+    return ColumnType.REAL;
 
-  return TableColumnDataType.TEXT;
+  return ColumnType.TEXT;
 }
 
 export function escapeDelimitedValue(

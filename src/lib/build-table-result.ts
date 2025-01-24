@@ -4,8 +4,8 @@ import {
   DatabaseResultSet,
   DatabaseSchemas,
   DatabaseTableSchema,
-  TableColumnDataType,
 } from "@/drivers/base-driver";
+import { ColumnType } from "@outerbase/sdk-transform";
 import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
 
 export interface BuildTableResultProps {
@@ -216,11 +216,11 @@ export function pipeCalculateInitialSize(
     let initialSize = 100;
 
     if (
-      dataType === TableColumnDataType.INTEGER ||
-      dataType === TableColumnDataType.REAL
+      dataType === ColumnType.INTEGER ||
+      dataType === ColumnType.REAL
     ) {
       initialSize = 100;
-    } else if (dataType === TableColumnDataType.TEXT) {
+    } else if (dataType === ColumnType.TEXT) {
       // Use 100 first rows to determine the good initial size
       let maxSize = 0;
       for (let i = 0; i < Math.min(result.rows.length, 100); i++) {

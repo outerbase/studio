@@ -11,7 +11,6 @@ import {
   DatabaseViewSchema,
   DriverFlags,
   SelectFromTableOptions,
-  TableColumnDataType,
 } from "./base-driver";
 import {
   convertSqliteType,
@@ -24,6 +23,7 @@ import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
 import CommonSQLImplement from "./common-sql-imp";
 import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 import { parseCreateViewScript } from "./sqlite/sql-parse-view";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   supportPragmaList = true;
@@ -33,9 +33,9 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     dropdownNormalized: (typeName: string): string => {
       const type = convertSqliteType(typeName);
       if (type === undefined) return "TEXT";
-      if (type === TableColumnDataType.INTEGER) return "INTEGER";
-      if (type === TableColumnDataType.REAL) return "REAL";
-      if (type === TableColumnDataType.BLOB) return "BLOB";
+      if (type === ColumnType.INTEGER) return "INTEGER";
+      if (type === ColumnType.REAL) return "REAL";
+      if (type === ColumnType.BLOB) return "BLOB";
       return "TEXT";
     },
     dropdownOptions: [
@@ -202,7 +202,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
 
   inferTypeFromHeader(
     header?: DatabaseTableColumn
-  ): TableColumnDataType | undefined {
+  ): ColumnType | undefined {
     if (!header) return undefined;
     return convertSqliteType(header.type);
   }
@@ -331,13 +331,12 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const orderPart =
       options.orderBy && options.orderBy.length > 0
         ? options.orderBy
-            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-            .join(", ")
+          .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+          .join(", ")
         : "";
 
-    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
-      whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${whereRaw ? ` WHERE ${whereRaw} ` : ""
+      } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
     return {
       data: await this.query(sql),

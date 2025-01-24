@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GenericCell from "./generic-cell";
-import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
+import { DatabaseValue } from "@/drivers/base-driver";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useFullEditor } from "../providers/full-editor-provider";
 import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 import { cn } from "@/lib/utils";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
-  valueType: TableColumnDataType | undefined;
+  valueType: ColumnType | undefined;
   isChanged?: boolean;
   focus?: boolean;
   editMode?: boolean;

@@ -6,7 +6,6 @@ import {
   DriverFlags,
   DatabaseSchemaItem,
   DatabaseTableColumn,
-  TableColumnDataType,
   DatabaseTableSchemaChange,
   ColumnTypeSelector,
   DatabaseTableColumnConstraint,
@@ -25,6 +24,7 @@ import {
   MYSQL_COLLATION_LIST,
   MYSQL_DATA_TYPE_SUGGESTION,
 } from "./mysql-data-type";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 interface MySqlDatabase {
   SCHEMA_NAME: string;
@@ -401,13 +401,13 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
           foreignKey:
             constraint.CONSTRAINT_TYPE === "FOREIGN KEY"
               ? {
-                  columns: columnList.map((c) => c.COLUMN_NAME),
-                  foreignColumns: columnList.map(
-                    (c) => c.REFERENCED_COLUMN_NAME
-                  ),
-                  foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
-                  foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
-                }
+                columns: columnList.map((c) => c.COLUMN_NAME),
+                foreignColumns: columnList.map(
+                  (c) => c.REFERENCED_COLUMN_NAME
+                ),
+                foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
+                foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
+              }
               : undefined,
         };
       }
@@ -500,7 +500,7 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     return `DROP VIEW IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
-  inferTypeFromHeader(): TableColumnDataType | undefined {
+  inferTypeFromHeader(): ColumnType | undefined {
     return undefined;
   }
 }

@@ -13,13 +13,11 @@ import TableFakeBodyPadding from "./table-fake-body-padding";
 import TableFakeRowPadding from "./table-fake-row-padding";
 import TableHeaderList from "./table-header-list";
 import OptimizeTableState from "./OptimizeTableState";
-import {
-  DatabaseTableColumn,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
+import { DatabaseTableColumn } from "@/drivers/base-driver";
 import OptimizeTableCell from "./table-cell";
 import { cn } from "@/lib/utils";
 import { Icon } from "@phosphor-icons/react";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 export interface TableHeaderMetadata {
   from?: {
@@ -38,7 +36,7 @@ export interface TableHeaderMetadata {
     column: string;
   };
 
-  type?: TableColumnDataType;
+  type?: ColumnType;
   originalType?: string;
 
   columnSchema?: DatabaseTableColumn;
