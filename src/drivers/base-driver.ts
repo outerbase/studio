@@ -1,3 +1,10 @@
+import {
+  type ColumnHeader,
+  ColumnType as TableColumnDataType,
+} from "@outerbase/sdk-transform";
+
+export { ColumnType as TableColumnDataType } from "@outerbase/sdk-transform";
+
 export type InValue =
   | null
   | string
@@ -7,13 +14,6 @@ export type InValue =
   | boolean
   | Uint8Array
   | Date;
-
-export enum TableColumnDataType {
-  TEXT = 1,
-  INTEGER = 2,
-  REAL = 3,
-  BLOB = 4,
-}
 
 export function describeTableColumnType(type: TableColumnDataType) {
   switch (type) {
@@ -31,16 +31,11 @@ export function describeTableColumnType(type: TableColumnDataType) {
   }
 }
 
-export type SupportedDialect = "sqlite" | "mysql" | "postgres";
+export type SupportedDialect = "sqlite" | "mysql" | "postgres" | "dolt";
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 
-export interface DatabaseHeader {
-  name: string;
-  displayName: string;
-  originalType: string | null;
-  type: TableColumnDataType | undefined;
-}
+export type DatabaseHeader = ColumnHeader;
 
 export interface DatabaseResultStat {
   rowsAffected: number;
@@ -178,6 +173,12 @@ export interface DatabaseTriggerSchema {
   statement: string;
 }
 
+export interface DatabaseViewSchema {
+  name: string;
+  schemaName: string;
+  statement: string;
+}
+
 interface DatabaseTableOperationInsert {
   operation: "INSERT";
   values: Record<string, DatabaseValue>;
@@ -222,6 +223,7 @@ export interface ColumnTypeSuggestion {
 export interface ColumnTypeSelector {
   type: "dropdown" | "text";
   dropdownOptions?: { value: string; text: string }[];
+  dropdownNormalized?: (value: string) => string;
   typeSuggestions?: ColumnTypeSuggestionGroup[];
 
   // This will use for auto field when create table column
@@ -343,4 +345,8 @@ export abstract class BaseDriver {
 
   abstract createTrigger(trigger: DatabaseTriggerSchema): string;
   abstract dropTrigger(schemaName: string, name: string): string;
+  abstract createView(view: DatabaseViewSchema): string;
+  abstract dropView(schemaName: string, name: string): string;
+
+  abstract view(schemaName: string, name: string): Promise<DatabaseViewSchema>;
 }

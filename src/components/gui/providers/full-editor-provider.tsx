@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { noop } from "@/lib/utils";
 import {
   createContext,
   Fragment,
@@ -11,6 +10,7 @@ import {
   useState,
 } from "react";
 import JsonEditor from "../json-editor";
+import { noop } from "lodash";
 
 interface FullEditorContextValue {
   openEditor: (option: FullEditorOption) => void;

@@ -1,13 +1,15 @@
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
-import { OpenContextMenuList } from "@/messages/open-context-menu";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { openTab } from "@/messages/open-tab";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { Table } from "@phosphor-icons/react";
 import SchemaCreateDialog from "./schema-editor/schema-create";
+import { scc } from "@/core/command";
+import { useConfig } from "@/context/config-provider";
+import { OpenContextMenuList } from "@/core/channel-builtin";
+import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
 
 interface SchemaListProps {
   search: string;
@@ -123,6 +125,7 @@ function flattenSchemaGroup(
 
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const { databaseDriver } = useDatabaseDriver();
+  const { extensions } = useConfig();
   const [selected, setSelected] = useState("");
   const { refresh, schema, currentSchemaName } = useSchema();
   const [editSchema, setEditSchema] = useState<string | null>(null);
@@ -139,9 +142,41 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
-      const isTrigger = item?.type === "trigger";
+
+      const createMenuSection = {
+        title: "Create",
+        sub: [
+          databaseDriver.getFlags().supportCreateUpdateTable && {
+            title: "Create Table",
+            onClick: () => {
+              scc.tabs.openBuiltinSchema({
+                schemaName: item?.schemaName ?? currentSchemaName,
+              });
+            },
+          },
+          ...extensions.getResourceCreateMenu(),
+        ].filter(Boolean),
+      };
+
+      const modificationSection = item
+        ? [
+            isTable && databaseDriver.getFlags().supportCreateUpdateTable
+              ? {
+                  title: "Edit Table",
+                  onClick: () => {
+                    scc.tabs.openBuiltinSchema({
+                      schemaName: item?.schemaName ?? currentSchemaName,
+                      tableName: item?.name,
+                    });
+                  },
+                }
+              : undefined,
+            ...extensions.getResourceContextMenu(item, "modification"),
+          ].filter(Boolean)
+        : [];
 
       return [
+        createMenuSection,
         {
           title: "Copy Name",
           disabled: !selectedName,
@@ -150,50 +185,15 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           },
         },
         { separator: true },
-        databaseDriver.getFlags().supportCreateUpdateTable && {
-          title: "Create New Table",
-          onClick: () => {
-            openTab({
-              type: "schema",
-              schemaName: item?.schemaName ?? currentSchemaName,
-            });
-          },
-        },
-        isTable && databaseDriver.getFlags().supportCreateUpdateTable
-          ? {
-              title: "Edit Table",
-              onClick: () => {
-                openTab({
-                  tableName: item?.name,
-                  type: "schema",
-                  schemaName: item?.schemaName ?? "",
-                });
-              },
-            }
-          : undefined,
-        databaseDriver.getFlags().supportCreateUpdateTrigger
-          ? { separator: true }
-          : undefined,
-        databaseDriver.getFlags().supportCreateUpdateTrigger
-          ? {
-              title: isTrigger ? "Edit Trigger" : "Create New Trigger",
-              onClick: () => {
-                openTab({
-                  type: "trigger",
-                  schemaName: item?.schemaName ?? currentSchemaName,
-                  name: isTrigger ? item.name : "",
-                  tableName: item?.tableSchema?.tableName,
-                });
-              },
-            }
-          : undefined,
-        databaseDriver.getFlags().supportCreateUpdateTable
-          ? { separator: true }
-          : undefined,
+
+        // Modification Section
+        ...modificationSection,
+        modificationSection.length > 0 ? { separator: true } : undefined,
+
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
     },
-    [refresh, databaseDriver, currentSchemaName]
+    [refresh, databaseDriver, currentSchemaName, extensions]
   );
 
   const listViewItems = useMemo(() => {
@@ -254,16 +254,15 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         onSelectChange={setSelected}
         onDoubleClick={(item) => {
           if (item.data.type === "table" || item.data.type === "view") {
-            openTab({
-              type: "table",
+            scc.tabs.openBuiltinTable({
               schemaName: item.data.schemaName ?? "",
               tableName: item.data.name,
             });
           } else if (item.data.type === "trigger") {
-            openTab({
-              type: "trigger",
-              schemaName: item.data.schemaName,
-              name: item.name,
+            triggerEditorExtensionTab.open({
+              schemaName: item.data.schemaName ?? "",
+              name: item.name ?? "",
+              tableName: item.data.tableName ?? "",
             });
           } else if (item.data.type === "schema") {
             if (databaseDriver.getFlags().supportUseStatement) {

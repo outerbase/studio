@@ -1,11 +1,13 @@
 // import { useCommonDialog } from "@/components/common-dialog";
-import { checkSchemaColumnChange } from "@/components/lib/sql-generate.schema";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
   DatabaseTableSchemaChange,
 } from "@/drivers/base-driver";
+import { checkSchemaColumnChange } from "@/lib/sql/sql-generate.schema";
 import { cn } from "@/lib/utils";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
@@ -87,16 +89,28 @@ function ColumnItemType({
   onChange: (type: string) => void;
   disabled?: boolean;
 }) {
+  const { databaseDriver } = useDatabaseDriver();
   const { suggestion } = useSchemaEditorContext();
 
-  if (suggestion.type === "dropdown" && suggestion.dropdownOptions) {
+  if (
+    databaseDriver.columnTypeSelector.type === "dropdown" &&
+    databaseDriver.columnTypeSelector.dropdownOptions
+  ) {
+    const normalizedValue = databaseDriver.columnTypeSelector.dropdownNormalized
+      ? databaseDriver.columnTypeSelector.dropdownNormalized(value) || value
+      : value;
+
     return (
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className="bg-inherit border-0 rounded-none shadow-none text-sm">
+      <Select
+        value={normalizedValue}
+        onValueChange={onChange}
+        disabled={disabled}
+      >
+        <SelectTrigger className="rounded-none border-0 bg-inherit text-sm shadow-none">
           <SelectValue placeholder="Select datatype" />
         </SelectTrigger>
         <SelectContent>
-          {suggestion.dropdownOptions.map((option) => (
+          {suggestion.dropdownOptions?.map((option) => (
             <SelectItem
               key={option.value}
               value={option.value}
@@ -173,6 +187,12 @@ function ColumnItem({
     );
   });
 
+  const isForeignKey = schema.constraints.some((constraint) => {
+    return (constraint.new ?? constraint.old)?.foreignKey?.columns?.includes(
+      column.name
+    );
+  });
+
   let rowBackgroundColor = "bg-background";
 
   if (value.new === null) {
@@ -196,12 +216,17 @@ function ColumnItem({
         ref={setActivatorNodeRef}
         {...listeners}
         className={cn(
-          "border-r border-t border-b text-sm text-center bg-muted font-mono"
+          "border-b border-r border-t bg-muted text-center font-mono text-sm"
         )}
       >
         <div className="flex items-center justify-end gap-1 pr-2">
           {isPrimaryKey ? (
-            <Key className="w-4 h-4 text-green-600" weight="duotone" />
+            <Key className="h-4 w-4 text-green-600" weight="duotone" />
+          ) : (
+            ""
+          )}
+          {isForeignKey ? (
+            <Key className="h-4 w-4 text-purple-600" weight="duotone" />
           ) : (
             ""
           )}
@@ -210,18 +235,18 @@ function ColumnItem({
       </td>
 
       <td
-        className={cn("border-t border-b px-2 border-r")}
+        className={cn("border-b border-r border-t px-2")}
         onClick={() => onSelectChange(!selected)}
       >
-        <div className="h-[38px] flex items-center justify-center">
+        <div className="flex h-[38px] items-center justify-center">
           <Checkbox checked={selected} />
         </div>
       </td>
-      <td className="border-r border-t border-b">
+      <td className="border-b border-r border-t">
         <input
           value={column.name}
           onChange={(e) => change({ name: e.currentTarget.value })}
-          className="p-2 text-sm outline-none w-[150px] bg-inherit font-mono"
+          className="w-[150px] bg-inherit p-2 font-mono text-sm outline-none"
           spellCheck={false}
         />
       </td>
@@ -243,7 +268,7 @@ function ColumnItem({
           disabled={disabled}
         />
       </td>
-      <td className="border text-center w-[50px]">
+      <td className="w-[50px] border text-center">
         <Checkbox
           disabled={disabled}
           checked={!column.constraint?.notNull}
@@ -289,8 +314,8 @@ function ColumnItem({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-1 shadow border rounded">
-                <LucidePlus className="w-4 h-4" />
+              <button className="rounded border p-1 shadow">
+                <LucidePlus className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -388,7 +413,7 @@ export default function SchemaEditorColumnList({
   onAddColumn: () => void;
   disabledEditExistingColumn?: boolean;
 }>) {
-  // const { showDialog } = useCommonDialog();
+  const { currentSchemaName } = useSchema();
   const headerStyle = "text-xs p-2 text-left border-x font-mono";
 
   const columns = value.columns;
@@ -488,44 +513,55 @@ export default function SchemaEditorColumnList({
   }, [selectedColumns, onChange, setSelectedColumns]);
 
   const onSetForeignKey = useCallback(() => {
-    // showDialog({
-    //   title: "Foreign Key",
-    //   content: (
-    //     <SchemaEditorForeignKey
-    //       selectedColumns={selectedColumns}
-    //       value={columns
-    //         .filter((c) => selectedColumns.has(c.key))
-    //         .map((x) => {
-    //           return {
-    //             old: x.old,
-    //             new: x.new,
-    //             id: x.key,
-    //           };
-    //         })}
-    //       onChange={onChange}
-    //     />
-    //   ),
-    // });
-    onChange((prev) => ({
-      ...prev,
-      constraints: [
-        ...columns
-          .filter((c) => selectedColumns.has(c.key))
-          .map((c) => ({
-            id: window.crypto.randomUUID(),
-            new: {
-              foreignKey: {
-                columns: [c.new?.name ?? ""],
-                foreignColumns: [""],
+    onChange((prev) => {
+      return produce(prev, (draft) => {
+        const selectColumnRefList = draft.columns.filter((c) =>
+          selectedColumns.has(c.key)
+        );
+
+        const existingForeignKey = draft.constraints
+          .filter((c) => c.new?.foreignKey)
+          .map((c) => c.new?.foreignKey?.columns)
+          .flat();
+
+        if (existingForeignKey.length > 0) {
+          for (const columnRef of selectColumnRefList) {
+            if (!existingForeignKey.includes(columnRef.new?.name ?? "")) {
+              for (const columnRef of selectColumnRefList) {
+                draft.constraints.push({
+                  id: columnRef.key,
+                  old: null,
+                  new: {
+                    name: `fk_${columnRef.new?.name}`,
+                    foreignKey: {
+                      columns: [columnRef.new?.name ?? ""],
+                      onDelete: "CASCADE",
+                      onUpdate: "CASCADE",
+                    },
+                  },
+                });
+              }
+            }
+          }
+        } else {
+          for (const columnRef of selectColumnRefList) {
+            draft.constraints.push({
+              id: columnRef.key,
+              old: null,
+              new: {
+                name: `fk_${columnRef.new?.name}`,
+                foreignKey: {
+                  columns: [columnRef.new?.name ?? ""],
+                  foreignSchemaName: currentSchemaName,
+                },
               },
-              name: c.new?.name,
-            } as DatabaseTableColumnConstraint,
-            old: null,
-          })),
-      ],
-    }));
+            });
+          }
+        }
+      });
+    });
     setShowForeignKey(true);
-  }, [columns, selectedColumns, onChange]);
+  }, [selectedColumns, onChange, currentSchemaName]);
 
   return (
     <div>
@@ -550,12 +586,12 @@ export default function SchemaEditorColumnList({
         <Toolbar>
           <ToolbarButton
             text="Add Column"
-            icon={PlusIcon}
+            icon={<PlusIcon />}
             onClick={onAddColumn}
           />
           <ToolbarButton
             text="Remove Column"
-            icon={LucideTrash2}
+            icon={<LucideTrash2 />}
             destructive
             disabled={selectedColumns.size === 0}
             onClick={onRemoveColumns}
@@ -563,7 +599,7 @@ export default function SchemaEditorColumnList({
           <ToolbarSeparator />
           <ToolbarButton
             text="Primary Key"
-            icon={Key}
+            icon={<Key />}
             onClick={onSetPrimaryKey}
             disabled={selectedColumns.size === 0}
           />
@@ -582,11 +618,11 @@ export default function SchemaEditorColumnList({
         <table className="w-full overflow-hidden font-mono text-sm">
           <thead>
             <tr>
-              <th className={cn(headerStyle, "bg-muted w-[50px] text-right")}>
+              <th className={cn(headerStyle, "w-[50px] bg-muted text-right")}>
                 #
               </th>
-              <th className={cn(headerStyle, "border-r w-[20px]")}></th>
-              <th className={cn(headerStyle, "border-l-0 w-[100px]")}>Name</th>
+              <th className={cn(headerStyle, "w-[20px] border-r")}></th>
+              <th className={cn(headerStyle, "w-[100px] border-l-0")}>Name</th>
               <th className={cn(headerStyle, "w-[150px]")}>Type</th>
               <th className={cn(headerStyle, "w-[150px]")}>Default</th>
               <th className={cn(headerStyle, "w-[50px]")}>Null</th>

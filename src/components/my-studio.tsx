@@ -1,9 +1,16 @@
 import { useRouter } from "next/navigation";
-import { ReactElement, useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { Studio } from "./gui/studio";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import {
+  createMySQLExtensions,
+  createPostgreSQLExtensions,
+  createSQLiteExtensions,
+  createStandardExtensions,
+} from "@/core/standard-extension";
 
 interface MyStudioProps {
   name: string;
@@ -12,7 +19,6 @@ interface MyStudioProps {
   expiredAt?: number;
   collabarator?: CollaborationBaseDriver;
   docDriver?: SavedDocDriver;
-  sideBarFooterComponent?: ReactElement;
 }
 
 function MyStudioInternal({
@@ -21,23 +27,35 @@ function MyStudioInternal({
   driver,
   docDriver,
   collabarator,
-  sideBarFooterComponent,
 }: MyStudioProps) {
   const router = useRouter();
+  const dialet = driver.getFlags().dialect;
 
   const goBack = useCallback(() => {
     router.push("/connect");
   }, [router]);
 
+  const extensions = useMemo(() => {
+    if (dialet === "mysql") {
+      return new StudioExtensionManager(createMySQLExtensions());
+    } else if (dialet === "sqlite") {
+      return new StudioExtensionManager(createSQLiteExtensions());
+    } else if (dialet === "postgres") {
+      return new StudioExtensionManager(createPostgreSQLExtensions());
+    }
+
+    return new StudioExtensionManager(createStandardExtensions());
+  }, [dialet]);
+
   return (
     <Studio
+      extensions={extensions}
       driver={driver}
       name={name}
       color={color ?? "blue"}
       onBack={goBack}
       collaboration={collabarator}
       docDriver={docDriver}
-      sideBarFooterComponent={sideBarFooterComponent}
     />
   );
 }

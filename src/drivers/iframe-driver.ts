@@ -1,5 +1,5 @@
 "use client";
-import { DatabaseResultSet } from "./base-driver";
+import { DatabaseResultSet, DriverFlags } from "./base-driver";
 import MySQLLikeDriver from "./mysql/mysql-driver";
 import PostgresLikeDriver from "./postgres/postgres-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
@@ -81,11 +81,11 @@ class ElectronConnection {
   }
 
   query(stmt: string): Promise<DatabaseResultSet> {
-    return window.outerbaseIpc.query(stmt);
+    return window.outerbaseIpc!.query(stmt);
   }
 
   transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
-    return window.outerbaseIpc.transaction(stmts);
+    return window.outerbaseIpc!.transaction(stmts);
   }
 }
 
@@ -95,11 +95,29 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
       ? new ElectronConnection()
       : new IframeConnection();
 
-  constructor(options?: { supportPragmaList: boolean }) {
+  protected supportBigInt = false;
+
+  constructor(options?: {
+    supportPragmaList?: boolean;
+    supportBigInt?: boolean;
+  }) {
     super();
     if (options?.supportPragmaList !== undefined) {
       this.supportPragmaList = options.supportPragmaList;
     }
+
+    if (options?.supportBigInt !== undefined) {
+      this.supportBigInt = options.supportBigInt;
+    }
+  }
+
+  getFlags(): DriverFlags {
+    return {
+      ...super.getFlags(),
+      supportCreateUpdateTable: true,
+      supportModifyColumn: true,
+      supportBigInt: this.supportBigInt,
+    };
   }
 
   listen() {
@@ -139,6 +157,15 @@ export class IframeMySQLDriver extends MySQLLikeDriver {
   transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = this.conn.transaction(stmts);
     return r;
+  }
+}
+
+export class IframeDoltDriver extends IframeMySQLDriver {
+  getFlags(): DriverFlags {
+    return {
+      ...super.getFlags(),
+      dialect: "dolt",
+    };
   }
 }
 

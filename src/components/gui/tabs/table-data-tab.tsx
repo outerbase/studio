@@ -1,6 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
 import ResultTable from "@/components/gui/query-result-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useAutoComplete } from "@/context/auto-complete-provider";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
+import {
+  ColumnSortOption,
+  DatabaseResultStat,
+  DatabaseTableSchema,
+} from "@/drivers/base-driver";
+import { KEY_BINDING } from "@/lib/key-matcher";
+import { commitChange } from "@/lib/sql/sql-execute-helper";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 import {
   LucideArrowLeft,
   LucideArrowRight,
@@ -10,36 +33,15 @@ import {
   LucideRefreshCcw,
   LucideSaveAll,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { commitChange } from "@/components/lib/sql-execute-helper";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import {
-  ColumnSortOption,
-  DatabaseResultStat,
-  DatabaseTableSchema,
-} from "@/drivers/base-driver";
-import { useAutoComplete } from "@/context/auto-complete-provider";
-import OpacityLoading from "../loading-opacity";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import ResultStats from "../result-stat";
-import useTableResultColumnFilter from "../table-result/filter-column";
-import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
-import { useCurrentTab } from "../windows-tab";
-import { KEY_BINDING } from "@/lib/key-matcher";
-import { Toolbar, ToolbarButton } from "../toolbar";
+import { useCallback, useEffect, useState } from "react";
 import AggregateResultButton from "../aggregate-result/aggregate-result-button";
+import ExportResultButton from "../export/export-result-button";
+import OpacityLoading from "../loading-opacity";
+import ResultStats from "../result-stat";
+import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import useTableResultColumnFilter from "../table-result/filter-column";
+import { Toolbar, ToolbarButton } from "../toolbar";
+import { useCurrentTab } from "../windows-tab";
 
 interface TableDataContentProps {
   tableName: string;
@@ -51,6 +53,7 @@ export default function TableDataWindow({
   tableName,
 }: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
+  const { schema } = useSchema();
   const { databaseDriver } = useDatabaseDriver();
   const [error, setError] = useState<string>();
   const [executeError, setExecuteError] = useState<string | null>(null);
@@ -75,6 +78,11 @@ export default function TableDataWindow({
   const [revision, setRevision] = useState(1);
   const [lastQueryTimestamp, setLastQueryTimestamp] = useState(0);
 
+  // We cache the schema to prevent re-initial
+  // the state when schema changes and lost all the
+  // changes in the table
+  const [cachedSchema] = useState(() => schema);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -88,11 +96,14 @@ export default function TableDataWindow({
             orderBy: sortColumns,
           });
 
-        const tableState = OptimizeTableState.createFromResult(
-          databaseDriver,
-          dataResult,
-          schemaResult
-        );
+        const tableState = OptimizeTableState.createFromResult({
+          driver: databaseDriver,
+          result: dataResult,
+          tableSchema: schemaResult,
+          schemas: cachedSchema,
+        });
+
+        tableState.setSql("SELECT * FROM " + tableName + ";");
 
         setData(tableState);
 
@@ -121,6 +132,7 @@ export default function TableDataWindow({
     finalOffset,
     finalLimit,
     revision,
+    cachedSchema,
   ]);
 
   useEffect(() => {
@@ -194,7 +206,7 @@ export default function TableDataWindow({
   }, [isActiveTab, onCommit, onDiscard]);
 
   return (
-    <div className="flex flex-col overflow-hidden w-full h-full">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       {executeError && (
         <AlertDialog open={true}>
           <AlertDialogContent title="Error">
@@ -208,11 +220,11 @@ export default function TableDataWindow({
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <div className="shrink-0 grow-0 py-2 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="shrink-0 grow-0 border-b border-neutral-200 py-2 dark:border-neutral-800">
         <Toolbar>
           <ToolbarButton
             text="Commit"
-            icon={LucideSaveAll}
+            icon={<LucideSaveAll className="h-4 w-4" />}
             tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
             disabled={!changeNumber || isExecuting}
             loading={isExecuting}
@@ -239,11 +251,11 @@ export default function TableDataWindow({
           </div>
 
           <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
-            <LucidePlus className="w-4 h-4 text-green-600" />
+            <LucidePlus className="h-4 w-4 text-green-600" />
           </Button>
 
           <Button variant={"ghost"} size={"sm"} onClick={onRemoveRow}>
-            <LucideDelete className="w-4 h-4 text-red-600" />
+            <LucideDelete className="h-4 w-4 text-red-600" />
           </Button>
 
           <Button
@@ -252,12 +264,12 @@ export default function TableDataWindow({
             onClick={() => setRevision((prev) => prev + 1)}
             disabled={loading}
           >
-            <LucideRefreshCcw className="w-4 h-4 text-green-600" />
+            <LucideRefreshCcw className="h-4 w-4 text-green-600" />
           </Button>
 
-          <div className="flex grow mx-2">
-            <div className="bg-secondary rounded overflow-hidden flex items-center w-full">
-              <div className="text-sm px-2 text-gray-500 bg-neutral-200 dark:bg-neutral-800 h-full flex items-center">
+          <div className="mx-2 flex grow">
+            <div className="flex w-full items-center overflow-hidden rounded bg-secondary">
+              <div className="flex h-full items-center bg-neutral-200 px-2 text-sm text-gray-500 dark:bg-neutral-800">
                 <LucideFilter className="h-4 w-4 text-black dark:text-white" />
               </div>
               <input
@@ -270,7 +282,7 @@ export default function TableDataWindow({
                     setWhere(e.currentTarget.value);
                   }
                 }}
-                className="bg-inherit p-1 pl-2 pr-2 outline-none text-sm font-mono h-full grow"
+                className="h-full grow bg-inherit p-1 pl-2 pr-2 font-mono text-sm outline-none"
               />
             </div>
           </div>
@@ -288,7 +300,7 @@ export default function TableDataWindow({
               setOffset((finalOffset - finalLimit).toString());
             }}
           >
-            <LucideArrowLeft className="w-4 h-4" />
+            <LucideArrowLeft className="h-4 w-4" />
           </Button>
 
           <div className="flex gap-2">
@@ -308,7 +320,7 @@ export default function TableDataWindow({
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 pl-2 pr-2 bg-neutral-200 dark:bg-neutral-800 rounded text-xs h-full"
+                  className="h-full rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-800"
                   alt="Limit"
                 />
               </TooltipTrigger>
@@ -331,7 +343,7 @@ export default function TableDataWindow({
                     }
                   }}
                   style={{ width: 50 }}
-                  className="p-1 pl-2 pr-2 bg-neutral-200 dark:bg-neutral-800 rounded text-xs h-full"
+                  className="h-full rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-800"
                   alt="Offset"
                 />
               </TooltipTrigger>
@@ -341,7 +353,7 @@ export default function TableDataWindow({
 
           <Button variant={"ghost"} size={"sm"} disabled={loading}>
             <LucideArrowRight
-              className="w-4 h-4"
+              className="h-4 w-4"
               onClick={() => {
                 setFinalOffset(finalOffset + finalLimit);
                 setOffset((finalOffset + finalLimit).toString());
@@ -350,10 +362,10 @@ export default function TableDataWindow({
           </Button>
         </Toolbar>
       </div>
-      <div className="grow overflow-hidden relative">
+      <div className="relative grow overflow-hidden">
         {loading && <OpacityLoading />}
         {error && (
-          <div className="text-red-500 p-5">
+          <div className="p-5 text-red-500">
             <pre>{error}</pre>
           </div>
         )}
@@ -369,9 +381,12 @@ export default function TableDataWindow({
         ) : null}
       </div>
       {stat && data && (
-        <div className="flex justify-between border-t shrink-0">
-          <div className="p-1">
+        <div className="flex shrink-0 justify-between border-t">
+          <div className="flex p-1">
             <ResultStats stats={stat} />
+            <div>
+              <ExportResultButton data={data} />
+            </div>
           </div>
           <div className="p-1 pr-3">
             <AggregateResultButton data={data} />

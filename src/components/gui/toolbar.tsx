@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Icon } from "@phosphor-icons/react";
 import { LucideCopy, LucideLoader } from "lucide-react";
-import { forwardRef, PropsWithChildren, ReactElement, useState } from "react";
+import { cloneElement, forwardRef, PropsWithChildren, ReactElement, useState } from "react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "../ui/button";
 import {
@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import CodePreview from "./code-preview";
+
 
 export function Toolbar({ children }: PropsWithChildren) {
   return <div className="flex p-1 gap-1">{children}</div>;
@@ -27,7 +28,7 @@ export function ToolbarSeparator() {
 }
 
 interface ToolbarButtonProps {
-  icon?: Icon;
+  icon?: React.ReactElement;
   disabled?: boolean;
   loading?: boolean;
   badge?: string;
@@ -63,9 +64,9 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
       >
         {loading ? (
           <LucideLoader className="w-4 h-4 animate-spin" />
-        ) : (
-          Icon && <Icon className="w-4 h-4" />
-        )}
+        ) : 
+          Icon && cloneElement(Icon, { className: "w-4 h-4" })
+        }
         <span>{text}</span>
         {badge && (
           <span

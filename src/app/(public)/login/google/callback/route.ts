@@ -9,9 +9,11 @@ export const GET = async (request: NextRequest) => {
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
 
-  const storedState = cookies().get("google_oauth_state")?.value ?? null;
+  const cookieStore = await cookies();
+
+  const storedState = cookieStore.get("google_oauth_state")?.value ?? null;
   const storedCodeVerifier =
-    cookies().get("google_oauth_code_verifier")?.value ?? null;
+    cookieStore.get("google_oauth_code_verifier")?.value ?? null;
   if (
     !code ||
     !state ||

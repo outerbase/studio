@@ -19,53 +19,32 @@ interface Props {
 }
 
 export function SchemaEditorForeignKey(props: Props) {
-  /*return (
-    <div className="mx-[-1.5rem]">
-      <table className="w-full font-mono">
-        <tbody>
-          {props.value?.map((x, idx) => {
-            return (
-              <tr key={x.id}>
-                <td className="border-r border-t border-b text-sm text-right bg-muted p-2 align-top">
-                  {idx + 1}
-                </td>
-                <td className="border-r border-t border-b text-sm p-2">
-                  <ConstraintForeignKeyEditor
-                    value={x}
-                    onChange={props.onChange}
-                  />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );*/
-
+  console.log(props);
   return (
     <Dialog open onOpenChange={props.onClose}>
       <DialogContent>
         <DialogTitle>Foreign Key</DialogTitle>
         <DialogDescription>
           <div className="mx-[-1.5rem]">
-            <table className="w-full font-mono">
+            <table className="font-mono">
               <tbody>
-                {props.constraints.map((x, idx) => {
-                  return (
-                    <tr key={x.id}>
-                      <td className="border-r border-t border-b text-sm text-right bg-muted p-2 align-top">
-                        {idx + 1}
-                      </td>
-                      <td className="border-r border-t border-b text-sm p-2">
-                        <ConstraintForeignKeyEditor
-                          value={x}
-                          onChange={props.onChange}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
+                {props.constraints
+                  .filter((x) => props.selectedColumns.has(x.id))
+                  .map((x, idx) => {
+                    return (
+                      <tr key={x.id}>
+                        <td className="border-b border-r border-t bg-muted p-2 text-right align-top text-sm">
+                          {idx + 1}
+                        </td>
+                        <td className="relative w-[31rem] overflow-hidden border-b border-r border-t p-2 text-sm">
+                          <ConstraintForeignKeyEditor
+                            value={x}
+                            onChange={props.onChange}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

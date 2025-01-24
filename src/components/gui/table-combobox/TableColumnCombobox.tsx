@@ -10,9 +10,9 @@ import {
   CommandInput,
   CommandItem,
 } from "../../ui/command";
-import { cn } from "../../lib/utils";
 import type { DatabaseTableSchema } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
+import { cn } from "@/lib/utils";
 
 export default function TableColumnCombobox({
   value,

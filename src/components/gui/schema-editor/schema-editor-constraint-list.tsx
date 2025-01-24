@@ -1,5 +1,4 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSchema } from "@/context/schema-provider";
 import {
   DatabaseTableColumnConstraint,
   DatabaseTableConstraintChange,
@@ -7,28 +6,16 @@ import {
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import { Plus } from "@phosphor-icons/react";
-import {
-  LucideArrowUpRight,
-  LucideCheck,
-  LucideFingerprint,
-  LucideKeySquare,
-  LucideTrash2,
-} from "lucide-react";
-import {
-  Dispatch,
-  PropsWithChildren,
-  SetStateAction,
-  useCallback,
-  useMemo,
-} from "react";
+import { produce } from "immer";
+import { LucideTrash2 } from "lucide-react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { DropdownMenuItem } from "../../ui/dropdown-menu";
-import ColumnListEditor from "../column-list-editor";
-import TableCombobox from "../table-combobox/TableCombobox";
-import { Toolbar, ToolbarDropdown } from "../toolbar";
+import { Toolbar, ToolbarButton, ToolbarDropdown } from "../toolbar";
 import ConstraintForeignKeyEditor from "./constraint-foreign-key";
 import ConstraintPrimaryKeyEditor from "./constraint-primary-key";
-import { useSchemaEditorContext } from "./schema-editor-prodiver";
 
+// ---- not remove this one because maybe can be used.
+/*
 type ConstraintChangeHandler = (
   constraint: DatabaseTableColumnConstraint
 ) => void;
@@ -247,7 +234,7 @@ function ColumnUnique({
     </>
   );
 }
-
+  
 function RemovableConstraintItem({
   children,
   idx,
@@ -285,6 +272,7 @@ function RemovableConstraintItem({
     </tr>
   );
 }
+
 
 function ColumnItemBody({
   onChange,
@@ -360,9 +348,9 @@ function ColumnItemBody({
   }
 
   return <td colSpan={4}></td>;
-}
+}*/
 
-function ColumnItem({
+/*function ColumnItem({
   constraint,
   onChange,
   idx,
@@ -386,7 +374,7 @@ function ColumnItem({
       />
     </RemovableConstraintItem>
   );
-}
+}*/
 
 function ConstraintListItem({
   value,
@@ -407,8 +395,8 @@ function ConstraintListItem({
 export default function SchemaEditorConstraintList({
   constraints,
   onChange,
-  schemaName,
-  disabled,
+  // schemaName,
+  // disabled,
 }: Readonly<{
   constraints: DatabaseTableConstraintChange[];
   onChange: Dispatch<SetStateAction<DatabaseTableSchemaChange>>;
@@ -416,6 +404,9 @@ export default function SchemaEditorConstraintList({
   disabled?: boolean;
 }>) {
   const headerClassName = "text-xs p-2 text-left border-l";
+  const [selectedColumns, setSelectedColumns] = useState<Set<string>>(
+    () => new Set()
+  );
 
   const newConstraint = useCallback(
     (con: DatabaseTableColumnConstraint) => {
@@ -436,11 +427,40 @@ export default function SchemaEditorConstraintList({
 
   const hasPrimaryKey = constraints.some((c) => c.new?.primaryKey);
 
+  const onRemoveConstraint = useCallback(() => {
+    onChange((prev) => {
+      return produce(prev, (draft) => {
+        draft.constraints = draft.constraints.filter((col) => {
+          if (selectedColumns.has(col.id) && !col.old) return false;
+          return true;
+        });
+
+        draft.constraints.forEach((col) => {
+          if (selectedColumns.has(col.id) && col.old) {
+            col.new = null;
+          }
+        });
+      });
+    });
+    setSelectedColumns(new Set());
+  }, [selectedColumns, onChange, setSelectedColumns]);
+
+  const onSelectChange = useCallback((selected: boolean, id: string) => {
+    setSelectedColumns((prev) => {
+      if (selected) {
+        prev.add(id);
+      } else {
+        prev.delete(id);
+      }
+      return new Set(prev);
+    });
+  }, []);
+
   return (
     <div>
-      <div className="p-1 border-b">
+      <div className="border-b p-1">
         <Toolbar>
-          <ToolbarDropdown text="Add Constraint" icon={Plus}>
+          <ToolbarDropdown text="Add Constraint" icon={<Plus />}>
             <DropdownMenuItem
               inset
               disabled={hasPrimaryKey}
@@ -479,6 +499,13 @@ export default function SchemaEditorConstraintList({
               Foreign Key
             </DropdownMenuItem>
           </ToolbarDropdown>
+          <ToolbarButton
+            text="Remove Constraint"
+            icon={<LucideTrash2 />}
+            disabled={selectedColumns.size === 0}
+            onClick={onRemoveConstraint}
+            destructive
+          />
         </Toolbar>
       </div>
       <table className="w-full font-mono">
@@ -493,15 +520,19 @@ export default function SchemaEditorConstraintList({
         </thead>
         <tbody>
           {constraints.map((constraint, idx) => {
+            const selected = selectedColumns.has(constraint.id);
             return (
               <tr key={constraint.id}>
-                <td className="border-r border-t border-b text-sm text-right bg-muted p-2 align-top">
+                <td className="border-b border-r border-t bg-muted p-2 text-right align-top text-sm">
                   {idx + 1}
                 </td>
-                <td className="border-r border-t border-b text-sm align-top pt-2 text-center">
-                  <Checkbox />
+                <td
+                  className="border-b border-r border-t pt-2 text-center align-top text-sm"
+                  onClick={() => onSelectChange(!selected, constraint.id)}
+                >
+                  <Checkbox checked={selected} />
                 </td>
-                <td className="border-r border-t border-b text-sm p-2">
+                <td className="border-b border-r border-t p-2 text-sm">
                   <ConstraintListItem
                     key={constraint.id}
                     value={constraint}

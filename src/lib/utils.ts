@@ -1,4 +1,3 @@
-import { env } from "@/env";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -14,11 +13,6 @@ export function scoped<T>(fn: () => T): T {
 }
 
 /**
- * Doesn't do anything :)
- */
-export function noop() {}
-
-/**
  * Join everything together into a string
  *
  * @example
@@ -27,19 +21,6 @@ export function noop() {}
  */
 export function concat(...inputs: string[]) {
   return inputs.join("");
-}
-
-/**
- * Get the file url from the filename
- * @example
- * const url = getFileUrl("filename.jpg")
- * // https://r2.example.com/filename.jpg
- * // make sure to set the R2_PUBLIC_URL in the .env
- */
-export function getFileUrl(filename: string) {
-  // If the R2_PUBLIC_URL is not set fallback to a dummy url
-  const url = new URL(filename, env.R2_PUBLIC_URL ?? "no-public-url.com");
-  return url.toString();
 }
 
 export interface ApiErrorResponse {

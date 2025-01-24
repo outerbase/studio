@@ -5,7 +5,7 @@ import {
 } from "@/drivers/base-driver";
 import { Key, Plus } from "@phosphor-icons/react";
 import { produce } from "immer";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import TableColumnCombobox from "../table-combobox/TableColumnCombobox";
 import TableCombobox from "../table-combobox/TableCombobox";
@@ -29,8 +29,8 @@ export default function ConstraintForeignKeyEditor({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2 items-center font-bold text-purple-600">
-        <Key className="w-4 h-4" />
+      <div className="flex items-center gap-2 font-bold text-purple-600">
+        <Key className="h-4 w-4" />
         Foreign Key
       </div>
 
@@ -68,7 +68,7 @@ export default function ConstraintForeignKeyEditor({
         />
         <div className="w-[250px]">
           <TableCombobox
-            schemaName="main"
+            schemaName={value.new?.foreignKey?.foreignSchemaName ?? "main"}
             onChange={(e) => {
               onChange((prev) => {
                 return produce(prev, (draft) => {
@@ -85,10 +85,37 @@ export default function ConstraintForeignKeyEditor({
         </div>
       </div>
 
-      <div className="ml-4 border-l-4 flex flex-col gap-2 pl-4">
+      <div className="ml-4 flex flex-col gap-2 border-l-4 pl-4">
         {columnSourceList.map((column, columnIdx) => {
           return (
             <div className="flex items-center gap-2" key={columnIdx}>
+              {columnSourceList.length > 1 && (
+                <div>
+                  <button
+                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600 text-white"
+                    onClick={() => {
+                      onChange((prev) => {
+                        return produce(prev, (draft) => {
+                          draft.constraints.forEach((c) => {
+                            if (c.id === value.id && c.new?.foreignKey) {
+                              c.new.foreignKey.columns =
+                                columnSourceList.filter(
+                                  (_, idx) => idx !== columnIdx
+                                );
+                              c.new.foreignKey.foreignColumns =
+                                columnDestinationList.filter(
+                                  (_, idx) => idx !== columnIdx
+                                );
+                            }
+                          });
+                        });
+                      });
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <div className="w-[200px]">
                 <SchemaEditorColumnCombobox
                   onChange={(e) => {
@@ -113,7 +140,7 @@ export default function ConstraintForeignKeyEditor({
                   value={column}
                 />
               </div>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="h-4 w-4" />
               <TableColumnCombobox
                 onChange={(e) => {
                   onChange((prev) => {
@@ -125,6 +152,8 @@ export default function ConstraintForeignKeyEditor({
                           ) {
                             (c.new.foreignKey.foreignColumns || [])[columnIdx] =
                               e;
+                          } else {
+                            c.new.foreignKey.foreignColumns = [e];
                           }
                         }
                       });
@@ -144,7 +173,7 @@ export default function ConstraintForeignKeyEditor({
         })}
 
         <button
-          className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center cursor-pointer"
+          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-green-600 text-white"
           onClick={() => {
             onChange((prev) => {
               return produce(prev, (draft) => {
@@ -161,7 +190,7 @@ export default function ConstraintForeignKeyEditor({
             });
           }}
         >
-          <Plus className="w-4 h-4" weight="bold" />
+          <Plus className="h-4 w-4" weight="bold" />
         </button>
       </div>
     </div>

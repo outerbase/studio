@@ -1,6 +1,6 @@
 "use client";
+import { scc } from "@/core/command";
 import ListButtonItem from "../list-button-item";
-import { openTab } from "@/messages/open-tab";
 import { StackMinus, TreeStructure } from "@phosphor-icons/react";
 
 export default function SettingSidebar() {
@@ -9,14 +9,14 @@ export default function SettingSidebar() {
       <ListButtonItem
         text="Relational Diagram"
         onClick={() => {
-          openTab({ type: "erd" });
+          scc.tabs.openBuiltinERD({});
         }}
         icon={TreeStructure}
       />
       <ListButtonItem
         text="Drop & Empty Multiple Tables"
         onClick={() => {
-          openTab({ type: "mass-drop-table" });
+          scc.tabs.openBuiltinMassDropTable({});
         }}
         icon={StackMinus}
       />

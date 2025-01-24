@@ -1,8 +1,8 @@
 import { useCommonDialog } from "@/components/common-dialog";
-import { checkSchemaChange } from "@/components/lib/sql-generate.schema";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import { checkSchemaChange } from "@/lib/sql/sql-generate.schema";
 import { cloneDeep } from "lodash";
 import { CodeIcon, LucideTableProperties, SaveIcon } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
@@ -104,7 +104,7 @@ export default function SchemaEditorToolbar({
     <Toolbar>
       <ToolbarButton
         text="Save"
-        icon={SaveIcon}
+        icon={<SaveIcon/>}
         onClick={onSaveClicked}
         disabled={!hasChange}
       />

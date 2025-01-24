@@ -3,7 +3,7 @@ import CodeMirror, {
   Extension,
   ReactCodeMirrorRef,
 } from "@uiw/react-codemirror";
-import { LanguageSupport } from "@codemirror/language";
+import { indentUnit, LanguageSupport } from "@codemirror/language";
 import {
   acceptCompletion,
   completionStatus,
@@ -153,6 +153,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           },
         }),
         keyExtensions,
+        indentUnit.of("  "),
         sqlDialect,
         tooltipExtension,
         tableNameHighlightPlugin,
@@ -184,6 +185,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           drawSelection: false,
         }}
         theme={theme}
+        indentWithTab={false}
         value={value}
         height="100%"
         onChange={onChange}

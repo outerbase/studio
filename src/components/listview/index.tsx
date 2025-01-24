@@ -4,8 +4,8 @@ import {
   ContextMenuContent,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { OpenContextMenuList } from "@/core/channel-builtin";
 import { cn } from "@/lib/utils";
-import { OpenContextMenuList } from "@/messages/open-context-menu";
 import {
   LucideChevronDown,
   LucideChevronRight,
@@ -102,9 +102,9 @@ function CollapsedButton({
   return hasCollapsed ? (
     <div onClick={onClick}>
       {collapsed ? (
-        <LucideChevronDown className={cn("w-4 h-4")} />
+        <LucideChevronDown className={cn("h-4 w-4")} />
       ) : (
-        <LucideChevronRight className={cn("w-4 h-4")} />
+        <LucideChevronRight className={cn("h-4 w-4")} />
       )}
     </div>
   ) : (
@@ -193,10 +193,10 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
               >
                 <div
                   className={cn(
-                    "px-4 flex text-xs items-center gap-0.5 h-8 text-neutral-500",
+                    "flex h-8 items-center gap-0.5 px-4 text-xs text-neutral-500",
                     selectedKey === item.key
-                      ? "dark:bg-neutral-800 dark:text-white bg-neutral-200 text-black"
-                      : "hover:dark:bg-neutral-900 hover:bg-neutral-100",
+                      ? "bg-neutral-200 text-black dark:bg-neutral-800 dark:text-white"
+                      : "hover:bg-neutral-100 hover:dark:bg-neutral-900",
                     contextMenuKey === item.key && contextOpen
                       ? "border border-blue-500"
                       : "border border-transparent",
@@ -214,12 +214,12 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                     />
                   )}
                   {item.icon && (
-                    <div className="w-4 h-4 mr-1 flex-shrink-0 relative">
-                      <item.icon className={cn("w-4 h-4", item.iconColor)} />
+                    <div className="relative mr-1 h-4 w-4 flex-shrink-0">
+                      <item.icon className={cn("h-4 w-4", item.iconColor)} />
                       {item.iconBadgeColor && (
                         <div
                           className={cn(
-                            "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full",
+                            "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full",
                             item.iconBadgeColor
                           )}
                         ></div>
@@ -227,12 +227,12 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                     </div>
                   )}
 
-                  <div className="text-xs line-clamp-1 flex-1">
+                  <div className="line-clamp-1 flex-1 text-xs">
                     <Highlight text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span
                         className={cn(
-                          "rounded p-0.5 px-1 ml-1 text-xs font-mono font-normal",
+                          "ml-1 rounded p-0.5 px-1 font-mono text-xs font-normal",
                           item.badgeClassName ?? "bg-red-500 text-white"
                         )}
                       >
@@ -242,9 +242,9 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   </div>
 
                   {item.progressBarValue && item.progressBarMax && (
-                    <div className="w-[50px] h-full flex items-center relative text-muted-foreground">
+                    <div className="relative flex h-full w-[50px] items-center text-muted-foreground">
                       <div
-                        className="dark:bg-gray-800 dark:border-gray-700 bg-gray-100 rounded-sm h-[20px] border border-gray-200"
+                        className="h-[20px] rounded-sm border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
                         style={{
                           width:
                             Math.max(

@@ -32,7 +32,9 @@ export default function AggregateResultButton({
   );
   useEffect(() => {
     const changeCallback = () => {
-      setResult({ ...data.getSelectionAggregatedResult() });
+      setResult({
+        ...(data.getSelectionAggregatedResult() as AggregateResult),
+      });
     };
 
     data.addChangeListener(changeCallback);

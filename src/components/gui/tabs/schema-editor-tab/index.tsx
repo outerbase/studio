@@ -1,7 +1,7 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import { createTableSchemaDraft } from "@/components/lib/sql-generate.schema";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import { createTableSchemaDraft } from "@/lib/sql/sql-generate.schema";
 import { useCallback, useEffect, useState } from "react";
 import SchemaEditor from "../../schema-editor";
 import SchemaEditorToolbar from "./toolbar";

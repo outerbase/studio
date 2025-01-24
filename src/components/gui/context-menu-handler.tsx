@@ -1,9 +1,3 @@
-import useMessageListener from "@/components/hooks/useMessageListener";
-import { MessageChannelName } from "@/const";
-import type {
-  OpenContextMenuList,
-  OpenContextMenuOptions,
-} from "@/messages/open-context-menu";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -18,6 +12,11 @@ import {
 } from "@/components/ui/context-menu";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import {
+  contextMenuChannel,
+  OpenContextMenuList,
+  OpenContextMenuOptions,
+} from "@/core/channel-builtin";
 
 export function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
   return menu.map((item, menuIndex) => {
@@ -62,7 +61,7 @@ export function ContextMenuList({ menu }: { menu: OpenContextMenuList }) {
         {item.icon && (
           <item.icon
             className={cn(
-              "w-4 h-4 mr-2",
+              "mr-2 h-4 w-4",
               item.destructive ? "text-red-500" : undefined
             )}
           />
@@ -84,14 +83,11 @@ export default function ContextMenuHandler() {
   const contextRef = useRef<HTMLSpanElement>(null);
   const [menu, setMenu] = useState<OpenContextMenuOptions>();
 
-  useMessageListener<OpenContextMenuOptions>(
-    MessageChannelName.OPEN_CONTEXT_MENU,
-    (options) => {
-      if (options) {
-        setMenu(options);
-      }
-    }
-  );
+  useEffect(() => {
+    return contextMenuChannel.listen((data) => {
+      setMenu(data);
+    });
+  }, [setMenu]);
 
   useEffect(() => {
     if (menu && contextRef.current) {

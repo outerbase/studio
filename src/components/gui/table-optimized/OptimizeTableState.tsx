@@ -1,15 +1,11 @@
-import { selectArrayFromIndexList } from "@/components/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
-import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
-import {
-  BaseDriver,
-  DatabaseResultSet,
-  DatabaseTableSchema,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
-import { ReactElement } from "react";
 import deepEqual from "deep-equal";
 import { formatNumber } from "@/lib/convertNumber";
+import { selectArrayFromIndexList } from "@/lib/export-helper";
+import {
+  buildTableResultHeader,
+  BuildTableResultProps,
+} from "@/lib/build-table-result";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -23,7 +19,7 @@ export type AggregateFunction = "sum" | "avg" | "min" | "max" | "count";
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
 
-interface TableSelectionRange {
+export interface TableSelectionRange {
   x1: number;
   y1: number;
   x2: number;
@@ -58,84 +54,12 @@ export default class OptimizeTableState {
   protected changeCounter = 1;
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
   protected defaultAggregateFunction: AggregateFunction = "sum";
+  protected sql: string = "";
 
-  static createFromResult(
-    driver: BaseDriver,
-    dataResult: DatabaseResultSet,
-    schemaResult?: DatabaseTableSchema
-  ) {
+  static createFromResult(props: BuildTableResultProps) {
     const r = new OptimizeTableState(
-      dataResult.headers.map((header) => {
-        const headerData = schemaResult
-          ? schemaResult.columns.find((c) => c.name === header.name)
-          : undefined;
-
-        let initialSize = 150;
-        const headerName = header.name;
-        const dataType = header.type ?? driver.inferTypeFromHeader(headerData);
-
-        if (
-          dataType === TableColumnDataType.INTEGER ||
-          dataType === TableColumnDataType.REAL
-        ) {
-          initialSize = 100;
-        } else if (dataType === TableColumnDataType.TEXT) {
-          // Use 100 first rows to determine the good initial size
-          let maxSize = 0;
-          for (let i = 0; i < Math.min(dataResult.rows.length, 100); i++) {
-            const currentCell = dataResult.rows[i];
-            if (currentCell) {
-              maxSize = Math.max(
-                (currentCell[headerName ?? ""]?.toString() ?? "").length,
-                maxSize
-              );
-            }
-          }
-
-          initialSize = Math.max(150, Math.min(500, maxSize * 8));
-        }
-
-        // --------------------------------------
-        // Matching foreign key
-        // --------------------------------------
-        let foreignKey = headerData?.constraint?.foreignKey;
-        if (!foreignKey && schemaResult?.constraints) {
-          for (const c of schemaResult.constraints) {
-            if (
-              c.foreignKey &&
-              c.foreignKey.columns?.length === 1 &&
-              c.foreignKey.columns[0] === header.name
-            ) {
-              foreignKey = c.foreignKey;
-            }
-          }
-        }
-
-        let icon: ReactElement | undefined = undefined;
-        if (schemaResult?.pk.includes(headerName ?? "")) {
-          icon = <LucideKey className="w-4 h-4 text-red-500" />;
-        } else if (foreignKey) {
-          icon = <LucideKeySquare className="w-4 h-4 text-yellow-500" />;
-        } else if (headerData?.constraint?.generatedExpression) {
-          icon = <LucideSigma className="w-4 h-4 text-blue-500" />;
-        }
-
-        return {
-          initialSize,
-          name: headerName ?? "",
-          originalDataType: header.originalType,
-          displayName: header.displayName,
-          resizable: true,
-          isPrimaryKey: schemaResult
-            ? schemaResult.pk.includes(header.name)
-            : false,
-          headerData,
-          foreignKey,
-          dataType,
-          icon,
-        };
-      }),
-      dataResult.rows.map((r) => ({ ...r }))
+      buildTableResultHeader(props),
+      props.result.rows.map((r) => ({ ...r }))
     );
 
     if (r.getRowsCount() >= 1000) {
@@ -157,7 +81,7 @@ export default class OptimizeTableState {
     this.data = data.map((row) => ({
       raw: row,
     }));
-    this.headerWidth = headers.map((h) => h.initialSize);
+    this.headerWidth = headers.map((h) => h.display.initialSize);
   }
 
   setReadOnlyMode(readOnly: boolean) {
@@ -307,6 +231,7 @@ export default class OptimizeTableState {
 
   changeValue(y: number, x: number, newValue: unknown) {
     if (this.readOnlyMode) return;
+    if (this.headers[x]?.setting.readonly) return;
 
     const oldValue = this.getOriginalValue(y, x);
 
@@ -660,6 +585,32 @@ export default class OptimizeTableState {
     return false;
   }
 
+  getFullSelectionRowsIndex() {
+    const selectedRows = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      if (range.x1 === 0 && range.x2 === this.getHeaderCount() - 1) {
+        for (let i = range.y1; i <= range.y2; i++) {
+          if (!selectedRows.has(i)) selectedRows.add(i);
+        }
+      }
+    }
+    return Array.from(selectedRows.values());
+  }
+
+  getFullSelectionColsIndex() {
+    const selectedCols = new Set<number>();
+
+    for (const range of this.selectionRanges) {
+      if (range.y1 === 0 && range.y2 === this.getRowsCount() - 1) {
+        for (let i = range.x1; i <= range.x2; i++) {
+          if (!selectedCols.has(i)) selectedCols.add(i);
+        }
+      }
+    }
+    return Array.from(selectedCols.values());
+  }
+
   isFullSelectionCol(x: number) {
     for (const range of this.selectionRanges) {
       if (
@@ -839,6 +790,7 @@ export default class OptimizeTableState {
     let min = undefined;
     let max = undefined;
     let count = 0;
+    let detectedDataType = undefined;
 
     const selectedCell = new Set<string>();
     for (const range of this.selectionRanges) {
@@ -851,12 +803,57 @@ export default class OptimizeTableState {
           selectedCell.add(key);
 
           const value = this.getValue(y, x);
-          const parsed = Number(value);
 
-          if (!isNaN(parsed)) {
-            sum = sum !== undefined ? sum + parsed : parsed;
-            min = min !== undefined ? (min < parsed ? min : parsed) : parsed;
-            max = max !== undefined ? (max > parsed ? max : parsed) : parsed;
+          if (value !== null && value !== undefined && value !== "") {
+            // detect first valid element data type
+            if (detectedDataType === undefined) {
+              if (!isNaN(Number(value))) {
+                detectedDataType = "number";
+              } else if (
+                typeof value === "string" &&
+                !isNaN(Date.parse(value))
+              ) {
+                detectedDataType = "date";
+              }
+            }
+
+            if (detectedDataType === "number") {
+              const parsed = Number(value);
+              if (!isNaN(parsed)) {
+                sum = sum !== undefined ? sum + parsed : parsed;
+                min =
+                  min !== undefined
+                    ? (min as number) < parsed
+                      ? min
+                      : parsed
+                    : parsed;
+                max =
+                  max !== undefined
+                    ? (max as number) > parsed
+                      ? max
+                      : parsed
+                    : parsed;
+              }
+            } else if (
+              detectedDataType === "date" &&
+              (isValidDate(value as string) || isValidDateTime(value as string))
+            ) {
+              const parsed = Date.parse(value as string);
+              if (!isNaN(parsed)) {
+                min =
+                  min !== undefined
+                    ? Date.parse(min as string) < parsed
+                      ? min
+                      : value
+                    : value;
+                max =
+                  max !== undefined
+                    ? Date.parse(max as string) > parsed
+                      ? max
+                      : value
+                    : value;
+              }
+            }
           }
           count = count + 1;
         }
@@ -865,12 +862,19 @@ export default class OptimizeTableState {
     if (sum !== undefined && count > 0) {
       avg = sum / count;
     }
+    if (detectedDataType === "number") {
+      return {
+        sum: formatNumber(sum),
+        avg: formatNumber(avg),
+        min: formatNumber(min as number),
+        max: formatNumber(max as number),
+        count: formatNumber(count),
+      };
+    }
     return {
-      sum: formatNumber(sum),
-      avg: formatNumber(avg),
-      min: formatNumber(min),
-      max: formatNumber(max),
-      count: formatNumber(count),
+      min,
+      max,
+      count,
     };
   }
 
@@ -880,4 +884,26 @@ export default class OptimizeTableState {
   getDefaultAggregateFunction() {
     return this.defaultAggregateFunction;
   }
+  setSql(sql: string) {
+    this.sql = sql;
+  }
+  getSql() {
+    return this.sql;
+  }
+}
+
+function isValidDate(value: string): boolean {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(value)) return false;
+
+  const parsedDate = new Date(value);
+  return !isNaN(parsedDate.getTime());
+}
+
+function isValidDateTime(value: string): boolean {
+  const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+  if (!dateTimeRegex.test(value)) return false;
+
+  const parsedDate = new Date(value);
+  return !isNaN(parsedDate.getTime());
 }

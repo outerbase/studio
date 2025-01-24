@@ -129,16 +129,16 @@ function mapSchema(
 
         initialEdges.push({
           type: "smoothstep",
-          markerStart: {
+          markerEnd: {
             type: MarkerType.ArrowClosed,
             width: 14,
             height: 14,
           },
           id: `${item.name}-${constraint.foreignKey.foreignTableName}`,
-          target: item.name,
-          source: constraint.foreignKey.foreignTableName || "",
-          targetHandle: columnName,
-          sourceHandle: constraint.foreignKey.foreignColumns
+          source: item.name,
+          target: constraint.foreignKey.foreignTableName || "",
+          sourceHandle: columnName,
+          targetHandle: constraint.foreignKey.foreignColumns
             ? constraint.foreignKey.foreignColumns[0]
             : "",
           animated: true,
@@ -203,12 +203,16 @@ function mapSchema(
   // Rearrange the nodes with relationship
   // We need to find the position
   const relationshipRightPosition =
-    (Math.max(...layoutRelationship.nodes.map((x) => x.position.x)) ?? 0) +
-    NODE_MARGIN +
-    MAX_NODE_WIDTH;
+    layoutRelationship.nodes.length === 0
+      ? 0
+      : (Math.max(...layoutRelationship.nodes.map((x) => x.position.x)) ?? 0) +
+        NODE_MARGIN +
+        MAX_NODE_WIDTH;
 
   const relationshipTopPosition =
-    Math.min(...layoutRelationship.nodes.map((x) => x.position.y)) ?? 0;
+    layoutRelationship.nodes.length === 0
+      ? 0
+      : Math.min(...layoutRelationship.nodes.map((x) => x.position.y)) ?? 0;
 
   // Calculate estimate area of the nodes without relationship
   const area =

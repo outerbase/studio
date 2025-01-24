@@ -11,7 +11,7 @@ export default function ERDTableColumn({
 }) {
   return (
     <TableRow className="group relative text-xs">
-      <TableCell className="p-0 pl-0 pr-6 font-light h-[30px] text-sm pl-2 font-mono">
+      <TableCell className="p-0 pr-6 font-light h-[30px] text-sm pl-2 font-mono">
         <BaseHandle
           id={column.title}
           type="target"
@@ -23,11 +23,11 @@ export default function ERDTableColumn({
             {column.pk && <Key size={15} color={"rgb(153 27 27)"} />}
             {column.fk && <Key size={15} color={"rgb(245 158 11)"} />}
           </div>
-          <div>{column.title}</div>
+          <div className="max-w-[120px] truncate">{column.title}</div>
         </div>
       </TableCell>
       <TableCell className="p-0 pr-0 text-right font-thin h-[30px] text-sm">
-        <div className="h-[30px] flex items-center justify-end pr-2 font-mono text-muted-foreground">
+        <div className="h-[30px] flex items-center justify-end pr-2 font-mono text-muted-foreground max-w-[75px] truncate">
           {column.type}
         </div>
         <BaseHandle

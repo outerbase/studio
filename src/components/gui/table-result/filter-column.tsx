@@ -37,10 +37,10 @@ export default function useTableResultColumnFilter({
     <Popover>
       <PopoverTrigger asChild>
         <Button variant={"ghost"} size={"sm"}>
-          <LucideSettings2 className="w-4 h-4 mr-2" />
+          <LucideSettings2 className="mr-2 h-4 w-4" />
           Columns
           {!!columnFilterBadge && (
-            <span className="rounded-full text-[10px] bg-primary w-4 h-4 text-primary text-primary-foreground ml-2">
+            <span className="ml-2 h-4 w-4 rounded-full bg-primary text-[10px] text-primary text-primary-foreground">
               {columnFilterBadge}
             </span>
           )}
@@ -55,7 +55,7 @@ export default function useTableResultColumnFilter({
                 onClick={() => {
                   setColumnIndexList(headers.map((_, idx) => idx));
                 }}
-                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 my-1 mx-1 hover:bg-secondary font-semibold text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                className="relative mx-1 my-1 flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-semibold outline-none hover:bg-secondary aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
               >
                 <ListChecks className="mr-2 h-4 w-4" />
                 Select all columns
@@ -69,7 +69,7 @@ export default function useTableResultColumnFilter({
 
               return (
                 <CommandItem
-                  value={header.displayName}
+                  value={header.display.text}
                   key={header.name}
                   onSelect={() => {
                     if (isChecked) {
@@ -91,7 +91,7 @@ export default function useTableResultColumnFilter({
                       isChecked ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {header.displayName}
+                  {header.display.text}
                 </CommandItem>
               );
             })}
