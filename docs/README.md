@@ -16,6 +16,9 @@ export default class SampleExtension extends StudioExtension {
 }
 ```
 
+- All of the extension is located at `/src/extensions`.
+- Once you finish implement your extension, you can attach it to studio at `/src/core/standard-extension.tsx`
+
 Below is a list of areas where extensions can build upon our core Outerbase Studio.
 
 - [Sidebar](sidebar.md)
