@@ -35,7 +35,7 @@ export abstract class SavedDocDriver {
     id: string,
     name: string
   ): Promise<SavedDocNamespace>;
-  abstract removeNamespapce(id: string): Promise<void>;
+  abstract removeNamespace(id: string): Promise<void>;
 
   abstract getDocs(): Promise<SavedDocGroupByNamespace[]>;
   abstract createDoc(

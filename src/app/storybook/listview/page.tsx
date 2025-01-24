@@ -86,7 +86,7 @@ function Demo1() {
   }, []);
 
   return (
-    <div className="w-[300px] border p-2 rounded">
+    <div className="w-[300px] rounded border p-2">
       <Input
         className="mb-2"
         value={filter}
@@ -107,7 +107,7 @@ function Demo1() {
 
 function Demo2() {
   return (
-    <div className="w-[300px] border p-2 rounded">
+    <div className="w-[300px] rounded border p-2">
       <ListView
         items={[
           {
@@ -136,10 +136,10 @@ function Demo2() {
 
 export default function ListViewStorybookPage() {
   return (
-    <body className="p-4">
+    <>
       <Demo1 />
       <br />
       <Demo2 />
-    </body>
+    </>
   );
 }

@@ -1,15 +1,16 @@
 import { useCallback } from "react";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { openContextMenuFromEvent } from "@/messages/open-context-menu";
 import { useFullEditor } from "../providers/full-editor-provider";
 import {
   exportRowsToExcel,
   exportRowsToJson,
   exportRowsToSqlInsert,
-} from "@/components/lib/export-helper";
+} from "@/lib/export-helper";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import TableStateActions from "../table-optimized/table-state-actions";
+import { openContextMenuFromEvent } from "@/core/channel-builtin";
+import { useConfig } from "@/context/config-provider";
 
 export default function useTableResultContextMenu({
   tableName,
@@ -23,6 +24,7 @@ export default function useTableResultContextMenu({
   pasteCallback: (state: OptimizeTableState) => void;
 }) {
   const { openEditor } = useFullEditor();
+  const { extensions } = useConfig();
 
   return useCallback(
     ({
@@ -44,6 +46,11 @@ export default function useTableResultContextMenu({
       }
 
       openContextMenuFromEvent([
+        ...extensions.getQueryCellContextMenu().map((r) => {
+          return {
+            title: r.title,
+          };
+        }),
         {
           title: "Insert Value",
           disabled: !hasFocus,
@@ -229,6 +236,6 @@ export default function useTableResultContextMenu({
             ]),
       ])(event);
     },
-    [data, tableName, copyCallback, pasteCallback, openEditor]
+    [data, tableName, copyCallback, pasteCallback, openEditor, extensions]
   );
 }

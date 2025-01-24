@@ -1,8 +1,8 @@
 import React, { type ReactElement } from "react";
 import type { OptimizeTableHeaderWithIndexProps } from ".";
-import TableHeaderResizeHandler from "./TableHeaderResizeHandler";
-import { cn } from "../../lib/utils";
+import TableHeaderResizeHandler from "./table-header-resize-handler";
 import OptimizeTableState from "./OptimizeTableState";
+import { cn } from "@/lib/utils";
 
 export default function TableHeader({
   idx,
@@ -29,7 +29,7 @@ export default function TableHeader({
   return (
     <th
       key={header.name}
-      title={header.tooltip}
+      title={header.display.tooltip}
       className={className}
       onContextMenu={onContextMenu}
       style={{
@@ -37,7 +37,7 @@ export default function TableHeader({
       }}
     >
       {renderHeader(header, idx)}
-      {header.resizable && (
+      {header.setting.resizable && (
         <TableHeaderResizeHandler idx={idx + 1} onResize={onHeaderResize} />
       )}
     </th>

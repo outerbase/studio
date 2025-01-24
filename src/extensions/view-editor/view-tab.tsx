@@ -6,7 +6,6 @@ import { useDatabaseDriver } from "@/context/driver-provider";
 import { useCommonDialog } from "@/components/common-dialog";
 import { LucideLoader, LucideSave } from "lucide-react";
 import { useSchema } from "@/context/schema-provider";
-import { useTabsContext } from "@/components/gui/windows-tab";
 import OpacityLoading from "@/components/gui/loading-opacity";
 import { ViewController } from "./view-controller";
 import ViewEditor from "./view-editor";
@@ -25,7 +24,6 @@ const EMPTY_DEFAULT_VIEW: DatabaseViewSchema = {
 
 export default function ViewTab(props: ViewTabProps) {
   const { showDialog } = useCommonDialog();
-  const { replaceCurrentTab } = useTabsContext();
   const { refresh: refreshSchema, currentSchemaName } = useSchema();
   const { databaseDriver } = useDatabaseDriver();
 
@@ -95,12 +93,12 @@ export default function ViewTab(props: ViewTabProps) {
           onClick: onContinue,
           onComplete: () => {
             refreshSchema();
-            replaceCurrentTab(
-              viewEditorExtensionTab.generate({
-                schemaName: value.schemaName,
-                name: value.name,
-              })
-            );
+
+            viewEditorExtensionTab.replace({
+              schemaName: value.schemaName,
+              name: value.name,
+            });
+
             setIsExecuting(false);
           },
         },
@@ -113,7 +111,6 @@ export default function ViewTab(props: ViewTabProps) {
     isExecuting,
     onContinue,
     refreshSchema,
-    replaceCurrentTab,
     value.name,
     value.schemaName,
   ]);
@@ -123,7 +120,7 @@ export default function ViewTab(props: ViewTabProps) {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden w-full h-full">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <ViewController
         onSave={onSave}
         onDiscard={() => {

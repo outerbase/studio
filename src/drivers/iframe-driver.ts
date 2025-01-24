@@ -81,11 +81,11 @@ class ElectronConnection {
   }
 
   query(stmt: string): Promise<DatabaseResultSet> {
-    return window.outerbaseIpc.query(stmt);
+    return window.outerbaseIpc!.query(stmt);
   }
 
   transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
-    return window.outerbaseIpc.transaction(stmts);
+    return window.outerbaseIpc!.transaction(stmts);
   }
 }
 

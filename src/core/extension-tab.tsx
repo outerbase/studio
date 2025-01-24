@@ -1,5 +1,6 @@
 import { WindowTabItemProps } from "@/components/gui/windows-tab";
 import { scc } from "./command";
+import { CommunicationChannel } from "./channel";
 
 interface TabExtensionConfig<T> {
   name: string;
@@ -10,8 +11,13 @@ interface TabExtensionConfig<T> {
 interface TabExtensionCommand<T> {
   open: (options: T) => void;
   generate: (options: T) => WindowTabItemProps;
+  replace: (options: T) => void;
   close: (options: T) => void;
 }
+
+export const tabOpenChannel = new CommunicationChannel<WindowTabItemProps>();
+export const tabReplaceChannel = new CommunicationChannel<WindowTabItemProps>();
+export const tabCloseChannel = new CommunicationChannel<string[]>();
 
 export function createTabExtension<T>(
   config: TabExtensionConfig<T>
@@ -27,19 +33,26 @@ export function createTabExtension<T>(
       };
     },
 
-    open(options: T) {
-      if (window.outerbaseOpenTab) {
-        const key = [config.name, config.key(options)]
-          .filter(Boolean)
-          .join("-");
+    replace(options: T) {
+      const key = [config.name, config.key(options)].filter(Boolean).join("-");
 
-        window.outerbaseOpenTab({
-          ...config.generate(options),
-          key,
-          identifier: key,
-          type: config.name,
-        });
-      }
+      tabReplaceChannel.send({
+        ...config.generate(options),
+        key,
+        identifier: key,
+        type: config.name,
+      });
+    },
+
+    open(options: T) {
+      const key = [config.name, config.key(options)].filter(Boolean).join("-");
+
+      tabOpenChannel.send({
+        ...config.generate(options),
+        key,
+        identifier: key,
+        type: config.name,
+      });
     },
 
     close(options: T) {

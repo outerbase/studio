@@ -12,7 +12,7 @@ export default class TableStateActions {
 
       // Remove all generated column
       for (const header of state.getHeaders()) {
-        if (header.headerData?.constraint?.generatedExpression) {
+        if (header.metadata.columnSchema?.constraint?.generatedExpression) {
           delete currentRowData[header.name];
         }
       }
@@ -33,8 +33,8 @@ export default class TableStateActions {
       // Remove all generated column
       for (const header of state.getHeaders()) {
         if (
-          header.headerData?.constraint?.generatedExpression ||
-          header.isPrimaryKey
+          header.metadata.columnSchema?.constraint?.generatedExpression ||
+          header.metadata.isPrimaryKey
         ) {
           delete currentRowData[header.name];
         }

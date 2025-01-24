@@ -1,6 +1,6 @@
 {
   "name": "@libsqlstudio/studio",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3008",
@@ -41,6 +41,7 @@
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@next/mdx": "^14.2.4",
+    "@outerbase/sdk-transform": "^1.0.1",
     "@phosphor-icons/react": "^2.1.7",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -127,6 +128,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.6.10",
     "shiki": "^1.12.0",
     "showdown": "^2.1.0",
     "tailwindcss": "^3.4.3",

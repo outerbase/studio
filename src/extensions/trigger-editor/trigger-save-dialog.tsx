@@ -5,15 +5,14 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LucideAlertCircle, LucideLoader, LucideSave, LucideTableProperties } from "lucide-react";
+import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
 import { useCallback, useState } from "react";
-import CodePreview from "../code-preview";
 import { Button } from "@/components/ui/button";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import TriggerTab from "../tabs/trigger-tab";
-import { useTabsContext } from "../windows-tab";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTriggerSchema } from "@/drivers/base-driver";
+import CodePreview from "@/components/gui/code-preview";
+import { triggerEditorExtensionTab } from ".";
 
 interface Props {
   onClose: () => void;
@@ -22,7 +21,6 @@ interface Props {
 }
 
 export function TriggerSaveDialog(props: Props) {
-  const { replaceCurrentTab } = useTabsContext();
   const { refresh: refreshSchema } = useSchema();
   const { databaseDriver } = useDatabaseDriver();
   const [isExecuting, setIsExecuting] = useState(false);
@@ -36,26 +34,18 @@ export function TriggerSaveDialog(props: Props) {
       )
       .then(() => {
         refreshSchema();
-        replaceCurrentTab({
-          component: (
-            <TriggerTab
-              tableName={props.trigger.tableName}
-              schemaName={props.trigger.schemaName}
-              name={props.trigger.name ?? ""}
-            />
-          ),
-          key: "trigger-" + props.trigger.name || "",
-          identifier: "trigger-" + props.trigger.name || "",
-          title: props.trigger.name || "",
-          icon: LucideTableProperties,
-        });
+        triggerEditorExtensionTab.replace({
+          schemaName: props.trigger.schemaName,
+          name: props.trigger.name ?? '',
+          tableName: props.trigger.tableName
+        })
         props.onClose();
       })
       .catch((err) => setErrorMessage((err as Error).message))
       .finally(() => {
         setIsExecuting(false);
       });
-  }, [databaseDriver, props, refreshSchema, replaceCurrentTab])
+  }, [databaseDriver, props, refreshSchema])
 
   return (
     <AlertDialog open onOpenChange={props.onClose}>

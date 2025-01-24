@@ -1,15 +1,11 @@
-import { selectArrayFromIndexList } from "@/components/lib/export-helper";
 import { OptimizeTableHeaderProps } from ".";
-import { LucideKey, LucideKeySquare, LucideSigma } from "lucide-react";
-import {
-  BaseDriver,
-  DatabaseResultSet,
-  DatabaseTableSchema,
-  TableColumnDataType,
-} from "@/drivers/base-driver";
-import { ReactElement } from "react";
 import deepEqual from "deep-equal";
 import { formatNumber } from "@/lib/convertNumber";
+import { selectArrayFromIndexList } from "@/lib/export-helper";
+import {
+  buildTableResultHeader,
+  BuildTableResultProps,
+} from "@/lib/build-table-result";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -60,83 +56,10 @@ export default class OptimizeTableState {
   protected defaultAggregateFunction: AggregateFunction = "sum";
   protected sql: string = "";
 
-  static createFromResult(
-    driver: BaseDriver,
-    dataResult: DatabaseResultSet,
-    schemaResult?: DatabaseTableSchema
-  ) {
+  static createFromResult(props: BuildTableResultProps) {
     const r = new OptimizeTableState(
-      dataResult.headers.map((header) => {
-        const headerData = schemaResult
-          ? schemaResult.columns.find((c) => c.name === header.name)
-          : undefined;
-
-        let initialSize = 150;
-        const headerName = header.name;
-        const dataType = header.type ?? driver.inferTypeFromHeader(headerData);
-
-        if (
-          dataType === TableColumnDataType.INTEGER ||
-          dataType === TableColumnDataType.REAL
-        ) {
-          initialSize = 100;
-        } else if (dataType === TableColumnDataType.TEXT) {
-          // Use 100 first rows to determine the good initial size
-          let maxSize = 0;
-          for (let i = 0; i < Math.min(dataResult.rows.length, 100); i++) {
-            const currentCell = dataResult.rows[i];
-            if (currentCell) {
-              maxSize = Math.max(
-                (currentCell[headerName ?? ""]?.toString() ?? "").length,
-                maxSize
-              );
-            }
-          }
-
-          initialSize = Math.max(150, Math.min(500, maxSize * 8));
-        }
-
-        // --------------------------------------
-        // Matching foreign key
-        // --------------------------------------
-        let foreignKey = headerData?.constraint?.foreignKey;
-        if (!foreignKey && schemaResult?.constraints) {
-          for (const c of schemaResult.constraints) {
-            if (
-              c.foreignKey &&
-              c.foreignKey.columns?.length === 1 &&
-              c.foreignKey.columns[0] === header.name
-            ) {
-              foreignKey = c.foreignKey;
-            }
-          }
-        }
-
-        let icon: ReactElement | undefined = undefined;
-        if (schemaResult?.pk.includes(headerName ?? "")) {
-          icon = <LucideKey className="w-4 h-4 text-red-500" />;
-        } else if (foreignKey) {
-          icon = <LucideKeySquare className="w-4 h-4 text-yellow-500" />;
-        } else if (headerData?.constraint?.generatedExpression) {
-          icon = <LucideSigma className="w-4 h-4 text-blue-500" />;
-        }
-
-        return {
-          initialSize,
-          name: headerName ?? "",
-          originalDataType: header.originalType,
-          displayName: header.displayName,
-          resizable: true,
-          isPrimaryKey: schemaResult
-            ? schemaResult.pk.includes(header.name)
-            : false,
-          headerData,
-          foreignKey,
-          dataType,
-          icon,
-        };
-      }),
-      dataResult.rows.map((r) => ({ ...r }))
+      buildTableResultHeader(props),
+      props.result.rows.map((r) => ({ ...r }))
     );
 
     if (r.getRowsCount() >= 1000) {
@@ -158,7 +81,7 @@ export default class OptimizeTableState {
     this.data = data.map((row) => ({
       raw: row,
     }));
-    this.headerWidth = headers.map((h) => h.initialSize);
+    this.headerWidth = headers.map((h) => h.display.initialSize);
   }
 
   setReadOnlyMode(readOnly: boolean) {
@@ -308,6 +231,7 @@ export default class OptimizeTableState {
 
   changeValue(y: number, x: number, newValue: unknown) {
     if (this.readOnlyMode) return;
+    if (this.headers[x]?.setting.readonly) return;
 
     const oldValue = this.getOriginalValue(y, x);
 

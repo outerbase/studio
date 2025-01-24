@@ -25,7 +25,8 @@ import {
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
 import { cn } from "@/lib/utils";
-import { exportDataAsDelimitedText } from "../lib/export-helper";
+import { useConfig } from "@/context/config-provider";
+import { exportDataAsDelimitedText } from "@/lib/export-helper";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -84,15 +85,21 @@ function Header({
           }
         }}
       >
-        {header.icon ? <div className="mr-2">{header.icon}</div> : null}
-        <div className={textClass}>{header.displayName}</div>
+        {header.display.icon ? (
+        <div className="mr-2">
+          <header.display.icon
+            className={cn("h-4 w-4", header.display.iconClassName)}
+          />
+        </div>
+      ) : null}
+        <div className={textClass}>{header.display.text}</div>
       </div>
       <div>
         <DropdownMenu modal={false} onOpenChange={setOpen} open={open}>
           <DropdownMenuTrigger asChild>
             <LucideChevronDown
               className={cn(
-                "text-mute w-4 h-4 cursor-pointer flex-shrink-0",
+                "text-mute h-4 w-4 flex-shrink-0 cursor-pointer",
                 textClass
               )}
             />
@@ -119,6 +126,8 @@ export default function ResultTable({
 }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
 
+  const { extensions } = useConfig();
+
   const headerIndex = useMemo(() => {
     if (visibleColumnIndexList) return visibleColumnIndexList;
     return data.getHeaders().map((_, idx) => idx);
@@ -126,35 +135,32 @@ export default function ResultTable({
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
-      const foreignKeyInfo = header.foreignKey ? (
-        <div className="p-2">
-          <div className="text-xs p-2 bg-yellow-200 text-black rounded">
-            <h2 className="font-semibold">Foreign Key</h2>
-            <p className="mt-1 font-mono">
-              {header.foreignKey.foreignTableName}.
-              {(header.foreignKey.foreignColumns ?? [])[0]}
-            </p>
-          </div>
-        </div>
-      ) : undefined;
+      const extensionMenu = extensions.getQueryHeaderContextMenu(header);
+      const extensionMenuItems = extensionMenu.map((item) => {
+        if (item.component) {
+          return (
+            <div
+              key={item.key}
+              onKeyDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+            >
+              {item.component}
+            </div>
+          );
+        }
 
-      const generatedExpression =
-        header.headerData?.constraint?.generatedExpression;
-      const generatedInfo = generatedExpression ? (
-        <div className="p-2">
-          <div className="text-xs p-2 bg-blue-200 text-black rounded">
-            <h2 className="font-semibold">Generated Expression</h2>
-            <pre className="text-sm">
-              <code>{generatedExpression}</code>
-            </pre>
-          </div>
-        </div>
-      ) : undefined;
+        return (
+          <DropdownMenuItem key={item.key} onClick={item.onClick}>
+            {item.title}
+          </DropdownMenuItem>
+        );
+      });
 
       return (
-        <Header header={header} internalState={data}>
-          {foreignKeyInfo}
-          {generatedInfo}
+        <Header key={header.name} header={header} internalState={data}>
+          {extensionMenuItems}
           <DropdownMenuItem
             onClick={() => {
               setStickHeaderIndex(
@@ -162,7 +168,7 @@ export default function ResultTable({
               );
             }}
           >
-            <LucidePin className="w-4 h-4 mr-2" />
+            <LucidePin className="mr-2 h-4 w-4" />
             Pin Header
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -174,7 +180,7 @@ export default function ResultTable({
               }
             }}
           >
-            <LucideSortAsc className="w-4 h-4 mr-2" />
+            <LucideSortAsc className="mr-2 h-4 w-4" />
             Sort A → Z
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -185,13 +191,13 @@ export default function ResultTable({
               }
             }}
           >
-            <LucideSortDesc className="w-4 h-4 mr-2" />
+            <LucideSortDesc className="mr-2 h-4 w-4" />
             Sort Z → A
           </DropdownMenuItem>
         </Header>
       );
     },
-    [data, tableName, stickyHeaderIndex, onSortColumnChange]
+    [data, tableName, stickyHeaderIndex, onSortColumnChange, extensions]
   );
 
   const onHeaderContextMenu = useCallback((e: React.MouseEvent) => {
