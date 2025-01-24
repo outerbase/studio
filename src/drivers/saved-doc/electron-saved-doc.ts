@@ -23,10 +23,18 @@ export default class ElectronSavedDocs implements SavedDocDriver {
     }
 
     const result = await window.outerbaseIpc.docs.load();
+    const now = Math.floor(Date.now() / 1000);
 
-    if (!result) {
-      this.cacheNamespaceList = [];
-      return [];
+    if (!result || result.namespace.length === 0) {
+      this.cacheNamespaceList = [
+        { id: "workspace", name: "Workspace", createdAt: now, updatedAt: now },
+      ];
+
+      this.cacheDocs = {
+        workspace: [],
+      }
+
+      return this.cacheNamespaceList;
     } else {
       this.cacheDocs = result.docs;
       this.cacheNamespaceList = result.namespace;
