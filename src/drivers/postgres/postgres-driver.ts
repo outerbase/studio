@@ -1,3 +1,4 @@
+import { ColumnType } from "@outerbase/sdk-transform";
 import {
   ColumnTypeSelector,
   DatabaseSchemaItem,
