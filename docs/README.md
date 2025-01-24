@@ -18,8 +18,8 @@ export default class SampleExtension extends StudioExtension {
 
 Below is a list of areas where extensions can build upon our core Outerbase Studio.
 
-- [Sidebar](sidebar)
-- [Window Tab](window-tab)
+- [Sidebar](sidebar.md)
+- [Window Tab](window-tab.md)
 - Resource Creation Menu
 - Resource Context Menu
 - Query Hook
