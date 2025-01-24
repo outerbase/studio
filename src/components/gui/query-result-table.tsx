@@ -120,24 +120,20 @@ export default function ResultTable({
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
-      // const generatedExpression =
-      //   header.headerData?.constraint?.generatedExpression;
-
-      // const generatedInfo = generatedExpression ? (
-      //   <div className="p-2">
-      //     <div className="rounded bg-blue-200 p-2 text-xs text-black">
-      //       <h2 className="font-semibold">Generated Expression</h2>
-      //       <pre className="text-sm">
-      //         <code>{generatedExpression}</code>
-      //       </pre>
-      //     </div>
-      //   </div>
-      // ) : undefined;
-
       const extensionMenu = extensions.getQueryHeaderContextMenu(header);
       const extensionMenuItems = extensionMenu.map((item) => {
         if (item.component) {
-          return <div key={item.key}>{item.component}</div>;
+          return (
+            <div
+              key={item.key}
+              onKeyDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+            >
+              {item.component}
+            </div>
+          );
         }
 
         return (
@@ -150,9 +146,6 @@ export default function ResultTable({
       return (
         <Header key={header.name} header={header} internalState={data}>
           {extensionMenuItems}
-          {/* 
-          {foreignKeyInfo}
-          {generatedInfo} */}
           <DropdownMenuItem
             onClick={() => {
               setStickHeaderIndex(

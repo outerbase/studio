@@ -5,13 +5,13 @@
 import QueryHistoryConsoleLogExtension from "@/extensions/query-console-log";
 import ViewEditorExtension from "@/extensions/view-editor";
 import TriggerEditorExtension from "@/extensions/trigger-editor";
-import ForeignKeyColumnExtension from "@/extensions/foreign-key-column";
+import ColumnDescriptorExtension from "@/extensions/column-descriptor";
 
 export function createStandardExtensions() {
   return [
     new QueryHistoryConsoleLogExtension(),
     new ViewEditorExtension(),
-    new ForeignKeyColumnExtension(),
+    new ColumnDescriptorExtension(),
   ];
 }
 

@@ -181,6 +181,7 @@ function pipeEditableTable(
     // If the table is editable, we will mark the whole columns that belongs to
     // that table as editable.
     if (editable) {
+      console.log("editable", table);
       for (const header of headers) {
         const from = header.metadata.from;
 
@@ -296,6 +297,8 @@ export function buildTableResultHeader(
   pipeVirtualColumnAsReadOnly(headers);
   pipeCalculateInitialSize(headers, props);
   pipeColumnIcon(headers);
+
+  console.log(headers);
 
   return headers;
 }

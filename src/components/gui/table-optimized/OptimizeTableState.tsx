@@ -231,6 +231,7 @@ export default class OptimizeTableState {
 
   changeValue(y: number, x: number, newValue: unknown) {
     if (this.readOnlyMode) return;
+    if (this.headers[x]?.setting.readonly) return;
 
     const oldValue = this.getOriginalValue(y, x);
 

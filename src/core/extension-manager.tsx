@@ -30,6 +30,8 @@ type QueryHeaderResultMenuHandler = (
   header: OptimizeTableHeaderProps
 ) => StudioExtensionMenuItem | undefined;
 
+type QueryResultCellMenuHandler = () => StudioExtensionMenuItem | undefined;
+
 export class StudioExtensionContext {
   protected sidebars: RegisterSidebarOption[] = [];
 
@@ -37,6 +39,7 @@ export class StudioExtensionContext {
   protected afterQueryHandlers: AfterQueryHandler[] = [];
 
   protected queryResultHeaderContextMenu: QueryHeaderResultMenuHandler[] = [];
+  protected queryResultCellContextMenu: QueryResultCellMenuHandler[] = [];
 
   protected resourceCreateMenu: StudioExtensionMenuItem[] = [];
   protected resourceContextMenu: Record<string, CreateResourceMenuHandler[]> =
@@ -75,6 +78,10 @@ export class StudioExtensionContext {
   registerQueryHeaderContextMenu(handler: QueryHeaderResultMenuHandler) {
     this.queryResultHeaderContextMenu.push(handler);
   }
+
+  registerQueryCellContextMenu(handler: QueryResultCellMenuHandler) {
+    this.queryResultCellContextMenu.push(handler);
+  }
 }
 export class StudioExtensionManager extends StudioExtensionContext {
   init() {
@@ -105,6 +112,12 @@ export class StudioExtensionManager extends StudioExtensionContext {
   getQueryHeaderContextMenu(header: OptimizeTableHeaderProps) {
     return this.queryResultHeaderContextMenu
       .map((handler) => handler(header))
+      .filter(Boolean) as StudioExtensionMenuItem[];
+  }
+
+  getQueryCellContextMenu() {
+    return this.queryResultCellContextMenu
+      .map((handler) => handler())
       .filter(Boolean) as StudioExtensionMenuItem[];
   }
 

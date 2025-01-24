@@ -138,8 +138,7 @@ export default function createEditableCell<T = unknown>({
       state.exitEditMode();
     }, [setEditValue, state, value]);
 
-    const uneditableColumn =
-      !!header.metadata.columnSchema?.constraint?.generatedExpression;
+    const uneditableColumn = header.setting.readonly;
 
     if (
       !uneditableColumn &&
