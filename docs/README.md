@@ -1,0 +1,25 @@
+This is working in progress about how to extend our studio functionality
+
+## Extensions
+
+We have transitioned our architecture to an extension-based approach, where most features will be implemented as extensions. This shift allows new contributors to easily contribute to the codebase without requiring in-depth knowledge of the entire system.
+
+This is the minimalist example of extension
+
+```typescript
+export default class SampleExtension extends StudioExtension {
+  extensionName = "sample-extension";
+
+  init(studio: StudioExtensionContext): void {
+    // this is where we extend studio functionality
+  }
+}
+```
+
+Below is a list of areas where extensions can build upon our core Outerbase Studio.
+
+- [Sidebar](sidebar)
+- [Window Tab](window-tab)
+- Resource Creation Menu
+- Resource Context Menu
+- Query Hook

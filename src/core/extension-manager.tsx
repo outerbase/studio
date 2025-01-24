@@ -8,7 +8,8 @@ interface RegisterSidebarOption {
   key: string;
   name: string;
   icon: ReactElement;
-  content: ReactElement;
+  content?: ReactElement;
+  onClick?: () => void;
 }
 
 type BeforeQueryHandler = (payload: BeforeQueryPipeline) => Promise<void>;
