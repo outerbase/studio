@@ -333,6 +333,18 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
       ].concat(triggers as DatabaseSchemaItem[]);
     }
 
+    // Building pk
+    for (const key in tableRecord) {
+      const table = tableRecord[key];
+      if (!table.tableSchema) continue;
+
+      const pk = table.tableSchema.columns
+        .filter((c) => c.pk)
+        .map((c) => c.name);
+
+      table.tableSchema.pk = pk;
+    }
+
     return schemaRecord;
   }
 

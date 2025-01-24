@@ -1,3 +1,10 @@
+import {
+  type ColumnHeader,
+  ColumnType as TableColumnDataType,
+} from "@outerbase/sdk-transform";
+
+export { ColumnType as TableColumnDataType } from "@outerbase/sdk-transform";
+
 export type InValue =
   | null
   | string
@@ -7,13 +14,6 @@ export type InValue =
   | boolean
   | Uint8Array
   | Date;
-
-export enum TableColumnDataType {
-  TEXT = 1,
-  INTEGER = 2,
-  REAL = 3,
-  BLOB = 4,
-}
 
 export function describeTableColumnType(type: TableColumnDataType) {
   switch (type) {
@@ -35,12 +35,7 @@ export type SupportedDialect = "sqlite" | "mysql" | "postgres" | "dolt";
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 
-export interface DatabaseHeader {
-  name: string;
-  displayName: string;
-  originalType: string | null;
-  type: TableColumnDataType | undefined;
-}
+export type DatabaseHeader = ColumnHeader;
 
 export interface DatabaseResultStat {
   rowsAffected: number;

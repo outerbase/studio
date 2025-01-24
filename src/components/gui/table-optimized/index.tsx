@@ -9,32 +9,59 @@ import React, {
   useEffect,
 } from "react";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
-import TableFakeBodyPadding from "./TableFakeBodyPadding";
-import TableFakeRowPadding from "./TableFakeRowPadding";
-import TableHeaderList from "./TableHeaderList";
+import TableFakeBodyPadding from "./table-fake-body-padding";
+import TableFakeRowPadding from "./table-fake-row-padding";
+import TableHeaderList from "./table-header-list";
 import OptimizeTableState from "./OptimizeTableState";
 import {
-  DatabaseForeignKeyClause,
   DatabaseTableColumn,
   TableColumnDataType,
 } from "@/drivers/base-driver";
 import OptimizeTableCell from "./table-cell";
 import { cn } from "@/lib/utils";
+import { Icon } from "@phosphor-icons/react";
 
+export interface TableHeaderMetadata {
+  from?: {
+    schema: string;
+    table: string;
+    column: string;
+  };
+
+  // Primary key
+  isPrimaryKey: boolean;
+
+  // Foreign key reference
+  referenceTo?: {
+    schema: string;
+    table: string;
+    column: string;
+  };
+
+  type?: TableColumnDataType;
+  originalType?: string;
+
+  columnSchema?: DatabaseTableColumn;
+}
 export interface OptimizeTableHeaderProps {
   name: string;
-  displayName: string;
-  initialSize: number;
-  resizable?: boolean;
-  dataType?: TableColumnDataType;
-  originalDataType?: string | null;
-  headerData?: DatabaseTableColumn;
-  foreignKey?: DatabaseForeignKeyClause;
-  icon?: ReactElement;
-  rightIcon?: ReactElement;
-  tooltip?: string;
-  isPrimaryKey?: boolean;
+
+  display: {
+    text: string;
+    initialSize: number;
+    icon?: Icon;
+    iconClassName?: string;
+    tooltip?: string;
+  };
+
+  setting: {
+    resizable: boolean;
+    readonly: boolean;
+  };
+
   onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
+
+  metadata: TableHeaderMetadata;
 }
 
 export interface OptimizeTableHeaderWithIndexProps

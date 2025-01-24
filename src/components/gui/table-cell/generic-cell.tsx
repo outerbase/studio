@@ -77,12 +77,12 @@ function SnippetRow({
 
         return (
           <div key={header.name}>
-            <div className="font-mono text-xs text-gray-400 mb-1">
+            <div className="mb-1 font-mono text-xs text-gray-400">
               {header.displayName}
             </div>
             <div
               className={cn(
-                "font-mono text-sm overflow-hidden line-clamp-1 text-ellipsis w-[350px] whitespace-nowrap block",
+                "line-clamp-1 block w-[350px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-sm",
                 colorClassName
               )}
             >
@@ -101,17 +101,17 @@ function ForeignKeyColumnSnippet(props: SneakpeakProps) {
   return (
     <Popover onOpenChange={setOpen}>
       <PopoverTrigger>
-        <LucideArrowUpRight className="w-4 h-4 text-gray-400 hover:text-blue-600" />
+        <LucideArrowUpRight className="h-4 w-4 text-gray-400 hover:text-blue-600" />
       </PopoverTrigger>
       <PopoverContent
         side="right"
-        className="overflow-hidden p-0 m-0 w-[400px]"
+        className="m-0 w-[400px] overflow-hidden p-0"
       >
-        <div className="flex w-full h-full flex-col overflow-hidden">
-          <div className="px-4 py-2 border-b">
+        <div className="flex h-full w-full flex-col overflow-hidden">
+          <div className="border-b px-4 py-2">
             <strong>{props.fkTableName}</strong>
           </div>
-          <div className="grow max-h-[300px] overflow-y-auto overflow-x-hidden">
+          <div className="max-h-[300px] grow overflow-y-auto overflow-x-hidden">
             {open && <SnippetRow {...props} />}
           </div>
         </div>
@@ -145,8 +145,8 @@ function BlobCellValue({
 
     return (
       <div className="flex">
-        <div className="mr-2 justify-center items-center flex-col">
-          <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
+        <div className="mr-2 flex-col items-center justify-center">
+          <span className="inline rounded bg-blue-500 p-1 pl-2 pr-2 text-white">
             vec({floatArray.length})
           </span>
         </div>
@@ -158,11 +158,11 @@ function BlobCellValue({
 
     return (
       <div className="flex w-full">
-        <span className="flex-1 text-ellipsis overflow-hidden whitespace-nowrap text-orange-600 dark:text-orange-400">
+        <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-orange-600 dark:text-orange-400">
           {prettifyBytes(bytes.subarray(0, 64))}
         </span>
-        <div className="ml-2 justify-center items-center flex-col">
-          <span className="bg-blue-500 text-white inline rounded p-1 pl-2 pr-2">
+        <div className="ml-2 flex-col items-center justify-center">
+          <span className="inline rounded bg-blue-500 p-1 pl-2 pr-2 text-white">
             {bytes.length.toLocaleString(undefined, {
               maximumFractionDigits: 0,
             })}
@@ -190,18 +190,13 @@ export default function GenericCell({
   );
 
   const fkContent = useMemo(() => {
-    if (
-      header.foreignKey?.foreignTableName &&
-      header.foreignKey.foreignColumns &&
-      header.foreignKey?.foreignSchemaName &&
-      value !== undefined
-    ) {
+    if (header.metadata.referenceTo && value !== undefined) {
       return (
-        <div className="flex items-center shrink-0 cursor-pointer ml-2">
+        <div className="ml-2 flex shrink-0 cursor-pointer items-center">
           <ForeignKeyColumnSnippet
-            fkSchemaName={header.foreignKey.foreignSchemaName}
-            fkColumnName={header.foreignKey.foreignColumns[0] as string}
-            fkTableName={header.foreignKey.foreignTableName}
+            fkSchemaName={header.metadata.referenceTo.schema}
+            fkColumnName={header.metadata.referenceTo.column}
+            fkTableName={header.metadata.referenceTo.table}
             value={value}
           />
         </div>
@@ -218,7 +213,8 @@ export default function GenericCell({
     if (value === undefined) {
       return (
         <span className={textBaseStyle}>
-          {header.headerData?.constraint?.generatedExpression ?? "DEFAULT"}
+          {header.metadata.columnSchema?.constraint?.generatedExpression ??
+            "DEFAULT"}
         </span>
       );
     }
@@ -231,7 +227,7 @@ export default function GenericCell({
       return (
         <span
           className={cn(
-            "flex-1 text-ellipsis overflow-hidden whitespace-nowrap",
+            "flex-1 overflow-hidden text-ellipsis whitespace-nowrap",
             "text-green-600 dark:text-green-500"
           )}
         >
@@ -244,8 +240,8 @@ export default function GenericCell({
       return (
         <span
           className={cn(
-            "flex-1 text-ellipsis overflow-hidden whitespace-nowrap",
-            "text-blue-700 dark:text-blue-300 block text-right flex-grow"
+            "flex-1 overflow-hidden text-ellipsis whitespace-nowrap",
+            "block flex-grow text-right text-blue-700 dark:text-blue-300"
           )}
         >
           {value.toString()}
@@ -262,8 +258,8 @@ export default function GenericCell({
         <BlobCellValue
           value={value}
           vector={
-            header.originalDataType?.includes("F32_BLOB") ||
-            header.originalDataType?.includes("FLOAT32 ")
+            header.metadata.originalType?.includes("F32_BLOB") ||
+            header.metadata.originalType?.includes("FLOAT32 ")
           }
         />
       );
