@@ -1,5 +1,6 @@
 {
-    "editor.formatOnSave": true,
-    "typescript.tsdk": "node_modules\\typescript\\lib",
-    "files.eol": "\n"
+  "editor.formatOnSave": true,
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "files.eol": "\n",
+  "editor.tabSize": 2
 }
