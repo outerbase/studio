@@ -70,7 +70,7 @@ export function DocNavigation({
         {sideMenu}
       </div>
       <div className="md:hidden p-2 border-b flex">
-        <div className="flex-grow px-2 font-bold">{title}</div>
+        <div className="grow px-2 font-bold">{title}</div>
         <Sheet>
           <SheetTrigger>
             <div className="px-2">

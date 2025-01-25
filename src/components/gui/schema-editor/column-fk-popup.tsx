@@ -22,7 +22,7 @@ export default function ColumnForeignKeyPopup({
   return (
     <Popover>
       <PopoverTrigger>
-        <span className="p-1 shadow border rounded block bg-blue-300 dark:bg-blue-600">
+        <span className="p-1 shadow-sm border rounded block bg-blue-300 dark:bg-blue-600">
           <LucideArrowUpRight className="w-4 h-4" />
         </span>
       </PopoverTrigger>

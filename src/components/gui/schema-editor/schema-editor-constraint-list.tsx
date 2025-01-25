@@ -59,7 +59,7 @@ function ColumnCheck({
           }}
           readOnly={disabled}
           value={constraint.checkExpression}
-          className="font-mono p-2 w-full outline-none"
+          className="font-mono p-2 w-full outline-hidden"
         />
       </td>
     </>

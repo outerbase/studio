@@ -282,7 +282,7 @@ export default function TableDataWindow({
                     setWhere(e.currentTarget.value);
                   }
                 }}
-                className="h-full grow bg-inherit p-1 pl-2 pr-2 font-mono text-sm outline-none"
+                className="h-full grow bg-inherit p-1 pl-2 pr-2 font-mono text-sm outline-hidden"
               />
             </div>
           </div>

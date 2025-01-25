@@ -99,7 +99,7 @@ function Header({
           <DropdownMenuTrigger asChild>
             <LucideChevronDown
               className={cn(
-                "text-mute h-4 w-4 flex-shrink-0 cursor-pointer",
+                "text-mute h-4 w-4 shrink-0 cursor-pointer",
                 textClass
               )}
             />

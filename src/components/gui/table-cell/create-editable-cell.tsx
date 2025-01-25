@@ -92,8 +92,8 @@ function InputCellEditor({
       type="text"
       className={
         align === "right"
-          ? "h-full w-full border-0 bg-inherit pl-2 pr-2 text-right font-mono outline-none"
-          : "h-full w-full border-0 bg-inherit pl-2 pr-2 font-mono outline-none"
+          ? "h-full w-full border-0 bg-inherit pl-2 pr-2 text-right font-mono outline-hidden"
+          : "h-full w-full border-0 bg-inherit pl-2 pr-2 font-mono outline-hidden"
       }
       value={value ?? ""}
     />

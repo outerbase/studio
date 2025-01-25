@@ -61,7 +61,7 @@ function SnippetRow({
   }
 
   return (
-    <div className="flex flex-grow flex-col gap-3 p-4">
+    <div className="flex grow flex-col gap-3 p-4">
       {data.headers.map((header) => {
         const value = data.rows[0][header.name];
         let colorClassName = "";
@@ -182,7 +182,7 @@ export default function GenericCell({
   const isAlignRight = align === "right";
 
   const textBaseStyle = cn(
-    "flex flex-grow text-gray-500",
+    "flex grow text-gray-500",
     isAlignRight ? "justify-end" : ""
   );
 
@@ -238,7 +238,7 @@ export default function GenericCell({
         <span
           className={cn(
             "flex-1 overflow-hidden text-ellipsis whitespace-nowrap",
-            "block flex-grow text-right text-blue-700 dark:text-blue-300"
+            "block grow text-right text-blue-700 dark:text-blue-300"
           )}
         >
           {value.toString()}
@@ -271,7 +271,7 @@ export default function GenericCell({
       onMouseDown={onFocus}
       onDoubleClick={onDoubleClick}
     >
-      <div className="flex flex-grow overflow-hidden">{content}</div>
+      <div className="flex grow overflow-hidden">{content}</div>
       {fkContent}
     </div>
   );

@@ -105,6 +105,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
     "@testing-library/jest-dom": "^6.2.1",
     "@testing-library/react": "^14.1.2",
     "@types/deep-equal": "^1.0.4",
@@ -119,7 +120,6 @@
     "@types/wicg-file-system-access": "^2023.10.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
-    "autoprefixer": "^10.4.19",
     "drizzle-kit": "^0.20.14",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
@@ -128,10 +128,10 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
-    "prettier-plugin-tailwindcss": "^0.6.10",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "shiki": "^1.12.0",
     "showdown": "^2.1.0",
-    "tailwindcss": "^3.4.3",
+    "tailwindcss": "^4.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5"

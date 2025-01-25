@@ -35,7 +35,7 @@ export function TableBlock(props: ExplainNodeProps) {
     <TooltipExplainHandle
       content={
         <div>
-          <p className="!text-[9pt]">
+          <p className="text-[9pt]!">
             Prefix Cost: {props.data.cost_info.prefix_cost}
           </p>
         </div>
@@ -47,13 +47,13 @@ export function TableBlock(props: ExplainNodeProps) {
           type="source"
           position={Position.Top}
           id={props.id}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
         <BaseHandle
           type="source"
           position={Position.Right}
           id={"right"}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
         <div
           className={`flex flex-row justify-between items-center text-[8pt]`}

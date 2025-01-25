@@ -16,7 +16,7 @@ export default function ERDTableColumn({
           id={column.title}
           type="target"
           position={Position.Left}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
         <div className="h-[30px] flex items-center">
           <div className="w-6">
@@ -34,7 +34,7 @@ export default function ERDTableColumn({
           id={column.title}
           type="source"
           position={Position.Right}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
       </TableCell>
     </TableRow>

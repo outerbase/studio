@@ -55,7 +55,7 @@ export default function useTableResultColumnFilter({
                 onClick={() => {
                   setColumnIndexList(headers.map((_, idx) => idx));
                 }}
-                className="relative mx-1 my-1 flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-semibold outline-none hover:bg-secondary aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                className="relative mx-1 my-1 flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-semibold outline-hidden hover:bg-secondary aria-selected:bg-accent aria-selected:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
               >
                 <ListChecks className="mr-2 h-4 w-4" />
                 Select all columns

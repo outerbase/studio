@@ -24,7 +24,7 @@ export default function ColumnGeneratingPopup({
   return (
     <Popover>
       <PopoverTrigger>
-        <span className="p-1 shadow border rounded block">
+        <span className="p-1 shadow-sm border rounded block">
           <LucideSigma className="w-4 h-4" />
         </span>
       </PopoverTrigger>
