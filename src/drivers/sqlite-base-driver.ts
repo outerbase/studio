@@ -1,4 +1,9 @@
 import {
+  convertSqliteType,
+  escapeIdentity,
+  escapeSqlValue,
+} from "@/drivers/sqlite/sql-helper";
+import {
   ColumnTypeSelector,
   DatabaseResultSet,
   DatabaseSchemaItem,
@@ -12,18 +17,13 @@ import {
   DriverFlags,
   SelectFromTableOptions,
 } from "./base-driver";
-import {
-  convertSqliteType,
-  escapeIdentity,
-  escapeSqlValue,
-} from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
-import CommonSQLImplement from "./common-sql-imp";
-import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
-import { parseCreateViewScript } from "./sqlite/sql-parse-view";
 import { ColumnType } from "@outerbase/sdk-transform";
+import CommonSQLImplement from "./common-sql-imp";
+import { parseCreateViewScript } from "./sqlite/sql-parse-view";
+import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   supportPragmaList = true;
@@ -113,7 +113,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.pragma_table_info(${this.escapeId(tableName)});`;
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.pragma_table_info(${this.escapeValue(tableName)});`;
     const result = await this.query(sql);
 
     const rows = result.rows as Array<{
@@ -200,9 +200,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     // do nothing
   }
 
-  inferTypeFromHeader(
-    header?: DatabaseTableColumn
-  ): ColumnType | undefined {
+  inferTypeFromHeader(header?: DatabaseTableColumn): ColumnType | undefined {
     if (!header) return undefined;
     return convertSqliteType(header.type);
   }
@@ -258,7 +256,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   }
 
   async view(schemaName: string, name: string): Promise<DatabaseViewSchema> {
-    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE type = 'view' AND name = ${this.escapeId(name)};`;
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE type = 'view' AND name = ${this.escapeValue(name)};`;
     const result = await this.query(sql);
 
     const viewRow = result.rows[0] as { sql: string } | undefined;
@@ -331,12 +329,13 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const orderPart =
       options.orderBy && options.orderBy.length > 0
         ? options.orderBy
-          .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-          .join(", ")
+            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+            .join(", ")
         : "";
 
-    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${whereRaw ? ` WHERE ${whereRaw} ` : ""
-      } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
+      whereRaw ? ` WHERE ${whereRaw} ` : ""
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
     return {
       data: await this.query(sql),
