@@ -70,7 +70,7 @@ export default async function PlaygroundPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {templateList.map((t) => {
             return (
-              <div className="border p-4 rounded-lg shadow" key={t.id}>
+              <div className="border p-4 rounded-lg shadow-sm" key={t.id}>
                 <h2 className="font-bold mb-2">{t.name}</h2>
                 <p className="text-sm text-secondary-foreground">{t.summary}</p>
                 <div className="mt-2">

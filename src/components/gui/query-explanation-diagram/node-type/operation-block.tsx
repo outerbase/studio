@@ -22,13 +22,13 @@ export function OperationBlock(props: ExplainNodeProps) {
             type="source"
             position={Position.Right}
             id={props.id}
-            className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+            className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
           />
           <BaseHandle
             type="target"
             position={Position.Left}
             id={props.id}
-            className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+            className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
           />
           <div className="flex flex-row justify-between items-center text-[8pt]">
             <small>{subLabel}</small>
@@ -47,9 +47,9 @@ export function OperationBlock(props: ExplainNodeProps) {
       <TooltipContent>
         <div>
           {props.data.using_temporary_table && (
-            <p className="!text-[9pt]">Using Temporary Table: True</p>
+            <p className="text-[9pt]!">Using Temporary Table: True</p>
           )}
-          <p className="!text-[9pt]">
+          <p className="text-[9pt]!">
             Using Filesort: {props.data.using_filesort ? "True" : "False"}
           </p>
         </div>

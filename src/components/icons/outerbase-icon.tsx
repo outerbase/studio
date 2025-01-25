@@ -7,7 +7,7 @@ export function StarbaseIcon({ className }: { className: string }) {
       height="18"
       viewBox="0 0 18 18"
       fill="none"
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       xmlns="http://www.w3.org/2000/svg"
     >
       <rect
@@ -231,7 +231,7 @@ export function StarbaseIcon({ className }: { className: string }) {
 export function MySQLIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -320,7 +320,7 @@ export function MySQLIcon({ className }: { className?: string }) {
 export function PostgreIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -369,7 +369,7 @@ export function TursoIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 201 170"
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -384,7 +384,7 @@ export function TursoIcon({ className }: { className?: string }) {
 export function CloudflareIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       viewBox="0 0 25 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -412,7 +412,7 @@ export function CloudflareIcon({ className }: { className?: string }) {
 export function ValtownIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       viewBox="80 85 230 225"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -438,7 +438,7 @@ export function ValtownIcon({ className }: { className?: string }) {
 export function RqliteIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       viewBox="0 0 126 126"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -491,7 +491,7 @@ export function RqliteIcon({ className }: { className?: string }) {
 export function SQLiteIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("w-12 h-12 flex-shrink-0", className)}
+      className={cn("w-12 h-12 shrink-0", className)}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -525,7 +525,7 @@ export function SQLiteIcon({ className }: { className?: string }) {
 export function DoltIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={cn("h-12 w-12 flex-shrink-0", className)}
+      className={cn("h-12 w-12 shrink-0", className)}
       width="64"
       height="64"
       viewBox="0 0 64 64"

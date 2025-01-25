@@ -68,7 +68,7 @@ function HeroSection() {
   return (
     <div className="mt-32 relative h-[428px]">
       <div
-        className="absolute top-0 bottom-0 left-0 right-0 transform-gpu before:absolute before:top-0 before:z-10 before:h-32 before:w-full before:bg-gradient-to-b before:from-black before:to-black/0 after:absolute after:bottom-0 after:left-0 after:h-full after:w-full after:bg-gradient-to-t after:from-black after:to-black/0"
+        className="absolute top-0 bottom-0 left-0 right-0 transform-gpu before:absolute before:top-0 before:z-10 before:h-32 before:w-full before:bg-linear-to-b before:from-black before:to-black/0 after:absolute after:bottom-0 after:left-0 after:h-full after:w-full after:bg-linear-to-t after:from-black after:to-black/0"
         style={{
           background: `url(/hero-banner.jpg)`,
           backgroundPosition: "center",

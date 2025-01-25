@@ -86,7 +86,7 @@ function Indentation({ depth }: { depth: number }) {
   if (depth <= 0) return null;
 
   return new Array(depth).fill(false).map((_, idx: number) => {
-    return <div key={idx} className={cn("w-4 flex-shrink-0")}></div>;
+    return <div key={idx} className={cn("w-4 shrink-0")}></div>;
   });
 }
 
@@ -108,7 +108,7 @@ function CollapsedButton({
       )}
     </div>
   ) : (
-    <div className="w-4 flex-shrink-0"></div>
+    <div className="w-4 shrink-0"></div>
   );
 }
 
@@ -196,7 +196,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                     "flex h-8 items-center gap-0.5 px-4 text-xs text-neutral-500",
                     selectedKey === item.key
                       ? "bg-neutral-200 text-black dark:bg-neutral-800 dark:text-white"
-                      : "hover:bg-neutral-100 hover:dark:bg-neutral-900",
+                      : "hover:bg-neutral-100 dark:hover:bg-neutral-900",
                     contextMenuKey === item.key && contextOpen
                       ? "border border-blue-500"
                       : "border border-transparent",
@@ -214,7 +214,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                     />
                   )}
                   {item.icon && (
-                    <div className="relative mr-1 h-4 w-4 flex-shrink-0">
+                    <div className="relative mr-1 h-4 w-4 shrink-0">
                       <item.icon className={cn("h-4 w-4", item.iconColor)} />
                       {item.iconBadgeColor && (
                         <div

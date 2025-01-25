@@ -1,27 +1,140 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-html,
-body {
-  overscroll-behavior-x: none;
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-*: initial;
+  --font-sans: Inter, Helvetica, ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-selected: var(--selected);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-shake: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes shake {
+    10%,
+    90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+    20%,
+    80% {
+      transform: translate3d(2px, 0, 0);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+    40%,
+    60% {
+      transform: translate3d(4px, 0, 0);
+    }
+  }
 }
 
-:root {
-  --color-table-grid: #eee;
-  --color-table-change: #f6e58d;
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
 
-  --color-table-cell-number: #2980b9;
-  --color-table-cell-code: #95a5a6;
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
 
-  --color-table-row-selected: #e4e6f1;
-  --color-table-row-removed: #ff8b81;
-  --color-table-row-new: #7bed9f;
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
-  /* For Scroll */
-  --color-scrollbar: #0001;
-  --color-scrollbar-track: #0001;
-  --color-scrollbar-hover: #0005;
+@layer utilities {
+  html,
+  body {
+    overscroll-behavior-x: none;
+  }
+
+  :root {
+    --color-table-grid: #eee;
+    --color-table-change: #f6e58d;
+
+    --color-table-cell-number: #2980b9;
+    --color-table-cell-code: #95a5a6;
+
+    --color-table-row-selected: #e4e6f1;
+    --color-table-row-removed: #ff8b81;
+    --color-table-row-new: #7bed9f;
+
+    /* For Scroll */
+    --color-scrollbar: #0001;
+    --color-scrollbar-track: #0001;
+    --color-scrollbar-hover: #0005;
+  }
 }
 
 @layer base {
@@ -100,24 +213,26 @@ body {
   }
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 
-/* Track */
-::-webkit-scrollbar-track {
-  padding: 2px;
-}
+  /* Track */
+  ::-webkit-scrollbar-track {
+    padding: 2px;
+  }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: var(--scroll-bar);
-}
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: var(--scroll-bar);
+  }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: var(--scroll-bar);
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-bar);
+  }
 }
 
 @layer base {
@@ -190,7 +305,7 @@ body {
 
 .libsql-table td,
 .libsql-table th {
-  @apply border-b border-r;
+  @apply border-r border-b;
   overflow: hidden;
 }
 
@@ -244,23 +359,23 @@ For Markdown Side
 }
 
 .mdx-content h2 {
-  @apply text-2xl my-4 pb-2 border-b font-bold;
+  @apply my-4 border-b pb-2 text-2xl font-bold;
 }
 
 .mdx-content h3 {
-  @apply text-xl my-4 pb-2 border-b font-bold;
+  @apply my-4 border-b pb-2 text-xl font-bold;
 }
 
 .mdx-content ul {
-  @apply list-disc pl-8 my-4;
+  @apply my-4 list-disc pl-8;
 }
 
 .mdx-content ol {
-  @apply list-decimal pl-8 my-4;
+  @apply my-4 list-decimal pl-8;
 }
 
 .mdx-content pre {
-  @apply bg-gray-200 dark:bg-gray-700 p-4 leading-5 rounded overflow-x-auto m-0;
+  @apply m-0 overflow-x-auto rounded bg-gray-200 p-4 leading-5 dark:bg-gray-700;
 }
 
 .mdx-content p {

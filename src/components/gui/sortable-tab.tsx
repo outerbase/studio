@@ -41,7 +41,7 @@ export const WindowTabItemButton = forwardRef<
   return (
     <button
       className={cn(
-        "bg-neutral-100 dark:bg-neutral-900 relative h-[40px] border-x text-neutral-500 flex items-center text-left text-xs px-2 min-w-[170px] max-w-[300px] hover:dark:text-white hover:text-black",
+        "bg-neutral-100 dark:bg-neutral-900 relative h-[40px] border-x text-neutral-500 flex items-center text-left text-xs px-2 min-w-[170px] max-w-[300px] dark:hover:text-white hover:text-black",
         isDragging && "z-20",
         selected
           ? "bg-neutral-50 dark:bg-neutral-950 text-primary"

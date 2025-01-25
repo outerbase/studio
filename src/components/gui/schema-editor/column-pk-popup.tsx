@@ -24,7 +24,7 @@ export default function ColumnPrimaryKeyPopup({
   return (
     <Popover>
       <PopoverTrigger>
-        <span className="p-1 shadow border rounded block bg-green-200 dark:bg-green-600">
+        <span className="p-1 shadow-sm border rounded block bg-green-200 dark:bg-green-600">
           <LucideKeyRound className="w-4 h-4" />
         </span>
       </PopoverTrigger>

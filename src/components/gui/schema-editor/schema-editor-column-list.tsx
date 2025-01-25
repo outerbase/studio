@@ -216,7 +216,7 @@ function ColumnItem({
         <input
           value={column.name}
           onChange={(e) => change({ name: e.currentTarget.value })}
-          className="p-2 text-sm outline-none w-[150px] bg-inherit"
+          className="p-2 text-sm outline-hidden w-[150px] bg-inherit"
           spellCheck={false}
         />
       </td>
@@ -290,7 +290,7 @@ function ColumnItem({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-1 shadow border rounded">
+              <button className="p-1 shadow-sm border rounded">
                 <LucidePlus className="w-4 h-4" />
               </button>
             </DropdownMenuTrigger>

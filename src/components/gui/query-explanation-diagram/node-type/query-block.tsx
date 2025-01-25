@@ -16,13 +16,13 @@ export function QueryBlock(props: ExplainNodeProps) {
             type="target"
             position={Position.Left}
             id={props.id}
-            className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+            className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
           />
           <BaseHandle
             type="source"
             position={Position.Right}
             id={props.id}
-            className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+            className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
           />
           <div className="flex flex-row justify-between items-center text-[8pt]">
             <div
@@ -47,9 +47,9 @@ export function QueryBlock(props: ExplainNodeProps) {
       </TooltipTrigger>
       <TooltipContent>
         <div>
-          <p className="!text-[9pt]">Select ID: {props.data.select_id}</p>
+          <p className="text-[9pt]!">Select ID: {props.data.select_id}</p>
           <p
-            className={`!text-[9pt] ${props.data.cost_info.query_cost === 0 ? "hidden" : ""}`}
+            className={`text-[9pt]! ${props.data.cost_info.query_cost === 0 ? "hidden" : ""}`}
           >
             Query Cost: {props.data.cost_info.query_cost}
           </p>

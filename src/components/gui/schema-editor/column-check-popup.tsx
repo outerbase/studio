@@ -17,7 +17,7 @@ export default function ColumnCheckPopup({
   return (
     <Popover>
       <PopoverTrigger>
-        <span className="p-1 shadow border rounded block">
+        <span className="p-1 shadow-sm border rounded block">
           <LucideCheck className="w-4 h-4" />
         </span>
       </PopoverTrigger>
