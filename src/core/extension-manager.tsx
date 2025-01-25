@@ -1,8 +1,8 @@
+import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
+import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { BeforeQueryPipeline } from "./query-pipeline";
-import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
 
 interface RegisterSidebarOption {
   key: string;
@@ -61,7 +61,6 @@ export class StudioExtensionContext {
   }
 
   registerCreateResourceMenu(menu: StudioExtensionMenuItem) {
-    console.log("Register", menu);
     this.resourceCreateMenu.push(menu);
   }
 

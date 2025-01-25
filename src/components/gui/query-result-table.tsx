@@ -2,7 +2,11 @@ import OptimizeTable, {
   OptimizeTableHeaderWithIndexProps,
 } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import { useConfig } from "@/context/config-provider";
+import { ColumnSortOption } from "@/drivers/base-driver";
+import { exportDataAsDelimitedText } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
+import { cn } from "@/lib/utils";
 import {
   LucideChevronDown,
   LucidePin,
@@ -15,18 +19,14 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { ColumnSortOption } from "@/drivers/base-driver";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
-import { cn } from "@/lib/utils";
-import { useConfig } from "@/context/config-provider";
-import { exportDataAsDelimitedText } from "@/lib/export-helper";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -86,12 +86,12 @@ function Header({
         }}
       >
         {header.display.icon ? (
-        <div className="mr-2">
-          <header.display.icon
-            className={cn("h-4 w-4", header.display.iconClassName)}
-          />
-        </div>
-      ) : null}
+          <div className="mr-2">
+            <header.display.icon
+              className={cn("h-4 w-4", header.display.iconClassName)}
+            />
+          </div>
+        ) : null}
         <div className={textClass}>{header.display.text}</div>
       </div>
       <div>
@@ -257,7 +257,6 @@ export default function ResultTable({
 
         for (let row = 0; row < data.length; row++) {
           for (let col = 0; col < data[row].length; col++) {
-            console.log(row, col, data[row][col]);
             state.changeValue(
               y + row,
               x + col,
