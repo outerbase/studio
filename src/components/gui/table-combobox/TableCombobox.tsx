@@ -1,6 +1,8 @@
+import { useSchema } from "@/context/schema-provider";
+import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, LucideRefreshCw } from "lucide-react";
-import { Button } from "../../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import { useState } from "react";
+import { Button, buttonVariants } from "../../ui/button";
 import {
   Command,
   CommandEmpty,
@@ -8,10 +10,8 @@ import {
   CommandInput,
   CommandItem,
 } from "../../ui/command";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { Separator } from "../../ui/separator";
-import { useSchema } from "@/context/schema-provider";
 
 export default function TableCombobox({
   value,
@@ -33,18 +33,23 @@ export default function TableCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
         {borderless ? (
-          <div className="justify-between flex w-full px-2 items-center">
+          <div className="flex w-full items-center justify-between px-2">
             {value ?? "No table selected"}
             <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
           </div>
         ) : (
-          <Button variant="outline" className="justify-between flex w-full">
+          <div
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "flex w-full justify-between"
+            )}
+          >
             {value ?? "No table selected"}
             <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-          </Button>
+          </div>
         )}
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[250px]">
+      <PopoverContent className="w-[250px] p-0">
         <Command>
           <CommandInput placeholder="Search table name..." />
 
@@ -80,7 +85,7 @@ export default function TableCombobox({
               refresh();
             }}
           >
-            <LucideRefreshCw className="w-4 h-4 mr-2" /> Refresh
+            <LucideRefreshCw className="mr-2 h-4 w-4" /> Refresh
           </Button>
         </div>
       </PopoverContent>
