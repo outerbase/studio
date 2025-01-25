@@ -181,7 +181,6 @@ function pipeEditableTable(
     // If the table is editable, we will mark the whole columns that belongs to
     // that table as editable.
     if (editable) {
-      console.log("editable", table);
       for (const header of headers) {
         const from = header.metadata.from;
 
@@ -215,10 +214,7 @@ export function pipeCalculateInitialSize(
     const dataType = header.metadata.type;
     let initialSize = 100;
 
-    if (
-      dataType === ColumnType.INTEGER ||
-      dataType === ColumnType.REAL
-    ) {
+    if (dataType === ColumnType.INTEGER || dataType === ColumnType.REAL) {
       initialSize = 100;
     } else if (dataType === ColumnType.TEXT) {
       // Use 100 first rows to determine the good initial size
@@ -261,8 +257,6 @@ export function buildTableResultHeader(
 ): OptimizeTableHeaderProps[] {
   const { result } = props;
 
-  console.log(props);
-
   const headers = result.headers.map((column) => {
     let from: { schema: string; table: string; column: string } | null = null;
 
@@ -297,8 +291,6 @@ export function buildTableResultHeader(
   pipeVirtualColumnAsReadOnly(headers);
   pipeCalculateInitialSize(headers, props);
   pipeColumnIcon(headers);
-
-  console.log(headers);
 
   return headers;
 }
