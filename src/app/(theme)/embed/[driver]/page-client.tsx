@@ -58,8 +58,12 @@ function createDatabaseDriver(driverName: string) {
       supportPragmaList: false,
       supportBigInt: true,
     });
-  } else if (driverName === "sqlite" || driverName === "starbase") {
+  } else if (driverName === "sqlite") {
     return new IframeSQLiteDriver();
+  } else if (driverName === "starbase") {
+    return new IframeSQLiteDriver({
+      supportPragmaList: false,
+    });
   } else if (driverName === "mysql" || driverName === "dolt") {
     return new IframeMySQLDriver();
   } else if (driverName === "postgres") {
