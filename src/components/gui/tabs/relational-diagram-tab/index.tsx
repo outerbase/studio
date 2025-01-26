@@ -1,6 +1,14 @@
 import { DatabaseSchemaNode } from "@/components/gui/tabs/relational-diagram-tab/database-schema-node";
+import { DevTools } from "@/components/gui/tabs/relational-diagram-tab/devtools";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
+import Dagre from "@dagrejs/dagre";
+import {
+  AlignCenterHorizontalSimple,
+  AlignCenterVerticalSimple,
+} from "@phosphor-icons/react";
 import {
   Background,
   Controls,
@@ -14,19 +22,11 @@ import {
   useNodesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useEffect, useState } from "react";
-import { Toolbar } from "../../toolbar";
-import { Button } from "@/components/ui/button";
 import { LucideRefreshCcw } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from "react";
 import SchemaNameSelect from "../../schema-editor/schema-name-select";
-import Dagre from "@dagrejs/dagre";
-import {
-  AlignCenterHorizontalSimple,
-  AlignCenterVerticalSimple,
-} from "@phosphor-icons/react";
+import { Toolbar } from "../../toolbar";
 import { DownloadImageDiagram } from "./download-image-diagram";
-import { DevTools } from "@/components/gui/tabs/relational-diagram-tab/devtools";
 
 const NODE_MARGIN = 50;
 const MAX_NODE_WIDTH = 300;
@@ -298,16 +298,16 @@ function LayoutFlow() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden relative">
+    <div className="relative flex h-full flex-col overflow-hidden">
       <div className="border-b pb-1">
-        <h1 className="text-lg font-semibold text-primary p-4 mb-1">
+        <h1 className="text-primary mb-1 p-4 text-lg font-semibold">
           Entity Relationship Diagram
         </h1>
       </div>
       <div className="shrink-0 grow-0 border-b border-neutral-200 dark:border-neutral-800">
         <Toolbar>
           <Button variant={"ghost"} size={"sm"} onClick={refresh}>
-            <LucideRefreshCcw className="w-4 h-4 text-green-600" />
+            <LucideRefreshCcw className="h-4 w-4 text-green-600" />
           </Button>
           <Button
             variant={"ghost"}
@@ -366,7 +366,7 @@ function LayoutFlow() {
         </Toolbar>
       </div>
       {selectedSchema && (
-        <div className="flex-1 relative overflow-hidden">
+        <div className="relative flex-1 overflow-hidden">
           <ReactFlow
             nodes={nodes}
             edges={edges}

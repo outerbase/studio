@@ -1,6 +1,6 @@
-import { Node, NodeProps } from "@xyflow/react";
-import { TableBody } from "@/components/ui/table";
 import { BaseNode } from "@/components/base-node";
+import { TableBody } from "@/components/ui/table";
+import { Node, NodeProps } from "@xyflow/react";
 import ContextMenuERD from "./context-menu-diagram";
 import ERDTableColumn from "./erd-table-column";
 
@@ -27,12 +27,12 @@ export function DatabaseSchemaNode({
   return (
     <BaseNode className="p-0" selected={selected}>
       <ContextMenuERD tableName={data.label} schemaName={data.schemaName}>
-        <h2 className="rounded-tl-md rounded-tr-md bg-secondary p-2 flex items-center justify-center text-sm text-muted-foreground h-[30px] max-w-[300px] hover:text-blue-600 transition-all">
+        <h2 className="bg-secondary text-muted-foreground flex h-[30px] max-w-[300px] items-center justify-center rounded-tl-md rounded-tr-md p-2 text-sm transition-all hover:text-blue-600">
           {data.label}
         </h2>
       </ContextMenuERD>
       {/* shadcn Table cannot be used because of hardcoded overflow-auto */}
-      <table className="overflow-visible w-full">
+      <table className="w-full overflow-visible">
         <TableBody>
           {schema.map((entry) => {
             return <ERDTableColumn key={entry.title} column={entry} />;
