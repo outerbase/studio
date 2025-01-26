@@ -8,7 +8,7 @@ export function NestedLoop(props: ExplainNodeProps) {
     <TooltipExplainHandle
       content={
         <div>
-          <p className="!text-[9pt]">
+          <p className="text-[9pt]!">
             Prefix Cost: {props.data.cost_info.prefix_cost}
             {props.id}
           </p>
@@ -21,19 +21,19 @@ export function NestedLoop(props: ExplainNodeProps) {
           type="source"
           position={Position.Right}
           id={props.id}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
         <BaseHandle
           type="target"
           position={Position.Left}
           id={"left"}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
         <BaseHandle
           type="target"
           position={Position.Bottom}
           id={"bottom"}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="opacity-0 group-hover:opacity-100 w-[10px]! h-[10px]!"
         />
         <div className="flex flex-row justify-between items-center text-[8pt]">
           <div

@@ -61,7 +61,7 @@ function DoltCommitLog({
         content: (
           <div className="flex flex-col gap-2">
             <p>Are you sure you want to reset to this commit?</p>
-            <div className="p-4 border shadow rounded text-sm flex flex-col gap-1">
+            <div className="p-4 border shadow-sm rounded text-sm flex flex-col gap-1">
               <div className="font-semibold">{commit.message}</div>
               <div className="font-mono">{commit.commit_hash}</div>
             </div>

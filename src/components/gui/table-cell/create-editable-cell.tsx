@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GenericCell from "./generic-cell";
-import { DatabaseValue, TableColumnDataType } from "@/drivers/base-driver";
+import { DatabaseValue } from "@/drivers/base-driver";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import { useFullEditor } from "../providers/full-editor-provider";
 import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 import { cn } from "@/lib/utils";
+import { ColumnType } from "@outerbase/sdk-transform";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
-  valueType: TableColumnDataType | undefined;
+  valueType: ColumnType | undefined;
   isChanged?: boolean;
   focus?: boolean;
   editMode?: boolean;
@@ -91,8 +92,8 @@ function InputCellEditor({
       type="text"
       className={
         align === "right"
-          ? "font-mono bg-inherit w-full h-full outline-none pl-2 pr-2 border-0 text-right"
-          : "font-mono bg-inherit w-full h-full outline-none pl-2 pr-2 border-0"
+          ? "h-full w-full border-0 bg-inherit pl-2 pr-2 text-right font-mono outline-hidden"
+          : "h-full w-full border-0 bg-inherit pl-2 pr-2 font-mono outline-hidden"
       }
       value={value ?? ""}
     />
@@ -138,8 +139,7 @@ export default function createEditableCell<T = unknown>({
       state.exitEditMode();
     }, [setEditValue, state, value]);
 
-    const uneditableColumn =
-      !!header.headerData?.constraint?.generatedExpression;
+    const uneditableColumn = header.setting.readonly;
 
     if (
       !uneditableColumn &&

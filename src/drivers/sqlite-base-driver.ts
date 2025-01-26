@@ -1,4 +1,9 @@
 import {
+  convertSqliteType,
+  escapeIdentity,
+  escapeSqlValue,
+} from "@/drivers/sqlite/sql-helper";
+import {
   ColumnTypeSelector,
   DatabaseResultSet,
   DatabaseSchemaItem,
@@ -11,19 +16,14 @@ import {
   DatabaseViewSchema,
   DriverFlags,
   SelectFromTableOptions,
-  TableColumnDataType,
 } from "./base-driver";
-import {
-  convertSqliteType,
-  escapeIdentity,
-  escapeSqlValue,
-} from "@/drivers/sqlite/sql-helper";
 
 import { parseCreateTableScript } from "@/drivers/sqlite/sql-parse-table";
 import { parseCreateTriggerScript } from "@/drivers/sqlite/sql-parse-trigger";
+import { ColumnType } from "@outerbase/sdk-transform";
 import CommonSQLImplement from "./common-sql-imp";
-import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 import { parseCreateViewScript } from "./sqlite/sql-parse-view";
+import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 
 export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   supportPragmaList = true;
@@ -33,9 +33,9 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     dropdownNormalized: (typeName: string): string => {
       const type = convertSqliteType(typeName);
       if (type === undefined) return "TEXT";
-      if (type === TableColumnDataType.INTEGER) return "INTEGER";
-      if (type === TableColumnDataType.REAL) return "REAL";
-      if (type === TableColumnDataType.BLOB) return "BLOB";
+      if (type === ColumnType.INTEGER) return "INTEGER";
+      if (type === ColumnType.REAL) return "REAL";
+      if (type === ColumnType.BLOB) return "BLOB";
       return "TEXT";
     },
     dropdownOptions: [
@@ -113,7 +113,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     schemaName: string,
     tableName: string
   ): Promise<DatabaseTableSchema> {
-    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.pragma_table_info(${this.escapeId(tableName)});`;
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.pragma_table_info(${this.escapeValue(tableName)});`;
     const result = await this.query(sql);
 
     const rows = result.rows as Array<{
@@ -200,9 +200,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     // do nothing
   }
 
-  inferTypeFromHeader(
-    header?: DatabaseTableColumn
-  ): TableColumnDataType | undefined {
+  inferTypeFromHeader(header?: DatabaseTableColumn): ColumnType | undefined {
     if (!header) return undefined;
     return convertSqliteType(header.type);
   }
@@ -258,7 +256,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   }
 
   async view(schemaName: string, name: string): Promise<DatabaseViewSchema> {
-    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE type = 'view' AND name = ${this.escapeId(name)};`;
+    const sql = `SELECT * FROM ${this.escapeId(schemaName)}.sqlite_schema WHERE type = 'view' AND name = ${this.escapeValue(name)};`;
     const result = await this.query(sql);
 
     const viewRow = result.rows[0] as { sql: string } | undefined;

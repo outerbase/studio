@@ -1,16 +1,12 @@
+import { ExportOptions, ExportSelection, ExportTarget } from "@/components/gui/export/export-result-button";
+import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import { getSingleTableName } from "@/components/gui/tabs/query-tab";
 import {
   escapeDelimitedValue,
   escapeIdentity,
   escapeSqlValue,
 } from "@/drivers/sqlite/sql-helper";
-import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
-import {
-  ExportOptions,
-  ExportSelection,
-  ExportTarget,
-} from "../gui/export/export-result-button";
 import { toast } from "sonner";
-import { getSingleTableName } from "../gui/tabs/query-tab";
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],
@@ -140,7 +136,7 @@ export function exportDataAsDelimitedText(
     escapeDelimitedValue(v, fieldSeparator, lineTerminator, textEncloser)
   );
   const headerLine = escapedHeaders.join(fieldSeparator);
-  result.push(headerLine);
+  if (headers.length > 0) result.push(headerLine);
 
   // Add records
   for (const record of records) {
@@ -239,4 +235,9 @@ function copyToClipboard(content: string) {
     .writeText(content)
     .then(() => toast.success("Copied to clipboard"))
     .catch(() => toast.error("Failed to copy to clipboard"));
+}
+
+export function convertExcelStringToArray(data: string): string[][] {
+  const lines = data.split("\r\n");
+  return lines.map((line) => line.split("\t"));
 }

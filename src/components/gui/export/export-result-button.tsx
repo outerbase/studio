@@ -4,7 +4,6 @@ import OptimizeTableState, {
   TableSelectionRange,
 } from "../table-optimized/OptimizeTableState";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getFormatHandlers } from "@/components/lib/export-helper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { getFormatHandlers } from "@/lib/export-helper";
 
 export type ExportTarget = "clipboard" | "file";
 type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";
@@ -262,7 +262,7 @@ export default function ExportResultButton({
             </RadioGroup>
           </div>
 
-          <div className="flex flex-grow border-b mb-2">
+          <div className="flex grow border-b mb-2">
             <div className="flex flex-col px-4 p-2 border-r">
               <small>Output format</small>
               <RadioGroup
@@ -331,8 +331,8 @@ export default function ExportResultButton({
                 </div>
               </RadioGroup>
             </div>
-            <div className="flex-grow">
-              <div className="flex flex-grow px-4 p-2 flex-col border-b">
+            <div className="grow">
+              <div className="flex grow px-4 p-2 flex-col border-b">
                 <small>Selection</small>
                 <div>
                   <RadioGroup
@@ -410,7 +410,7 @@ export default function ExportResultButton({
                   </RadioGroup>
                 </div>
               </div>
-              <div className="flex flex-grow ml-2 p-2 flex-col">
+              <div className="flex grow ml-2 p-2 flex-col">
                 <small>Options</small>
                 <div className="flex flex-col space-y-2 mt-2">
                   <div className="flex items-center space-x-4">
@@ -419,7 +419,7 @@ export default function ExportResultButton({
                       <input
                         disabled={format !== "delimited"}
                         type="text"
-                        className="bg-transparent flex-1 outline-none text-sm font-light"
+                        className="bg-transparent flex-1 outline-hidden text-sm font-light"
                         value={exportOptions?.fieldSeparator || ""}
                         onChange={(e) => {
                           setExportOptions({
@@ -436,7 +436,7 @@ export default function ExportResultButton({
                       <input
                         disabled={format !== "delimited"}
                         type="text"
-                        className="bg-transparent flex-1 outline-none text-sm font-light"
+                        className="bg-transparent flex-1 outline-hidden text-sm font-light"
                         value={exportOptions?.lineTerminator || ""}
                         onChange={(e) => {
                           setExportOptions({
@@ -454,7 +454,7 @@ export default function ExportResultButton({
                       <input
                         disabled={format !== "delimited"}
                         type="text"
-                        className="bg-transparent flex-1 outline-none text-sm font-light"
+                        className="bg-transparent flex-1 outline-hidden text-sm font-light"
                         value={exportOptions?.encloser || ""}
                         onChange={(e) => {
                           setExportOptions({

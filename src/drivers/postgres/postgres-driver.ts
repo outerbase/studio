@@ -1,3 +1,4 @@
+import { ColumnType } from "@outerbase/sdk-transform";
 import {
   ColumnTypeSelector,
   DatabaseSchemaItem,
@@ -8,7 +9,6 @@ import {
   DatabaseTriggerSchema,
   DatabaseViewSchema,
   DriverFlags,
-  TableColumnDataType,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -392,7 +392,7 @@ WHERE
     return `DROP VIEW IF EXISTS ${this.escapeId(schemaName)}.${this.escapeId(name)}`;
   }
 
-  inferTypeFromHeader(): TableColumnDataType | undefined {
+  inferTypeFromHeader(): ColumnType | undefined {
     return undefined;
   }
 }

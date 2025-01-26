@@ -1,8 +1,8 @@
+import { ColumnType } from "@outerbase/sdk-transform";
 import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
-  TableColumnDataType,
 } from "./base-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
@@ -36,17 +36,17 @@ function transformRawResult(raw: StarbaseResult): DatabaseResultSet {
       name: renameColName,
       displayName: colName,
       originalType: "text",
-      type: TableColumnDataType.TEXT,
+      type: ColumnType.TEXT,
     };
   });
 
   const rows = values
     ? values.map((r) =>
-        headers.reduce((a, b, idx) => {
-          a[b.name] = r[idx];
-          return a;
-        }, {} as DatabaseRow)
-      )
+      headers.reduce((a, b, idx) => {
+        a[b.name] = r[idx];
+        return a;
+      }, {} as DatabaseRow)
+    )
     : [];
 
   return {

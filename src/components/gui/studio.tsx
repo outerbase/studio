@@ -3,7 +3,7 @@ import MainScreen from "@/components/gui/main-connection";
 import { ConfigProvider } from "@/context/config-provider";
 import { DriverProvider } from "@/context/driver-provider";
 import type { BaseDriver } from "@/drivers/base-driver";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { FullEditorProvider } from "./providers/full-editor-provider";
@@ -33,6 +33,14 @@ export function Studio({
   containerClassName,
   docDriver,
 }: Readonly<StudioProps>) {
+  const extensionRef = useRef<StudioExtensionManager | undefined | null>(
+    extensions
+  );
+
+  useEffect(() => {
+    extensionRef.current = extensions;
+  }, [extensions]);
+
   const proxyDriver = useMemo(() => {
     return new Proxy(driver, {
       get(...arg) {
@@ -44,8 +52,8 @@ export function Studio({
               statement,
             ]);
 
-            if (extensions) {
-              await extensions.beforeQuery(beforePipeline);
+            if (extensionRef.current) {
+              await extensionRef.current.beforeQuery(beforePipeline);
             }
 
             return await target.query(beforePipeline.getStatments()[0]);
@@ -56,8 +64,8 @@ export function Studio({
               ...statements,
             ]);
 
-            if (extensions) {
-              await extensions.beforeQuery(beforePipeline);
+            if (extensionRef.current) {
+              await extensionRef.current.beforeQuery(beforePipeline);
             }
 
             return await target.transaction(beforePipeline.getStatments());
@@ -67,7 +75,7 @@ export function Studio({
         return Reflect.get(...arg);
       },
     });
-  }, [driver, extensions]);
+  }, [driver, extensionRef]);
 
   const finalExtensionManager = useMemo(() => {
     return extensions ?? new StudioExtensionManager([]);

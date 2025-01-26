@@ -1,13 +1,15 @@
+import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
+import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { BeforeQueryPipeline } from "./query-pipeline";
 
 interface RegisterSidebarOption {
   key: string;
   name: string;
   icon: ReactElement;
-  content: ReactElement;
+  content?: ReactElement;
+  onClick?: () => void;
 }
 
 type BeforeQueryHandler = (payload: BeforeQueryPipeline) => Promise<void>;
@@ -17,16 +19,29 @@ export interface StudioExtensionMenuItem {
   key: string;
   title: string;
   icon?: ReactElement;
-  onClick: () => void;
+  onClick?: () => void;
+  component?: ReactElement;
 }
 
 type CreateResourceMenuHandler = (
   resource: DatabaseSchemaItem
 ) => StudioExtensionMenuItem | undefined;
+
+type QueryHeaderResultMenuHandler = (
+  header: OptimizeTableHeaderProps
+) => StudioExtensionMenuItem | undefined;
+
+type QueryResultCellMenuHandler = () => StudioExtensionMenuItem | undefined;
+
 export class StudioExtensionContext {
   protected sidebars: RegisterSidebarOption[] = [];
+
   protected beforeQueryHandlers: BeforeQueryHandler[] = [];
   protected afterQueryHandlers: AfterQueryHandler[] = [];
+
+  protected queryResultHeaderContextMenu: QueryHeaderResultMenuHandler[] = [];
+  protected queryResultCellContextMenu: QueryResultCellMenuHandler[] = [];
+
   protected resourceCreateMenu: StudioExtensionMenuItem[] = [];
   protected resourceContextMenu: Record<string, CreateResourceMenuHandler[]> =
     {};
@@ -46,7 +61,6 @@ export class StudioExtensionContext {
   }
 
   registerCreateResourceMenu(menu: StudioExtensionMenuItem) {
-    console.log("Register", menu);
     this.resourceCreateMenu.push(menu);
   }
 
@@ -59,6 +73,14 @@ export class StudioExtensionContext {
     } else {
       this.resourceContextMenu[group].push(handler);
     }
+  }
+
+  registerQueryHeaderContextMenu(handler: QueryHeaderResultMenuHandler) {
+    this.queryResultHeaderContextMenu.push(handler);
+  }
+
+  registerQueryCellContextMenu(handler: QueryResultCellMenuHandler) {
+    this.queryResultCellContextMenu.push(handler);
   }
 }
 export class StudioExtensionManager extends StudioExtensionContext {
@@ -84,6 +106,18 @@ export class StudioExtensionManager extends StudioExtensionContext {
   ) {
     return (this.resourceContextMenu[group] ?? [])
       .map((handler) => handler(resource))
+      .filter(Boolean) as StudioExtensionMenuItem[];
+  }
+
+  getQueryHeaderContextMenu(header: OptimizeTableHeaderProps) {
+    return this.queryResultHeaderContextMenu
+      .map((handler) => handler(header))
+      .filter(Boolean) as StudioExtensionMenuItem[];
+  }
+
+  getQueryCellContextMenu() {
+    return this.queryResultCellContextMenu
+      .map((handler) => handler())
       .filter(Boolean) as StudioExtensionMenuItem[];
   }
 

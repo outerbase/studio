@@ -76,7 +76,7 @@ function FullEditorSheet({ option }: { option: FullEditorOption }) {
           {option.format === "text" && (
             <textarea
               autoFocus
-              className="flex-grow p-4 w-full outline-none bg-inherit font-mono"
+              className="grow p-4 w-full outline-hidden bg-inherit font-mono"
               value={value}
               onChange={(e) => setValue(e.currentTarget.value)}
               readOnly={option.readOnly}
@@ -84,7 +84,7 @@ function FullEditorSheet({ option }: { option: FullEditorOption }) {
           )}
 
           {option.format === "json" && (
-            <div className="flex-grow overflow-hidden">
+            <div className="grow overflow-hidden">
               <JsonEditor
                 value={value}
                 onChange={setValue}

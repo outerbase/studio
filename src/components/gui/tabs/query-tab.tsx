@@ -20,7 +20,7 @@ import {
   MultipleQueryProgress,
   MultipleQueryResult,
   multipleQuery,
-} from "@/components/lib/multiple-query";
+} from "@/lib/sql/multiple-query";
 import WindowTabs, { useTabsContext, WindowTabItemProps } from "../windows-tab";
 import QueryResult from "../tabs-result/query-result-tab";
 import { useSchema } from "@/context/schema-provider";
@@ -318,7 +318,7 @@ export default function QueryWindow({
               {namespaceName} /
             </div>
             <div className="inline-block relative">
-              <span className="inline-block text-sm p-1 outline-none font-semibold min-w-[175px] border border-background opacity-0">
+              <span className="inline-block text-sm p-1 outline-hidden font-semibold min-w-[175px] border border-background opacity-0">
                 &nbsp;{name}
               </span>
               <input
@@ -329,7 +329,7 @@ export default function QueryWindow({
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"
-                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-none font-semibold focus:border-secondary-foreground rounded bg-transparent"
+                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-hidden font-semibold focus:border-secondary-foreground rounded bg-transparent"
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
               />

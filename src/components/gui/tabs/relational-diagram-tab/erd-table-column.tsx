@@ -1,8 +1,13 @@
-import { TableCell, TableRow } from "@/components/ui/table";
-import { ERDSchemaNodeColumnProps } from "./database-schema-node";
 import { BaseHandle } from "@/components/base-handle";
+import { TableCell, TableRow } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Position } from "@xyflow/react";
 import { Key } from "lucide-react";
+import { ERDSchemaNodeColumnProps } from "./database-schema-node";
 
 export default function ERDTableColumn({
   column,
@@ -11,14 +16,14 @@ export default function ERDTableColumn({
 }) {
   return (
     <TableRow className="group relative text-xs">
-      <TableCell className="p-0 pr-6 font-light h-[30px] text-sm pl-2 font-mono">
+      <TableCell className="h-[30px] p-0 pr-6 pl-2 font-mono text-sm font-light">
         <BaseHandle
           id={column.title}
           type="target"
           position={Position.Left}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="h-[10px]! w-[10px]! opacity-0 group-hover:opacity-100"
         />
-        <div className="h-[30px] flex items-center">
+        <div className="flex h-[30px] items-center">
           <div className="w-6">
             {column.pk && <Key size={15} color={"rgb(153 27 27)"} />}
             {column.fk && <Key size={15} color={"rgb(245 158 11)"} />}
@@ -26,15 +31,20 @@ export default function ERDTableColumn({
           <div className="max-w-[120px] truncate">{column.title}</div>
         </div>
       </TableCell>
-      <TableCell className="p-0 pr-0 text-right font-thin h-[30px] text-sm">
-        <div className="h-[30px] flex items-center justify-end pr-2 font-mono text-muted-foreground max-w-[75px] truncate">
-          {column.type}
-        </div>
+      <TableCell className="relative h-[30px] w-[75px] p-0 pr-0 text-sm font-thin">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="text-muted-foreground flex h-[30px] max-w-[75px] items-center justify-end truncate pr-2 font-mono">
+              {column.type}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">{column.type}</TooltipContent>
+        </Tooltip>
         <BaseHandle
           id={column.title}
           type="source"
           position={Position.Right}
-          className="opacity-0 group-hover:opacity-100 !w-[10px] !h-[10px]"
+          className="h-[10px]! w-[10px]! opacity-0 group-hover:opacity-100"
         />
       </TableCell>
     </TableRow>

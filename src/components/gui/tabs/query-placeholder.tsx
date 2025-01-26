@@ -38,7 +38,7 @@ export function QueryPlaceholder({
                 <td className="border-t px-4 py-2">
                   <input
                     type="text"
-                    className="h-full w-full border-0 bg-inherit font-mono outline-none"
+                    className="h-full w-full border-0 bg-inherit font-mono outline-hidden"
                     placeholder="Please fill your value"
                     value={value ?? ""}
                     onChange={(e) => {

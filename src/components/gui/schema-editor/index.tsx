@@ -4,7 +4,6 @@ import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { Button, buttonVariants } from "../../ui/button";
 import SchemaEditorColumnList from "./schema-editor-column-list";
 import { Input } from "../../ui/input";
-import { checkSchemaChange } from "@/components/lib/sql-generate.schema";
 import SchemaEditorConstraintList from "./schema-editor-constraint-list";
 import { ColumnsProvider } from "./column-provider";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
@@ -13,6 +12,7 @@ import { toast } from "sonner";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import SchemaNameSelect from "./schema-name-select";
+import { checkSchemaChange } from "@/lib/sql/sql-generate.schema";
 
 interface Props {
   onSave: () => void;

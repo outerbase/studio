@@ -13,7 +13,7 @@ export default function ColumnCollation({
       placeholder="Collation"
       disabled={disabled}
       list="collation-list"
-      className="p-2 text-xs outline-none w-[150px] bg-inherit"
+      className="p-2 text-xs outline-hidden w-[150px] bg-inherit"
       spellCheck={false}
       onChange={(e) => onChange(e.currentTarget.value)}
     />

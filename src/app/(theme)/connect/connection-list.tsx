@@ -226,7 +226,7 @@ export default function ConnectionList({
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
               type="text"
-              className="bg-inherit p-2 pl-2 pr-2 outline-none text-sm  h-full grow"
+              className="bg-inherit p-2 pl-2 pr-2 outline-hidden text-sm  h-full grow"
               placeholder="Search base name"
             />
           </div>

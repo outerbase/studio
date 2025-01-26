@@ -53,7 +53,7 @@ export default function ConnectionItemCard({
         >
           <div className="py-4 shrink-0 ml-3 mr-2 flex flex-col gap-3 flex-1">
             <div className="flex gap-2 overflow-hidden">
-              <div className="w-10 h-10 bg-accent flex justify-center items-center rounded flex-shrink-0">
+              <div className="w-10 h-10 bg-accent flex justify-center items-center rounded shrink-0">
                 <DatabaseIcon className="w-6 h-6 text-accent-foreground" />
               </div>
 

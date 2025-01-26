@@ -1,3 +1,4 @@
+import { useSchema } from "@/context/schema-provider";
 import {
   DatabaseTableColumnConstraint,
   DatabaseTableConstraintChange,
@@ -12,14 +13,6 @@ import {
   LucideShieldPlus,
   LucideTrash2,
 } from "lucide-react";
-import TableCombobox from "../table-combobox/TableCombobox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { Button } from "../../ui/button";
 import {
   Dispatch,
   PropsWithChildren,
@@ -27,9 +20,16 @@ import {
   useCallback,
   useMemo,
 } from "react";
+import { Button } from "../../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
 import ColumnListEditor from "../column-list-editor";
+import TableCombobox from "../table-combobox/TableCombobox";
 import { useColumnList } from "./column-provider";
-import { useSchema } from "@/context/schema-provider";
 
 type ConstraintChangeHandler = (
   constraint: DatabaseTableColumnConstraint
@@ -47,7 +47,7 @@ function ColumnCheck({
   return (
     <>
       <td className="border p-2">
-        <LucideCheck className="w-4 h-4 inline mr-2" /> Check
+        <LucideCheck className="mr-2 inline h-4 w-4" /> Check
       </td>
       <td className="border" colSpan={2}>
         <input
@@ -59,7 +59,7 @@ function ColumnCheck({
           }}
           readOnly={disabled}
           value={constraint.checkExpression}
-          className="font-mono p-2 w-full outline-none"
+          className="w-full p-2 font-mono outline-hidden"
         />
       </td>
     </>
@@ -133,7 +133,7 @@ function ColumnForeignKey({
   return (
     <>
       <td className="border p-2">
-        <LucideArrowUpRight className="w-4 h-4 inline mr-2" />
+        <LucideArrowUpRight className="mr-2 inline h-4 w-4" />
         Foreign Key
       </td>
       <td className="border">
@@ -146,7 +146,7 @@ function ColumnForeignKey({
         />
       </td>
       <td className="border">
-        <div className="p-1 px-2 flex gap-2 items-center">
+        <div className="flex items-center gap-2 p-1 px-2">
           <ColumnListEditor
             disabled={disabled}
             value={constraint.foreignKey?.columns ?? []}
@@ -191,11 +191,11 @@ function ColumnPrimaryKey({
   return (
     <>
       <td className="border p-2">
-        <LucideKeySquare className="w-4 h-4 inline mr-2" />
+        <LucideKeySquare className="mr-2 inline h-4 w-4" />
         Primary Key
       </td>
       <td className="border" colSpan={2}>
-        <div className="px-2 p-1 flex gap-2">
+        <div className="flex gap-2 p-1 px-2">
           <ColumnListEditor
             disabled={disabled}
             value={constraint.primaryColumns ?? []}
@@ -233,11 +233,11 @@ function ColumnUnique({
   return (
     <>
       <td className="border p-2">
-        <LucideFingerprint className="w-4 h-4 inline mr-2" />
+        <LucideFingerprint className="mr-2 inline h-4 w-4" />
         Unique
       </td>
       <td className="border" colSpan={2}>
-        <div className="px-2 p-1 flex gap-2">
+        <div className="flex gap-2 p-1 px-2">
           <ColumnListEditor
             disabled={disabled}
             value={constraint.uniqueColumns ?? []}
@@ -281,7 +281,7 @@ function RemovableConstraintItem({
       {children}
       <td className="border">
         <button className="p-1" onClick={onRemoveClicked}>
-          <LucideTrash2 className="w-4 h-4 text-red-500" />
+          <LucideTrash2 className="h-4 w-4 text-red-500" />
         </button>
       </td>
     </tr>
@@ -446,11 +446,11 @@ export default function SchemaEditorConstraintList({
           })}
           {!disabled && (
             <tr>
-              <td colSpan={4} className="px-4 py-2 border">
+              <td colSpan={4} className="border px-4 py-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size={"sm"}>
-                      <LucideShieldPlus className="w-4 h-4 mr-1" />
+                      <LucideShieldPlus className="mr-1 h-4 w-4" />
                       Add Constraint
                     </Button>
                   </DropdownMenuTrigger>

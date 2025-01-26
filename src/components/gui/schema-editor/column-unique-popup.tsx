@@ -17,7 +17,7 @@ export default function ColumnUniquePopup({
   return (
     <Popover>
       <PopoverTrigger>
-        <span className="p-1 shadow border rounded block bg-yellow-200 dark:bg-yellow-600">
+        <span className="p-1 shadow-sm border rounded block bg-yellow-200 dark:bg-yellow-600">
           <LucideStar className="w-4 h-4" />
         </span>
       </PopoverTrigger>

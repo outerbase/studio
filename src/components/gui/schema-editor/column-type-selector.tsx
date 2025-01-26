@@ -179,7 +179,7 @@ export default function ColumnTypeSelector({
   return (
     <div className="relative">
       <input
-        className="p-2 text-sm outline-none w-[150px] bg-inherit"
+        className="p-2 text-sm outline-hidden w-[150px] bg-inherit"
         onFocus={() => setShowSuggestion(true)}
         onBlur={() => {
           setShowSuggestion(false);

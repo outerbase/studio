@@ -1,3 +1,8 @@
+import {
+  type ColumnHeader,
+  ColumnType
+} from "@outerbase/sdk-transform";
+
 export type InValue =
   | null
   | string
@@ -8,25 +13,18 @@ export type InValue =
   | Uint8Array
   | Date;
 
-export enum TableColumnDataType {
-  TEXT = 1,
-  INTEGER = 2,
-  REAL = 3,
-  BLOB = 4,
-}
-
-export function describeTableColumnType(type: TableColumnDataType) {
+export function describeTableColumnType(type: ColumnType) {
   switch (type) {
-    case TableColumnDataType.TEXT:
+    case ColumnType.TEXT:
       return "TEXT";
 
-    case TableColumnDataType.INTEGER:
+    case ColumnType.INTEGER:
       return "INTEGER";
 
-    case TableColumnDataType.REAL:
+    case ColumnType.REAL:
       return "REAL";
 
-    case TableColumnDataType.BLOB:
+    case ColumnType.BLOB:
       return "BLOB";
   }
 }
@@ -35,12 +33,7 @@ export type SupportedDialect = "sqlite" | "mysql" | "postgres" | "dolt";
 export type SqlOrder = "ASC" | "DESC";
 export type DatabaseRow = Record<string, unknown>;
 
-export interface DatabaseHeader {
-  name: string;
-  displayName: string;
-  originalType: string | null;
-  type: TableColumnDataType | undefined;
-}
+export type DatabaseHeader = ColumnHeader;
 
 export interface DatabaseResultStat {
   rowsAffected: number;
@@ -313,7 +306,7 @@ export abstract class BaseDriver {
 
   abstract inferTypeFromHeader(
     header?: DatabaseTableColumn
-  ): TableColumnDataType | undefined;
+  ): ColumnType | undefined;
 
   abstract trigger(
     schemaName: string,
