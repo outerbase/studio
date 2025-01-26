@@ -9,6 +9,14 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_STUDIO_VERSION: pkg.version,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${process.env.NEXT_PUBLIC_OB_API ?? "https://app.dev.outerbase.com/api/v1"}/:path*`,
+      },
+    ];
+  },
 };
 
 module.exports = withMDX(nextConfig);
