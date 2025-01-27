@@ -7,6 +7,7 @@ import { OuterbaseAPISource } from "@/outerbase-cloud/api-type";
 import { OuterbaseMySQLDriver } from "@/outerbase-cloud/database/mysql";
 import { OuterbasePostgresDriver } from "@/outerbase-cloud/database/postgresql";
 import { OuterbaseSqliteDriver } from "@/outerbase-cloud/database/sqlite";
+import OuterbaseQueryDriver from "@/outerbase-cloud/query-driver";
 import { useEffect, useMemo, useState } from "react";
 
 export default function OuterbaseSourcePageClient({
@@ -28,6 +29,11 @@ export default function OuterbaseSourcePageClient({
     });
   }, [workspaceId, baseId]);
 
+  const savedDocDriver = useMemo(() => {
+    if (!workspaceId || !source?.id || !baseId) return null;
+    return new OuterbaseQueryDriver(workspaceId, baseId, source.id);
+  }, [workspaceId, baseId, source?.id]);
+
   const outerbaseDriver = useMemo(() => {
     if (!workspaceId || !source) return null;
 
@@ -48,11 +54,16 @@ export default function OuterbaseSourcePageClient({
     return new OuterbaseSqliteDriver(outerbaseConfig);
   }, [workspaceId, source]);
 
-  if (!outerbaseDriver) {
+  if (!outerbaseDriver || !savedDocDriver) {
     return <OpacityLoading />;
   }
 
   return (
-    <Studio color="gray" driver={outerbaseDriver} name="Storybook Testing" />
+    <Studio
+      color="gray"
+      driver={outerbaseDriver}
+      docDriver={savedDocDriver}
+      name="Storybook Testing"
+    />
   );
 }

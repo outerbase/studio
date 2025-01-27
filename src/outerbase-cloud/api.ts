@@ -2,6 +2,8 @@ import {
   OuterbaseAPIBaseResponse,
   OuterbaseAPIDashboardDetail,
   OuterbaseAPIDashboardListResponse,
+  OuterbaseAPIQuery,
+  OuterbaseAPIQueryListResponse,
   OuterbaseAPIQueryRaw,
   OuterbaseAPIResponse,
   OuterbaseAPIWorkspaceResponse,
@@ -9,7 +11,7 @@ import {
 
 export async function requestOuterbase<T = unknown>(
   url: string,
-  method: "GET" | "POST" | "DELETE" = "GET",
+  method: "GET" | "POST" | "DELETE" | "PUT" = "GET",
   body?: unknown
 ) {
   const raw = await fetch(url, {
@@ -64,5 +66,48 @@ export async function runOuterbaseQueryRaw(
     `/api/v1/workspace/${workspaceId}/source/${sourceId}/query/raw`,
     "POST",
     { query }
+  );
+}
+
+export async function getOuterbaseQueryList(
+  workspaceId: string,
+  baseId: string
+) {
+  return requestOuterbase<OuterbaseAPIQueryListResponse>(
+    `/api/v1/workspace/${workspaceId}/query?${new URLSearchParams({ baseId })}`
+  );
+}
+
+export async function createOuterbaseQuery(
+  workspaceId: string,
+  baseId: string,
+  options: { source_id: string; name: string; baseId: string; query: string }
+) {
+  return requestOuterbase<OuterbaseAPIQuery>(
+    `/api/v1/workspace/${workspaceId}/query?${new URLSearchParams({ baseId })}`,
+    "POST",
+    options
+  );
+}
+
+export async function deleteOuterbaseQuery(
+  worksaceId: string,
+  queryId: string
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${worksaceId}/query/${queryId}`,
+    "DELETE"
+  );
+}
+
+export async function updateOuterbaseQuery(
+  worksaceId: string,
+  queryId: string,
+  options: { name: string; query: string }
+) {
+  return requestOuterbase<OuterbaseAPIQuery>(
+    `/api/v1/workspace/${worksaceId}/query/${queryId}`,
+    "PUT",
+    options
   );
 }

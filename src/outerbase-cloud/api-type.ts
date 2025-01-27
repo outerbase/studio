@@ -60,6 +60,13 @@ export interface OuterbaseAPIDashboard {
   }[];
 }
 
+export interface OuterbaseAPIQuery {
+  base_id: string;
+  id: string;
+  name: string;
+  query: string;
+  source_id: string;
+}
 export interface OuterbaseAPIDashboardChart {
   connection_id: string | null;
   created_at: string;
@@ -105,4 +112,8 @@ export interface OuterbaseAPIBaseResponse {
 
 export interface OuterbaseAPIDashboardListResponse {
   items: OuterbaseAPIDashboard[];
+}
+
+export interface OuterbaseAPIQueryListResponse {
+  items: OuterbaseAPIQuery[];
 }
