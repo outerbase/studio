@@ -1,5 +1,8 @@
 import {
   OuterbaseAPIBaseResponse,
+  OuterbaseAPIDashboardDetail,
+  OuterbaseAPIDashboardListResponse,
+  OuterbaseAPIQueryRaw,
   OuterbaseAPIResponse,
   OuterbaseAPIWorkspaceResponse,
 } from "./api-type";
@@ -35,4 +38,31 @@ export async function getOuterbaseBase(workspaceId: string, baseId: string) {
   );
 
   return baseList.items[0];
+}
+
+export async function getOuterbaseDashboardList(workspaceId: string) {
+  return requestOuterbase<OuterbaseAPIDashboardListResponse>(
+    `/api/v1/workspace/${workspaceId}/dashboard`
+  );
+}
+
+export async function getOuterbaseDashboard(
+  workspaceId: string,
+  dashboardId: string
+) {
+  return requestOuterbase<OuterbaseAPIDashboardDetail>(
+    `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`
+  );
+}
+
+export async function runOuterbaseQueryRaw(
+  workspaceId: string,
+  sourceId: string,
+  query: string
+) {
+  return requestOuterbase<OuterbaseAPIQueryRaw>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/query/raw`,
+    "POST",
+    { query }
+  );
 }
