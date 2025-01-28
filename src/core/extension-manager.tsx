@@ -84,6 +84,12 @@ export class StudioExtensionContext {
   registerQueryCellContextMenu(handler: QueryResultCellMenuHandler) {
     this.queryResultCellContextMenu.push(handler);
   }
+
+  getExtension<T>(name: string): T | undefined {
+    return this.extensions.find((ext) => ext.extensionName === name) as
+      | T
+      | undefined;
+  }
 }
 export class StudioExtensionManager extends StudioExtensionContext {
   cleanup() {

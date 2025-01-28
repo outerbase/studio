@@ -5,6 +5,7 @@ import { LucideDatabase, LucideNotepadText } from "lucide-react";
 import DataCatalogModelTab from "./data-model-tab";
 import DataCatalogDriver from "./driver";
 import DataCatalogSidebar from "./sidebar";
+import DataCatalogResultHeader from "./table-result-header";
 
 export const dataCatalogModelTab = createTabExtension({
   key: () => "data-catalog-model",
@@ -18,16 +19,36 @@ export const dataCatalogModelTab = createTabExtension({
 export default class DataCatalogExtension extends StudioExtension {
   extensionName = "data-catalog";
 
-  constructor(protected driver: DataCatalogDriver) {
+  constructor(public readonly driver: DataCatalogDriver) {
     super();
   }
 
   init(studio: StudioExtensionContext): void {
+    this.driver.load().then().catch();
+
     studio.registerSidebar({
       key: "data-catalog",
-      name: "Data Catalog 3",
+      name: "Data Catalog",
       icon: <LucideDatabase />,
       content: <DataCatalogSidebar />,
+    });
+
+    studio.registerQueryHeaderContextMenu((header) => {
+      const from = header.metadata.from;
+      if (!from) return;
+
+      return {
+        key: "data-catalog",
+        title: "",
+        component: (
+          <DataCatalogResultHeader
+            schemaName={from.schema}
+            tableName={from.table}
+            columnName={from.column}
+            driver={this.driver}
+          />
+        ),
+      };
     });
   }
 }
