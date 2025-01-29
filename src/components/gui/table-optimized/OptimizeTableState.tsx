@@ -1,11 +1,11 @@
-import { OptimizeTableHeaderProps } from ".";
-import deepEqual from "deep-equal";
-import { formatNumber } from "@/lib/convertNumber";
-import { selectArrayFromIndexList } from "@/lib/export-helper";
 import {
   buildTableResultHeader,
   BuildTableResultProps,
 } from "@/lib/build-table-result";
+import { formatNumber } from "@/lib/convertNumber";
+import { selectArrayFromIndexList } from "@/lib/export-helper";
+import deepEqual from "deep-equal";
+import { OptimizeTableHeaderProps } from ".";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -321,6 +321,8 @@ export default class OptimizeTableState {
 
     if (removedRows.length > 0) {
       this.data = this.data.filter((row) => !removedRows.includes(row));
+      // after rows were removed, we need to deselect them
+      this.selectionRanges = [];
     }
 
     this.changeLogs = {};
