@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { LucideDatabase, LucideTable } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
-function Demo1() {
+export function StorybookListviewExample() {
   const [filter, setFilter] = useState("");
   const [selected, setSelected] = useState("");
   const [collapsed, setCollapsed] = useState(new Set<string>(["movies"]));
@@ -102,44 +102,5 @@ function Demo1() {
         onSelectChange={setSelected}
       />
     </div>
-  );
-}
-
-function Demo2() {
-  return (
-    <div className="w-[300px] rounded border p-2">
-      <ListView
-        items={[
-          {
-            name: "insert_movies",
-            key: "movies.insert_movies",
-            icon: LucideTable,
-            data: {},
-          },
-          {
-            name: "update_movies",
-            key: "movies.update_users",
-            icon: LucideTable,
-            data: {},
-          },
-          {
-            name: "delete_movies",
-            key: "movies.delete_movies",
-            icon: LucideTable,
-            data: {},
-          },
-        ]}
-      />
-    </div>
-  );
-}
-
-export default function ListViewStorybookPage() {
-  return (
-    <>
-      <Demo1 />
-      <br />
-      <Demo2 />
-    </>
   );
 }

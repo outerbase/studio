@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { PropsWithChildren } from "react";
 import { DocNavigation } from "./docs-navigation";
 
@@ -13,16 +14,20 @@ export function DocContent({
   children,
   title,
   group,
-}: PropsWithChildren<{ title: string; group?: string }>) {
+}: PropsWithChildren<{ title?: string; group?: string }>) {
   return (
     <>
-      <div className="-mx-4 px-4 pb-4 border-b mb-4">
-        <div className="max-w-[800px] mx-auto">
-          {group && <span className="text-sm">{group}</span>}
-          <h1 className="text-2xl font-semibold">{title}</h1>
+      {title && (
+        <div className="-mx-4 mb-4 border-b px-4 pb-4">
+          <div className="max-w-[800px]">
+            {group && <span className="text-sm">{group}</span>}
+            <h1 className="text-2xl font-semibold">{title}</h1>
+          </div>
         </div>
-      </div>
-      <article className="max-w-[800px] mx-auto">{children}</article>
+      )}
+      <article className={cn("mdx-content max-w-[800px]", { "mt-4": !title })}>
+        {children}
+      </article>
     </>
   );
 }
@@ -36,7 +41,7 @@ export function DocLayout({
     <>
       <DocNavigation content={content} title={title} />
       <div className="md:pl-[300px]">
-        <article className="p-4 mdx-content">{children}</article>
+        <article className="mdx-content p-4">{children}</article>
       </div>
     </>
   );

@@ -1,0 +1,55 @@
+import { DocContent } from "@/components/mdx/docs";
+
+export const metadata = {
+  title: "Standard Component Guideline",
+};
+
+<DocContent title="Guideline" group="Standard Components">
+
+Please prioritize using these standard components whenever possible. Our goal is to maintain consistency and **limit excessive customization**.
+
+### Example 1
+
+⛔ Developers may have their own preferences for styling
+
+```tsx
+<div className="flex flex-col gap-2">
+  <div className="flex flex-col gap-2">
+    <Label>Username</Label>
+    <Input placeholder="Enter your username" />
+    <div className="text-red-500">Your username does not exist</div>
+  </div>
+
+  <div className="flex flex-col gap-2">
+    <Label>Password</Label>
+    <Input type="password" placeholder="Enter your password" />
+  </div>
+</div>
+```
+
+✅ Developers must follow a single prescribed method.
+
+```tsx
+<FormGroup>
+  <LabelInput
+    placeholder="Enter your username"
+    error="Your username does not exist"
+  />
+  <LabelInput placeholder="Enter your password" />
+</FormGroup>
+```
+
+## New Components Guideline
+
+- ✅ All standard components should be placed in the `src/app/components` folder.
+- ✅ Try to make your component friendly for copy-pasting to other project.
+- ⛔ Avoid including business logic that is tightly coupled with the application in standard components.
+- ⛔ Do not place one-off components in the `src/app/components` folder.
+  - If it is an extension component, place it in the extension folder.
+  - If it is a page-specific component, place it in the corresponding app router folder near the page.
+- ⛔ Minimize the use of color-specific class names whenever possible.
+  Instead, use theme-based colors to ensure easier customization and future support for custom themes.
+  - Example 1: `border` instead of `border-gray-100 dark:border-gray-600`
+  - Example 2: `bg-secondary` instead of `bg-gray-100 dark:bg-gray-600`
+
+</DocContent>

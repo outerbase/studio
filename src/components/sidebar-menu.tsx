@@ -33,6 +33,14 @@ export function SidebarMenuItem({
   );
 
   if (href) {
+    if (href.startsWith("https://")) {
+      return (
+        <Link href={href} className={className} target="_blank">
+          {body}
+        </Link>
+      );
+    }
+
     return (
       <Link href={href} className={className}>
         {body}

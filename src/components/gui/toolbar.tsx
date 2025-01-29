@@ -1,12 +1,12 @@
+import { cn } from "@/lib/utils";
+import { LucideLoader } from "lucide-react";
 import { PropsWithChildren, ReactElement } from "react";
 import { buttonVariants } from "../ui/button";
-import { LucideLoader } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Separator } from "../ui/separator";
-import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function Toolbar({ children }: PropsWithChildren) {
-  return <div className="flex p-1 gap-1">{children}</div>;
+  return <div className="flex gap-1 p-1">{children}</div>;
 }
 
 export function ToolbarSeparator() {
@@ -15,6 +15,10 @@ export function ToolbarSeparator() {
       <Separator orientation="vertical" />
     </div>
   );
+}
+
+export function ToolbarFiller() {
+  return <div className="flex-1" />;
 }
 
 export function ToolbarButton({
@@ -46,12 +50,12 @@ export function ToolbarButton({
       disabled={disabled}
       onClick={onClick}
     >
-      {loading ? <LucideLoader className="w-4 h-4 animate-spin" /> : icon}
+      {loading ? <LucideLoader className="h-4 w-4 animate-spin" /> : icon}
       <span>{text}</span>
       {badge && (
         <span
           className={
-            "ml-2 bg-red-500 text-white leading-5 w-5 h-5 rounded-full"
+            "ml-2 h-5 w-5 rounded-full bg-red-500 leading-5 text-white"
           }
           style={{ fontSize: 9 }}
         >
