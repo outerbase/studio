@@ -31,11 +31,11 @@ export default function ERDTableColumn({
           <div className="max-w-[120px] truncate">{column.title}</div>
         </div>
       </TableCell>
-      <TableCell className="relative h-[30px] w-[75px] p-0 pr-0 text-sm font-thin">
+      <TableCell className="relative h-[30px] p-0 pr-0 text-sm font-thin">
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="text-muted-foreground flex h-[30px] max-w-[75px] items-center justify-end truncate pr-2 font-mono">
-              {column.type}
+            <div className="text-muted-foreground flex h-[30px] w-[100px] items-center justify-end pr-2 font-mono">
+              <div className="truncate">{column.type}</div>
             </div>
           </TooltipTrigger>
           <TooltipContent side="right">{column.type}</TooltipContent>

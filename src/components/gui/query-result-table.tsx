@@ -256,6 +256,12 @@ export default function ResultTable({
         const data = pasteValue.split("\r\n").map((row) => row.split("\t"));
 
         for (let row = 0; row < data.length; row++) {
+          //filter out the additional enter from excel copy
+          if (row === data.length - 1) {
+            if (data[row].length === 1 && data[row][0] === "") {
+              break;
+            }
+          }
           for (let col = 0; col < data[row].length; col++) {
             state.changeValue(
               y + row,
