@@ -2,14 +2,14 @@
 import MainScreen from "@/components/gui/main-connection";
 import { ConfigProvider } from "@/context/config-provider";
 import { DriverProvider } from "@/context/driver-provider";
-import type { BaseDriver } from "@/drivers/base-driver";
-import { useEffect, useMemo, useRef } from "react";
-import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
-import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
-import { FullEditorProvider } from "./providers/full-editor-provider";
-import { CommonDialogProvider } from "../common-dialog";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import { BeforeQueryPipeline } from "@/core/query-pipeline";
+import type { BaseDriver } from "@/drivers/base-driver";
+import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
+import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
+import { useEffect, useMemo, useRef } from "react";
+import { CommonDialogProvider } from "../common-dialog";
+import { FullEditorProvider } from "./providers/full-editor-provider";
 
 interface StudioProps {
   driver: BaseDriver;
@@ -82,7 +82,6 @@ export function Studio({
   }, [extensions]);
 
   useEffect(() => {
-    finalExtensionManager.init();
     return () => finalExtensionManager.cleanup();
   }, [finalExtensionManager]);
 

@@ -46,7 +46,9 @@ export class StudioExtensionContext {
   protected resourceContextMenu: Record<string, CreateResourceMenuHandler[]> =
     {};
 
-  constructor(protected extensions: IStudioExtension[]) {}
+  constructor(protected extensions: IStudioExtension[]) {
+    this.extensions.forEach((ext) => ext.init(this));
+  }
 
   registerBeforeQuery(handler: BeforeQueryHandler) {
     this.beforeQueryHandlers.push(handler);
@@ -82,12 +84,14 @@ export class StudioExtensionContext {
   registerQueryCellContextMenu(handler: QueryResultCellMenuHandler) {
     this.queryResultCellContextMenu.push(handler);
   }
+
+  getExtension<T>(name: string): T | undefined {
+    return this.extensions.find((ext) => ext.extensionName === name) as
+      | T
+      | undefined;
+  }
 }
 export class StudioExtensionManager extends StudioExtensionContext {
-  init() {
-    this.extensions.forEach((ext) => ext.init(this));
-  }
-
   cleanup() {
     this.extensions.forEach((ext) => ext.cleanup());
   }

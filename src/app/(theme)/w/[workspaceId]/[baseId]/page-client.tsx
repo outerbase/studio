@@ -2,6 +2,12 @@
 
 import OpacityLoading from "@/components/gui/loading-opacity";
 import { Studio } from "@/components/gui/studio";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import {
+  createMySQLExtensions,
+  createPostgreSQLExtensions,
+  createSQLiteExtensions,
+} from "@/core/standard-extension";
 import { getOuterbaseBase } from "@/outerbase-cloud/api";
 import { OuterbaseAPISource } from "@/outerbase-cloud/api-type";
 import { OuterbaseMySQLDriver } from "@/outerbase-cloud/database/mysql";
@@ -34,8 +40,8 @@ export default function OuterbaseSourcePageClient({
     return new OuterbaseQueryDriver(workspaceId, baseId, source.id);
   }, [workspaceId, baseId, source?.id]);
 
-  const outerbaseDriver = useMemo(() => {
-    if (!workspaceId || !source) return null;
+  const [outerbaseDriver, extensions] = useMemo(() => {
+    if (!workspaceId || !source) return [null, null];
 
     const dialect = source.type;
     const outerbaseConfig = {
@@ -46,12 +52,21 @@ export default function OuterbaseSourcePageClient({
     };
 
     if (dialect === "postgres") {
-      return new OuterbasePostgresDriver(outerbaseConfig);
+      return [
+        new OuterbasePostgresDriver(outerbaseConfig),
+        new StudioExtensionManager(createPostgreSQLExtensions()),
+      ];
     } else if (dialect === "mysql") {
-      return new OuterbaseMySQLDriver(outerbaseConfig);
+      return [
+        new OuterbaseMySQLDriver(outerbaseConfig),
+        new StudioExtensionManager(createMySQLExtensions()),
+      ];
     }
 
-    return new OuterbaseSqliteDriver(outerbaseConfig);
+    return [
+      new OuterbaseSqliteDriver(outerbaseConfig),
+      new StudioExtensionManager(createSQLiteExtensions()),
+    ];
   }, [workspaceId, source]);
 
   if (!outerbaseDriver || !savedDocDriver) {
@@ -63,6 +78,7 @@ export default function OuterbaseSourcePageClient({
       color="gray"
       driver={outerbaseDriver}
       docDriver={savedDocDriver}
+      extensions={extensions}
       name="Storybook Testing"
     />
   );

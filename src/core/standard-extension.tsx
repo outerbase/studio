@@ -2,10 +2,10 @@
  * This contains the standard extensions as a base for all databases.
  */
 
-import QueryHistoryConsoleLogExtension from "@/extensions/query-console-log";
-import ViewEditorExtension from "@/extensions/view-editor";
-import TriggerEditorExtension from "@/extensions/trigger-editor";
 import ColumnDescriptorExtension from "@/extensions/column-descriptor";
+import QueryHistoryConsoleLogExtension from "@/extensions/query-console-log";
+import TriggerEditorExtension from "@/extensions/trigger-editor";
+import ViewEditorExtension from "@/extensions/view-editor";
 
 export function createStandardExtensions() {
   return [
