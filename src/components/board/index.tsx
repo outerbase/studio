@@ -16,19 +16,19 @@ export interface BoardChartLayout {
 
 interface BoardProps {
   layout: ReactGridLayout.Layout[];
-  onChangeLayout: (v: ReactGridLayout.Layout[]) => void;
+  onChange: (v: ReactGridLayout.Layout[]) => void;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
 
-export default function Board({ value }: { value: BoardProps }) {
+export default function Board(props: BoardProps) {
   const [layout, setLayout] = useState<ReactGridLayout.Layout[]>([]);
 
   useEffect(() => {
-    if (value.layout) {
-      setLayout(value.layout);
+    if (props.layout) {
+      setLayout(props.layout);
     }
-  }, [value]);
+  }, [props]);
 
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
@@ -49,15 +49,15 @@ export default function Board({ value }: { value: BoardProps }) {
 
   const handleClickResize = useCallback(
     (w: number, h: number, index: number) => {
-      const dummy = [...value.layout];
+      const dummy = [...props.layout];
       dummy[index].w = w;
       dummy[index].h = h;
-      value.onChangeLayout(dummy);
+      props.onChange(dummy);
     },
-    [value]
+    [props]
   );
 
-  const mapItem: JSX.Element[] = [...Array(value.layout.length)].map((_, i) => {
+  const mapItem: JSX.Element[] = [...Array(props.layout.length)].map((_, i) => {
     return (
       <div
         key={i}
@@ -94,7 +94,7 @@ export default function Board({ value }: { value: BoardProps }) {
       <div className="p-4">
         <div>Display as [x, y, w, h]:</div>
         <div style={{ display: "flex", gap: 7 }}>
-          {value.layout.map((l) => {
+          {props.layout.map((l) => {
             return (
               <div className="layoutItem" key={l.i}>
                 <b>{l.i}</b>

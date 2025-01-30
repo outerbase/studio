@@ -13,12 +13,7 @@ export default function StorybookBoardPage() {
 
   return (
     <div className="bg-secondary min-h-full w-full flex-1">
-      <Board
-        value={{
-          layout,
-          onChangeLayout: setLayout,
-        }}
-      />
+      <Board layout={layout} onChange={setLayout} />
     </div>
   );
 }
