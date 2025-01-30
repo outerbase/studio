@@ -1,5 +1,5 @@
 import SchemaNameSelect from "@/components/gui/schema-editor/schema-name-select";
-import { Toolbar } from "@/components/gui/toolbar";
+import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useConfig } from "@/context/config-provider";
@@ -63,6 +64,34 @@ function DataCatalogTableColumnModal({
       .finally(() => setSampleLoading(false));
   }, [databaseDriver, columnName, schemaName, tableName]);
 
+  const onSaveUpdateColumn = useCallback(() => {
+    setLoading(true);
+
+    driver
+      .updateColumn(schemaName, tableName, columnName, {
+        definition,
+        samples:
+          samples && samples.trim()
+            ? samples.split(",").map((s) => s.trim())
+            : [],
+        hideFromEzql: modelColumn?.hideFromEzql ?? false,
+      })
+      .then()
+      .finally(() => {
+        setLoading(false);
+        onClose();
+      });
+  }, [
+    driver,
+    modelColumn,
+    samples,
+    columnName,
+    onClose,
+    schemaName,
+    tableName,
+    definition,
+  ]);
+
   return (
     <>
       <DialogHeader>
@@ -113,24 +142,7 @@ function DataCatalogTableColumnModal({
       </div>
 
       <DialogFooter>
-        <Button
-          disabled={loading}
-          onClick={() => {
-            setLoading(true);
-
-            driver
-              .updateColumn(schemaName, tableName, columnName, {
-                definition,
-                samples: samples.split(",").map((s) => s.trim()),
-                hideFromEzql: modelColumn?.hideFromEzql ?? false,
-              })
-              .then()
-              .finally(() => {
-                setLoading(false);
-                onClose();
-              });
-          }}
-        >
+        <Button disabled={loading} onClick={onSaveUpdateColumn}>
           {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
           Save
         </Button>
@@ -227,6 +239,7 @@ function DataCatalogTableAccordion({
 
 export default function DataCatalogModelTab() {
   const { currentSchemaName, schema } = useSchema();
+  const [search, setSearch] = useState("");
   const [selectedSchema, setSelectedSchema] = useState(currentSchemaName);
 
   const { extensions } = useConfig();
@@ -235,6 +248,10 @@ export default function DataCatalogModelTab() {
     extensions.getExtension<DataCatalogExtension>("data-catalog");
 
   const driver = dataCatalogExtension?.driver;
+
+  const onChangeText = useCallback((value: string) => {
+    setSearch(value);
+  }, []);
 
   const currentSchema = useMemo(() => {
     if (!selectedSchema) return [];
@@ -259,6 +276,16 @@ export default function DataCatalogModelTab() {
             value={selectedSchema}
             onChange={setSelectedSchema}
           />
+          <ToolbarFiller />
+          <div>
+            <Input
+              value={search}
+              onChange={(e) => {
+                onChangeText(e.currentTarget.value);
+              }}
+              placeholder="Search tables, columns"
+            />
+          </div>
         </Toolbar>
       </div>
 
