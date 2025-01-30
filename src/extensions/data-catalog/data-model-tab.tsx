@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import HighlightText from "@/components/ui/highlight-text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -155,12 +156,14 @@ interface DataCatalogTableColumnProps {
   table: DatabaseTableSchema;
   column: DatabaseTableColumn;
   driver: DataCatalogDriver;
+  search?: string;
 }
 
 function DataCatalogTableColumn({
   column,
   table,
   driver,
+  search,
 }: DataCatalogTableColumnProps) {
   const modelColumn = driver.getColumn(
     table.schemaName,
@@ -175,7 +178,9 @@ function DataCatalogTableColumn({
 
   return (
     <div key={column.name} className="flex border-t">
-      <div className="w-[175px] p-2">{column.name}</div>
+      <div className="flex w-[150px] items-center p-2">
+        <HighlightText text={column.name} highlight={search} />
+      </div>
       <div className="text-muted-foreground flex-1 p-2">
         {definition || "No description"}
       </div>
@@ -211,25 +216,47 @@ function DataCatalogTableColumn({
 interface DataCatalogTableAccordionProps {
   table: DatabaseTableSchema;
   driver: DataCatalogDriver;
+  search?: string;
 }
 
 function DataCatalogTableAccordion({
   table,
   driver,
+  search,
 }: DataCatalogTableAccordionProps) {
+  // Check if any of the column match?
+  const matchColumns = useMemo(() => {
+    return !search || search.toLowerCase() === table.tableName!.toLowerCase()
+      ? table.columns
+      : table.columns.filter((column) =>
+          column.name.toLowerCase().includes(search.toLowerCase())
+        );
+  }, [search, table]);
+
+  const matchedTableName = useMemo(() => {
+    return search
+      ? table.tableName!.toLowerCase().includes(search?.toLowerCase())
+      : true;
+  }, [search, table]);
+
+  if (!matchedTableName && matchColumns.length === 0 && search) {
+    return null;
+  }
+
   return (
     <div className="rounded-lg border text-sm">
       <div className="p-2">
         <div className="font-bold">{table.tableName}</div>
         <div>No description</div>
       </div>
-      {table.columns.map((column) => {
+      {matchColumns.map((column) => {
         return (
           <DataCatalogTableColumn
             key={column.name}
             table={table}
             column={column}
             driver={driver}
+            search={search}
           />
         );
       })}
@@ -248,10 +275,6 @@ export default function DataCatalogModelTab() {
     extensions.getExtension<DataCatalogExtension>("data-catalog");
 
   const driver = dataCatalogExtension?.driver;
-
-  const onChangeText = useCallback((value: string) => {
-    setSearch(value);
-  }, []);
 
   const currentSchema = useMemo(() => {
     if (!selectedSchema) return [];
@@ -281,7 +304,7 @@ export default function DataCatalogModelTab() {
             <Input
               value={search}
               onChange={(e) => {
-                onChangeText(e.currentTarget.value);
+                setSearch(e.currentTarget.value);
               }}
               placeholder="Search tables, columns"
             />
@@ -292,6 +315,7 @@ export default function DataCatalogModelTab() {
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
         {currentSchema.map((table) => (
           <DataCatalogTableAccordion
+            search={search}
             key={table.tableName}
             table={table}
             driver={driver}
