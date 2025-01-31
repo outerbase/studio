@@ -90,7 +90,11 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
 
-    if (!this.schemas.tables || !this.schemas.tables[normalizedSchemaName]) {
+    if (!this.schemas.tables) {
+      this.schemas.tables = {};
+    }
+
+    if (!this.schemas.tables[normalizedSchemaName]) {
       this.schemas.tables[normalizedSchemaName] = {};
     }
 

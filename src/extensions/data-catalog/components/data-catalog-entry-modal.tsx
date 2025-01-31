@@ -20,7 +20,7 @@ interface Props {
   open: boolean;
   onSuccess: () => void;
   onClose: (open: boolean) => void;
-  selectedTermDefinition?: DataCatalogTermDefinition; // Updated type to allow editing
+  selectedTermDefinition?: DataCatalogTermDefinition;
 }
 
 export function DataCatalogEntryModal({
