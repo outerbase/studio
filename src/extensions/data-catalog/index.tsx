@@ -1,7 +1,7 @@
 import { StudioExtension } from "@/core/extension-base";
 import { StudioExtensionContext } from "@/core/extension-manager";
 import { createTabExtension } from "@/core/extension-tab";
-import { LucideDatabase, LucideNotepadText } from "lucide-react";
+import { Book } from "@phosphor-icons/react";
 import DataCatalogModelTab from "./data-model-tab";
 import DataCatalogDriver from "./driver";
 import DataCatalogSidebar from "./sidebar";
@@ -11,7 +11,7 @@ export const dataCatalogModelTab = createTabExtension({
   key: () => "data-catalog-model",
   name: "Data Model",
   generate: () => ({
-    icon: LucideNotepadText,
+    icon: Book,
     title: "Data Model",
     component: <DataCatalogModelTab />,
   }),
@@ -29,7 +29,7 @@ export default class DataCatalogExtension extends StudioExtension {
     studio.registerSidebar({
       key: "data-catalog",
       name: "Data Catalog",
-      icon: <LucideDatabase />,
+      icon: <Book className="h-6 w-6" />,
       content: <DataCatalogSidebar />,
     });
 
