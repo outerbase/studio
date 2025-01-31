@@ -17,18 +17,19 @@ export interface BoardChartLayout {
 interface BoardProps {
   layout: ReactGridLayout.Layout[];
   onChange: (v: ReactGridLayout.Layout[]) => void;
+  editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
 
 export default function Board(props: BoardProps) {
-  const [layout, setLayout] = useState<ReactGridLayout.Layout[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (props.layout) {
-      setLayout(props.layout);
+    if (props.layout.length > 0 && !!loading) {
+      setLoading(false);
     }
-  }, [props]);
+  }, [props, loading]);
 
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
@@ -49,6 +50,7 @@ export default function Board(props: BoardProps) {
 
   const handleClickResize = useCallback(
     (w: number, h: number, index: number) => {
+      setLoading(true);
       const dummy = [...props.layout];
       dummy[index].w = w;
       dummy[index].h = h;
@@ -61,29 +63,31 @@ export default function Board(props: BoardProps) {
     return (
       <div
         key={i}
-        className="group dark:bg-background relative flex items-center justify-center bg-white hover:bg-gray-50 dark:text-white"
+        className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
         data-grid={_}
       >
-        <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
-          {sizes.map((x, index) => {
-            return (
-              <button
-                className={cn(
-                  buttonVariants({ variant: "secondary", size: "icon" }),
-                  "cancelSelectorName h-6 w-6 p-0"
-                )}
-                onClick={() =>
-                  handleClickResize(x.w as number, x.h as number, i)
-                }
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-                key={index}
-              >
-                {x.icon}
-              </button>
-            );
-          })}
-        </div>
+        {props.editMode === "REARRANGING_CHART" && (
+          <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
+            {sizes.map((x, index) => {
+              return (
+                <button
+                  className={cn(
+                    buttonVariants({ variant: "secondary", size: "icon" }),
+                    "cancelSelectorName h-6 w-6 p-0"
+                  )}
+                  onClick={() =>
+                    handleClickResize(x.w as number, x.h as number, i)
+                  }
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  key={index}
+                >
+                  {x.icon}
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div>{i}</div>
       </div>
     );
@@ -91,32 +95,21 @@ export default function Board(props: BoardProps) {
 
   return (
     <div>
-      <div className="p-4">
-        <div>Display as [x, y, w, h]:</div>
-        <div style={{ display: "flex", gap: 7 }}>
-          {props.layout.map((l) => {
-            return (
-              <div className="layoutItem" key={l.i}>
-                <b>{l.i}</b>
-                {`: [${l.x}, ${l.y}, ${l.w}, ${l.h}]`}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <ReactGridLayout
-        cols={4}
-        rowHeight={220}
-        draggableCancel=".cancelSelectorName"
-        className="layout"
-        layout={layout}
-        onLayoutChange={setLayout}
-        isDraggable
-        isResizable
-        compactType={"horizontal"}
-      >
-        {mapItem}
-      </ReactGridLayout>
+      {!loading && (
+        <ReactGridLayout
+          cols={4}
+          rowHeight={220}
+          draggableCancel=".cancelSelectorName"
+          className="layout"
+          layout={props.layout}
+          onLayoutChange={props.onChange}
+          isDraggable={props.editMode === "REARRANGING_CHART"}
+          isResizable={props.editMode === "REARRANGING_CHART"}
+          compactType={"horizontal"}
+        >
+          {mapItem}
+        </ReactGridLayout>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
 import { Separator } from "@/components/ui/separator";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Component, Layers2 } from "lucide-react";
 import StorybookThemeSwitcher from "./storybook-theme-switcher";
 
@@ -55,8 +56,11 @@ export default function StorybookRootLayout({
             text="Chart"
             href="/storybook/chart"
           />
+          <SidebarMenuItem icon={Component} text="Board" href="/story/board" />
         </div>
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <TooltipProvider>{children}</TooltipProvider>
+        </div>
       </div>
     </body>
   );
