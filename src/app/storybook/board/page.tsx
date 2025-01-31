@@ -46,12 +46,13 @@ export default function StorybookBoardPage() {
       <BoardTool editMode={editMode} setEditMode={setEditMode} />
       <Board
         layout={value.layout}
-        onChange={(v) =>
+        onChange={(v) => {
+          console.log("change here");
           setValue({
             ...value,
             layout: v,
-          })
-        }
+          });
+        }}
         editMode={editMode}
       />
     </div>

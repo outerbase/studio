@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { RectangleHorizontal, Square } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
 import { buttonVariants } from "../ui/button";
 import "./board-style.css";
@@ -23,14 +23,6 @@ interface BoardProps {
 const ReactGridLayout = WidthProvider(RGL);
 
 export default function Board(props: BoardProps) {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (props.layout.length > 0 && !!loading) {
-      setLoading(false);
-    }
-  }, [props, loading]);
-
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -50,8 +42,7 @@ export default function Board(props: BoardProps) {
 
   const handleClickResize = useCallback(
     (w: number, h: number, index: number) => {
-      setLoading(true);
-      const dummy = [...props.layout];
+      const dummy = structuredClone(props.layout);
       dummy[index].w = w;
       dummy[index].h = h;
       props.onChange(dummy);
@@ -95,21 +86,19 @@ export default function Board(props: BoardProps) {
 
   return (
     <div>
-      {!loading && (
-        <ReactGridLayout
-          cols={4}
-          rowHeight={220}
-          draggableCancel=".cancelSelectorName"
-          className="layout"
-          layout={props.layout}
-          onLayoutChange={props.onChange}
-          isDraggable={props.editMode === "REARRANGING_CHART"}
-          isResizable={props.editMode === "REARRANGING_CHART"}
-          compactType={"horizontal"}
-        >
-          {mapItem}
-        </ReactGridLayout>
-      )}
+      <ReactGridLayout
+        cols={4}
+        rowHeight={220}
+        draggableCancel=".cancelSelectorName"
+        className="layout overflow-x-hidden"
+        layout={props.layout}
+        onLayoutChange={props.onChange}
+        isDraggable={props.editMode === "REARRANGING_CHART"}
+        isResizable={props.editMode === "REARRANGING_CHART"}
+        compactType={"vertical"}
+      >
+        {mapItem}
+      </ReactGridLayout>
     </div>
   );
 }

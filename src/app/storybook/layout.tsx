@@ -56,7 +56,11 @@ export default function StorybookRootLayout({
             text="Chart"
             href="/storybook/chart"
           />
-          <SidebarMenuItem icon={Component} text="Board" href="/story/board" />
+          <SidebarMenuItem
+            icon={Component}
+            text="Board"
+            href="/storybook/board"
+          />
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           <TooltipProvider>{children}</TooltipProvider>
