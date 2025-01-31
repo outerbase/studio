@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useConfig } from "@/context/config-provider";
 import { useState } from "react";
 import DataCatalogExtension from ".";
-import { DataCatalogEntryModal } from "./components/data-catalog-entry-modal";
-import EmptyTermDefinition from "./components/empty-definition";
-import TermDefinitionList from "./components/term-definition-list";
+import { DataCatalogEntryModal } from "./data-catalog-entry-modal";
 import { DataCatalogTermDefinition } from "./driver";
+import EmptyTermDefinition from "./empty-definition";
+import TermDefinitionList from "./term-definition-list";
 
 export default function DataCatalogTab() {
   const { extensions } = useConfig();

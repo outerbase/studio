@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import DataCatalogDriver, { DataCatalogTermDefinition } from "../driver";
+import DataCatalogDriver, { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
   driver?: DataCatalogDriver;

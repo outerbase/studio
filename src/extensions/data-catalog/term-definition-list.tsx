@@ -1,5 +1,5 @@
 import { Edit3 } from "lucide-react";
-import { DataCatalogTermDefinition } from "../driver";
+import { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
   onSelect: (item: DataCatalogTermDefinition) => void;
