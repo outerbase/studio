@@ -41,11 +41,11 @@ export default function ResourceCard({
 
   return (
     <Link
-      onClick={() => {
-        console.log("link here");
-      }}
       href={href}
-      className="group relative flex h-36 w-[302px] flex-col justify-between overflow-hidden rounded-md border border-neutral-200 bg-white p-3.5 hover:border-neutral-300 focus:outline-none focus:*:opacity-100 focus-visible:ring focus-visible:ring-blue-600 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700/75"
+      className={cn(
+        "group relative flex h-36 w-[302px] flex-col justify-between overflow-hidden rounded-md border border-neutral-200 bg-white p-3.5 hover:border-neutral-300 focus:outline-none focus:*:opacity-100 focus-visible:ring focus-visible:ring-blue-600 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700/75",
+        className
+      )}
     >
       {/* content */}
       <header className="z-10 flex items-center gap-3">
@@ -70,7 +70,7 @@ export default function ResourceCard({
             }
           )}
         >
-          {IconComponent && <IconComponent />}
+          {IconComponent && <IconComponent className="h-6 w-6" />}
         </div>
         <div className="">
           <p className="text-sm font-semibold tracking-tight">{title}</p>
@@ -110,8 +110,7 @@ export default function ResourceCard({
             "from-emerald-500 to-teal-500": color === "green",
             "from-sky-500 to-indigo-500": color === "blue",
             "from-fuchsia-500 via-sky-500 to-yellow-500": color === "rainbow",
-          },
-          className
+          }
         )}
       />
 
