@@ -1,0 +1,119 @@
+export const PostgresVisual = () => (
+  <svg
+    width="154"
+    height="154"
+    viewBox="0 0 154 154"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="absolute top-1/2 -right-2 origin-right -translate-y-1/2 text-neutral-200/75 *:ease-in *:group-hover:duration-500 dark:text-neutral-800"
+  >
+    <path
+      d="M134.002 26.337V1H51.6683L51.6683 26.3333M134.002 26.337L146.668 26.3352V83.3334L134 83.3315M134.002 26.337L134 83.3315M134 83.3315V64.3333H121.333L121.333 26.3333H51.6683M51.6683 26.3333L39 26.3352L39 89.6667M51.6683 26.3333L51.6683 102.333H70.6667M70.6667 102.333L70.6667 83.3333H89.6667L89.6667 102.333M70.6667 102.333H89.6667M70.6667 102.333L70.6667 121.333H39M89.6667 102.333H102.333L102.333 140.333L127.668 140.333L127.67 102.333H153V153H89.6667V102.333ZM39 121.333V89.6667M39 121.333L39 137.167H20M39 89.6667H20L20 121.333M20 137.167L20 121.333M20 137.167H0.999971L0.999983 121.333H20M77 53.9286H102.333V68.8572H77V53.9286Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="group-hover:text-blue-200 group-hover:transition-colors dark:group-hover:text-blue-900"
+    />
+    <path
+      d="M39 121.333H70.6667V83.3333H89.6667V153H153V102.333H127.667V140.333H102.333V102.333H51.6667V1H134V26.3333H146.667V83.3333H134V64.3333H121.333V26.3333H39V89.6667H20V121.333H1V137.167H39V121.333Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="db-card text-blue-300 opacity-0 drop-shadow-[0px_0px_2px_#93C5FD50] transition-opacity group-hover:opacity-100 dark:text-blue-700 dark:drop-shadow-[0px_0px_5px_#1D4ED8]"
+    />
+  </svg>
+);
+
+export const MySQLVisual = () => (
+  <svg
+    width="153"
+    height="153"
+    viewBox="0 0 153 153"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="absolute top-1/2 -right-2 origin-right -translate-y-1/2 text-neutral-200/75 *:ease-in *:group-hover:duration-500 dark:text-neutral-800"
+  >
+    <path
+      d="M37.9948 57.9993H6.32812V76.9993H37.9948M37.9948 57.9993V38.9993H69.6615M37.9948 57.9993H69.6615V38.9993M37.9948 57.9993V76.9993M69.6615 38.9993V19.9993H82.3281M69.6615 38.9993H82.3331L82.3281 19.9993M126.661 1.00195V19.9993H82.3281M126.661 1.00195H152V102.333M126.661 1.00195H82.3331L82.3281 19.9993M152 102.333H132.995M152 102.333V127.666H132.995M132.995 102.333H82.3281H56.9948L56.9998 127.666H101.328V140.333H132.995V127.666M132.995 102.333V76.9993H107.661H37.9948M132.995 102.333V127.666M113.995 38.9993H139.328V57.9993H113.995V38.9993Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="group-hover:text-blue-200 group-hover:transition-colors dark:group-hover:text-blue-900"
+    />
+    <path
+      d="M6.33398 77H133.001V140.333H101.334V127.667H57.0007V102.333H152.001V1H82.334V39H38.0007V58H6.33398V77Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="db-card text-blue-300 opacity-0 drop-shadow-[0px_0px_2px_#93C5FD50] transition-opacity group-hover:opacity-100 dark:text-blue-700 dark:drop-shadow-[0px_0px_5px_#1D4ED8]"
+    />
+  </svg>
+);
+
+export const SQLiteVisual = () => (
+  <svg
+    width="153"
+    height="153"
+    viewBox="0 0 153 153"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="absolute top-1/2 -right-2 origin-right -translate-y-1/2 text-neutral-200/75 *:ease-in *:group-hover:duration-500 dark:text-neutral-800"
+  >
+    <path
+      d="M133 114H139.333V142.5H133V129.833M133 114V129.833M133 114V88.6667H126.667M133 129.833H126.667V120.333M126.667 88.6667V120.333M126.667 88.6667V47.5H114V25.3333H85.5M126.667 120.333H72.8333V98.1667H34.8333V60.1667M34.8333 60.1667H19V41.1667M34.8333 60.1667H85.5V25.3333M85.5 25.3333V9.5H76M19 41.1667V19H34.8333V9.5H76M19 41.1667H76V9.5M107.667 82.3333V107.667H114V82.3333H107.667ZM107.667 82.3333H95V69.6667H107.667V82.3333Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="group-hover:text-blue-200 group-hover:transition-colors dark:group-hover:text-blue-900"
+    />
+    <path
+      d="M76 9.5H85.5V25.3333H114V47.5H126.667V88.6667H133V114M76 9.5V41.1667H19M76 9.5H34.8333V19H19V41.1667M19 41.1667V60.1667H34.8333V98.1667H72.8333V120.333H126.667V129.833H133M133 129.833V142.5H139.333V114H133M133 129.833V114M114 107.667V82.3333H95V69.6667H107.667V107.667H114Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="db-card text-blue-300 opacity-0 drop-shadow-[0px_0px_2px_#93C5FD50] transition-opacity group-hover:opacity-100 dark:text-blue-700 dark:drop-shadow-[0px_0px_5px_#1D4ED8]"
+    />
+  </svg>
+);
+
+export const BoardVisual = () => (
+  <svg
+    width="153"
+    height="153"
+    viewBox="0 0 153 153"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="absolute top-1/2 -right-2 origin-right -translate-y-1/2 text-neutral-200/75 *:ease-in *:group-hover:duration-500 dark:text-neutral-800"
+  >
+    <path
+      d="M20 153H1V108.667H20M20 153V108.667M20 153H42.1667M20 108.667V89.6667H42.1667M70.6667 153V121.333M70.6667 153H89.6667M70.6667 153H61.1667M70.6667 121.333V102.333H42.1667V89.6667M70.6667 121.333H89.6667M89.6667 121.333V153M89.6667 121.333V64.3333H102.333M89.6667 153H102.333M102.333 64.3333V153M102.333 64.3333V32.6667H108.667V51.6667M102.333 153H108.667M108.667 153V51.6667M108.667 153H137.167M108.667 51.6667H137.167M137.167 51.6667V102.333V153M137.167 51.6667V26.3333M137.167 153H153V26.3333M42.1667 89.6667V153M42.1667 153H51.6667M61.1667 153V127.667H51.6667V153M61.1667 153H51.6667M137.167 26.3333V1H153V26.3333M137.167 26.3333H153M70.6667 89.6667V58H61.1667V89.6667H70.6667ZM45.3333 77H20V70.6667H45.3333V77ZM121.333 77H127.667V121.333H121.333V77ZM127.667 130.833H118.167V137.167H127.667V130.833Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="group-hover:text-blue-200 group-hover:transition-colors dark:group-hover:text-blue-900"
+    />
+    <path
+      d="M1 153.001V108.667H20V89.6673H42.1667V153.001H51.6667V127.667H61.1667V153.001H70.6667V121.334H89.6667V64.334H102.333V32.6673H108.667V153.001H137.167M137.167 153.001V26.334H153V153.001H137.167ZM45.3333 77.0006H20V70.6673H45.3333V77.0006ZM127.667 121.334V77.0006H121.333V121.334H127.667ZM70.6667 58.0006H61.1667V89.6673H70.6667V58.0006Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="db-card text-blue-300 opacity-0 drop-shadow-[0px_0px_2px_#93C5FD50] transition-opacity group-hover:opacity-100 dark:text-blue-700 dark:drop-shadow-[0px_0px_5px_#1D4ED8]"
+    />
+  </svg>
+);
+
+export const GeneralVisual = () => (
+  <svg
+    width="153"
+    height="153"
+    viewBox="0 0 153 153"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="absolute top-1/2 -right-2 origin-right -translate-y-1/2 text-neutral-200/75 *:ease-in *:group-hover:duration-500 dark:text-neutral-800"
+  >
+    <path
+      d="M82.3349 16.833L82.3344 1H34.8345L34.835 16.833M82.3349 16.833H120.334V76.9994M82.3349 16.833L66.5007 16.8333L34.835 16.833M82.3349 16.833L82.3347 45.3333M34.835 16.833H12.6673V45.3333M34.8345 96.0006L34.8348 76.9994L34.8345 45.3333H12.6673M34.8345 96.0006H19.0007L12.6673 95.9988V45.3333M34.8345 96.0006V108.667V124.5H50.6671M50.6671 124.5V137.166H66.501M50.6671 124.5L50.6673 108.667M66.501 137.166H82.3349M66.501 137.166L66.5005 108.667H50.6673M82.3349 137.166V153H139.333M82.3349 137.166H91.8341L91.8337 124.5M139.333 153L139.335 137.167M139.333 153H152L152.001 137.167M145.668 111.832H152.001V137.167M145.668 111.832V86.5H129.834M145.668 111.832L129.834 111.834V86.5M129.834 86.5V76.9994H120.334M120.334 76.9994H82.3344M82.3344 76.9994L82.334 96.0003V111.833L91.8337 111.834V124.5M82.3344 76.9994L82.3347 45.3333M91.8337 124.5H126.667L126.668 137.166L139.335 137.167M152.001 137.167H139.335M82.3347 45.3333H66.5005L66.5008 76.9994H50.6671L50.6673 108.667M114.001 96L104.501 95.9988V111.83L114.001 111.832V96ZM19.0007 115H6.33398V134H19.0007V115Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="group-hover:text-blue-200 group-hover:transition-colors dark:group-hover:text-blue-900"
+    />
+    <path
+      d="M34.834 45.3333H12.6673V16.8333H34.834V1H82.334V16.8333H120.334V77H82.334V111.833H91.834V124.5H126.667V137.167H152.001V153H82.334V137.167H66.5007V108.667H50.6673V124.5H34.834V45.3333Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      className="db-card text-blue-300 opacity-0 drop-shadow-[0px_0px_2px_#93C5FD50] transition-opacity group-hover:opacity-100 dark:text-blue-700 dark:drop-shadow-[0px_0px_5px_#1D4ED8]"
+    />
+  </svg>
+);

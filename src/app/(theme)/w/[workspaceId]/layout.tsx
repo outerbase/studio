@@ -1,9 +1,14 @@
 import { OuterbaseSessionProvider } from "@/outerbase-cloud/session-provider";
+import ThemeLayout from "../../theme_layout";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <OuterbaseSessionProvider>{children}</OuterbaseSessionProvider>;
+  return (
+    <ThemeLayout>
+      <OuterbaseSessionProvider>{children}</OuterbaseSessionProvider>
+    </ThemeLayout>
+  );
 }

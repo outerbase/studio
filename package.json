@@ -21,7 +21,8 @@
     "format:fix": "prettier --write .",
     "lint": "next lint",
     "lint:fix": "next lint --fix .",
-    "dialect": "node build-dialect.js"
+    "dialect": "node build-dialect.js",
+    "remove-branch": "npx git-removed-branches --prune -f"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
@@ -98,6 +99,7 @@
     "react-resizable-panels": "^2.1.7",
     "sonner": "^1.4.41",
     "sql-formatter": "^15.3.2",
+    "swr": "^2.3.0",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
     "use-immer": "^0.11.0",

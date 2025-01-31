@@ -1,42 +1,42 @@
 "use client";
 
+import ResourceCard from "@/components/resource-card";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import {
   getOuterbaseDashboardList,
   getOuterbaseWorkspace,
 } from "@/outerbase-cloud/api";
-import {
-  OuterbaseAPIBase,
-  OuterbaseAPIDashboard,
-} from "@/outerbase-cloud/api-type";
+import { Database } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 export default function WorkspaceListPageClient({
   workspaceId,
 }: {
   workspaceId: string;
 }) {
-  const [loading, setLoading] = useState(true);
-  const [bases, setBases] = useState<OuterbaseAPIBase[]>([]);
-  const [boards, setBoards] = useState<OuterbaseAPIDashboard[]>([]);
+  const { data, isLoading } = useSWR(`workspace-${workspaceId}`, () => {
+    const fetching = async () => {
+      const [workspaces, boards] = await Promise.all([
+        getOuterbaseWorkspace(),
+        getOuterbaseDashboardList(workspaceId),
+      ]);
 
-  useEffect(() => {
-    Promise.all([
-      getOuterbaseWorkspace(),
-      getOuterbaseDashboardList(workspaceId),
-    ])
-      .then(([workspace, boards]) => {
-        setBases(
-          workspace.items.find((w) => w.short_name === workspaceId)?.bases ?? []
-        );
-        setBoards((boards.items ?? []).filter((b) => b.base_id === null));
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [workspaceId]);
+      return {
+        bases:
+          workspaces.items.find((w) => w.short_name === workspaceId)?.bases ??
+          [],
+        boards: (boards.items ?? []).filter((b) => b.base_id === null),
+      };
+    };
 
-  if (loading) {
+    return fetching();
+  });
+
+  const boards = data?.boards ?? [];
+  const bases = data?.bases ?? [];
+
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -58,13 +58,15 @@ export default function WorkspaceListPageClient({
       <h1>Base</h1>
       <div className="flex flex-wrap gap-4 p-4">
         {bases.map((base) => (
-          <Link
+          <ResourceCard
             key={base.id}
-            className="border p-4"
+            icon={() => <Database weight="fill" />}
             href={`/w/${workspaceId}/${base.short_name}`}
+            title={base.name}
+            subtitle={base.sources[0]?.type}
           >
-            {base.name}
-          </Link>
+            <DropdownMenuItem>Remove</DropdownMenuItem>
+          </ResourceCard>
         ))}
       </div>
     </div>
