@@ -51,7 +51,7 @@ export function ToolbarButton({
       onClick={onClick}
     >
       {loading ? <LucideLoader className="h-4 w-4 animate-spin" /> : icon}
-      <span>{text}</span>
+      {text && <span>{text}</span>}
       {badge && (
         <span
           className={
