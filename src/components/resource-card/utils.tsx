@@ -1,6 +1,7 @@
 import { Database } from "@phosphor-icons/react";
 import { MySQLIcon, PostgreIcon, SQLiteIcon } from "../icons/outerbase-icon";
 import { CloudflareIcon, StarbaseIcon, ValTownIcon } from "./icon";
+import { GeneralVisual, MySQLVisual, SQLiteVisual } from "./visual";
 
 export function getDatabaseFriendlyName(type: string) {
   if (type === "sqlite") return "SQLite";
@@ -29,4 +30,12 @@ export function getDatabaseIcon(type: string) {
   if (type === "libsql") return SQLiteIcon;
 
   return Database;
+}
+
+export function getDatabaseVisual(type: string) {
+  if (type === "mysql") return MySQLVisual;
+  if (type === "sqlite") return SQLiteVisual;
+  if (type === "postgres") return GeneralVisual;
+
+  return GeneralVisual;
 }

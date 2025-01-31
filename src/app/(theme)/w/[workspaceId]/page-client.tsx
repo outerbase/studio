@@ -6,6 +6,7 @@ import ResourceCard from "@/components/resource-card";
 import {
   getDatabaseFriendlyName,
   getDatabaseIcon,
+  getDatabaseVisual,
 } from "@/components/resource-card/utils";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import {
@@ -103,6 +104,7 @@ export default function WorkspaceListPageClient({
               href={`/w/${workspaceId}/${base.short_name}`}
               title={base.name}
               subtitle={getDatabaseFriendlyName(base.sources[0]?.type)}
+              visual={getDatabaseVisual(base.sources[0]?.type)}
             >
               <DropdownMenuItem>Remove</DropdownMenuItem>
             </ResourceCard>
