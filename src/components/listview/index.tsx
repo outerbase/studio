@@ -19,6 +19,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import HighlightText from "../ui/highlight-text";
 
 export interface ListViewItem<T = unknown> {
   key: string;
@@ -55,31 +56,6 @@ interface ListViewRendererProps<T> extends ListViewProps<T> {
   contextMenuKey: string;
   setContextMenuKey: Dispatch<SetStateAction<string>>;
   contextOpen: boolean;
-}
-
-function Highlight({ text, highlight }: { text: string; highlight?: string }) {
-  if (!highlight) return <span>{text}</span>;
-
-  const regex = new RegExp(
-    "(" + (highlight ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
-    "i"
-  );
-
-  const splitedText = text.split(regex);
-
-  return (
-    <span>
-      {splitedText.map((text, idx) => {
-        return text.toLowerCase() === (highlight ?? "").toLowerCase() ? (
-          <span key={idx} className="bg-yellow-300 text-black">
-            {text}
-          </span>
-        ) : (
-          <span key={idx}>{text}</span>
-        );
-      })}
-    </span>
-  );
 }
 
 function Indentation({ depth }: { depth: number }) {
@@ -219,7 +195,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                       {item.iconBadgeColor && (
                         <div
                           className={cn(
-                            "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full",
+                            "absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full",
                             item.iconBadgeColor
                           )}
                         ></div>
@@ -228,7 +204,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   )}
 
                   <div className="line-clamp-1 flex-1 text-xs">
-                    <Highlight text={item.name} highlight={highlight} />
+                    <HighlightText text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span
                         className={cn(
@@ -242,7 +218,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   </div>
 
                   {item.progressBarValue && item.progressBarMax && (
-                    <div className="relative flex h-full w-[50px] items-center text-muted-foreground">
+                    <div className="text-muted-foreground relative flex h-full w-[50px] items-center">
                       <div
                         className="h-[20px] rounded-sm border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
                         style={{

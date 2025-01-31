@@ -1,6 +1,7 @@
 import SchemaNameSelect from "@/components/gui/schema-editor/schema-name-select";
-import { Toolbar } from "@/components/gui/toolbar";
+import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import HighlightText from "@/components/ui/highlight-text";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useConfig } from "@/context/config-provider";
@@ -63,6 +66,34 @@ function DataCatalogTableColumnModal({
       .finally(() => setSampleLoading(false));
   }, [databaseDriver, columnName, schemaName, tableName]);
 
+  const onSaveUpdateColumn = useCallback(() => {
+    setLoading(true);
+
+    driver
+      .updateColumn(schemaName, tableName, columnName, {
+        definition,
+        samples:
+          samples && samples.trim()
+            ? samples.split(",").map((s) => s.trim())
+            : [],
+        hideFromEzql: modelColumn?.hideFromEzql ?? false,
+      })
+      .then()
+      .finally(() => {
+        setLoading(false);
+        onClose();
+      });
+  }, [
+    driver,
+    modelColumn,
+    samples,
+    columnName,
+    onClose,
+    schemaName,
+    tableName,
+    definition,
+  ]);
+
   return (
     <>
       <DialogHeader>
@@ -113,24 +144,7 @@ function DataCatalogTableColumnModal({
       </div>
 
       <DialogFooter>
-        <Button
-          disabled={loading}
-          onClick={() => {
-            setLoading(true);
-
-            driver
-              .updateColumn(schemaName, tableName, columnName, {
-                definition,
-                samples: samples.split(",").map((s) => s.trim()),
-                hideFromEzql: modelColumn?.hideFromEzql ?? false,
-              })
-              .then()
-              .finally(() => {
-                setLoading(false);
-                onClose();
-              });
-          }}
-        >
+        <Button disabled={loading} onClick={onSaveUpdateColumn}>
           {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
           Save
         </Button>
@@ -143,12 +157,16 @@ interface DataCatalogTableColumnProps {
   table: DatabaseTableSchema;
   column: DatabaseTableColumn;
   driver: DataCatalogDriver;
+  search?: string;
+  hasDefinitionOnly?: boolean;
 }
 
 function DataCatalogTableColumn({
   column,
   table,
   driver,
+  search,
+  hasDefinitionOnly,
 }: DataCatalogTableColumnProps) {
   const modelColumn = driver.getColumn(
     table.schemaName,
@@ -161,9 +179,15 @@ function DataCatalogTableColumn({
 
   const [open, setOpen] = useState(false);
 
+  if (hasDefinitionOnly && !definition) {
+    return null;
+  }
+
   return (
     <div key={column.name} className="flex border-t">
-      <div className="w-[175px] p-2">{column.name}</div>
+      <div className="flex w-[150px] items-center p-2">
+        <HighlightText text={column.name} highlight={search} />
+      </div>
       <div className="text-muted-foreground flex-1 p-2">
         {definition || "No description"}
       </div>
@@ -199,25 +223,96 @@ function DataCatalogTableColumn({
 interface DataCatalogTableAccordionProps {
   table: DatabaseTableSchema;
   driver: DataCatalogDriver;
+  search?: string;
+  columnName?: string;
+  hasDefinitionOnly?: boolean;
 }
 
 function DataCatalogTableAccordion({
   table,
   driver,
+  search,
+  hasDefinitionOnly,
 }: DataCatalogTableAccordionProps) {
+  const modelTable = driver.getTable(table.schemaName, table.tableName!);
+
+  const [definition, setDefinition] = useState(modelTable?.definition || "");
+
+  const onUpdateTable = useCallback(() => {
+    if (
+      definition &&
+      definition.trim() &&
+      definition !== modelTable?.definition
+    ) {
+      driver.updateTable(table?.schemaName, table.tableName!, {
+        definition,
+      });
+    }
+  }, [driver, table, definition, modelTable]);
+
+  // Check if any of the column match?
+  const matchColumns = useMemo(() => {
+    if (!search || search.toLowerCase() === table.tableName!.toLowerCase()) {
+      return table.columns;
+    }
+    return table.columns.filter((column) =>
+      column.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search, table]);
+
+  const matchedTableName = useMemo(() => {
+    if (search) {
+      return table.tableName!.toLowerCase().includes(search?.toLowerCase());
+    }
+    return true;
+  }, [search, table]);
+
+  // this will work only toggle check box
+  if (hasDefinitionOnly) {
+    const columnsDefinition = table.columns
+      .map((col) => {
+        const modelColumn = driver.getColumn(
+          table.schemaName,
+          table.tableName!,
+          col.name
+        );
+        return !!modelColumn?.definition;
+      })
+      .filter(Boolean);
+
+    if (columnsDefinition.length === 0) {
+      return null;
+    }
+  }
+
+  if (!matchedTableName && matchColumns.length === 0 && search) {
+    return null;
+  }
+
   return (
     <div className="rounded-lg border text-sm">
       <div className="p-2">
         <div className="font-bold">{table.tableName}</div>
-        <div>No description</div>
+        <input
+          value={definition}
+          placeholder="No description"
+          onBlur={onUpdateTable}
+          onChange={(e) => {
+            e.preventDefault();
+            setDefinition(e.currentTarget.value);
+          }}
+          className="h-[30px] w-[150px] p-0 text-[13px] focus-visible:outline-none"
+        />
       </div>
-      {table.columns.map((column) => {
+      {matchColumns.map((column) => {
         return (
           <DataCatalogTableColumn
             key={column.name}
             table={table}
             column={column}
             driver={driver}
+            search={search}
+            hasDefinitionOnly={hasDefinitionOnly}
           />
         );
       })}
@@ -227,6 +322,8 @@ function DataCatalogTableAccordion({
 
 export default function DataCatalogModelTab() {
   const { currentSchemaName, schema } = useSchema();
+  const [search, setSearch] = useState("");
+  const [hasDefinitionOnly, setHasDefinitionOnly] = useState(false);
   const [selectedSchema, setSelectedSchema] = useState(currentSchemaName);
 
   const { extensions } = useConfig();
@@ -259,15 +356,34 @@ export default function DataCatalogModelTab() {
             value={selectedSchema}
             onChange={setSelectedSchema}
           />
+          <div className="ml-2 flex items-center gap-2">
+            <Checkbox
+              checked={hasDefinitionOnly}
+              onCheckedChange={() => setHasDefinitionOnly(!hasDefinitionOnly)}
+            />
+            <label className="text-sm">Definition only?</label>
+          </div>
+          <ToolbarFiller />
+          <div>
+            <Input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.currentTarget.value);
+              }}
+              placeholder="Search tables, columns"
+            />
+          </div>
         </Toolbar>
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
         {currentSchema.map((table) => (
           <DataCatalogTableAccordion
+            search={search}
             key={table.tableName}
             table={table}
             driver={driver}
+            hasDefinitionOnly={hasDefinitionOnly}
           />
         ))}
       </div>

@@ -48,4 +48,9 @@ export default abstract class DataCatalogDriver {
     tableName: string,
     columnName: string
   ): DataCatalogModelColumn | undefined;
+
+  abstract getTable(
+    schemaName: string,
+    tableName: string
+  ): DataCatalogModelTable | undefined;
 }
