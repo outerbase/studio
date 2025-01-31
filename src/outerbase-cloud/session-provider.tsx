@@ -40,7 +40,7 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   }, [router]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Session Loading...</div>;
   }
 
   if (!session || !user) {
