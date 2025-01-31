@@ -10,6 +10,7 @@ import { LucideLoader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import ThemeLayout from "../(theme)/theme_layout";
 import { LoginBaseSpaceship } from "./starbase-portal";
 
 export default function SigninPage() {
@@ -45,7 +46,7 @@ export default function SigninPage() {
   }, [email, password, router]);
 
   return (
-    <body className="dark">
+    <ThemeLayout overrideTheme="dark">
       <div
         className="absolute left-[10%] z-2 flex w-[400px] flex-col gap-4 rounded-lg border-neutral-800 bg-neutral-900 p-8 md:m-0"
         style={{
@@ -94,6 +95,6 @@ export default function SigninPage() {
       </div>
 
       <LoginBaseSpaceship />
-    </body>
+    </ThemeLayout>
   );
 }
