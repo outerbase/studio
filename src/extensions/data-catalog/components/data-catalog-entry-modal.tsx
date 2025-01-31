@@ -1,3 +1,4 @@
+import { ToolbarFiller } from "@/components/gui/toolbar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -6,84 +7,102 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCallback, useState } from "react";
+import { LucideLoader } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import DataCatalogDriver, { DataCatalogTermDefinition } from "../driver";
 
 interface Props {
-  schemaName: string;
   driver?: DataCatalogDriver;
   open: boolean;
+  onSuccess: () => void;
   onClose: (open: boolean) => void;
-  selectedTermDefinition: string;
+  selectedTermDefinition?: DataCatalogTermDefinition; // Updated type to allow editing
 }
 
 export function DataCatalogEntryModal({
   open,
   onClose,
-  schemaName,
   driver,
+  onSuccess,
   selectedTermDefinition,
 }: Props) {
+  const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<
-    Exclude<DataCatalogTermDefinition, "id">
-  >({
+  const [formData, setFormData] = useState<DataCatalogTermDefinition>({
     id: "",
     name: "",
     otherName: "",
     definition: "",
   });
 
-  const updateTermDefinition = useCallback(() => {
-    setLoading(true);
-    let data = {
-      ...formData,
-      id: String(Date.now() * 1000),
-    };
+  const clear = useCallback(() => {
+    setLoading(false);
+    setDeleting(false);
+    onClose(false);
+    setFormData({
+      id: "",
+      name: "",
+      otherName: "",
+      definition: "",
+    });
+  }, [onClose]);
+
+  useEffect(() => {
     if (selectedTermDefinition) {
-      data = formData;
+      setFormData(selectedTermDefinition);
+    } else {
+      clear();
     }
+  }, [selectedTermDefinition, clear]);
+
+  const saveTermDefinition = useCallback(() => {
+    setLoading(true);
+    const data = {
+      ...formData,
+      id: selectedTermDefinition?.id || String(Date.now() * 1000), // Use existing ID if editing
+    };
+
     driver
-      ?.updateTermDefinition(schemaName, data)
-      .then((r) => {
-        console.log(r);
-      })
-      .catch(() => {
-        setLoading(false);
-      })
-      .finally(() => {
-        setLoading(false);
-        onClose(false);
-      });
-  }, [formData, driver, onClose, selectedTermDefinition, schemaName]);
+      ?.updateTermDefinition(data)
+      .then(() => onSuccess())
+      .finally(() => clear());
+  }, [formData, driver, onSuccess, clear, selectedTermDefinition]);
+
+  function onDelete() {
+    if (!selectedTermDefinition) return;
+
+    setDeleting(true);
+    driver
+      ?.deleteTermDefinition(selectedTermDefinition.id)
+      .then(() => onSuccess())
+      .finally(() => clear());
+  }
 
   const onChangeValue = useCallback(
     (value: string, key: keyof DataCatalogTermDefinition) => {
-      setFormData(() => ({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         [key]: value,
       }));
     },
-    [formData]
+    []
   );
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size="sm">Add Entry</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Term</DialogTitle>
+          <DialogTitle>
+            {selectedTermDefinition ? "Edit Term" : "Add Term"}
+          </DialogTitle>
           <DialogDescription>
-            Add terms to your Data Dictionary to help your team and AI
-            understand important business terminology. For example Customer
-            Acquisition Cost, Churn, Activation Rate.
+            {selectedTermDefinition
+              ? "Modify the existing term definition."
+              : "Add terms to your Data Dictionary to help your team and AI understand important business terminology."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -95,9 +114,7 @@ export function DataCatalogEntryModal({
               value={formData.name}
               placeholder="Add a name"
               className="col-span-3"
-              onChange={(e) => {
-                onChangeValue(e.currentTarget.value, "name");
-              }}
+              onChange={(e) => onChangeValue(e.currentTarget.value, "name")}
             />
           </div>
           <div className="items-center gap-4">
@@ -106,9 +123,9 @@ export function DataCatalogEntryModal({
               value={formData.otherName}
               className="col-span-3"
               placeholder="Add other names"
-              onChange={(e) => {
-                onChangeValue(e.currentTarget.value, "otherName");
-              }}
+              onChange={(e) =>
+                onChangeValue(e.currentTarget.value, "otherName")
+              }
             />
           </div>
           <div className="items-center gap-4">
@@ -119,17 +136,35 @@ export function DataCatalogEntryModal({
               rows={4}
               value={formData.definition}
               className="col-span-3"
-              placeholder="Add d definition"
-              onChange={(e) => {
-                onChangeValue(e.currentTarget.value, "definition");
-              }}
+              placeholder="Add a definition"
+              onChange={(e) =>
+                onChangeValue(e.currentTarget.value, "definition")
+              }
             />
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={updateTermDefinition} type="submit">
-            Add Entry
+          <Button
+            disabled={loading || !formData.name || !formData.definition}
+            onClick={saveTermDefinition}
+            type="submit"
+          >
+            {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
+            {selectedTermDefinition ? "Save Change" : "Add Entry"}
           </Button>
+          {selectedTermDefinition && (
+            <Button
+              disabled={deleting}
+              onClick={onDelete}
+              variant="destructive"
+            >
+              {deleting && (
+                <LucideLoader className="mr-1 h-4 w-4 animate-spin" />
+              )}
+              Delete
+            </Button>
+          )}
+          <ToolbarFiller />
         </DialogFooter>
       </DialogContent>
     </Dialog>

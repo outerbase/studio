@@ -4,6 +4,7 @@ import DataCatalogDriver, {
   DataCatalogModelTable,
   DataCatalogModelTableInput,
   DataCatalogSchemas,
+  DataCatalogTermDefinition,
 } from "./driver";
 
 interface DataCatalogInmemoryDriverOptions {
@@ -11,7 +12,7 @@ interface DataCatalogInmemoryDriverOptions {
 }
 
 export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
-  protected schemas: DataCatalogSchemas;
+  private schemas: DataCatalogSchemas = { tables: {}, termDefinitions: [] };
   protected options: DataCatalogInmemoryDriverOptions;
 
   constructor(
@@ -22,11 +23,14 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     this.options = options;
   }
 
-  async load(): Promise<DataCatalogSchemas> {
+  private async delay() {
     if (this.options.delay) {
       await new Promise((resolve) => setTimeout(resolve, this.options.delay));
     }
+  }
 
+  async load(): Promise<DataCatalogSchemas> {
+    await this.delay();
     return this.schemas;
   }
 
@@ -36,19 +40,21 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     columnName: string,
     data: DataCatalogModelColumnInput
   ): Promise<DataCatalogModelColumn> {
-    if (this.options.delay) {
-      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
-    }
+    await this.delay();
 
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
     const normalizedColumnName = columnName.toLowerCase();
 
-    if (!this.schemas[normalizedSchemaName]) {
-      this.schemas[normalizedSchemaName] = {};
+    if (!this.schemas.tables) {
+      this.schemas.tables = {};
     }
 
-    const schemas = this.schemas[normalizedSchemaName];
+    if (!this.schemas.tables[normalizedSchemaName]) {
+      this.schemas.tables[normalizedSchemaName] = {};
+    }
+
+    const schemas = this.schemas.tables[normalizedSchemaName];
 
     if (!schemas[normalizedTableName]) {
       schemas[normalizedTableName] = {
@@ -79,18 +85,16 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     tableName: string,
     data: DataCatalogModelTableInput
   ): Promise<DataCatalogModelTable> {
-    if (this.options.delay) {
-      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
-    }
+    await this.delay();
 
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
 
-    if (!this.schemas[normalizedSchemaName]) {
-      this.schemas[normalizedSchemaName] = {};
+    if (!this.schemas.tables || !this.schemas.tables[normalizedSchemaName]) {
+      this.schemas.tables[normalizedSchemaName] = {};
     }
 
-    const schemas = this.schemas[normalizedSchemaName];
+    const schemas = this.schemas.tables[normalizedSchemaName];
 
     if (!schemas[normalizedTableName]) {
       schemas[normalizedTableName] = {
@@ -113,7 +117,6 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     columnName: string
   ): DataCatalogModelColumn | undefined {
     const normalizedColumnName = columnName.toLowerCase();
-
     const table = this.getTable(schemaName, tableName);
     return table?.columns[normalizedColumnName];
   }
@@ -125,17 +128,50 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
 
-    if (!this.schemas[normalizedSchemaName]) {
+    if (!this.schemas.tables) {
       return;
     }
+    const schemas = this.schemas.tables[normalizedSchemaName];
+    return schemas[normalizedTableName];
+  }
 
-    const schemas = this.schemas[normalizedSchemaName];
-
-    if (!schemas[normalizedTableName]) {
+  getTermDefinitions(): DataCatalogTermDefinition[] | undefined {
+    if (!this.schemas.termDefinitions) {
       return;
     }
+    return this.schemas.termDefinitions;
+  }
 
-    const table = schemas[normalizedTableName];
-    return table;
+  async updateTermDefinition(
+    data: DataCatalogTermDefinition
+  ): Promise<DataCatalogTermDefinition | undefined> {
+    await this.delay();
+
+    if (!this.schemas.termDefinitions) {
+      this.schemas.termDefinitions = [];
+    }
+    const schemaTerms = this.schemas.termDefinitions;
+
+    const existingIndex = schemaTerms.findIndex((term) => term.id === data.id);
+
+    if (existingIndex !== -1) {
+      schemaTerms[existingIndex] = { ...schemaTerms[existingIndex], ...data };
+    } else {
+      schemaTerms.unshift(data);
+    }
+
+    return data;
+  }
+
+  async deleteTermDefinition(id: string): Promise<boolean> {
+    await this.delay();
+    if (!this.schemas.termDefinitions) return false;
+
+    const terms = this.schemas.termDefinitions;
+    const initialLength = terms.length;
+
+    this.schemas.termDefinitions = terms.filter((term) => term.id !== id);
+
+    return terms.length < initialLength;
   }
 }

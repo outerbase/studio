@@ -15,17 +15,21 @@ export interface DataCatalogModelColumn extends DataCatalogModelColumnInput {
 export interface DataCatalogModelTableInput {
   definition: string;
 }
-
+export interface DataCatalogTermDefinition extends DataCatalogModelTableInput {
+  id: string;
+  name: string;
+  otherName?: string;
+}
 export interface DataCatalogModelTable extends DataCatalogModelTableInput {
   schemaName: string;
   tableName: string;
   columns: Record<string, DataCatalogModelColumn>;
 }
 
-export type DataCatalogSchemas = Record<
-  string,
-  Record<string, DataCatalogModelTable>
->;
+export interface DataCatalogSchemas {
+  tables: Record<string, Record<string, DataCatalogModelTable>>;
+  termDefinitions: DataCatalogTermDefinition[];
+}
 
 export default abstract class DataCatalogDriver {
   abstract load(): Promise<DataCatalogSchemas>;
@@ -53,4 +57,12 @@ export default abstract class DataCatalogDriver {
     schemaName: string,
     tableName: string
   ): DataCatalogModelTable | undefined;
+
+  abstract updateTermDefinition(
+    data: DataCatalogTermDefinition
+  ): Promise<DataCatalogTermDefinition | undefined>;
+
+  abstract getTermDefinitions(): DataCatalogTermDefinition[] | undefined;
+
+  abstract deleteTermDefinition(id: string): Promise<boolean>;
 }
