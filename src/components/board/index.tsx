@@ -1,104 +1,51 @@
-"use client";
-import { cn } from "@/lib/utils";
-import { RectangleHorizontal, Square } from "lucide-react";
-import { useCallback } from "react";
-import RGL, { WidthProvider } from "react-grid-layout";
-import { buttonVariants } from "../ui/button";
-import "./board-style.css";
+import { useState } from "react";
+import { BoardCanvas } from "./board-canvas";
+import { BoardFilter } from "./board-filter";
+import { BoardFilterProps } from "./board-filter-dialog";
 
-export interface BoardChartLayout {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  i: number;
-}
-
-interface BoardProps {
+interface DashboardProps {
   layout: ReactGridLayout.Layout[];
-  onChange: (v: ReactGridLayout.Layout[]) => void;
-  editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
+  data: {
+    filters: BoardFilterProps[];
+  };
 }
 
-const ReactGridLayout = WidthProvider(RGL);
+interface Props {
+  value: DashboardProps;
+  setValue: (value: DashboardProps) => void;
+}
 
-export default function Board(props: BoardProps) {
-  const sizes = [
-    { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
-    {
-      w: 2,
-      h: 1,
-      name: "2",
-      icon: <RectangleHorizontal className="h-4 w-4" />,
-    },
-    { w: 2, h: 2, name: "3", icon: <Square className="h-4 w-4" /> },
-    {
-      w: 4,
-      h: 2,
-      name: "4",
-      icon: <RectangleHorizontal className="h-4 w-4" />,
-    },
-  ];
-
-  const handleClickResize = useCallback(
-    (w: number, h: number, index: number) => {
-      const dummy = structuredClone(props.layout);
-      dummy[index].w = w;
-      dummy[index].h = h;
-      props.onChange(dummy);
-    },
-    [props]
-  );
-
-  const mapItem: JSX.Element[] = [...Array(props.layout.length)].map((_, i) => {
-    return (
-      <div
-        key={i}
-        className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
-        data-grid={_}
-      >
-        {props.editMode === "REARRANGING_CHART" && (
-          <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
-            {sizes.map((x, index) => {
-              return (
-                <button
-                  className={cn(
-                    buttonVariants({ variant: "secondary", size: "icon" }),
-                    "cancelSelectorName h-6 w-6 p-0"
-                  )}
-                  onClick={() =>
-                    handleClickResize(x.w as number, x.h as number, i)
-                  }
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  key={index}
-                >
-                  {x.icon}
-                </button>
-              );
-            })}
-          </div>
-        )}
-        <div>{i}</div>
-      </div>
-    );
-  });
+export default function Board({ value, setValue }: Props) {
+  const [editMode, setEditMode] = useState<
+    "ADD_CHART" | "REARRANGING_CHART" | null
+  >(null);
 
   return (
     <div>
-      <ReactGridLayout
-        cols={4}
-        rowHeight={220}
-        draggableCancel=".cancelSelectorName"
-        className="layout overflow-x-hidden"
-        layout={props.layout}
-        onLayoutChange={props.onChange}
-        isDraggable={props.editMode === "REARRANGING_CHART"}
-        isResizable={props.editMode === "REARRANGING_CHART"}
-        compactType={"vertical"}
-      >
-        {mapItem}
-      </ReactGridLayout>
+      <BoardFilter
+        filters={value.data.filters}
+        onFilters={(v) =>
+          setValue({
+            ...value,
+            data: {
+              ...value.data,
+              filters: v,
+            },
+          })
+        }
+        editMode={editMode}
+        setEditMode={setEditMode}
+      />
+      <BoardCanvas
+        layout={value.layout}
+        onChange={(v) => {
+          setValue({
+            ...value,
+            layout: v,
+          });
+        }}
+        editMode={editMode}
+      />
     </div>
   );
 }

@@ -117,3 +117,23 @@
   bottom: 0;
   transform: rotate(45deg);
 }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.animate-revealMenu {
+  animation: revealMenu 1s cubic-bezier(0.7, 0, 0, 1.2) forwards;
+}
+
+@keyframes revealMenu {
+  0% {
+    opacity: 100%;
+    transform: translateY(100px) translateX(-40%);
+  }
+  100% {
+    opacity: 100%;
+    transform: translateY(0) translateX(-40%);
+  }
+}

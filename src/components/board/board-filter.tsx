@@ -8,7 +8,7 @@ import {
   Search,
 } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Toolbar, ToolbarButton } from "../gui/toolbar";
+import { buttonVariants } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import {
   DropdownMenu,
@@ -22,10 +22,13 @@ import {
   BoardFilterProps,
   DEFAULT_DATE_FILTER,
 } from "./board-filter-dialog";
+import { BoardTool } from "./board-tool";
 
 interface Props {
   filters: BoardFilterProps[];
   onFilters: (f: BoardFilterProps[]) => void;
+  editMode: "ADD_CHART" | "REARRANGING_CHART" | null;
+  setEditMode: (v: "ADD_CHART" | "REARRANGING_CHART") => void;
 }
 
 export function BoardFilter(props: Props) {
@@ -63,7 +66,7 @@ export function BoardFilter(props: Props) {
           placeholder={`Enter ${x.name}`}
           value={x.default_value}
           onChange={(v) => {
-            const data = [...props.filters];
+            const data = structuredClone(props.filters);
             data[i].default_value = v.target.value;
             props.onFilters(data);
           }}
@@ -95,7 +98,7 @@ export function BoardFilter(props: Props) {
                       checked={x.default_value.split(",").includes(v)}
                       onCheckedChange={(checked) => {
                         const value = x.default_value.split(",");
-                        const data = [...props.filters];
+                        const data = structuredClone(props.filters);
 
                         if (checked) {
                           data[i].default_value = [...value, v]
@@ -136,7 +139,7 @@ export function BoardFilter(props: Props) {
                 <DropdownMenuItem
                   key={date}
                   onClick={() => {
-                    const data = [...props.filters];
+                    const data = structuredClone(props.filters);
                     data[i].default_value = date;
                     props.onFilters(data);
                   }}
@@ -200,41 +203,44 @@ export function BoardFilter(props: Props) {
   });
 
   return (
-    <div>
-      {open && selectIndex !== undefined && (
-        <BoardFilterDialog
-          onClose={() => {
-            setOpen(false);
-            if (props.filters[selectIndex].new === true) {
-              props.onFilters([
-                ...props.filters.filter((_, i) => i !== selectIndex),
-              ]);
-              setSelectIndex(undefined);
-            }
-          }}
-          filter={props.filters[selectIndex]}
-          onFilter={(v) => {
-            const data = [...props.filters];
-            data[selectIndex] = v;
-            props.onFilters(data);
-          }}
-          onAddFilter={() => {
-            const data = [...props.filters];
-            data[selectIndex].new = false;
-            setOpen(false);
-            props.onFilters(data);
-          }}
-        />
-      )}
-      <Toolbar>
-        {mapFilterItem}
-        <ToolbarButton
-          icon={<ListFilter className="h-4 w-4" />}
-          text=""
-          tooltip={"Filter"}
-          onClick={onFilter}
-        />
-      </Toolbar>
-    </div>
+    <>
+      <BoardTool editMode={props.editMode} setEditMode={props.setEditMode} />
+      <div className="sticky -top-4 z-50 bg-neutral-100 px-1 pt-4 pb-2 dark:bg-neutral-950">
+        {open && selectIndex !== undefined && (
+          <BoardFilterDialog
+            onClose={() => {
+              setOpen(false);
+              if (props.filters[selectIndex].new === true) {
+                props.onFilters([
+                  ...props.filters.filter((_, i) => i !== selectIndex),
+                ]);
+                setSelectIndex(undefined);
+              }
+            }}
+            filter={props.filters[selectIndex]}
+            onFilter={(v) => {
+              const data = structuredClone(props.filters);
+              data[selectIndex] = v;
+              props.onFilters(data);
+            }}
+            onAddFilter={() => {
+              const data = structuredClone(props.filters);
+              data[selectIndex].new = false;
+              setOpen(false);
+              props.onFilters(data);
+            }}
+          />
+        )}
+        <div className="flex flex-wrap gap-3">
+          {mapFilterItem}
+          <button
+            className={buttonVariants({ size: "sm", variant: "ghost" })}
+            onClick={onFilter}
+          >
+            <ListFilter className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

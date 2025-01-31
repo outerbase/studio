@@ -1,8 +1,6 @@
 "use client";
 import Board from "@/components/board";
-import { BoardFilter } from "@/components/board/board-filter";
 import { BoardFilterProps } from "@/components/board/board-filter-dialog";
-import { BoardTool } from "@/components/board/board-tool";
 import { useState } from "react";
 import ReactGridLayout from "react-grid-layout";
 
@@ -14,9 +12,6 @@ interface DashboardProps {
 }
 
 export default function StorybookBoardPage() {
-  const [editMode, setEditMode] = useState<
-    "ADD_CHART" | "REARRANGING_CHART" | null
-  >(null);
   const [value, setValue] = useState<DashboardProps>({
     layout: [
       { x: 0, y: 0, w: 1, h: 1, i: "0" },
@@ -30,31 +25,8 @@ export default function StorybookBoardPage() {
   console.log(value);
 
   return (
-    <div className="min-h-full w-full flex-1">
-      <BoardFilter
-        filters={value.data.filters}
-        onFilters={(v) =>
-          setValue({
-            ...value,
-            data: {
-              ...value.data,
-              filters: v,
-            },
-          })
-        }
-      />
-      <BoardTool editMode={editMode} setEditMode={setEditMode} />
-      <Board
-        layout={value.layout}
-        onChange={(v) => {
-          console.log("change here");
-          setValue({
-            ...value,
-            layout: v,
-          });
-        }}
-        editMode={editMode}
-      />
+    <div className="relative h-full w-full flex-1">
+      <Board value={value} setValue={setValue} />
     </div>
   );
 }
