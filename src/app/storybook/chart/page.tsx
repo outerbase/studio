@@ -4,7 +4,7 @@ import Chart, { ChartData, ChartValue } from "@/components/chart";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const chatValue: ChartValue[] = [
+const data: ChartData[] = [
   {
     package_year: 2021,
     package_count: 33,
@@ -35,7 +35,7 @@ const chatValue: ChartValue[] = [
   },
 ];
 
-const lineChartData: ChartData = {
+const lineChartValue: ChartValue = {
   connection_id: null,
   created_at: "2025-01-30T02:57:34.579Z",
   id: "2bdc1dc4-21de-4b5f-90d2-384e40288769",
@@ -73,7 +73,7 @@ const lineChartData: ChartData = {
   workspace_id: "3db2e96f-ee43-412d-be09-25fc02d3a463",
 };
 
-const barChartData: ChartData = {
+const barChartValue: ChartValue = {
   connection_id: null,
   created_at: "2025-01-30T02:56:40.851Z",
   id: "fed7cd59-6be9-4f43-af6d-b730d14be984",
@@ -114,7 +114,7 @@ const barChartData: ChartData = {
   workspace_id: "3db2e96f-ee43-412d-be09-25fc02d3a463",
 };
 
-const pieChartData: ChartData = {
+const pieChartValue: ChartValue = {
   connection_id: null,
   created_at: "2025-01-30T03:00:40.963Z",
   id: "602f5960-e2db-4359-8008-c87629c1d169",
@@ -153,8 +153,8 @@ const pieChartData: ChartData = {
 };
 
 export default function StorybookChartPage() {
-  const [chartData, setChartData] = useState(lineChartData);
-  const [items, setItems] = useState(chatValue);
+  const [chartValue, setChartValue] = useState(lineChartValue);
+  const [items, setItems] = useState(data);
   const [modifier, setModifier] = useState({});
 
   return (
@@ -162,7 +162,7 @@ export default function StorybookChartPage() {
       <div>
         <Button
           onClick={() => {
-            setChartData(lineChartData);
+            setChartValue(lineChartValue);
             setItems(items);
             setModifier({
               title: {
@@ -180,7 +180,7 @@ export default function StorybookChartPage() {
         <Button
           className="ml-2"
           onClick={() => {
-            setChartData(barChartData);
+            setChartValue(barChartValue);
             setItems(items);
             setModifier({
               title: {
@@ -198,7 +198,7 @@ export default function StorybookChartPage() {
         <Button
           className="ml-2"
           onClick={() => {
-            setChartData(pieChartData);
+            setChartValue(pieChartValue);
             setItems(items);
             setModifier({
               title: {
@@ -215,7 +215,7 @@ export default function StorybookChartPage() {
         </Button>
       </div>
       <div>
-        <Chart chartData={chartData} chartValue={items} modifier={modifier} />
+        <Chart value={chartValue} data={items} modifier={modifier} />
       </div>
     </div>
   );

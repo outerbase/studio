@@ -32,7 +32,7 @@ interface ChartParams {
   connection_id: string | null;
 }
 
-export interface ChartData {
+export interface ChartValue {
   connection_id: string | null;
   created_at: string;
   id: string;
@@ -45,29 +45,25 @@ export interface ChartData {
   workspace_id: string;
 }
 
-export interface ChartValue {
+export interface ChartData {
   [key: string]: any;
 }
 
 export type ChartType = "line" | "bar" | "pie" | "column" | "scatter";
 
 interface OuterbaseChartProps {
-  chartValue: ChartValue[];
-  chartData: ChartData;
+  data: ChartData[];
+  value: ChartValue;
   modifier?: EChartsOption;
 }
 
-export default function Chart({
-  chartValue,
-  chartData,
-  modifier,
-}: OuterbaseChartProps) {
+export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
   const domRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const props = transfromOutbaseChartData({
-      chartValue,
-      chartData,
+      value,
+      data,
       modifier,
     });
     if (domRef.current) {
@@ -79,30 +75,30 @@ export default function Chart({
       chartInstance.clear();
       chartInstance.setOption(props);
     }
-  }, [domRef, chartValue, chartData, modifier]);
+  }, [domRef, value, data, modifier]);
 
   return <div ref={domRef} className="h-[400px] w-[500px]"></div>;
 }
 
 export function transfromOutbaseChartData({
-  chartValue,
-  chartData,
+  value,
+  data,
   modifier,
 }: OuterbaseChartProps) {
-  const xAxisData = chartValue.map(
-    (item) => item[chartData?.params?.options?.xAxisKey] ?? ""
+  const xAxisData = data.map(
+    (item) => item[value?.params?.options?.xAxisKey] ?? ""
   );
-  const seriesData = chartData?.params?.options?.yAxisKeys.map((key) => {
-    const color = chartData?.params?.options?.yAxisKeyColors?.[key] ?? "";
-    const chartType = chartData?.type;
+  const seriesData = value?.params?.options?.yAxisKeys.map((key) => {
+    const color = value?.params?.options?.yAxisKeyColors?.[key] ?? "";
+    const chartType = value?.type;
     const baseSeries = {
       name: key,
-      type: chartData.type,
-      data: chartValue.map((item) => {
+      type: value.type,
+      data: data.map((item) => {
         if (chartType === "pie") {
           return {
             value: item[key],
-            name: item[chartData?.params?.options?.xAxisKey] ?? "",
+            name: item[value?.params?.options?.xAxisKey] ?? "",
           };
         } else {
           return item[key];
@@ -118,7 +114,7 @@ export function transfromOutbaseChartData({
     return baseSeries;
   });
 
-  if (chartData.type === "pie") {
+  if (value.type === "pie") {
     return {
       series: seriesData,
       ...modifier,
