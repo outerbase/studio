@@ -55,9 +55,15 @@ interface OuterbaseChartProps {
   data: ChartData[];
   value: ChartValue;
   modifier?: EChartsOption;
+  className?: string;
 }
 
-export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
+export default function Chart({
+  value,
+  data,
+  modifier,
+  className,
+}: OuterbaseChartProps) {
   const domRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -77,7 +83,9 @@ export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
     }
   }, [domRef, value, data, modifier]);
 
-  return <div ref={domRef} className="h-[400px] w-[500px]"></div>;
+  return (
+    <div ref={domRef} className={className ?? "h-[400px] w-[500px]"}></div>
+  );
 }
 
 export function transfromOutbaseChartData({
