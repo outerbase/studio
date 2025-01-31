@@ -1,4 +1,10 @@
-import DataCatalogDriver, { DataCatalogModelColumn, DataCatalogModelColumnInput, DataCatalogModelTable, DataCatalogModelTableInput, DataCatalogSchemas } from "./driver";
+import DataCatalogDriver, {
+  DataCatalogModelColumn,
+  DataCatalogModelColumnInput,
+  DataCatalogModelTable,
+  DataCatalogModelTableInput,
+  DataCatalogSchemas,
+} from "./driver";
 
 interface DataCatalogInmemoryDriverOptions {
   delay?: number;
@@ -6,16 +12,19 @@ interface DataCatalogInmemoryDriverOptions {
 
 export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
   protected schemas: DataCatalogSchemas;
-  protected options: DataCatalogInmemoryDriverOptions
+  protected options: DataCatalogInmemoryDriverOptions;
 
-  constructor(schemas: DataCatalogSchemas, options: DataCatalogInmemoryDriverOptions) {
+  constructor(
+    schemas: DataCatalogSchemas,
+    options: DataCatalogInmemoryDriverOptions
+  ) {
     this.schemas = schemas;
     this.options = options;
   }
 
   async load(): Promise<DataCatalogSchemas> {
     if (this.options.delay) {
-      await new Promise(resolve => setTimeout(resolve, this.options.delay));
+      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
     }
 
     return this.schemas;
@@ -28,7 +37,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     data: DataCatalogModelColumnInput
   ): Promise<DataCatalogModelColumn> {
     if (this.options.delay) {
-      await new Promise(resolve => setTimeout(resolve, this.options.delay));
+      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
     }
 
     const normalizedSchemaName = schemaName.toLowerCase();
@@ -46,7 +55,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
         schemaName: normalizedSchemaName,
         tableName: normalizedTableName,
         columns: {},
-        definition: '',
+        definition: "",
       };
     }
 
@@ -54,7 +63,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     if (!table.columns[normalizedColumnName]) {
       table.columns[normalizedColumnName] = {
         name: normalizedColumnName,
-        definition: '',
+        definition: "",
         samples: [],
         hideFromEzql: false,
       };
@@ -71,7 +80,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     data: DataCatalogModelTableInput
   ): Promise<DataCatalogModelTable> {
     if (this.options.delay) {
-      await new Promise(resolve => setTimeout(resolve, this.options.delay));
+      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
     }
 
     const normalizedSchemaName = schemaName.toLowerCase();
@@ -88,7 +97,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
         schemaName: normalizedSchemaName,
         tableName: normalizedTableName,
         columns: {},
-        definition: '',
+        definition: "",
       };
     }
 
@@ -103,9 +112,18 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     tableName: string,
     columnName: string
   ): DataCatalogModelColumn | undefined {
+    const normalizedColumnName = columnName.toLowerCase();
+
+    const table = this.getTable(schemaName, tableName);
+    return table?.columns[normalizedColumnName];
+  }
+
+  getTable(
+    schemaName: string,
+    tableName: string
+  ): DataCatalogModelTable | undefined {
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
-    const normalizedColumnName = columnName.toLowerCase();
 
     if (!this.schemas[normalizedSchemaName]) {
       return;
@@ -118,6 +136,6 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     }
 
     const table = schemas[normalizedTableName];
-    return table.columns[normalizedColumnName];
+    return table;
   }
 }
