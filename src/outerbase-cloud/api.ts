@@ -2,10 +2,13 @@ import {
   OuterbaseAPIBaseResponse,
   OuterbaseAPIDashboardDetail,
   OuterbaseAPIDashboardListResponse,
+  OuterbaseAPIError,
   OuterbaseAPIQuery,
   OuterbaseAPIQueryListResponse,
   OuterbaseAPIQueryRaw,
   OuterbaseAPIResponse,
+  OuterbaseAPISession,
+  OuterbaseAPIUser,
   OuterbaseAPIWorkspaceResponse,
 } from "./api-type";
 
@@ -24,6 +27,11 @@ export async function requestOuterbase<T = unknown>(
   });
 
   const json = (await raw.json()) as OuterbaseAPIResponse<T>;
+
+  if (json.error) {
+    throw new OuterbaseAPIError(json.error)
+  }
+
   return json.response;
 }
 
@@ -34,9 +42,9 @@ export function getOuterbaseWorkspace() {
 export async function getOuterbaseBase(workspaceId: string, baseId: string) {
   const baseList = await requestOuterbase<OuterbaseAPIBaseResponse>(
     "/api/v1/workspace/" +
-      workspaceId +
-      "/connection?" +
-      new URLSearchParams({ baseId })
+    workspaceId +
+    "/connection?" +
+    new URLSearchParams({ baseId })
   );
 
   return baseList.items[0];
@@ -110,4 +118,14 @@ export async function updateOuterbaseQuery(
     "PUT",
     options
   );
+}
+
+export async function getOuterbaseSession() {
+  return requestOuterbase<{ session: OuterbaseAPISession, user: OuterbaseAPIUser }>('/api/v1/auth/session')
+}
+
+export async function loginOuterbaseByPassword(email: string, password: string) {
+  return requestOuterbase<OuterbaseAPISession>("/api/v1/auth/login", "POST", {
+    email, password
+  })
 }
