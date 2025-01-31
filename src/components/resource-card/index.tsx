@@ -51,13 +51,16 @@ export default function ResourceCard({
       <header className="z-10 flex items-center gap-3">
         <div
           className={cn(
-            "relative flex size-10 items-center justify-center rounded bg-linear-to-br after:absolute after:size-full after:rounded after:border after:border-black/5 dark:after:border-white/10",
+            "relative flex size-10 shrink-0 items-center justify-center rounded bg-linear-to-br after:absolute after:size-full after:rounded after:border after:border-black/5 dark:after:border-white/10",
             {
               "from-neutral-200 to-neutral-50 dark:from-neutral-700 dark:to-neutral-700/0":
                 color === "default",
 
               "from-amber-500/20 to-orange-500/5 text-orange-500 dark:from-amber-800/50 dark:to-orange-800/10 dark:text-orange-300":
-                color === "orange",
+                color === "orange" || color === "yellow",
+
+              "from-red-500/20 to-red-500/5 text-red-500 dark:from-red-800/50 dark:to-red-800/10 dark:text-red-300":
+                color === "red",
 
               "from-green-500/20 to-teal-500/5 text-teal-500 dark:from-green-800/50 dark:to-teal-800/10 dark:text-emerald-300":
                 color === "green",
@@ -72,8 +75,10 @@ export default function ResourceCard({
         >
           {IconComponent && <IconComponent className="h-6 w-6" />}
         </div>
-        <div className="">
-          <p className="text-sm font-semibold tracking-tight">{title}</p>
+        <div className="flex-1 overflow-x-hidden">
+          <p className="line-clamp-1 w-full text-sm font-semibold tracking-tight">
+            {title}
+          </p>
           {subtitle && (
             <p className="text-xs font-medium text-neutral-400">{subtitle}</p>
           )}
@@ -106,7 +111,8 @@ export default function ResourceCard({
           "absolute right-0 bottom-0 z-[2] h-full w-1/2 bg-gradient-to-br mix-blend-hue",
           {
             "from-white to-white": color === "default",
-            "from-yellow-500 to-red-500": color === "orange",
+            "from-yellow-500 to-red-500":
+              color === "orange" || color === "yellow" || color === "red",
             "from-emerald-500 to-teal-500": color === "green",
             "from-sky-500 to-indigo-500": color === "blue",
             "from-fuchsia-500 via-sky-500 to-yellow-500": color === "rainbow",
@@ -130,7 +136,15 @@ export default function ResourceCard({
               <DotsThreeVertical size={18} weight="bold" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">{children}</DropdownMenuContent>
+          <DropdownMenuContent
+            align="end"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            {children}
+          </DropdownMenuContent>
         </DropdownMenu>
       )}
     </Link>
