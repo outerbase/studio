@@ -1,9 +1,10 @@
 import { useConfig } from "@/context/config-provider";
-import { useTheme } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
-import { ReactElement, useMemo, useState } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { ArrowLeft } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ReactElement, useMemo, useState } from "react";
+import ThemeToggle from "../theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ArrowLeft, MoonStars, Sun } from "@phosphor-icons/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export interface SidebarTabItem {
   key: string;
@@ -27,12 +28,14 @@ interface SidebarTabProps {
 
 export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { theme, toggleTheme, disableToggle } = useTheme();
   const [loadedIndex, setLoadedIndex] = useState(() => {
     const a: boolean[] = new Array(tabs.length).fill(false);
     a[0] = true;
     return a;
   });
+
+  const searchParams = useSearchParams();
+  const disableToggle = searchParams.get("disableThemeToggle") === "1";
 
   const config = useConfig();
 
@@ -103,26 +106,18 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
               </div>
 
               {!disableToggle && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    toggleTheme();
-                  }}
-                >
-                  {theme === "dark" ? (
-                    <Sun className="mr-2" />
-                  ) : (
-                    <MoonStars className="mr-2" />
-                  )}
-                  Switch to {theme === "dark" ? "light mode" : "dark mode"}
-                </DropdownMenuItem>
+                <div className="flex p-2">
+                  <ThemeToggle />
+                </div>
               )}
+
               {config.onBack && (
                 <DropdownMenuItem onClick={config.onBack}>
                   <ArrowLeft className="mr-2" />
                   Back to bases
                 </DropdownMenuItem>
               )}
-              {config.onBack && !disableToggle && <DropdownMenuSeparator />}
+              {config.onBack && <DropdownMenuSeparator />}
               <DropdownMenuItem inset>
                 <Link
                   className="block w-full"

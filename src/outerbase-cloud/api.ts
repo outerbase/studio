@@ -1,11 +1,15 @@
 import {
   OuterbaseAPIBaseResponse,
+  OuterbaseAPIDashboardChart,
   OuterbaseAPIDashboardDetail,
   OuterbaseAPIDashboardListResponse,
+  OuterbaseAPIError,
   OuterbaseAPIQuery,
   OuterbaseAPIQueryListResponse,
   OuterbaseAPIQueryRaw,
   OuterbaseAPIResponse,
+  OuterbaseAPISession,
+  OuterbaseAPIUser,
   OuterbaseAPIWorkspaceResponse,
 } from "./api-type";
 
@@ -24,6 +28,11 @@ export async function requestOuterbase<T = unknown>(
   });
 
   const json = (await raw.json()) as OuterbaseAPIResponse<T>;
+
+  if (json.error) {
+    throw new OuterbaseAPIError(json.error);
+  }
+
   return json.response;
 }
 
@@ -110,4 +119,39 @@ export async function updateOuterbaseQuery(
     "PUT",
     options
   );
+}
+
+export async function getOuterbaseSession() {
+  return requestOuterbase<{
+    session: OuterbaseAPISession;
+    user: OuterbaseAPIUser;
+  }>("/api/v1/auth/session");
+}
+
+export async function loginOuterbaseByPassword(
+  email: string,
+  password: string
+) {
+  return requestOuterbase<OuterbaseAPISession>("/api/v1/auth/login", "POST", {
+    email,
+    password,
+  });
+}
+
+export async function getOuterbaseEmbedChart(
+  chartId: string,
+  apiKey: string
+): Promise<OuterbaseAPIResponse<OuterbaseAPIDashboardChart>> {
+  const result = await fetch(
+    `${process.env.NEXT_PUBLIC_OB_API}/chart/${chartId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-chart-api-key": apiKey,
+      },
+    }
+  );
+
+  return await result.json();
 }

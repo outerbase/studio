@@ -1,7 +1,9 @@
 import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
+import ThemeToggle from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Component, Layers2 } from "lucide-react";
-import StorybookThemeSwitcher from "./storybook-theme-switcher";
+import ThemeLayout from "../(theme)/theme_layout";
 
 export default function StorybookRootLayout({
   children,
@@ -9,11 +11,11 @@ export default function StorybookRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <body>
+    <ThemeLayout>
       <div className="flex h-screen w-screen overflow-hidden">
         <div className="flex w-[300px] flex-col border-r">
-          <div className="p-2">
-            <StorybookThemeSwitcher />
+          <div className="flex p-2">
+            <ThemeToggle />
           </div>
 
           <SidebarMenuItem icon={Layers2} text="Guideline" href="/storybook" />
@@ -50,9 +52,21 @@ export default function StorybookRootLayout({
             text="List View"
             href="/storybook/listview"
           />
+          <SidebarMenuItem
+            icon={Component}
+            text="Chart"
+            href="/storybook/chart"
+          />
+          <SidebarMenuItem
+            icon={Component}
+            text="Board"
+            href="/storybook/board"
+          />
         </div>
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <TooltipProvider>{children}</TooltipProvider>
+        </div>
       </div>
-    </body>
+    </ThemeLayout>
   );
 }

@@ -1,0 +1,53 @@
+@keyframes moveStars {
+  0% {
+    bottom: 32%;
+    transform: rotate(0deg);
+  }
+  25% {
+    bottom: 33%;
+    transform: rotate(-1deg);
+  }
+  50% {
+    bottom: 34%;
+    transform: rotate(0deg);
+  }
+  75% {
+    bottom: 33%;
+    transform: rotate(1deg);
+  }
+  100% {
+    bottom: 32%;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes movePlanet {
+  0% {
+    bottom: 16%;
+    transform: rotate(0deg);
+  }
+  25% {
+    bottom: 17.5%;
+    transform: rotate(1deg);
+  }
+  50% {
+    bottom: 20%;
+    transform: rotate(0deg);
+  }
+  75% {
+    bottom: 17.5%;
+    transform: rotate(-1deg);
+  }
+  100% {
+    bottom: 16%;
+    transform: rotate(0deg);
+  }
+}
+
+.stars-animation {
+  animation: moveStars 30s ease-in-out infinite;
+}
+
+.planet-animation {
+  animation: movePlanet 30s ease-in-out infinite;
+}

@@ -1,6 +1,6 @@
-import { useTheme } from "@/context/theme-provider";
 import { tags as t } from "@lezer/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
+import { useTheme } from "next-themes";
 import { useMemo } from "react";
 
 export default function useCodeEditorTheme({

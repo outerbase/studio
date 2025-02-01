@@ -1,44 +1,40 @@
-import { Analytics } from "@vercel/analytics/react";
-import { Inter } from "next/font/google";
-import ThemeProvider from "@/context/theme-provider";
-import { cookies } from "next/headers";
-import { Toaster } from "@/components/ui/sonner";
-import { Fragment, PropsWithChildren } from "react";
-import Script from "next/script";
-import { cn } from "@/lib/utils";
+"use client";
 import PageTracker from "@/components/page-tracker";
+import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/react";
+import { ThemeProvider } from "next-themes";
+import Script from "next/script";
+import { Fragment, PropsWithChildren, useEffect } from "react";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export default async function ThemeLayout({
+export default function ThemeLayout({
   children,
   overrideTheme,
-  disableToggle,
   overrideThemeVariables,
 }: PropsWithChildren<{
   overrideTheme?: "dark" | "light";
-  disableToggle?: boolean;
   overrideThemeVariables?: Record<string, string>;
 }>) {
-  const cookieStore = await cookies();
-  const theme =
-    overrideTheme ??
-    (cookieStore.get("theme")?.value === "dark" ? "dark" : "light");
-  const style = overrideThemeVariables ?? {};
+  useEffect(() => {
+    if (overrideThemeVariables && typeof window === "undefined") {
+      Object.entries(overrideThemeVariables).forEach(([key, value]) => {
+        document.body.style.setProperty(key, value);
+      });
+    }
+  }, [overrideThemeVariables]);
 
   return (
-    <body
-      className={cn(inter.className, theme)}
-      style={style}
-      suppressHydrationWarning
-    >
-      <ThemeProvider defaultTheme={theme} disableToggle={disableToggle}>
+    <>
+      <ThemeProvider
+        forcedTheme={overrideTheme}
+        enableColorScheme
+        attribute="class"
+      >
         <Fragment>{children}</Fragment>
         <Toaster />
       </ThemeProvider>
       <Analytics />
       <PageTracker />
       <Script async defer src="https://buttons.github.io/buttons.js" />
-    </body>
+    </>
   );
 }
