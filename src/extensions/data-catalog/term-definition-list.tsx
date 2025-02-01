@@ -13,7 +13,7 @@ export default function TermDefinitionList({ data, onSelect }: Props) {
           <div
             onClick={() => onSelect(item)}
             key={item.id}
-            className="bg-accent dark:bg-primary-foreground mt-3 flex rounded-xl border p-5 hover:bg-gray-200"
+            className="bg-accent mt-3 flex rounded-xl border p-5 hover:bg-gray-200 dark:bg-neutral-900 dark:hover:bg-neutral-800"
           >
             <div className="gap-5">
               <div className="text-lg font-bold">{item.name}</div>
