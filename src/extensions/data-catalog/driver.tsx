@@ -26,13 +26,16 @@ export interface DataCatalogModelTable extends DataCatalogModelTableInput {
   columns: Record<string, DataCatalogModelColumn>;
 }
 
-export interface DataCatalogSchemas {
-  tables: Record<string, Record<string, DataCatalogModelTable>>;
-  termDefinitions: DataCatalogTermDefinition[];
-}
+export type DataCatalogSchemas = Record<
+  string,
+  Record<string, DataCatalogModelTable>
+>;
 
 export default abstract class DataCatalogDriver {
-  abstract load(): Promise<DataCatalogSchemas>;
+  abstract load(): Promise<{
+    schemas: DataCatalogSchemas;
+    dataCatalog: DataCatalogTermDefinition[];
+  }>;
 
   abstract updateColumn(
     schemaName: string,
