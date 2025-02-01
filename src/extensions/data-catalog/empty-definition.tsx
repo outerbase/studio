@@ -1,32 +1,31 @@
-import { useTheme } from "@/context/theme-provider";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useMemo } from "react";
 
 export default function EmptyTermDefinition() {
-  const { theme } = useTheme();
-
+  const { resolvedTheme } = useTheme();
   const EmptyTerm = useMemo(() => {
     return [
       {
-        src: `/extension/term-${theme}.png`,
+        src: `/extension/term-${resolvedTheme}.png`,
         title: "Create a term",
         describtion:
           "Start by adding a term or acronym your organization regularly uses.",
       },
       {
-        src: `/extension/definition-${theme}.png`,
+        src: `/extension/definition-${resolvedTheme}.png`,
         title: "Add a definition",
         describtion:
           "Give your term context and define it using plaintext or SQL.",
       },
       {
-        src: `/extension/chart-${theme}.png`,
+        src: `/extension/chart-${resolvedTheme}.png`,
         title: "Reference your entry",
         describtion:
           "Now, your entry can be referenced while chatting with EZQL.",
       },
     ];
-  }, [theme]);
+  }, [resolvedTheme]);
 
   return (
     <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
