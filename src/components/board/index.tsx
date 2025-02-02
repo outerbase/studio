@@ -1,11 +1,13 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import { useState } from "react";
+import { ChartValue } from "../chart";
 import { BoardCanvas } from "./board-canvas";
 import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";
 import { BoardProvider } from "./board-provider";
 
-interface DashboardProps {
+export interface DashboardProps {
+  charts: ChartValue[];
   layout: ReactGridLayout.Layout[];
   data: {
     filters: BoardFilterProps[];
@@ -41,7 +43,7 @@ export default function Board({ value, setValue, sources }: Props) {
           setEditMode={setEditMode}
         />
         <BoardCanvas
-          layout={value.layout}
+          value={value}
           onChange={(v) => {
             setValue({
               ...value,

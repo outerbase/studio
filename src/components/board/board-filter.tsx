@@ -205,7 +205,7 @@ export function BoardFilter(props: Props) {
   return (
     <>
       <BoardTool editMode={props.editMode} setEditMode={props.setEditMode} />
-      <div className="sticky -top-4 z-50 bg-neutral-100 px-1 pt-4 pb-2 dark:bg-neutral-950">
+      <div className="sticky top-0 z-50 bg-neutral-100 px-1 pt-4 pb-2 dark:bg-neutral-950">
         {open && selectIndex !== undefined && (
           <BoardFilterDialog
             onClose={() => {

@@ -3,7 +3,9 @@ import { cn } from "@/lib/utils";
 import { RectangleHorizontal, Square } from "lucide-react";
 import { useCallback } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
+import { DashboardProps } from ".";
 import { buttonVariants } from "../ui/button";
+import BoardChart from "./board-chart";
 import "./board-style.css";
 
 export interface BoardChartLayout {
@@ -15,14 +17,14 @@ export interface BoardChartLayout {
 }
 
 interface BoardProps {
-  layout: ReactGridLayout.Layout[];
+  value: DashboardProps;
   onChange: (v: ReactGridLayout.Layout[]) => void;
   editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
 
-export function BoardCanvas(props: BoardProps) {
+export function BoardCanvas({ value, onChange, editMode }: BoardProps) {
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -42,22 +44,26 @@ export function BoardCanvas(props: BoardProps) {
 
   const handleClickResize = useCallback(
     (w: number, h: number, index: number) => {
-      const dummy = structuredClone(props.layout);
+      const dummy = structuredClone(value.layout);
       dummy[index].w = w;
       dummy[index].h = h;
-      props.onChange(dummy);
+      onChange(dummy);
     },
-    [props]
+    [onChange, value.layout]
   );
 
-  const mapItem: JSX.Element[] = structuredClone(props.layout).map((_, i) => {
+  const mapItem: JSX.Element[] = value.layout.map((_, i) => {
     return (
       <div
         key={_.i}
-        className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
+        className="group dark:bg-secondary relative flex items-center justify-center overflow-hidden rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
         data-grid={_}
       >
-        {props.editMode === "REARRANGING_CHART" && (
+        <BoardChart
+          value={value.charts.find((chart) => chart.id === _.i) as any}
+        />
+
+        {editMode === "REARRANGING_CHART" && (
           <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
             {sizes.map((x, index) => {
               return (
@@ -79,7 +85,6 @@ export function BoardCanvas(props: BoardProps) {
             })}
           </div>
         )}
-        <div>{_.i}</div>
       </div>
     );
   });
@@ -91,10 +96,10 @@ export function BoardCanvas(props: BoardProps) {
         rowHeight={220}
         draggableCancel=".cancelSelectorName"
         className="layout overflow-x-hidden"
-        layout={props.layout}
-        onLayoutChange={props.onChange}
-        isDraggable={props.editMode === "REARRANGING_CHART"}
-        isResizable={props.editMode === "REARRANGING_CHART"}
+        layout={value.layout}
+        onLayoutChange={onChange}
+        isDraggable={editMode === "REARRANGING_CHART"}
+        isResizable={editMode === "REARRANGING_CHART"}
         compactType={"vertical"}
       >
         {mapItem}

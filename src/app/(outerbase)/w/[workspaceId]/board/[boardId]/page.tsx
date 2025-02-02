@@ -1,11 +1,13 @@
 "use client";
 
+import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
 import ClientOnly from "@/components/client-only";
 import { getOuterbaseDashboard } from "@/outerbase-cloud/api";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
+import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 
 function BoardPageEditor({
@@ -13,10 +15,27 @@ function BoardPageEditor({
 }: {
   initialValue: OuterbaseAPIDashboardDetail;
 }) {
-  console.log(initialValue);
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaces } = useWorkspaces();
+
+  const boardSources = useMemo(
+    () =>
+      new OuterbaseBoardSourceDriver(
+        workspaces.find(
+          (w) => w.id === workspaceId || w.short_name === workspaceId
+        )!
+      ),
+    [workspaces, workspaceId]
+  );
   const [value, setValue] = useState(initialValue);
 
-  return <Board value={value as any} setValue={setValue as any} />;
+  return (
+    <Board
+      value={value as any}
+      setValue={setValue as any}
+      sources={boardSources}
+    />
+  );
 }
 
 export default function BoardPage() {
@@ -33,7 +52,7 @@ export default function BoardPage() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden">
+    <div className="overflow-y-autp h-screen w-screen overflow-x-hidden">
       <ClientOnly>
         <BoardPageEditor initialValue={data} />
       </ClientOnly>
