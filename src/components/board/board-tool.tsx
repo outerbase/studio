@@ -16,22 +16,22 @@ export function BoardTool(props: Props) {
         value={props.editMode as string}
         onValueChange={props.setEditMode}
       >
-        <ToggleGroupItem value="ADD_CHART">
-          <Tooltip>
-            <TooltipTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem value="ADD_CHART">
               <ChartLine className="h-4 w-4" />
-            </TooltipTrigger>
-            <TooltipContent>Add Chart</TooltipContent>
-          </Tooltip>
-        </ToggleGroupItem>
-        <ToggleGroupItem value="REARRANGING_CHART">
-          <Tooltip>
-            <TooltipTrigger>
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>Add Chart</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem value="REARRANGING_CHART">
               <ImageUpscale className="h-4 w-4" />
-            </TooltipTrigger>
-            <TooltipContent>Rearranging charts</TooltipContent>
-          </Tooltip>
-        </ToggleGroupItem>
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>Rearranging charts</TooltipContent>
+        </Tooltip>
       </ToggleGroup>
     </div>
   );

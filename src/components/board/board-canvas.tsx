@@ -50,10 +50,10 @@ export function BoardCanvas(props: BoardProps) {
     [props]
   );
 
-  const mapItem: JSX.Element[] = [...Array(props.layout.length)].map((_, i) => {
+  const mapItem: JSX.Element[] = structuredClone(props.layout).map((_, i) => {
     return (
       <div
-        key={i}
+        key={_.i}
         className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
         data-grid={_}
       >
@@ -79,7 +79,7 @@ export function BoardCanvas(props: BoardProps) {
             })}
           </div>
         )}
-        <div>{i}</div>
+        <div>{_.i}</div>
       </div>
     );
   });
