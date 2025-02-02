@@ -8,10 +8,10 @@ export default function useCodeEditorTheme({
 }: {
   fontSize?: number;
 }) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return useMemo(() => {
-    if (theme === "light") {
+    if (resolvedTheme === "light") {
       return createTheme({
         theme: "light",
         settings: {
@@ -73,5 +73,5 @@ export default function useCodeEditorTheme({
         ],
       });
     }
-  }, [theme, fontSize]);
+  }, [resolvedTheme, fontSize]);
 }
