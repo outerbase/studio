@@ -18,7 +18,14 @@ export function BoardTool(props: Props) {
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <ToggleGroupItem value="ADD_CHART">
+            <ToggleGroupItem
+              value="ADD_CHART"
+              className={
+                props.editMode === "ADD_CHART"
+                  ? "bg-white/15 dark:bg-black/10"
+                  : ""
+              }
+            >
               <ChartLine className="h-4 w-4" />
             </ToggleGroupItem>
           </TooltipTrigger>
@@ -26,7 +33,14 @@ export function BoardTool(props: Props) {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <ToggleGroupItem value="REARRANGING_CHART">
+            <ToggleGroupItem
+              value="REARRANGING_CHART"
+              className={
+                props.editMode === "REARRANGING_CHART"
+                  ? "bg-white/15 dark:bg-black/10"
+                  : ""
+              }
+            >
               <ImageUpscale className="h-4 w-4" />
             </ToggleGroupItem>
           </TooltipTrigger>
