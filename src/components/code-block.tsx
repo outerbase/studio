@@ -1,3 +1,4 @@
+import React from "react";
 import { createHighlighter } from "shiki";
 import type { BundledLanguage } from "shiki/bundle/full";
 
@@ -55,7 +56,17 @@ interface MDXCodeBlockProps {
 
 async function CodeBlock(props: MDXCodeBlockProps) {
   if (typeof props.children === "string") {
+    console.log("here");
     return <CodeBlockInner {...(props as CodeBlockProps)} />;
+  }
+
+  const codeElement = React.Children.toArray(props.children).find(
+    (child) =>
+      React.isValidElement(child) && (child as any).type().type === "code"
+  ) as React.ReactElement | undefined;
+
+  if (codeElement && typeof codeElement.props.children === "string") {
+    return <CodeBlockInner {...(codeElement.props as CodeBlockProps)} />;
   }
 
   return (

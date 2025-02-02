@@ -1,10 +1,10 @@
-import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
-import { forwardRef, useMemo } from "react";
 import { tags as t } from "@lezer/highlight";
-import createTheme from "@uiw/codemirror-themes";
-import { useTheme } from "@/context/theme-provider";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
+import createTheme from "@uiw/codemirror-themes";
+import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import { useTheme } from "next-themes";
+import { forwardRef, useMemo } from "react";
 
 interface JsonEditorProps {
   value: string;
@@ -13,10 +13,10 @@ interface JsonEditorProps {
 }
 
 function useJsonTheme() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return useMemo(() => {
-    if (theme === "light") {
+    if (resolvedTheme === "light") {
       return createTheme({
         theme: "light",
         settings: {
@@ -69,7 +69,7 @@ function useJsonTheme() {
         ],
       });
     }
-  }, [theme]);
+  }, [resolvedTheme]);
 }
 
 const JsonEditor = forwardRef<ReactCodeMirrorRef, JsonEditorProps>(

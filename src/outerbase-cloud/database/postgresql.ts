@@ -1,13 +1,11 @@
 import {
   DatabaseHeader,
-  DriverFlags,
   DatabaseResultSet,
+  DriverFlags,
 } from "@/drivers/base-driver";
-import {
-  OuterbaseAPIQueryRawResponse,
-  OuterbaseDatabaseConfig,
-} from "../api-type";
 import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
+import { runOuterbaseQueryRaw } from "../api";
+import { OuterbaseDatabaseConfig } from "../api-type";
 
 function transformObjectBasedResult(arr: Record<string, unknown>[]) {
   const usedColumnName = new Set();
@@ -37,7 +35,6 @@ function transformObjectBasedResult(arr: Record<string, unknown>[]) {
 export class OuterbasePostgresDriver extends PostgresLikeDriver {
   supportPragmaList = false;
 
-  protected token: string;
   protected workspaceId: string;
   protected sourceId: string;
 
@@ -48,37 +45,21 @@ export class OuterbasePostgresDriver extends PostgresLikeDriver {
     };
   }
 
-  constructor({ workspaceId, sourceId, token }: OuterbaseDatabaseConfig) {
+  constructor({ workspaceId, sourceId }: OuterbaseDatabaseConfig) {
     super();
 
     this.workspaceId = workspaceId;
     this.sourceId = sourceId;
-    this.token = token;
   }
 
   async query(stmt: string): Promise<DatabaseResultSet> {
-    const response = await fetch(
-      `/api/v1/workspace/${this.workspaceId}/source/${this.sourceId}/query/raw`,
-      {
-        method: "POST",
-        headers: {
-          "x-auth-token": this.token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: stmt,
-        }),
-      }
+    const jsonResponse = await runOuterbaseQueryRaw(
+      this.workspaceId,
+      this.sourceId,
+      stmt
     );
 
-    const jsonResponse =
-      (await response.json()) as OuterbaseAPIQueryRawResponse;
-
-    if (!jsonResponse.success) {
-      throw new Error("Query failed");
-    }
-
-    const result = transformObjectBasedResult(jsonResponse.response.items);
+    const result = transformObjectBasedResult(jsonResponse.items);
 
     return {
       rows: result.data,

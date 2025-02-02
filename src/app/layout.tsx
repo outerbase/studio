@@ -1,11 +1,13 @@
+import { WEBSITE_NAME } from "@/const";
 import type { Metadata } from "next";
 
-import "./globals.css";
 import "./codemirror-override.css";
-import { Fragment } from "react";
-import { WEBSITE_NAME } from "@/const";
+import "./globals.css";
 
 const siteDescription = `${WEBSITE_NAME} is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything`;
+
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: WEBSITE_NAME,
@@ -33,8 +35,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <Fragment>{children}</Fragment>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

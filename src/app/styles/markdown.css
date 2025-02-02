@@ -1,0 +1,47 @@
+.mdx-content {
+  @apply leading-7;
+}
+
+.mdx-content h1 {
+  @apply text-3xl;
+}
+
+.mdx-content h2 {
+  @apply my-4 border-b pb-2 text-2xl font-bold;
+}
+
+.mdx-content h3 {
+  @apply my-4 border-b pb-2 text-xl font-bold;
+}
+
+.mdx-content ul {
+  @apply my-4 list-disc pl-8;
+}
+
+.mdx-content li ul {
+  @apply my-0 list-disc pl-8;
+}
+
+.mdx-content ol {
+  @apply my-4 list-decimal pl-8;
+}
+
+.mdx-content pre {
+  @apply bg-secondary m-0 overflow-x-auto rounded p-4 leading-5;
+}
+
+.mdx-content p {
+  @apply my-2;
+}
+
+.mdx-content a {
+  @apply text-blue-500 underline;
+}
+
+.mdx-content code {
+  @apply bg-secondary rounded p-1;
+}
+
+.mdx-content pre code {
+  @apply rounded-none bg-inherit p-0;
+}
