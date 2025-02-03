@@ -18,16 +18,21 @@ function BoardPageEditor({
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const { workspaces } = useWorkspaces();
 
-  const boardSources = useMemo(
-    () =>
-      new OuterbaseBoardSourceDriver(
-        workspaces.find(
-          (w) => w.id === workspaceId || w.short_name === workspaceId
-        )!
-      ),
-    [workspaces, workspaceId]
-  );
+  const boardSources = useMemo(() => {
+    if (workspaces.length === 0) return;
+
+    return new OuterbaseBoardSourceDriver(
+      workspaces.find(
+        (w) => w.id === workspaceId || w.short_name === workspaceId
+      )!
+    );
+  }, [workspaces, workspaceId]);
+
   const [value, setValue] = useState(initialValue);
+
+  if (!boardSources) {
+    return <div>Loading Workspace....</div>;
+  }
 
   return (
     <Board
