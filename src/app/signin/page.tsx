@@ -5,11 +5,14 @@ import {
   getOuterbaseWorkspace,
   loginOuterbaseByPassword,
 } from "@/outerbase-cloud/api";
-import { OuterbaseAPIError } from "@/outerbase-cloud/api-type";
+import {
+  OuterbaseAPIError,
+  OuterbaseAPISession,
+} from "@/outerbase-cloud/api-type";
 import { LucideLoader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ThemeLayout from "../(theme)/theme_layout";
 import { LoginBaseSpaceship } from "./starbase-portal";
 
@@ -19,6 +22,7 @@ export default function SigninPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [session, setSession] = useState<OuterbaseAPISession>();
 
   const onLoginClicked = useCallback(() => {
     setLoading(true);
@@ -28,14 +32,7 @@ export default function SigninPage() {
         localStorage.setItem("session", JSON.stringify(session));
         localStorage.setItem("ob-token", session.token);
 
-        getOuterbaseWorkspace()
-          .then((w) => {
-            router.push(`/w/${w.items[0].short_name}`);
-          })
-          .catch(console.error)
-          .finally(() => {
-            setLoading(false);
-          });
+        setSession(session);
       })
       .catch((e) => {
         setLoading(false);
@@ -43,7 +40,27 @@ export default function SigninPage() {
           setError(e.description);
         }
       });
-  }, [email, password, router]);
+  }, [email, password]);
+
+  useEffect(() => {
+    if (!session) return;
+
+    const redirect = localStorage.getItem("continue-redirect");
+    if (redirect) {
+      localStorage.removeItem("continue-redirect");
+      router.push(redirect);
+      return;
+    }
+
+    getOuterbaseWorkspace()
+      .then((w) => {
+        router.push(`/w/${w.items[0].short_name}`);
+      })
+      .catch(console.error)
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [session, router]);
 
   return (
     <ThemeLayout overrideTheme="dark">
