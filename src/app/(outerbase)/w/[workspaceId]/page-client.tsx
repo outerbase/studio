@@ -8,13 +8,17 @@ import {
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
+import { BoardVisual } from "@/components/resource-card/visual";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { getOuterbaseDashboardList } from "@/outerbase-cloud/api";
 import {
   CalendarDots,
+  ChartBar,
   SortAscending,
   SortDescending,
 } from "@phosphor-icons/react";
 import { useParams } from "next/navigation";
+import useSWR from "swr";
 import { NavigationBar } from "../../navigation";
 import { useWorkspaces } from "../../workspace-provider";
 
@@ -22,7 +26,18 @@ export default function WorkspaceListPageClient() {
   const { workspaces } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
-  // const boards = data?.boards ?? [];
+  const { data: boards } = useSWR(
+    `/workspace/${workspaceId}/boards`,
+    () => {
+      return getOuterbaseDashboardList(workspaceId);
+    },
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+
   const bases =
     workspaces.find(
       (workspace) =>
@@ -31,20 +46,6 @@ export default function WorkspaceListPageClient() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      {/* <h1>Board</h1>
-      <div className="flex flex-wrap gap-4 p-4">
-        {boards.map((board) => (
-          <Link
-            key={board.id}
-            className="border p-4"
-            href={`/w/${workspaceId}/board/${board.id}`}
-          >
-            {board.name}
-          </Link>
-        ))}
-      </div>
-
-      <h1>Base</h1> */}
       <NavigationBar />
 
       <div className="container mx-auto p-4">
@@ -74,6 +75,26 @@ export default function WorkspaceListPageClient() {
             </ButtonGroup>
           </Toolbar>
         </div>
+
+        <h1 className="my-4">Board</h1>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {(boards?.items ?? [])
+            .filter((board) => board.base_id === null)
+            .map((board) => (
+              <ResourceCard
+                key={board.id}
+                className="w-full"
+                color="default"
+                icon={ChartBar}
+                title={board.name}
+                subtitle={"Board"}
+                visual={BoardVisual}
+                href={`/w/${workspaceId}/board/${board.id}`}
+              />
+            ))}
+        </div>
+
+        <h1 className="my-4">Base</h1>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {bases.map((base) => (

@@ -2,10 +2,21 @@ import { StudioExtension } from "@/core/extension-base";
 import { StudioExtensionContext } from "@/core/extension-manager";
 import { createTabExtension } from "@/core/extension-tab";
 import { Book } from "@phosphor-icons/react";
+import DataCatalogTab from "./data-catalog-tab";
 import DataCatalogModelTab from "./data-model-tab";
 import DataCatalogDriver from "./driver";
 import DataCatalogSidebar from "./sidebar";
 import DataCatalogResultHeader from "./table-result-header";
+
+export const dataCatalogTab = createTabExtension({
+  key: () => "data-catalog",
+  name: "Data Catalog",
+  generate: () => ({
+    icon: Book,
+    title: "Data Catalog",
+    component: <DataCatalogTab />,
+  }),
+});
 
 export const dataCatalogModelTab = createTabExtension({
   key: () => "data-catalog-model",

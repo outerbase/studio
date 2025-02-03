@@ -25,10 +25,11 @@ export function useSession() {
 export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
-  const token = localStorage.getItem("ob-token");
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("ob-token") : "";
 
   const { data, isLoading } = useSWR(
-    token ? "session-" + localStorage.getItem("ob-token") : undefined,
+    token ? "session-" + token : undefined,
     () => {
       return getOuterbaseSession();
     },

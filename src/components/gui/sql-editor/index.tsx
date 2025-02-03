@@ -1,28 +1,33 @@
-import CodeMirror, {
-  EditorView,
-  Extension,
-  ReactCodeMirrorRef,
-} from "@uiw/react-codemirror";
-import { indentUnit, LanguageSupport } from "@codemirror/language";
 import {
   acceptCompletion,
   completionStatus,
   startCompletion,
 } from "@codemirror/autocomplete";
-import { sql, SQLNamespace, MySQL as MySQLDialect } from "@codemirror/lang-sql";
+import {
+  MySQL as MySQLDialect,
+  PostgreSQL as PostgresDialect,
+  sql,
+  SQLNamespace,
+} from "@codemirror/lang-sql";
+import { indentUnit, LanguageSupport } from "@codemirror/language";
+import CodeMirror, {
+  EditorView,
+  Extension,
+  ReactCodeMirrorRef,
+} from "@uiw/react-codemirror";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
+import { SupportedDialect } from "@/drivers/base-driver";
+import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
+import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
+import { KEY_BINDING } from "@/lib/key-matcher";
 import { defaultKeymap, insertTab } from "@codemirror/commands";
 import { keymap } from "@codemirror/view";
-import { KEY_BINDING } from "@/lib/key-matcher";
-import useCodeEditorTheme from "./use-editor-theme";
-import createSQLTableNameHighlightPlugin from "./sql-tablename-highlight";
-import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
-import { functionTooltip } from "./function-tooltips";
-import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 import { toast } from "sonner";
+import { functionTooltip } from "./function-tooltips";
+import createSQLTableNameHighlightPlugin from "./sql-tablename-highlight";
 import SqlStatementHighlightPlugin from "./statement-highlight";
-import { SupportedDialect } from "@/drivers/base-driver";
+import useCodeEditorTheme from "./use-editor-theme";
 
 interface SqlEditorProps {
   value: string;
@@ -135,6 +140,11 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           schema,
         });
         tooltipExtension = functionTooltip(sqliteFunctionList);
+      } else if (dialect === "postgres") {
+        sqlDialect = sql({
+          dialect: PostgresDialect,
+          schema,
+        });
       } else {
         sqlDialect = sql({
           dialect: MySQLDialect,
