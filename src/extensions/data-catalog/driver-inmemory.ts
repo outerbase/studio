@@ -4,6 +4,7 @@ import DataCatalogDriver, {
   DataCatalogModelTable,
   DataCatalogModelTableInput,
   DataCatalogSchemas,
+  DataCatalogTermDefinition,
 } from "./driver";
 
 interface DataCatalogInmemoryDriverOptions {
@@ -11,23 +12,36 @@ interface DataCatalogInmemoryDriverOptions {
 }
 
 export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
-  protected schemas: DataCatalogSchemas;
+  private schemas: DataCatalogSchemas;
   protected options: DataCatalogInmemoryDriverOptions;
+  private dataCatalog: DataCatalogTermDefinition[];
 
   constructor(
     schemas: DataCatalogSchemas,
+    dataCatalog: DataCatalogTermDefinition[],
     options: DataCatalogInmemoryDriverOptions
   ) {
     this.schemas = schemas;
     this.options = options;
+    this.dataCatalog = dataCatalog;
   }
 
-  async load(): Promise<DataCatalogSchemas> {
+  private async delay() {
     if (this.options.delay) {
       await new Promise((resolve) => setTimeout(resolve, this.options.delay));
     }
+  }
 
-    return this.schemas;
+  async load(): Promise<{
+    schemas: DataCatalogSchemas;
+    dataCatalog: DataCatalogTermDefinition[];
+  }> {
+    await this.delay();
+
+    return {
+      schemas: this.schemas,
+      dataCatalog: this.dataCatalog,
+    };
   }
 
   async updateColumn(
@@ -36,9 +50,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     columnName: string,
     data: DataCatalogModelColumnInput
   ): Promise<DataCatalogModelColumn> {
-    if (this.options.delay) {
-      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
-    }
+    await this.delay();
 
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
@@ -79,9 +91,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     tableName: string,
     data: DataCatalogModelTableInput
   ): Promise<DataCatalogModelTable> {
-    if (this.options.delay) {
-      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
-    }
+    await this.delay();
 
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
@@ -113,7 +123,6 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     columnName: string
   ): DataCatalogModelColumn | undefined {
     const normalizedColumnName = columnName.toLowerCase();
-
     const table = this.getTable(schemaName, tableName);
     return table?.columns[normalizedColumnName];
   }
@@ -130,12 +139,52 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     }
 
     const schemas = this.schemas[normalizedSchemaName];
-
     if (!schemas[normalizedTableName]) {
       return;
     }
 
     const table = schemas[normalizedTableName];
     return table;
+  }
+
+  getTermDefinitions(): DataCatalogTermDefinition[] {
+    if (!this.dataCatalog) {
+      return [];
+    }
+    return this.dataCatalog;
+  }
+
+  async updateTermDefinition(
+    data: DataCatalogTermDefinition
+  ): Promise<DataCatalogTermDefinition | undefined> {
+    await this.delay();
+
+    if (!this.dataCatalog) {
+      this.dataCatalog = [];
+    }
+
+    const dataCatalog = this.dataCatalog;
+
+    const existingIndex = dataCatalog.findIndex((term) => term.id === data.id);
+
+    if (existingIndex !== -1) {
+      dataCatalog[existingIndex] = { ...dataCatalog[existingIndex], ...data };
+    } else {
+      dataCatalog.unshift(data);
+    }
+
+    return data;
+  }
+
+  async deleteTermDefinition(id: string): Promise<boolean> {
+    await this.delay();
+    if (!this.dataCatalog) return false;
+
+    const dataCatalog = this.dataCatalog;
+    const initialLength = dataCatalog.length;
+
+    this.dataCatalog = dataCatalog.filter((term) => term.id !== id);
+
+    return dataCatalog.length < initialLength;
   }
 }

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 interface SidebarMenuItemProps {
@@ -17,6 +18,7 @@ export function SidebarMenuItem({
   onClick,
   icon: IconComponent,
   href,
+  selected,
 }: SidebarMenuItemProps) {
   const className =
     "flex p-2 pl-4 text-xs hover:cursor-pointer hover:bg-secondary";
@@ -49,7 +51,10 @@ export function SidebarMenuItem({
   }
 
   return (
-    <button className={className} onClick={onClick}>
+    <button
+      className={cn(className, selected ? "bg-selected" : "")}
+      onClick={onClick}
+    >
       {body}
     </button>
   );
