@@ -35,7 +35,6 @@ function transformObjectBasedResult(arr: Record<string, unknown>[]) {
 export class OuterbaseSqliteDriver extends SqliteLikeBaseDriver {
   supportPragmaList = false;
 
-  protected token: string;
   protected workspaceId: string;
   protected sourceId: string;
 
@@ -46,12 +45,11 @@ export class OuterbaseSqliteDriver extends SqliteLikeBaseDriver {
     };
   }
 
-  constructor({ workspaceId, sourceId, token }: OuterbaseDatabaseConfig) {
+  constructor({ workspaceId, sourceId }: OuterbaseDatabaseConfig) {
     super();
 
     this.workspaceId = workspaceId;
     this.sourceId = sourceId;
-    this.token = token;
   }
 
   async query(stmt: string): Promise<DatabaseResultSet> {

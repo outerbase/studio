@@ -1,7 +1,5 @@
 export interface OuterbaseDatabaseConfig {
-  token: string;
   workspaceId: string;
-  baseId: string;
   sourceId: string;
 }
 

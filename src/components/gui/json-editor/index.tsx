@@ -13,10 +13,10 @@ interface JsonEditorProps {
 }
 
 function useJsonTheme() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return useMemo(() => {
-    if (theme === "light") {
+    if (resolvedTheme === "light") {
       return createTheme({
         theme: "light",
         settings: {
@@ -69,7 +69,7 @@ function useJsonTheme() {
         ],
       });
     }
-  }, [theme]);
+  }, [resolvedTheme]);
 }
 
 const JsonEditor = forwardRef<ReactCodeMirrorRef, JsonEditorProps>(

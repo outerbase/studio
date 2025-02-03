@@ -10,45 +10,24 @@ import {
 } from "@/components/resource-card/utils";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import {
-  getOuterbaseDashboardList,
-  getOuterbaseWorkspace,
-} from "@/outerbase-cloud/api";
-import {
   CalendarDots,
   SortAscending,
   SortDescending,
 } from "@phosphor-icons/react";
-import useSWR from "swr";
+import { useParams } from "next/navigation";
+import { NavigationBar } from "../../navigation";
+import { useWorkspaces } from "../../workspace-provider";
 
-export default function WorkspaceListPageClient({
-  workspaceId,
-}: {
-  workspaceId: string;
-}) {
-  const { data, isLoading } = useSWR(`workspace-${workspaceId}`, () => {
-    const fetching = async () => {
-      const [workspaces, boards] = await Promise.all([
-        getOuterbaseWorkspace(),
-        getOuterbaseDashboardList(workspaceId),
-      ]);
-
-      return {
-        bases:
-          workspaces.items.find((w) => w.short_name === workspaceId)?.bases ??
-          [],
-        boards: (boards.items ?? []).filter((b) => b.base_id === null),
-      };
-    };
-
-    return fetching();
-  });
+export default function WorkspaceListPageClient() {
+  const { workspaces } = useWorkspaces();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
 
   // const boards = data?.boards ?? [];
-  const bases = data?.bases ?? [];
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const bases =
+    workspaces.find(
+      (workspace) =>
+        workspace.short_name === workspaceId || workspace.id === workspaceId
+    )?.bases ?? [];
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -66,6 +45,8 @@ export default function WorkspaceListPageClient({
       </div>
 
       <h1>Base</h1> */}
+      <NavigationBar />
+
       <div className="container mx-auto p-4">
         <div className="mb-8">
           <Toolbar>

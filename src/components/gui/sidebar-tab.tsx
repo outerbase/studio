@@ -1,6 +1,7 @@
 import { useConfig } from "@/context/config-provider";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "@phosphor-icons/react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ReactElement, useMemo, useState } from "react";
@@ -27,6 +28,7 @@ interface SidebarTabProps {
 }
 
 export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
+  const { forcedTheme } = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loadedIndex, setLoadedIndex] = useState(() => {
     const a: boolean[] = new Array(tabs.length).fill(false);
@@ -35,7 +37,8 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   });
 
   const searchParams = useSearchParams();
-  const disableToggle = searchParams.get("disableThemeToggle") === "1";
+  const disableToggle =
+    searchParams.get("disableThemeToggle") === "1" || forcedTheme;
 
   const config = useConfig();
 
