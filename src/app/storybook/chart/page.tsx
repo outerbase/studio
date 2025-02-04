@@ -1,6 +1,7 @@
 "use client";
 
-import Chart, { ChartData, ChartValue } from "@/components/chart";
+import Chart from "@/components/chart";
+import { ChartData, ChartValue } from "@/components/chart/chartTypes";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -158,7 +159,7 @@ export default function StorybookChartPage() {
   const [modifier, setModifier] = useState({});
 
   return (
-    <div>
+    <div className="flex h-full w-full flex-col">
       <div>
         <Button
           onClick={() => {
@@ -214,7 +215,7 @@ export default function StorybookChartPage() {
           Pie
         </Button>
       </div>
-      <div>
+      <div className="flex h-full w-full p-4">
         <Chart value={chartValue} data={items} modifier={modifier} />
       </div>
     </div>

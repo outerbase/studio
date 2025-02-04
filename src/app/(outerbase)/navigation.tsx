@@ -1,3 +1,4 @@
+import { OuterbaseIcon } from "@/components/icons/outerbase";
 import { getDatabaseIcon } from "@/components/resource-card/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -6,13 +7,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { CaretUpDown } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useWorkspaces } from "./workspace-provider";
 
 function WorkspaceSelector() {
   const router = useRouter();
-  const { workspaces } = useWorkspaces();
+  const { workspaces, currentWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(workspaceId);
 
@@ -38,7 +40,11 @@ function WorkspaceSelector() {
             key={workspace.id}
             onMouseEnter={() => setSelectedWorkspaceId(workspace.short_name)}
             className={cn(
-              buttonVariants({ variant: "ghost", size: "sm" }),
+              buttonVariants({
+                variant:
+                  currentWorkspace?.id === workspace.id ? "secondary" : "ghost",
+                size: "sm",
+              }),
               "cursor-pointer justify-start py-0.5"
             )}
           >
@@ -78,13 +84,22 @@ function WorkspaceSelector() {
 }
 
 export function NavigationBar() {
+  const { currentWorkspace } = useWorkspaces();
+
+  if (!currentWorkspace) {
+    return null;
+  }
+
   return (
-    <div className="p-1">
-      <Popover open>
+    <div className="flex h-14 items-center gap-2 px-2">
+      <OuterbaseIcon className="h-8 w-8" />
+      <Popover>
         <PopoverTrigger asChild>
-          <Button>Workspace</Button>
+          <Button variant={"ghost"}>
+            {currentWorkspace?.name} <CaretUpDown className="ml-2" />
+          </Button>
         </PopoverTrigger>
-        <PopoverContent className="h-[400px] w-[500px] p-0">
+        <PopoverContent className="h-[400px] w-[500px] p-0" align="start">
           <WorkspaceSelector />
         </PopoverContent>
       </Popover>

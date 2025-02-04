@@ -1,6 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { createContext, PropsWithChildren, useContext } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { createContext, PropsWithChildren, useContext, useEffect } from "react";
 import useSWR from "swr";
 import { getOuterbaseSession } from "../../outerbase-cloud/api";
 import {
@@ -24,9 +24,12 @@ export function useSession() {
 
 export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   const router = useRouter();
+  const pathname = usePathname();
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("ob-token") : "";
 
   const { data, isLoading } = useSWR(
-    "session",
+    token ? "session-" + token : undefined,
     () => {
       return getOuterbaseSession();
     },
@@ -37,13 +40,16 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
     }
   );
 
-  if (isLoading) {
-    return <div>Session Loading...</div>;
-  }
+  useEffect(() => {
+    if (isLoading) return;
+    if (!data?.session || !data?.user) {
+      localStorage.setItem("continue-redirect", pathname);
+      router.push("/signin");
+    }
+  }, [isLoading, data, pathname, router]);
 
-  if (!data?.session || !data?.user) {
-    router.push("/signin");
-    return <div>Redirecting...</div>;
+  if (isLoading || !data) {
+    return <div>Session Loading...</div>;
   }
 
   return (

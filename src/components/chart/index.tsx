@@ -1,55 +1,10 @@
 "use client";
 import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
-
-interface ChartLayer {
-  sql: string;
-  type: string;
-}
-
-interface ChartOptions {
-  theme?: string;
-  xAxisKey: string;
-  yAxisKeys: string[];
-  yAxisKeyColors: {
-    [key: string]: string;
-  };
-}
-
-interface ChartParams {
-  id: string;
-  name: string;
-  type: ChartType;
-  model: string;
-  apiKey: string;
-  layers: ChartLayer[];
-  options: ChartOptions;
-  source_id: string;
-  created_at: string;
-  updated_at: string;
-  workspace_id: string;
-  connection_id: string | null;
-}
-
-export interface ChartValue {
-  connection_id: string | null;
-  created_at: string;
-  id: string;
-  model: string;
-  name: string;
-  params: ChartParams;
-  source_id: string;
-  type: ChartType;
-  updated_at: string;
-  workspace_id: string;
-}
-
-export interface ChartData {
-  [key: string]: any;
-}
-
-export type ChartType = "line" | "bar" | "pie" | "column" | "scatter";
+import { ChartData, ChartValue } from "./chartTypes";
+import EchartOptionsBuilder from "./echartOptionsBuilder";
 
 interface OuterbaseChartProps {
   data: ChartData[];
@@ -58,114 +13,197 @@ interface OuterbaseChartProps {
   className?: string;
 }
 
-export default function Chart({
-  value,
-  data,
-  modifier,
-  className,
-}: OuterbaseChartProps) {
-  const domRef = useRef<HTMLDivElement>(null);
+const TextComponent = ({ value }: OuterbaseChartProps) => {
+  let markdown = value.params.options?.text ?? "";
 
-  useEffect(() => {
-    const props = transfromOutbaseChartData({
-      value,
-      data,
-      modifier,
-    });
-    if (domRef.current) {
-      let chartInstance = echarts.getInstanceByDom(domRef.current);
-      if (chartInstance) {
-        chartInstance.dispose();
-      }
-      chartInstance = echarts.init(domRef.current);
-      chartInstance.clear();
-      chartInstance.setOption(props);
-    }
-  }, [domRef, value, data, modifier]);
+  // Bold (**text** or __text__)
+  markdown = markdown.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+  markdown = markdown.replace(/__(.*?)__/g, "<b>$1</b>");
 
+  // Italic (*text* or _text_)
+  markdown = markdown.replace(/\*(.*?)\*/g, "<i>$1</i>");
+  markdown = markdown.replace(/_(.*?)_/g, "<i>$1</i>");
+
+  // Underline (__text__)
+  markdown = markdown.replace(/~~(.*?)~~/g, "<u>$1</u>");
+
+  // Line break (double space followed by a newline)
+  markdown = markdown.replace(/  \n/g, "<br>");
   return (
-    <div ref={domRef} className={className ?? "h-[400px] w-[500px]"}></div>
+    <div className="h-full w-full">
+      <p
+        style={{
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          fontFamily: "Inter, sans-serif",
+        }}
+        className="flex-1 self-start text-neutral-900 dark:text-neutral-100"
+      >
+        <span
+          dangerouslySetInnerHTML={{
+            __html: markdown,
+          }}
+        ></span>
+      </p>
+    </div>
   );
-}
+};
 
-export function transfromOutbaseChartData({
-  value,
-  data,
-  modifier,
-}: OuterbaseChartProps) {
-  const xAxisData = data.map(
-    (item) => item[value?.params?.options?.xAxisKey] ?? ""
-  );
-  const seriesData = value?.params?.options?.yAxisKeys.map((key) => {
-    const color = value?.params?.options?.yAxisKeyColors?.[key] ?? "";
-    const chartType = value?.type;
-    const baseSeries = {
-      name: key,
-      type: value.type,
-      data: data.map((item) => {
-        if (chartType === "pie") {
-          return {
-            value: item[key],
-            name: item[value?.params?.options?.xAxisKey] ?? "",
-          };
-        } else {
-          return item[key];
-        }
-      }),
-      itemStyle: {
-        color: color,
-      },
-    };
-    if (chartType === "pie") {
-      return pieChartDecoration(baseSeries);
+const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
+  const firstRecord = data.length > 0 ? data[0] : null;
+  let firstRecordValue = firstRecord
+    ? firstRecord[value.params.options.xAxisKey ?? ""]
+    : "";
+  const formattedValue = value.params.options?.format;
+
+  if (formattedValue === "percent") {
+    const number = parseFloat(`${firstRecordValue}`);
+    firstRecordValue = `${number.toFixed(2)}%`;
+  } else if (formattedValue === "number") {
+    const number = parseFloat(`${firstRecordValue}`);
+    const rounded = Math.round(number);
+    firstRecordValue = `${rounded.toLocaleString("en-US")}`;
+  } else if (formattedValue === "decimal") {
+    const number = parseFloat(`${firstRecordValue}`);
+    firstRecordValue = `${number.toFixed(2)}`;
+  } else if (formattedValue === "date") {
+    const stringDate = `${firstRecordValue}`;
+
+    // Convert to a Date object to validate the input
+    const date = new Date(stringDate);
+
+    if (!isNaN(date.getTime())) {
+      // Check if the date is valid
+      // Extract the date components
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-based
+      const day = String(date.getUTCDate()).padStart(2, "0");
+
+      // Manually construct the formatted date string
+      const formattedDate = `${month}/${day}/${year}`;
+
+      firstRecordValue = formattedDate;
     }
-    return baseSeries;
-  });
-
-  if (value.type === "pie") {
-    return {
-      series: seriesData,
-      ...modifier,
-    };
+  } else if (formattedValue === "time") {
+    const date = new Date(`${firstRecordValue}`);
+    firstRecordValue = date.toLocaleTimeString("en-US");
+  } else if (formattedValue === "dollar") {
+    const number = parseFloat(`${firstRecordValue}`);
+    firstRecordValue = `$${number.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } else if (formattedValue === "euro") {
+    const number = parseFloat(`${firstRecordValue}`);
+    firstRecordValue = `€${number.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } else if (formattedValue === "pound") {
+    const number = parseFloat(`${firstRecordValue}`);
+    firstRecordValue = `£${number.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } else if (formattedValue === "yen") {
+    const number = parseFloat(`${firstRecordValue}`);
+    firstRecordValue = `¥${number.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   }
 
-  return {
-    xAxis: {
-      type: "category",
-      data: xAxisData,
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: seriesData,
-    ...modifier,
-  };
-}
+  // there is something to check with the sizeX and sizeY
+  // we will figure it out later
+  const sizeX = 1;
+  const sizeY = 1;
 
-function pieChartDecoration(baseSeries: any) {
-  return {
-    ...baseSeries,
-    type: "pie",
-    radius: ["40%", "70%"],
-    avoidLabelOverlap: false,
-    itemStyle: {
-      borderRadius: 10,
-      borderColor: "#fff",
-      borderWidth: 2,
-    },
-    label: {
-      show: false,
-      position: "center",
-    },
-    emphasis: {
-      label: {
-        show: true,
-        fontSize: 40,
-        fontWeight: "bold",
-      },
-    },
-    labelLine: {
-      show: false,
-    },
+  let style: React.CSSProperties = {
+    fontSize: sizeX === 1 && sizeY === 1 ? "30px" : "60px",
+    lineHeight: sizeX === 1 && sizeY === 1 ? "36px" : "68px",
   };
+  const fgColor = value.params.options?.foreground;
+  if (fgColor) style.color = fgColor;
+
+  return (
+    <div className="h-full w-full">
+      <div style={style} className="truncate font-bold">
+        {firstRecordValue}
+      </div>
+    </div>
+  );
+};
+
+const TableComponent = ({ data }: OuterbaseChartProps) => {
+  return (
+    <div className="w-full overflow-auto rounded border">
+      <table className="w-full border-separate border-spacing-0 text-sm">
+        <thead className="sticky top-0">
+          <tr className="bg-secondary h-[35px] text-xs">
+            {Object.keys(data[0]).map((key) => (
+              <th key={key} className="border-r px-2 text-left">
+                {key}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, index) => (
+            <tr key={index}>
+              {Object.keys(row).map((key) => (
+                <td className="border-t border-r px-4 py-2" key={key}>
+                  {row[key] || ""}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+const ChartComponent = ({ value, data, modifier }: OuterbaseChartProps) => {
+  const domRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    if (domRef.current) {
+      let chartInstance =
+        echarts.getInstanceByDom(domRef.current) ||
+        echarts.init(domRef.current);
+      chartInstance.clear();
+
+      const chartBuilder = new EchartOptionsBuilder(value, data);
+      chartBuilder.setTheme(theme || "dark");
+
+      const options = chartBuilder.getChartOptions();
+      chartInstance.setOption(options);
+
+      // handle resize event
+      const resizeObserver = new ResizeObserver((entries) => {
+        requestAnimationFrame(() => {
+          for (const entry of entries) {
+            if (entry.target === domRef.current) {
+              const { width, height } = entry.contentRect;
+              chartBuilder.setChartSize(width, height);
+              chartInstance.resize();
+              break;
+            }
+          }
+        });
+      });
+
+      resizeObserver.observe(domRef.current);
+
+      return () => {
+        if (domRef.current) {
+          resizeObserver.unobserve(domRef.current);
+        }
+      };
+    }
+  }, [domRef, value, data]);
+
+  return <div ref={domRef} className="h-full w-full"></div>;
+};
+
+export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
+  if (value.type === "text") {
+    return <TextComponent value={value} data={data} />;
+  } else if (value.type === "single_value") {
+    return <SingleValueComponent value={value} data={data} />;
+  } else if (value.type === "table") {
+    return <TableComponent value={value} data={data} />;
+  } else {
+    return <ChartComponent value={value} data={data} modifier={modifier} />;
+  }
 }
