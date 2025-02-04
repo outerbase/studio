@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-type ThemeType = "dark" | "light";
+export type ThemeType = "dark" | "light";
 
 const ThemeContext = createContext<{
   theme: ThemeType;
