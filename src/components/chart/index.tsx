@@ -10,6 +10,7 @@ interface OuterbaseChartProps {
   data: ChartData[];
   value: ChartValue;
   modifier?: EChartsOption;
+  className?: string;
 }
 
 const TextComponent = ({ value }: OuterbaseChartProps) => {

@@ -29,16 +29,14 @@ function transformObjectBasedResult(arr: Record<string, unknown>[]) {
 }
 
 export class OuterbaseMySQLDriver extends MySQLLikeDriver {
-  protected token: string;
   protected workspaceId: string;
   protected sourceId: string;
 
-  constructor({ workspaceId, sourceId, token }: OuterbaseDatabaseConfig) {
+  constructor({ workspaceId, sourceId }: OuterbaseDatabaseConfig) {
     super();
 
     this.workspaceId = workspaceId;
     this.sourceId = sourceId;
-    this.token = token;
   }
 
   async query(stmt: string): Promise<DatabaseResultSet> {

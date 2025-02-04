@@ -18,7 +18,6 @@ export default async function EmbedPage(props: EmbedPageProps) {
   const driver = (await props.params).driver;
 
   let overrideTheme: "dark" | "light" | undefined = undefined;
-  const disableToggle = searchParams.disableThemeToggle === "1";
 
   if (searchParams.theme) {
     overrideTheme = searchParams.theme === "dark" ? "dark" : "light";
@@ -37,7 +36,6 @@ export default async function EmbedPage(props: EmbedPageProps) {
   return (
     <ThemeLayout
       overrideTheme={overrideTheme}
-      disableToggle={disableToggle}
       overrideThemeVariables={overrideThemeVariables}
     >
       <ClientOnly>

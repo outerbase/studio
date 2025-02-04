@@ -1,6 +1,6 @@
-import { useTheme } from "@/context/theme-provider";
 import { tags as t } from "@lezer/highlight";
 import { createTheme } from "@uiw/codemirror-themes";
+import { useTheme } from "next-themes";
 import { useMemo } from "react";
 
 export default function useCodeEditorTheme({
@@ -8,10 +8,10 @@ export default function useCodeEditorTheme({
 }: {
   fontSize?: number;
 }) {
-  const { theme } = useTheme();
+  const { resolvedTheme, forcedTheme } = useTheme();
 
   return useMemo(() => {
-    if (theme === "light") {
+    if ((forcedTheme ?? resolvedTheme) === "light") {
       return createTheme({
         theme: "light",
         settings: {
@@ -73,5 +73,5 @@ export default function useCodeEditorTheme({
         ],
       });
     }
-  }, [theme, fontSize]);
+  }, [resolvedTheme, forcedTheme, fontSize]);
 }

@@ -1,8 +1,5 @@
-
 export interface OuterbaseDatabaseConfig {
-  token: string;
   workspaceId: string;
-  baseId: string;
   sourceId: string;
 }
 
@@ -22,15 +19,15 @@ export class OuterbaseAPIError extends Error {
 }
 
 export interface OuterbaseAPIErrorResponse {
-  code: string,
-  description: string,
-  title: string
+  code: string;
+  description: string;
+  title: string;
 }
 
 export interface OuterbaseAPIResponse<T = unknown> {
   success: boolean;
   response: T;
-  error?: OuterbaseAPIErrorResponse
+  error?: OuterbaseAPIErrorResponse;
 }
 
 export interface OuterbaseAPIQueryRaw {
@@ -115,6 +112,7 @@ export interface OuterbaseAPIDashboardChart {
     workspace_id: string;
     connection_id: string | null;
   };
+  result?: OuterbaseAPIQueryRaw;
   source_id: string;
   type: string;
   updated_at: string;
