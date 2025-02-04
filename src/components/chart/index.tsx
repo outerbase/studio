@@ -28,7 +28,7 @@ const TextComponent = ({ value }: OuterbaseChartProps) => {
   markdown = markdown.replace(/~~(.*?)~~/g, "<u>$1</u>");
 
   // Line break (double space followed by a newline)
-  markdown = markdown.replace(/  \n/g, "<br>");
+  markdown = markdown.replace(/ {2}\n/g, "<br>");
   return (
     <div className="h-full w-full">
       <p
@@ -107,7 +107,7 @@ const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
   const sizeX = 1;
   const sizeY = 1;
 
-  let style: React.CSSProperties = {
+  const style: React.CSSProperties = {
     fontSize: sizeX === 1 && sizeY === 1 ? "30px" : "60px",
     lineHeight: sizeX === 1 && sizeY === 1 ? "36px" : "68px",
   };
@@ -152,13 +152,13 @@ const TableComponent = ({ data }: OuterbaseChartProps) => {
   );
 };
 
-const ChartComponent = ({ value, data, modifier }: OuterbaseChartProps) => {
+const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
   const domRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
     if (domRef.current) {
-      let chartInstance =
+      const chartInstance =
         echarts.getInstanceByDom(domRef.current) ||
         echarts.init(domRef.current);
       chartInstance.clear();

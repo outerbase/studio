@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import Chart, { ChartValue } from "../chart";
+import Chart from "../chart";
+import { ChartValue } from "../chart/chartTypes";
 import { useBoardContext } from "./board-provider";
 
 export default function BoardChart({ value }: { value: ChartValue }) {
