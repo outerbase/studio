@@ -196,7 +196,7 @@ const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
   return <div ref={domRef} className="h-full w-full"></div>;
 };
 
-export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
+function ChartBody({ value, data, modifier }: OuterbaseChartProps) {
   if (value.type === "text") {
     return <TextComponent value={value} data={data} />;
   } else if (value.type === "single_value") {
@@ -206,4 +206,15 @@ export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
   } else {
     return <ChartComponent value={value} data={data} modifier={modifier} />;
   }
+}
+
+export default function Chart(props: OuterbaseChartProps) {
+  return (
+    <div className="flex h-full w-full flex-col p-6">
+      <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
+      <div className="flex-1">
+        <ChartBody {...props} />
+      </div>
+    </div>
+  );
 }
