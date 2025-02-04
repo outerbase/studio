@@ -1,7 +1,7 @@
 "use client";
-import { useTheme } from "@/context/theme-provider";
 import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 import { ChartData, ChartValue } from "./chartTypes";
 import EchartOptionsBuilder from "./echartOptionsBuilder";
@@ -164,7 +164,7 @@ const ChartComponent = ({ value, data, modifier }: OuterbaseChartProps) => {
       chartInstance.clear();
 
       const chartBuilder = new EchartOptionsBuilder(value, data);
-      chartBuilder.setTheme(theme);
+      chartBuilder.setTheme(theme || "dark");
 
       const options = chartBuilder.getChartOptions();
       chartInstance.setOption(options);

@@ -1,4 +1,3 @@
-import { ThemeType } from "@/context/theme-provider";
 import {
   BarSeriesOption,
   EChartsOption,
@@ -13,7 +12,7 @@ import { ChartData, ChartValue } from "./chartTypes";
 export default class EchartOptionsBuilder {
   private chartValue: ChartValue;
   private chartData: ChartData[];
-  private theme: ThemeType = "light";
+  private theme: string = "light";
   private columns: string[] = [];
   private chartHeight: number = 0;
   private chartWidth: number = 0;
@@ -28,7 +27,7 @@ export default class EchartOptionsBuilder {
     this.chartHeight = height;
   }
 
-  setTheme(theme: ThemeType) {
+  setTheme(theme: string) {
     this.theme = theme;
   }
 
