@@ -7,32 +7,44 @@ import {
   ScatterSeriesOption,
   SeriesOption,
 } from "echarts";
-import { ChartData, ChartValue } from "./chartTypes";
+import { ChartData, ChartValue, ThemeColors, THEMES } from "./chart-type";
 
 export default class EchartOptionsBuilder {
   private chartValue: ChartValue;
   private chartData: ChartData[];
-  private theme: string = "light";
+  private theme: "dark" | "light" = "light";
   private columns: string[] = [];
-  private chartHeight: number = 0;
-  private chartWidth: number = 0;
+  public chartHeight: number = 0;
+  public chartWidth: number = 0;
+  public colorTheme: ThemeColors = "mercury";
 
   constructor(value: ChartValue, data: ChartData[]) {
     this.chartValue = value;
     this.chartData = data;
   }
 
-  setChartSize(width: number, height: number) {
-    this.chartWidth = width;
-    this.chartHeight = height;
+  setChartValue(value: ChartValue) {
+    this.chartValue = value;
+  }
+
+  getChartType() {
+    return this.chartValue.type;
   }
 
   setTheme(theme: string) {
-    this.theme = theme;
+    this.theme = theme as "dark" | "light";
   }
 
   private getColorValues(): string[] {
-    return ["#5B8FF9", "#5AD8A6", "#5D7092", "#F6BD16", "#6F5EF9"];
+    const DEFAULT_THEME = "mercury";
+    const colorTheme = this.colorTheme ?? DEFAULT_THEME;
+    const values = THEMES[colorTheme];
+
+    if (!values) {
+      throw new Error(`Theme "${colorTheme}" does not exist`);
+    }
+
+    return values.colors[this.theme]; // return light or dark values
   }
 
   private getTextColor(): string {
@@ -46,6 +58,7 @@ export default class EchartOptionsBuilder {
     const colorValues = this.getColorValues();
 
     const formattedSource = this.chartData;
+    this.columns = [];
     if (this.chartValue.params.options?.xAxisKey) {
       this.columns.push(this.chartValue.params.options.xAxisKey);
     }
@@ -54,6 +67,7 @@ export default class EchartOptionsBuilder {
     }
 
     const isTall = this.chartHeight > 150;
+
     const gridLineColors = this.theme === "dark" ? "#FFFFFF08" : "#00000010";
     const axisLineColors = this.theme === "dark" ? "#FFFFFF15" : "#00000020";
 
@@ -94,8 +108,20 @@ export default class EchartOptionsBuilder {
       };
     }
 
+    const xAxisLabel = !this.chartValue.params.options.xAxisLabel
+      ? this.chartValue.params.options.xAxisKey
+      : this.chartValue.params.options.xAxisLabel;
+
+    let yaxisLabel = !this.chartValue.params.options.yAxisLabel
+      ? this.chartValue.params.options.yAxisKeys[0]
+      : this.chartValue.params.options.yAxisLabel;
+
+    yaxisLabel = this.chartValue.params.options.yAxisLabelHidden
+      ? ""
+      : yaxisLabel;
+
     const options: EChartsOption = {
-      // backgroundColor: this.getBackgroundColor(),
+      //backgroundColor: this.getBackgroundColor(),
       dataset: {
         dimensions: this.columns,
         source: formattedSource,
@@ -117,9 +143,8 @@ export default class EchartOptionsBuilder {
       grid: {
         left: "0", // this.type === 'bar' ? '100' : '0',
         right: "6",
-        bottom:
-          this.chartValue.params.options.xAxisLabel && isTall ? "23" : "0", // isTall ? '15%' : '15%',
-        top: this.chartValue.params.options.yAxisLabel && isTall ? "26" : "8",
+        bottom: xAxisLabel && isTall ? "23" : "0", // isTall ? '15%' : '15%',
+        top: yaxisLabel && isTall ? "26" : "8",
         containLabel: true,
       },
       xAxis: {
@@ -130,7 +155,7 @@ export default class EchartOptionsBuilder {
             : isXAxisDate
               ? "time"
               : "category",
-        name: isTall ? this.chartValue.params.options.xAxisLabel : "",
+        name: isTall ? xAxisLabel : "",
         nameLocation: "middle",
         nameGap: 30,
         nameTextStyle: {
@@ -169,7 +194,7 @@ export default class EchartOptionsBuilder {
             : isYAxisDate
               ? "time"
               : "value",
-        name: isTall ? this.chartValue.params.options.yAxisLabel : "",
+        name: isTall ? yaxisLabel : "",
         show: this.chartValue.params.options.yAxisLabelDisplay !== "hidden",
         position:
           (this.chartValue.params.options.yAxisLabelDisplay !== "hidden" &&

@@ -3,8 +3,8 @@ import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
-import { ChartData, ChartValue } from "./chartTypes";
-import EchartOptionsBuilder from "./echartOptionsBuilder";
+import { ChartData, ChartValue } from "./chart-type";
+import EchartOptionsBuilder from "./echart-options-builder";
 
 interface OuterbaseChartProps {
   data: ChartData[];
@@ -28,7 +28,7 @@ const TextComponent = ({ value }: OuterbaseChartProps) => {
   markdown = markdown.replace(/~~(.*?)~~/g, "<u>$1</u>");
 
   // Line break (double space followed by a newline)
-  markdown = markdown.replace(/  \n/g, "<br>");
+  markdown = markdown.replace(/ {2}\n/g, "<br>");
   return (
     <div className="h-full w-full">
       <p
@@ -107,7 +107,7 @@ const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
   const sizeX = 1;
   const sizeY = 1;
 
-  let style: React.CSSProperties = {
+  const style: React.CSSProperties = {
     fontSize: sizeX === 1 && sizeY === 1 ? "30px" : "60px",
     lineHeight: sizeX === 1 && sizeY === 1 ? "36px" : "68px",
   };
@@ -152,51 +152,68 @@ const TableComponent = ({ data }: OuterbaseChartProps) => {
   );
 };
 
-const ChartComponent = ({ value, data, modifier }: OuterbaseChartProps) => {
+const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
   const domRef = useRef<HTMLDivElement>(null);
-  const { theme } = useTheme();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const chartBuilderRef = useRef<EchartOptionsBuilder | null>(null);
+  const { resolvedTheme, forcedTheme } = useTheme();
 
   useEffect(() => {
+    if (
+      !chartBuilderRef.current ||
+      chartBuilderRef.current.getChartType() !== value.type
+    ) {
+      chartBuilderRef.current = new EchartOptionsBuilder(value, data);
+    } else {
+      chartBuilderRef.current.setChartValue(value);
+    }
+
     if (domRef.current) {
-      let chartInstance =
-        echarts.getInstanceByDom(domRef.current) ||
-        echarts.init(domRef.current);
+      const currentDomRef = domRef.current;
+      const chartInstance =
+        echarts.getInstanceByDom(currentDomRef) || echarts.init(currentDomRef);
       chartInstance.clear();
 
-      const chartBuilder = new EchartOptionsBuilder(value, data);
-      chartBuilder.setTheme(theme || "dark");
-
-      const options = chartBuilder.getChartOptions();
-      chartInstance.setOption(options);
+      const chartBuilder = chartBuilderRef.current;
+      chartBuilder.setTheme((forcedTheme ?? resolvedTheme) as "light" | "dark");
 
       // handle resize event
       const resizeObserver = new ResizeObserver((entries) => {
         requestAnimationFrame(() => {
           for (const entry of entries) {
-            if (entry.target === domRef.current) {
+            if (entry.target === currentDomRef) {
               const { width, height } = entry.contentRect;
-              chartBuilder.setChartSize(width, height);
+              chartBuilder.chartHeight = height;
+              chartBuilder.chartWidth = width;
               chartInstance.resize();
+              if (timerRef.current) {
+                clearTimeout(timerRef.current);
+              }
+
+              timerRef.current = setTimeout(() => {
+                chartInstance.setOption(chartBuilder.getChartOptions());
+              }, 200);
+
               break;
             }
           }
         });
       });
 
-      resizeObserver.observe(domRef.current);
+      resizeObserver.observe(currentDomRef);
 
       return () => {
-        if (domRef.current) {
-          resizeObserver.unobserve(domRef.current);
+        if (currentDomRef) {
+          resizeObserver.unobserve(currentDomRef);
         }
       };
     }
-  }, [domRef, value, data]);
+  }, [domRef, value, data, forcedTheme, resolvedTheme]);
 
   return <div ref={domRef} className="h-full w-full"></div>;
 };
 
-export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
+function ChartBody({ value, data, modifier }: OuterbaseChartProps) {
   if (value.type === "text") {
     return <TextComponent value={value} data={data} />;
   } else if (value.type === "single_value") {
@@ -206,4 +223,15 @@ export default function Chart({ value, data, modifier }: OuterbaseChartProps) {
   } else {
     return <ChartComponent value={value} data={data} modifier={modifier} />;
   }
+}
+
+export default function Chart(props: OuterbaseChartProps) {
+  return (
+    <div className="flex h-full w-full flex-col p-6">
+      <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
+      <div className="flex-1">
+        <ChartBody {...props} />
+      </div>
+    </div>
+  );
 }

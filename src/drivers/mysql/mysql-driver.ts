@@ -1,18 +1,19 @@
+import { ColumnType } from "@outerbase/sdk-transform";
 import { format } from "sql-formatter";
 import {
-  DatabaseSchemas,
-  DatabaseTableSchema,
-  DatabaseTriggerSchema,
-  DriverFlags,
-  DatabaseSchemaItem,
-  DatabaseTableColumn,
-  DatabaseTableSchemaChange,
   ColumnTypeSelector,
-  DatabaseTableColumnConstraint,
   DatabaseSchemaChange,
+  DatabaseSchemaItem,
+  DatabaseSchemas,
+  DatabaseTableColumn,
+  DatabaseTableColumnConstraint,
+  DatabaseTableSchema,
+  DatabaseTableSchemaChange,
+  DatabaseTriggerSchema,
+  DatabaseViewSchema,
+  DriverFlags,
   TriggerOperation,
   TriggerWhen,
-  DatabaseViewSchema,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -24,7 +25,6 @@ import {
   MYSQL_COLLATION_LIST,
   MYSQL_DATA_TYPE_SUGGESTION,
 } from "./mysql-data-type";
-import { ColumnType } from "@outerbase/sdk-transform";
 
 interface MySqlDatabase {
   SCHEMA_NAME: string;
@@ -169,32 +169,38 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
   async schemas(): Promise<DatabaseSchemas> {
     const schemaSql =
       "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
-    const schemaResult = (await this.query(schemaSql))
-      .rows as unknown as MySqlDatabase[];
 
     const tableSql =
       "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, DATA_LENGTH, INDEX_LENGTH FROM information_schema.tables WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
-    const tableResult = (await this.query(tableSql))
-      .rows as unknown as MySqlTable[];
 
     const columnSql =
       "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.columns WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
-    const columnResult = (await this.query(columnSql))
-      .rows as unknown as MySqlColumn[];
 
     const constraintSql =
       "SELECT TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE FROM information_schema.table_constraints WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys') AND CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY')";
-    const constraintResult = (await this.query(constraintSql))
-      .rows as unknown as MySQLConstraintResult[];
 
     const constraintColumnsSql = `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')`;
-    const constraintColumnsResult = (await this.query(constraintColumnsSql))
-      .rows as unknown as MySQLConstraintColumnResult[];
 
     const triggerSql =
       "SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
-    const triggerResult = (await this.query(triggerSql))
-      .rows as unknown as MySQLTriggerResult[];
+
+    const result = await this.batch([
+      schemaSql,
+      tableSql,
+      columnSql,
+      constraintSql,
+      constraintColumnsSql,
+      triggerSql,
+    ]);
+
+    const schemaResult = result[0].rows as unknown as MySqlDatabase[];
+    const tableResult = result[1].rows as unknown as MySqlTable[];
+    const columnResult = result[2].rows as unknown as MySqlColumn[];
+    const constraintResult = result[3]
+      .rows as unknown as MySQLConstraintResult[];
+    const constraintColumnsResult = result[4]
+      .rows as unknown as MySQLConstraintColumnResult[];
+    const triggerResult = result[5].rows as unknown as MySQLTriggerResult[];
 
     // Hash table of schema
     const schemaRecord: Record<string, DatabaseSchemaItem[]> = {};
@@ -353,20 +359,24 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
     tableName: string
   ): Promise<DatabaseTableSchema> {
     const columnSql = `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT, COLLATION_NAME FROM information_schema.columns WHERE TABLE_NAME=${escapeSqlValue(tableName)} AND TABLE_SCHEMA=${escapeSqlValue(schemaName)} ORDER BY ORDINAL_POSITION`;
-    const columnResult = (await this.query(columnSql))
-      .rows as unknown as MySqlColumn[];
+    const constraintSql = `SELECT TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE FROM information_schema.table_constraints WHERE TABLE_SCHEMA = ${this.escapeValue(schemaName)} AND TABLE_NAME = ${this.escapeValue(tableName)} AND CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY')`;
+    const constraintColumnsSql = `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA = ${this.escapeValue(schemaName)} AND TABLE_NAME = ${this.escapeValue(tableName)}`;
+
+    const result = await this.batch([
+      columnSql,
+      constraintSql,
+      constraintColumnsSql,
+    ]);
+
+    const columnResult = result[0].rows as unknown as MySqlColumn[];
+    const constraintResult = result[1]
+      .rows as unknown as MySQLConstraintResult[];
+    const constraintColumnsResult = result[2]
+      .rows as unknown as MySQLConstraintColumnResult[];
 
     const autoIncrement = columnResult.some(
       (c) => c.EXTRA === "auto_increment"
     );
-
-    const constraintSql = `SELECT TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE FROM information_schema.table_constraints WHERE TABLE_SCHEMA = ${this.escapeValue(schemaName)} AND TABLE_NAME = ${this.escapeValue(tableName)} AND CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY')`;
-    const constraintResult = (await this.query(constraintSql))
-      .rows as unknown as MySQLConstraintResult[];
-
-    const constraintColumnsSql = `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA = ${this.escapeValue(schemaName)} AND TABLE_NAME = ${this.escapeValue(tableName)}`;
-    const constraintColumnsResult = (await this.query(constraintColumnsSql))
-      .rows as unknown as MySQLConstraintColumnResult[];
 
     const columns: DatabaseTableColumn[] = columnResult.map(mapColumn);
 
@@ -401,13 +411,13 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
           foreignKey:
             constraint.CONSTRAINT_TYPE === "FOREIGN KEY"
               ? {
-                columns: columnList.map((c) => c.COLUMN_NAME),
-                foreignColumns: columnList.map(
-                  (c) => c.REFERENCED_COLUMN_NAME
-                ),
-                foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
-                foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
-              }
+                  columns: columnList.map((c) => c.COLUMN_NAME),
+                  foreignColumns: columnList.map(
+                    (c) => c.REFERENCED_COLUMN_NAME
+                  ),
+                  foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
+                  foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
+                }
               : undefined,
         };
       }
