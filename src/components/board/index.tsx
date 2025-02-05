@@ -1,5 +1,5 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChartValue } from "../chart/chartTypes";
 import { BoardCanvas } from "./board-canvas";
 import { BoardFilter } from "./board-filter";
@@ -18,31 +18,62 @@ export interface DashboardProps {
 interface Props {
   value: DashboardProps;
   sources?: BoardSourceDriver;
-  setValue: (value: DashboardProps) => void;
   interval: number;
-  setInterval: (v: number) => void;
-  onRefresh?: () => void;
+  onChange: (value: DashboardProps) => void;
+  onChangeInterval: (v: number) => void;
 }
 
 export default function Board({
   value,
-  setValue,
   sources,
   interval,
-  setInterval,
-  onRefresh,
+  onChange,
+  onChangeInterval,
 }: Props) {
   const [editMode, setEditMode] = useState<
     "ADD_CHART" | "REARRANGING_CHART" | null
   >(null);
 
+  const autoRefresh = [
+    "5s",
+    "10s",
+    "30s",
+    "1m",
+    "5m",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "1d",
+  ];
+
+  const [lastRunTimestamp, setLastRunTimestamp] = useState(() => {
+    return Date.now();
+  });
+
+  useEffect(() => {
+    if (!interval) return;
+
+    const intervalId = setInterval(() => {
+      setLastRunTimestamp(Date.now());
+    }, interval);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [interval]);
+
   return (
-    <BoardProvider sources={sources}>
+    <BoardProvider
+      sources={sources}
+      lastRunTimestamp={lastRunTimestamp}
+      setting={{ autoRefresh, name: value.name }}
+    >
       <div>
         <BoardFilter
           filters={value.data.filters}
           onFilters={(v) =>
-            setValue({
+            onChange({
               ...value,
               data: {
                 ...value.data,
@@ -54,13 +85,15 @@ export default function Board({
           setEditMode={setEditMode}
           name={value.name}
           interval={interval}
-          setInterval={setInterval}
-          onRefresh={onRefresh}
+          setInterval={onChangeInterval}
+          onRefresh={() => {
+            setLastRunTimestamp(Date.now());
+          }}
         />
         <BoardCanvas
           value={value}
           onChange={(v) => {
-            setValue({
+            onChange({
               ...value,
               layout: v,
             });

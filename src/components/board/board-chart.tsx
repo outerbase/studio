@@ -5,9 +5,9 @@ import { useBoardContext } from "./board-provider";
 
 export default function BoardChart({ value }: { value: ChartValue }) {
   const [data, setData] = useState<Record<string, unknown>[] | null>(null);
-  const [lastLoading, setLastLoading] = useState(0);
   const loaderRef = useRef<HTMLDivElement>(null);
-  const { sources } = useBoardContext();
+  const { sources, lastRunTimestamp } = useBoardContext();
+  const [loading, setLoading] = useState(false);
 
   const sql = value.params.layers[0].sql;
   const sourceId = value.source_id;
@@ -17,7 +17,7 @@ export default function BoardChart({ value }: { value: ChartValue }) {
       return;
     }
 
-    setLastLoading(Date.now());
+    setLoading(true);
 
     sources
       .query(sourceId, sql)
@@ -27,15 +27,19 @@ export default function BoardChart({ value }: { value: ChartValue }) {
       .catch((e) => {
         console.error(e);
       })
-      .finally(() => setLastLoading(0));
-  }, [sources, sourceId, sql]);
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [sources, sourceId, sql, lastRunTimestamp, loaderRef]);
 
   useEffect(() => {
-    if (loaderRef.current && lastLoading) {
+    if (loaderRef.current && loading) {
       const interval = setInterval(() => {
+        console.log(Date.now(), lastRunTimestamp);
+
         if (loaderRef.current) {
           const progress = Math.min(
-            ((Date.now() - lastLoading) / 3000) * 100,
+            ((Date.now() - lastRunTimestamp) / 3000) * 100,
             80
           );
 
@@ -44,15 +48,19 @@ export default function BoardChart({ value }: { value: ChartValue }) {
       }, 100);
       return () => clearInterval(interval);
     }
-  }, [lastLoading]);
+  }, [lastRunTimestamp, loading, loaderRef]);
 
   return (
     <>
-      {!!lastLoading && (
-        <div className="absolute top-0 right-0 left-0 z-10 h-[3px]">
+      {loading && (
+        <div
+          key={lastRunTimestamp}
+          className="absolute top-0 right-0 left-0 z-10 h-[3px]"
+        >
           <div
             ref={loaderRef}
-            className="h-[3px] bg-blue-400 transition-all"
+            key={lastRunTimestamp}
+            className="h-[3px] w-[0%] bg-blue-400 transition-all"
           ></div>
         </div>
       )}

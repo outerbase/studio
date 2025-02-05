@@ -9,7 +9,7 @@ interface Props {
 
 export function BoardTool(props: Props) {
   return (
-    <div className="reveal animate-revealMenu fixed bottom-6 left-[60%] z-100 flex -translate-x-[60%] rounded-xl bg-neutral-800 p-1 text-neutral-100 shadow-lg dark:bg-white dark:text-neutral-900">
+    <div className="reveal animate-revealMenu fixed bottom-6 left-[50%] z-100 flex -translate-x-[50%] rounded-xl bg-neutral-800 p-1 text-neutral-100 shadow-lg dark:bg-white dark:text-neutral-900">
       <ToggleGroup
         type="single"
         size={"sm"}
