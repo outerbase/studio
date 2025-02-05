@@ -3,8 +3,8 @@ import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
-import { ChartData, ChartValue } from "./chartTypes";
-import EchartOptionsBuilder from "./echartOptionsBuilder";
+import { ChartData, ChartValue } from "./chart-type";
+import EchartOptionsBuilder from "./echart-options-builder";
 
 interface OuterbaseChartProps {
   data: ChartData[];

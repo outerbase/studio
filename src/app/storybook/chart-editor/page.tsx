@@ -1,6 +1,6 @@
 "use client";
 import Chart from "@/components/chart";
-import { ChartData, ChartValue } from "@/components/chart/chartTypes";
+import { ChartData, ChartValue } from "@/components/chart/chart-type";
 import EditChartMenu from "@/components/chart/edit-chart-menu";
 import { useState } from "react";
 
@@ -70,7 +70,7 @@ const lineChartValue: ChartValue = {
         seller2: "#FFA285",
       },
       xAxisLabelHidden: false,
-      yAxisLabelHidden: false,
+      yAxisLabelHidden: true,
       yAxisLabelDisplay: "right",
     },
     source_id: "856a1855-2bee-4d87-9756-a783088c0568",

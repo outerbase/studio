@@ -28,6 +28,7 @@ interface SimpleComboboxProps {
   onChange: (v: string) => void;
   placeholder?: string;
   selected?: string;
+  hideArrow?: boolean;
 }
 
 export function SimpleCombobox({
@@ -35,6 +36,7 @@ export function SimpleCombobox({
   onChange,
   placeholder,
   selected,
+  hideArrow,
 }: SimpleComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState<string | null>(
@@ -53,7 +55,7 @@ export function SimpleCombobox({
           {values
             ? values.find((value) => value.value === selectedValue)?.label
             : placeholder || ""}
-          <ChevronsUpDown className="opacity-50" />
+          {!hideArrow && <ChevronsUpDown className="opacity-50" />}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
@@ -62,9 +64,9 @@ export function SimpleCombobox({
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
-              {values.map((value) => (
+              {values.map((value, idx) => (
                 <CommandItem
-                  key={value.value}
+                  key={idx}
                   value={value.value}
                   onSelect={(currentValue) => {
                     setSelectedValue(currentValue);

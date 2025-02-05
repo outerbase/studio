@@ -10,9 +10,15 @@ import { Table } from "@phosphor-icons/react/dist/icons/Table";
 import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
 import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
 import { useMemo } from "react";
+import {
+  ChartLabelDisplayY,
+  ChartValue,
+  SingleValueFormat,
+} from "./chart-type";
 import { ChartTypeButton } from "./chart-type-button";
-import { ChartValue, SingleValueFormat } from "./chartTypes";
 import { SimpleCombobox } from "./simple-combobox";
+import SimpleInput from "./simple-input";
+import SimpleToggle from "./simple-toggle";
 
 interface EditChartMenuProps {
   value: ChartValue;
@@ -24,53 +30,173 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
     value.type
   );
 
-  const yAxisLabelSection = useMemo(() => {
+  const selectYAxisDisplay = useMemo(() => {
     if (isNotChartComponent) return null;
+    const yAxisSideValues = [
+      {
+        value: "left",
+        label: "Left",
+      },
+      {
+        value: "right",
+        label: "Right",
+      },
+      {
+        value: "hidden",
+        label: "Hidden",
+      },
+    ];
     return (
       <div>
-        <input
-          className="w-full rounded-md border p-2"
-          placeholder={value.params.options?.yAxisKeys[0] ?? "Y Axis Label"}
-          value={value.params.options?.yAxisLabel ?? ""}
-          onChange={(v) =>
+        <SimpleCombobox
+          hideArrow={true}
+          values={yAxisSideValues}
+          selected={value.params.options?.yAxisLabelDisplay ?? "left"}
+          placeholder="Select display..."
+          onChange={function (v: string): void {
             setValue({
               ...value,
               params: {
                 ...value.params,
                 options: {
                   ...value.params.options,
-                  yAxisLabel: v.target.value,
+                  yAxisLabelDisplay: v as ChartLabelDisplayY,
                 },
               },
-            })
-          }
-        />
+            });
+          }}
+        ></SimpleCombobox>
       </div>
     );
   }, [isNotChartComponent, setValue, value]);
+
+  const selectAxisKey = useMemo(() => {
+    if (isNotChartComponent) return null;
+    const allKeys = [
+      value.params.options?.xAxisKey,
+      ...(value.params.options?.yAxisKeys ?? []),
+    ];
+    return (
+      <div>
+        <p className="mb-1.5 text-sm font-bold opacity-70">Select X Axis</p>
+        <SimpleCombobox
+          values={
+            allKeys.map((key) => {
+              return {
+                value: key,
+                label: key,
+              };
+            }) ?? []
+          }
+          selected={value.params.options?.xAxisKey ?? ""}
+          placeholder="Select axis key..."
+          onChange={function (v: string): void {
+            setValue({
+              ...value,
+              params: {
+                ...value.params,
+                options: {
+                  ...value.params.options,
+                  xAxisKey: v,
+                  yAxisKeys: allKeys.filter((key) => key !== v),
+                },
+              },
+            });
+          }}
+        ></SimpleCombobox>
+      </div>
+    );
+  }, [isNotChartComponent, setValue, value]);
+
+  const yAxisLabelSection = useMemo(() => {
+    if (isNotChartComponent) return null;
+    return (
+      <div>
+        <p className="mb-1.5 text-sm font-bold opacity-70">Y Axis Label</p>
+        <div className="flex items-center justify-between gap-2">
+          <SimpleInput
+            value={value.params.options?.yAxisLabel}
+            placeholder={value.params.options?.yAxisKeys[0] ?? "Y Axis Label"}
+            onSumit={(v) => {
+              setValue({
+                ...value,
+                params: {
+                  ...value.params,
+                  options: {
+                    ...value.params.options,
+                    yAxisLabel: v,
+                  },
+                },
+              });
+            }}
+          />
+
+          <SimpleToggle
+            values={["Show", "Hide"]}
+            onChange={(v) => {
+              setValue({
+                ...value,
+                params: {
+                  ...value.params,
+                  options: {
+                    ...value.params.options,
+                    yAxisLabelHidden: v === "Hide",
+                  },
+                },
+              });
+            }}
+            selectedValue={
+              value.params.options?.yAxisLabelHidden ? "Hide" : "Show"
+            }
+          />
+          {selectYAxisDisplay}
+        </div>
+      </div>
+    );
+  }, [isNotChartComponent, selectYAxisDisplay, setValue, value]);
 
   const xAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
     return (
       <div>
         <p className="mb-1.5 text-sm font-bold opacity-70">X Axis Label</p>
-        <input
-          className="w-full rounded-md border p-2"
-          placeholder={value.params.options?.xAxisKey ?? "X Axis Label"}
-          value={value.params.options?.xAxisLabel ?? ""}
-          onChange={(v) =>
-            setValue({
-              ...value,
-              params: {
-                ...value.params,
-                options: {
-                  ...value.params.options,
-                  xAxisLabel: v.target.value ?? "",
+        <div className="flex items-center justify-between gap-2">
+          <SimpleInput
+            value={value.params.options?.xAxisLabel}
+            placeholder={value.params.options?.xAxisKey ?? "X Axis Label"}
+            onSumit={(v) => {
+              setValue({
+                ...value,
+                params: {
+                  ...value.params,
+                  options: {
+                    ...value.params.options,
+                    xAxisLabel: v,
+                  },
                 },
-              },
-            })
-          }
-        />
+              });
+            }}
+          />
+
+          <SimpleToggle
+            values={["Show", "Hide"]}
+            onChange={(v) => {
+              setValue({
+                ...value,
+                params: {
+                  ...value.params,
+                  options: {
+                    ...value.params.options,
+                    xAxisLabelHidden: v === "Hide",
+                  },
+                },
+              });
+            }}
+            selectedValue={
+              value.params.options?.xAxisLabelHidden ? "Hide" : "Show"
+            }
+          />
+        </div>
       </div>
     );
   }, [isNotChartComponent, setValue, value]);
@@ -293,6 +419,7 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
       {textColorSection}
       {dataFormatSection}
       {xAxisLabelSection}
+      {selectAxisKey}
       {yAxisLabelSection}
     </div>
   );

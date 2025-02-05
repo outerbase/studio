@@ -7,7 +7,7 @@ import {
   ScatterSeriesOption,
   SeriesOption,
 } from "echarts";
-import { ChartData, ChartValue, ThemeColors, THEMES } from "./chartTypes";
+import { ChartData, ChartValue, ThemeColors, THEMES } from "./chart-type";
 
 export default class EchartOptionsBuilder {
   private chartValue: ChartValue;
@@ -112,8 +112,16 @@ export default class EchartOptionsBuilder {
       ? this.chartValue.params.options.xAxisKey
       : this.chartValue.params.options.xAxisLabel;
 
+    let yaxisLabel = !this.chartValue.params.options.yAxisLabel
+      ? this.chartValue.params.options.yAxisKeys[0]
+      : this.chartValue.params.options.yAxisLabel;
+
+    yaxisLabel = this.chartValue.params.options.yAxisLabelHidden
+      ? ""
+      : yaxisLabel;
+
     const options: EChartsOption = {
-      // backgroundColor: this.getBackgroundColor(),
+      //backgroundColor: this.getBackgroundColor(),
       dataset: {
         dimensions: this.columns,
         source: formattedSource,
@@ -135,9 +143,8 @@ export default class EchartOptionsBuilder {
       grid: {
         left: "0", // this.type === 'bar' ? '100' : '0',
         right: "6",
-        bottom:
-          this.chartValue.params.options.xAxisLabel && isTall ? "23" : "0", // isTall ? '15%' : '15%',
-        top: this.chartValue.params.options.yAxisLabel && isTall ? "26" : "8",
+        bottom: xAxisLabel && isTall ? "23" : "0", // isTall ? '15%' : '15%',
+        top: yaxisLabel && isTall ? "26" : "8",
         containLabel: true,
       },
       xAxis: {
@@ -187,7 +194,7 @@ export default class EchartOptionsBuilder {
             : isYAxisDate
               ? "time"
               : "value",
-        name: isTall ? this.chartValue.params.options.yAxisLabel : "",
+        name: isTall ? yaxisLabel : "",
         show: this.chartValue.params.options.yAxisLabelDisplay !== "hidden",
         position:
           (this.chartValue.params.options.yAxisLabelDisplay !== "hidden" &&
