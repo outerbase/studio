@@ -64,7 +64,7 @@ export default function DataCatalogTableColumn({
       .finally(() => {
         setLoading(false);
       });
-  }, [driver, modelColumn, modelColumn, table]);
+  }, [driver, table, hideFromEzql, modelColumn, column]);
 
   if (hasDefinitionOnly && !definition) {
     return null;

@@ -31,7 +31,6 @@ export default function VirtaulJoinColumn({
   onDeletRelatinship,
 }: Props) {
   const [isActive, setIsActive] = useState<boolean>(flags?.isActive || true);
-  const [open, setOpen] = useState(false);
   return (
     <div
       className={cn(

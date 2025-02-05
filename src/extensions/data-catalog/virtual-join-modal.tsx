@@ -88,10 +88,10 @@ export default function VirtualJoinModal({
       <DialogHeader>
         <DialogTitle>Add Relationship to {tableName}</DialogTitle>
         <DialogDescription>
-          Use virtual relationships to connect fields that don't have a direct
-          foreign key link. For example, if two tables should be related by
-          email or title but don't have a formal foreign key, use these virtual
-          relationships to link them.
+          Use virtual relationships to connect fields that don&apos;t have a
+          direct foreign key link. For example, if two tables should be related
+          by email or title but don&apos;t have a formal foreign key, use these
+          virtual relationships to link them.
         </DialogDescription>
       </DialogHeader>
 

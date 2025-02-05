@@ -69,7 +69,7 @@ export default function DataCatalogTableAccordion({
           console.log("deleted sucessful");
         });
     },
-    [driver, modelTable]
+    [driver, modelTable, table]
   );
 
   // Check if any of the column match?
