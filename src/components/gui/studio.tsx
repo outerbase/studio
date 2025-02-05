@@ -58,9 +58,9 @@ export function Studio({
 
             return await target.query(beforePipeline.getStatments()[0]);
           };
-        } else if (property === "transaction") {
+        } else if (property === "transaction" || property === "batch") {
           return async (statements: string[]) => {
-            const beforePipeline = new BeforeQueryPipeline("transaction", [
+            const beforePipeline = new BeforeQueryPipeline(property, [
               ...statements,
             ]);
 

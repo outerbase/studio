@@ -1,3 +1,5 @@
+import { ColumnHeader, ResultStat } from "@outerbase/sdk-transform";
+
 export interface OuterbaseDatabaseConfig {
   workspaceId: string;
   sourceId: string;
@@ -32,6 +34,9 @@ export interface OuterbaseAPIResponse<T = unknown> {
 
 export interface OuterbaseAPIQueryRaw {
   items: Record<string, unknown>[];
+  headers: ColumnHeader[];
+  stat?: ResultStat;
+  lastInsertRowid?: number;
 }
 
 export interface OuterbaseAPIAnalyticEvent {
