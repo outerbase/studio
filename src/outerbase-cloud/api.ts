@@ -78,6 +78,18 @@ export async function runOuterbaseQueryRaw(
   );
 }
 
+export async function runOuterbaseQueryBatch(
+  workspaceId: string,
+  sourceId: string,
+  queries: string[]
+) {
+  return requestOuterbase<OuterbaseAPIQueryRaw[]>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/query/batch`,
+    "POST",
+    { query: queries }
+  );
+}
+
 export async function getOuterbaseQueryList(
   workspaceId: string,
   baseId: string

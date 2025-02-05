@@ -8,8 +8,8 @@ import {
   DatabaseValue,
   SelectFromTableOptions,
 } from "./base-driver";
-import { escapeSqlValue } from "./sqlite/sql-helper";
 import { deleteFrom, insertInto, updateTable } from "./query-builder";
+import { escapeSqlValue } from "./sqlite/sql-helper";
 
 export default abstract class CommonSQLImplement extends BaseDriver {
   protected validateUpdateOperation(
@@ -26,6 +26,16 @@ export default abstract class CommonSQLImplement extends BaseDriver {
 
   async getCurrentSchema(): Promise<string | null> {
     return null;
+  }
+
+  async batch(stmts: string[]): Promise<DatabaseResultSet[]> {
+    const result: DatabaseResultSet[] = [];
+
+    for (const stmt of stmts) {
+      result.push(await this.query(stmt));
+    }
+
+    return result;
   }
 
   getCollationList(): string[] {
