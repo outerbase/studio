@@ -23,16 +23,22 @@ import {
   DEFAULT_DATE_FILTER,
 } from "./board-filter-dialog";
 import { BoardTool } from "./board-tool";
+import { BoardToolbar } from "./board-toolbar";
 
 interface Props {
+  name: string;
   filters: BoardFilterProps[];
   onFilters: (f: BoardFilterProps[]) => void;
   editMode: "ADD_CHART" | "REARRANGING_CHART" | null;
   setEditMode: (v: "ADD_CHART" | "REARRANGING_CHART") => void;
+  interval: number;
+  setInterval: (v: number) => void;
+  onRefresh?: () => void;
 }
 
 export function BoardFilter(props: Props) {
   const [open, setOpen] = useState(false);
+  const [show, setShow] = useState(true);
   const [selectIndex, setSelectIndex] = useState<number | undefined>(undefined);
 
   const onFilter = useCallback(() => {
@@ -205,40 +211,49 @@ export function BoardFilter(props: Props) {
   return (
     <>
       <BoardTool editMode={props.editMode} setEditMode={props.setEditMode} />
-      <div className="sticky -top-4 z-50 bg-neutral-100 px-1 pt-4 pb-2 dark:bg-neutral-950">
-        {open && selectIndex !== undefined && (
-          <BoardFilterDialog
-            onClose={() => {
-              setOpen(false);
-              if (props.filters[selectIndex].new === true) {
-                props.onFilters([
-                  ...props.filters.filter((_, i) => i !== selectIndex),
-                ]);
-                setSelectIndex(undefined);
-              }
-            }}
-            filter={props.filters[selectIndex]}
-            onFilter={(v) => {
-              const data = structuredClone(props.filters);
-              data[selectIndex] = v;
-              props.onFilters(data);
-            }}
-            onAddFilter={() => {
-              const data = structuredClone(props.filters);
-              data[selectIndex].new = false;
-              setOpen(false);
-              props.onFilters(data);
-            }}
-          />
-        )}
-        <div className="flex flex-wrap gap-3">
-          {mapFilterItem}
-          <button
-            className={buttonVariants({ size: "sm", variant: "ghost" })}
-            onClick={onFilter}
-          >
-            <ListFilter className="h-4 w-4" />
-          </button>
+      <div className="sticky top-0 z-50 bg-neutral-100 px-1 pt-0 pb-2 dark:bg-neutral-950">
+        <BoardToolbar
+          show={show}
+          onChangeShow={setShow}
+          interval={props.interval}
+          onChange={props.setInterval}
+          onRefresh={props.onRefresh}
+        />
+        <div className={show ? "px-2 pt-4" : "hidden"}>
+          {open && selectIndex !== undefined && (
+            <BoardFilterDialog
+              onClose={() => {
+                setOpen(false);
+                if (props.filters[selectIndex].new === true) {
+                  props.onFilters([
+                    ...props.filters.filter((_, i) => i !== selectIndex),
+                  ]);
+                  setSelectIndex(undefined);
+                }
+              }}
+              filter={props.filters[selectIndex]}
+              onFilter={(v) => {
+                const data = structuredClone(props.filters);
+                data[selectIndex] = v;
+                props.onFilters(data);
+              }}
+              onAddFilter={() => {
+                const data = structuredClone(props.filters);
+                data[selectIndex].new = false;
+                setOpen(false);
+                props.onFilters(data);
+              }}
+            />
+          )}
+          <div className="flex flex-wrap gap-3">
+            {mapFilterItem}
+            <button
+              className={buttonVariants({ size: "sm", variant: "ghost" })}
+              onClick={onFilter}
+            >
+              <ListFilter className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </>

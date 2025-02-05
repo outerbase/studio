@@ -1,12 +1,15 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ChartValue } from "../chart/chartTypes";
 import { BoardCanvas } from "./board-canvas";
 import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";
 import { BoardProvider } from "./board-provider";
 
-interface DashboardProps {
+export interface DashboardProps {
+  charts: ChartValue[];
   layout: ReactGridLayout.Layout[];
+  name: string;
   data: {
     filters: BoardFilterProps[];
   };
@@ -15,21 +18,62 @@ interface DashboardProps {
 interface Props {
   value: DashboardProps;
   sources?: BoardSourceDriver;
-  setValue: (value: DashboardProps) => void;
+  interval: number;
+  onChange: (value: DashboardProps) => void;
+  onChangeInterval: (v: number) => void;
 }
 
-export default function Board({ value, setValue, sources }: Props) {
+export default function Board({
+  value,
+  sources,
+  interval,
+  onChange,
+  onChangeInterval,
+}: Props) {
   const [editMode, setEditMode] = useState<
     "ADD_CHART" | "REARRANGING_CHART" | null
   >(null);
 
+  const autoRefresh = [
+    "5s",
+    "10s",
+    "30s",
+    "1m",
+    "5m",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "1d",
+  ];
+
+  const [lastRunTimestamp, setLastRunTimestamp] = useState(() => {
+    return Date.now();
+  });
+
+  useEffect(() => {
+    if (!interval) return;
+
+    const intervalId = setInterval(() => {
+      setLastRunTimestamp(Date.now());
+    }, interval);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [interval]);
+
   return (
-    <BoardProvider sources={sources}>
+    <BoardProvider
+      sources={sources}
+      lastRunTimestamp={lastRunTimestamp}
+      setting={{ autoRefresh, name: value.name }}
+    >
       <div>
         <BoardFilter
           filters={value.data.filters}
           onFilters={(v) =>
-            setValue({
+            onChange({
               ...value,
               data: {
                 ...value.data,
@@ -39,16 +83,23 @@ export default function Board({ value, setValue, sources }: Props) {
           }
           editMode={editMode}
           setEditMode={setEditMode}
+          name={value.name}
+          interval={interval}
+          setInterval={onChangeInterval}
+          onRefresh={() => {
+            setLastRunTimestamp(Date.now());
+          }}
         />
         <BoardCanvas
-          layout={value.layout}
+          value={value}
           onChange={(v) => {
-            setValue({
+            onChange({
               ...value,
               layout: v,
             });
           }}
           editMode={editMode}
+          setEditMode={setEditMode}
         />
       </div>
     </BoardProvider>
