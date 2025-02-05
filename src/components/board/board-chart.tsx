@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Chart from "../chart";
-import { ChartValue } from "../chart/chartTypes";
+import { ChartValue } from "../chart/chart-type";
 import { useBoardContext } from "./board-provider";
 
 export default function BoardChart({ value }: { value: ChartValue }) {
@@ -35,8 +35,6 @@ export default function BoardChart({ value }: { value: ChartValue }) {
   useEffect(() => {
     if (loaderRef.current && loading) {
       const interval = setInterval(() => {
-        console.log(Date.now(), lastRunTimestamp);
-
         if (loaderRef.current) {
           const progress = Math.min(
             ((Date.now() - lastRunTimestamp) / 3000) * 100,

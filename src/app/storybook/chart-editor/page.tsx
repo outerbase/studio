@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import Chart from "@/components/chart";
-import { ChartData, ChartValue } from "@/components/chart/chartTypes";
+import { ChartData, ChartValue } from "@/components/chart/chart-type";
 import EditChartMenu from "@/components/chart/edit-chart-menu";
 import { useState } from "react";
 
@@ -61,7 +61,6 @@ const lineChartValue: ChartValue = {
       theme: "afterburn",
       xAxisKey: "_year",
       yAxisKeys: ["seller", "seller2"],
-      foreground: "#ffffff",
       xAxisLabel: "cust year",
       yAxisLabel: "cust sellers",
       gradientStop: "#42788F",
@@ -72,7 +71,7 @@ const lineChartValue: ChartValue = {
         seller2: "#FFA285",
       },
       xAxisLabelHidden: false,
-      yAxisLabelHidden: false,
+      yAxisLabelHidden: true,
       yAxisLabelDisplay: "right",
     },
     source_id: "856a1855-2bee-4d87-9756-a783088c0568",
@@ -89,12 +88,11 @@ const lineChartValue: ChartValue = {
 
 export default function StorybookChartEditorPage() {
   const [chartValue, setChartValue] = useState(lineChartValue);
-  const [items, setItems] = useState(data);
-  const [modifier, setModifier] = useState({});
+  const [items] = useState(data);
   return (
     <div className="flex h-full space-x-4">
       <div className="w-full flex-1 border-r p-4">
-        <Chart value={chartValue} data={items} modifier={modifier} />
+        <Chart value={chartValue} data={items} />
       </div>
       <div className="w-[400px] flex-shrink-0 p-4">
         {/* render chart editor menu here */}
