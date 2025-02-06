@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DatabaseTableSchema } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Edit3, EyeOff, LucideMoreHorizontal } from "lucide-react";
+import { Blend, ChevronDown, Edit3, LucideMoreHorizontal } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataCatalogTableColumn from "./data-catalog-table-column";
 import DataCatalogDriver, { VirtualJoinColumn } from "./driver";
@@ -154,7 +154,7 @@ export default function DataCatalogTableAccordion({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="p-2">
                   <DropdownMenuItem
-                    className="gap-5"
+                    className="gap-1"
                     onClick={() => {
                       setOpen(true);
                     }}
@@ -166,11 +166,11 @@ export default function DataCatalogTableAccordion({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setOpenVirtaulModal(true)}
-                    className="gap-5"
+                    className="gap-1"
                   >
                     Add Virtaul Join
                     <div className="flex-1" />
-                    <EyeOff className="h-4 w-4" />
+                    <Blend className="h-4 w-4" />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -199,7 +199,7 @@ export default function DataCatalogTableAccordion({
             })}
             {modelTable?.virtualJoin && modelTable.virtualJoin.length > 0 && (
               <div className="rounded-xl border border-neutral-200 p-3 hover:bg-white dark:border-neutral-800/50 dark:bg-neutral-950 dark:text-white">
-                <div className="p-3 font-bold">Relationship</div>
+                <div className="p-3 font-bold">Relationships</div>
                 <div className="">
                   {modelTable.virtualJoin?.map((column) => {
                     return (
