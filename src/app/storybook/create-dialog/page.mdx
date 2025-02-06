@@ -1,0 +1,104 @@
+import { StorybookCreateDialogExample } from "@/app/storybook/create-dialog/example";
+import { DocContent } from "@/components/mdx/docs";
+
+export const metadata = {
+  title: "Create Dialog",
+};
+
+<DocContent title="Create Dialog" group="Standard Components"></DocContent>
+
+<StorybookCreateDialogExample />
+
+<DocContent>
+
+```tsx
+<Button
+  onClick={async () => {
+    // Flexible dialog that can be reused. It can accept custom parameters
+    // and return a result asynchronously.
+    const result = await testingDialog.show({ color: "text-red-500" });
+
+    // ...
+  }}
+>
+  Show Dialog
+</Button>
+```
+
+`createDialog` offers a utility to create reusable dialogs and retrieve results asynchronously.
+This simplifies state management.
+
+```tsx
+const testingDialog = createDialog<{ color: string }, string>(
+  ({ close, color }) => {
+    const [name, setName] = useState("");
+
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle className={color}>Hello World</DialogTitle>
+          <DialogDescription>Please enter your name</DialogDescription>
+        </DialogHeader>
+
+        <div>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.currentTarget.value)}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button
+            onClick={() => {
+              close(name); // <=== Passing the value back
+            }}
+          >
+            Done
+          </Button>
+        </DialogFooter>
+      </>
+    );
+  }
+);
+```
+
+## What do we solve here?
+
+This is a typical pattern when we work with dialog. There are several shortcoming with this approach:
+
+- ⛔ The dialog is not easily reusable because we need to manage several extra states
+- ⛔ If the children needs to access the dialog, we need to pass the state deep down the tree
+- ⛔ The code flow is jumping all over the place
+
+```tsx
+function SomePage() {
+  const [open, setOpen] = useState(false);
+  const [color, setColor] = useState();
+
+  return (
+    <div>
+      <TestingDialog
+        color={color}
+        open={open}
+        onClose={() => setOpen(false)}
+        onComplete={(result) => {
+          // do something here
+        }}
+      />
+
+      {/* imagine hunderd of lines of code here */}
+
+      <Button
+        onClick={() => {
+          setOpen(true);
+          setColor("text-red-500");
+        }}
+      >
+        Show Dialog
+      </Button>
+    </div>
+  );
+}
+```
+
+</DocContent>

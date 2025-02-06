@@ -32,6 +32,11 @@ export default function StorybookRootLayout({
           />
           <SidebarMenuItem
             icon={Layers2}
+            text="Create Dialog"
+            href="/storybook/create-dialog"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
             text="Dropdown Menu"
             href="https://ui.shadcn.com/docs/components/dropdown-menu"
           />
