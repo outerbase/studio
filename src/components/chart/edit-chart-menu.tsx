@@ -387,21 +387,22 @@ export default function EditChartMenu({
   }, [setValue, value]);
 
   const textColorSection = useMemo(() => {
-    if (value.type !== "text") return null;
     const textColorValues = [
       {
         value: "Automatic",
         label: "Automatic",
       },
       {
-        value: "White",
+        value: "#ffffff",
         label: "White",
       },
       {
-        value: "Black",
+        value: "#000000",
         label: "Black",
       },
     ];
+
+    console.log(value.params.options?.foreground);
     return (
       <div>
         <p className="mb-1.5 pt-2 text-sm font-bold opacity-70">Text Color</p>
@@ -414,7 +415,10 @@ export default function EditChartMenu({
               ...value,
               params: {
                 ...value.params,
-                options: { ...value.params.options, foreground: v },
+                options: {
+                  ...value.params.options,
+                  foreground: v === "Automatic" ? undefined : v,
+                },
               },
             });
           }}
@@ -512,11 +516,11 @@ export default function EditChartMenu({
       </section>
 
       {textSection}
-      {textColorSection}
       {dataFormatSection}
       {xAxisLabelSection}
       {selectAxisKey}
       {yAxisLabelSection}
+      {textColorSection}
     </div>
   );
 }
