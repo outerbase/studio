@@ -1,11 +1,20 @@
+export interface VirtualJoinColumn {
+  id: string;
+  schema: string;
+  tableName: string;
+  columnName: string;
+  virtualKeyColumn: string;
+  virtualKeySchema: string;
+  virtualKeyTable: string;
+  flags?: {
+    isActive: boolean;
+    isVirtual: boolean;
+  };
+}
 export interface DataCatalogModelColumnInput {
   hideFromEzql: boolean;
   definition: string;
   samples: string[];
-  virtualJoin?: {
-    tableName: string;
-    columnName: string;
-  };
 }
 
 export interface DataCatalogModelColumn extends DataCatalogModelColumnInput {
@@ -13,7 +22,8 @@ export interface DataCatalogModelColumn extends DataCatalogModelColumnInput {
 }
 
 export interface DataCatalogModelTableInput {
-  definition: string;
+  definition?: string;
+  virtualJoin?: VirtualJoinColumn[];
 }
 export interface DataCatalogTermDefinition extends DataCatalogModelTableInput {
   id: string;
@@ -24,6 +34,7 @@ export interface DataCatalogModelTable extends DataCatalogModelTableInput {
   schemaName: string;
   tableName: string;
   columns: Record<string, DataCatalogModelColumn>;
+  virtualJoin?: VirtualJoinColumn[];
 }
 
 export type DataCatalogSchemas = Record<
