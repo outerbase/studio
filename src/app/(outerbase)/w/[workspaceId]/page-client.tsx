@@ -1,14 +1,20 @@
 "use client";
 
 import { ButtonGroup, ButtonGroupItem } from "@/components/button-group";
-import { Toolbar } from "@/components/gui/toolbar";
+import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import ResourceCard from "@/components/resource-card";
 import {
   getDatabaseFriendlyName,
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { timeSince } from "@/lib/utils-datetime";
 import { getOuterbaseDashboardList } from "@/outerbase-cloud/api";
 import {
@@ -16,11 +22,12 @@ import {
   SortAscending,
   SortDescending,
 } from "@phosphor-icons/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import useSWR from "swr";
 import { NavigationBar } from "../../navigation";
 import { useWorkspaces } from "../../workspace-provider";
+import { createBoardDialog } from "./create-board-dialog";
 
 interface ResourceItem {
   id: string;
@@ -31,10 +38,11 @@ interface ResourceItem {
 }
 
 export default function WorkspaceListPageClient() {
+  const router = useRouter();
   const { currentWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
-  const { data: boards } = useSWR(
+  const { data: boards, mutate } = useSWR(
     `/workspace/${workspaceId}/boards`,
     () => {
       return getOuterbaseDashboardList(workspaceId);
@@ -69,7 +77,9 @@ export default function WorkspaceListPageClient() {
 
     const allResources = [...baseResources, ...boardResources];
 
-    return allResources.sort((a, b) => a.name.localeCompare(b.name));
+    return allResources.sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? "")
+    );
   }, [currentWorkspace, boards]);
 
   return (
@@ -101,6 +111,30 @@ export default function WorkspaceListPageClient() {
                 <CalendarDots size={16} />
               </ButtonGroupItem>
             </ButtonGroup>
+
+            <ToolbarFiller />
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button>New Resource</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>New Base</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    const createdBoard = await createBoardDialog.show({
+                      workspaceId,
+                    });
+
+                    if (createdBoard) {
+                      mutate();
+                      router.push(`/w/${workspaceId}/board/${createdBoard.id}`);
+                    }
+                  }}
+                >
+                  New Board
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </Toolbar>
         </div>
 

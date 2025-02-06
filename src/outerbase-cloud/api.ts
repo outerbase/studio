@@ -66,6 +66,30 @@ export async function getOuterbaseDashboard(
   );
 }
 
+export async function createOuterbaseDashboard(
+  workspaceId: string,
+  baseId: string | undefined,
+  name: string
+) {
+  return requestOuterbase<OuterbaseAPIDashboardDetail>(
+    `/api/v1/workspace/${workspaceId}/dashboard` +
+      (baseId ? `?baseId=${baseId}` : ""),
+    "POST",
+    {
+      name,
+      base_id: baseId ?? "",
+      chart_ids: [],
+      data: {
+        version: 3,
+        filters: [],
+        isWorkspaceScoped: !baseId,
+      },
+      layout: [],
+      type: "dashboard",
+    }
+  );
+}
+
 export async function runOuterbaseQueryRaw(
   workspaceId: string,
   sourceId: string,
