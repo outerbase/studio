@@ -27,7 +27,8 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import { NavigationBar } from "../../navigation";
 import { useWorkspaces } from "../../workspace-provider";
-import { createBoardDialog } from "./create-board-dialog";
+import { createBoardDialog } from "./dialog-board-create";
+import { deleteBoardDialog } from "./dialog-board-delete";
 
 interface ResourceItem {
   id: string;
@@ -151,7 +152,24 @@ export default function WorkspaceListPageClient() {
               visual={getDatabaseVisual(resource.type)}
               status={resource.status}
             >
-              <DropdownMenuItem>Remove</DropdownMenuItem>
+              {resource.type === "board" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteBoardDialog
+                      .show({
+                        workspaceId,
+                        boardId: resource.id,
+                        boardName: resource.name,
+                      })
+                      .then(() => mutate());
+                  }}
+                >
+                  Remove board
+                </DropdownMenuItem>
+              )}
+              {resource.type !== "board" && (
+                <DropdownMenuItem>Remove</DropdownMenuItem>
+              )}
             </ResourceCard>
           ))}
         </div>
