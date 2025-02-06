@@ -8,22 +8,30 @@ import {
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
-import { BoardVisual } from "@/components/resource-card/visual";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { timeSince } from "@/lib/utils-datetime";
 import { getOuterbaseDashboardList } from "@/outerbase-cloud/api";
 import {
   CalendarDots,
-  ChartBar,
   SortAscending,
   SortDescending,
 } from "@phosphor-icons/react";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import useSWR from "swr";
 import { NavigationBar } from "../../navigation";
 import { useWorkspaces } from "../../workspace-provider";
 
+interface ResourceItem {
+  id: string;
+  type: string;
+  name: string;
+  href: string;
+  status?: string;
+}
+
 export default function WorkspaceListPageClient() {
-  const { workspaces } = useWorkspaces();
+  const { currentWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
   const { data: boards } = useSWR(
@@ -38,11 +46,31 @@ export default function WorkspaceListPageClient() {
     }
   );
 
-  const bases =
-    workspaces.find(
-      (workspace) =>
-        workspace.short_name === workspaceId || workspace.id === workspaceId
-    )?.bases ?? [];
+  const resources: ResourceItem[] = useMemo(() => {
+    const baseResources = (currentWorkspace?.bases ?? []).map((base) => ({
+      id: base.id,
+      type: base.sources[0]?.type ?? "database",
+      name: base.name,
+      href: `/w/${currentWorkspace?.short_name}/${base.short_name}`,
+      status: base.last_analytics_event?.created_at
+        ? `Last viewed ${timeSince(new Date(base.last_analytics_event?.created_at))} ago`
+        : undefined,
+    }));
+
+    const boardResources = (boards?.items ?? [])
+      .filter((board) => board.base_id === null)
+      .map((board) => ({
+        id: board.id,
+        type: "board",
+        name: board.name,
+        href: `/w/${currentWorkspace?.short_name}/board/${board.id}`,
+        status: `Last updated ${timeSince(new Date(board?.updated_at ?? ""))} ago`,
+      }));
+
+    const allResources = [...baseResources, ...boardResources];
+
+    return allResources.sort((a, b) => a.name.localeCompare(b.name));
+  }, [currentWorkspace, boards]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -76,37 +104,18 @@ export default function WorkspaceListPageClient() {
           </Toolbar>
         </div>
 
-        <h1 className="my-4">Board</h1>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {(boards?.items ?? [])
-            .filter((board) => board.base_id === null)
-            .map((board) => (
-              <ResourceCard
-                key={board.id}
-                className="w-full"
-                color="default"
-                icon={ChartBar}
-                title={board.name}
-                subtitle={"Board"}
-                visual={BoardVisual}
-                href={`/w/${workspaceId}/board/${board.id}`}
-              />
-            ))}
-        </div>
-
-        <h1 className="my-4">Base</h1>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {bases.map((base) => (
+          {resources.map((resource) => (
             <ResourceCard
               className="w-full"
-              key={base.id}
+              key={resource.id}
               color="default"
-              icon={getDatabaseIcon(base.sources[0]?.type)}
-              href={`/w/${workspaceId}/${base.short_name}`}
-              title={base.name}
-              subtitle={getDatabaseFriendlyName(base.sources[0]?.type)}
-              visual={getDatabaseVisual(base.sources[0]?.type)}
+              icon={getDatabaseIcon(resource.type)}
+              href={resource.href}
+              title={resource.name}
+              subtitle={getDatabaseFriendlyName(resource.type)}
+              visual={getDatabaseVisual(resource.type)}
+              status={resource.status}
             >
               <DropdownMenuItem>Remove</DropdownMenuItem>
             </ResourceCard>

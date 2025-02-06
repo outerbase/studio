@@ -1,6 +1,6 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import { useEffect, useState } from "react";
-import { ChartValue } from "../chart/chartTypes";
+import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
 import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";

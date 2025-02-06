@@ -1,4 +1,4 @@
-import { Database } from "@phosphor-icons/react";
+import { ChartBar, Database } from "@phosphor-icons/react";
 import {
   MySQLIcon,
   PostgreIcon,
@@ -6,7 +6,12 @@ import {
   SQLiteIcon,
 } from "../icons/outerbase-icon";
 import { CloudflareIcon, StarbaseIcon, ValTownIcon } from "./icon";
-import { GeneralVisual, MySQLVisual, SQLiteVisual } from "./visual";
+import {
+  BoardVisual,
+  GeneralVisual,
+  MySQLVisual,
+  SQLiteVisual,
+} from "./visual";
 
 export function getDatabaseFriendlyName(type: string) {
   if (type === "sqlite") return "SQLite";
@@ -23,6 +28,8 @@ export function getDatabaseFriendlyName(type: string) {
   if (type === "starbasedb") return "StarbaseDB";
   if (type === "starbase") return "StarbaseDB";
   if (type === "bigquery") return "BigQuery";
+  if (type === "valtown") return "ValTown";
+  if (type === "board") return "Board";
 
   return type;
 }
@@ -35,6 +42,7 @@ export function getDatabaseIcon(type: string) {
   if (type === "starbasedb" || type === "starbase") return StarbaseIcon;
   if (type === "libsql" || type === "turso") return SQLiteIcon;
   if (type === "rqlite") return RqliteIcon;
+  if (type === "board") return ChartBar;
 
   return Database;
 }
@@ -43,6 +51,7 @@ export function getDatabaseVisual(type: string) {
   if (type === "mysql") return MySQLVisual;
   if (type === "sqlite") return SQLiteVisual;
   if (type === "postgres") return GeneralVisual;
+  if (type === "board") return BoardVisual;
 
   return GeneralVisual;
 }

@@ -108,11 +108,15 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
         tableName: normalizedTableName,
         columns: {},
         definition: "",
+        virtualJoin: [],
       };
     }
-
     const table = schemas[normalizedTableName];
-    schemas[normalizedTableName] = { ...table, ...data };
+    schemas[normalizedTableName] = {
+      ...table,
+      ...data,
+      
+    };
 
     return schemas[normalizedTableName];
   }
