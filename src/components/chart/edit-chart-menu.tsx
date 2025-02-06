@@ -74,8 +74,12 @@ export default function EditChartMenu({
 
         <div className="flex flex-col gap-2">
           {value.params.options?.yAxisKeys?.map((key, index) => {
+            const color = value.params.options?.yAxisKeyColors
+              ? value.params.options?.yAxisKeyColors[key]
+              : undefined;
             return (
               <ChartSeriesCombobox
+                color={color}
                 key={index}
                 values={
                   allAxisKeys.map((s) => {
@@ -117,6 +121,21 @@ export default function EditChartMenu({
                             (k) => k !== series
                           );
                         })(),
+                      },
+                    },
+                  });
+                }}
+                onChangeColor={function (color: string): void {
+                  setValue({
+                    ...value,
+                    params: {
+                      ...value.params,
+                      options: {
+                        ...value.params.options,
+                        yAxisKeyColors: {
+                          ...value.params.options?.yAxisKeyColors,
+                          [key]: color,
+                        },
                       },
                     },
                   });

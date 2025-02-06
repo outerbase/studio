@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import SimpleColorPicker from "./simple-color-picker";
 interface SimpleComboValue {
   value: string;
   label: string;
@@ -28,6 +29,8 @@ interface ChartSeriesComboboxProps {
   placeholder?: string;
   selected?: string;
   onRemove: (v: string | null) => void;
+  color?: string;
+  onChangeColor: (color: string) => void;
 }
 
 export function ChartSeriesCombobox({
@@ -36,9 +39,12 @@ export function ChartSeriesCombobox({
   placeholder,
   selected,
   onRemove,
+  color,
+  onChangeColor,
 }: ChartSeriesComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [openMore, setOpenMore] = React.useState(false);
+  const [openColorPicker, setOpenColorPicker] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState<string | null>(
     selected || null
   );
@@ -56,14 +62,40 @@ export function ChartSeriesCombobox({
             role="combobox"
             className="w-full justify-between"
           >
-            {values
-              ? values.find((value) => value.value === selectedValue)?.label
-              : placeholder || ""}
+            <div className="flex items-center">
+              <Popover open={openColorPicker} onOpenChange={setOpenColorPicker}>
+                <PopoverTrigger asChild>
+                  <div
+                    className="mr-2 h-[16px] w-[16px] cursor-pointer rounded-full"
+                    style={{ backgroundColor: color || "gray" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenColorPicker(true);
+                    }}
+                  />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-full p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <SimpleColorPicker
+                    onChange={function (color: string): void {
+                      onChangeColor(color);
+                      setOpenColorPicker(false);
+                    }}
+                  ></SimpleColorPicker>
+                </PopoverContent>
+              </Popover>
+
+              {values
+                ? values.find((value) => value.value === selectedValue)?.label
+                : placeholder || ""}
+            </div>
+
             <Popover open={openMore} onOpenChange={setOpenMore}>
               <PopoverTrigger asChild>
                 <MoreVertical
                   className="w-4 cursor-pointer opacity-30"
-                  style={{ zIndex: 10 }}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
