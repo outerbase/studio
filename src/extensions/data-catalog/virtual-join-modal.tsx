@@ -2,6 +2,7 @@ import TableColumnCombobox from "@/components/gui/table-combobox/TableColumnComb
 import TableCombobox from "@/components/gui/table-combobox/TableCombobox";
 import { Button } from "@/components/ui/button";
 import {
+  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -9,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { LucideLoader } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DataCatalogDriver, {
   DataCatalogModelTableInput,
   VirtualJoinColumn,
@@ -30,16 +31,30 @@ export default function VirtualJoinModal({
   onClose,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const [virtualKeySchema, setVirtualKeySchema] = useState<string | undefined>(
-    column?.virtualKeySchema
-  );
+  const [virtualKeySchema, setVirtualKeySchema] = useState<
+    string | undefined
+  >();
 
-  const [virtualKeyTable, setVirtualKeyTable] = useState<string | undefined>(
-    column?.virtualKeyTable
-  );
-  const [virtualKeyColumn, setVirtualKeyColumn] = useState<string | undefined>(
-    column?.virtualKeyColumn
-  );
+  const [virtualKeyTable, setVirtualKeyTable] = useState<string | undefined>();
+  const [virtualKeyColumn, setVirtualKeyColumn] = useState<
+    string | undefined
+  >();
+
+  const clear = useCallback(() => {
+    setVirtualKeyColumn(undefined);
+    setVirtualKeySchema(undefined);
+    setVirtualKeyTable(undefined);
+  }, []);
+
+  useEffect(() => {
+    if (column) {
+      setVirtualKeyColumn(column.virtualKeyColumn);
+      setVirtualKeySchema(column.virtualKeySchema);
+      setVirtualKeyTable(column.virtualKeyTable);
+    } else {
+      clear();
+    }
+  }, [column, clear]);
 
   const createVirtualJoin = () => {
     setLoading(true);
@@ -80,21 +95,23 @@ export default function VirtualJoinModal({
       .finally(() => {
         setLoading(false);
         onClose();
+        clear();
       });
   };
 
   return (
-    <>
+    <DialogContent>
       <DialogHeader>
-        <DialogTitle>Add Relationship to {tableName}</DialogTitle>
-        <DialogDescription>
-          Use virtual relationships to connect fields that don&apos;t have a
-          direct foreign key link. For example, if two tables should be related
-          by email or title but don&apos;t have a formal foreign key, use these
-          virtual relationships to link them.
-        </DialogDescription>
+        <DialogTitle>
+          {column ? "Edit" : "Add Relationship"} to {tableName}
+        </DialogTitle>
       </DialogHeader>
-
+      <DialogDescription>
+        Use virtual relationships to connect fields that don&apos;t have a
+        direct foreign key link. For example, if two tables should be related by
+        email or title but don&apos;t have a formal foreign key, use these
+        virtual relationships to link them.
+      </DialogDescription>
       <div className="mt-2 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label>Column</Label>
@@ -141,6 +158,6 @@ export default function VirtualJoinModal({
         </Button>
         <div className="flex-1" />
       </DialogFooter>
-    </>
+    </DialogContent>
   );
 }

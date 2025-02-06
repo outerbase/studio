@@ -15,18 +15,18 @@ import {
   Trash,
 } from "lucide-react";
 import { useState } from "react";
-import { VirtualJoinColumn } from "./driver";
+import { VirtualJoinColumn as IVirtualJoinColumn } from "./driver";
 
-interface Props extends VirtualJoinColumn {
+interface Props extends IVirtualJoinColumn {
   onDeletRelatinship: () => void;
   onEditRelationship: () => void;
 }
 
-export default function VirtaulJoinColumn({
+export default function VirtualJoinColumn({
+  flags,
   virtualKeyColumn,
   virtualKeySchema,
   virtualKeyTable,
-  flags,
   onEditRelationship,
   onDeletRelatinship,
 }: Props) {
