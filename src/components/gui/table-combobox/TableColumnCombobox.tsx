@@ -1,8 +1,10 @@
+import { useDatabaseDriver } from "@/context/driver-provider";
+import type { DatabaseTableSchema } from "@/drivers/base-driver";
+import { cn } from "@/lib/utils";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { PopoverContent } from "../../ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -10,9 +12,7 @@ import {
   CommandInput,
   CommandItem,
 } from "../../ui/command";
-import type { DatabaseTableSchema } from "@/drivers/base-driver";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { cn } from "@/lib/utils";
+import { PopoverContent } from "../../ui/popover";
 
 export default function TableColumnCombobox({
   value,
@@ -51,8 +51,8 @@ export default function TableColumnCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger disabled={disabled}>
-        <Button variant="outline" className="justify-between w-full">
+      <PopoverTrigger asChild disabled={disabled}>
+        <Button variant="outline" className="w-full justify-between">
           {value ?? "No column selected"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
