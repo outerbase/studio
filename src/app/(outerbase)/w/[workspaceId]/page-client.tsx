@@ -1,32 +1,50 @@
 "use client";
 
 import { ButtonGroup, ButtonGroupItem } from "@/components/button-group";
-import { Toolbar } from "@/components/gui/toolbar";
+import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import ResourceCard from "@/components/resource-card";
 import {
   getDatabaseFriendlyName,
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
-import { BoardVisual } from "@/components/resource-card/visual";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { timeSince } from "@/lib/utils-datetime";
 import { getOuterbaseDashboardList } from "@/outerbase-cloud/api";
 import {
   CalendarDots,
-  ChartBar,
   SortAscending,
   SortDescending,
 } from "@phosphor-icons/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useMemo } from "react";
 import useSWR from "swr";
 import { NavigationBar } from "../../navigation";
 import { useWorkspaces } from "../../workspace-provider";
+import { deleteBaseDialog } from "./dialog-base-delete";
+import { createBoardDialog } from "./dialog-board-create";
+import { deleteBoardDialog } from "./dialog-board-delete";
+
+interface ResourceItem {
+  id: string;
+  type: string;
+  name: string;
+  href: string;
+  status?: string;
+}
 
 export default function WorkspaceListPageClient() {
-  const { workspaces } = useWorkspaces();
+  const router = useRouter();
+  const { currentWorkspace, refreshWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
-  const { data: boards } = useSWR(
+  const { data: boards, mutate } = useSWR(
     `/workspace/${workspaceId}/boards`,
     () => {
       return getOuterbaseDashboardList(workspaceId);
@@ -38,11 +56,33 @@ export default function WorkspaceListPageClient() {
     }
   );
 
-  const bases =
-    workspaces.find(
-      (workspace) =>
-        workspace.short_name === workspaceId || workspace.id === workspaceId
-    )?.bases ?? [];
+  const resources: ResourceItem[] = useMemo(() => {
+    const baseResources = (currentWorkspace?.bases ?? []).map((base) => ({
+      id: base.id,
+      type: base.sources[0]?.type ?? "database",
+      name: base.name,
+      href: `/w/${currentWorkspace?.short_name}/${base.short_name}`,
+      status: base.last_analytics_event?.created_at
+        ? `Last viewed ${timeSince(new Date(base.last_analytics_event?.created_at))} ago`
+        : undefined,
+    }));
+
+    const boardResources = (boards?.items ?? [])
+      .filter((board) => board.base_id === null)
+      .map((board) => ({
+        id: board.id,
+        type: "board",
+        name: board.name,
+        href: `/w/${currentWorkspace?.short_name}/board/${board.id}`,
+        status: `Last updated ${timeSince(new Date(board?.updated_at ?? ""))} ago`,
+      }));
+
+    const allResources = [...baseResources, ...boardResources];
+
+    return allResources.sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? "")
+    );
+  }, [currentWorkspace, boards]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -73,42 +113,76 @@ export default function WorkspaceListPageClient() {
                 <CalendarDots size={16} />
               </ButtonGroupItem>
             </ButtonGroup>
+
+            <ToolbarFiller />
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button>New Resource</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>New Base</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    const createdBoard = await createBoardDialog.show({
+                      workspaceId,
+                    });
+
+                    if (createdBoard) {
+                      mutate();
+                      router.push(`/w/${workspaceId}/board/${createdBoard.id}`);
+                    }
+                  }}
+                >
+                  New Board
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </Toolbar>
         </div>
 
-        <h1 className="my-4">Board</h1>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {(boards?.items ?? [])
-            .filter((board) => board.base_id === null)
-            .map((board) => (
-              <ResourceCard
-                key={board.id}
-                className="w-full"
-                color="default"
-                icon={ChartBar}
-                title={board.name}
-                subtitle={"Board"}
-                visual={BoardVisual}
-                href={`/w/${workspaceId}/board/${board.id}`}
-              />
-            ))}
-        </div>
-
-        <h1 className="my-4">Base</h1>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {bases.map((base) => (
+          {resources.map((resource) => (
             <ResourceCard
               className="w-full"
-              key={base.id}
+              key={resource.id}
               color="default"
-              icon={getDatabaseIcon(base.sources[0]?.type)}
-              href={`/w/${workspaceId}/${base.short_name}`}
-              title={base.name}
-              subtitle={getDatabaseFriendlyName(base.sources[0]?.type)}
-              visual={getDatabaseVisual(base.sources[0]?.type)}
+              icon={getDatabaseIcon(resource.type)}
+              href={resource.href}
+              title={resource.name}
+              subtitle={getDatabaseFriendlyName(resource.type)}
+              visual={getDatabaseVisual(resource.type)}
+              status={resource.status}
             >
-              <DropdownMenuItem>Remove</DropdownMenuItem>
+              {resource.type === "board" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteBoardDialog
+                      .show({
+                        workspaceId,
+                        boardId: resource.id,
+                        boardName: resource.name,
+                      })
+                      .then(() => mutate());
+                  }}
+                >
+                  Remove board
+                </DropdownMenuItem>
+              )}
+              {resource.type !== "board" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteBaseDialog
+                      .show({
+                        workspaceId,
+                        baseId: resource.id,
+                        baseName: resource.name,
+                      })
+                      .then(() => refreshWorkspace());
+                  }}
+                >
+                  Remove
+                </DropdownMenuItem>
+              )}
             </ResourceCard>
           ))}
         </div>

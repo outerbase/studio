@@ -54,7 +54,7 @@ export interface OuterbaseAPIBase {
   name: string;
   id: string;
   sources: OuterbaseAPISource[];
-  last_analytic_event: OuterbaseAPIAnalyticEvent;
+  last_analytics_event: OuterbaseAPIAnalyticEvent;
 }
 
 export interface OuterbaseAPIWorkspace {
@@ -69,6 +69,7 @@ export interface OuterbaseAPIDashboard {
   base_id: string | null;
   chart_ids: string[];
   created_at: string;
+  updated_at: string;
   id: string;
   model: "dashboard";
   type: "dashboard";
