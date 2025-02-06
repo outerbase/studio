@@ -43,12 +43,19 @@ export function getOuterbaseWorkspace() {
 export async function getOuterbaseBase(workspaceId: string, baseId: string) {
   const baseList = await requestOuterbase<OuterbaseAPIBaseResponse>(
     "/api/v1/workspace/" +
-    workspaceId +
-    "/connection?" +
-    new URLSearchParams({ baseId })
+      workspaceId +
+      "/connection?" +
+      new URLSearchParams({ baseId })
   );
 
   return baseList.items[0];
+}
+
+export async function deleteOuterbaseBase(workspaceId: string, baseId: string) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/base/${baseId}`,
+    "DELETE"
+  );
 }
 
 export async function getOuterbaseDashboardList(workspaceId: string) {
@@ -73,7 +80,7 @@ export async function createOuterbaseDashboard(
 ) {
   return requestOuterbase<OuterbaseAPIDashboardDetail>(
     `/api/v1/workspace/${workspaceId}/dashboard` +
-    (baseId ? `?baseId=${baseId}` : ""),
+      (baseId ? `?baseId=${baseId}` : ""),
     "POST",
     {
       name,

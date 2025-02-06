@@ -27,6 +27,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import { NavigationBar } from "../../navigation";
 import { useWorkspaces } from "../../workspace-provider";
+import { deleteBaseDialog } from "./dialog-base-delete";
 import { createBoardDialog } from "./dialog-board-create";
 import { deleteBoardDialog } from "./dialog-board-delete";
 
@@ -40,7 +41,7 @@ interface ResourceItem {
 
 export default function WorkspaceListPageClient() {
   const router = useRouter();
-  const { currentWorkspace } = useWorkspaces();
+  const { currentWorkspace, refreshWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
   const { data: boards, mutate } = useSWR(
@@ -168,7 +169,19 @@ export default function WorkspaceListPageClient() {
                 </DropdownMenuItem>
               )}
               {resource.type !== "board" && (
-                <DropdownMenuItem>Remove</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteBaseDialog
+                      .show({
+                        workspaceId,
+                        baseId: resource.id,
+                        baseName: resource.name,
+                      })
+                      .then(() => refreshWorkspace());
+                  }}
+                >
+                  Remove
+                </DropdownMenuItem>
               )}
             </ResourceCard>
           ))}

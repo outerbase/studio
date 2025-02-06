@@ -8,46 +8,47 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { deleteOuterbaseDashboard } from "@/outerbase-cloud/api";
+import { deleteOuterbaseBase } from "@/outerbase-cloud/api";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 
-export const deleteBoardDialog = createDialog<{
+export const deleteBaseDialog = createDialog<{
   workspaceId: string;
-  boardId: string;
-  boardName: string;
-}>(({ close, boardName, workspaceId, boardId }) => {
+  baseId: string;
+  baseName: string;
+}>(({ close, baseName, workspaceId, baseId }) => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
 
   const deleteClicked = useCallback(() => {
-    if (name !== boardName) return;
+    if (name !== baseName) return;
 
     setLoading(true);
 
-    deleteOuterbaseDashboard(workspaceId, boardId)
+    deleteOuterbaseBase(workspaceId, baseId)
       .then(() => {
         close(undefined);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [name, workspaceId, boardId, close, boardName]);
+  }, [name, workspaceId, baseId, close, baseName]);
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Confirm deletion of board {boardName}</DialogTitle>
+        <DialogTitle>Confirm deletion of {baseName}</DialogTitle>
         <DialogDescription>
-          All saved charts and any other contributions made to your Dashboard
-          will be deleted. This action is permanent and <strong>cannot</strong>{" "}
+          All saved queries, dashboards, definitions and any other contributions
+          made to your Base will be deleted. This action is permanent and{" "}
+          <strong>cannot</strong>
           be undone.
         </DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-4">
         <div>
-          <CopyableText text={boardName} />
+          <CopyableText text={baseName} />
         </div>
 
         <LabelInput
@@ -61,12 +62,12 @@ export const deleteBoardDialog = createDialog<{
 
       <DialogFooter>
         <Button
-          variant={"destructive"}
-          disabled={loading || boardName !== name}
+          disabled={loading || baseName !== name}
           onClick={deleteClicked}
+          variant={"destructive"}
         >
           {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}I
-          understand, delete this board
+          understand, delete this base
         </Button>
         <Button variant={"secondary"} onClick={() => close(undefined)}>
           Cancel
