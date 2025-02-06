@@ -15,7 +15,7 @@ export default function SimpleInput({
 
   return (
     <input
-      className="w-full rounded-md border p-2"
+      className="h-[36px] w-full rounded-md border p-2"
       placeholder={placeholder ?? ""}
       value={text ?? ""}
       onChange={(v) => {

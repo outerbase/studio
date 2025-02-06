@@ -10,7 +10,10 @@ import { Table } from "@phosphor-icons/react/dist/icons/Table";
 import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
 import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
 import { useMemo } from "react";
+import { ButtonGroupItem } from "../button-group";
+import { ChartSeriesCombobox } from "./chart-series-combobox";
 import {
+  ChartData,
   ChartLabelDisplayY,
   ChartValue,
   SingleValueFormat,
@@ -22,13 +25,109 @@ import SimpleToggle from "./simple-toggle";
 
 interface EditChartMenuProps {
   value: ChartValue;
+  data: ChartData[];
   setValue: (value: ChartValue) => void;
 }
 
-export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
+export default function EditChartMenu({
+  value,
+  setValue,
+  data,
+}: EditChartMenuProps) {
   const isNotChartComponent = ["text", "single_value", "table"].includes(
     value.type
   );
+
+  const allAxisKeys = Object.keys(data[0] ?? {});
+
+  const seriesList = useMemo(() => {
+    if (isNotChartComponent) return null;
+
+    return (
+      <div className="pt-4">
+        <div className="flex items-center justify-between pb-2">
+          <p className="mb-1.5 text-sm font-bold opacity-70">Series</p>
+          <ButtonGroupItem
+            onClick={() => {
+              if (value.params.options?.yAxisKeys.length === allAxisKeys.length)
+                return;
+              setValue({
+                ...value,
+                params: {
+                  ...value.params,
+                  options: {
+                    ...value.params.options,
+                    yAxisKeys: [
+                      ...(value.params.options?.yAxisKeys ?? []),
+                      allAxisKeys.filter(
+                        (key) => !value.params.options?.yAxisKeys?.includes(key)
+                      )[0],
+                    ],
+                  },
+                },
+              });
+            }}
+          >
+            <p className="text-xs">Add Series</p>
+          </ButtonGroupItem>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {value.params.options?.yAxisKeys?.map((key, index) => {
+            return (
+              <ChartSeriesCombobox
+                key={index}
+                values={
+                  allAxisKeys.map((s) => {
+                    return {
+                      value: s,
+                      label: s,
+                    };
+                  }) ?? []
+                }
+                selected={key ?? ""}
+                placeholder="Select axis key..."
+                onChange={function (v: string): void {
+                  setValue({
+                    ...value,
+                    params: {
+                      ...value.params,
+                      options: {
+                        ...value.params.options,
+                        yAxisKeys: (() => {
+                          const yAxisKeys =
+                            value.params.options?.yAxisKeys ?? [];
+                          yAxisKeys[index] = v;
+                          return yAxisKeys;
+                        })(),
+                      },
+                    },
+                  });
+                }}
+                onRemove={(series) => {
+                  setValue({
+                    ...value,
+                    params: {
+                      ...value.params,
+                      options: {
+                        ...value.params.options,
+                        yAxisKeys: (() => {
+                          if (series === null) return [];
+                          return (value.params.options?.yAxisKeys ?? []).filter(
+                            (k) => k !== series
+                          );
+                        })(),
+                      },
+                    },
+                  });
+                }}
+              ></ChartSeriesCombobox>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }, [allAxisKeys, isNotChartComponent, setValue, value]);
 
   const selectYAxisDisplay = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -72,16 +171,13 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
 
   const selectAxisKey = useMemo(() => {
     if (isNotChartComponent) return null;
-    const allKeys = [
-      value.params.options?.xAxisKey,
-      ...(value.params.options?.yAxisKeys ?? []),
-    ];
+
     return (
       <div>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Select X Axis</p>
+        <p className="mb-1.5 text-sm font-bold opacity-70">X Axis Value</p>
         <SimpleCombobox
           values={
-            allKeys.map((key) => {
+            allAxisKeys.map((key) => {
               return {
                 value: key,
                 label: key,
@@ -98,7 +194,6 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
                 options: {
                   ...value.params.options,
                   xAxisKey: v,
-                  yAxisKeys: allKeys.filter((key) => key !== v),
                 },
               },
             });
@@ -106,13 +201,13 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
         ></SimpleCombobox>
       </div>
     );
-  }, [isNotChartComponent, setValue, value]);
+  }, [allAxisKeys, isNotChartComponent, setValue, value]);
 
   const yAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
     return (
       <div>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Y Axis Label</p>
+        <p className="mb-1.5 text-sm font-bold opacity-70">Y Axis</p>
         <div className="flex items-center justify-between gap-2">
           <SimpleInput
             value={value.params.options?.yAxisLabel}
@@ -130,6 +225,7 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
               });
             }}
           />
+          {selectYAxisDisplay}
 
           <SimpleToggle
             values={["Show", "Hide"]}
@@ -149,11 +245,11 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
               value.params.options?.yAxisLabelHidden ? "Hide" : "Show"
             }
           />
-          {selectYAxisDisplay}
         </div>
+        {seriesList}
       </div>
     );
-  }, [isNotChartComponent, selectYAxisDisplay, setValue, value]);
+  }, [isNotChartComponent, selectYAxisDisplay, seriesList, setValue, value]);
 
   const xAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
