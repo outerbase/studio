@@ -172,7 +172,7 @@ const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
       const currentDomRef = domRef.current;
       const chartInstance =
         echarts.getInstanceByDom(currentDomRef) || echarts.init(currentDomRef);
-      chartInstance.clear();
+      // chartInstance.clear();
 
       const chartBuilder = chartBuilderRef.current;
       chartBuilder.setTheme((forcedTheme ?? resolvedTheme) as "light" | "dark");

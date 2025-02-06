@@ -14,7 +14,7 @@ import {
 } from "../ui/dropdown-menu";
 import { BoardVisual } from "./visual";
 
-interface DatabaseCardProps {
+export interface ResourceCardProps {
   className?: string;
   href: string;
   status?: string;
@@ -36,7 +36,7 @@ export default function ResourceCard({
   icon: IconComponent = Database,
   visual: VisualComponent = BoardVisual,
   children,
-}: PropsWithChildren<DatabaseCardProps>) {
+}: PropsWithChildren<ResourceCardProps>) {
   const [open, setOpen] = useState(false);
 
   return (
