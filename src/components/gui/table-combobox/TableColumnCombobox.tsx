@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "../../ui/button";
+import { buttonVariants } from "../../ui/button";
 import {
   Command,
   CommandEmpty,
@@ -20,12 +20,14 @@ export default function TableColumnCombobox({
   schemaName,
   onChange,
   disabled,
+  borderless,
 }: Readonly<{
   schemaName: string;
   tableName: string;
   value?: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  borderless?: boolean;
 }>) {
   const { databaseDriver } = useDatabaseDriver();
   const [open, setOpen] = useState(false);
@@ -52,10 +54,22 @@ export default function TableColumnCombobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
-        <Button variant="outline" className="w-full justify-between">
-          {value ?? "No column selected"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        {borderless ? (
+          <div className="flex w-full items-center justify-between px-2">
+            {value ?? "No table selected"}
+            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+          </div>
+        ) : (
+          <div
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "flex w-full justify-between"
+            )}
+          >
+            {value ?? "No table selected"}
+            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+          </div>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-[250px] p-0">
         <Command>
