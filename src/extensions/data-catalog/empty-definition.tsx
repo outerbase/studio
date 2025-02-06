@@ -32,13 +32,13 @@ export default function EmptyTermDefinition() {
       {EmptyTerm.map((item, index) => {
         return (
           <div key={index}>
-            <div className="dark:bg-primary-foreground bg-accent relative mt-10 mb-10 h-[280px] flex-1 items-center justify-center rounded-md border p-[10px] pb-0">
+            <div className="bg-accent relative mt-10 mb-10 h-[280px] flex-1 items-center justify-center rounded-md border pb-0 dark:bg-neutral-900">
               <div className="relative h-full w-full overflow-hidden rounded-md">
                 <Image
                   src={item.src}
                   alt={item.title}
                   layout="fill"
-                  objectFit="cover"
+                  objectFit="contain"
                 />
               </div>
             </div>
