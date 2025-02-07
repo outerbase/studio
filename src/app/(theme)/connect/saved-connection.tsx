@@ -1,6 +1,3 @@
-import { useCallback, useState } from "react";
-import ConnectionDialogContent from "./saved-connection-content";
-import SaveConnectionType from "./saved-connection-type";
 import {
   DRIVER_DETAIL,
   SavedConnectionItem,
@@ -10,16 +7,19 @@ import {
   SavedConnectionStorage,
   SupportedDriver,
 } from "@/app/(theme)/connect/saved-connection-storage";
-import SavedConnectionConfig from "./saved-connection-config";
+import { WEBSITE_NAME } from "@/const";
 import { createDatabase } from "@/lib/api/fetch-databases";
 import { User } from "lucia";
-import { WEBSITE_NAME } from "@/const";
+import { useCallback, useState } from "react";
+import SavedConnectionConfig from "./saved-connection-config";
+import ConnectionDialogContent from "./saved-connection-content";
+import SaveConnectionType from "./saved-connection-type";
 
 type SaveConnectionStep = "storage" | "config";
 
 export function RqliteInstruction() {
   return (
-    <div className="bg-secondary p-4 mb-4 text-sm">
+    <div className="bg-secondary mb-4 p-4 text-sm">
       You should include {WEBSITE_NAME} in the list of allowed origins for CORS
       (Cross-Origin Resource Sharing)
       <pre className="mt-2">
@@ -31,7 +31,7 @@ export function RqliteInstruction() {
 
 export function CloudflareWarning() {
   return (
-    <div className="bg-secondary p-4 mb-4 text-sm">
+    <div className="bg-secondary mb-4 p-4 text-sm">
       To bypass CORS (Cross-Origin Resource Sharing) restrictions, we will route
       your request through our server. If you are fine with this, please
       proceed.

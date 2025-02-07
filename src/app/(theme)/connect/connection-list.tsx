@@ -1,5 +1,14 @@
 "use client";
+import {
+  SavedConnectionItem,
+  SavedConnectionLocalStorage,
+  SupportedDriver,
+} from "@/app/(theme)/connect/saved-connection-storage";
 import { Button } from "@/components/ui/button";
+import { getDatabases } from "@/lib/api/fetch-databases";
+import { cn } from "@/lib/utils";
+import { User } from "lucia";
+import { LucideChevronDown, LucideSearch } from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
@@ -8,21 +17,12 @@ import {
   useMemo,
   useState,
 } from "react";
+import DriverDropdown from "./driver-dropdown";
+import QuickConnect from "./quick-connect";
 import SaveConnection from "./saved-connection";
-import {
-  SavedConnectionItem,
-  SavedConnectionLocalStorage,
-  SupportedDriver,
-} from "@/app/(theme)/connect/saved-connection-storage";
+import ConnectionItemCard from "./saved-connection-card";
 import EditSavedConnection from "./saved-edit-connection";
 import RemoveSavedConnection from "./saved-remove-connection";
-import ConnectionItemCard from "./saved-connection-card";
-import { getDatabases } from "@/lib/api/fetch-databases";
-import { User } from "lucia";
-import QuickConnect from "./quick-connect";
-import { LucideChevronDown, LucideSearch } from "lucide-react";
-import DriverDropdown from "./driver-dropdown";
-import { cn } from "@/lib/utils";
 
 function ConnectionListSection({
   data,
@@ -74,7 +74,7 @@ function ConnectionListSection({
   return (
     <>
       {name && (
-        <h2 className="mt-4 font-semibold text-sm text-primary">{name}</h2>
+        <h2 className="text-primary mt-4 text-sm font-semibold">{name}</h2>
       )}
       {body}
     </>
@@ -211,22 +211,22 @@ export default function ConnectionList({
   }
 
   return (
-    <div className="flex flex-col flex-1 max-w-[1000px] mx-auto pb-12">
-      <div className="flex mt-12 gap-2">
-        <h1 className="flex-1 flex items-center font-semibold text-xl text-primary">
+    <div className="mx-auto flex max-w-[1000px] flex-1 flex-col pb-12">
+      <div className="mt-12 flex gap-2">
+        <h1 className="text-primary flex flex-1 items-center text-xl font-semibold">
           Bases
         </h1>
 
         <div>
-          <div className="border rounded overflow-hidden flex items-center grow mx-2 bg-background">
-            <div className="text-sm px-2 h-full flex items-center">
+          <div className="bg-background mx-2 flex grow items-center overflow-hidden rounded border">
+            <div className="flex h-full items-center px-2 text-sm">
               <LucideSearch className="h-4 w-4 text-black dark:text-white" />
             </div>
             <input
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
               type="text"
-              className="bg-inherit p-2 pl-2 pr-2 outline-hidden text-sm  h-full grow"
+              className="h-full grow bg-inherit p-2 pr-2 pl-2 text-sm outline-hidden"
               placeholder="Search base name"
             />
           </div>
@@ -235,7 +235,7 @@ export default function ConnectionList({
         <DriverDropdown onSelect={setShowAddConnection}>
           <Button variant={"default"}>
             New Connection
-            <LucideChevronDown className="ml-2 w-4 h-4" />
+            <LucideChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DriverDropdown>
 

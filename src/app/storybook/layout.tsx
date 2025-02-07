@@ -22,8 +22,43 @@ export default function StorybookRootLayout({
           <SidebarMenuHeader text="Basic UI Components" />
           <SidebarMenuItem
             icon={Layers2}
+            text="Avatar"
+            href="/storybook/avatar"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Button"
+            href="/storybook/button"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
             text="Input"
-            href="https://ui.shadcn.com/docs/components/input"
+            href="/storybook/input"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Label"
+            href="/storybook/label"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Loader"
+            href="/storybook/loader"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Menu bar"
+            href="/storybook/menu-bar"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Select"
+            href="/storybook/select"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Toggle"
+            href="/storybook/toggle"
           />
           <SidebarMenuItem
             icon={Layers2}
