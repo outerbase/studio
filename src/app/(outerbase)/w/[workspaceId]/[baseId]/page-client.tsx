@@ -8,8 +8,10 @@ import {
   createPostgreSQLExtensions,
   createSQLiteExtensions,
 } from "@/core/standard-extension";
+import DataCatalogExtension from "@/extensions/data-catalog";
 import { getOuterbaseBase } from "@/outerbase-cloud/api";
 import { OuterbaseAPISource } from "@/outerbase-cloud/api-type";
+import DataCatalogOuterbaseDriver from "@/outerbase-cloud/data-catalog-driver";
 import { OuterbaseMySQLDriver } from "@/outerbase-cloud/database/mysql";
 import { OuterbasePostgresDriver } from "@/outerbase-cloud/database/postgresql";
 import { OuterbaseSqliteDriver } from "@/outerbase-cloud/database/sqlite";
@@ -47,7 +49,7 @@ export default function OuterbaseSourcePageClient({
     const outerbaseConfig = {
       workspaceId,
       sourceId: source.id,
-      baseId: "",
+      baseId,
       token: localStorage.getItem("ob-token") ?? "",
     };
 
@@ -66,8 +68,9 @@ export default function OuterbaseSourcePageClient({
     return [
       new OuterbaseSqliteDriver(outerbaseConfig),
       new StudioExtensionManager(createSQLiteExtensions()),
+      new DataCatalogExtension(new DataCatalogOuterbaseDriver(outerbaseConfig)),
     ];
-  }, [workspaceId, source]);
+  }, [workspaceId, source, baseId]);
 
   if (!outerbaseDriver || !savedDocDriver) {
     return <OpacityLoading />;
