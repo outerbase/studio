@@ -184,9 +184,6 @@
 
     --selected: #e2e8f0;
     --scroll-bar: #e2e8f0;
-
-    --chart-button-bg: #f5f5f5;
-    --chart-button-selected: #171717;
   }
 
   .dark {
@@ -223,9 +220,6 @@
 
     --selected: #222;
     --scroll-bar: #353535;
-
-    --chart-button-bg: #404040;
-    --chart-button-selected: #ffffff;
   }
 }
 

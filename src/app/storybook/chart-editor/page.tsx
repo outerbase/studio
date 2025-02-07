@@ -97,7 +97,7 @@ export default function StorybookChartEditorPage() {
         {/* render chart editor menu here */}
         <EditChartMenu
           value={chartValue}
-          setValue={setChartValue}
+          onChange={setChartValue}
           data={data}
         />
       </div>

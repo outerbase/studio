@@ -125,7 +125,6 @@ export default function ChartBackgroundSelection({
         },
       };
     });
-    console.log(value.params.options.gradientStart);
   };
 
   return (
