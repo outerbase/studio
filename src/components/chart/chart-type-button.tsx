@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 interface ChartTypeButtonProps {
   icon: React.ReactNode;
   isActive: boolean;
@@ -13,25 +15,14 @@ export function ChartTypeButton({
 }: ChartTypeButtonProps) {
   return (
     <button
+      className={cn(
+        "flex size-[50px] cursor-pointer items-center justify-center rounded-lg border-0 transition-colors",
+        isActive
+          ? "bg-primary text-primary-foreground"
+          : "bg-secondary text-secondary-foreground"
+      )}
       onClick={onClick}
       title={tooltipText}
-      style={{
-        width: "50px",
-        height: "50px",
-        borderRadius: "8px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: isActive
-          ? "var(--chart-button-selected)"
-          : "var(--chart-button-bg)",
-        color: isActive
-          ? "var(--chart-button-bg)"
-          : "var(--chart-button-selected)",
-        border: "none",
-        cursor: "pointer",
-        transition: "background-color 0.3s",
-      }}
     >
       {icon}
     </button>

@@ -38,9 +38,6 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
-  --color-chart-button-bg: var(--chart-button-bg);
-  --color-chart-button-selected: var(--chart-button-selected);
-
   --color-selected: var(--selected);
 
   --radius-lg: var(--radius);
