@@ -57,10 +57,10 @@ const lineChartValue: ChartValue = {
       },
     ],
     options: {
-      text: "Hello world",
       theme: "afterburn",
       xAxisKey: "_year",
       yAxisKeys: ["seller", "seller2"],
+      foreground: "#ffffff",
       xAxisLabel: "cust year",
       yAxisLabel: "cust sellers",
       gradientStop: "#42788F",
@@ -82,21 +82,24 @@ const lineChartValue: ChartValue = {
   },
   source_id: "856a1855-2bee-4d87-9756-a783088c0568",
   type: "line",
-  updated_at: "2025-02-02T13:44:55.532Z",
+  updated_at: "2025-02-05T09:18:03.224Z",
   workspace_id: "3db2e96f-ee43-412d-be09-25fc02d3a463",
 };
 
 export default function StorybookChartEditorPage() {
   const [chartValue, setChartValue] = useState(lineChartValue);
-  const [items] = useState(data);
   return (
     <div className="flex h-full space-x-4">
       <div className="w-full flex-1 border-r p-4">
-        <Chart value={chartValue} data={items} />
+        <Chart value={chartValue} data={data} />
       </div>
       <div className="w-[400px] flex-shrink-0 p-4">
         {/* render chart editor menu here */}
-        <EditChartMenu value={chartValue} setValue={setChartValue} />
+        <EditChartMenu
+          value={chartValue}
+          setValue={setChartValue}
+          data={data}
+        />
       </div>
     </div>
   );

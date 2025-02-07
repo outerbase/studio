@@ -9,8 +9,12 @@ import { NumberCircleOne } from "@phosphor-icons/react/dist/icons/NumberCircleOn
 import { Table } from "@phosphor-icons/react/dist/icons/Table";
 import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
 import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
-import { useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
+import { ButtonGroupItem } from "../button-group";
+import ChartBackgroundSelection from "./chart-background-selection";
+import { ChartSeriesCombobox } from "./chart-series-combobox";
 import {
+  ChartData,
   ChartLabelDisplayY,
   ChartValue,
   SingleValueFormat,
@@ -22,13 +26,132 @@ import SimpleToggle from "./simple-toggle";
 
 interface EditChartMenuProps {
   value: ChartValue;
-  setValue: (value: ChartValue) => void;
+  data: ChartData[];
+  setValue: Dispatch<SetStateAction<ChartValue>>;
 }
 
-export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
+export default function EditChartMenu({
+  value,
+  setValue,
+  data,
+}: EditChartMenuProps) {
   const isNotChartComponent = ["text", "single_value", "table"].includes(
     value.type
   );
+
+  const allAxisKeys = Object.keys(data[0] ?? {});
+
+  const seriesList = useMemo(() => {
+    if (isNotChartComponent) return null;
+
+    return (
+      <div className="pt-4">
+        <div className="flex items-center justify-between pb-2">
+          <p className="mb-1.5 text-sm font-bold opacity-70">Series</p>
+          <ButtonGroupItem
+            onClick={() => {
+              if (value.params.options?.yAxisKeys.length === allAxisKeys.length)
+                return;
+
+              setValue((prev) => {
+                return {
+                  ...prev,
+                  params: {
+                    ...prev.params,
+                    options: {
+                      ...prev.params.options,
+                      yAxisKeys: [
+                        ...(prev.params.options?.yAxisKeys ?? []),
+                        allAxisKeys.filter(
+                          (key) =>
+                            !prev.params.options?.yAxisKeys?.includes(key)
+                        )[0],
+                      ],
+                    },
+                  },
+                };
+              });
+            }}
+          >
+            <p className="text-xs">Add Series</p>
+          </ButtonGroupItem>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {value.params.options?.yAxisKeys?.map((key, index) => {
+            const color = value.params.options?.yAxisKeyColors
+              ? value.params.options?.yAxisKeyColors[key]
+              : undefined;
+            return (
+              <ChartSeriesCombobox
+                color={color}
+                key={index}
+                values={
+                  allAxisKeys.map((s) => {
+                    return {
+                      value: s,
+                      label: s,
+                    };
+                  }) ?? []
+                }
+                selected={key ?? ""}
+                placeholder="Select axis key..."
+                onChange={function (v: string): void {
+                  setValue({
+                    ...value,
+                    params: {
+                      ...value.params,
+                      options: {
+                        ...value.params.options,
+                        yAxisKeys: (() => {
+                          const yAxisKeys =
+                            value.params.options?.yAxisKeys ?? [];
+                          yAxisKeys[index] = v;
+                          return yAxisKeys;
+                        })(),
+                      },
+                    },
+                  });
+                }}
+                onRemove={(series) => {
+                  setValue({
+                    ...value,
+                    params: {
+                      ...value.params,
+                      options: {
+                        ...value.params.options,
+                        yAxisKeys: (() => {
+                          if (series === null) return [];
+                          return (value.params.options?.yAxisKeys ?? []).filter(
+                            (k) => k !== series
+                          );
+                        })(),
+                      },
+                    },
+                  });
+                }}
+                onChangeColor={function (color: string): void {
+                  setValue({
+                    ...value,
+                    params: {
+                      ...value.params,
+                      options: {
+                        ...value.params.options,
+                        yAxisKeyColors: {
+                          ...value.params.options?.yAxisKeyColors,
+                          [key]: color,
+                        },
+                      },
+                    },
+                  });
+                }}
+              ></ChartSeriesCombobox>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }, [allAxisKeys, isNotChartComponent, setValue, value]);
 
   const selectYAxisDisplay = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -72,16 +195,13 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
 
   const selectAxisKey = useMemo(() => {
     if (isNotChartComponent) return null;
-    const allKeys = [
-      value.params.options?.xAxisKey,
-      ...(value.params.options?.yAxisKeys ?? []),
-    ];
+
     return (
       <div>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Select X Axis</p>
+        <p className="mb-1.5 text-sm font-bold opacity-70">X Axis Value</p>
         <SimpleCombobox
           values={
-            allKeys.map((key) => {
+            allAxisKeys.map((key) => {
               return {
                 value: key,
                 label: key,
@@ -98,7 +218,6 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
                 options: {
                   ...value.params.options,
                   xAxisKey: v,
-                  yAxisKeys: allKeys.filter((key) => key !== v),
                 },
               },
             });
@@ -106,13 +225,13 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
         ></SimpleCombobox>
       </div>
     );
-  }, [isNotChartComponent, setValue, value]);
+  }, [allAxisKeys, isNotChartComponent, setValue, value]);
 
   const yAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
     return (
       <div>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Y Axis Label</p>
+        <p className="mb-1.5 text-sm font-bold opacity-70">Y Axis</p>
         <div className="flex items-center justify-between gap-2">
           <SimpleInput
             value={value.params.options?.yAxisLabel}
@@ -130,6 +249,7 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
               });
             }}
           />
+          {selectYAxisDisplay}
 
           <SimpleToggle
             values={["Show", "Hide"]}
@@ -149,11 +269,11 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
               value.params.options?.yAxisLabelHidden ? "Hide" : "Show"
             }
           />
-          {selectYAxisDisplay}
         </div>
+        {seriesList}
       </div>
     );
-  }, [isNotChartComponent, selectYAxisDisplay, setValue, value]);
+  }, [isNotChartComponent, selectYAxisDisplay, seriesList, setValue, value]);
 
   const xAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -291,21 +411,21 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
   }, [setValue, value]);
 
   const textColorSection = useMemo(() => {
-    if (value.type !== "text") return null;
     const textColorValues = [
       {
         value: "Automatic",
         label: "Automatic",
       },
       {
-        value: "White",
+        value: "#ffffff",
         label: "White",
       },
       {
-        value: "Black",
+        value: "#000000",
         label: "Black",
       },
     ];
+
     return (
       <div>
         <p className="mb-1.5 pt-2 text-sm font-bold opacity-70">Text Color</p>
@@ -318,7 +438,10 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
               ...value,
               params: {
                 ...value.params,
-                options: { ...value.params.options, foreground: v },
+                options: {
+                  ...value.params.options,
+                  foreground: v === "Automatic" ? undefined : v,
+                },
               },
             });
           }}
@@ -330,7 +453,7 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
   return (
     <div className="flex w-full flex-col gap-5 p-1 pb-4">
       <section key={1}>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Type</p>
+        <p className="mb-1.5 text-sm font-bold opacity-70">Chart Type</p>
         <div className="grid grid-cols-6 gap-2">
           <ChartTypeButton
             icon={<ChartLine />}
@@ -416,11 +539,12 @@ export default function EditChartMenu({ value, setValue }: EditChartMenuProps) {
       </section>
 
       {textSection}
-      {textColorSection}
       {dataFormatSection}
       {xAxisLabelSection}
       {selectAxisKey}
       {yAxisLabelSection}
+      {textColorSection}
+      <ChartBackgroundSelection value={value} setValue={setValue} />
     </div>
   );
 }

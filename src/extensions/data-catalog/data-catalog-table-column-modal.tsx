@@ -85,13 +85,12 @@ export default function DataCatalogTableColumnModal({
     <>
       <DialogHeader>
         <DialogTitle>Column Metadata</DialogTitle>
-        <DialogDescription>
-          Add metadata to this column to help your team and AI understand its
-          purpose. Include detailed descriptions and examples of sample data to
-          make the data more clear and easier to use.
-        </DialogDescription>
       </DialogHeader>
-
+      <DialogDescription>
+        Add metadata to this column to help your team and AI understand its
+        purpose. Include detailed descriptions and examples of sample data to
+        make the data more clear and easier to use.
+      </DialogDescription>
       <div className="mt-2 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label>Column Description</Label>

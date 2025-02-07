@@ -1,6 +1,7 @@
 "use client";
 import { getOuterbaseWorkspace } from "@/outerbase-cloud/api";
 import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
+import { noop } from "lodash";
 import { useParams, useRouter } from "next/navigation";
 import {
   createContext,
@@ -14,8 +15,9 @@ import useSWR from "swr";
 const WorkspaceContext = createContext<{
   workspaces: OuterbaseAPIWorkspace[];
   currentWorkspace?: OuterbaseAPIWorkspace;
+  refreshWorkspace: () => void;
   loading: boolean;
-}>({ workspaces: [], loading: true });
+}>({ workspaces: [], loading: true, refreshWorkspace: noop });
 
 export function useWorkspaces() {
   return useContext(WorkspaceContext);
@@ -24,7 +26,7 @@ export function useWorkspaces() {
 export function WorkspaceProvider({ children }: PropsWithChildren) {
   const router = useRouter();
 
-  const { data, isLoading } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     "workspaces",
     () => {
       return getOuterbaseWorkspace();
@@ -65,6 +67,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
         workspaces: data?.items || [],
         loading: isLoading,
         currentWorkspace,
+        refreshWorkspace: mutate,
       }}
     >
       {children}

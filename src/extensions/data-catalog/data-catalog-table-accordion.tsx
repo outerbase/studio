@@ -4,7 +4,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +14,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DatabaseTableSchema } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Edit3, EyeOff, LucideMoreHorizontal } from "lucide-react";
+import { Blend, ChevronDown, Edit3, LucideMoreHorizontal } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataCatalogTableColumn from "./data-catalog-table-column";
-import DataCatalogDriver, { VirtualJoinColumn } from "./driver";
-import VirtaulJoinColumn from "./virtual-column";
+import DataCatalogDriver, {
+  VirtualJoinColumn as IVirtualJoinColumn,
+} from "./driver";
+import VirtualJoinColumn from "./virtual-column";
 import VirtualJoinModal from "./virtual-join-modal";
 
 interface DataCatalogTableAccordionProps {
@@ -37,7 +39,7 @@ export default function DataCatalogTableAccordion({
 }: DataCatalogTableAccordionProps) {
   const modelTable = driver.getTable(table.schemaName, table.tableName!);
   const [open, setOpen] = useState(true);
-  const [virtaulJoinColumn, setVirtualColumn] = useState<VirtualJoinColumn>();
+  const [virtualJoinColumn, setVirtualColumn] = useState<IVirtualJoinColumn>();
   const [openVirtualModal, setOpenVirtaulModal] = useState(false);
 
   const [definition, setDefinition] = useState(modelTable?.definition || "");
@@ -60,6 +62,7 @@ export default function DataCatalogTableAccordion({
       const newVirtualJoinColumn = modelTable?.virtualJoin?.filter(
         (col) => col.id !== id
       );
+      console.log("new coolumn update: ", newVirtualJoinColumn);
       driver
         .updateTable(table?.schemaName, table.tableName!, {
           ...modelTable,
@@ -114,20 +117,17 @@ export default function DataCatalogTableAccordion({
   return (
     <>
       <Dialog open={openVirtualModal} onOpenChange={setOpenVirtaulModal}>
-        <DialogContent>
-          <VirtualJoinModal
-            driver={driver}
-            column={virtaulJoinColumn}
-            tableName={table.tableName!}
-            schemaName={table.schemaName}
-            onClose={() => {
-              setOpenVirtaulModal(false);
-              setVirtualColumn(undefined);
-            }}
-          />
-        </DialogContent>
+        <VirtualJoinModal
+          driver={driver}
+          column={virtualJoinColumn}
+          tableName={table.tableName!}
+          schemaName={table.schemaName}
+          onClose={() => {
+            setOpenVirtaulModal(false);
+            setVirtualColumn(undefined);
+          }}
+        />
       </Dialog>
-
       <Collapsible open={open} onOpenChange={setOpen}>
         <div className="rounded-xl border border-neutral-200 bg-white/50 p-3 hover:border-neutral-300 hover:bg-white dark:border-neutral-800/50 dark:bg-neutral-900 dark:text-white dark:hover:border-neutral-800 dark:hover:bg-neutral-800">
           <div className="flex p-2">
@@ -154,7 +154,7 @@ export default function DataCatalogTableAccordion({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="p-2">
                   <DropdownMenuItem
-                    className="gap-5"
+                    className="gap-1"
                     onClick={() => {
                       setOpen(true);
                     }}
@@ -165,12 +165,15 @@ export default function DataCatalogTableAccordion({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => setOpenVirtaulModal(true)}
-                    className="gap-5"
+                    onClick={() => {
+                      setOpenVirtaulModal(true);
+                      setVirtualColumn(undefined);
+                    }}
+                    className="gap-1"
                   >
                     Add Virtaul Join
                     <div className="flex-1" />
-                    <EyeOff className="h-4 w-4" />
+                    <Blend className="h-4 w-4" />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -199,13 +202,13 @@ export default function DataCatalogTableAccordion({
             })}
             {modelTable?.virtualJoin && modelTable.virtualJoin.length > 0 && (
               <div className="rounded-xl border border-neutral-200 p-3 hover:bg-white dark:border-neutral-800/50 dark:bg-neutral-950 dark:text-white">
-                <div className="p-3 font-bold">Relationship</div>
+                <div className="p-3 font-bold">Relationships</div>
                 <div className="">
                   {modelTable.virtualJoin?.map((column) => {
                     return (
-                      <VirtaulJoinColumn
-                        key={column.id}
+                      <VirtualJoinColumn
                         {...column}
+                        key={column.id}
                         onEditRelationship={() => {
                           setOpenVirtaulModal(true);
                           setVirtualColumn(column);

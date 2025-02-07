@@ -51,6 +51,13 @@ export async function getOuterbaseBase(workspaceId: string, baseId: string) {
   return baseList.items[0];
 }
 
+export async function deleteOuterbaseBase(workspaceId: string, baseId: string) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/base/${baseId}`,
+    "DELETE"
+  );
+}
+
 export async function getOuterbaseDashboardList(workspaceId: string) {
   return requestOuterbase<OuterbaseAPIDashboardListResponse>(
     `/api/v1/workspace/${workspaceId}/dashboard`
@@ -63,6 +70,40 @@ export async function getOuterbaseDashboard(
 ) {
   return requestOuterbase<OuterbaseAPIDashboardDetail>(
     `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`
+  );
+}
+
+export async function createOuterbaseDashboard(
+  workspaceId: string,
+  baseId: string | undefined,
+  name: string
+) {
+  return requestOuterbase<OuterbaseAPIDashboardDetail>(
+    `/api/v1/workspace/${workspaceId}/dashboard` +
+      (baseId ? `?baseId=${baseId}` : ""),
+    "POST",
+    {
+      name,
+      base_id: baseId ?? "",
+      chart_ids: [],
+      data: {
+        version: 3,
+        filters: [],
+        isWorkspaceScoped: !baseId,
+      },
+      layout: [],
+      type: "dashboard",
+    }
+  );
+}
+
+export async function deleteOuterbaseDashboard(
+  workspaceId: string,
+  dashboardId: string
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`,
+    "DELETE"
   );
 }
 
