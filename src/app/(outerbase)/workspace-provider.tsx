@@ -11,6 +11,7 @@ import {
   useMemo,
 } from "react";
 import useSWR from "swr";
+import { useSession } from "./session-provider";
 
 const WorkspaceContext = createContext<{
   workspaces: OuterbaseAPIWorkspace[];
@@ -25,9 +26,10 @@ export function useWorkspaces() {
 
 export function WorkspaceProvider({ children }: PropsWithChildren) {
   const router = useRouter();
+  const { token } = useSession();
 
   const { data, isLoading, mutate } = useSWR(
-    "workspaces",
+    token ? "workspaces" : undefined,
     () => {
       return getOuterbaseWorkspace();
     },
@@ -53,6 +55,9 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     // If the current workspace is not found, redirect to the first workspace
     if (isLoading) return;
+    if (!workspaceId) return;
+    if (workspaceId === "local-workspace") return;
+    if (typeof window === "undefined") return;
 
     if (!currentWorkspace) {
       if (data?.items.length) {

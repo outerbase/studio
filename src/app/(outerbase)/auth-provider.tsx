@@ -1,4 +1,5 @@
 "use client";
+import PageLoading from "@/components/page-loading";
 import { usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren, useEffect } from "react";
 import { useSession } from "./session-provider";
@@ -17,7 +18,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   }, [isLoading, session, pathname, router]);
 
   if (isLoading || !session) {
-    return <div>Session Loading...</div>;
+    return <PageLoading>Session Loading...</PageLoading>;
   }
 
   return <>{children}</>;

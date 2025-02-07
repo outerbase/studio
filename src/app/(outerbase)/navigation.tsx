@@ -7,7 +7,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CaretUpDown } from "@phosphor-icons/react";
+import { CaretUpDown, Gear, GlobeHemisphereEast } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useWorkspaces } from "./workspace-provider";
@@ -85,20 +86,52 @@ function WorkspaceSelector() {
 
 export function NavigationBar() {
   const { currentWorkspace } = useWorkspaces();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
 
   return (
-    <div className="bg-background sticky top-0 z-10 flex h-14 items-center gap-2 px-2">
-      <OuterbaseIcon className="h-8 w-8" />
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant={"ghost"}>
-            {currentWorkspace?.name} <CaretUpDown className="ml-2" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="h-[400px] w-[500px] p-0" align="start">
-          <WorkspaceSelector />
-        </PopoverContent>
-      </Popover>
+    <div className="bg-netural-100 dark:bg-background relative sticky top-0 z-10 flex h-14 items-center justify-center gap-2 px-2">
+      <div className="absolute left-0 flex h-14 items-center pl-2">
+        <OuterbaseIcon className="h-8 w-8" />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant={"ghost"}>
+              {currentWorkspace?.name} <CaretUpDown className="ml-2" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="h-[400px] w-[500px] p-0" align="start">
+            <WorkspaceSelector />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div className="flex gap-4 text-sm">
+        <Link
+          href={`/w/${workspaceId}`}
+          className="flex cursor-pointer items-center gap-1"
+        >
+          <GlobeHemisphereEast weight="fill" className="size-5" /> Home
+        </Link>
+        <Link
+          href={`/w/${workspaceId}/settings`}
+          className="flex cursor-pointer items-center gap-1"
+        >
+          <Gear className="size-5" />
+          Settings
+        </Link>
+        <Link
+          href={`/w/${workspaceId}/billing`}
+          className="flex cursor-pointer items-center gap-1"
+        >
+          <Gear className="size-5" />
+          Billing
+        </Link>
+      </div>
+
+      <div className="absolute right-0 pr-2">
+        <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-lg font-bold">
+          GI
+        </div>
+      </div>
     </div>
   );
 }
