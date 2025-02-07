@@ -1,8 +1,8 @@
 "use client";
 
+import { NavigationBar } from "@/app/(outerbase)/nav";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
-import ClientOnly from "@/components/client-only";
 import {
   getOuterbaseDashboard,
   updateOuterbaseDashboard,
@@ -85,10 +85,11 @@ export default function BoardPage() {
   }
 
   return (
-    <div className="overflow-y-autp h-screen w-screen overflow-x-hidden">
-      <ClientOnly>
+    <div className="flex h-screen w-screen flex-col overflow-hidden">
+      <NavigationBar />
+      <div className="flex-1 overflow-x-hidden overflow-y-auto">
         <BoardPageEditor initialValue={data} mutate={mutate} />
-      </ClientOnly>
+      </div>
     </div>
   );
 }
