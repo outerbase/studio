@@ -10,7 +10,7 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
 import { DashboardProps } from ".";
 import { buttonVariants } from "../ui/button";
@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import BoardChart from "./board-chart";
+import { BoardDeleteDialog } from "./board-delete-dialog";
 import "./board-style.css";
 
 export interface BoardChartLayout {
@@ -46,6 +47,7 @@ export function BoardCanvas({
   editMode,
   setEditMode,
 }: BoardProps) {
+  const [selectedKey, setSelectedKey] = useState<string>("");
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -89,7 +91,9 @@ export function BoardCanvas({
     {
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
-      onclick: () => {},
+      onclick: (key?: string) => {
+        setSelectedKey(key ?? "");
+      },
     },
   ];
 
@@ -103,42 +107,64 @@ export function BoardCanvas({
     [onChange, value.layout]
   );
 
+  const handleDeleteChart = useCallback(() => {
+    onChange(value.layout.filter((f) => f.i !== selectedKey));
+    setSelectedKey("");
+  }, [onChange, selectedKey, value.layout]);
+
   const mapItem: JSX.Element[] = value.layout.map((_, i) => {
     return (
       <div
         key={_.i}
-        className="group dark:bg-secondary relative flex items-center justify-center overflow-hidden rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
+        className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
         data-grid={_}
       >
         <BoardChart
           value={value.charts.find((chart) => chart.id === _.i) as any}
         />
         {editMode === "REARRANGING_CHART" ? (
-          <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
-            {sizes.map((x, index) => {
-              return (
-                <button
-                  className={cn(
-                    buttonVariants({ variant: "secondary", size: "icon" }),
-                    "cancelSelectorName h-6 w-6 p-0"
-                  )}
-                  onClick={() =>
-                    handleClickResize(x.w as number, x.h as number, i)
-                  }
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  key={index}
-                >
-                  {x.icon}
-                </button>
-              );
-            })}
-          </div>
+          <>
+            <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
+              {sizes.map((x, index) => {
+                return (
+                  <button
+                    className={cn(
+                      buttonVariants({ variant: "secondary", size: "icon" }),
+                      "cancelSelectorName h-6 w-6 p-0"
+                    )}
+                    onClick={() =>
+                      handleClickResize(x.w as number, x.h as number, i)
+                    }
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    key={index}
+                  >
+                    {x.icon}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="absolute -top-2 -left-2 z-40 hidden group-hover:block">
+              <button
+                className={cn(
+                  buttonVariants({ variant: "default", size: "icon" }),
+                  "cancelSelectorName h-6 w-6 cursor-pointer rounded-full"
+                )}
+                onClick={() => setSelectedKey(_.i)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </>
         ) : (
           <div className="absolute top-4 right-4">
             <DropdownMenu key={_.i}>
               <DropdownMenuTrigger asChild>
-                <EllipsisVertical className="h-4 w-4" />
+                <button
+                  className={buttonVariants({ size: "icon", variant: "ghost" })}
+                >
+                  <EllipsisVertical className="h-4 w-4" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {menus.map((menu) => {
@@ -146,7 +172,7 @@ export function BoardCanvas({
                     <DropdownMenuItem
                       key={menu.name}
                       className="flex gap-2"
-                      onClick={menu.onclick}
+                      onClick={() => menu.onclick(_.i)}
                     >
                       {menu.icon}
                       {menu.name}
@@ -163,6 +189,18 @@ export function BoardCanvas({
 
   return (
     <div>
+      {selectedKey &&
+        value.charts.find((chart) => chart.id === selectedKey) && (
+          <BoardDeleteDialog
+            onClose={() => setSelectedKey("")}
+            value={
+              value.charts.find(
+                (chart) => chart.id === selectedKey
+              ) as unknown as DashboardProps
+            }
+            onDelete={handleDeleteChart}
+          />
+        )}
       <ReactGridLayout
         cols={4}
         rowHeight={220}
