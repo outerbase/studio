@@ -6,6 +6,30 @@ import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";
 import { BoardProvider } from "./board-provider";
 
+export interface BoardData {
+  filters: any[];
+  version: number;
+  isWorkspaceScoped: boolean;
+}
+
+export interface BoardLayout {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
+
+export interface BoardRoot {
+  base_id: any;
+  chart_ids: string[];
+  data: BoardData;
+  directory_index: number;
+  layout: BoardLayout[];
+  name: string;
+  type: string;
+}
+
 export interface DashboardProps {
   charts: ChartValue[];
   layout: ReactGridLayout.Layout[];
@@ -21,6 +45,8 @@ interface Props {
   interval: number;
   onChange: (value: DashboardProps) => void;
   onChangeInterval: (v: number) => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 export default function Board({
@@ -29,6 +55,8 @@ export default function Board({
   interval,
   onChange,
   onChangeInterval,
+  onCancel,
+  onSave,
 }: Props) {
   const [editMode, setEditMode] = useState<
     "ADD_CHART" | "REARRANGING_CHART" | null
@@ -82,13 +110,17 @@ export default function Board({
             })
           }
           editMode={editMode}
-          setEditMode={setEditMode}
-          name={value.name}
+          onChangeEditMode={setEditMode}
           interval={interval}
-          setInterval={onChangeInterval}
+          onChangeInterval={onChangeInterval}
           onRefresh={() => {
             setLastRunTimestamp(Date.now());
           }}
+          onCancel={() => {
+            setEditMode(null);
+            onCancel();
+          }}
+          onSave={onSave}
         />
         <BoardCanvas
           value={value}

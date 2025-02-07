@@ -3,11 +3,14 @@
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
 import ClientOnly from "@/components/client-only";
-import { getOuterbaseDashboard } from "@/outerbase-cloud/api";
+import {
+  getOuterbaseDashboard,
+  updateOuterbaseDashboard,
+} from "@/outerbase-cloud/api";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
 import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 
 function BoardPageEditor({
@@ -15,7 +18,10 @@ function BoardPageEditor({
 }: {
   initialValue: OuterbaseAPIDashboardDetail;
 }) {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId, boardId } = useParams<{
+    workspaceId: string;
+    boardId: string;
+  }>();
   const { workspaces } = useWorkspaces();
   const [interval, setIntervals] = useState<number>(0);
 
@@ -30,6 +36,21 @@ function BoardPageEditor({
 
   const [value, setValue] = useState(initialValue);
 
+  console.log(value);
+
+  const onSave = useCallback(() => {
+    const input = {
+      base_id: null,
+      chart_ids: value.chart_ids,
+      data: (value as any).data,
+      layout: value.layout.map(({ w, h, i, x, y }) => ({ w, h, x, y, i })),
+      directory_index: (value as any).directory_index,
+      name: value.name,
+      type: value.type,
+    };
+    updateOuterbaseDashboard(workspaceId, boardId, input);
+  }, [boardId, value, workspaceId]);
+
   if (!boardSources) {
     return <div>Loading Workspace....</div>;
   }
@@ -41,6 +62,8 @@ function BoardPageEditor({
       sources={boardSources}
       interval={interval}
       onChangeInterval={setIntervals}
+      onCancel={() => setValue(initialValue)}
+      onSave={onSave}
     />
   );
 }
