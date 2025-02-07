@@ -50,7 +50,7 @@ export default function SimpleColorPicker({
   const [selectedColor, setSelectedColor] = useState<string>(selected || "");
   return (
     <div>
-      <div className="mt-2 shadow-lg">
+      <div>
         <SketchPicker
           disableAlpha
           presetColors={presetColors}
