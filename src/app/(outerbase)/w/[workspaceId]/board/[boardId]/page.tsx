@@ -3,12 +3,16 @@
 import { NavigationBar } from "@/app/(outerbase)/nav";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
+import { deleteChartDialog } from "@/components/board/board-delete-dialog";
+import ClientOnly from "@/components/client-only";
+
 import {
   getOuterbaseDashboard,
   updateOuterbaseDashboard,
 } from "@/outerbase-cloud/api";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
 import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
+import { produce } from "immer";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import useSWR, { KeyedMutator } from "swr";
@@ -53,6 +57,50 @@ function BoardPageEditor({
       .finally(mutate);
   }, [boardId, value, workspaceId, mutate]);
 
+  const onRemove = useCallback(
+    async (key: string) => {
+      const chart = value.charts.find((f) => f.id === key);
+      if (chart) {
+        const deleteChartId = await deleteChartDialog.show({
+          workspaceId,
+          chartId: key,
+          chartName: chart.name,
+        });
+
+        if (deleteChartId) {
+          const input = {
+            base_id: null,
+            chart_ids: value.chart_ids.filter((f) => f !== deleteChartId),
+            data: (value as any).data,
+            layout: value.layout
+              .filter((f) => f.i !== deleteChartId)
+              .map(({ w, h, i, x, y }) => ({ w, h, x, y, i })),
+            directory_index: (value as any).directory_index,
+            name: value.name,
+            type: value.type,
+          };
+
+          updateOuterbaseDashboard(workspaceId, boardId, input)
+            .then(() => {
+              setValue((prev) => {
+                return produce(prev, (draft) => {
+                  draft.chart_ids = input.chart_ids;
+                  draft.layout = prev.layout.filter(
+                    (f) => f.i !== deleteChartId
+                  );
+                  draft.charts = prev.charts.filter(
+                    (f) => f.id !== deleteChartId
+                  );
+                });
+              });
+            })
+            .finally(mutate);
+        }
+      }
+    },
+    [value, workspaceId, boardId, mutate]
+  );
+
   if (!boardSources) {
     return <div>Loading Workspace....</div>;
   }
@@ -66,7 +114,7 @@ function BoardPageEditor({
       onChangeInterval={setIntervals}
       onLayoutCancel={() => setValue(initialValue)}
       onLayoutSave={onSave}
-      onRemove={() => {}}
+      onRemove={onRemove}
     />
   );
 }
