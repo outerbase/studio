@@ -99,12 +99,12 @@ export function DataCatalogEntryModal({
           <DialogTitle>
             {selectedTermDefinition ? "Edit Term" : "Add Term"}
           </DialogTitle>
-          <DialogDescription>
-            {selectedTermDefinition
-              ? "Modify the existing term definition."
-              : "Add terms to your Data Dictionary to help your team and AI understand important business terminology."}
-          </DialogDescription>
         </DialogHeader>
+        <DialogDescription>
+          {selectedTermDefinition
+            ? "Modify the existing term definition."
+            : "Add terms to your Data Dictionary to help your team and AI understand important business terminology."}
+        </DialogDescription>
         <div className="grid gap-4 py-4">
           <div className="items-center gap-4">
             <Label className="text-right text-xs">
