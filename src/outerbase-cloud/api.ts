@@ -103,8 +103,20 @@ export async function deleteOuterbaseDashboard(
 ) {
   return requestOuterbase(
     `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`,
-    "DELETE"
+    "DELETE",
   );
+}
+
+export async function updateOuterbaseDashboard(
+  workspaceName: string,
+  dashboardId: string,
+  data: any
+) {
+    return requestOuterbase(
+      `/api/v1/workspace/${workspaceName}/dashboard/${dashboardId}`,
+      "PUT",
+      data
+    );
 }
 
 export async function runOuterbaseQueryRaw(
