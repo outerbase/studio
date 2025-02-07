@@ -86,12 +86,8 @@ function WorkspaceSelector() {
 export function NavigationBar() {
   const { currentWorkspace } = useWorkspaces();
 
-  if (!currentWorkspace) {
-    return null;
-  }
-
   return (
-    <div className="flex h-14 items-center gap-2 px-2">
+    <div className="bg-background sticky top-0 z-10 flex h-14 items-center gap-2 px-2">
       <OuterbaseIcon className="h-8 w-8" />
       <Popover>
         <PopoverTrigger asChild>
