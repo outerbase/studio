@@ -6,30 +6,6 @@ import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";
 import { BoardProvider } from "./board-provider";
 
-export interface BoardData {
-  filters: any[];
-  version: number;
-  isWorkspaceScoped: boolean;
-}
-
-export interface BoardLayout {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
-
-export interface BoardRoot {
-  base_id: any;
-  chart_ids: string[];
-  data: BoardData;
-  directory_index: number;
-  layout: BoardLayout[];
-  name: string;
-  type: string;
-}
-
 export interface DashboardProps {
   charts: ChartValue[];
   layout: ReactGridLayout.Layout[];

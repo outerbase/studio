@@ -36,8 +36,6 @@ function BoardPageEditor({
 
   const [value, setValue] = useState(initialValue);
 
-  console.log(value);
-
   const onSave = useCallback(() => {
     const input = {
       base_id: null,
