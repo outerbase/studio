@@ -25,11 +25,12 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import useSWR from "swr";
-import { NavigationBar } from "../../navigation";
+import { NavigationBar } from "../../nav";
 import { useWorkspaces } from "../../workspace-provider";
 import { deleteBaseDialog } from "./dialog-base-delete";
 import { createBoardDialog } from "./dialog-board-create";
 import { deleteBoardDialog } from "./dialog-board-delete";
+import useRedirectValidWorkspace from "./redirect-valid-workspace";
 
 interface ResourceItem {
   id: string;
@@ -43,6 +44,8 @@ export default function WorkspaceListPageClient() {
   const router = useRouter();
   const { currentWorkspace, refreshWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
+
+  useRedirectValidWorkspace();
 
   const { data: boards, mutate } = useSWR(
     `/workspace/${workspaceId}/boards`,
