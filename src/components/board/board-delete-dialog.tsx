@@ -1,92 +1,81 @@
-import { Check, Copy } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { DashboardProps } from ".";
-import { Button, buttonVariants } from "../ui/button";
+import { deleteOuterbaseDashboardChart } from "@/outerbase-cloud/api";
+import { LucideLoader } from "lucide-react";
+import { useCallback, useState } from "react";
+import CopyableText from "../copyable-text";
+import { createDialog } from "../create-dialog";
+import LabelInput from "../label-input";
+import { Button } from "../ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Input } from "../ui/input";
 
-interface Props {
-  onClose?: () => void;
-  onDelete: () => void;
-  value: DashboardProps;
-}
+export const deleteChartDialog = createDialog<
+  {
+    workspaceId: string;
+    chartId: string;
+    chartName: string;
+  },
+  string | undefined
+>(({ close, chartName, workspaceId, chartId }) => {
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
 
-export function BoardDeleteDialog(props: Props) {
-  const [nameInput, setNameInput] = useState("");
-  const [copied, setCopied] = useState(false);
+  const deleteClicked = useCallback(() => {
+    if (name !== chartName) return;
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (copied) setCopied(false);
-    }, 1000);
+    setLoading(true);
 
-    return () => clearTimeout(timeout);
-  }, [copied]);
-
-  const onClickCopy = useCallback(() => {
-    setCopied(true);
-    navigator.clipboard.writeText(props.value.name);
-  }, [props.value.name]);
+    deleteOuterbaseDashboardChart(workspaceId, chartId)
+      .then(() => {
+        close(chartId);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [chartName, chartId, close, name, workspaceId]);
 
   return (
-    <Dialog open onOpenChange={props.onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Confirm deletion of {props.value.name}</DialogTitle>
-          <DialogDescription className="py-4">
-            Deleting this chart will remove it from your dashboard. All members
-            will lose access. This action is permanent and cannot be undone.
-          </DialogDescription>
-          <div>
-            <button
-              className={buttonVariants({ size: "sm", variant: "secondary" })}
-              onClick={onClickCopy}
-            >
-              <div className="flex flex-row items-center gap-2">
-                <div>{props.value.name}</div>
-                <div className="relative h-4 w-4">
-                  <Copy
-                    className={`${copied ? "hidden" : ""} absolute h-4 w-4`}
-                  />
-                  <Check
-                    className={`${!copied ? "hidden" : ""} absolute h-4 w-4`}
-                  />
-                </div>
-              </div>
-            </button>
-            <div className="pt-4 pb-2 text-xs">
-              Enter the name of this Chart to confirm:
-            </div>
-            <Input
-              value={nameInput}
-              onChange={(v) => setNameInput(v.target.value)}
-            />
-          </div>
-        </DialogHeader>
-        <DialogFooter className="sm:justify-start">
-          <Button
-            type="button"
-            variant={"destructive"}
-            disabled={nameInput !== props.value.name}
-            onClick={props.onDelete}
-          >
-            I understand, delete my chart
-          </Button>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              Cancel
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <DialogHeader>
+        <DialogTitle>Confirm deletion of {chartName}</DialogTitle>
+        <DialogDescription>
+          All saved queries, dashboards, definitions and any other contributions
+          made to your Base will be deleted. This action is permanent and{" "}
+          <strong>cannot</strong>
+          be undone.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="flex flex-col gap-4">
+        <div>
+          <CopyableText text={chartName} />
+        </div>
+
+        <LabelInput
+          label="Enter the name of this Base to confirm:"
+          placeholder="Board name"
+          value={name}
+          required
+          onChange={(e) => setName(e.currentTarget.value)}
+        />
+      </div>
+
+      <DialogFooter>
+        <Button
+          disabled={loading || chartName !== name}
+          onClick={deleteClicked}
+          variant={"destructive"}
+        >
+          {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}I
+          understand, delete this base
+        </Button>
+        <Button variant={"secondary"} onClick={() => close(undefined)}>
+          Cancel
+        </Button>
+      </DialogFooter>
+    </>
   );
-}
+}, "close");

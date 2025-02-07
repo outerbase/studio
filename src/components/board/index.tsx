@@ -23,7 +23,7 @@ interface Props {
   onChangeInterval: (v: number) => void;
   onLayoutSave: () => void;
   onLayoutCancel: () => void;
-  onRemove: () => void;
+  onRemove: (key: string) => void;
 }
 
 export default function Board({
@@ -34,6 +34,7 @@ export default function Board({
   onChangeInterval,
   onLayoutCancel,
   onLayoutSave,
+  onRemove,
 }: Props) {
   const [editMode, setEditMode] = useState<
     "ADD_CHART" | "REARRANGING_CHART" | null
@@ -112,6 +113,7 @@ export default function Board({
           }}
           editMode={editMode}
           setEditMode={setEditMode}
+          onRemove={onRemove}
         />
       </div>
     </BoardProvider>
