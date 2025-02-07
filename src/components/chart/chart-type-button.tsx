@@ -22,7 +22,12 @@ export function ChartTypeButton({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: isActive ? "var(--accent)" : "var(--secondary)",
+        backgroundColor: isActive
+          ? "var(--chart-button-selected)"
+          : "var(--chart-button-bg)",
+        color: isActive
+          ? "var(--chart-button-bg)"
+          : "var(--chart-button-selected)",
         border: "none",
         cursor: "pointer",
         transition: "background-color 0.3s",
