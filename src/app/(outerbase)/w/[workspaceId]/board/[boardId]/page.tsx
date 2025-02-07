@@ -11,12 +11,14 @@ import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
 import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import useSWR from "swr";
+import useSWR, { KeyedMutator } from "swr";
 
 function BoardPageEditor({
   initialValue,
+  mutate,
 }: {
   initialValue: OuterbaseAPIDashboardDetail;
+  mutate: KeyedMutator<OuterbaseAPIDashboardDetail>;
 }) {
   const { workspaceId, boardId } = useParams<{
     workspaceId: string;
@@ -46,8 +48,10 @@ function BoardPageEditor({
       name: value.name,
       type: value.type,
     };
-    updateOuterbaseDashboard(workspaceId, boardId, input);
-  }, [boardId, value, workspaceId]);
+    updateOuterbaseDashboard(workspaceId, boardId, input)
+      .then()
+      .finally(mutate);
+  }, [boardId, value, workspaceId, mutate]);
 
   if (!boardSources) {
     return <div>Loading Workspace....</div>;
@@ -60,8 +64,9 @@ function BoardPageEditor({
       sources={boardSources}
       interval={interval}
       onChangeInterval={setIntervals}
-      onCancel={() => setValue(initialValue)}
-      onSave={onSave}
+      onLayoutCancel={() => setValue(initialValue)}
+      onLayoutSave={onSave}
+      onRemove={() => {}}
     />
   );
 }
@@ -71,7 +76,7 @@ export default function BoardPage() {
     boardId: string;
     workspaceId: string;
   }>();
-  const { data } = useSWR(`board-${boardId}`, () => {
+  const { data, mutate } = useSWR(`board-${boardId}`, () => {
     return getOuterbaseDashboard(workspaceId, boardId);
   });
 
@@ -82,7 +87,7 @@ export default function BoardPage() {
   return (
     <div className="overflow-y-autp h-screen w-screen overflow-x-hidden">
       <ClientOnly>
-        <BoardPageEditor initialValue={data} />
+        <BoardPageEditor initialValue={data} mutate={mutate} />
       </ClientOnly>
     </div>
   );

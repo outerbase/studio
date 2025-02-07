@@ -21,8 +21,9 @@ interface Props {
   interval: number;
   onChange: (value: DashboardProps) => void;
   onChangeInterval: (v: number) => void;
-  onSave: () => void;
-  onCancel: () => void;
+  onLayoutSave: () => void;
+  onLayoutCancel: () => void;
+  onRemove: () => void;
 }
 
 export default function Board({
@@ -31,8 +32,8 @@ export default function Board({
   interval,
   onChange,
   onChangeInterval,
-  onCancel,
-  onSave,
+  onLayoutCancel,
+  onLayoutSave,
 }: Props) {
   const [editMode, setEditMode] = useState<
     "ADD_CHART" | "REARRANGING_CHART" | null
@@ -94,9 +95,12 @@ export default function Board({
           }}
           onCancel={() => {
             setEditMode(null);
-            onCancel();
+            onLayoutCancel();
           }}
-          onSave={onSave}
+          onSave={() => {
+            setEditMode(null);
+            onLayoutSave();
+          }}
         />
         <BoardCanvas
           value={value}
