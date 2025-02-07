@@ -9,8 +9,9 @@ import { NumberCircleOne } from "@phosphor-icons/react/dist/icons/NumberCircleOn
 import { Table } from "@phosphor-icons/react/dist/icons/Table";
 import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
 import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
-import { useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 import { ButtonGroupItem } from "../button-group";
+import ChartBackgroundSelection from "./chart-background-selection";
 import { ChartSeriesCombobox } from "./chart-series-combobox";
 import {
   ChartData,
@@ -26,7 +27,7 @@ import SimpleToggle from "./simple-toggle";
 interface EditChartMenuProps {
   value: ChartValue;
   data: ChartData[];
-  setValue: (value: ChartValue) => void;
+  setValue: Dispatch<SetStateAction<ChartValue>>;
 }
 
 export default function EditChartMenu({
@@ -51,20 +52,24 @@ export default function EditChartMenu({
             onClick={() => {
               if (value.params.options?.yAxisKeys.length === allAxisKeys.length)
                 return;
-              setValue({
-                ...value,
-                params: {
-                  ...value.params,
-                  options: {
-                    ...value.params.options,
-                    yAxisKeys: [
-                      ...(value.params.options?.yAxisKeys ?? []),
-                      allAxisKeys.filter(
-                        (key) => !value.params.options?.yAxisKeys?.includes(key)
-                      )[0],
-                    ],
+
+              setValue((prev) => {
+                return {
+                  ...prev,
+                  params: {
+                    ...prev.params,
+                    options: {
+                      ...prev.params.options,
+                      yAxisKeys: [
+                        ...(prev.params.options?.yAxisKeys ?? []),
+                        allAxisKeys.filter(
+                          (key) =>
+                            !prev.params.options?.yAxisKeys?.includes(key)
+                        )[0],
+                      ],
+                    },
                   },
-                },
+                };
               });
             }}
           >
@@ -421,7 +426,6 @@ export default function EditChartMenu({
       },
     ];
 
-    console.log(value.params.options?.foreground);
     return (
       <div>
         <p className="mb-1.5 pt-2 text-sm font-bold opacity-70">Text Color</p>
@@ -449,7 +453,7 @@ export default function EditChartMenu({
   return (
     <div className="flex w-full flex-col gap-5 p-1 pb-4">
       <section key={1}>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Type</p>
+        <p className="mb-1.5 text-sm font-bold opacity-70">Chart Type</p>
         <div className="grid grid-cols-6 gap-2">
           <ChartTypeButton
             icon={<ChartLine />}
@@ -540,6 +544,7 @@ export default function EditChartMenu({
       {selectAxisKey}
       {yAxisLabelSection}
       {textColorSection}
+      <ChartBackgroundSelection value={value} setValue={setValue} />
     </div>
   );
 }

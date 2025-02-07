@@ -226,8 +226,18 @@ function ChartBody({ value, data, modifier }: OuterbaseChartProps) {
 }
 
 export default function Chart(props: OuterbaseChartProps) {
+  let backGroundStyle = {};
+
+  if (props.value.params.options?.backgroundType === "gradient") {
+    const startColor = props.value.params.options?.gradientStart;
+    const stopColor = props.value.params.options?.gradientStop;
+    backGroundStyle = {
+      background: `linear-gradient(45deg, ${startColor}, ${stopColor})`,
+    };
+  }
+
   return (
-    <div className="flex h-full w-full flex-col p-6">
+    <div className="flex h-full w-full flex-col p-6" style={backGroundStyle}>
       <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
       <div className="flex-1">
         <ChartBody {...props} />

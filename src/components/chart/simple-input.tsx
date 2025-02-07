@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface SimpleInputProps {
   value?: string;
@@ -12,6 +12,10 @@ export default function SimpleInput({
   onSumit,
 }: SimpleInputProps) {
   const [text, setText] = React.useState(value || "");
+
+  useEffect(() => {
+    setText(value || "");
+  }, [value]);
 
   return (
     <input
