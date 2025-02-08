@@ -14,16 +14,16 @@ interface DataCatalogInmemoryDriverOptions {
 export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
   private schemas: DataCatalogSchemas;
   protected options: DataCatalogInmemoryDriverOptions;
-  private dataCatalog: DataCatalogTermDefinition[];
+  private definitions: DataCatalogTermDefinition[];
 
   constructor(
     schemas: DataCatalogSchemas,
-    dataCatalog: DataCatalogTermDefinition[],
+    definitions: DataCatalogTermDefinition[],
     options: DataCatalogInmemoryDriverOptions
   ) {
     this.schemas = schemas;
     this.options = options;
-    this.dataCatalog = dataCatalog;
+    this.definitions = definitions;
   }
 
   private async delay() {
@@ -40,7 +40,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
 
     return {
       schemas: this.schemas,
-      dataCatalog: this.dataCatalog,
+      dataCatalog: this.definitions,
     };
   }
 
@@ -115,7 +115,6 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     schemas[normalizedTableName] = {
       ...table,
       ...data,
-      
     };
 
     return schemas[normalizedTableName];
@@ -152,10 +151,10 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
   }
 
   getTermDefinitions(): DataCatalogTermDefinition[] {
-    if (!this.dataCatalog) {
+    if (!this.definitions) {
       return [];
     }
-    return this.dataCatalog;
+    return this.definitions;
   }
 
   async updateTermDefinition(
@@ -163,11 +162,11 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
   ): Promise<DataCatalogTermDefinition | undefined> {
     await this.delay();
 
-    if (!this.dataCatalog) {
-      this.dataCatalog = [];
+    if (!this.definitions) {
+      this.definitions = [];
     }
 
-    const dataCatalog = this.dataCatalog;
+    const dataCatalog = this.definitions;
 
     const existingIndex = dataCatalog.findIndex((term) => term.id === data.id);
 
@@ -182,12 +181,12 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
 
   async deleteTermDefinition(id: string): Promise<boolean> {
     await this.delay();
-    if (!this.dataCatalog) return false;
+    if (!this.definitions) return false;
 
-    const dataCatalog = this.dataCatalog;
+    const dataCatalog = this.definitions;
     const initialLength = dataCatalog.length;
 
-    this.dataCatalog = dataCatalog.filter((term) => term.id !== id);
+    this.definitions = dataCatalog.filter((term) => term.id !== id);
 
     return dataCatalog.length < initialLength;
   }
