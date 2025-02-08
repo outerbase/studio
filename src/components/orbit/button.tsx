@@ -19,6 +19,7 @@ export const Button = ({
   as,
   children,
   disabled,
+  className,
   displayContent = "items-last",
   href,
   loading,
@@ -35,7 +36,6 @@ export const Button = ({
     <Component
       className={cn(
         "ob-btn ob-focus interactive flex shrink-0 items-center font-medium select-none",
-
         {
           "btn-primary btn-shadow": variant === "primary",
           "btn-secondary btn-shadow": variant === "secondary",
@@ -53,7 +53,8 @@ export const Button = ({
           "ob-disable": disabled,
 
           toggle: toggled,
-        }
+        },
+        className
       )}
       disabled={disabled || loading}
       href={href}

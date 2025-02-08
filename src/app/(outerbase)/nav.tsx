@@ -1,13 +1,12 @@
 "use client";
 import { OuterbaseIcon } from "@/components/icons/outerbase";
+import { Button } from "@/components/orbit/button";
 import { getDatabaseIcon } from "@/components/resource-card/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { CaretUpDown, Gear, GlobeHemisphereEast } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -28,7 +27,7 @@ export function NavigationBar() {
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant={"ghost"}>
+            <Button variant="ghost">
               {currentWorkspace?.name} <CaretUpDown className="ml-2" />
             </Button>
           </PopoverTrigger>
@@ -91,65 +90,50 @@ function WorkspaceSelector() {
   return (
     <div className="flex h-[400px] w-[500px]">
       <div className="flex h-full w-1/2 flex-col gap-0.5 border-r p-1">
-        <label className="text-muted-foreground mt-1 px-3 py-1 text-xs font-bold">
+        <label className="text-muted-foreground mt-1 px-2 py-1 text-sm">
           WORKSPACES
         </label>
 
-        <div
+        <Button
+          variant="ghost"
           onClick={() => router.push(`/w/local-workspace`)}
-          className={cn(
-            buttonVariants({
-              variant: "ghost",
-              size: "sm",
-            }),
-            "cursor-pointer justify-start py-0.5"
-          )}
+          toggled={!currentWorkspace}
         >
           Local
-        </div>
+        </Button>
 
         {workspaces.map((workspace) => (
-          <div
-            onClick={() => router.push(`/w/${workspace.short_name}`)}
+          <Button
             key={workspace.id}
+            onClick={() => router.push(`/w/${workspace.short_name}`)}
             onMouseEnter={() => setSelectedWorkspaceId(workspace.short_name)}
-            className={cn(
-              buttonVariants({
-                variant:
-                  currentWorkspace?.id === workspace.id ? "secondary" : "ghost",
-                size: "sm",
-              }),
-              "cursor-pointer justify-start py-0.5"
-            )}
+            variant="ghost"
+            toggled={currentWorkspace?.id === workspace.id}
+            className="font-normal"
           >
             {workspace.name}
-          </div>
+          </Button>
         ))}
       </div>
       <div className="flex h-full w-1/2 flex-col gap-0.5 overflow-y-auto p-1 text-sm">
-        <label className="text-muted-foreground mt-1 px-3 py-1 text-xs font-bold">
+        <label className="text-muted-foreground mt-1 px-3 py-1 text-sm font-bold">
           BASES
         </label>
         {bases.map((base) => {
           const IconComponent = getDatabaseIcon(base.sources[0]?.type);
 
           return (
-            <div
+            <Button
+              key={base.id}
+              variant="ghost"
+              className="font-normal"
               onClick={() =>
                 router.push(`/w/${selectedWorkspaceId}/${base.short_name}`, {})
               }
-              key={base.id}
-              className={cn(
-                buttonVariants({
-                  variant: "ghost",
-                  size: "sm",
-                }),
-                "cursor-pointer justify-start p-2"
-              )}
             >
-              <IconComponent className="mr-2 h-4 w-4" />
+              <IconComponent className="h-4 w-4" />
               {base.name}
-            </div>
+            </Button>
           );
         })}
       </div>

@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar } from "@/components/orbit/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,20 +16,20 @@ export default function NavigationProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <div className="bg-secondary text-secondary-foreground flex size-9 items-center justify-center rounded-lg border text-sm font-semibold">
-          {session.user.initials}
-        </div>
+        <Avatar size="lg" username={session.user.initials} as="div" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
         <div className="flex gap-2 p-2">
-          <Avatar>
+          {/* <Avatar>
             <AvatarFallback>{session.user.initials}</AvatarFallback>
-          </Avatar>
+          </Avatar> */}
+          <Avatar size="lg" username={session.user.initials} />
+
           <div className="flex flex-col justify-center">
-            <div className="text-xs font-semibold">
+            <div className="text-sm font-semibold">
               {session.user.first_name + " " + session.user.last_name}
             </div>
-            <div className="text-xs">{session.user.email}</div>
+            <div className="text-sm">{session.user.email}</div>
           </div>
         </div>
         <DropdownMenuSeparator />
