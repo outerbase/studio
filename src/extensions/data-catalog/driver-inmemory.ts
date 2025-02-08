@@ -166,14 +166,14 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
       this.definitions = [];
     }
 
-    const dataCatalog = this.definitions;
+    const definitions = this.definitions;
 
-    const existingIndex = dataCatalog.findIndex((term) => term.id === data.id);
+    const existingIndex = definitions.findIndex((term) => term.id === data.id);
 
     if (existingIndex !== -1) {
-      dataCatalog[existingIndex] = { ...dataCatalog[existingIndex], ...data };
+      definitions[existingIndex] = { ...definitions[existingIndex], ...data };
     } else {
-      dataCatalog.unshift(data);
+      definitions.unshift(data);
     }
 
     return data;
@@ -183,11 +183,11 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     await this.delay();
     if (!this.definitions) return false;
 
-    const dataCatalog = this.definitions;
-    const initialLength = dataCatalog.length;
+    const definitions = this.definitions;
+    const initialLength = definitions.length;
 
-    this.definitions = dataCatalog.filter((term) => term.id !== id);
+    this.definitions = definitions.filter((term) => term.id !== id);
 
-    return dataCatalog.length < initialLength;
+    return definitions.length < initialLength;
   }
 }
