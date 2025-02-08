@@ -34,13 +34,13 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
 
   async load(): Promise<{
     schemas: DataCatalogSchemas;
-    dataCatalog: DataCatalogTermDefinition[];
+    definitions: DataCatalogTermDefinition[];
   }> {
     await this.delay();
 
     return {
       schemas: this.schemas,
-      dataCatalog: this.definitions,
+      definitions: this.definitions,
     };
   }
 
