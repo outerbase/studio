@@ -1,56 +1,34 @@
 "use client";
 
-import { MenuBar } from "@/app/storybook/menu-bar/MenuBar";
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
+import Block from "@/components/orbit/block";
+import Inset from "@/components/orbit/inset";
+import { MenuBar, MenuBarItemProps } from "@/components/orbit/menu-bar";
+import Section from "@/components/orbit/section";
 import { useState } from "react";
 
-const items = [
+const items: MenuBarItemProps[] = [
   {
     content: "All",
-    onClick: () => {
-      console.log("Sort by All logic");
-    },
-    id: 0,
+    value: "all",
   },
   {
     content: "Bases",
-    onClick: () => {
-      console.log("Sort by Boards logic");
-    },
-    id: 1,
+    value: "base",
   },
   {
     content: "Boards",
-    onClick: () => {
-      console.log("Sort by Boards logic");
-    },
-    id: 2,
+    value: "board",
   },
 ];
 
 export default function MenuBarStorybook() {
-  const [active, setActive] = useState(0);
-
-  const handleMenuClick = (id: number) => {
-    setActive(id);
-  };
-
-  // Update list to handle ID click + its own onClick
-  const updatedItems = items.map((item) => ({
-    ...item,
-    onClick: () => {
-      handleMenuClick(item.id);
-      item.onClick();
-    },
-  }));
+  const [active, setActive] = useState("all");
 
   return (
     <Section>
       <Inset>
         <Block title="Menu bar">
-          <MenuBar items={updatedItems} activeItem={active} />
+          <MenuBar items={items} value={active} onChange={setActive} />
         </Block>
       </Inset>
     </Section>

@@ -21,7 +21,7 @@ export function SidebarMenuItem({
   selected,
 }: SidebarMenuItemProps) {
   const className =
-    "flex p-2 pl-4 text-xs hover:cursor-pointer hover:bg-secondary";
+    "flex p-2 pl-4 text-sm hover:cursor-pointer hover:bg-secondary";
 
   const body = (
     <>
@@ -61,5 +61,5 @@ export function SidebarMenuItem({
 }
 
 export function SidebarMenuHeader({ text }: SidebarMenuHeader) {
-  return <div className="mt-2 flex p-2 pl-4 text-xs font-bold">{text}</div>;
+  return <div className="mt-2 flex p-2 pl-4 text-sm font-bold">{text}</div>;
 }

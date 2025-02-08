@@ -1,4 +1,4 @@
-import { Loader } from "@/app/storybook/loader/Loader";
+import { Loader } from "@/components/orbit/loader";
 import { cn } from "@/lib/utils";
 import Link, { LinkProps } from "next/link";
 
@@ -18,7 +18,6 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export const Button = ({
   as,
   children,
-  className,
   disabled,
   displayContent = "items-last",
   href,
@@ -56,7 +55,7 @@ export const Button = ({
           toggle: toggled,
         }
       )}
-      disabled={disabled}
+      disabled={disabled || loading}
       href={href}
       {...props}
     >

@@ -1,9 +1,9 @@
 "use client";
 
-import { Select } from "@/app/storybook/select/Select";
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
+import Block from "@/components/orbit/block";
+import Inset from "@/components/orbit/inset";
+import Section from "@/components/orbit/section";
+import { Select } from "@/components/orbit/select";
 import { useState } from "react";
 
 const dbs = [

@@ -19,7 +19,30 @@ export default function StorybookRootLayout({
           </div>
 
           <SidebarMenuItem icon={Layers2} text="Guideline" href="/storybook" />
-          <SidebarMenuHeader text="Basic UI Components" />
+          <SidebarMenuHeader text="Shadcn UI" />
+
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Dialog"
+            href="https://ui.shadcn.com/docs/components/dialog"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Create Dialog"
+            href="/storybook/create-dialog"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Dropdown Menu"
+            href="https://ui.shadcn.com/docs/components/dropdown-menu"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Popover"
+            href="https://ui.shadcn.com/docs/components/popover"
+          />
+
+          <SidebarMenuHeader text="Orbit Design System" />
           <SidebarMenuItem
             icon={Layers2}
             text="Avatar"
@@ -55,31 +78,13 @@ export default function StorybookRootLayout({
             text="Select"
             href="/storybook/select"
           />
+
           <SidebarMenuItem
             icon={Layers2}
             text="Toggle"
             href="/storybook/toggle"
           />
-          <SidebarMenuItem
-            icon={Layers2}
-            text="Dialog"
-            href="https://ui.shadcn.com/docs/components/dialog"
-          />
-          <SidebarMenuItem
-            icon={Layers2}
-            text="Create Dialog"
-            href="/storybook/create-dialog"
-          />
-          <SidebarMenuItem
-            icon={Layers2}
-            text="Dropdown Menu"
-            href="https://ui.shadcn.com/docs/components/dropdown-menu"
-          />
-          <SidebarMenuItem
-            icon={Layers2}
-            text="Popover"
-            href="https://ui.shadcn.com/docs/components/popover"
-          />
+
           <Separator />
           <SidebarMenuHeader text="Advanced UI Components" />
           <SidebarMenuItem

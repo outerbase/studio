@@ -1,7 +1,7 @@
-import { Avatar } from "@/app/storybook/avatar/Avatar";
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
+import { Avatar } from "@/components/orbit/avatar";
+import Block from "@/components/orbit/block";
+import Inset from "@/components/orbit/inset";
+import Section from "@/components/orbit/section";
 
 const userL = "logan";
 const userLImg = "/logo.svg";

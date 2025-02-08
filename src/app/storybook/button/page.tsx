@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/app/storybook/button/Button";
-import { RefreshButton } from "@/app/storybook/button/RefreshButton";
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
+import { RefreshButton } from "@/app/storybook/button/refresh-button";
+import Block from "@/components/orbit/block";
+import { Button } from "@/components/orbit/button";
+import Inset from "@/components/orbit/inset";
+import Section from "@/components/orbit/section";
 import { Database } from "@phosphor-icons/react";
 import { useState } from "react";
 

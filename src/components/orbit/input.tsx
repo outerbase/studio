@@ -21,9 +21,7 @@ export type InputProps = Omit<
 };
 
 export const Input = ({
-  children,
   className,
-  displayContent,
   initialValue,
   isValid = true,
   onValueChange,

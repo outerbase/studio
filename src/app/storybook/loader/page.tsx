@@ -1,7 +1,7 @@
-import { Loader } from "@/app/storybook/loader/Loader";
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
+import Block from "@/components/orbit/block";
+import Inset from "@/components/orbit/inset";
+import { Loader } from "@/components/orbit/loader";
+import Section from "@/components/orbit/section";
 
 export default function LoaderStorybook() {
   return (

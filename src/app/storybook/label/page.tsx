@@ -1,10 +1,10 @@
 "use client";
 
-import { Input } from "@/app/storybook/input/Input";
-import { Label } from "@/app/storybook/label/Label";
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
+import Block from "@/components/orbit/block";
+import { Input } from "@/components/orbit/input";
+import Inset from "@/components/orbit/inset";
+import { Label } from "@/components/orbit/label";
+import Section from "@/components/orbit/section";
 
 export default function LabelStorybook() {
   return (

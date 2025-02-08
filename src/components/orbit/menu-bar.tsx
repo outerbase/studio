@@ -1,26 +1,27 @@
 import { cn } from "@/lib/utils";
 
-type MenuItemProps = {
+export interface MenuBarItemProps {
   aria?: string;
   content: string | React.ReactNode;
-  onClick: () => void;
-  id: number;
-};
+  value: string;
+}
 
 const MenuItem = ({
-  activeItem,
-  aria,
-  content,
+  value: { content, aria },
+  selected,
   onClick,
-  id,
-}: MenuItemProps & { activeItem: number }) => (
+}: {
+  value: MenuBarItemProps;
+  selected: boolean;
+  onClick: () => void;
+}) => (
   <button
     aria-label={typeof content === "string" ? content : aria}
     className={cn(
       "text-ob-base-200 hover:text-ob-base-300 ob-focus block h-full cursor-pointer rounded-sm border border-transparent px-2 transition-colors",
       {
         "bg-ob-base-100 border-ob-border text-ob-base-300 dark:bg-ob-base-500 dark:border-neutral-700":
-          activeItem === id,
+          selected,
       }
     )}
     onClick={onClick}
@@ -29,19 +30,21 @@ const MenuItem = ({
   </button>
 );
 
-type MenuBarProps = {
-  activeItem: number;
+interface MenuBarProps {
+  value?: string;
+  onChange?: (value: string) => void;
   className?: string;
-  items: MenuItemProps[];
+  items: MenuBarItemProps[];
   size?: "sm" | "base" | "lg";
-};
+}
 
-export const MenuBar = ({
-  activeItem,
+export function MenuBar({
+  value,
+  onChange,
   className,
   items,
   size = "base",
-}: MenuBarProps) => {
+}: MenuBarProps) {
   return (
     <nav
       className={cn(
@@ -54,9 +57,16 @@ export const MenuBar = ({
         className
       )}
     >
-      {items.map((item, index) => (
-        <MenuItem {...item} key={index} activeItem={activeItem} />
+      {items.map((item) => (
+        <MenuItem
+          key={item.value}
+          value={item}
+          selected={value === item.value}
+          onClick={() => {
+            if (onChange) onChange(item.value);
+          }}
+        />
       ))}
     </nav>
   );
-};
+}

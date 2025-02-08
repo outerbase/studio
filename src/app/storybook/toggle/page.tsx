@@ -1,9 +1,9 @@
 "use client";
 
-import Block from "@/app/storybook/storybook/Block";
-import Inset from "@/app/storybook/storybook/Inset";
-import Section from "@/app/storybook/storybook/Section";
-import { Toggle } from "@/app/storybook/toggle/Toggle";
+import Block from "@/components/orbit/block";
+import Inset from "@/components/orbit/inset";
+import Section from "@/components/orbit/section";
+import { Toggle } from "@/components/orbit/toggle";
 import { useState } from "react";
 
 export default function ToggleStorybook() {
