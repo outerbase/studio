@@ -36,6 +36,7 @@ interface BoardProps {
   onChange: (v: ReactGridLayout.Layout[]) => void;
   editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
   setEditMode?: (mode: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
+  onRemove: (key: string) => void;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -45,6 +46,7 @@ export function BoardCanvas({
   onChange,
   editMode,
   setEditMode,
+  onRemove,
 }: BoardProps) {
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
@@ -89,7 +91,9 @@ export function BoardCanvas({
     {
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
-      onclick: () => {},
+      onclick: (key?: string) => {
+        onRemove(key || "");
+      },
     },
   ];
 
@@ -107,38 +111,55 @@ export function BoardCanvas({
     return (
       <div
         key={_.i}
-        className="group dark:bg-secondary relative flex items-center justify-center overflow-hidden rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
+        className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
         data-grid={_}
       >
         <BoardChart
           value={value.charts.find((chart) => chart.id === _.i) as any}
         />
         {editMode === "REARRANGING_CHART" ? (
-          <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
-            {sizes.map((x, index) => {
-              return (
-                <button
-                  className={cn(
-                    buttonVariants({ variant: "secondary", size: "icon" }),
-                    "cancelSelectorName h-6 w-6 p-0"
-                  )}
-                  onClick={() =>
-                    handleClickResize(x.w as number, x.h as number, i)
-                  }
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  key={index}
-                >
-                  {x.icon}
-                </button>
-              );
-            })}
-          </div>
+          <>
+            <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
+              {sizes.map((x, index) => {
+                return (
+                  <button
+                    className={cn(
+                      buttonVariants({ variant: "secondary", size: "icon" }),
+                      "cancelSelectorName h-6 w-6 p-0"
+                    )}
+                    onClick={() =>
+                      handleClickResize(x.w as number, x.h as number, i)
+                    }
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    key={index}
+                  >
+                    {x.icon}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="absolute -top-2 -left-2 z-40 hidden group-hover:block">
+              <button
+                className={cn(
+                  buttonVariants({ variant: "default", size: "icon" }),
+                  "cancelSelectorName h-6 w-6 cursor-pointer rounded-full"
+                )}
+                onClick={() => onRemove(_.i)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </>
         ) : (
           <div className="absolute top-4 right-4">
             <DropdownMenu key={_.i}>
               <DropdownMenuTrigger asChild>
-                <EllipsisVertical className="h-4 w-4" />
+                <button
+                  className={buttonVariants({ size: "icon", variant: "ghost" })}
+                >
+                  <EllipsisVertical className="h-4 w-4" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {menus.map((menu) => {
@@ -146,7 +167,7 @@ export function BoardCanvas({
                     <DropdownMenuItem
                       key={menu.name}
                       className="flex gap-2"
-                      onClick={menu.onclick}
+                      onClick={() => menu.onclick(_.i)}
                     >
                       {menu.icon}
                       {menu.name}

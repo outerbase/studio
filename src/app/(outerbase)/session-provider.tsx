@@ -1,6 +1,5 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
-import { createContext, PropsWithChildren, useContext, useEffect } from "react";
+import { createContext, PropsWithChildren, useContext } from "react";
 import useSWR from "swr";
 import { getOuterbaseSession } from "../../outerbase-cloud/api";
 import {
@@ -9,24 +8,25 @@ import {
 } from "../../outerbase-cloud/api-type";
 
 interface OuterebaseSessionContextProps {
-  session: OuterbaseAPISession;
-  user: OuterbaseAPIUser;
+  isLoading: boolean;
+  token?: string;
+  session?: {
+    session: OuterbaseAPISession;
+    user: OuterbaseAPIUser;
+  };
 }
 
-const OuterbaseSessionContext = createContext<{
-  session: OuterbaseAPISession;
-  user: OuterbaseAPIUser;
-}>({} as OuterebaseSessionContextProps);
+const OuterbaseSessionContext = createContext<OuterebaseSessionContextProps>({
+  isLoading: true,
+});
 
 export function useSession() {
   return useContext(OuterbaseSessionContext);
 }
 
 export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
-  const router = useRouter();
-  const pathname = usePathname();
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("ob-token") : "";
+    typeof window !== "undefined" ? localStorage.getItem("ob-token") || "" : "";
 
   const { data, isLoading } = useSWR(
     token ? "session-" + token : undefined,
@@ -40,21 +40,9 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
     }
   );
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (!data?.session || !data?.user) {
-      localStorage.setItem("continue-redirect", pathname);
-      router.push("/signin");
-    }
-  }, [isLoading, data, pathname, router]);
-
-  if (isLoading || !data) {
-    return <div>Session Loading...</div>;
-  }
-
   return (
     <OuterbaseSessionContext.Provider
-      value={{ session: data?.session, user: data?.user }}
+      value={{ session: data, isLoading, token }}
     >
       {children}
     </OuterbaseSessionContext.Provider>
