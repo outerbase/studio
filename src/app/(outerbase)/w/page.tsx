@@ -25,7 +25,7 @@ export default function OuterbaseMainPage() {
     } else if (!isLoading && !session) {
       // Invalid session, it might be expired session. We will
       // ask them for login again
-      router.push("/sigin");
+      router.push("/signin");
     }
   }, [token, session, isLoading, workspaces, router]);
 

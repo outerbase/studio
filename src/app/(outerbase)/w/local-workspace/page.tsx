@@ -41,7 +41,7 @@ export default function LocalWorkspacePage() {
               key={conn.id}
               color={conn.label ?? ""}
               icon={getDatabaseIcon(conn.driver ?? "")}
-              href={`/client/s/${conn.id}`}
+              href={`/client/s/${conn.driver}?p=${conn.id}`}
               title={conn.name}
               subtitle={getDatabaseFriendlyName(conn.driver ?? "")}
               visual={getDatabaseVisual(conn.driver ?? "")}
