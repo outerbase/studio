@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function BoardButtonMenu(props: Props) {
-  const { setting } = useBoardContext();
+  const { setting, setBoardMode } = useBoardContext();
 
   if (props.mode === "REARRANGING_CHART") {
     return (
@@ -35,7 +35,7 @@ export function BoardButtonMenu(props: Props) {
   }
 
   return (
-    <div>
+    <div className="flex gap-2">
       <button
         className={buttonVariants({ size: "sm", variant: "ghost" })}
         onClick={() => {
@@ -88,6 +88,17 @@ export function BoardButtonMenu(props: Props) {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
+      <div>
+        <Button
+          variant={"default"}
+          size="sm"
+          onClick={() => {
+            setBoardMode("ADD_CHART");
+          }}
+        >
+          Add Chart
+        </Button>
+      </div>
     </div>
   );
 }

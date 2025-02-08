@@ -2,6 +2,7 @@ import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import { useEffect, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
+import BoardChartEditor from "./board-chart-editor";
 import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";
 import { BoardProvider } from "./board-provider";
@@ -14,6 +15,8 @@ export interface DashboardProps {
     filters: BoardFilterProps[];
   };
 }
+
+export type BoardEditorMode = "ADD_CHART" | "REARRANGING_CHART" | null;
 
 interface Props {
   value: DashboardProps;
@@ -36,9 +39,7 @@ export default function Board({
   onLayoutSave,
   onRemove,
 }: Props) {
-  const [editMode, setEditMode] = useState<
-    "ADD_CHART" | "REARRANGING_CHART" | null
-  >(null);
+  const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
   const autoRefresh = [
     "5s",
@@ -74,8 +75,9 @@ export default function Board({
       sources={sources}
       lastRunTimestamp={lastRunTimestamp}
       setting={{ autoRefresh, name: value.name }}
+      setBoardMode={setEditMode}
     >
-      <div>
+      <div className="flex flex-1 flex-col">
         <BoardFilter
           filters={value.data.filters}
           onFilters={(v) =>
@@ -103,18 +105,26 @@ export default function Board({
             onLayoutSave();
           }}
         />
-        <BoardCanvas
-          value={value}
-          onChange={(v) => {
-            onChange({
-              ...value,
-              layout: v,
-            });
-          }}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          onRemove={onRemove}
-        />
+        <div className="relative flex-1">
+          {editMode === "ADD_CHART" && (
+            <div className="bg-background absolute top-0 right-0 bottom-0 left-0 z-10 flex">
+              <BoardChartEditor />
+            </div>
+          )}
+
+          <BoardCanvas
+            value={value}
+            onChange={(v) => {
+              onChange({
+                ...value,
+                layout: v,
+              });
+            }}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            onRemove={onRemove}
+          />
+        </div>
       </div>
     </BoardProvider>
   );
