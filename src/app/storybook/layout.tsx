@@ -19,12 +19,8 @@ export default function StorybookRootLayout({
           </div>
 
           <SidebarMenuItem icon={Layers2} text="Guideline" href="/storybook" />
-          <SidebarMenuHeader text="Basic UI Components" />
-          <SidebarMenuItem
-            icon={Layers2}
-            text="Input"
-            href="https://ui.shadcn.com/docs/components/input"
-          />
+          <SidebarMenuHeader text="Shadcn UI" />
+
           <SidebarMenuItem
             icon={Layers2}
             text="Dialog"
@@ -45,6 +41,50 @@ export default function StorybookRootLayout({
             text="Popover"
             href="https://ui.shadcn.com/docs/components/popover"
           />
+
+          <SidebarMenuHeader text="Orbit Design System" />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Avatar"
+            href="/storybook/avatar"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Button"
+            href="/storybook/button"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Input"
+            href="/storybook/input"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Label"
+            href="/storybook/label"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Loader"
+            href="/storybook/loader"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Menu bar"
+            href="/storybook/menu-bar"
+          />
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Select"
+            href="/storybook/select"
+          />
+
+          <SidebarMenuItem
+            icon={Layers2}
+            text="Toggle"
+            href="/storybook/toggle"
+          />
+
           <Separator />
           <SidebarMenuHeader text="Advanced UI Components" />
           <SidebarMenuItem
