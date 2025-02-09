@@ -1,6 +1,6 @@
 "use client";
 import LabelInput from "@/components/label-input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   getOuterbaseWorkspace,
   loginOuterbaseByPassword,
@@ -9,7 +9,6 @@ import {
   OuterbaseAPIError,
   OuterbaseAPISession,
 } from "@/outerbase-cloud/api-type";
-import { LucideLoader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -84,27 +83,43 @@ export default function SigninPage() {
           <p>Sign in to your existing account</p>
         </div>
 
-        <LabelInput
-          label="Work Email"
-          value={email}
-          placeholder="Enter your email address"
-          onChange={(e) => setEmail(e.currentTarget.value)}
-        />
+        <form
+          onSubmit={(e) => {
+            onLoginClicked();
+            e.preventDefault();
+          }}
+          className="flex flex-col gap-4"
+        >
+          <LabelInput
+            autoFocus
+            label="Work Email"
+            size="lg"
+            value={email}
+            placeholder="Enter your email address"
+            onChange={(e) => setEmail(e.currentTarget.value)}
+          />
 
-        <LabelInput
-          label="Password"
-          value={password}
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.currentTarget.value)}
-        />
+          <LabelInput
+            label="Password"
+            size="lg"
+            value={password}
+            type="password"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.currentTarget.value)}
+          />
 
-        {error && <div className="text-red-400">{error}</div>}
+          {error && <div className="text-red-400">{error}</div>}
 
-        <Button onClick={onLoginClicked}>
-          {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-          Continue with email
-        </Button>
+          <Button
+            loading={loading}
+            onClick={onLoginClicked}
+            variant="primary"
+            size="lg"
+            className="justify-center"
+          >
+            Continue with email
+          </Button>
+        </form>
 
         <Link href="#" className="text-sm">
           Forget password

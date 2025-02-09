@@ -14,7 +14,7 @@ export type InputProps = Omit<
   displayContent?: "items-first" | "items-last"; // used for children of component
   initialValue?: string;
   isValid?: boolean;
-  onValueChange: ((value: string, isValid: boolean) => void) | undefined;
+  onValueChange?: ((value: string, isValid: boolean) => void) | undefined;
   preText?: string[] | React.ReactNode[] | React.ReactNode;
   postText?: string[] | React.ReactNode[] | React.ReactNode;
   size?: "sm" | "base" | "lg";

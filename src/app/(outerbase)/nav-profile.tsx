@@ -6,10 +6,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { useSession } from "./session-provider";
 
 export default function NavigationProfile() {
   const { session } = useSession();
+  const router = useRouter();
+
+  const onLogoutClicked = useCallback(() => {
+    // Remove all the session data
+    localStorage.removeItem("session");
+    localStorage.removeItem("ob-token");
+    router.push("/signin");
+  }, [router]);
 
   if (!session?.user) return null;
 
@@ -20,9 +30,6 @@ export default function NavigationProfile() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
         <div className="flex gap-2 p-2">
-          {/* <Avatar>
-            <AvatarFallback>{session.user.initials}</AvatarFallback>
-          </Avatar> */}
           <Avatar size="lg" username={session.user.initials} />
 
           <div className="flex flex-col justify-center">
@@ -35,7 +42,7 @@ export default function NavigationProfile() {
         <DropdownMenuSeparator />
         <DropdownMenuItem>Account Setting</DropdownMenuItem>
         <DropdownMenuItem>Theme</DropdownMenuItem>
-        <DropdownMenuItem>Log out</DropdownMenuItem>
+        <DropdownMenuItem onClick={onLogoutClicked}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
