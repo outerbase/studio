@@ -119,8 +119,6 @@ export default function ChartBackgroundSelection({
             ...prev.params.options,
             backgroundType: v,
             backgroundImage: undefined,
-            gradientStart: undefined,
-            gradientStop: undefined,
           },
         },
       };

@@ -1,8 +1,10 @@
 import { produce } from "immer";
+import { useTheme } from "next-themes";
 import { Dispatch, SetStateAction } from "react";
 import { ButtonGroupItem } from "../button-group";
 import { ChartSeriesCombobox } from "./chart-series-combobox";
-import { ChartValue } from "./chart-type";
+import { ChartValue, ThemeColors, THEMES } from "./chart-type";
+import { generateGradientColors } from "./echart-options-builder";
 
 interface ChartSeriesProps {
   value: ChartValue;
@@ -17,6 +19,7 @@ export default function ChartSeries({
   isNotChartComponent,
   columns,
 }: ChartSeriesProps) {
+  const { forcedTheme, resolvedTheme } = useTheme();
   if (isNotChartComponent) return null;
 
   return (
@@ -93,7 +96,31 @@ export default function ChartSeries({
                   });
                 });
               }}
-            ></ChartSeriesCombobox>
+              onThemeChange={function (theme: ThemeColors): void {
+                onChange((prev) => {
+                  const appTheme: "light" | "dark" = (forcedTheme ||
+                    resolvedTheme) as "light" | "dark";
+                  const themeColor =
+                    THEMES[theme].colors?.[appTheme ?? "light"];
+                  const colors = generateGradientColors(
+                    themeColor[0],
+                    themeColor[1],
+                    columns.length
+                  );
+                  const newColors = prev.params.options.yAxisKeys.reduce(
+                    (acc, col, i) => {
+                      acc[col] = colors[i];
+                      return acc;
+                    },
+                    {} as Record<string, string>
+                  );
+                  return produce(prev, (draft) => {
+                    draft.params.options.theme = theme;
+                    draft.params.options.yAxisKeyColors = newColors;
+                  });
+                });
+              }}
+            />
           );
         })}
       </div>

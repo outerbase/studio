@@ -1,77 +1,80 @@
 "use client";
-import { useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import { SketchPicker } from "react-color";
-import { Button } from "../ui/button";
+import { ThemeColors, THEMES } from "./chart-type";
 
 const presetColors = [
-  "#FF0000", // Red
-  "#FF7F00", // Orange
-  "#FFFF00", // Yellow
-  "#7FFF00", // Chartreuse Green
-  "#00FF00", // Green
-  "#00FF7F", // Spring Green
-  "#00FFFF", // Cyan
-  "#007FFF", // Azure
-  "#0000FF", // Blue
-  "#7F00FF", // Violet
-  "#FF00FF", // Magenta
-  "#FF007F", // Rose
-  "#800000", // Maroon
-  "#FF4500", // Orange Red
-  "#FFD700", // Gold
-  "#808000", // Olive
-  "#008000", // Dark Green
-  "#008080", // Teal
-  "#000080", // Navy
-  "#800080", // Purple
-  "#8B0000", // Dark Red
-  "#FF6347", // Tomato
-  "#FFA500", // Orange
-  "#FFFFE0", // Light Yellow
-  "#ADFF2F", // Green Yellow
-  "#32CD32", // Lime Green
-  "#40E0D0", // Turquoise
-  "#4682B4", // Steel Blue
-  "#6A5ACD", // Slate Blue
-  "#EE82EE", // Violet
-  "#D2691E", // Chocolate
-  "#A52A2A", // Brown
+  "#D0021B",
+  "#F5A623",
+  "#F8E71C",
+  "#8B572A",
+  "#7ED321",
+  "#417505",
+  "#BD10E0",
+  "#9013FE",
+  "#4A90E2",
+  "#50E3C2",
 ];
 
 interface SimpleColorPickerProps {
   selected?: string;
   onChange: (color: string) => void;
+  onThemeChange: (theme: ThemeColors) => void;
 }
 
 export default function SimpleColorPicker({
   selected,
   onChange,
+  onThemeChange,
 }: SimpleColorPickerProps) {
-  const [selectedColor, setSelectedColor] = useState<string>(selected || "");
+  const { resolvedTheme, forcedTheme } = useTheme();
+  const [selectedColor, setSelectedColor] = useState<string | "">(
+    selected || ""
+  );
+  useEffect(() => {
+    if (selected) {
+      setSelectedColor(selected);
+    }
+  }, [selected]);
   return (
     <div>
-      <div>
+      <div className="flex">
         <SketchPicker
+          width="255px"
+          className="bg-background! shadow-none!"
           disableAlpha
           presetColors={presetColors}
           color={selectedColor}
           onChangeComplete={(color) => {
             setSelectedColor(color.hex);
+            onChange(color.hex);
           }}
         />
-      </div>
-      <div className="m-2 flex items-center justify-between">
-        <p className="text-sm">
-          <span className="pr-2.5 font-bold">{selectedColor}</span>
-        </p>
-        <Button
-          onClick={() => {
-            onChange(selectedColor);
-          }}
-          variant="ghost"
-        >
-          <span className="text-sm">Ok</span>
-        </Button>
+
+        <div className="border-l-accent flex flex-col gap-1 border-l-2 p-3">
+          {Object.keys(THEMES).map((key) => {
+            return (
+              <div
+                key={key}
+                className="flex cursor-pointer items-center gap-1 text-xs"
+                onClick={() => {
+                  if (key) {
+                    onThemeChange(key as ThemeColors);
+                  }
+                }}
+              >
+                <div
+                  className="mr-2 h-[14px] w-[14px] cursor-pointer rounded-full"
+                  style={{
+                    background: THEMES[key as ThemeColors].background,
+                  }}
+                />
+                <p>{key}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
