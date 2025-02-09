@@ -355,14 +355,17 @@ export default function EditChartMenu({
       {dataFormatSection}
       {xAxisLabelSection}
       {selectAxisKey}
-      <ChartYAxisSection
-        value={value}
-        onChange={function (value: SetStateAction<ChartValue>): void {
-          onChange(value);
-        }}
-        isNotChartComponent={false}
-        columns={columns}
-      ></ChartYAxisSection>
+      {!isNotChartComponent && (
+        <ChartYAxisSection
+          value={value}
+          onChange={function (value: SetStateAction<ChartValue>): void {
+            onChange(value);
+          }}
+          isNotChartComponent={false}
+          columns={columns}
+        />
+      )}
+
       {textColorSection}
       <ChartBackgroundSelection value={value} setValue={onChange} />
     </div>
