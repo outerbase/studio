@@ -12,11 +12,7 @@ import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
 import { produce } from "immer";
 import { Dispatch, SetStateAction, useMemo } from "react";
 import ChartBackgroundSelection from "./chart-background-selection";
-import {
-  ChartLabelDisplayY,
-  ChartValue,
-  SingleValueFormat,
-} from "./chart-type";
+import { ChartValue, SingleValueFormat } from "./chart-type";
 import { ChartTypeButton } from "./chart-type-button";
 import ChartYAxisSection from "./chart-y-axis-section";
 import { SimpleCombobox } from "./simple-combobox";
@@ -37,42 +33,6 @@ export default function EditChartMenu({
   const isNotChartComponent = ["text", "single_value", "table"].includes(
     value.type
   );
-
-  const selectYAxisDisplay = useMemo(() => {
-    if (isNotChartComponent) return null;
-    const yAxisSideValues = [
-      {
-        value: "left",
-        label: "Left",
-      },
-      {
-        value: "right",
-        label: "Right",
-      },
-      {
-        value: "hidden",
-        label: "Hidden",
-      },
-    ];
-    return (
-      <div>
-        <SimpleCombobox
-          hideArrow={true}
-          values={yAxisSideValues}
-          selected={value.params.options?.yAxisLabelDisplay ?? "left"}
-          placeholder="Select display..."
-          onChange={function (v: string): void {
-            onChange((prev) => {
-              return produce(prev, (draft) => {
-                draft.params.options.yAxisLabelDisplay =
-                  v as ChartLabelDisplayY;
-              });
-            });
-          }}
-        ></SimpleCombobox>
-      </div>
-    );
-  }, [isNotChartComponent, onChange, value.params.options?.yAxisLabelDisplay]);
 
   const selectAxisKey = useMemo(() => {
     if (isNotChartComponent) return null;
