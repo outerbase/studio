@@ -66,7 +66,7 @@ export default function BoardChartEditor() {
         </div>
       </div>
       <div className="w-[370px] overflow-x-hidden overflow-y-auto border-l p-4">
-        <EditChartMenu value={value} setValue={setValue} data={[{}]} />
+        <EditChartMenu value={value} onChange={setValue} columns={[]} />
       </div>
     </div>
   );
