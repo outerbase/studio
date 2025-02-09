@@ -98,6 +98,7 @@ const lineChartValue: ChartValue = {
 
 export default function StorybookChartEditorPage() {
   const [chartValue, setChartValue] = useState(lineChartValue);
+
   return (
     <div className="flex h-full space-x-4">
       <div className="w-full flex-1 border-r p-4">
@@ -108,7 +109,7 @@ export default function StorybookChartEditorPage() {
         <EditChartMenu
           value={chartValue}
           onChange={setChartValue}
-          data={data}
+          columns={Object.keys(data[0]) || []}
         />
       </div>
     </div>

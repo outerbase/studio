@@ -13,7 +13,6 @@ import { produce } from "immer";
 import { Dispatch, SetStateAction, useMemo } from "react";
 import ChartBackgroundSelection from "./chart-background-selection";
 import {
-  ChartData,
   ChartLabelDisplayY,
   ChartValue,
   SingleValueFormat,
@@ -26,20 +25,18 @@ import SimpleToggle from "./simple-toggle";
 
 interface EditChartMenuProps {
   value: ChartValue;
-  data: ChartData[];
+  columns: string[];
   onChange: Dispatch<SetStateAction<ChartValue>>;
 }
 
 export default function EditChartMenu({
   value,
   onChange,
-  data,
+  columns,
 }: EditChartMenuProps) {
   const isNotChartComponent = ["text", "single_value", "table"].includes(
     value.type
   );
-
-  const allAxisKeys = Object.keys(data[0] ?? {});
 
   const selectYAxisDisplay = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -85,7 +82,7 @@ export default function EditChartMenu({
         <p className="mb-1.5 text-sm font-bold opacity-70">X Axis Value</p>
         <SimpleCombobox
           values={
-            allAxisKeys.map((key) => {
+            columns.map((key) => {
               return {
                 value: key,
                 label: key,
@@ -104,12 +101,7 @@ export default function EditChartMenu({
         ></SimpleCombobox>
       </div>
     );
-  }, [
-    allAxisKeys,
-    isNotChartComponent,
-    onChange,
-    value.params.options?.xAxisKey,
-  ]);
+  }, [columns, isNotChartComponent, onChange, value.params.options?.xAxisKey]);
 
   const xAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -409,7 +401,7 @@ export default function EditChartMenu({
           onChange(value);
         }}
         isNotChartComponent={false}
-        columns={allAxisKeys}
+        columns={columns}
       ></ChartYAxisSection>
       {textColorSection}
       <ChartBackgroundSelection value={value} setValue={onChange} />

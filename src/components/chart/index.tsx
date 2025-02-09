@@ -243,9 +243,14 @@ export default function Chart(props: OuterbaseChartProps) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-6" style={backGroundStyle}>
-      <div className="dark:shadow-accent flex flex-1 rounded-lg p-2 shadow-2xl backdrop-blur-lg backdrop-brightness-100 dark:backdrop-brightness-100">
-        <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
+    <div className="flex h-full w-full p-6" style={backGroundStyle}>
+      <div className="dark:shadow-accent flex h-full w-full flex-col rounded-lg p-2 shadow-2xl backdrop-blur-lg backdrop-brightness-100 dark:backdrop-brightness-100">
+        <h1
+          className="mb-4 text-lg font-semibold"
+          style={{ color: props.value.params.options?.foreground }}
+        >
+          {props.value.name}
+        </h1>
         <div className="flex-1">
           <ChartBody {...props} />
         </div>
