@@ -20,8 +20,6 @@ export default function ChartYAxisSection({
   isNotChartComponent,
   columns,
 }: ChartYAxisSectionProps) {
-  if (isNotChartComponent) return null;
-
   const selectYAxisDisplay = useMemo(() => {
     if (isNotChartComponent) return null;
     const yAxisSideValues = [
@@ -64,7 +62,7 @@ export default function ChartYAxisSection({
       <div className="flex items-center justify-between gap-2">
         <SimpleInput
           value={value.params.options?.yAxisLabel}
-          placeholder={value.params.options?.yAxisKeys[0] ?? "Y Axis Label"}
+          placeholder={"Y Axis Label"}
           onSumit={(v) => {
             onChange((prev) => {
               return produce(prev, (draft) => {

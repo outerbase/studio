@@ -28,14 +28,16 @@ export default function ChartSeries({
         <p className="mb-1.5 text-sm font-bold opacity-70">Series</p>
         <ButtonGroupItem
           onClick={() => {
+            if (!value.params.options?.yAxisKeys) return;
             if (value.params.options?.yAxisKeys.length === columns.length)
               return;
 
             onChange((prev) => {
               return produce(prev, (draft) => {
+                if (!draft.params.options.yAxisKeys) return;
                 draft.params.options.yAxisKeys.push(
                   columns.filter(
-                    (key) => !draft.params.options.yAxisKeys.includes(key)
+                    (key) => !draft.params.options.yAxisKeys?.includes(key)
                   )[0]
                 );
               });
@@ -68,6 +70,7 @@ export default function ChartSeries({
               onChange={function (v: string): void {
                 onChange((prev) => {
                   return produce(prev, (draft) => {
+                    if (!draft.params.options.yAxisKeys) return;
                     draft.params.options.yAxisKeys[index] = v;
                   });
                 });
@@ -79,7 +82,7 @@ export default function ChartSeries({
                       draft.params.options.yAxisKeys = [];
                     } else {
                       draft.params.options.yAxisKeys =
-                        draft.params.options.yAxisKeys.filter(
+                        draft.params.options.yAxisKeys?.filter(
                           (k) => k !== series
                         );
                     }
@@ -107,7 +110,7 @@ export default function ChartSeries({
                     themeColor[1],
                     columns.length
                   );
-                  const newColors = prev.params.options.yAxisKeys.reduce(
+                  const newColors = prev.params.options.yAxisKeys?.reduce(
                     (acc, col, i) => {
                       acc[col] = colors[i];
                       return acc;

@@ -124,6 +124,7 @@ const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
 };
 
 const TableComponent = ({ data }: OuterbaseChartProps) => {
+  if (data?.length === 0) return;
   return (
     <div className="w-full overflow-auto rounded border">
       <table className="w-full border-separate border-spacing-0 text-sm">
@@ -249,7 +250,7 @@ export default function Chart(props: OuterbaseChartProps) {
           className="mb-4 text-lg font-semibold"
           style={{ color: props.value.params.options?.foreground }}
         >
-          {props.value.name}
+          {props.value.name ?? "New Chart"}
         </h1>
         <div className="flex-1">
           <ChartBody {...props} />

@@ -29,8 +29,8 @@ interface ChartOptions {
   legend?: ChartLegend;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  xAxisKey: string;
-  yAxisKeys: string[];
+  xAxisKey?: string;
+  yAxisKeys?: string[];
   yAxisKeyColors?: Record<string, string>;
   xAxisLabelDisplay?: ChartLabelDisplayX;
   yAxisLabelDisplay?: ChartLabelDisplayY;
@@ -43,31 +43,31 @@ interface ChartOptions {
 }
 
 interface ChartParams {
-  id: string;
-  name: string;
-  type: ChartType;
-  model: string;
-  apiKey: string;
-  layers: ChartLayer[];
+  id?: string;
+  name?: string;
+  type?: ChartType;
+  model?: string;
+  apiKey?: string;
+  layers?: ChartLayer[];
   options: ChartOptions;
-  source_id: string;
-  created_at: string;
-  updated_at: string;
-  workspace_id: string;
-  connection_id: string | null;
+  source_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  workspace_id?: string;
+  connection_id?: string | null;
 }
 
 export interface ChartValue {
-  connection_id: string | null;
-  created_at: string;
-  id: string;
-  model: string;
-  name: string;
+  connection_id?: string | null;
+  created_at?: string;
+  id?: string;
+  model?: string;
+  name?: string;
   params: ChartParams;
-  source_id: string;
-  type: ChartType;
-  updated_at: string;
-  workspace_id: string;
+  source_id?: string;
+  type?: ChartType;
+  updated_at?: string;
+  workspace_id?: string;
   description?: string;
 }
 

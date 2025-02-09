@@ -10,11 +10,13 @@ import { Table } from "@phosphor-icons/react/dist/icons/Table";
 import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
 import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
 import { produce } from "immer";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { useTheme } from "next-themes";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import ChartBackgroundSelection from "./chart-background-selection";
-import { ChartValue, SingleValueFormat } from "./chart-type";
+import { ChartValue, SingleValueFormat, THEMES } from "./chart-type";
 import { ChartTypeButton } from "./chart-type-button";
 import ChartYAxisSection from "./chart-y-axis-section";
+import { generateGradientColors } from "./echart-options-builder";
 import { SimpleCombobox } from "./simple-combobox";
 import SimpleInput from "./simple-input";
 import SimpleToggle from "./simple-toggle";
@@ -30,9 +32,69 @@ export default function EditChartMenu({
   onChange,
   columns,
 }: EditChartMenuProps) {
+  const { forcedTheme, resolvedTheme } = useTheme();
   const isNotChartComponent = ["text", "single_value", "table"].includes(
-    value.type
+    value.type ?? "line"
   );
+
+  // Add default yAxisKeyColors
+  useEffect(() => {
+    if (!value.params.options.yAxisKeyColors && columns?.length > 0) {
+      const appTheme: "light" | "dark" = (forcedTheme || resolvedTheme) as
+        | "light"
+        | "dark";
+      const themeColor = THEMES.neonPunk.colors?.[appTheme ?? "light"];
+      const colors = generateGradientColors(
+        themeColor[0],
+        themeColor[1],
+        columns.length
+      );
+
+      onChange((prev) => {
+        const newColors = columns.reduce(
+          (acc, col, i) => {
+            acc[col] = colors[i];
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+        return produce(prev, (draft) => {
+          draft.params.options.yAxisKeyColors = newColors;
+        });
+      });
+    }
+  }, [
+    columns,
+    forcedTheme,
+    onChange,
+    resolvedTheme,
+    value.params.options.yAxisKeyColors,
+  ]);
+
+  // add default yAxisKeys and xAxisKey
+  useEffect(() => {
+    const allColumns = columns ?? [];
+    if (!value.params.options.xAxisKey && columns?.length > 0) {
+      onChange((prev) => {
+        return produce(prev, (draft) => {
+          draft.params.options.xAxisKey = allColumns.pop();
+        });
+      });
+    }
+
+    if (!value.params.options.yAxisKeys && columns?.length > 0) {
+      onChange((prev) => {
+        return produce(prev, (draft) => {
+          draft.params.options.yAxisKeys = allColumns;
+        });
+      });
+    }
+  }, [
+    columns,
+    onChange,
+    value.params.options.xAxisKey,
+    value.params.options.yAxisKeys,
+  ]);
 
   const selectAxisKey = useMemo(() => {
     if (isNotChartComponent) return null;

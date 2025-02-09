@@ -65,7 +65,7 @@ export default class EchartOptionsBuilder {
     }
 
     const colorTheme =
-      this.chartValue.params.options.theme ?? ("mercury" as ThemeColors);
+      this.chartValue.params.options.theme ?? ("neonPunk" as ThemeColors);
     const values = THEMES[colorTheme as ThemeColors];
 
     if (!values) {
@@ -94,8 +94,13 @@ export default class EchartOptionsBuilder {
     if (this.chartValue.params.options?.xAxisKey) {
       this.columns.push(this.chartValue.params.options.xAxisKey);
     }
-    for (const key of this.chartValue.params.options.yAxisKeys) {
-      this.columns.push(key);
+    if (
+      this.chartValue.params.options?.yAxisKeys &&
+      this.chartValue.params.options.yAxisKeys.length > 0
+    ) {
+      for (const key of this.chartValue.params.options.yAxisKeys) {
+        this.columns.push(key);
+      }
     }
 
     const isTall = this.chartHeight > 150;
@@ -138,17 +143,20 @@ export default class EchartOptionsBuilder {
       };
     }
 
-    let xAxisLabel = !this.chartValue.params.options.xAxisLabel
-      ? this.chartValue.params.options.xAxisKey
-      : this.chartValue.params.options.xAxisLabel;
+    let xAxisLabel =
+      this.chartValue.params.options.xAxisLabel ??
+      (this.chartValue.params.options.xAxisKey || "");
 
     xAxisLabel = this.chartValue.params.options.xAxisLabelHidden
       ? ""
       : xAxisLabel;
 
-    let yaxisLabel = !this.chartValue.params.options.yAxisLabel
-      ? this.chartValue.params.options.yAxisKeys[0]
-      : this.chartValue.params.options.yAxisLabel;
+    let yaxisLabel =
+      this.chartValue.params.options.yAxisLabel ??
+      (this.chartValue.params.options.yAxisKeys &&
+      this.chartValue.params.options.yAxisKeys?.length > 0
+        ? this.chartValue.params.options.yAxisKeys[0]
+        : "");
 
     yaxisLabel = this.chartValue.params.options.yAxisLabelHidden
       ? ""

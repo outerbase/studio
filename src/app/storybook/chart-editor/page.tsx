@@ -65,21 +65,15 @@ const lineChartValue: ChartValue = {
     layers: [
       {
         sql: "select \n    count(*) as seller,\n    count(*) + 1000 as seller2, \n    count(*) + 2000 as seller3, \n    count(*) + 3000 as seller4,\n    year(l192_new.supplier.registered_date) as _year\nFROM\n    supplier\nGROUP BY _year\nhaving _year is not null\nORDER BY _year\n",
-        type: "line",
+        type: "table",
       },
     ],
     options: {
-      xAxisKey: "_year",
-      yAxisKeys: ["seller2", "seller", "seller3", "seller4"],
-      xAxisLabel: "cust year",
+      xAxisKey: undefined,
+      yAxisKeys: undefined,
+      xAxisLabel: undefined,
       yAxisLabel: "cust sellers",
-      backgroundType: "gradient",
-      yAxisKeyColors: {
-        seller: "#FFA285",
-        seller2: "#E75F98",
-        seller3: "#CCB8F2",
-        seller4: "#E75F98",
-      },
+      backgroundType: "none",
       xAxisLabelHidden: true,
       yAxisLabelHidden: true,
       yAxisLabelDisplay: "right",
@@ -92,7 +86,7 @@ const lineChartValue: ChartValue = {
   },
   source_id: "856a1855-2bee-4d87-9756-a783088c0568",
   type: "line",
-  updated_at: "2025-02-08T13:47:52.833Z",
+  updated_at: "2025-02-09T07:58:17.571Z",
   workspace_id: "3db2e96f-ee43-412d-be09-25fc02d3a463",
 };
 
@@ -109,7 +103,7 @@ export default function StorybookChartEditorPage() {
         <EditChartMenu
           value={chartValue}
           onChange={setChartValue}
-          columns={Object.keys(data[0]) || []}
+          columns={data?.length > 0 ? Object.keys(data[0]) : []}
         />
       </div>
     </div>
