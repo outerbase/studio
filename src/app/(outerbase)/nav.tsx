@@ -7,7 +7,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CaretUpDown, Gear, GlobeHemisphereEast } from "@phosphor-icons/react";
+import {
+  CaretUpDown,
+  Gear,
+  GlobeHemisphereEast,
+  SquaresFour,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -125,7 +130,7 @@ function WorkspaceSelector() {
           as="link"
           href="/new-workspace"
         >
-          New Workspace
+          <SquaresFour size={16} /> New Workspace
         </Button>
       </div>
       <div className="flex h-full w-1/2 flex-col gap-0.5 overflow-y-auto p-1 text-sm">
