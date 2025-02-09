@@ -169,7 +169,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
               >
                 <div
                   className={cn(
-                    "flex h-8 items-center gap-0.5 px-4 text-xs text-neutral-500",
+                    "flex h-8 items-center gap-0.5 px-4 text-sm text-neutral-500",
                     selectedKey === item.key
                       ? "bg-neutral-200 text-black dark:bg-neutral-800 dark:text-white"
                       : "hover:bg-neutral-100 dark:hover:bg-neutral-900",
@@ -203,12 +203,12 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                     </div>
                   )}
 
-                  <div className="line-clamp-1 flex-1 text-xs">
+                  <div className="line-clamp-1 flex-1 text-sm">
                     <HighlightText text={item.name} highlight={highlight} />
                     {item.badgeContent && (
                       <span
                         className={cn(
-                          "ml-1 rounded p-0.5 px-1 font-mono text-xs font-normal",
+                          "ml-1 rounded p-0.5 px-1 font-mono text-sm font-normal",
                           item.badgeClassName ?? "bg-red-500 text-white"
                         )}
                       >
