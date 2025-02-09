@@ -96,6 +96,7 @@ export default function ChartSeries({
                       ...draft.params.options.yAxisKeyColors,
                       [key]: color,
                     };
+                    draft.params.options.theme = undefined;
                   });
                 });
               }}
