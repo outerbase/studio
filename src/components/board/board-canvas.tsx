@@ -10,7 +10,7 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import RGL, { WidthProvider } from "react-grid-layout";
 import { DashboardProps } from ".";
 import { buttonVariants } from "../ui/button";
@@ -21,7 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import BoardChart from "./board-chart";
-import { BoardDeleteDialog } from "./board-delete-dialog";
 import "./board-style.css";
 
 export interface BoardChartLayout {
@@ -37,6 +36,7 @@ interface BoardProps {
   onChange: (v: ReactGridLayout.Layout[]) => void;
   editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
   setEditMode?: (mode: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
+  onRemove: (key: string) => void;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -46,8 +46,8 @@ export function BoardCanvas({
   onChange,
   editMode,
   setEditMode,
+  onRemove,
 }: BoardProps) {
-  const [selectedKey, setSelectedKey] = useState<string>("");
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -92,7 +92,7 @@ export function BoardCanvas({
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
       onclick: (key?: string) => {
-        setSelectedKey(key ?? "");
+        onRemove(key || "");
       },
     },
   ];
@@ -106,11 +106,6 @@ export function BoardCanvas({
     },
     [onChange, value.layout]
   );
-
-  const handleDeleteChart = useCallback(() => {
-    onChange(value.layout.filter((f) => f.i !== selectedKey));
-    setSelectedKey("");
-  }, [onChange, selectedKey, value.layout]);
 
   const mapItem: JSX.Element[] = value.layout.map((_, i) => {
     return (
@@ -150,7 +145,7 @@ export function BoardCanvas({
                   buttonVariants({ variant: "default", size: "icon" }),
                   "cancelSelectorName h-6 w-6 cursor-pointer rounded-full"
                 )}
-                onClick={() => setSelectedKey(_.i)}
+                onClick={() => onRemove(_.i)}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -189,18 +184,6 @@ export function BoardCanvas({
 
   return (
     <div>
-      {selectedKey &&
-        value.charts.find((chart) => chart.id === selectedKey) && (
-          <BoardDeleteDialog
-            onClose={() => setSelectedKey("")}
-            value={
-              value.charts.find(
-                (chart) => chart.id === selectedKey
-              ) as unknown as DashboardProps
-            }
-            onDelete={handleDeleteChart}
-          />
-        )}
       <ReactGridLayout
         cols={4}
         rowHeight={220}

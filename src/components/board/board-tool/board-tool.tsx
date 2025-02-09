@@ -1,6 +1,6 @@
 import { ChartLine, ImageUpscale } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { ToggleGroup, ToggleGroupItem } from "../../ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 interface Props {
   editMode: "ADD_CHART" | "REARRANGING_CHART" | null;

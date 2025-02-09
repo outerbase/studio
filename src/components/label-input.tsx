@@ -1,11 +1,12 @@
-import { Input, InputProps } from "./ui/input";
-import { Label } from "./ui/label";
+import { Input, InputProps } from "./orbit/input";
+import { Label } from "./orbit/label";
 
 export default function LabelInput(props: InputProps & { label: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label>{props.label}</Label>
-      <Input {...props} />
+      <Label title={props.label}>
+        <Input {...props} />
+      </Label>
     </div>
   );
 }

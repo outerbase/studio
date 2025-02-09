@@ -9,6 +9,7 @@ import {
 
 interface OuterebaseSessionContextProps {
   isLoading: boolean;
+  token?: string;
   session?: {
     session: OuterbaseAPISession;
     user: OuterbaseAPIUser;
@@ -25,7 +26,7 @@ export function useSession() {
 
 export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("ob-token") : "";
+    typeof window !== "undefined" ? localStorage.getItem("ob-token") || "" : "";
 
   const { data, isLoading } = useSWR(
     token ? "session-" + token : undefined,
@@ -40,7 +41,9 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   );
 
   return (
-    <OuterbaseSessionContext.Provider value={{ session: data, isLoading }}>
+    <OuterbaseSessionContext.Provider
+      value={{ session: data, isLoading, token }}
+    >
       {children}
     </OuterbaseSessionContext.Provider>
   );
