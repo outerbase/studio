@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useMemo } from "react";
+import ChartBackGroundImage from "./chart-background-image";
 import { ChartValue } from "./chart-type";
 import SimpleInput from "./simple-input";
 import SimpleToggle from "./simple-toggle";
@@ -118,7 +119,6 @@ export default function ChartBackgroundSelection({
           options: {
             ...prev.params.options,
             backgroundType: v,
-            backgroundImage: undefined,
           },
         },
       };
@@ -143,6 +143,9 @@ export default function ChartBackgroundSelection({
       </div>
       <div>
         {value.params.options.backgroundType === "gradient" && gradientSection}
+        {value.params.options.backgroundType === "image" && (
+          <ChartBackGroundImage value={value} onChange={setValue} />
+        )}
       </div>
     </div>
   );

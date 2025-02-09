@@ -3,7 +3,7 @@ import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
-import { ChartData, ChartValue } from "./chart-type";
+import { ChartData, ChartValue, outerBaseUrl } from "./chart-type";
 import EchartOptionsBuilder from "./echart-options-builder";
 
 interface OuterbaseChartProps {
@@ -234,13 +234,21 @@ export default function Chart(props: OuterbaseChartProps) {
     backGroundStyle = {
       background: `linear-gradient(45deg, ${startColor}, ${stopColor})`,
     };
+  } else if (props.value.params.options?.backgroundType === "image") {
+    backGroundStyle = {
+      backgroundImage: `url(${outerBaseUrl + props.value.params.options?.backgroundImage})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
   }
 
   return (
     <div className="flex h-full w-full flex-col p-6" style={backGroundStyle}>
-      <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
-      <div className="flex-1">
-        <ChartBody {...props} />
+      <div className="dark:shadow-accent flex flex-1 rounded-lg p-2 shadow-2xl backdrop-blur-lg backdrop-brightness-100 dark:backdrop-brightness-100">
+        <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
+        <div className="flex-1">
+          <ChartBody {...props} />
+        </div>
       </div>
     </div>
   );
