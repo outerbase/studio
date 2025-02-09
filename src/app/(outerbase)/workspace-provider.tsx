@@ -87,7 +87,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
         optimisticData: newData,
       });
     },
-    [mutate]
+    [mutate, data]
   );
 
   const refreshWorkspace = useCallback(async () => {

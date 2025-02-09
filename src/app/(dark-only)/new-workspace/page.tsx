@@ -9,8 +9,6 @@ import useOuterbaseMutation from "@/outerbase-cloud/hook";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
-export const theme = "dark";
-
 function strippedWorkspaceName(value: string) {
   return value
     .replace(
