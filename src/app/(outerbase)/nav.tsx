@@ -96,6 +96,7 @@ function WorkspaceSelector() {
 
         <Button
           variant="ghost"
+          className="font-normal"
           onClick={() => router.push(`/w/local-workspace`)}
           toggled={!currentWorkspace}
         >
@@ -116,7 +117,7 @@ function WorkspaceSelector() {
         ))}
       </div>
       <div className="flex h-full w-1/2 flex-col gap-0.5 overflow-y-auto p-1 text-sm">
-        <label className="text-muted-foreground mt-1 px-3 py-1 text-sm font-bold">
+        <label className="text-muted-foreground mt-1 px-3 py-1 text-sm">
           BASES
         </label>
         {bases.map((base) => {
