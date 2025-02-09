@@ -2,7 +2,13 @@
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent } from "./ui/dialog";
 
-export function DialogProvider() {
+type DialogProviderSlot = "default" | "workspace" | "base";
+
+export function DialogProvider({
+  slot = "default",
+}: {
+  slot?: DialogProviderSlot;
+}) {
   const [open, setOpen] = useState(false);
   const [component, setComponent] = useState<FunctionComponent>();
   const [options, setOptions] = useState<unknown>();
@@ -34,8 +40,15 @@ export function DialogProvider() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.showOuterbaseDialog = showToggle;
-  }, [showToggle]);
+    if (!window.showOuterbaseDialog) {
+      window.showOuterbaseDialog = {};
+    }
+
+    window.showOuterbaseDialog[slot] = showToggle;
+    return () => {
+      delete window.showOuterbaseDialog[slot];
+    };
+  }, [showToggle, slot]);
 
   return (
     <>
@@ -75,12 +88,30 @@ export function createDialog<ParamType = unknown, ReturnType = undefined>(
   component: FunctionComponent<DialogComponentProps<ParamType, ReturnType>>,
   options?: {
     defaultValue?: ReturnType;
+
+    /**
+     * Slot to render the dialog in. If not specified,
+     * it will be rendered to the deepest available slot.
+     */
+    slot?: DialogProviderSlot;
   }
 ) {
   return {
     show: (props: ParamType) => {
       return new Promise<ReturnType>((resolve) => {
-        window.showOuterbaseDialog({
+        if (!window.showOuterbaseDialog) return;
+
+        let slot = options?.slot;
+
+        if (!slot) {
+          if (window.showOuterbaseDialog["base"]) slot = "base";
+          else if (window.showOuterbaseDialog["workspace"]) slot = "workspace";
+          else slot = "default";
+        }
+
+        if (!window.showOuterbaseDialog[slot]) return;
+
+        window.showOuterbaseDialog[slot]({
           component,
           options: props,
           resolve: resolve as unknown as (props: unknown) => void,

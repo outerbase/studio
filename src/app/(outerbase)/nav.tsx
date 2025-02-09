@@ -37,7 +37,7 @@ export function NavigationBar() {
         </Popover>
       </div>
 
-      <div className="flex gap-4 text-sm">
+      <div className="flex gap-4 text-base">
         <Link
           href={`/w/${workspaceId}`}
           className="flex cursor-pointer items-center gap-1"
@@ -61,7 +61,7 @@ export function NavigationBar() {
       </div>
 
       <div className="absolute right-0 flex gap-2 pr-2">
-        <div className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg border px-4 text-sm font-semibold">
+        <div className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg border px-4 text-base font-semibold">
           Feedback
         </div>
 
@@ -117,6 +117,16 @@ function WorkspaceSelector() {
             {workspace.name}
           </Button>
         ))}
+
+        <Button
+          variant="ghost"
+          className="p-4 font-normal"
+          size="sm"
+          as="link"
+          href="/new-workspace"
+        >
+          New Workspace
+        </Button>
       </div>
       <div className="flex h-full w-1/2 flex-col gap-0.5 overflow-y-auto p-1 text-sm">
         <label className="text-muted-foreground mt-1 px-3 py-1 text-sm">

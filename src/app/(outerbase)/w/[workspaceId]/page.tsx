@@ -96,8 +96,8 @@ export default function WorkspaceListPageClient() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <NavigationBar />
 
-      <div className="container mx-auto p-4">
-        <div className="mb-8 flex gap-4">
+      <div className="container mx-auto mt-10 p-4">
+        <div className="mb-12 flex gap-4">
           <div className="flex-1">
             <Input
               preText={<MagnifyingGlass size={16} className="mr-2" />}

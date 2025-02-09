@@ -3,8 +3,8 @@
 import PageLoading from "@/components/page-loading";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useSession } from "../session-provider";
-import { useWorkspaces } from "../workspace-provider";
+import { useSession } from "./session-provider";
+import { useWorkspaces } from "./workspace-provider";
 
 export default function OuterbaseMainPage() {
   const { token, isLoading, session } = useSession();

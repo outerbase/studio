@@ -14,7 +14,7 @@ export default function WorkspaceBillingPage() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <NavigationBar />
 
-      <div className="container mt-18 flex flex-col">
+      <div className="container mt-10 flex flex-col p-4">
         <h1 className="text-lg font-bold">Workspace settings</h1>
 
         {currentWorkspace ? (

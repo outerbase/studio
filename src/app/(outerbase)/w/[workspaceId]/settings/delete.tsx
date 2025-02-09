@@ -33,7 +33,7 @@ function DeleteWorkspaceDialog({
       .finally(() => {
         setLoading(false);
       });
-  }, [name, close]);
+  }, [close, workspace]);
 
   return (
     <>
@@ -63,6 +63,7 @@ function DeleteWorkspaceDialog({
 
       <DialogFooter>
         <Button
+          disabled={name !== workspace.name}
           variant="destructive"
           loading={loading}
           onClick={onDeletedClicked}
@@ -84,7 +85,7 @@ const deleteWorkspaceDialog = createDialog<
   ({ workspace, close }) => {
     return <DeleteWorkspaceDialog workspace={workspace} close={close} />;
   },
-  { defaultValue: false }
+  { defaultValue: false, slot: "workspace" }
 );
 
 export default function WorkspaceDeleteSection({
@@ -98,9 +99,9 @@ export default function WorkspaceDeleteSection({
   const onDeleteClicked = useCallback(async () => {
     const success = await deleteWorkspaceDialog.show({ workspace });
     if (success) {
-      refreshWorkspace().then(() => router.push("/w"));
+      refreshWorkspace().then(() => router.push("/"));
     }
-  }, [workspace]);
+  }, [workspace, router, refreshWorkspace]);
 
   return (
     <div className="mt-12 flex flex-col gap-4">
