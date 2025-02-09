@@ -19,6 +19,7 @@ export type SingleValueFormat =
   | "yen";
 
 interface ChartOptions {
+  backgroundImage?: string;
   foreground?: string;
   gradientStop?: string;
   gradientStart?: string;

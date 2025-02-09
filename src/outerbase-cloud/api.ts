@@ -113,6 +113,28 @@ export async function deleteOuterbaseDashboard(
   );
 }
 
+export async function updateOuterbaseDashboard(
+  workspaceId: string,
+  dashboardId: string,
+  data: any
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`,
+    "PUT",
+    data
+  );
+}
+
+export async function deleteOuterbaseDashboardChart(
+  workspaceId: string,
+  chartId: string
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/chart/${chartId}`,
+    "DELETE"
+  );
+}
+
 export async function runOuterbaseQueryRaw(
   workspaceId: string,
   sourceId: string,

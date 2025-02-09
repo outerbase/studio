@@ -1,14 +1,14 @@
 "use client";
 
-import { ButtonGroup, ButtonGroupItem } from "@/components/button-group";
-import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
+import { Button } from "@/components/orbit/button";
+import { Input } from "@/components/orbit/input";
+import { MenuBar } from "@/components/orbit/menu-bar";
 import ResourceCard from "@/components/resource-card";
 import {
   getDatabaseFriendlyName,
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,17 +19,22 @@ import { timeSince } from "@/lib/utils-datetime";
 import { getOuterbaseDashboardList } from "@/outerbase-cloud/api";
 import {
   CalendarDots,
+  CaretDown,
+  Eye,
+  MagnifyingGlass,
   SortAscending,
   SortDescending,
+  Users,
 } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { NavigationBar } from "../../navigation";
+import { NavigationBar } from "../../nav";
 import { useWorkspaces } from "../../workspace-provider";
 import { deleteBaseDialog } from "./dialog-base-delete";
 import { createBoardDialog } from "./dialog-board-create";
 import { deleteBoardDialog } from "./dialog-board-delete";
+import useRedirectValidWorkspace from "./redirect-valid-workspace";
 
 interface ResourceItem {
   id: string;
@@ -43,6 +48,9 @@ export default function WorkspaceListPageClient() {
   const router = useRouter();
   const { currentWorkspace, refreshWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  useRedirectValidWorkspace();
 
   const { data: boards, mutate } = useSWR(
     `/workspace/${workspaceId}/boards`,
@@ -88,56 +96,63 @@ export default function WorkspaceListPageClient() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <NavigationBar />
 
-      <div className="container mx-auto p-4">
-        <div className="mb-8">
-          <Toolbar>
-            <ButtonGroup>
-              <ButtonGroupItem>All</ButtonGroupItem>
-              <ButtonGroupItem>Bases</ButtonGroupItem>
-              <ButtonGroupItem>Boards</ButtonGroupItem>
-            </ButtonGroup>
-            <ButtonGroup>
-              <ButtonGroupItem>
-                <SortAscending size={16} />
-              </ButtonGroupItem>
-              <ButtonGroupItem>
-                <SortDescending size={16} />
-              </ButtonGroupItem>
-              <ButtonGroupItem>
-                <CalendarDots size={16} />
-              </ButtonGroupItem>
-              <ButtonGroupItem>
-                <CalendarDots size={16} />
-              </ButtonGroupItem>
-              <ButtonGroupItem>
-                <CalendarDots size={16} />
-              </ButtonGroupItem>
-            </ButtonGroup>
+      <div className="container mx-auto mt-10 p-4">
+        <div className="mb-12 flex gap-4">
+          <div className="flex-1">
+            <Input
+              preText={<MagnifyingGlass size={16} className="mr-2" />}
+              size="lg"
+              placeholder="Search resources..."
+              onValueChange={() => {}}
+            />
+          </div>
 
-            <ToolbarFiller />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button>New Resource</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>New Base</DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={async () => {
-                    const createdBoard = await createBoardDialog.show({
-                      workspaceId,
-                    });
+          <MenuBar
+            size="lg"
+            items={[
+              { value: "all", content: "All" },
+              { value: "bases", content: "Bases" },
+              { value: "boards", content: "Boards" },
+            ]}
+            onChange={setTypeFilter}
+            value={typeFilter}
+          />
 
-                    if (createdBoard) {
-                      mutate();
-                      router.push(`/w/${workspaceId}/board/${createdBoard.id}`);
-                    }
-                  }}
-                >
-                  New Board
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </Toolbar>
+          <MenuBar
+            size="lg"
+            items={[
+              { value: "all", content: <SortAscending size={16} /> },
+              { value: "recent", content: <SortDescending size={16} /> },
+              { value: "updated", content: <CalendarDots size={16} /> },
+              { value: "created", content: <Eye size={16} /> },
+              { value: "name", content: <Users size={16} /> },
+            ]}
+          />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="lg" variant="primary">
+                New Resource <CaretDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>New Base</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  const createdBoard = await createBoardDialog.show({
+                    workspaceId,
+                  });
+
+                  if (createdBoard) {
+                    mutate();
+                    router.push(`/w/${workspaceId}/board/${createdBoard.id}`);
+                  }
+                }}
+              >
+                New Board
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">

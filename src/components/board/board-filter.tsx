@@ -22,18 +22,19 @@ import {
   BoardFilterProps,
   DEFAULT_DATE_FILTER,
 } from "./board-filter-dialog";
-import { BoardTool } from "./board-tool";
-import { BoardToolbar } from "./board-toolbar";
+import { BoardTool } from "./board-tool/board-tool";
+import { BoardToolbar } from "./board-tool/board-toolbar";
 
 interface Props {
-  name: string;
   filters: BoardFilterProps[];
   onFilters: (f: BoardFilterProps[]) => void;
   editMode: "ADD_CHART" | "REARRANGING_CHART" | null;
-  setEditMode: (v: "ADD_CHART" | "REARRANGING_CHART") => void;
+  onChangeEditMode: (v: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
   interval: number;
-  setInterval: (v: number) => void;
+  onChangeInterval: (v: number) => void;
   onRefresh?: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 export function BoardFilter(props: Props) {
@@ -210,14 +211,20 @@ export function BoardFilter(props: Props) {
 
   return (
     <>
-      <BoardTool editMode={props.editMode} setEditMode={props.setEditMode} />
+      <BoardTool
+        editMode={props.editMode}
+        setEditMode={props.onChangeEditMode}
+      />
       <div className="sticky top-0 z-50 bg-neutral-100 px-1 pt-0 pb-2 dark:bg-neutral-950">
         <BoardToolbar
           show={show}
           onChangeShow={setShow}
           interval={props.interval}
-          onChange={props.setInterval}
+          onChange={props.onChangeInterval}
           onRefresh={props.onRefresh}
+          mode={props.editMode}
+          onSave={props.onSave}
+          onCancel={props.onCancel}
         />
         <div className={show ? "px-2 pt-4" : "hidden"}>
           {open && selectIndex !== undefined && (

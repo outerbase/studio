@@ -40,7 +40,7 @@ const testingDialog = createDialog<{ color: string }, string>(
       </>
     );
   },
-  "close"
+  { defaultValue: "close" }
 );
 
 export function StorybookCreateDialogExample() {

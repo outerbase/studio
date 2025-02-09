@@ -39,7 +39,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         {children}
-        <DialogProvider />
+        <DialogProvider slot="default" />
       </body>
     </html>
   );

@@ -1,5 +1,13 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
-import { createContext, PropsWithChildren, useContext } from "react";
+import { noop } from "lodash";
+import {
+  createContext,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useContext,
+} from "react";
+import { BoardEditorMode } from ".";
 
 interface BoardContextSettingProps {
   autoRefresh: string[];
@@ -10,10 +18,12 @@ interface BoardContextProps {
   sources?: BoardSourceDriver;
   setting?: BoardContextSettingProps;
   lastRunTimestamp: number;
+  setBoardMode: Dispatch<SetStateAction<BoardEditorMode>>;
 }
 
 const BoardContext = createContext<BoardContextProps>({
   lastRunTimestamp: 0,
+  setBoardMode: noop,
 });
 
 export function useBoardContext() {
@@ -22,13 +32,9 @@ export function useBoardContext() {
 
 export function BoardProvider({
   children,
-  sources,
-  lastRunTimestamp,
-  setting,
+  ...value
 }: PropsWithChildren<BoardContextProps>) {
   return (
-    <BoardContext.Provider value={{ sources, setting, lastRunTimestamp }}>
-      {children}
-    </BoardContext.Provider>
+    <BoardContext.Provider value={value}>{children}</BoardContext.Provider>
   );
 }

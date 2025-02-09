@@ -23,11 +23,14 @@ interface OuterbaseIPC {
 declare global {
   interface Window {
     outerbaseIpc?: OuterbaseIPC;
-    showOuterbaseDialog: (props: {
-      component: FunctionComponent;
-      options: unknown;
-      resolve: (props: unknown) => void;
-      defaultCloseValue: unknown;
-    }) => void;
+    showOuterbaseDialog: Record<
+      string,
+      (props: {
+        component: FunctionComponent;
+        options: unknown;
+        resolve: (props: unknown) => void;
+        defaultCloseValue: unknown;
+      }) => void
+    >;
   }
 }

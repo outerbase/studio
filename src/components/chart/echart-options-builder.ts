@@ -108,9 +108,13 @@ export default class EchartOptionsBuilder {
       };
     }
 
-    const xAxisLabel = !this.chartValue.params.options.xAxisLabel
+    let xAxisLabel = !this.chartValue.params.options.xAxisLabel
       ? this.chartValue.params.options.xAxisKey
       : this.chartValue.params.options.xAxisLabel;
+
+    xAxisLabel = this.chartValue.params.options.xAxisLabelHidden
+      ? ""
+      : xAxisLabel;
 
     let yaxisLabel = !this.chartValue.params.options.yAxisLabel
       ? this.chartValue.params.options.yAxisKeys[0]
@@ -148,7 +152,7 @@ export default class EchartOptionsBuilder {
         containLabel: true,
       },
       xAxis: {
-        show: !this.chartValue.params.options.xAxisLabelHidden,
+        show: true,
         type:
           this.chartValue.type === "bar"
             ? "value"
