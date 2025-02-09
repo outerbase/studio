@@ -12,12 +12,10 @@ const PRESET_IMAGES = [
 ];
 
 interface ChartBackgroundImageProps {
-  value: ChartValue;
   onChange: Dispatch<SetStateAction<ChartValue>>;
 }
 
 export default function ChartBackGroundImage({
-  value,
   onChange,
 }: ChartBackgroundImageProps) {
   return (

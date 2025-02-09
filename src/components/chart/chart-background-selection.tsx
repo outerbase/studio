@@ -116,7 +116,7 @@ export default function ChartBackgroundSelection({
       <div>
         {value.params.options.backgroundType === "gradient" && gradientSection}
         {value.params.options.backgroundType === "image" && (
-          <ChartBackGroundImage value={value} onChange={setValue} />
+          <ChartBackGroundImage onChange={setValue} />
         )}
       </div>
     </div>

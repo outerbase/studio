@@ -48,7 +48,7 @@ interface ChartParams {
   type?: ChartType;
   model?: string;
   apiKey?: string;
-  layers?: ChartLayer[];
+  layers: ChartLayer[];
   options: ChartOptions;
   source_id?: string;
   created_at?: string;

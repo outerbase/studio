@@ -1,5 +1,4 @@
 "use client";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { SketchPicker } from "react-color";
 import { ThemeColors, THEMES } from "./chart-type";
@@ -28,7 +27,6 @@ export default function SimpleColorPicker({
   onChange,
   onThemeChange,
 }: SimpleColorPickerProps) {
-  const { resolvedTheme, forcedTheme } = useTheme();
   const [selectedColor, setSelectedColor] = useState<string | "">(
     selected || ""
   );
