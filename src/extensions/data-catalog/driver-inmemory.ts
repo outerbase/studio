@@ -1,8 +1,10 @@
+import {
+  OuterbaseDataCatalogComment,
+  OuterbaseDataCatalogDefinition,
+  OuterbaseDataCatalogVirtualColumnInput,
+} from "@/outerbase-cloud/api-type";
 import DataCatalogDriver, {
-  DataCatalogModelColumn,
-  DataCatalogModelColumnInput,
   DataCatalogModelTable,
-  DataCatalogModelTableInput,
   DataCatalogSchemas,
   DataCatalogTermDefinition,
 } from "./driver";
@@ -12,13 +14,14 @@ interface DataCatalogInmemoryDriverOptions {
 }
 
 export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
-  private schemas: DataCatalogSchemas;
   protected options: DataCatalogInmemoryDriverOptions;
-  private definitions: DataCatalogTermDefinition[];
+  private schemas: DataCatalogSchemas;
+  private definitions: OuterbaseDataCatalogDefinition[];
+  private subscribers: Set<() => void> = new Set();
 
   constructor(
     schemas: DataCatalogSchemas,
-    definitions: DataCatalogTermDefinition[],
+    definitions: OuterbaseDataCatalogDefinition[],
     options: DataCatalogInmemoryDriverOptions
   ) {
     this.schemas = schemas;
@@ -34,7 +37,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
 
   async load(): Promise<{
     schemas: DataCatalogSchemas;
-    definitions: DataCatalogTermDefinition[];
+    definitions: OuterbaseDataCatalogDefinition[];
   }> {
     await this.delay();
 
@@ -47,52 +50,53 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
   async updateColumn(
     schemaName: string,
     tableName: string,
-    columnName: string,
-    data: DataCatalogModelColumnInput
-  ): Promise<DataCatalogModelColumn> {
+    data: OuterbaseDataCatalogVirtualColumnInput,
+    commentId?: string,
+    isVirtual?: boolean
+  ): Promise<OuterbaseDataCatalogComment> {
     await this.delay();
 
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
-    const normalizedColumnName = columnName.toLowerCase();
 
-    if (!this.schemas[normalizedSchemaName]) {
-      this.schemas[normalizedSchemaName] = {};
+    if (
+      this.schemas[normalizedSchemaName] &&
+      this.schemas[normalizedSchemaName][normalizedTableName]
+    ) {
+      const table = this.schemas[normalizedSchemaName][normalizedTableName];
+
+      if (isVirtual) {
+        const index = table.virtualJoin.findIndex((vc) => vc.id === commentId);
+        if (index > -1) {
+          table.virtualJoin[index] = {
+            ...table.virtualJoin[index],
+            ...data,
+          };
+        } else {
+          table.virtualJoin?.push({
+            ...(data as unknown as OuterbaseDataCatalogComment),
+          });
+        }
+      } else {
+        table.columns[data.column] = {
+          ...table.columns[data.column],
+          ...data,
+        };
+      }
+      // notify update driver
+      this.notify();
     }
 
-    const schemas = this.schemas[normalizedSchemaName];
-
-    if (!schemas[normalizedTableName]) {
-      schemas[normalizedTableName] = {
-        schemaName: normalizedSchemaName,
-        tableName: normalizedTableName,
-        columns: {},
-        definition: "",
-      };
-    }
-
-    const table = schemas[normalizedTableName];
-    if (!table.columns[normalizedColumnName]) {
-      table.columns[normalizedColumnName] = {
-        name: normalizedColumnName,
-        definition: "",
-        samples: [],
-        hideFromEzql: false,
-      };
-    }
-
-    const column = table.columns[normalizedColumnName];
-    table.columns[normalizedColumnName] = { ...column, ...data };
-    return table.columns[normalizedColumnName];
+    return data as unknown as OuterbaseDataCatalogComment;
   }
 
   async updateTable(
     schemaName: string,
     tableName: string,
-    data: DataCatalogModelTableInput
-  ): Promise<DataCatalogModelTable> {
+    data: OuterbaseDataCatalogVirtualColumnInput,
+    commentId: string
+  ): Promise<DataCatalogModelTable | undefined> {
     await this.delay();
-
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
 
@@ -107,16 +111,20 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
         schemaName: normalizedSchemaName,
         tableName: normalizedTableName,
         columns: {},
-        definition: "",
         virtualJoin: [],
       };
     }
     const table = schemas[normalizedTableName];
-    schemas[normalizedTableName] = {
+
+    this.schemas[schemaName][tableName] = {
       ...table,
-      ...data,
+      metadata: {
+        ...data,
+        ...(commentId ? { commentId } : {}),
+      } as unknown as OuterbaseDataCatalogComment,
     };
 
+    this.notify();
     return schemas[normalizedTableName];
   }
 
@@ -124,10 +132,29 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     schemaName: string,
     tableName: string,
     columnName: string
-  ): DataCatalogModelColumn | undefined {
+  ): OuterbaseDataCatalogComment | undefined {
     const normalizedColumnName = columnName.toLowerCase();
     const table = this.getTable(schemaName, tableName);
     return table?.columns[normalizedColumnName];
+  }
+  async deleteVirtualColumn(
+    schemaName: string,
+    tableName: string,
+    id: string
+  ): Promise<boolean> {
+    const normalizedSchemaName = schemaName.toLowerCase();
+    const normalizedTableName = tableName.toLowerCase();
+
+    if (
+      this.schemas[normalizedSchemaName] &&
+      this.schemas[normalizedSchemaName][normalizedTableName]
+    ) {
+      const table = this.schemas[normalizedSchemaName][normalizedTableName];
+      table.virtualJoin = table.virtualJoin?.filter((vc) => vc.id !== id) || [];
+      // notify update driver
+      this.notify();
+    }
+    return true;
   }
 
   getTable(
@@ -150,7 +177,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     return table;
   }
 
-  getTermDefinitions(): DataCatalogTermDefinition[] {
+  getTermDefinitions(): OuterbaseDataCatalogDefinition[] {
     if (!this.definitions) {
       return [];
     }
@@ -173,7 +200,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     if (existingIndex !== -1) {
       definitions[existingIndex] = { ...definitions[existingIndex], ...data };
     } else {
-      definitions.unshift(data);
+      definitions.unshift(data as OuterbaseDataCatalogDefinition);
     }
 
     return data;
@@ -189,5 +216,19 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     this.definitions = definitions.filter((term) => term.id !== id);
 
     return definitions.length < initialLength;
+  }
+
+  addEventListener(callback: () => void) {
+    this.subscribers.add(callback);
+    return () => this.removeEventListener(callback);
+  }
+
+  removeEventListener(callback: () => void) {
+    this.subscribers.delete(callback);
+  }
+
+  // Notify all subscribers
+  private notify() {
+    this.subscribers.forEach((callback) => callback());
   }
 }

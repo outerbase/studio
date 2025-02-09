@@ -3,6 +3,8 @@ import { ColumnHeader, ResultStat } from "@outerbase/sdk-transform";
 export interface OuterbaseDatabaseConfig {
   workspaceId: string;
   sourceId: string;
+  baseId: string;
+  token: string;
 }
 
 export class OuterbaseAPIError extends Error {
@@ -164,4 +166,96 @@ export interface OuterbaseAPIDashboardListResponse {
 
 export interface OuterbaseAPIQueryListResponse {
   items: OuterbaseAPIQuery[];
+}
+
+export interface OuterbaseDataCatalogFlag {
+  isActive: boolean;
+  isVirtualKey: boolean;
+}
+export interface OuterbaseDataCatalogModelColumn {
+  character_maximum_length: string;
+  default: string;
+  is_nullable: boolean;
+  model: string;
+  name: string;
+  position: number;
+  type: string;
+}
+
+export interface OuterbaseDataCatalogModelConstraint {
+  column: string;
+  model: string;
+  name: string;
+  table: string;
+  type: string;
+  columns: OuterbaseDataCatalogModelColumn[];
+}
+
+export interface OuterbaseDataCatalogSchemas {
+  model: string;
+  name: string;
+  schema: string;
+  type: string;
+  columns: OuterbaseDataCatalogModelColumn[];
+  constraints: OuterbaseDataCatalogModelConstraint[];
+}
+
+export interface OuterbaseDataCatalogComment {
+  alias: string | null;
+  body: string;
+  column: string;
+  created_at: string;
+  flags: OuterbaseDataCatalogFlag;
+  id: string;
+  model: string;
+  sample_data: string;
+  schema: string;
+  source_id: string;
+  table: string;
+  unit: string | null;
+  updated_at: string;
+  virtualKeyColumn: string;
+  virtualKeySchema: string;
+  virtualKeyTable: string;
+}
+
+export interface OuterbaseDataCatalogResponse<T = unknown> {
+  items: T;
+  count: number;
+  order: { field: string; dir: string };
+  pagination: { page: number; size: number; total: number };
+}
+export interface OuterbaseDataCatalogDefinition {
+  connection_id: string | null;
+  createdAt: string;
+  created_at: string;
+  created_user_id: string;
+  definition: string;
+  id: string;
+  last_used_at: null;
+  model: string;
+  name: string;
+  otherNames: string;
+  updatedAt: string;
+  updated_at: string;
+  updated_by_user_id: string;
+  workspace_id: string;
+}
+
+export interface OuterbaseDefinitionInput {
+  name: string;
+  definition: string;
+  otherNames?: string;
+}
+
+export interface OuterbaseDataCatalogVirtualColumnInput {
+  body: string;
+  column: string;
+  flags: OuterbaseDataCatalogFlag;
+  sample_data: string;
+  schema: string;
+  table: string;
+  virtual_key_column: string;
+  virtual_key_schema: string;
+  virtual_key_table: string;
 }

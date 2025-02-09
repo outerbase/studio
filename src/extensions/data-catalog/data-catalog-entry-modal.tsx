@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import DataCatalogDriver, { DataCatalogTermDefinition } from "./driver";
@@ -18,24 +19,22 @@ import DataCatalogDriver, { DataCatalogTermDefinition } from "./driver";
 interface Props {
   driver?: DataCatalogDriver;
   open: boolean;
-  onSuccess: () => void;
   onClose: (open: boolean) => void;
-  selectedTermDefinition?: DataCatalogTermDefinition;
+  definition?: OuterbaseDataCatalogDefinition;
 }
 
 export function DataCatalogEntryModal({
   open,
   onClose,
   driver,
-  onSuccess,
-  selectedTermDefinition,
+  definition,
 }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<DataCatalogTermDefinition>({
     id: "",
     name: "",
-    otherName: "",
+    otherNames: "",
     definition: "",
   });
 
@@ -46,39 +45,39 @@ export function DataCatalogEntryModal({
     setFormData({
       id: "",
       name: "",
-      otherName: "",
+      otherNames: "",
       definition: "",
     });
   }, [onClose]);
 
   useEffect(() => {
-    if (selectedTermDefinition) {
-      setFormData(selectedTermDefinition);
+    if (definition) {
+      setFormData(definition);
     } else {
       clear();
     }
-  }, [selectedTermDefinition, clear]);
+  }, [definition, clear]);
 
   const saveTermDefinition = useCallback(() => {
     setLoading(true);
     const data = {
       ...formData,
-      id: selectedTermDefinition?.id || String(Date.now() * 1000), // Use existing ID if editing
+      id: definition?.id || undefined,
     };
 
     driver
       ?.updateTermDefinition(data)
-      .then(() => onSuccess())
+      .then()
       .finally(() => clear());
-  }, [formData, driver, onSuccess, clear, selectedTermDefinition]);
+  }, [formData, driver, clear, definition]);
 
   function onDelete() {
-    if (!selectedTermDefinition) return;
+    if (!definition) return;
 
     setDeleting(true);
     driver
-      ?.deleteTermDefinition(selectedTermDefinition.id)
-      .then(() => onSuccess())
+      ?.deleteTermDefinition(definition.id)
+      .then()
       .finally(() => clear());
   }
 
@@ -96,12 +95,10 @@ export function DataCatalogEntryModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {selectedTermDefinition ? "Edit Term" : "Add Term"}
-          </DialogTitle>
+          <DialogTitle>{definition ? "Edit Term" : "Add Term"}</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          {selectedTermDefinition
+          {definition
             ? "Modify the existing term definition."
             : "Add terms to your Data Dictionary to help your team and AI understand important business terminology."}
         </DialogDescription>
@@ -120,11 +117,11 @@ export function DataCatalogEntryModal({
           <div className="items-center gap-4">
             <Label className="text-right text-xs">Other Names</Label>
             <Input
-              value={formData.otherName}
+              value={formData.otherNames}
               className="col-span-3"
               placeholder="Add other names"
               onChange={(e) =>
-                onChangeValue(e.currentTarget.value, "otherName")
+                onChangeValue(e.currentTarget.value, "otherNames")
               }
             />
           </div>
@@ -150,9 +147,9 @@ export function DataCatalogEntryModal({
             type="submit"
           >
             {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-            {selectedTermDefinition ? "Save Change" : "Add Entry"}
+            {definition ? "Save Change" : "Add Entry"}
           </Button>
-          {selectedTermDefinition && (
+          {definition && (
             <Button
               disabled={deleting}
               onClick={onDelete}

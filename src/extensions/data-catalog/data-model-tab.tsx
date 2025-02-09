@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useConfig } from "@/context/config-provider";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTableSchema } from "@/drivers/base-driver";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DataCatalogExtension from ".";
 import DataCatalogTableAccordion from "./data-catalog-table-accordion";
 
@@ -16,13 +16,13 @@ export default function DataCatalogModelTab() {
   const [selectedSchema, setSelectedSchema] = useState(currentSchemaName);
 
   const { extensions } = useConfig();
-
+  const [schemas, setSchemas] = useState<DatabaseTableSchema[]>([]);
   const dataCatalogExtension =
     extensions.getExtension<DataCatalogExtension>("data-catalog");
 
   const driver = dataCatalogExtension?.driver;
 
-  const currentSchema = useMemo(() => {
+  const onRefresh = useCallback(() => {
     if (!selectedSchema) return [];
     const result = (schema[selectedSchema] || [])
       .filter((table) => table.type === "table")
@@ -30,8 +30,31 @@ export default function DataCatalogModelTab() {
       .filter(Boolean) as DatabaseTableSchema[];
 
     result.sort((a, b) => a.tableName!.localeCompare(b.tableName!));
-    return result;
+
+    setSchemas(result);
   }, [schema, selectedSchema]);
+
+  useEffect(() => {
+    if (!driver) return;
+
+    const onRefresh = () => {
+      if (!selectedSchema) return [];
+      const result = (schema[selectedSchema] || [])
+        .filter((table) => table.type === "table")
+        .map((table) => table.tableSchema)
+        .filter(Boolean) as DatabaseTableSchema[];
+
+      result.sort((a, b) => a.tableName!.localeCompare(b.tableName!));
+
+      setSchemas(result);
+    };
+
+    onRefresh();
+
+    const unsubscribe = driver.addEventListener(onRefresh);
+
+    return () => unsubscribe;
+  }, [onRefresh, driver, schema, selectedSchema]);
 
   if (!driver) {
     return <div>Missing driver</div>;
@@ -66,7 +89,7 @@ export default function DataCatalogModelTab() {
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-        {currentSchema.map((table) => (
+        {schemas.map((table) => (
           <DataCatalogTableAccordion
             search={search}
             key={table.tableName}

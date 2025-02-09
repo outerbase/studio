@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import {
   Edit3,
   LucideMoreHorizontal,
@@ -14,23 +15,52 @@ import {
   ToggleRightIcon,
   Trash,
 } from "lucide-react";
-import { useState } from "react";
-import { VirtualJoinColumn as IVirtualJoinColumn } from "./driver";
+import { useCallback, useState } from "react";
 
-interface Props extends IVirtualJoinColumn {
+interface Props {
+  data: OuterbaseDataCatalogComment;
   onDeletRelatinship: () => void;
   onEditRelationship: () => void;
+  onToggleHideFromEzql: (
+    column?: OuterbaseDataCatalogComment,
+    cb?: () => void,
+    isVirtual?: boolean
+  ) => void;
 }
 
 export default function VirtualJoinColumn({
-  flags,
-  virtualKeyColumn,
-  virtualKeySchema,
-  virtualKeyTable,
+  data,
+  onToggleHideFromEzql,
   onEditRelationship,
   onDeletRelatinship,
 }: Props) {
-  const [isActive, setIsActive] = useState<boolean>(flags?.isActive || true);
+  const [loading, setLoading] = useState(false);
+  const [isActive, setIsActive] = useState<boolean>(() => {
+    if (data.flags) {
+      return data?.flags.isActive;
+    }
+    return true;
+  });
+
+  const handleClickToggle = useCallback(() => {
+    setIsActive(!isActive);
+    setLoading(true);
+    onToggleHideFromEzql(
+      {
+        ...data,
+        flags: {
+          ...data.flags,
+          isActive: !isActive,
+        },
+      },
+      // call me back when finish update column
+      () => {
+        setLoading(false);
+      },
+      true
+    );
+  }, [data]);
+
   return (
     <div
       className={cn(
@@ -39,7 +69,8 @@ export default function VirtualJoinColumn({
       )}
     >
       <Button
-        onClick={() => setIsActive(!isActive)}
+        disabled={loading}
+        onClick={handleClickToggle}
         size={"icon"}
         variant="ghost"
       >
@@ -50,9 +81,12 @@ export default function VirtualJoinColumn({
         )}
       </Button>
 
-      <div className="flex w-[150px] items-center p-2">{virtualKeyColumn}</div>
-      <div className="flex w-[150px] items-center p-2">{virtualKeySchema}</div>
-      <div className="flex w-[150px] items-center p-2">{virtualKeyTable}</div>
+      <div className="flex w-[150px] items-center p-2">
+        Virtual Relationship
+      </div>
+      <div className="flex w-[150px] items-center p-2">{data.column}</div>
+      <div className="flex w-[150px] items-center p-2">{data.table}</div>
+      <div className="flex w-[150px] items-center p-2">{data.body}</div>
       <div className="flex-1" />
       {
         //=================

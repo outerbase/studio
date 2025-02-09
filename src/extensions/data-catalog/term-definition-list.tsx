@@ -1,9 +1,9 @@
+import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { Edit3 } from "lucide-react";
-import { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
-  onSelect: (item: DataCatalogTermDefinition) => void;
-  data: DataCatalogTermDefinition[];
+  onSelect: (item: OuterbaseDataCatalogDefinition) => void;
+  data: OuterbaseDataCatalogDefinition[];
 }
 export default function TermDefinitionList({ data, onSelect }: Props) {
   return (
@@ -18,9 +18,9 @@ export default function TermDefinitionList({ data, onSelect }: Props) {
             <div className="gap-5">
               <div className="text-lg font-bold">{item.name}</div>
               <div>{item.definition}</div>
-              {item.otherName && (
+              {item.otherNames && (
                 <div className="mt-3 text-sm">
-                  Also known as: {item.otherName}
+                  Also known as: {item.otherNames}
                 </div>
               )}
             </div>
