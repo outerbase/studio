@@ -1,7 +1,6 @@
 "use client";
 import { getOuterbaseWorkspace } from "@/outerbase-cloud/api";
 import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
-import { noop } from "lodash";
 import { useParams } from "next/navigation";
 import { createContext, PropsWithChildren, useContext, useMemo } from "react";
 import useSWR from "swr";
@@ -10,9 +9,9 @@ import { useSession } from "./session-provider";
 const WorkspaceContext = createContext<{
   workspaces: OuterbaseAPIWorkspace[];
   currentWorkspace?: OuterbaseAPIWorkspace;
-  refreshWorkspace: () => void;
+  refreshWorkspace: () => Promise<void>;
   loading: boolean;
-}>({ workspaces: [], loading: true, refreshWorkspace: noop });
+}>({ workspaces: [], loading: true, refreshWorkspace: async () => {} });
 
 export function useWorkspaces() {
   return useContext(WorkspaceContext);
@@ -51,7 +50,13 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
         workspaces: data?.items || [],
         loading: isLoading,
         currentWorkspace,
-        refreshWorkspace: mutate,
+        refreshWorkspace: async () => {
+          const newWorkspceList = await getOuterbaseWorkspace();
+          mutate(newWorkspceList, {
+            revalidate: true,
+            optimisticData: newWorkspceList,
+          });
+        },
       }}
     >
       {children}

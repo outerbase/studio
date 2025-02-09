@@ -19,7 +19,7 @@ export function NavigationBar() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
   return (
-    <div className="bg-netural-100 dark:bg-background relative sticky top-0 z-50 flex h-14 items-center justify-center gap-2 px-2">
+    <div className="dark:bg-background relative sticky top-0 z-20 flex h-14 items-center justify-center gap-2 bg-neutral-50 px-2">
       <div className="text-primary absolute left-0 flex h-14 items-center pl-2">
         <Link href={`/w/${workspaceId}`}>
           <OuterbaseIcon className="h-8 w-8" />
@@ -96,7 +96,8 @@ function WorkspaceSelector() {
 
         <Button
           variant="ghost"
-          className="font-normal"
+          size="sm"
+          className="p-4 font-normal"
           onClick={() => router.push(`/w/local-workspace`)}
           toggled={!currentWorkspace}
         >
@@ -110,7 +111,8 @@ function WorkspaceSelector() {
             onMouseEnter={() => setSelectedWorkspaceId(workspace.short_name)}
             variant="ghost"
             toggled={currentWorkspace?.id === workspace.id}
-            className="font-normal"
+            className="p-4 font-normal"
+            size="sm"
           >
             {workspace.name}
           </Button>
@@ -127,7 +129,8 @@ function WorkspaceSelector() {
             <Button
               key={base.id}
               variant="ghost"
-              className="font-normal"
+              className="p-4 font-normal"
+              size="sm"
               onClick={() =>
                 router.push(`/w/${selectedWorkspaceId}/${base.short_name}`, {})
               }

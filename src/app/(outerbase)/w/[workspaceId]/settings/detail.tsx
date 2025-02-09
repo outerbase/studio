@@ -22,13 +22,14 @@ export default function WorkspaceDetailSection({
     setLoading(true);
     updateOuterbaseWorkspace(workspace.id, { short_name: shortName, name })
       .then(() => {
-        refreshWorkspace();
-        if (workspace.short_name !== shortName) {
-          router.push(`/w/${shortName}/settings`);
-        }
+        refreshWorkspace().then(() => {
+          if (workspace.short_name !== shortName) {
+            router.push(`/w/${shortName}/settings`);
+          }
+          setLoading(false);
+        });
       })
-      .catch()
-      .finally(() => setLoading(false));
+      .catch(() => setLoading(false));
   }, [shortName, name, workspace, router, refreshWorkspace]);
 
   return (

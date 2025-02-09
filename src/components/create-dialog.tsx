@@ -73,7 +73,9 @@ type DialogComponentProps<
 
 export function createDialog<ParamType = unknown, ReturnType = undefined>(
   component: FunctionComponent<DialogComponentProps<ParamType, ReturnType>>,
-  defaultCloseValue?: ReturnType
+  options?: {
+    defaultValue?: ReturnType;
+  }
 ) {
   return {
     show: (props: ParamType) => {
@@ -82,7 +84,7 @@ export function createDialog<ParamType = unknown, ReturnType = undefined>(
           component,
           options: props,
           resolve: resolve as unknown as (props: unknown) => void,
-          defaultCloseValue,
+          defaultCloseValue: options?.defaultValue,
         });
       });
     },

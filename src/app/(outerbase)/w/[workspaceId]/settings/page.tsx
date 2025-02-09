@@ -2,10 +2,10 @@
 import { NavigationBar } from "@/app/(outerbase)/nav";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import { Loader } from "@/components/orbit/loader";
+import WorkspaceDeleteSection from "./delete";
 import WorkspaceDetailSection from "./detail";
 import WorkspaceGatewaySection from "./gateway";
 import WorkspaceMemberSection from "./members";
-import WorkspaceDeleteSection from "./workspace-delete";
 
 export default function WorkspaceBillingPage() {
   const { currentWorkspace } = useWorkspaces();
@@ -22,7 +22,7 @@ export default function WorkspaceBillingPage() {
             <WorkspaceDetailSection workspace={currentWorkspace} />
             <WorkspaceMemberSection />
             <WorkspaceGatewaySection />
-            <WorkspaceDeleteSection />
+            <WorkspaceDeleteSection workspace={currentWorkspace} />
           </>
         ) : (
           <div className="my-12 flex flex-col items-center justify-center gap-4">
