@@ -1,6 +1,6 @@
 import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
 import { createOuterbaseDatabaseDriver } from "@/outerbase-cloud/database/utils";
-import { BaseDriver } from "../../drivers/base-driver";
+import { BaseDriver, DatabaseSchemas } from "../../drivers/base-driver";
 import {
   BoardSource,
   BoardSourceDriver,
@@ -9,6 +9,13 @@ import {
 export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
   protected workspace: OuterbaseAPIWorkspace;
   protected sourceDrivers: Record<string, BaseDriver> = {};
+  protected cacheSchemas: Record<
+    string,
+    {
+      schema: DatabaseSchemas;
+      selectedSchema: string;
+    }
+  > = {};
 
   constructor(workspace: OuterbaseAPIWorkspace) {
     this.workspace = workspace;
@@ -26,10 +33,7 @@ export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
       });
   }
 
-  async query(
-    sourceId: string,
-    statement: string
-  ): Promise<Record<string, unknown>[]> {
+  getDriver(sourceId: string) {
     const source = this.workspace.bases.find((base) => {
       return (
         base.sources &&
@@ -52,7 +56,29 @@ export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
       );
     }
 
-    const driver = this.sourceDrivers[sourceId]!;
+    return this.sourceDrivers[sourceId]!;
+  }
+
+  async schemas(sourceId: string) {
+    const driver = this.getDriver(sourceId);
+
+    if (this.cacheSchemas[sourceId]) {
+      return this.cacheSchemas[sourceId];
+    }
+
+    this.cacheSchemas[sourceId] = {
+      schema: await driver.schemas(),
+      selectedSchema: driver.getFlags().defaultSchema,
+    };
+
+    return this.cacheSchemas[sourceId];
+  }
+
+  async query(
+    sourceId: string,
+    statement: string
+  ): Promise<Record<string, unknown>[]> {
+    const driver = this.getDriver(sourceId);
     const result = await driver.query(statement);
 
     return result.rows;
