@@ -52,6 +52,7 @@ export default function BoardChartEditor() {
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [selectedSchema, setSelectedSchema] = useState("");
   const [displayType, setDisplayType] = useState("chart");
+  const [loading, setLoading] = useState(false);
 
   const autoCompletion = useMemo(() => {
     return generateAutoComplete(selectedSchema, schema);
@@ -65,9 +66,11 @@ export default function BoardChartEditor() {
     const sourceId = value?.source_id ?? "";
 
     if (sourceDriver && sourceId) {
+      setLoading(true);
       sourceDriver
         .query(sourceId, sql)
         .then((newResult) => {
+          setLoading(false);
           setResult(
             OptimizeTableState.createFromResult({
               result: newResult,
@@ -146,7 +149,7 @@ export default function BoardChartEditor() {
             <div className="flex-1"></div>
 
             <div>
-              <Button size="lg" onClick={onRunClicked}>
+              <Button size="lg" onClick={onRunClicked} loading={loading}>
                 <Play />
                 Run
               </Button>
