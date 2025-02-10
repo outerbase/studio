@@ -3,7 +3,7 @@ import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
-import { ChartData, ChartValue } from "./chart-type";
+import { ChartData, ChartValue, outerBaseUrl } from "./chart-type";
 import EchartOptionsBuilder from "./echart-options-builder";
 
 interface OuterbaseChartProps {
@@ -124,6 +124,7 @@ const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
 };
 
 const TableComponent = ({ data }: OuterbaseChartProps) => {
+  if (data?.length === 0) return;
   return (
     <div className="w-full overflow-auto rounded border">
       <table className="w-full border-separate border-spacing-0 text-sm">
@@ -234,13 +235,26 @@ export default function Chart(props: OuterbaseChartProps) {
     backGroundStyle = {
       background: `linear-gradient(45deg, ${startColor}, ${stopColor})`,
     };
+  } else if (props.value.params.options?.backgroundType === "image") {
+    backGroundStyle = {
+      backgroundImage: `url(${outerBaseUrl + props.value.params.options?.backgroundImage})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-6" style={backGroundStyle}>
-      <h1 className="mb-4 text-lg font-semibold">{props.value.name}</h1>
-      <div className="flex-1">
-        <ChartBody {...props} />
+    <div className="flex h-full w-full p-6" style={backGroundStyle}>
+      <div className="dark:shadow-accent flex h-full w-full flex-col rounded-lg p-2 shadow-2xl backdrop-blur-lg backdrop-brightness-100 dark:backdrop-brightness-100">
+        <h1
+          className="mb-4 text-lg font-semibold"
+          style={{ color: props.value.params.options?.foreground }}
+        >
+          {props.value.name ?? "New Chart"}
+        </h1>
+        <div className="flex-1">
+          <ChartBody {...props} />
+        </div>
       </div>
     </div>
   );

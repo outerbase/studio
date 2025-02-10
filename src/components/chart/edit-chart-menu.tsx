@@ -9,189 +9,92 @@ import { NumberCircleOne } from "@phosphor-icons/react/dist/icons/NumberCircleOn
 import { Table } from "@phosphor-icons/react/dist/icons/Table";
 import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
 import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
-import { Dispatch, SetStateAction, useMemo } from "react";
-import { ButtonGroupItem } from "../button-group";
+import { produce } from "immer";
+import { useTheme } from "next-themes";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import ChartBackgroundSelection from "./chart-background-selection";
-import { ChartSeriesCombobox } from "./chart-series-combobox";
-import {
-  ChartData,
-  ChartLabelDisplayY,
-  ChartValue,
-  SingleValueFormat,
-} from "./chart-type";
+import { ChartValue, SingleValueFormat, THEMES } from "./chart-type";
 import { ChartTypeButton } from "./chart-type-button";
+import ChartYAxisSection from "./chart-y-axis-section";
+import { generateGradientColors } from "./echart-options-builder";
 import { SimpleCombobox } from "./simple-combobox";
 import SimpleInput from "./simple-input";
 import SimpleToggle from "./simple-toggle";
 
 interface EditChartMenuProps {
   value: ChartValue;
-  data: ChartData[];
-  setValue: Dispatch<SetStateAction<ChartValue>>;
+  columns: string[];
+  onChange: Dispatch<SetStateAction<ChartValue>>;
 }
 
 export default function EditChartMenu({
   value,
-  setValue,
-  data,
+  onChange,
+  columns,
 }: EditChartMenuProps) {
+  const { forcedTheme, resolvedTheme } = useTheme();
   const isNotChartComponent = ["text", "single_value", "table"].includes(
-    value.type
+    value.type ?? "line"
   );
 
-  const allAxisKeys = Object.keys(data[0] ?? {});
+  // Add default yAxisKeyColors
+  useEffect(() => {
+    if (!value.params.options.yAxisKeyColors && columns?.length > 0) {
+      const appTheme: "light" | "dark" = (forcedTheme || resolvedTheme) as
+        | "light"
+        | "dark";
+      const themeColor = THEMES.neonPunk.colors?.[appTheme ?? "light"];
+      const colors = generateGradientColors(
+        themeColor[0],
+        themeColor[1],
+        columns.length
+      );
 
-  const seriesList = useMemo(() => {
-    if (isNotChartComponent) return null;
+      onChange((prev) => {
+        const newColors = columns.reduce(
+          (acc, col, i) => {
+            acc[col] = colors[i];
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+        return produce(prev, (draft) => {
+          draft.params.options.yAxisKeyColors = newColors;
+        });
+      });
+    }
+  }, [
+    columns,
+    forcedTheme,
+    onChange,
+    resolvedTheme,
+    value.params.options.yAxisKeyColors,
+  ]);
 
-    return (
-      <div className="pt-4">
-        <div className="flex items-center justify-between pb-2">
-          <p className="mb-1.5 text-sm font-bold opacity-70">Series</p>
-          <ButtonGroupItem
-            onClick={() => {
-              if (value.params.options?.yAxisKeys.length === allAxisKeys.length)
-                return;
+  // add default yAxisKeys and xAxisKey
+  useEffect(() => {
+    const allColumns = columns ?? [];
+    if (!value.params.options.xAxisKey && columns?.length > 0) {
+      onChange((prev) => {
+        return produce(prev, (draft) => {
+          draft.params.options.xAxisKey = allColumns.pop();
+        });
+      });
+    }
 
-              setValue((prev) => {
-                return {
-                  ...prev,
-                  params: {
-                    ...prev.params,
-                    options: {
-                      ...prev.params.options,
-                      yAxisKeys: [
-                        ...(prev.params.options?.yAxisKeys ?? []),
-                        allAxisKeys.filter(
-                          (key) =>
-                            !prev.params.options?.yAxisKeys?.includes(key)
-                        )[0],
-                      ],
-                    },
-                  },
-                };
-              });
-            }}
-          >
-            <p className="text-xs">Add Series</p>
-          </ButtonGroupItem>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          {value.params.options?.yAxisKeys?.map((key, index) => {
-            const color = value.params.options?.yAxisKeyColors
-              ? value.params.options?.yAxisKeyColors[key]
-              : undefined;
-            return (
-              <ChartSeriesCombobox
-                color={color}
-                key={index}
-                values={
-                  allAxisKeys.map((s) => {
-                    return {
-                      value: s,
-                      label: s,
-                    };
-                  }) ?? []
-                }
-                selected={key ?? ""}
-                placeholder="Select axis key..."
-                onChange={function (v: string): void {
-                  setValue({
-                    ...value,
-                    params: {
-                      ...value.params,
-                      options: {
-                        ...value.params.options,
-                        yAxisKeys: (() => {
-                          const yAxisKeys =
-                            value.params.options?.yAxisKeys ?? [];
-                          yAxisKeys[index] = v;
-                          return yAxisKeys;
-                        })(),
-                      },
-                    },
-                  });
-                }}
-                onRemove={(series) => {
-                  setValue({
-                    ...value,
-                    params: {
-                      ...value.params,
-                      options: {
-                        ...value.params.options,
-                        yAxisKeys: (() => {
-                          if (series === null) return [];
-                          return (value.params.options?.yAxisKeys ?? []).filter(
-                            (k) => k !== series
-                          );
-                        })(),
-                      },
-                    },
-                  });
-                }}
-                onChangeColor={function (color: string): void {
-                  setValue({
-                    ...value,
-                    params: {
-                      ...value.params,
-                      options: {
-                        ...value.params.options,
-                        yAxisKeyColors: {
-                          ...value.params.options?.yAxisKeyColors,
-                          [key]: color,
-                        },
-                      },
-                    },
-                  });
-                }}
-              ></ChartSeriesCombobox>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }, [allAxisKeys, isNotChartComponent, setValue, value]);
-
-  const selectYAxisDisplay = useMemo(() => {
-    if (isNotChartComponent) return null;
-    const yAxisSideValues = [
-      {
-        value: "left",
-        label: "Left",
-      },
-      {
-        value: "right",
-        label: "Right",
-      },
-      {
-        value: "hidden",
-        label: "Hidden",
-      },
-    ];
-    return (
-      <div>
-        <SimpleCombobox
-          hideArrow={true}
-          values={yAxisSideValues}
-          selected={value.params.options?.yAxisLabelDisplay ?? "left"}
-          placeholder="Select display..."
-          onChange={function (v: string): void {
-            setValue({
-              ...value,
-              params: {
-                ...value.params,
-                options: {
-                  ...value.params.options,
-                  yAxisLabelDisplay: v as ChartLabelDisplayY,
-                },
-              },
-            });
-          }}
-        ></SimpleCombobox>
-      </div>
-    );
-  }, [isNotChartComponent, setValue, value]);
+    if (!value.params.options.yAxisKeys && columns?.length > 0) {
+      onChange((prev) => {
+        return produce(prev, (draft) => {
+          draft.params.options.yAxisKeys = allColumns;
+        });
+      });
+    }
+  }, [
+    columns,
+    onChange,
+    value.params.options.xAxisKey,
+    value.params.options.yAxisKeys,
+  ]);
 
   const selectAxisKey = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -201,7 +104,7 @@ export default function EditChartMenu({
         <p className="mb-1.5 text-sm font-bold opacity-70">X Axis Value</p>
         <SimpleCombobox
           values={
-            allAxisKeys.map((key) => {
+            columns.map((key) => {
               return {
                 value: key,
                 label: key,
@@ -211,69 +114,16 @@ export default function EditChartMenu({
           selected={value.params.options?.xAxisKey ?? ""}
           placeholder="Select axis key..."
           onChange={function (v: string): void {
-            setValue({
-              ...value,
-              params: {
-                ...value.params,
-                options: {
-                  ...value.params.options,
-                  xAxisKey: v,
-                },
-              },
+            onChange((prev) => {
+              return produce(prev, (draft) => {
+                draft.params.options.xAxisKey = v;
+              });
             });
           }}
         ></SimpleCombobox>
       </div>
     );
-  }, [allAxisKeys, isNotChartComponent, setValue, value]);
-
-  const yAxisLabelSection = useMemo(() => {
-    if (isNotChartComponent) return null;
-    return (
-      <div>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Y Axis</p>
-        <div className="flex items-center justify-between gap-2">
-          <SimpleInput
-            value={value.params.options?.yAxisLabel}
-            placeholder={value.params.options?.yAxisKeys[0] ?? "Y Axis Label"}
-            onSumit={(v) => {
-              setValue({
-                ...value,
-                params: {
-                  ...value.params,
-                  options: {
-                    ...value.params.options,
-                    yAxisLabel: v,
-                  },
-                },
-              });
-            }}
-          />
-          {selectYAxisDisplay}
-
-          <SimpleToggle
-            values={["Show", "Hide"]}
-            onChange={(v) => {
-              setValue({
-                ...value,
-                params: {
-                  ...value.params,
-                  options: {
-                    ...value.params.options,
-                    yAxisLabelHidden: v === "Hide",
-                  },
-                },
-              });
-            }}
-            selectedValue={
-              value.params.options?.yAxisLabelHidden ? "Hide" : "Show"
-            }
-          />
-        </div>
-        {seriesList}
-      </div>
-    );
-  }, [isNotChartComponent, selectYAxisDisplay, seriesList, setValue, value]);
+  }, [columns, isNotChartComponent, onChange, value.params.options?.xAxisKey]);
 
   const xAxisLabelSection = useMemo(() => {
     if (isNotChartComponent) return null;
@@ -285,15 +135,10 @@ export default function EditChartMenu({
             value={value.params.options?.xAxisLabel}
             placeholder={value.params.options?.xAxisKey ?? "X Axis Label"}
             onSumit={(v) => {
-              setValue({
-                ...value,
-                params: {
-                  ...value.params,
-                  options: {
-                    ...value.params.options,
-                    xAxisLabel: v,
-                  },
-                },
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.params.options.xAxisLabel = v;
+                });
               });
             }}
           />
@@ -301,15 +146,10 @@ export default function EditChartMenu({
           <SimpleToggle
             values={["Show", "Hide"]}
             onChange={(v) => {
-              setValue({
-                ...value,
-                params: {
-                  ...value.params,
-                  options: {
-                    ...value.params.options,
-                    xAxisLabelHidden: v === "Hide",
-                  },
-                },
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.params.options.xAxisLabelHidden = v === "Hide";
+                });
               });
             }}
             selectedValue={
@@ -319,7 +159,13 @@ export default function EditChartMenu({
         </div>
       </div>
     );
-  }, [isNotChartComponent, setValue, value]);
+  }, [
+    isNotChartComponent,
+    onChange,
+    value.params.options?.xAxisKey,
+    value.params.options?.xAxisLabel,
+    value.params.options?.xAxisLabelHidden,
+  ]);
 
   const dataFormatSection = useMemo(() => {
     if (value.type !== "single_value") return null;
@@ -373,21 +219,16 @@ export default function EditChartMenu({
           selected={value.params.options?.format ?? "none"}
           placeholder="Select format..."
           onChange={function (v: string): void {
-            setValue({
-              ...value,
-              params: {
-                ...value.params,
-                options: {
-                  ...value.params.options,
-                  format: v === "none" ? undefined : (v as SingleValueFormat),
-                },
-              },
+            onChange((prev) => {
+              return produce(prev, (draft) => {
+                draft.params.options.format = v as SingleValueFormat;
+              });
             });
           }}
         ></SimpleCombobox>
       </div>
     );
-  }, [setValue, value]);
+  }, [onChange, value.params.options?.format, value.type]);
 
   const textSection = useMemo(() => {
     if (value.type !== "text") return null;
@@ -397,18 +238,16 @@ export default function EditChartMenu({
         <textarea
           className="h-[200px] w-full rounded-md border p-2"
           onChange={(v) =>
-            setValue({
-              ...value,
-              params: {
-                ...value.params,
-                options: { ...value.params.options, text: v.target.value },
-              },
+            onChange((prev) => {
+              return produce(prev, (draft) => {
+                draft.params.options.text = v.target.value;
+              });
             })
           }
         />
       </div>
     );
-  }, [setValue, value]);
+  }, [onChange, value.type]);
 
   const textColorSection = useMemo(() => {
     const textColorValues = [
@@ -434,21 +273,17 @@ export default function EditChartMenu({
           selected={value.params.options?.foreground ?? "Automatic"}
           placeholder="Select color..."
           onChange={function (v: string): void {
-            setValue({
-              ...value,
-              params: {
-                ...value.params,
-                options: {
-                  ...value.params.options,
-                  foreground: v === "Automatic" ? undefined : v,
-                },
-              },
+            onChange((prev) => {
+              return produce(prev, (draft) => {
+                draft.params.options.foreground =
+                  v === "Automatic" ? undefined : v;
+              });
             });
           }}
         ></SimpleCombobox>
       </div>
     );
-  }, [setValue, value]);
+  }, [onChange, value.params.options?.foreground]);
 
   return (
     <div className="flex w-full flex-col gap-5 p-1 pb-4">
@@ -459,7 +294,11 @@ export default function EditChartMenu({
             icon={<ChartLine />}
             isActive={value.type === "line"}
             onClick={() => {
-              setValue({ ...value, type: "line" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "line";
+                });
+              });
             }}
             tooltipText="Line"
           />
@@ -467,7 +306,11 @@ export default function EditChartMenu({
             icon={<ChartBar />}
             isActive={value.type === "column"}
             onClick={() => {
-              setValue({ ...value, type: "column" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "column";
+                });
+              });
             }}
             tooltipText="Column"
           />
@@ -475,7 +318,11 @@ export default function EditChartMenu({
             icon={<ChartBarHorizontal />}
             isActive={value.type === "bar"}
             onClick={() => {
-              setValue({ ...value, type: "bar" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "bar";
+                });
+              });
             }}
             tooltipText="Bar"
           />
@@ -483,7 +330,11 @@ export default function EditChartMenu({
             icon={<ChartScatter />}
             isActive={value.type === "scatter"}
             onClick={() => {
-              setValue({ ...value, type: "scatter" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "scatter";
+                });
+              });
             }}
             tooltipText="scatter"
           />
@@ -491,7 +342,11 @@ export default function EditChartMenu({
             icon={<TextT />}
             isActive={value.type === "text"}
             onClick={() => {
-              setValue({ ...value, type: "text" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "text";
+                });
+              });
             }}
             tooltipText="Text"
           />
@@ -499,7 +354,11 @@ export default function EditChartMenu({
             icon={<NumberCircleOne weight="bold" />}
             isActive={value.type === "single_value"}
             onClick={() => {
-              setValue({ ...value, type: "single_value" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "single_value";
+                });
+              });
             }}
             tooltipText="Single Value"
           />
@@ -507,7 +366,11 @@ export default function EditChartMenu({
             icon={<Table />}
             isActive={value.type === "table"}
             onClick={() => {
-              setValue({ ...value, type: "table" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "table";
+                });
+              });
             }}
             tooltipText="Table"
           />
@@ -515,7 +378,11 @@ export default function EditChartMenu({
             icon={<ChartPieSlice weight="bold" />}
             isActive={value.type === "pie"}
             onClick={() => {
-              setValue({ ...value, type: "pie" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "pie";
+                });
+              });
             }}
             tooltipText="Pie"
           />
@@ -523,7 +390,11 @@ export default function EditChartMenu({
             icon={<ChartPolar />}
             isActive={value.type === "radar"}
             onClick={() => {
-              setValue({ ...value, type: "radar" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "radar";
+                });
+              });
             }}
             tooltipText="Radar"
           />
@@ -531,7 +402,11 @@ export default function EditChartMenu({
             icon={<Funnel />}
             isActive={value.type === "funnel"}
             onClick={() => {
-              setValue({ ...value, type: "funnel" });
+              onChange((prev) => {
+                return produce(prev, (draft) => {
+                  draft.type = "funnel";
+                });
+              });
             }}
             tooltipText="Funnel"
           />
@@ -542,9 +417,19 @@ export default function EditChartMenu({
       {dataFormatSection}
       {xAxisLabelSection}
       {selectAxisKey}
-      {yAxisLabelSection}
+      {!isNotChartComponent && (
+        <ChartYAxisSection
+          value={value}
+          onChange={function (value: SetStateAction<ChartValue>): void {
+            onChange(value);
+          }}
+          isNotChartComponent={false}
+          columns={columns}
+        />
+      )}
+
       {textColorSection}
-      <ChartBackgroundSelection value={value} setValue={setValue} />
+      <ChartBackgroundSelection value={value} setValue={onChange} />
     </div>
   );
 }

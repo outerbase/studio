@@ -1,4 +1,6 @@
+import { produce } from "immer";
 import { Dispatch, SetStateAction, useMemo } from "react";
+import ChartBackGroundImage from "./chart-background-image";
 import { ChartValue } from "./chart-type";
 import SimpleInput from "./simple-input";
 import SimpleToggle from "./simple-toggle";
@@ -43,16 +45,9 @@ export default function ChartBackgroundSelection({
               value={value.params.options.gradientStart || ""}
               onSumit={function (v: string): void {
                 setValue((prev) => {
-                  return {
-                    ...prev,
-                    params: {
-                      ...prev.params,
-                      options: {
-                        ...prev.params.options,
-                        gradientStart: v,
-                      },
-                    },
-                  };
+                  return produce(prev, (draft) => {
+                    draft.params.options.gradientStart = v;
+                  });
                 });
               }}
             ></SimpleInput>
@@ -63,16 +58,9 @@ export default function ChartBackgroundSelection({
               value={value.params.options.gradientStop || ""}
               onSumit={function (v: string): void {
                 setValue((prev) => {
-                  return {
-                    ...prev,
-                    params: {
-                      ...prev.params,
-                      options: {
-                        ...prev.params.options,
-                        gradientStop: v,
-                      },
-                    },
-                  };
+                  return produce(prev, (draft) => {
+                    draft.params.options.gradientStop = v;
+                  });
                 });
               }}
             ></SimpleInput>
@@ -88,18 +76,10 @@ export default function ChartBackgroundSelection({
               }}
               onClick={() => {
                 setValue((prev) => {
-                  return {
-                    ...prev,
-                    params: {
-                      ...prev.params,
-                      options: {
-                        ...prev.params.options,
-                        gradientStart: start,
-                        gradientStop: stop,
-                        backgroundImage: undefined,
-                      },
-                    },
-                  };
+                  return produce(prev, (draft) => {
+                    draft.params.options.gradientStart = start;
+                    draft.params.options.gradientStop = stop;
+                  });
                 });
               }}
             />
@@ -111,21 +91,10 @@ export default function ChartBackgroundSelection({
 
   const handleBackgroundTypeChange = (v: string): void => {
     setValue((prev) => {
-      return {
-        ...prev,
-        params: {
-          ...prev.params,
-          options: {
-            ...prev.params.options,
-            backgroundType: v,
-            backgroundImage: undefined,
-            gradientStart: undefined,
-            gradientStop: undefined,
-          },
-        },
-      };
+      return produce(prev, (draft) => {
+        draft.params.options.backgroundType = v;
+      });
     });
-    console.log(value.params.options.gradientStart);
   };
 
   return (
@@ -146,6 +115,9 @@ export default function ChartBackgroundSelection({
       </div>
       <div>
         {value.params.options.backgroundType === "gradient" && gradientSection}
+        {value.params.options.backgroundType === "image" && (
+          <ChartBackGroundImage onChange={setValue} />
+        )}
       </div>
     </div>
   );

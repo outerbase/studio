@@ -43,6 +43,10 @@ export function SimpleCombobox({
     selected || null
   );
 
+  React.useEffect(() => {
+    setSelectedValue(selected || null);
+  }, [selected]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
