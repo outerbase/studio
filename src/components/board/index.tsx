@@ -77,7 +77,7 @@ export default function Board({
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
     >
-      <div className="flex flex-1 flex-col">
+      <div className="relative flex flex-1 flex-col">
         <BoardFilter
           filters={value.data.filters}
           onFilters={(v) =>
@@ -106,12 +106,6 @@ export default function Board({
           }}
         />
         <div className="relative flex-1">
-          {editMode === "ADD_CHART" && (
-            <div className="bg-background absolute top-0 right-0 bottom-0 left-0 z-10 flex">
-              <BoardChartEditor />
-            </div>
-          )}
-
           <BoardCanvas
             value={value}
             onChange={(v) => {
@@ -125,6 +119,12 @@ export default function Board({
             onRemove={onRemove}
           />
         </div>
+
+        {editMode === "ADD_CHART" && (
+          <div className="bg-background absolute top-0 bottom-0 left-0 z-50 flex w-screen">
+            <BoardChartEditor />
+          </div>
+        )}
       </div>
     </BoardProvider>
   );

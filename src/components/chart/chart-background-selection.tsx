@@ -100,7 +100,7 @@ export default function ChartBackgroundSelection({
   return (
     <div>
       <p className="mb-1.5 text-sm font-bold opacity-70">Background</p>
-      <div className="flex items-center justify-center pt-2">
+      <div className="flex items-center pt-2">
         <div className="w-[200px]">
           <MenuBar
             size="lg"

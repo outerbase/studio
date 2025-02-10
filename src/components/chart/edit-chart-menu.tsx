@@ -2,6 +2,7 @@
 import { produce } from "immer";
 import { useTheme } from "next-themes";
 import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+import { Label } from "../orbit/label";
 import { MenuBar } from "../orbit/menu-bar";
 import { Select } from "../orbit/select";
 import ChartBackgroundSelection, {
@@ -249,18 +250,19 @@ export default function EditChartMenu({
   }, [onChange, value.params.options?.foreground]);
 
   return (
-    <div className="flex w-full flex-col gap-2 p-1 pb-4">
-      <p className="mb-1.5 text-sm font-bold opacity-70">Chart Title</p>
-      <SimpleInput
-        value={value.name}
-        onSumit={function (v: string): void {
-          onChange((prev) => {
-            return produce(prev, (draft) => {
-              draft.name = v;
+    <div className="flex w-full flex-col gap-4 p-1 pb-4">
+      <Label title="Chart Title">
+        <SimpleInput
+          value={value.name}
+          onSumit={function (v: string): void {
+            onChange((prev) => {
+              return produce(prev, (draft) => {
+                draft.name = v;
+              });
             });
-          });
-        }}
-      />
+          }}
+        />
+      </Label>
 
       <ChartTypeSelection
         value={value}

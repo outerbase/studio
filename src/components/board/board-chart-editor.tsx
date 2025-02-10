@@ -70,7 +70,6 @@ export default function BoardChartEditor() {
       sourceDriver
         .query(sourceId, sql)
         .then((newResult) => {
-          setLoading(false);
           setResult(
             OptimizeTableState.createFromResult({
               result: newResult,
@@ -89,14 +88,19 @@ export default function BoardChartEditor() {
             });
           });
         })
-        .catch();
+        .catch(() => {
+          console.log("error");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [value, sourceDriver, schema]);
 
   return (
-    <div className="flex flex-1 border-t">
-      <div className="flex flex-1 flex-col">
-        <div className="h-1/2 border-b">
+    <div className="flex flex-1 overflow-hidden border-t">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="h-1/2 overflow-x-hidden border-b">
           {result && displayType === "table" && <ResultTable data={result} />}
           {result && displayType === "chart" && (
             <Chart data={result.getAllRows().map((r) => r.raw)} value={value} />
@@ -155,7 +159,7 @@ export default function BoardChartEditor() {
               </Button>
             </div>
           </div>
-          <div>
+          <div className="flex-1">
             <SqlEditor
               dialect="sqlite"
               value={value.params.layers[0].sql}
@@ -171,12 +175,18 @@ export default function BoardChartEditor() {
           </div>
         </div>
       </div>
-      <div className="w-[370px] overflow-x-hidden overflow-y-auto border-l p-4">
-        <EditChartMenu
-          value={value}
-          onChange={setValue}
-          columns={result?.getHeaders().map((header) => header.name) ?? []}
-        />
+      <div className="flex w-[370px] shrink-0 flex-col overflow-x-hidden overflow-y-auto border-l">
+        <div className="overflow-y-auto p-4">
+          <EditChartMenu
+            value={value}
+            onChange={setValue}
+            columns={result?.getHeaders().map((header) => header.name) ?? []}
+          />
+        </div>
+        <div className="flex justify-end gap-2 border-t p-4">
+          <Button variant="primary">Save Changes</Button>
+          <Button>Cancel</Button>
+        </div>
       </div>
     </div>
   );

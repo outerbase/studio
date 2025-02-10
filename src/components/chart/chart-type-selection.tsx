@@ -25,7 +25,7 @@ export default function ChartTypeSelection({
   return (
     <section key={1}>
       <p className="mb-1.5 text-sm font-bold opacity-70">Chart Type</p>
-      <div className="grid grid-cols-6 gap-2">
+      <div className="flex flex-wrap gap-4">
         <ChartTypeButton
           icon={<ChartLine />}
           isActive={value.type === "line"}
