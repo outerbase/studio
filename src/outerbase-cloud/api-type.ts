@@ -3,8 +3,7 @@ import { ColumnHeader, ResultStat } from "@outerbase/sdk-transform";
 export interface OuterbaseDatabaseConfig {
   workspaceId: string;
   sourceId: string;
-  baseId: string;
-  token: string;
+  baseId?: string;
 }
 
 export class OuterbaseAPIError extends Error {

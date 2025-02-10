@@ -39,8 +39,8 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
     const { sourceId, workspaceId, baseId } = this.config;
     const [schemas, comments, definition] = await Promise.all([
       getOuterbaseSchemas(workspaceId, sourceId, baseId),
-      getOuterbaseBaseComments(workspaceId, sourceId, baseId),
-      getOuterbaseDefinitions(workspaceId, baseId),
+      getOuterbaseBaseComments(workspaceId, sourceId, baseId!),
+      getOuterbaseDefinitions(workspaceId, baseId!),
     ]);
     const transformedSchemas = transformOuterbaseSchema(
       schemas,
@@ -199,14 +199,14 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
     if (data.id) {
       result = await updateOuerbaseDefinition(
         this.config.workspaceId,
-        this.config.baseId,
+        this.config.baseId!,
         data.id,
         inputData
       );
     } else {
       result = await createOuterbaseDefinition(
         this.config.workspaceId,
-        this.config.baseId,
+        this.config.baseId!,
         inputData
       );
     }
@@ -270,7 +270,7 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
     try {
       await deleteOuterbaseDefinition(
         this.config.workspaceId,
-        this.config.baseId,
+        this.config.baseId!,
         id
       );
       const newDefinitions = this.definitions.filter((def) => def.id !== id);
