@@ -1,6 +1,6 @@
 import TableColumnCombobox from "@/components/gui/table-combobox/TableColumnCombobox";
 import TableCombobox from "@/components/gui/table-combobox/TableCombobox";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import {
   OuterbaseDataCatalogVirtualColumnInput,
 } from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { defaultVirtualColumn } from "./constant";
 import DataCatalogDriver from "./driver";
@@ -118,7 +117,7 @@ export default function VirtualJoinModal({
             {data ? "Edit" : "Add Relationship"} to {tableName}
           </DialogTitle>
         </DialogHeader>
-        <DialogDescription>
+        <DialogDescription className="text-base">
           Use virtual relationships to connect fields that don&apos;t have a
           direct foreign key link. For example, if two tables should be related
           by email or title but don&apos;t have a formal foreign key, use these
@@ -181,13 +180,13 @@ export default function VirtualJoinModal({
 
         <DialogFooter>
           <Button
+            loading={loading}
             variant="ghost"
             disabled={disabled}
             onClick={createUpdateVirtualJoin}
-          >
-            {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-            {data ? "Edit Relationship" : "Create Virtual Join"}
-          </Button>
+            title={data ? "Edit Relationship" : "Create Virtual Join"}
+          />
+
           <div className="flex-1" />
         </DialogFooter>
       </DialogContent>

@@ -39,7 +39,7 @@ export default function DataCatalogResultHeader({
       .then()
       .catch()
       .finally(() => setLoading(false));
-  }, [driver, definition, column, schemaName, tableName, columnName]);
+  }, [driver, definition, column, schemaName, tableName]);
 
   return (
     <div className="flex flex-col gap-2 border-b p-2 text-sm">
