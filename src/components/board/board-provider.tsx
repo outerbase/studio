@@ -7,7 +7,8 @@ import {
   SetStateAction,
   useContext,
 } from "react";
-import { BoardEditorMode } from ".";
+import { BoardEditorMode, DashboardProps } from ".";
+import { ChartValue } from "../chart/chart-type";
 
 interface BoardContextSettingProps {
   autoRefresh: string[];
@@ -15,7 +16,9 @@ interface BoardContextSettingProps {
 }
 
 interface BoardContextProps {
+  value?: DashboardProps;
   sources?: BoardSourceDriver;
+  onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
   setting?: BoardContextSettingProps;
   lastRunTimestamp: number;
   setBoardMode: Dispatch<SetStateAction<BoardEditorMode>>;
@@ -24,6 +27,9 @@ interface BoardContextProps {
 const BoardContext = createContext<BoardContextProps>({
   lastRunTimestamp: 0,
   setBoardMode: noop,
+  onAddChart: async () => {
+    return undefined;
+  },
 });
 
 export function useBoardContext() {

@@ -90,7 +90,7 @@ export async function createOuterbaseDashboard(
     "POST",
     {
       name,
-      base_id: baseId ?? "",
+      base_id: baseId ?? null,
       chart_ids: [],
       data: {
         version: 3,
@@ -98,6 +98,7 @@ export async function createOuterbaseDashboard(
         isWorkspaceScoped: !baseId,
       },
       layout: [],
+      directory_index: 0,
       type: "dashboard",
     }
   );

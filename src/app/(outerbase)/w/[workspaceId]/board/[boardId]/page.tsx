@@ -4,11 +4,13 @@ import { NavigationBar } from "@/app/(outerbase)/nav";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
 import { deleteChartDialog } from "@/components/board/board-delete-dialog";
+import { ChartValue } from "@/components/chart/chart-type";
 
 import {
   getOuterbaseDashboard,
   updateOuterbaseDashboard,
 } from "@/outerbase-cloud/api";
+import { createOuterbaseDashboardChart } from "@/outerbase-cloud/api-board";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
 import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
 import { produce } from "immer";
@@ -44,13 +46,14 @@ function BoardPageEditor({
   const onSave = useCallback(() => {
     const input = {
       base_id: null,
-      chart_ids: value.chart_ids,
+      chart_ids: Array.from(new Set(value.charts.map((v) => v.id))),
       data: (value as any).data,
       layout: value.layout.map(({ w, h, i, x, y }) => ({ w, h, x, y, i })),
       directory_index: (value as any).directory_index,
       name: value.name,
       type: value.type,
     };
+
     updateOuterbaseDashboard(workspaceId, boardId, input)
       .then()
       .finally(mutate);
@@ -100,6 +103,31 @@ function BoardPageEditor({
     [value, workspaceId, boardId, mutate]
   );
 
+  const onAddChart = useCallback(
+    async (chartValue: ChartValue) => {
+      if (!chartValue.source_id) return;
+      if (!chartValue.type) return;
+
+      return createOuterbaseDashboardChart(workspaceId, {
+        source_id: chartValue.source_id,
+        params: {
+          ...chartValue.params,
+          source_id: chartValue.source_id,
+          workspace_id: workspaceId,
+          layers: chartValue.params.layers.map((layer) => {
+            return {
+              ...layer,
+              type: chartValue.type!,
+            };
+          }),
+        },
+        type: chartValue.type,
+        name: chartValue.name ?? "",
+      });
+    },
+    [workspaceId]
+  );
+
   if (!boardSources) {
     return <div>Loading Workspace....</div>;
   }
@@ -114,6 +142,7 @@ function BoardPageEditor({
       onLayoutCancel={() => setValue(initialValue)}
       onLayoutSave={onSave}
       onRemove={onRemove}
+      onAddChart={onAddChart}
     />
   );
 }

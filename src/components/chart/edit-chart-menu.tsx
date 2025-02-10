@@ -258,6 +258,7 @@ export default function EditChartMenu({
             onChange((prev) => {
               return produce(prev, (draft) => {
                 draft.name = v;
+                draft.params.name = v;
               });
             });
           }}

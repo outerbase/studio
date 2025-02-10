@@ -111,7 +111,7 @@ export function BoardCanvas({
     return (
       <div
         key={_.i}
-        className="group dark:bg-secondary relative flex items-center justify-center rounded-md bg-white shadow hover:bg-gray-50 dark:text-white"
+        className="group bg-background relative flex items-center justify-center overflow-hidden rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
         data-grid={_}
       >
         <BoardChart
@@ -183,7 +183,7 @@ export function BoardCanvas({
   });
 
   return (
-    <div>
+    <div className="bg-neutral-100 dark:bg-neutral-950">
       <ReactGridLayout
         cols={4}
         rowHeight={220}
