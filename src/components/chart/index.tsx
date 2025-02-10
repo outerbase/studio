@@ -126,10 +126,10 @@ const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
 const TableComponent = ({ data }: OuterbaseChartProps) => {
   if (data?.length === 0) return;
   return (
-    <div className="w-full overflow-auto rounded border">
-      <table className="w-full border-separate border-spacing-0 text-sm">
-        <thead className="sticky top-0">
-          <tr className="bg-secondary h-[35px] text-xs">
+    <div className="h-full w-full overflow-hidden overflow-x-auto overflow-y-auto rounded border">
+      <table className="border-separate border-spacing-0 text-sm">
+        <thead>
+          <tr className="bg-secondary sticky top-0 h-[35px] text-xs">
             {Object.keys(data[0]).map((key) => (
               <th key={key} className="border-r px-2 text-left">
                 {key}
@@ -141,7 +141,7 @@ const TableComponent = ({ data }: OuterbaseChartProps) => {
           {data.map((row, index) => (
             <tr key={index}>
               {Object.keys(row).map((key) => (
-                <td className="border-t border-r px-4 py-2" key={key}>
+                <td className="border px-4 py-2" key={key}>
                   {row[key] || ""}
                 </td>
               ))}
@@ -252,7 +252,7 @@ export default function Chart(props: OuterbaseChartProps) {
         >
           {props.value.name ?? "New Chart"}
         </h1>
-        <div className="flex-1">
+        <div className="flex-1 overflow-hidden">
           <ChartBody {...props} />
         </div>
       </div>

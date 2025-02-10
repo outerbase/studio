@@ -13,7 +13,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     if (isLoading) return;
     if (!session?.session || !session?.user) {
       localStorage.setItem("continue-redirect", pathname);
-      router.push("/signin");
+      router.replace("/signin");
     }
   }, [isLoading, session, pathname, router]);
 

@@ -48,7 +48,9 @@ export default function WorkspaceListPageClient() {
   const router = useRouter();
   const { currentWorkspace, refreshWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
-  const [typeFilter, setTypeFilter] = useState("all");
+
+  const [filterType, setFilterType] = useState("all");
+  const [filterName, setFilterName] = useState("");
 
   useRedirectValidWorkspace();
 
@@ -85,25 +87,43 @@ export default function WorkspaceListPageClient() {
         status: `Last updated ${timeSince(new Date(board?.updated_at ?? ""))} ago`,
       }));
 
-    const allResources = [...baseResources, ...boardResources];
+    let allResources = [...baseResources, ...boardResources];
+
+    // Apply filters
+    if (filterName) {
+      allResources = allResources.filter((resource) =>
+        resource.name?.toLowerCase().includes(filterName.toLowerCase())
+      );
+    }
+
+    if (filterType === "base") {
+      allResources = allResources.filter(
+        (resource) => resource.type !== "board"
+      );
+    } else if (filterType === "board") {
+      allResources = allResources.filter(
+        (resource) => resource.type === "board"
+      );
+    }
 
     return allResources.sort((a, b) =>
       (a.name ?? "").localeCompare(b.name ?? "")
     );
-  }, [currentWorkspace, boards]);
+  }, [currentWorkspace, boards, filterName, filterType]);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <NavigationBar />
 
       <div className="container mx-auto mt-10 p-4">
-        <div className="mb-12 flex gap-4">
+        <div className="sticky top-14 z-20 mb-12 flex gap-4 bg-neutral-50 pb-2 dark:bg-neutral-950">
           <div className="flex-1">
             <Input
               preText={<MagnifyingGlass size={16} className="mr-2" />}
               size="lg"
               placeholder="Search resources..."
-              onValueChange={() => {}}
+              onValueChange={setFilterName}
+              value={filterName}
             />
           </div>
 
@@ -111,11 +131,11 @@ export default function WorkspaceListPageClient() {
             size="lg"
             items={[
               { value: "all", content: "All" },
-              { value: "bases", content: "Bases" },
-              { value: "boards", content: "Boards" },
+              { value: "base", content: "Bases" },
+              { value: "board", content: "Boards" },
             ]}
-            onChange={setTypeFilter}
-            value={typeFilter}
+            onChange={setFilterType}
+            value={filterType}
           />
 
           <MenuBar

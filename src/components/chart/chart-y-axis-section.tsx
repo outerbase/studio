@@ -1,11 +1,12 @@
 "use client";
 import { produce } from "immer";
 import { Dispatch, SetStateAction, useMemo } from "react";
+import { MenuBar } from "../orbit/menu-bar";
+import { Select } from "../orbit/select";
+import { capitalizeFirstChar } from "./chart-background-selection";
 import ChartSeries from "./chart-series";
 import { ChartLabelDisplayY, ChartValue } from "./chart-type";
-import { SimpleCombobox } from "./simple-combobox";
 import SimpleInput from "./simple-input";
-import SimpleToggle from "./simple-toggle";
 
 interface ChartYAxisSectionProps {
   value: ChartValue;
@@ -22,36 +23,24 @@ export default function ChartYAxisSection({
 }: ChartYAxisSectionProps) {
   const selectYAxisDisplay = useMemo(() => {
     if (isNotChartComponent) return null;
-    const yAxisSideValues = [
-      {
-        value: "left",
-        label: "Left",
-      },
-      {
-        value: "right",
-        label: "Right",
-      },
-      {
-        value: "hidden",
-        label: "Hidden",
-      },
-    ];
+
     return (
       <div>
-        <SimpleCombobox
-          hideArrow={true}
-          values={yAxisSideValues}
-          selected={value.params.options?.yAxisLabelDisplay ?? "left"}
-          placeholder="Select display..."
-          onChange={function (v: string): void {
+        <Select
+          size="lg"
+          options={["Left", "Right", "Hidden"]}
+          setValue={function (value: string): void {
             onChange((prev) => {
               return produce(prev, (draft) => {
                 draft.params.options.yAxisLabelDisplay =
-                  v as ChartLabelDisplayY;
+                  value.toLowerCase() as ChartLabelDisplayY;
               });
             });
           }}
-        ></SimpleCombobox>
+          value={capitalizeFirstChar(
+            value.params.options?.yAxisLabelDisplay ?? "left"
+          )}
+        />
       </div>
     );
   }, [isNotChartComponent, onChange, value.params.options?.yAxisLabelDisplay]);
@@ -72,19 +61,26 @@ export default function ChartYAxisSection({
           }}
         />
         {selectYAxisDisplay}
-
-        <SimpleToggle
-          values={["Show", "Hide"]}
+        <MenuBar
+          size="lg"
+          value={value.params.options?.yAxisLabelHidden ? "hide" : "show"}
           onChange={(v) => {
             onChange((prev) => {
               return produce(prev, (draft) => {
-                draft.params.options.yAxisLabelHidden = v === "Hide";
+                draft.params.options.yAxisLabelHidden = v === "hide";
               });
             });
           }}
-          selectedValue={
-            value.params.options?.yAxisLabelHidden ? "Hide" : "Show"
-          }
+          items={[
+            {
+              value: "show",
+              content: "Show",
+            },
+            {
+              value: "hide",
+              content: "Hide",
+            },
+          ]}
         />
       </div>
       <ChartSeries
