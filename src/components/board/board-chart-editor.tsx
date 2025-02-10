@@ -2,11 +2,14 @@ import { generateAutoComplete } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
 import { Play } from "@phosphor-icons/react";
 import { produce } from "immer";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import EditChartMenu from "../chart/edit-chart-menu";
+import ResultTable from "../gui/query-result-table";
 import SqlEditor from "../gui/sql-editor";
+import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
 import { Button } from "../orbit/button";
+import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
 
 export default function BoardChartEditor() {
@@ -51,11 +54,34 @@ export default function BoardChartEditor() {
     return generateAutoComplete(selectedSchema, schema);
   }, [schema, selectedSchema]);
 
+  const { sources: sourceDriver } = useBoardContext();
+  const [result, setResult] = useState<OptimizeTableState>();
+
+  const onRunClicked = useCallback(() => {
+    const sql = value?.params.layers[0].sql ?? "";
+    const sourceId = value?.source_id ?? "";
+
+    if (sourceDriver && sourceId) {
+      sourceDriver
+        .query(sourceId, sql)
+        .then((newResult) => {
+          setResult(
+            OptimizeTableState.createFromResult({
+              result: newResult,
+              driver: sourceDriver.getDriver(sourceId),
+              schemas: schema,
+            })
+          );
+        })
+        .catch();
+    }
+  }, [value, sourceDriver, schema]);
+
   return (
     <div className="flex flex-1 border-t">
       <div className="flex flex-1 flex-col">
-        <div className="h-1/2 border-b p-4">
-          <div className="text-lg font-semibold">Chart Editor</div>
+        <div className="h-1/2 border-b">
+          {result && <ResultTable data={result} />}
         </div>
         <div className="h-1/2 overflow-x-hidden">
           <div className="flex border-b px-4 py-2">
@@ -78,7 +104,7 @@ export default function BoardChartEditor() {
             <div className="flex-1"></div>
 
             <div>
-              <Button size="lg">
+              <Button size="lg" onClick={onRunClicked}>
                 <Play />
                 Run
               </Button>

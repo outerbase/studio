@@ -1,6 +1,10 @@
 import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
 import { createOuterbaseDatabaseDriver } from "@/outerbase-cloud/database/utils";
-import { BaseDriver, DatabaseSchemas } from "../../drivers/base-driver";
+import {
+  BaseDriver,
+  DatabaseResultSet,
+  DatabaseSchemas,
+} from "../../drivers/base-driver";
 import {
   BoardSource,
   BoardSourceDriver,
@@ -74,14 +78,9 @@ export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
     return this.cacheSchemas[sourceId];
   }
 
-  async query(
-    sourceId: string,
-    statement: string
-  ): Promise<Record<string, unknown>[]> {
+  async query(sourceId: string, statement: string): Promise<DatabaseResultSet> {
     const driver = this.getDriver(sourceId);
-    const result = await driver.query(statement);
-
-    return result.rows;
+    return await driver.query(statement);
   }
 
   cleanup(): void {
