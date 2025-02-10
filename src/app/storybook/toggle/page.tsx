@@ -17,9 +17,9 @@ export default function ToggleStorybook() {
     <Section>
       <Inset>
         <Block title="Toggle">
-          <Toggle onClick={handleToggleClick} toggled={toggle} size="sm" />
-          <Toggle onClick={handleToggleClick} toggled={toggle} size="base" />
-          <Toggle onClick={handleToggleClick} toggled={toggle} size="lg" />
+          <Toggle onChange={handleToggleClick} toggled={toggle} size="sm" />
+          <Toggle onChange={handleToggleClick} toggled={toggle} size="base" />
+          <Toggle onChange={handleToggleClick} toggled={toggle} size="lg" />
         </Block>
       </Inset>
     </Section>
