@@ -24,7 +24,7 @@ export default function BoardChartEditor() {
     source_id: "",
     updated_at: "",
     workspace_id: "",
-    name: "",
+    name: "New Chart",
     params: {
       type: "line",
       id: "",
