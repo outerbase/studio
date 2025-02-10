@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 
 type ToggleProps = {
-  onClick: () => void;
   size?: "sm" | "base" | "lg";
-  toggled: boolean;
+  toggled?: boolean;
+  onChange?: (value: boolean) => void;
 };
 
-export const Toggle = ({ onClick, size = "base", toggled }: ToggleProps) => {
+export const Toggle = ({ onChange, size = "base", toggled }: ToggleProps) => {
   return (
     <button
       className={cn(
@@ -19,7 +19,9 @@ export const Toggle = ({ onClick, size = "base", toggled }: ToggleProps) => {
             toggled,
         }
       )}
-      onClick={onClick}
+      onClick={() => {
+        if (onChange) onChange(!toggled);
+      }}
     >
       <div
         className={cn(
