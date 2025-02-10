@@ -1,9 +1,9 @@
 import { produce } from "immer";
 import { Dispatch, SetStateAction, useMemo } from "react";
+import { MenuBar } from "../orbit/menu-bar";
 import ChartBackGroundImage from "./chart-background-image";
 import { ChartValue } from "./chart-type";
 import SimpleInput from "./simple-input";
-import SimpleToggle from "./simple-toggle";
 
 const PRESET_GRADIENTS = [
   { start: "#0A0A0A", stop: "#171717" },
@@ -102,15 +102,25 @@ export default function ChartBackgroundSelection({
       <p className="mb-1.5 text-sm font-bold opacity-70">Background</p>
       <div className="flex items-center justify-center pt-2">
         <div className="w-[200px]">
-          <SimpleToggle
-            values={["None", "Gradient", "Image"]}
-            onChange={function (v: string): void {
-              handleBackgroundTypeChange(v.toLowerCase());
-            }}
-            selectedValue={capitalizeFirstChar(
-              value.params.options.backgroundType || "none"
-            )}
-          ></SimpleToggle>
+          <MenuBar
+            size="lg"
+            value={value.params.options.backgroundType}
+            onChange={handleBackgroundTypeChange}
+            items={[
+              {
+                value: "none",
+                content: "None",
+              },
+              {
+                value: "gradient",
+                content: "Gradient",
+              },
+              {
+                value: "image",
+                content: "Image",
+              },
+            ]}
+          />
         </div>
       </div>
       <div>
@@ -123,7 +133,7 @@ export default function ChartBackgroundSelection({
   );
 }
 
-function capitalizeFirstChar(word: string): string {
+export function capitalizeFirstChar(word: string): string {
   if (!word) return word;
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
