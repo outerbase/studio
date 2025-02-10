@@ -1,25 +1,17 @@
 "use client";
-import { ChartBar } from "@phosphor-icons/react/dist/icons/ChartBar";
-import { ChartLine } from "@phosphor-icons/react/dist/icons/ChartLine";
-import { ChartPieSlice } from "@phosphor-icons/react/dist/icons/ChartPieSlice";
-import { ChartPolar } from "@phosphor-icons/react/dist/icons/ChartPolar";
-import { ChartScatter } from "@phosphor-icons/react/dist/icons/ChartScatter";
-import { Funnel } from "@phosphor-icons/react/dist/icons/Funnel";
-import { NumberCircleOne } from "@phosphor-icons/react/dist/icons/NumberCircleOne";
-import { Table } from "@phosphor-icons/react/dist/icons/Table";
-import { TextT } from "@phosphor-icons/react/dist/icons/TextT";
-import { ChartBarHorizontal } from "@phosphor-icons/react/dist/ssr";
 import { produce } from "immer";
 import { useTheme } from "next-themes";
 import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
-import ChartBackgroundSelection from "./chart-background-selection";
+import { MenuBar } from "../orbit/menu-bar";
+import { Select } from "../orbit/select";
+import ChartBackgroundSelection, {
+  capitalizeFirstChar,
+} from "./chart-background-selection";
 import { ChartValue, SingleValueFormat, THEMES } from "./chart-type";
-import { ChartTypeButton } from "./chart-type-button";
+import ChartTypeSelection from "./chart-type-selection";
 import ChartYAxisSection from "./chart-y-axis-section";
 import { generateGradientColors } from "./echart-options-builder";
-import { SimpleCombobox } from "./simple-combobox";
 import SimpleInput from "./simple-input";
-import SimpleToggle from "./simple-toggle";
 
 interface EditChartMenuProps {
   value: ChartValue;
@@ -102,25 +94,19 @@ export default function EditChartMenu({
     return (
       <div>
         <p className="mb-1.5 text-sm font-bold opacity-70">X Axis Value</p>
-        <SimpleCombobox
-          values={
-            columns.map((key) => {
-              return {
-                value: key,
-                label: key,
-              };
-            }) ?? []
-          }
-          selected={value.params.options?.xAxisKey ?? ""}
-          placeholder="Select axis key..."
-          onChange={function (v: string): void {
+        <Select
+          size="lg"
+          className="w-full"
+          options={columns}
+          value={value.params.options?.xAxisKey ?? ""}
+          setValue={function (value: string): void {
             onChange((prev) => {
               return produce(prev, (draft) => {
-                draft.params.options.xAxisKey = v;
+                draft.params.options.xAxisKey = value;
               });
             });
           }}
-        ></SimpleCombobox>
+        />
       </div>
     );
   }, [columns, isNotChartComponent, onChange, value.params.options?.xAxisKey]);
@@ -143,18 +129,26 @@ export default function EditChartMenu({
             }}
           />
 
-          <SimpleToggle
-            values={["Show", "Hide"]}
+          <MenuBar
+            size="lg"
+            value={value.params.options?.xAxisLabelHidden ? "hide" : "show"}
             onChange={(v) => {
               onChange((prev) => {
                 return produce(prev, (draft) => {
-                  draft.params.options.xAxisLabelHidden = v === "Hide";
+                  draft.params.options.xAxisLabelHidden = v === "hide";
                 });
               });
             }}
-            selectedValue={
-              value.params.options?.xAxisLabelHidden ? "Hide" : "Show"
-            }
+            items={[
+              {
+                value: "show",
+                content: "Show",
+              },
+              {
+                value: "hide",
+                content: "Hide",
+              },
+            ]}
           />
         </div>
       </div>
@@ -169,63 +163,35 @@ export default function EditChartMenu({
 
   const dataFormatSection = useMemo(() => {
     if (value.type !== "single_value") return null;
-    const dataFormatValues = [
-      {
-        value: "none",
-        label: "None",
-      },
-      {
-        value: "percent",
-        label: "Percent",
-      },
-      {
-        value: "number",
-        label: "Number",
-      },
-      {
-        value: "decimal",
-        label: "Decimal",
-      },
-      {
-        value: "date",
-        label: "Date",
-      },
-      {
-        value: "time",
-        label: "Time",
-      },
-      {
-        value: "dollar",
-        label: "Dollar",
-      },
-      {
-        value: "euro",
-        label: "Euro",
-      },
-      {
-        value: "pound",
-        label: "Pound",
-      },
-      {
-        value: "yen",
-        label: "Yen",
-      },
-    ];
+
     return (
       <div>
         <p className="mb-1.5 text-sm font-bold opacity-70">Data Format</p>
-        <SimpleCombobox
-          values={dataFormatValues}
-          selected={value.params.options?.format ?? "none"}
-          placeholder="Select format..."
-          onChange={function (v: string): void {
+        <Select
+          className="w-full"
+          size="lg"
+          options={[
+            "None",
+            "Percent",
+            "Number",
+            "Decimal",
+            "Date",
+            "Time",
+            "Dollar",
+            "Euro",
+            "Pound",
+            "Yen",
+          ]}
+          setValue={function (value: string): void {
             onChange((prev) => {
               return produce(prev, (draft) => {
-                draft.params.options.format = v as SingleValueFormat;
+                draft.params.options.format =
+                  value.toLowerCase() as SingleValueFormat;
               });
             });
           }}
-        ></SimpleCombobox>
+          value={capitalizeFirstChar(value.params.options?.format ?? "none")}
+        />
       </div>
     );
   }, [onChange, value.params.options?.format, value.type]);
@@ -250,169 +216,58 @@ export default function EditChartMenu({
   }, [onChange, value.type]);
 
   const textColorSection = useMemo(() => {
-    const textColorValues = [
-      {
-        value: "Automatic",
-        label: "Automatic",
-      },
-      {
-        value: "#ffffff",
-        label: "White",
-      },
-      {
-        value: "#000000",
-        label: "Black",
-      },
-    ];
-
     return (
       <div>
         <p className="mb-1.5 pt-2 text-sm font-bold opacity-70">Text Color</p>
-        <SimpleCombobox
-          values={textColorValues}
-          selected={value.params.options?.foreground ?? "Automatic"}
-          placeholder="Select color..."
-          onChange={function (v: string): void {
+        <Select
+          className="w-full"
+          size="lg"
+          options={["Automatic", "White", "Black"]}
+          setValue={function (value: string): void {
             onChange((prev) => {
               return produce(prev, (draft) => {
-                draft.params.options.foreground =
-                  v === "Automatic" ? undefined : v;
+                if (value === "Automatic") {
+                  delete draft.params.options.foreground;
+                } else if (value === "White") {
+                  draft.params.options.foreground = "#ffffff";
+                } else if (value === "Black") {
+                  draft.params.options.foreground = "#000000";
+                }
               });
             });
           }}
-        ></SimpleCombobox>
+          value={
+            value.params.options?.foreground === "#000000"
+              ? "Black"
+              : value.params.options?.foreground === "#ffffff"
+                ? "White"
+                : "Automatic"
+          }
+        />
       </div>
     );
   }, [onChange, value.params.options?.foreground]);
 
   return (
-    <div className="flex w-full flex-col gap-5 p-1 pb-4">
-      <section key={1}>
-        <p className="mb-1.5 text-sm font-bold opacity-70">Chart Type</p>
-        <div className="grid grid-cols-6 gap-2">
-          <ChartTypeButton
-            icon={<ChartLine />}
-            isActive={value.type === "line"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "line";
-                });
-              });
-            }}
-            tooltipText="Line"
-          />
-          <ChartTypeButton
-            icon={<ChartBar />}
-            isActive={value.type === "column"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "column";
-                });
-              });
-            }}
-            tooltipText="Column"
-          />
-          <ChartTypeButton
-            icon={<ChartBarHorizontal />}
-            isActive={value.type === "bar"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "bar";
-                });
-              });
-            }}
-            tooltipText="Bar"
-          />
-          <ChartTypeButton
-            icon={<ChartScatter />}
-            isActive={value.type === "scatter"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "scatter";
-                });
-              });
-            }}
-            tooltipText="scatter"
-          />
-          <ChartTypeButton
-            icon={<TextT />}
-            isActive={value.type === "text"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "text";
-                });
-              });
-            }}
-            tooltipText="Text"
-          />
-          <ChartTypeButton
-            icon={<NumberCircleOne weight="bold" />}
-            isActive={value.type === "single_value"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "single_value";
-                });
-              });
-            }}
-            tooltipText="Single Value"
-          />
-          <ChartTypeButton
-            icon={<Table />}
-            isActive={value.type === "table"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "table";
-                });
-              });
-            }}
-            tooltipText="Table"
-          />
-          <ChartTypeButton
-            icon={<ChartPieSlice weight="bold" />}
-            isActive={value.type === "pie"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "pie";
-                });
-              });
-            }}
-            tooltipText="Pie"
-          />
-          <ChartTypeButton
-            icon={<ChartPolar />}
-            isActive={value.type === "radar"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "radar";
-                });
-              });
-            }}
-            tooltipText="Radar"
-          />
-          <ChartTypeButton
-            icon={<Funnel />}
-            isActive={value.type === "funnel"}
-            onClick={() => {
-              onChange((prev) => {
-                return produce(prev, (draft) => {
-                  draft.type = "funnel";
-                });
-              });
-            }}
-            tooltipText="Funnel"
-          />
-        </div>
-      </section>
+    <div className="flex w-full flex-col gap-2 p-1 pb-4">
+      <p className="mb-1.5 text-sm font-bold opacity-70">Chart Title</p>
+      <SimpleInput
+        value={value.name}
+        onSumit={function (v: string): void {
+          onChange((prev) => {
+            return produce(prev, (draft) => {
+              draft.name = v;
+            });
+          });
+        }}
+      />
 
+      <ChartTypeSelection
+        value={value}
+        onChange={function (value: SetStateAction<ChartValue>): void {
+          onChange(value);
+        }}
+      />
       {textSection}
       {dataFormatSection}
       {xAxisLabelSection}

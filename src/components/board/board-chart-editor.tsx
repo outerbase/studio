@@ -1,14 +1,16 @@
 import { generateAutoComplete } from "@/context/schema-provider";
 import { DatabaseSchemas } from "@/drivers/base-driver";
-import { Play } from "@phosphor-icons/react";
+import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { useCallback, useMemo, useState } from "react";
+import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
 import EditChartMenu from "../chart/edit-chart-menu";
 import ResultTable from "../gui/query-result-table";
 import SqlEditor from "../gui/sql-editor";
 import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
 import { Button } from "../orbit/button";
+import { MenuBar } from "../orbit/menu-bar";
 import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
 
@@ -22,7 +24,7 @@ export default function BoardChartEditor() {
     source_id: "",
     updated_at: "",
     workspace_id: "",
-    name: "",
+    name: "New Chart",
     params: {
       type: "line",
       id: "",
@@ -49,6 +51,8 @@ export default function BoardChartEditor() {
 
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [selectedSchema, setSelectedSchema] = useState("");
+  const [displayType, setDisplayType] = useState("chart");
+  const [loading, setLoading] = useState(false);
 
   const autoCompletion = useMemo(() => {
     return generateAutoComplete(selectedSchema, schema);
@@ -62,9 +66,11 @@ export default function BoardChartEditor() {
     const sourceId = value?.source_id ?? "";
 
     if (sourceDriver && sourceId) {
+      setLoading(true);
       sourceDriver
         .query(sourceId, sql)
         .then((newResult) => {
+          setLoading(false);
           setResult(
             OptimizeTableState.createFromResult({
               result: newResult,
@@ -72,6 +78,16 @@ export default function BoardChartEditor() {
               schemas: schema,
             })
           );
+          setValue((prev) => {
+            return produce(prev, (draft) => {
+              draft.params.layers[0].sql = sql;
+              if (newResult.headers?.length > 0) {
+                const columns = newResult.headers.map((header) => header.name);
+                draft.params.options.xAxisKey = columns.pop();
+                draft.params.options.yAxisKeys = columns;
+              }
+            });
+          });
         })
         .catch();
     }
@@ -81,10 +97,13 @@ export default function BoardChartEditor() {
     <div className="flex flex-1 border-t">
       <div className="flex flex-1 flex-col">
         <div className="h-1/2 border-b">
-          {result && <ResultTable data={result} />}
+          {result && displayType === "table" && <ResultTable data={result} />}
+          {result && displayType === "chart" && (
+            <Chart data={result.getAllRows().map((r) => r.raw)} value={value} />
+          )}
         </div>
         <div className="h-1/2 overflow-x-hidden">
-          <div className="flex border-b px-4 py-2">
+          <div className="flex gap-2 border-b px-4 py-2">
             <BoardSourcePicker
               value={value?.source_id}
               onChange={(newSourceId) => {
@@ -101,10 +120,36 @@ export default function BoardChartEditor() {
               }}
             />
 
+            <div>
+              <MenuBar
+                size="lg"
+                value={displayType}
+                onChange={setDisplayType}
+                items={[
+                  {
+                    value: "chart",
+                    content: (
+                      <span>
+                        <ChartBar className="inline" /> Chart
+                      </span>
+                    ),
+                  },
+                  {
+                    value: "table",
+                    content: (
+                      <span>
+                        <Table className="inline" /> Table
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+
             <div className="flex-1"></div>
 
             <div>
-              <Button size="lg" onClick={onRunClicked}>
+              <Button size="lg" onClick={onRunClicked} loading={loading}>
                 <Play />
                 Run
               </Button>
@@ -127,7 +172,11 @@ export default function BoardChartEditor() {
         </div>
       </div>
       <div className="w-[370px] overflow-x-hidden overflow-y-auto border-l p-4">
-        <EditChartMenu value={value} onChange={setValue} columns={[]} />
+        <EditChartMenu
+          value={value}
+          onChange={setValue}
+          columns={result?.getHeaders().map((header) => header.name) ?? []}
+        />
       </div>
     </div>
   );

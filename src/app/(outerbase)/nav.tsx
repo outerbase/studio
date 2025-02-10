@@ -14,26 +14,36 @@ import {
   SquaresFour,
 } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import NavigationProfile from "./nav-profile";
+import { useSession } from "./session-provider";
 import { useWorkspaces } from "./workspace-provider";
 
 export function NavigationBar() {
   const { currentWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
+  const pathname = usePathname();
+  const { session } = useSession();
 
   return (
     <div className="dark:bg-background relative sticky top-0 z-20 flex h-14 items-center justify-center gap-2 bg-neutral-50 px-2">
       <div className="text-primary absolute left-0 flex h-14 items-center pl-2">
-        <Link href={`/w/${workspaceId}`}>
+        <Link
+          href={
+            pathname !== "/w/local-workspace"
+              ? `/w/${workspaceId}`
+              : "/w/local-workspace"
+          }
+        >
           <OuterbaseIcon className="h-8 w-8" />
         </Link>
 
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost">
-              {currentWorkspace?.name} <CaretUpDown className="ml-2" />
+              {currentWorkspace?.name ?? "Local"}
+              <CaretUpDown className="ml-2" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="h-[400px] w-[500px] p-0" align="start">
@@ -42,28 +52,30 @@ export function NavigationBar() {
         </Popover>
       </div>
 
-      <div className="flex gap-4 text-base">
-        <Link
-          href={`/w/${workspaceId}`}
-          className="flex cursor-pointer items-center gap-1"
-        >
-          <GlobeHemisphereEast weight="fill" className="size-5" /> Home
-        </Link>
-        <Link
-          href={`/w/${workspaceId}/settings`}
-          className="flex cursor-pointer items-center gap-1"
-        >
-          <Gear className="size-5" />
-          Settings
-        </Link>
-        <Link
-          href={`/w/${workspaceId}/billing`}
-          className="flex cursor-pointer items-center gap-1"
-        >
-          <Gear className="size-5" />
-          Billing
-        </Link>
-      </div>
+      {workspaceId && workspaceId !== "local-workspace" && (
+        <div className="flex gap-4 text-base">
+          <Link
+            href={`/w/${workspaceId}`}
+            className="flex cursor-pointer items-center gap-1"
+          >
+            <GlobeHemisphereEast weight="fill" className="size-5" /> Home
+          </Link>
+          <Link
+            href={`/w/${workspaceId}/settings`}
+            className="flex cursor-pointer items-center gap-1"
+          >
+            <Gear className="size-5" />
+            Settings
+          </Link>
+          <Link
+            href={`/w/${workspaceId}/billing`}
+            className="flex cursor-pointer items-center gap-1"
+          >
+            <Gear className="size-5" />
+            Billing
+          </Link>
+        </div>
+      )}
 
       <div className="absolute right-0 flex gap-2 pr-2">
         <div className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg border px-4 text-base font-semibold">
@@ -71,6 +83,12 @@ export function NavigationBar() {
         </div>
 
         <NavigationProfile />
+
+        {!session && (
+          <Button href="/signin" size="lg" as="link">
+            Sign In
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -78,6 +96,7 @@ export function NavigationBar() {
 
 function WorkspaceSelector() {
   const router = useRouter();
+  const { session } = useSession();
   const { workspaces, currentWorkspace } = useWorkspaces();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(workspaceId);
@@ -128,7 +147,7 @@ function WorkspaceSelector() {
           className="p-4 font-normal"
           size="sm"
           as="link"
-          href="/new-workspace"
+          href={session ? "/new-workspace" : "/signin"}
         >
           <SquaresFour size={16} /> New Workspace
         </Button>
