@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import { Input } from "@/components/orbit/input";
 import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,7 +13,6 @@ import {
   OuterbaseDataCatalogVirtualColumnInput,
 } from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 import DataCatalogDriver from "./driver";
 
@@ -93,23 +92,25 @@ export default function TableMetadataModal({
         setLoading(false);
         onClose();
       });
-  }, [driver, onClose, metadataInput, schemaName, tableName]);
+  }, [driver, onClose, metadataInput, schemaName, data, tableName]);
 
   return (
     <>
       <DialogHeader>
         <DialogTitle>Add Table Metadata: {tableName}</DialogTitle>
       </DialogHeader>
-      <DialogDescription>Add metadata to your...</DialogDescription>
+      <DialogDescription className="text-base">
+        Add metadata to your...
+      </DialogDescription>
       <div className="mt-2 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label>Table Pseudonym</Label>
+          <Label className="text-sm">Table Pseudonym</Label>
           <Input
             value={metadataInput.alias}
-            onChange={(e) => {
+            onValueChange={(value) => {
               setMetadataInput((prev) =>
                 produce(prev, (draft) => {
-                  draft.alias = e.target.value;
+                  draft.alias = value;
                 })
               );
             }}
@@ -118,7 +119,7 @@ export default function TableMetadataModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label>Table Description</Label>
+          <Label className="text-sm">Table Description</Label>
           <Textarea
             value={metadataInput.body}
             rows={4}
@@ -129,19 +130,22 @@ export default function TableMetadataModal({
                 });
               });
             }}
+            className="text-base"
             placeholder="Add a description"
           />
         </div>
       </div>
 
       <DialogFooter>
-        <Button disabled={loading} onClick={onSaveUpdateColumn}>
-          {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-          Save
-        </Button>
-        <Button variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
+        <Button
+          loading={loading}
+          title="Save"
+          disabled={loading}
+          onClick={onSaveUpdateColumn}
+          shape="base"
+        />
+
+        <Button title="Cancel" variant="ghost" onClick={onClose} />
       </DialogFooter>
     </>
   );

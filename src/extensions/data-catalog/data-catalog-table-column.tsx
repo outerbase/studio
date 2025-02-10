@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import { Toggle } from "@/components/orbit/toggle";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -14,13 +15,7 @@ import {
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
-import {
-  Edit3,
-  EyeOff,
-  LucideMoreHorizontal,
-  ToggleLeftIcon,
-  ToggleRightIcon,
-} from "lucide-react";
+import { Edit3, EyeOff, LucideMoreHorizontal } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataCatalogTableColumnModal from "./data-catalog-table-column-modal";
 import DataCatalogDriver from "./driver";
@@ -52,7 +47,6 @@ export default function DataCatalogTableColumn({
   );
   const definition = modelColumn?.body;
 
-  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [hideFromEzql, setHideFromEzql] = useState<boolean>(() => {
     if (modelColumn?.flags) {
@@ -64,21 +58,14 @@ export default function DataCatalogTableColumn({
   const handleClickToggle = useCallback(() => {
     if (!modelColumn) return;
     setHideFromEzql(!hideFromEzql);
-    setLoading(true);
-    onToggleHideFromEzql(
-      {
-        ...modelColumn,
-        flags: {
-          ...modelColumn.flags,
-          isActive: !hideFromEzql,
-        },
+    onToggleHideFromEzql({
+      ...modelColumn,
+      flags: {
+        ...modelColumn.flags,
+        isActive: !hideFromEzql,
       },
-      // call me back when finish update column
-      () => {
-        setLoading(false);
-      }
-    );
-  }, [modelColumn]);
+    });
+  }, [modelColumn, hideFromEzql, onToggleHideFromEzql]);
 
   const sampleData = useMemo(() => {
     if (modelColumn?.sample_data) {
@@ -95,32 +82,20 @@ export default function DataCatalogTableColumn({
     <div
       key={column.name}
       className={cn(
-        "border-accent flex border-t pt-2 pb-2 text-sm",
+        "border-accent flex items-center border-t pt-2 pb-2 text-sm",
         hideFromEzql ? "opacity-100" : "opacity-50"
       )}
     >
-      <Button
-        disabled={loading}
-        onClick={handleClickToggle}
-        size={"icon"}
-        variant="ghost"
-      >
-        {hideFromEzql ? (
-          <ToggleRightIcon className="text-black dark:text-green-500" />
-        ) : (
-          <ToggleLeftIcon className="text-gray-400" />
-        )}
-      </Button>
-
-      <div className="flex w-[150px] items-center p-2">
+      <Toggle size="sm" toggled={hideFromEzql} onChange={handleClickToggle} />
+      <div className="flex w-[150px] items-center p-2 text-base">
         <HighlightText text={column.name} highlight={search} />
       </div>
-      <div className="text-muted-foreground flex-1 p-2">
+      <div className="text-muted-foreground flex-1 p-2 text-base">
         {definition || "No description"}
       </div>
       <div className="w-[150px] p-2">
         {sampleData.length > 0 && (
-          <span className="bg-secondary rounded p-1 px-2 text-xs">
+          <span className="bg-secondary rounded p-1 px-2 text-sm">
             {sampleData.length} sample data
           </span>
         )}
@@ -132,7 +107,7 @@ export default function DataCatalogTableColumn({
       }
       <DropdownMenu>
         <DropdownMenuTrigger asChild disabled={!hideFromEzql}>
-          <Button size="icon" variant="ghost">
+          <Button variant="ghost">
             <LucideMoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

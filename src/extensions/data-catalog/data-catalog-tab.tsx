@@ -1,5 +1,6 @@
 import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useConfig } from "@/context/config-provider";
 import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { useEffect, useState } from "react";
@@ -24,16 +25,17 @@ export default function DataCatalogTab() {
     useState<OuterbaseDataCatalogDefinition>();
 
   useEffect(() => {
+    if (!driver) return;
     const getDataCatalog = () => {
       setDataCatalog(driver?.getTermDefinitions() || []);
     };
 
     getDataCatalog();
 
-    const unsubscribe = driver?.addEventListener(getDataCatalog);
+    const unsubscribe = driver.addEventListener(getDataCatalog);
 
     return () => unsubscribe;
-  }, []);
+  }, [driver]);
 
   function onOpenModal() {
     setOpen(true);
@@ -50,15 +52,19 @@ export default function DataCatalogTab() {
         <Toolbar>
           <div>Data Catalog</div>
           <ToolbarFiller />
-          <Button size="sm" onClick={onOpenModal}>
-            Add Entry
-          </Button>
-          <DataCatalogEntryModal
-            open={open}
-            onClose={setOpen}
-            driver={driver}
-            definition={definition}
-          />
+          <Button title="Add Entry" size="sm" onClick={onOpenModal} />
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              {open && (
+                <DataCatalogEntryModal
+                  onClose={() => setOpen(false)}
+                  driver={driver}
+                  definition={definition}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
         </Toolbar>
       </div>
       <div className="flex-1 gap-5 overflow-scroll p-10 pb-0">
@@ -68,7 +74,7 @@ export default function DataCatalogTab() {
               ? "Get started with Data Catalog"
               : "Definitions"}
           </div>
-          <div className="text-sm">
+          <div className="text-base">
             {dataCatalog?.length === 0
               ? " Provide explanations for terminology in your schema. EZQL will use this to make running queries more efficient and accurate."
               : "Defined terms to be used in your product."}
@@ -85,9 +91,13 @@ export default function DataCatalogTab() {
             }}
           />
         )}
-        <Button className="mt-10 mb-10" onClick={onOpenModal}>
-          {dataCatalog?.length === 0 ? "Create your first entry" : "Add Entry"}
-        </Button>
+        <Button
+          title={
+            dataCatalog?.length === 0 ? "Create your first entry" : "Add Entry"
+          }
+          className="mt-10 mb-10"
+          onClick={onOpenModal}
+        />
       </div>
     </div>
   );
