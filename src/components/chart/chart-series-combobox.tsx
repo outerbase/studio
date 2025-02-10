@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { ThemeColors } from "./chart-type";
 import SimpleColorPicker from "./simple-color-picker";
 interface SimpleComboValue {
   value: string;
@@ -31,6 +32,7 @@ interface ChartSeriesComboboxProps {
   onRemove: (v: string | null) => void;
   color?: string;
   onChangeColor: (color: string) => void;
+  onThemeChange: (theme: ThemeColors) => void;
 }
 
 export function ChartSeriesCombobox({
@@ -41,6 +43,7 @@ export function ChartSeriesCombobox({
   onRemove,
   color,
   onChangeColor,
+  onThemeChange,
 }: ChartSeriesComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [openMore, setOpenMore] = React.useState(false);
@@ -79,9 +82,10 @@ export function ChartSeriesCombobox({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <SimpleColorPicker
+                    selected={color}
+                    onThemeChange={onThemeChange}
                     onChange={function (color: string): void {
                       onChangeColor(color);
-                      setOpenColorPicker(false);
                     }}
                   ></SimpleColorPicker>
                 </PopoverContent>

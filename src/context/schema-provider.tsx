@@ -46,7 +46,7 @@ function generateAutoCompleteFromSchemaItems(
     );
 }
 
-function generateAutoComplete(
+export function generateAutoComplete(
   currentSchemaName: string,
   schema: DatabaseSchemas
 ) {

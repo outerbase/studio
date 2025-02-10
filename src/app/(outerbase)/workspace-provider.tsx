@@ -1,33 +1,50 @@
 "use client";
 import { getOuterbaseWorkspace } from "@/outerbase-cloud/api";
 import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
+import { produce } from "immer";
 import { noop } from "lodash";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   createContext,
   PropsWithChildren,
+  useCallback,
   useContext,
-  useEffect,
   useMemo,
 } from "react";
 import useSWR from "swr";
+import { useSession } from "./session-provider";
 
 const WorkspaceContext = createContext<{
   workspaces: OuterbaseAPIWorkspace[];
   currentWorkspace?: OuterbaseAPIWorkspace;
-  refreshWorkspace: () => void;
+  refreshWorkspace: () => Promise<void>;
+
+  /**
+   * Updates the specified workspace in the cache directly,
+   * instead of refreshing all workspaces from the server.
+   * This is useful when the modify API returns the updated workspace object,
+   * allowing us to save time by updating the cache directly.
+   *
+   * @param workspace - The workspace object to update in the cache.
+   */
+  refreshPartial: (workspace: OuterbaseAPIWorkspace) => void;
   loading: boolean;
-}>({ workspaces: [], loading: true, refreshWorkspace: noop });
+}>({
+  workspaces: [],
+  loading: true,
+  refreshWorkspace: async () => {},
+  refreshPartial: noop,
+});
 
 export function useWorkspaces() {
   return useContext(WorkspaceContext);
 }
 
 export function WorkspaceProvider({ children }: PropsWithChildren) {
-  const router = useRouter();
+  const { token } = useSession();
 
   const { data, isLoading, mutate } = useSWR(
-    "workspaces",
+    token ? "workspaces" : undefined,
     () => {
       return getOuterbaseWorkspace();
     },
@@ -50,16 +67,36 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
     );
   }, [workspaceId, data]);
 
-  useEffect(() => {
-    // If the current workspace is not found, redirect to the first workspace
-    if (isLoading) return;
+  const refreshPartial = useCallback(
+    (modifiedWorkspace: OuterbaseAPIWorkspace) => {
+      if (!data) return;
 
-    if (!currentWorkspace) {
-      if (data?.items.length) {
-        router.replace(`/w/${data.items[0].short_name}`);
-      }
-    }
-  }, [isLoading, data, currentWorkspace, workspaceId, router]);
+      const newData = produce(data, (draft) => {
+        for (let i = 0; i < draft.items.length; i++) {
+          if (draft.items[i].id === modifiedWorkspace.id) {
+            draft.items[i] = modifiedWorkspace;
+            return;
+          }
+        }
+
+        draft.items.push(modifiedWorkspace);
+      });
+
+      mutate(newData, {
+        revalidate: true,
+        optimisticData: newData,
+      });
+    },
+    [mutate, data]
+  );
+
+  const refreshWorkspace = useCallback(async () => {
+    const newWorkspceList = await getOuterbaseWorkspace();
+    mutate(newWorkspceList, {
+      revalidate: true,
+      optimisticData: newWorkspceList,
+    });
+  }, [mutate]);
 
   return (
     <WorkspaceContext.Provider
@@ -67,7 +104,8 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
         workspaces: data?.items || [],
         loading: isLoading,
         currentWorkspace,
-        refreshWorkspace: mutate,
+        refreshWorkspace,
+        refreshPartial,
       }}
     >
       {children}

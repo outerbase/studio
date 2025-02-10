@@ -1,3 +1,4 @@
+import { CircularProgressBar } from "@/components/circular-progress-bar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,7 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { convertTimeToMilliseconds } from "@/lib/convertNumber";
+import { cn } from "@/lib/utils";
 import { ChevronDown, RefreshCcw } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useBoardContext } from "../board-provider";
 
 interface Props {
@@ -18,8 +21,48 @@ interface Props {
   onCancel: () => void;
 }
 
+function useAutoRefresh(interval: number) {
+  const [isActive, setIsActive] = useState(false);
+  const [isReset, setIsReset] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(interval / 1000);
+
+  useEffect(() => {
+    setIsReset(true);
+    setTimeLeft(0);
+  }, [interval]);
+
+  useEffect(() => {
+    if (interval > 0 && isReset) {
+      setTimeLeft(interval / 1000);
+      setIsActive(true);
+      setIsReset(false);
+    }
+  }, [interval, isReset]);
+
+  useEffect(() => {
+    if (timeLeft > 0 && isActive) {
+      const run = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setIsActive(false);
+            setIsReset(true);
+            clearInterval(run);
+            return 0;
+          }
+          return timeLeft - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(run);
+    }
+  }, [interval, isActive, timeLeft]);
+
+  return timeLeft;
+}
+
 export function BoardButtonMenu(props: Props) {
-  const { setting } = useBoardContext();
+  const { setting, setBoardMode } = useBoardContext();
+  const timeleft = useAutoRefresh(props.interval);
 
   if (props.mode === "REARRANGING_CHART") {
     return (
@@ -34,8 +77,14 @@ export function BoardButtonMenu(props: Props) {
     );
   }
 
+  const autoIntervalSelected = setting?.autoRefresh.find(
+    (f) => convertTimeToMilliseconds(f) === props.interval
+  );
+
+  const progress = (timeleft * 100000) / props.interval;
+
   return (
-    <div>
+    <div className="flex gap-2">
       <button
         className={buttonVariants({ size: "sm", variant: "ghost" })}
         onClick={() => {
@@ -46,12 +95,27 @@ export function BoardButtonMenu(props: Props) {
           <div>
             <RefreshCcw className="h-4 w-4" />
           </div>
-          <div>{props.interval === 0 ? "" : `${props.interval / 1000}s`}</div>
         </div>
       </button>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className={buttonVariants({ size: "sm", variant: "ghost" })}>
+          <button
+            className={cn(
+              buttonVariants({ size: "sm", variant: "ghost" }),
+              "gap-2"
+            )}
+          >
+            {props.interval > 0 && (
+              <div className="relative h-4 w-4 pt-[3%]">
+                <CircularProgressBar
+                  value={progress}
+                  size={15}
+                  strokeWidth={3}
+                />
+              </div>
+            )}
+            {props.interval > 0 && <div>{autoIntervalSelected}</div>}
             <ChevronDown className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
@@ -67,7 +131,8 @@ export function BoardButtonMenu(props: Props) {
           <DropdownMenuCheckboxItem
             checked={props.interval === convertTimeToMilliseconds("5m")}
             onClick={() => {
-              props.onChangeInterval(convertTimeToMilliseconds("5m"));
+              const time = convertTimeToMilliseconds("5m");
+              props.onChangeInterval(time);
             }}
           >
             Auto
@@ -88,6 +153,17 @@ export function BoardButtonMenu(props: Props) {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
+      <div>
+        <Button
+          variant={"default"}
+          size="sm"
+          onClick={() => {
+            setBoardMode("ADD_CHART");
+          }}
+        >
+          Add Chart
+        </Button>
+      </div>
     </div>
   );
 }

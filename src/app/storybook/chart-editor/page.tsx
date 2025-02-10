@@ -9,31 +9,43 @@ const data: ChartData[] = [
   {
     seller: 49,
     seller2: 1049,
+    seller3: 2049,
+    seller4: 3049,
     _year: 2019,
   },
   {
     seller: 590,
     seller2: 1590,
+    seller3: 2590,
+    seller4: 3590,
     _year: 2020,
   },
   {
     seller: 7908,
     seller2: 8908,
+    seller3: 9908,
+    seller4: 10908,
     _year: 2021,
   },
   {
     seller: 4985,
     seller2: 5985,
+    seller3: 6985,
+    seller4: 7985,
     _year: 2022,
   },
   {
     seller: 2638,
     seller2: 3638,
+    seller3: 4638,
+    seller4: 5638,
     _year: 2023,
   },
   {
     seller: 4,
     seller2: 1004,
+    seller3: 2004,
+    seller4: 3004,
     _year: 2024,
   },
 ];
@@ -52,25 +64,17 @@ const lineChartValue: ChartValue = {
     apiKey: "",
     layers: [
       {
-        sql: "select count(*) as seller,count(*) + 1000 as seller2, year(l192_new.supplier.registered_date) as _year\nFROM\n    supplier\nGROUP BY _year\nhaving _year is not null\nORDER BY _year\n",
-        type: "line",
+        sql: "select \n    count(*) as seller,\n    count(*) + 1000 as seller2, \n    count(*) + 2000 as seller3, \n    count(*) + 3000 as seller4,\n    year(l192_new.supplier.registered_date) as _year\nFROM\n    supplier\nGROUP BY _year\nhaving _year is not null\nORDER BY _year\n",
+        type: "table",
       },
     ],
     options: {
-      theme: "afterburn",
-      xAxisKey: "_year",
-      yAxisKeys: ["seller", "seller2"],
-      foreground: "#ffffff",
-      xAxisLabel: "cust year",
+      xAxisKey: undefined,
+      yAxisKeys: undefined,
+      xAxisLabel: undefined,
       yAxisLabel: "cust sellers",
-      gradientStop: "#42788F",
-      gradientStart: "#2C4F5E",
-      backgroundType: "gradient",
-      yAxisKeyColors: {
-        seller: "#E75F98",
-        seller2: "#FFA285",
-      },
-      xAxisLabelHidden: false,
+      backgroundType: "none",
+      xAxisLabelHidden: true,
       yAxisLabelHidden: true,
       yAxisLabelDisplay: "right",
     },
@@ -82,12 +86,13 @@ const lineChartValue: ChartValue = {
   },
   source_id: "856a1855-2bee-4d87-9756-a783088c0568",
   type: "line",
-  updated_at: "2025-02-05T09:18:03.224Z",
+  updated_at: "2025-02-09T07:58:17.571Z",
   workspace_id: "3db2e96f-ee43-412d-be09-25fc02d3a463",
 };
 
 export default function StorybookChartEditorPage() {
   const [chartValue, setChartValue] = useState(lineChartValue);
+
   return (
     <div className="flex h-full space-x-4">
       <div className="w-full flex-1 border-r p-4">
@@ -97,8 +102,8 @@ export default function StorybookChartEditorPage() {
         {/* render chart editor menu here */}
         <EditChartMenu
           value={chartValue}
-          setValue={setChartValue}
-          data={data}
+          onChange={setChartValue}
+          columns={data?.length > 0 ? Object.keys(data[0]) : []}
         />
       </div>
     </div>

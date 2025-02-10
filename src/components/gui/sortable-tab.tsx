@@ -1,10 +1,10 @@
-import { LucideIcon, LucideX } from "lucide-react";
-import { useSortable } from "@dnd-kit/sortable";
-import { WindowTabItemProps } from "./windows-tab";
+import { CSS } from "@/lib/dnd-kit";
 import { cn } from "@/lib/utils";
+import { useSortable } from "@dnd-kit/sortable";
+import { LucideIcon, LucideX } from "lucide-react";
 import { forwardRef } from "react";
 import { ButtonProps } from "../ui/button";
-import { CSS } from "@/lib/dnd-kit";
+import { WindowTabItemProps } from "./windows-tab";
 
 interface SortableTabProps {
   tab: WindowTabItemProps;
@@ -41,10 +41,10 @@ export const WindowTabItemButton = forwardRef<
   return (
     <button
       className={cn(
-        "bg-neutral-100 dark:bg-neutral-900 relative h-[40px] border-x text-neutral-500 flex items-center text-left text-xs px-2 min-w-[170px] max-w-[300px] dark:hover:text-white hover:text-black",
+        "relative flex h-[40px] max-w-[300px] min-w-[170px] items-center border-x bg-neutral-100 px-2 text-left text-sm text-neutral-500 hover:text-black dark:bg-neutral-900 dark:hover:text-white",
         isDragging && "z-20",
         selected
-          ? "bg-neutral-50 dark:bg-neutral-950 text-primary"
+          ? "text-primary bg-neutral-50 dark:bg-neutral-950"
           : "border-b border-x-transparent",
         index === 0 ? "border-l-0" : ""
       )}
@@ -57,19 +57,19 @@ export const WindowTabItemButton = forwardRef<
       {onClose && (
         <div
           className={cn(
-            "rounded hover:bg-neutral-800 hover:text-white w-5 h-5 ml-2 flex justify-center items-center"
+            "ml-2 flex h-5 w-5 items-center justify-center rounded hover:bg-neutral-800 hover:text-white"
           )}
           onClick={(e) => {
             e.stopPropagation();
             if (onClose) onClose();
           }}
         >
-          <LucideX className={cn("w-3 h-3 grow-0 shrink-0")} />
+          <LucideX className={cn("h-3 w-3 shrink-0 grow-0")} />
         </div>
       )}
 
       {!selected && (
-        <div className="absolute right-[-1px] top-2 w-[1px] h-6 bg-border dark:bg-neutral-800" />
+        <div className="bg-border absolute top-2 right-[-1px] h-6 w-[1px] dark:bg-neutral-800" />
       )}
     </button>
   );

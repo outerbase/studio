@@ -19,7 +19,7 @@ import {
 export interface BoardFilterProps {
   type: string;
   name: string;
-  default_value: string;
+  defaultValue: string;
   value: string;
   new?: boolean;
 }
@@ -34,7 +34,7 @@ interface Props {
 const DEFAULT_EMPTY = {
   type: "search",
   name: "",
-  default_value: "",
+  defaultValue: "",
   value: "",
 };
 
@@ -135,20 +135,20 @@ export function BoardFilterDialog(props: Props) {
             {props.filter.type === "search" ? (
               <Input
                 placeholder="Enter default value"
-                value={props.filter.default_value}
+                value={props.filter.defaultValue}
                 onChange={(v) =>
                   props.onFilter({
                     ...props.filter,
-                    default_value: v.target.value,
+                    defaultValue: v.target.value,
                   })
                 }
               />
             ) : (
               <Select
                 disabled={default_value.length === 0}
-                value={props.filter.default_value}
+                value={props.filter.defaultValue}
                 onValueChange={(v) =>
-                  props.onFilter({ ...props.filter, default_value: v })
+                  props.onFilter({ ...props.filter, defaultValue: v })
                 }
               >
                 <SelectTrigger>

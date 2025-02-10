@@ -8,9 +8,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useDatabaseDriver } from "@/context/driver-provider";
+import { OuterbaseDataCatalogVirtualColumnInput } from "@/outerbase-cloud/api-type";
 import { MagicWand } from "@phosphor-icons/react";
+import { produce } from "immer";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
+import { defaultVirtualColumn } from "./constant";
 import DataCatalogDriver from "./driver";
 
 interface DataCatalogTableColumnModalProps {
@@ -20,7 +23,6 @@ interface DataCatalogTableColumnModalProps {
   columnName: string;
   onClose: () => void;
 }
-
 export default function DataCatalogTableColumnModal({
   driver,
   schemaName,
@@ -30,12 +32,36 @@ export default function DataCatalogTableColumnModal({
 }: DataCatalogTableColumnModalProps) {
   const modelColumn = driver.getColumn(schemaName, tableName, columnName);
   const { databaseDriver } = useDatabaseDriver();
-
-  const [definition, setDefinition] = useState(modelColumn?.definition ?? "");
-  const [samples, setSamples] = useState(
-    (modelColumn?.samples ?? []).join(",")
+  const [column, setColumn] = useState<OuterbaseDataCatalogVirtualColumnInput>(
+    () => {
+      if (modelColumn) {
+        return {
+          body: modelColumn.body,
+          column: modelColumn.column,
+          flags: modelColumn.flags,
+          sample_data: modelColumn.sample_data,
+          schema: modelColumn.schema,
+          table: modelColumn.table,
+          virtual_key_column: modelColumn.virtualKeyColumn,
+          virtual_key_schema: modelColumn.virtualKeySchema,
+          virtual_key_table: modelColumn.virtualKeyTable,
+        };
+      } else {
+        return {
+          ...defaultVirtualColumn,
+          flags: {
+            isActive: true,
+            isVirtualKey: false,
+          },
+          schema: schemaName,
+          table: tableName,
+          column: columnName,
+          virtual_key_schema: schemaName,
+          virtual_key_table: tableName,
+        };
+      }
+    }
   );
-
   const [loading, setLoading] = useState(false);
   const [sampleLoading, setSampleLoading] = useState(false);
 
@@ -46,40 +72,25 @@ export default function DataCatalogTableColumnModal({
         `SELECT DISTINCT ${databaseDriver.escapeId(columnName)} FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT 10`
       )
       .then((r) => {
-        setSamples(r.rows.map((row) => row[columnName]).join(", "));
+        setColumn((prev) =>
+          produce(prev, (draft) => {
+            draft.sample_data = r.rows.map((row) => row[columnName]).join(", ");
+          })
+        );
       })
       .finally(() => setSampleLoading(false));
   }, [databaseDriver, columnName, schemaName, tableName]);
 
   const onSaveUpdateColumn = useCallback(() => {
     setLoading(true);
-
     driver
-      .updateColumn(schemaName, tableName, columnName, {
-        definition,
-        samples:
-          samples && samples.trim()
-            ? samples.split(",").map((s) => s.trim())
-            : [],
-        hideFromEzql: modelColumn?.hideFromEzql ?? false,
-      })
-      .then((r) => {
-        console.log(r);
-      })
+      .updateColumn(schemaName, tableName, column, modelColumn?.id)
+      .then()
       .finally(() => {
         setLoading(false);
         onClose();
       });
-  }, [
-    driver,
-    modelColumn,
-    samples,
-    columnName,
-    onClose,
-    schemaName,
-    tableName,
-    definition,
-  ]);
+  }, [driver, column, onClose, schemaName, tableName]);
 
   return (
     <>
@@ -96,8 +107,14 @@ export default function DataCatalogTableColumnModal({
           <Label>Column Description</Label>
           <Textarea
             rows={4}
-            value={definition}
-            onChange={(e) => setDefinition(e.currentTarget.value)}
+            value={column.body}
+            onChange={(e) => {
+              setColumn((prev) =>
+                produce(prev, (draft) => {
+                  draft.body = e.target.value;
+                })
+              );
+            }}
             placeholder="Please provide the definition of a column. This is intended to enhance AI functionality."
           />
         </div>
@@ -122,8 +139,14 @@ export default function DataCatalogTableColumnModal({
           </div>
           <Textarea
             rows={4}
-            value={samples}
-            onChange={(e) => setSamples(e.currentTarget.value)}
+            value={column.sample_data}
+            onChange={(e) => {
+              setColumn((prev) => {
+                return produce(prev, (draft) => {
+                  draft.sample_data = e.target.value;
+                });
+              });
+            }}
             placeholder="Please provide the definition of a column. This is intended to enhance AI functionality."
           />
         </div>

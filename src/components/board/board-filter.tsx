@@ -1,4 +1,5 @@
 "use client";
+import { produce } from "immer";
 import {
   CalendarDays,
   Check,
@@ -8,6 +9,7 @@ import {
   Search,
 } from "lucide-react";
 import { useCallback, useState } from "react";
+import { DashboardProps } from ".";
 import { buttonVariants } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import {
@@ -17,17 +19,11 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import {
-  BoardFilterDialog,
-  BoardFilterProps,
-  DEFAULT_DATE_FILTER,
-} from "./board-filter-dialog";
+import { BoardFilterDialog, DEFAULT_DATE_FILTER } from "./board-filter-dialog";
 import { BoardTool } from "./board-tool/board-tool";
 import { BoardToolbar } from "./board-tool/board-toolbar";
 
 interface Props {
-  filters: BoardFilterProps[];
-  onFilters: (f: BoardFilterProps[]) => void;
   editMode: "ADD_CHART" | "REARRANGING_CHART" | null;
   onChangeEditMode: (v: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
   interval: number;
@@ -35,6 +31,8 @@ interface Props {
   onRefresh?: () => void;
   onSave: () => void;
   onCancel: () => void;
+  value: DashboardProps;
+  onChange: (v: DashboardProps) => void;
 }
 
 export function BoardFilter(props: Props) {
@@ -43,22 +41,21 @@ export function BoardFilter(props: Props) {
   const [selectIndex, setSelectIndex] = useState<number | undefined>(undefined);
 
   const onFilter = useCallback(() => {
-    const data = [
-      ...props.filters,
-      {
+    const data = produce(props.value, (draft) => {
+      draft.data.filters.push({
         type: "search",
-        default_value: "",
+        defaultValue: "",
         value: "",
         name: "",
         new: true,
-      },
-    ];
-    props.onFilters(data);
-    setSelectIndex(data.length - 1);
+      });
+    });
+    props.onChange(data);
+    setSelectIndex(data.data.filters.length - 1);
     setOpen(true);
   }, [props]);
 
-  const mapFilterItem = props.filters.map((x, i) => {
+  const mapFilterItem = props.value.data.filters.map((x, i) => {
     const icon =
       x.type === "search" ? (
         <Search className="h-3 w-3" />
@@ -71,11 +68,14 @@ export function BoardFilter(props: Props) {
       x.type === "search" ? (
         <input
           placeholder={`Enter ${x.name}`}
-          value={x.default_value}
+          value={x.defaultValue}
           onChange={(v) => {
-            const data = structuredClone(props.filters);
-            data[i].default_value = v.target.value;
-            props.onFilters(data);
+            const data = structuredClone(props.value.data.filters);
+            data[i].defaultValue = v.target.value;
+            const value = produce(props.value, (draft) => {
+              draft.data.filters = data;
+            });
+            props.onChange(value);
           }}
           className="max-w-14 outline-0"
         />
@@ -85,12 +85,12 @@ export function BoardFilter(props: Props) {
             <PopoverTrigger asChild>
               <div
                 className={
-                  x.default_value
+                  x.defaultValue
                     ? "px-2 py-1"
                     : "text-muted-foreground px-2 py-1"
                 }
               >
-                <div>{x.default_value || `Select ${x.name}`}</div>
+                <div>{x.defaultValue || `Select ${x.name}`}</div>
               </div>
             </PopoverTrigger>
             <PopoverContent className="w-auto">
@@ -102,22 +102,25 @@ export function BoardFilter(props: Props) {
                   >
                     <Checkbox
                       id={v + idx}
-                      checked={x.default_value.split(",").includes(v)}
+                      checked={x.defaultValue.split(",").includes(v)}
                       onCheckedChange={(checked) => {
-                        const value = x.default_value.split(",");
-                        const data = structuredClone(props.filters);
+                        const valueString = x.defaultValue.split(",");
+                        const data = structuredClone(props.value.data.filters);
 
                         if (checked) {
-                          data[i].default_value = [...value, v]
+                          data[i].defaultValue = [...valueString, v]
                             .filter((f) => !!f)
                             .join(",");
                         } else {
-                          value.filter((f) => f !== v);
-                          data[i].default_value = value
+                          valueString.filter((f) => f !== v);
+                          data[i].defaultValue = valueString
                             .filter((f) => f !== v)
                             .join(",");
                         }
-                        props.onFilters(data);
+                        const value = produce(props.value, (draft) => {
+                          draft.data.filters = data;
+                        });
+                        props.onChange(value);
                       }}
                     />
                     <label htmlFor={v + idx}>{v}</label>
@@ -132,12 +135,10 @@ export function BoardFilter(props: Props) {
           <DropdownMenuTrigger asChild>
             <div
               className={
-                x.default_value
-                  ? "px-2 py-1"
-                  : "text-muted-foreground px-2 py-1"
+                x.defaultValue ? "px-2 py-1" : "text-muted-foreground px-2 py-1"
               }
             >
-              <div>{x.default_value || `Select ${x.name}`}</div>
+              <div>{x.defaultValue || `Select ${x.name}`}</div>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -146,14 +147,17 @@ export function BoardFilter(props: Props) {
                 <DropdownMenuItem
                   key={date}
                   onClick={() => {
-                    const data = structuredClone(props.filters);
-                    data[i].default_value = date;
-                    props.onFilters(data);
+                    const data = structuredClone(props.value.data.filters);
+                    data[i].defaultValue = date;
+                    const value = produce(props.value, (draft) => {
+                      draft.data.filters = data;
+                    });
+                    props.onChange(value);
                   }}
                 >
                   <div className="flex items-center gap-2">
                     {date}
-                    {date === x.default_value && <Check className="h-3 w-3" />}
+                    {date === x.defaultValue && <Check className="h-3 w-3" />}
                   </div>
                 </DropdownMenuItem>
               );
@@ -172,7 +176,7 @@ export function BoardFilter(props: Props) {
         </div>
         <div
           className={
-            x.default_value ? "px-2 py-1" : "text-muted-foreground px-2 py-1"
+            x.defaultValue ? "px-2 py-1" : "text-muted-foreground px-2 py-1"
           }
         >
           {input}
@@ -196,9 +200,12 @@ export function BoardFilter(props: Props) {
             <DropdownMenuItem
               className="text-xs"
               onClick={() => {
-                props.onFilters([
-                  ...props.filters.filter((_, idx) => idx !== i),
-                ]);
+                const value = produce(props.value, (draft) => {
+                  draft.data.filters = props.value.data.filters.filter(
+                    (_, idx) => idx !== i
+                  );
+                });
+                props.onChange(value);
               }}
             >
               Remove
@@ -225,30 +232,41 @@ export function BoardFilter(props: Props) {
           mode={props.editMode}
           onSave={props.onSave}
           onCancel={props.onCancel}
+          value={props.value}
+          onChangeValue={props.onChange}
         />
         <div className={show ? "px-2 pt-4" : "hidden"}>
           {open && selectIndex !== undefined && (
             <BoardFilterDialog
               onClose={() => {
                 setOpen(false);
-                if (props.filters[selectIndex].new === true) {
-                  props.onFilters([
-                    ...props.filters.filter((_, i) => i !== selectIndex),
-                  ]);
+                if (props.value.data.filters[selectIndex].new === true) {
+                  const value = produce(props.value, (draft) => {
+                    draft.data.filters = props.value.data.filters.filter(
+                      (_, i) => i !== selectIndex
+                    );
+                  });
+                  props.onChange(value);
                   setSelectIndex(undefined);
                 }
               }}
-              filter={props.filters[selectIndex]}
+              filter={props.value.data.filters[selectIndex]}
               onFilter={(v) => {
-                const data = structuredClone(props.filters);
+                const data = structuredClone(props.value.data.filters);
                 data[selectIndex] = v;
-                props.onFilters(data);
+                const value = produce(props.value, (draft) => {
+                  draft.data.filters = data;
+                });
+                props.onChange(value);
               }}
               onAddFilter={() => {
-                const data = structuredClone(props.filters);
+                const data = structuredClone(props.value.data.filters);
                 data[selectIndex].new = false;
                 setOpen(false);
-                props.onFilters(data);
+                const value = produce(props.value, (draft) => {
+                  draft.data.filters = data;
+                });
+                props.onChange(value);
               }}
             />
           )}

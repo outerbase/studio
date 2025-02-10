@@ -1,40 +1,22 @@
-export interface VirtualJoinColumn {
-  id: string;
-  schema: string;
-  tableName: string;
-  columnName: string;
-  virtualKeyColumn: string;
-  virtualKeySchema: string;
-  virtualKeyTable: string;
-  flags?: {
-    isActive: boolean;
-    isVirtual: boolean;
-  };
-}
-export interface DataCatalogModelColumnInput {
-  hideFromEzql: boolean;
-  definition: string;
-  samples: string[];
-}
+import {
+  OuterbaseDataCatalogComment,
+  OuterbaseDataCatalogDefinition,
+  OuterbaseDataCatalogVirtualColumnInput,
+} from "@/outerbase-cloud/api-type";
 
-export interface DataCatalogModelColumn extends DataCatalogModelColumnInput {
+export interface DataCatalogTermDefinition {
+  id?: string;
   name: string;
-}
-
-export interface DataCatalogModelTableInput {
   definition?: string;
-  virtualJoin?: VirtualJoinColumn[];
+  otherNames?: string;
 }
-export interface DataCatalogTermDefinition extends DataCatalogModelTableInput {
-  id: string;
-  name: string;
-  otherName?: string;
-}
-export interface DataCatalogModelTable extends DataCatalogModelTableInput {
+export interface DataCatalogModelTable {
   schemaName: string;
   tableName: string;
-  columns: Record<string, DataCatalogModelColumn>;
-  virtualJoin?: VirtualJoinColumn[];
+
+  virtualJoin: OuterbaseDataCatalogComment[];
+  columns: Record<string, OuterbaseDataCatalogComment>;
+  metadata?: OuterbaseDataCatalogComment;
 }
 
 export type DataCatalogSchemas = Record<
@@ -45,27 +27,28 @@ export type DataCatalogSchemas = Record<
 export default abstract class DataCatalogDriver {
   abstract load(): Promise<{
     schemas: DataCatalogSchemas;
-    dataCatalog: DataCatalogTermDefinition[];
+    definitions: OuterbaseDataCatalogDefinition[];
   }>;
-
   abstract updateColumn(
     schemaName: string,
     tableName: string,
-    columnName: string,
-    data: DataCatalogModelColumnInput
-  ): Promise<DataCatalogModelColumn>;
+    data: OuterbaseDataCatalogVirtualColumnInput,
+    commentId?: string,
+    isVirtual?: boolean
+  ): Promise<OuterbaseDataCatalogComment>;
 
   abstract updateTable(
     schemaName: string,
     tableName: string,
-    data: DataCatalogModelTableInput
-  ): Promise<DataCatalogModelTable>;
+    data: OuterbaseDataCatalogVirtualColumnInput,
+    commentId?: string
+  ): Promise<DataCatalogModelTable | undefined>;
 
   abstract getColumn(
     schemaName: string,
     tableName: string,
     columnName: string
-  ): DataCatalogModelColumn | undefined;
+  ): OuterbaseDataCatalogComment | undefined;
 
   abstract getTable(
     schemaName: string,
@@ -76,7 +59,16 @@ export default abstract class DataCatalogDriver {
     data: DataCatalogTermDefinition
   ): Promise<DataCatalogTermDefinition | undefined>;
 
-  abstract getTermDefinitions(): DataCatalogTermDefinition[] | undefined;
+  abstract getTermDefinitions(): OuterbaseDataCatalogDefinition[];
 
   abstract deleteTermDefinition(id: string): Promise<boolean>;
+
+  abstract deleteVirtualColumn(
+    schemaName: string,
+    tableName: string,
+    id: string
+  ): Promise<boolean>;
+
+  abstract addEventListener(cb: () => void): void;
+  abstract removeEventListener(cb: () => void): void;
 }

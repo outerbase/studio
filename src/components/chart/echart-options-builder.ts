@@ -16,7 +16,6 @@ export default class EchartOptionsBuilder {
   private columns: string[] = [];
   public chartHeight: number = 0;
   public chartWidth: number = 0;
-  public colorTheme: ThemeColors = "mercury";
 
   constructor(value: ChartValue, data: ChartData[]) {
     this.chartValue = value;
@@ -36,15 +35,50 @@ export default class EchartOptionsBuilder {
   }
 
   private getColorValues(): string[] {
-    const DEFAULT_THEME = "mercury";
-    const colorTheme = this.colorTheme ?? DEFAULT_THEME;
-    const values = THEMES[colorTheme];
+    let colors: string[] = [];
+
+    if (!this.chartValue.params.options.theme) {
+      colors = Object.keys(
+        this.chartValue.params.options?.yAxisKeyColors || {}
+      ).map(
+        (key) => this.chartValue.params.options.yAxisKeyColors?.[key] as string
+      );
+
+      // If the user has already set the colors, return them
+      if (colors.length >= this.columns.length) {
+        return colors;
+      }
+
+      // If the user has set some colors, but not enough, generate the rest
+      if (colors.length >= 2 && colors.length < this.columns.length) {
+        const startColor = colors[0];
+        const endColor = colors[1];
+        return [
+          ...colors,
+          ...generateGradientColors(
+            startColor,
+            endColor,
+            this.columns.length - colors.length
+          ),
+        ];
+      }
+    }
+
+    const colorTheme =
+      this.chartValue.params.options.theme ?? ("neonPunk" as ThemeColors);
+    const values = THEMES[colorTheme as ThemeColors];
 
     if (!values) {
       throw new Error(`Theme "${colorTheme}" does not exist`);
     }
 
-    return values.colors[this.theme]; // return light or dark values
+    const colorRange = values.colors[this.theme];
+
+    return generateGradientColors(
+      colorRange[0],
+      colorRange[1],
+      this.columns.length
+    );
   }
 
   private getTextColor(): string {
@@ -55,15 +89,18 @@ export default class EchartOptionsBuilder {
   }
 
   getChartOptions(): EChartsOption {
-    const colorValues = this.getColorValues();
-
     const formattedSource = this.chartData;
     this.columns = [];
     if (this.chartValue.params.options?.xAxisKey) {
       this.columns.push(this.chartValue.params.options.xAxisKey);
     }
-    for (const key of this.chartValue.params.options.yAxisKeys) {
-      this.columns.push(key);
+    if (
+      this.chartValue.params.options?.yAxisKeys &&
+      this.chartValue.params.options.yAxisKeys.length > 0
+    ) {
+      for (const key of this.chartValue.params.options.yAxisKeys) {
+        this.columns.push(key);
+      }
     }
 
     const isTall = this.chartHeight > 150;
@@ -94,9 +131,7 @@ export default class EchartOptionsBuilder {
               value: formattedSource.map((item) => Number(item[col])), // throws away precision of bigint?!
               name: col,
               itemStyle: {
-                color:
-                  this.chartValue.params.options.yAxisKeyColors?.[col] ||
-                  colorValues[index % colorValues.length],
+                color: this.getColorValues()[index],
               },
             },
           ],
@@ -108,17 +143,20 @@ export default class EchartOptionsBuilder {
       };
     }
 
-    let xAxisLabel = !this.chartValue.params.options.xAxisLabel
-      ? this.chartValue.params.options.xAxisKey
-      : this.chartValue.params.options.xAxisLabel;
+    let xAxisLabel =
+      this.chartValue.params.options.xAxisLabel ??
+      (this.chartValue.params.options.xAxisKey || "");
 
     xAxisLabel = this.chartValue.params.options.xAxisLabelHidden
       ? ""
       : xAxisLabel;
 
-    let yaxisLabel = !this.chartValue.params.options.yAxisLabel
-      ? this.chartValue.params.options.yAxisKeys[0]
-      : this.chartValue.params.options.yAxisLabel;
+    let yaxisLabel =
+      this.chartValue.params.options.yAxisLabel ??
+      (this.chartValue.params.options.yAxisKeys &&
+      this.chartValue.params.options.yAxisKeys?.length > 0
+        ? this.chartValue.params.options.yAxisKeys[0]
+        : "");
 
     yaxisLabel = this.chartValue.params.options.yAxisLabelHidden
       ? ""
@@ -352,7 +390,7 @@ export default class EchartOptionsBuilder {
     seriesType: T["type"],
     additionalOptions: Partial<Omit<T, "type">> = {}
   ): T[] {
-    return this.columns.slice(1).map((col) => {
+    return this.columns.slice(1).map((col, index) => {
       const baseSeries = {
         name: col,
         type: seriesType,
@@ -361,7 +399,7 @@ export default class EchartOptionsBuilder {
             ? { x: col, y: this.columns[0] } // For bar charts
             : { x: this.columns[0], y: col }, // For other chart types
         itemStyle: {
-          color: this.chartValue.params.options.yAxisKeyColors?.[col], // does NOT impact pie charts
+          color: this.getColorValues()[index], // does NOT impact pie charts
         },
         symbol: "circle",
         ...additionalOptions,
@@ -396,4 +434,40 @@ function isDate(dateString: string): boolean {
     const date = new Date(dateString);
     return !isNaN(date.getTime());
   }
+}
+
+function interpolateColor(
+  color1: string,
+  color2: string,
+  factor: number
+): string {
+  const c1 = parseInt(color1.slice(1), 16);
+  const c2 = parseInt(color2.slice(1), 16);
+
+  const r1 = (c1 >> 16) & 0xff;
+  const g1 = (c1 >> 8) & 0xff;
+  const b1 = c1 & 0xff;
+
+  const r2 = (c2 >> 16) & 0xff;
+  const g2 = (c2 >> 8) & 0xff;
+  const b2 = c2 & 0xff;
+
+  const r = Math.round(r1 + factor * (r2 - r1));
+  const g = Math.round(g1 + factor * (g2 - g1));
+  const b = Math.round(b1 + factor * (b2 - b1));
+
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+export function generateGradientColors(
+  startColor: string,
+  endColor: string,
+  numColors: number
+): string[] {
+  const colors = [];
+  for (let i = 0; i < numColors; i++) {
+    const factor = i / (numColors - 1);
+    colors.push(interpolateColor(startColor, endColor, factor));
+  }
+  return colors;
 }

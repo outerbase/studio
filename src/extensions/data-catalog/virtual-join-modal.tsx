@@ -2,6 +2,7 @@ import TableColumnCombobox from "@/components/gui/table-combobox/TableColumnComb
 import TableCombobox from "@/components/gui/table-combobox/TableCombobox";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -9,155 +10,187 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  OuterbaseDataCatalogComment,
+  OuterbaseDataCatalogVirtualColumnInput,
+} from "@/outerbase-cloud/api-type";
+import { produce } from "immer";
 import { LucideLoader } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import DataCatalogDriver, {
-  DataCatalogModelTableInput,
-  VirtualJoinColumn,
-} from "./driver";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { defaultVirtualColumn } from "./constant";
+import DataCatalogDriver from "./driver";
 
 interface Props {
+  open: boolean;
   driver: DataCatalogDriver;
   schemaName: string;
   tableName: string;
-  column?: VirtualJoinColumn;
+  data?: OuterbaseDataCatalogComment;
   onClose: () => void;
+  onOpenChange: (open: boolean) => void;
 }
+
 export default function VirtualJoinModal({
+  open,
   tableName,
   schemaName,
   driver,
-  column,
+  data,
   onClose,
+  onOpenChange,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const [virtualKeySchema, setVirtualKeySchema] = useState<
-    string | undefined
-  >();
-
-  const [virtualKeyTable, setVirtualKeyTable] = useState<string | undefined>();
-  const [virtualKeyColumn, setVirtualKeyColumn] = useState<
-    string | undefined
-  >();
+  const [virtualColumnInput, setVirtaulColumnInput] =
+    useState<OuterbaseDataCatalogVirtualColumnInput>(() => {
+      return {
+        ...defaultVirtualColumn,
+        schema: schemaName,
+        virtual_key_schema: schemaName,
+        virtual_key_table: tableName,
+      };
+    });
 
   const clear = useCallback(() => {
-    setVirtualKeyColumn(undefined);
-    setVirtualKeySchema(undefined);
-    setVirtualKeyTable(undefined);
+    setVirtaulColumnInput(defaultVirtualColumn);
   }, []);
 
   useEffect(() => {
-    if (column) {
-      setVirtualKeyColumn(column.virtualKeyColumn);
-      setVirtualKeySchema(column.virtualKeySchema);
-      setVirtualKeyTable(column.virtualKeyTable);
-    } else {
-      clear();
+    if (data) {
+      setVirtaulColumnInput({
+        body: data.body,
+        column: data.column,
+        flags: data.flags,
+        sample_data: data.sample_data,
+        schema: data.schema,
+        table: data.table,
+        virtual_key_column: data.virtualKeyColumn,
+        virtual_key_schema: data.virtualKeySchema,
+        virtual_key_table: data.virtualKeyTable,
+      });
     }
-  }, [column, clear]);
+  }, [data]);
 
-  const createVirtualJoin = () => {
+  const createUpdateVirtualJoin = useCallback(() => {
+    if (!driver) return;
     setLoading(true);
-
-    const modelTable = driver.getTable(schemaName, tableName);
-    const virtualJoin = [...(modelTable?.virtualJoin || [])];
-
-    const newVirtualJoin = {
-      id: column?.id || new Date().toISOString(),
-      schema: schemaName,
-      tableName: tableName,
-      columnName: virtualKeyColumn || "",
-      virtualKeyColumn: virtualKeyColumn || "",
-      virtualKeySchema: virtualKeySchema || "",
-      virtualKeyTable: virtualKeyTable || "",
-    };
-
-    if (column?.id) {
-      const index = virtualJoin.findIndex((col) => col.id === column.id);
-      if (index > -1) {
-        virtualJoin[index] = newVirtualJoin;
-      }
-    } else {
-      virtualJoin.push(newVirtualJoin);
-    }
-
-    const updatedData: DataCatalogModelTableInput = {
-      ...modelTable,
-      virtualJoin,
-    };
-
     driver
-      ?.updateTable(schemaName, tableName, updatedData)
-      .then((r) => console.log("Updated successfully:", r))
-      .catch((error) => {
-        console.error("Error updating virtual join:", error);
-      })
+      .updateColumn(
+        schemaName,
+        tableName,
+        virtualColumnInput,
+        data ? data.id : undefined,
+        true // make it true for update update virtual column
+      )
+      .then()
+      .catch()
       .finally(() => {
         setLoading(false);
         onClose();
         clear();
       });
-  };
+  }, [driver, schemaName, tableName, virtualColumnInput, data, clear, onClose]);
 
+  const disabled = useMemo(
+    () =>
+      !virtualColumnInput.body ||
+      !virtualColumnInput.table ||
+      !virtualColumnInput.column,
+    [virtualColumnInput]
+  );
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
-          {column ? "Edit" : "Add Relationship"} to {tableName}
-        </DialogTitle>
-      </DialogHeader>
-      <DialogDescription>
-        Use virtual relationships to connect fields that don&apos;t have a
-        direct foreign key link. For example, if two tables should be related by
-        email or title but don&apos;t have a formal foreign key, use these
-        virtual relationships to link them.
-      </DialogDescription>
-      <div className="mt-2 flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label>Column</Label>
-        </div>
-        <TableColumnCombobox
-          value={virtualKeySchema}
-          schemaName={schemaName}
-          tableName={tableName}
-          onChange={setVirtualKeySchema}
-        />
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Relationship Table</Label>
-          </div>
-          <TableCombobox
-            value={virtualKeyTable}
-            schemaName={schemaName}
-            onChange={setVirtualKeyTable}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Relationship Column</Label>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setVirtaulColumnInput({
+            ...defaultVirtualColumn,
+            schema: schemaName,
+            virtual_key_schema: schemaName,
+            virtual_key_table: tableName,
+          });
+        }
+        onOpenChange(open);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {data ? "Edit" : "Add Relationship"} to {tableName}
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Use virtual relationships to connect fields that don&apos;t have a
+          direct foreign key link. For example, if two tables should be related
+          by email or title but don&apos;t have a formal foreign key, use these
+          virtual relationships to link them.
+        </DialogDescription>
+        <div className="mt-2 flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label>Column</Label>
           </div>
           <TableColumnCombobox
-            value={virtualKeyColumn}
+            value={virtualColumnInput.body}
             schemaName={schemaName}
             tableName={tableName}
-            onChange={setVirtualKeyColumn}
+            onChange={(value) => {
+              setVirtaulColumnInput((prev) =>
+                produce(prev, (draft) => {
+                  draft.body = value;
+                })
+              );
+            }}
           />
-        </div>
-      </div>
 
-      <DialogFooter>
-        <Button
-          variant="ghost"
-          disabled={!virtualKeyColumn || !virtualKeySchema || !virtualKeyTable}
-          onClick={createVirtualJoin}
-        >
-          {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-          {column ? "Edit Relationship" : "Create Virtual Join"}
-        </Button>
-        <div className="flex-1" />
-      </DialogFooter>
-    </DialogContent>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label>Relationship Table</Label>
+            </div>
+            <TableCombobox
+              value={virtualColumnInput.table}
+              schemaName={schemaName}
+              onChange={(value) => {
+                setVirtaulColumnInput((prev) =>
+                  produce(prev, (draft) => {
+                    draft.table = value;
+                    draft.column = draft.column !== value ? "" : draft.column;
+                  })
+                );
+              }}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label>Relationship Column</Label>
+            </div>
+            <TableColumnCombobox
+              value={virtualColumnInput.column}
+              schemaName={schemaName}
+              tableName={virtualColumnInput.table}
+              onChange={(value) => {
+                setVirtaulColumnInput((prev) =>
+                  produce(prev, (draft) => {
+                    draft.column = value;
+                    draft.virtual_key_column = value;
+                  })
+                );
+              }}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="ghost"
+            disabled={disabled}
+            onClick={createUpdateVirtualJoin}
+          >
+            {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
+            {data ? "Edit Relationship" : "Create Virtual Join"}
+          </Button>
+          <div className="flex-1" />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

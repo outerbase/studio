@@ -22,7 +22,7 @@ export default function BoardChart({ value }: { value: ChartValue }) {
     sources
       .query(sourceId, sql)
       .then((v) => {
-        setData(v);
+        setData(v.rows);
       })
       .catch((e) => {
         console.error(e);

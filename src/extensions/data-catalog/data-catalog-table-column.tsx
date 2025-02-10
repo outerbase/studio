@@ -13,6 +13,7 @@ import {
   DatabaseTableSchema,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
+import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import {
   Edit3,
   EyeOff,
@@ -20,7 +21,7 @@ import {
   ToggleLeftIcon,
   ToggleRightIcon,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import DataCatalogTableColumnModal from "./data-catalog-table-column-modal";
 import DataCatalogDriver from "./driver";
 
@@ -30,6 +31,10 @@ interface DataCatalogTableColumnProps {
   driver: DataCatalogDriver;
   search?: string;
   hasDefinitionOnly?: boolean;
+  onToggleHideFromEzql: (
+    column?: OuterbaseDataCatalogComment,
+    cb?: () => void
+  ) => void;
 }
 
 export default function DataCatalogTableColumn({
@@ -38,33 +43,49 @@ export default function DataCatalogTableColumn({
   driver,
   search,
   hasDefinitionOnly,
+  onToggleHideFromEzql,
 }: DataCatalogTableColumnProps) {
   const modelColumn = driver.getColumn(
     table.schemaName,
     table.tableName!,
     column.name
   );
+  const definition = modelColumn?.body;
 
-  const definition = modelColumn?.definition;
-  const sampleData = modelColumn?.samples ?? [];
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [hideFromEzql, setHideFromEzql] = useState<boolean>(() => {
-    return modelColumn?.hideFromEzql || true;
+    if (modelColumn?.flags) {
+      return modelColumn.flags.isActive;
+    }
+    return true;
   });
 
-  const onToggleHideFromEzql = useCallback(() => {
+  const handleClickToggle = useCallback(() => {
+    if (!modelColumn) return;
     setHideFromEzql(!hideFromEzql);
     setLoading(true);
-    driver
-      .updateColumn(table.schemaName, table.tableName!, column.name, {
-        ...modelColumn!,
-        hideFromEzql: !hideFromEzql,
-      })
-      .finally(() => {
+    onToggleHideFromEzql(
+      {
+        ...modelColumn,
+        flags: {
+          ...modelColumn.flags,
+          isActive: !hideFromEzql,
+        },
+      },
+      // call me back when finish update column
+      () => {
         setLoading(false);
-      });
-  }, [driver, table, hideFromEzql, modelColumn, column]);
+      }
+    );
+  }, [modelColumn]);
+
+  const sampleData = useMemo(() => {
+    if (modelColumn?.sample_data) {
+      return modelColumn.sample_data.split(",").map((s) => s.trim());
+    }
+    return [];
+  }, [modelColumn]);
 
   if (hasDefinitionOnly && !definition) {
     return null;
@@ -80,7 +101,7 @@ export default function DataCatalogTableColumn({
     >
       <Button
         disabled={loading}
-        onClick={onToggleHideFromEzql}
+        onClick={handleClickToggle}
         size={"icon"}
         variant="ghost"
       >
@@ -127,7 +148,7 @@ export default function DataCatalogTableColumn({
             <Edit3 className="h-4 w-4" />
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="gap-5" onClick={onToggleHideFromEzql}>
+          <DropdownMenuItem className="gap-5" onClick={handleClickToggle}>
             Hide from EZQL
             <div className="flex-1" />
             <EyeOff className="h-4 w-4" />

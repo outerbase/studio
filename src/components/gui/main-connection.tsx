@@ -1,13 +1,14 @@
 "use client";
-import { useEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import DatabaseGui from "./database-gui";
-import { useConfig } from "@/context/config-provider";
-import { AutoCompleteProvider } from "@/context/auto-complete-provider";
-import { SchemaProvider } from "@/context/schema-provider";
 import { WEBSITE_NAME } from "@/const";
+import { AutoCompleteProvider } from "@/context/auto-complete-provider";
+import { useConfig } from "@/context/config-provider";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { SchemaProvider } from "@/context/schema-provider";
+import { useEffect } from "react";
+import { DialogProvider } from "../create-dialog";
 import ContextMenuHandler from "./context-menu-handler";
+import DatabaseGui from "./database-gui";
 
 function MainConnection() {
   const { databaseDriver: driver } = useDatabaseDriver();
@@ -21,6 +22,7 @@ function MainConnection() {
   return (
     <SchemaProvider>
       <DatabaseGui />
+      <DialogProvider slot="base" />
     </SchemaProvider>
   );
 }

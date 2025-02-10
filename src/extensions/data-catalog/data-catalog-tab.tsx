@@ -1,10 +1,10 @@
 import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/context/config-provider";
-import { useState } from "react";
+import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
+import { useEffect, useState } from "react";
 import DataCatalogExtension from ".";
 import { DataCatalogEntryModal } from "./data-catalog-entry-modal";
-import { DataCatalogTermDefinition } from "./driver";
 import EmptyTermDefinition from "./empty-definition";
 import TermDefinitionList from "./term-definition-list";
 
@@ -16,22 +16,28 @@ export default function DataCatalogTab() {
 
   const [open, setOpen] = useState(false);
 
-  const [dataCatalog, setDataCatalog] = useState<DataCatalogTermDefinition[]>(
-    () => {
-      return driver?.getTermDefinitions() || [];
-    }
-  );
+  const [dataCatalog, setDataCatalog] = useState<
+    OuterbaseDataCatalogDefinition[]
+  >([]);
 
-  const [selectedTermDefinition, setSeletedTermDefinition] =
-    useState<DataCatalogTermDefinition>();
+  const [definition, setDefinition] =
+    useState<OuterbaseDataCatalogDefinition>();
 
-  function onSuccess() {
-    setDataCatalog(driver?.getTermDefinitions() || []);
-  }
+  useEffect(() => {
+    const getDataCatalog = () => {
+      setDataCatalog(driver?.getTermDefinitions() || []);
+    };
+
+    getDataCatalog();
+
+    const unsubscribe = driver?.addEventListener(getDataCatalog);
+
+    return () => unsubscribe;
+  }, []);
 
   function onOpenModal() {
     setOpen(true);
-    setSeletedTermDefinition(undefined);
+    setDefinition(undefined);
   }
 
   if (!driver) {
@@ -48,11 +54,10 @@ export default function DataCatalogTab() {
             Add Entry
           </Button>
           <DataCatalogEntryModal
-            selectedTermDefinition={selectedTermDefinition}
             open={open}
             onClose={setOpen}
             driver={driver}
-            onSuccess={onSuccess}
+            definition={definition}
           />
         </Toolbar>
       </div>
@@ -75,7 +80,7 @@ export default function DataCatalogTab() {
           <TermDefinitionList
             data={dataCatalog}
             onSelect={(item) => {
-              setSeletedTermDefinition(item);
+              setDefinition(item);
               setOpen(true);
             }}
           />
