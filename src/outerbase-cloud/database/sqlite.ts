@@ -1,6 +1,6 @@
 import { DatabaseResultSet, DriverFlags } from "@/drivers/base-driver";
 import { SqliteLikeBaseDriver } from "@/drivers/sqlite-base-driver";
-import { runOuterbaseQueryBatch, runOuterbaseQueryRaw } from "../api";
+import { runOuterbaseQueryRaw } from "../api";
 import { OuterbaseDatabaseConfig } from "../api-type";
 import { transformOuterbaseResult } from "./utils";
 
@@ -34,11 +34,11 @@ export class OuterbaseSqliteDriver extends SqliteLikeBaseDriver {
     return transformOuterbaseResult(jsonResponse);
   }
 
-  async batch(stmts: string[]): Promise<DatabaseResultSet[]> {
-    return (
-      await runOuterbaseQueryBatch(this.workspaceId, this.sourceId, stmts)
-    ).map(transformOuterbaseResult);
-  }
+  // async batch(stmts: string[]): Promise<DatabaseResultSet[]> {
+  //   return (
+  //     await runOuterbaseQueryBatch(this.workspaceId, this.sourceId, stmts)
+  //   ).map(transformOuterbaseResult);
+  // }
 
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     return this.batch(stmts);

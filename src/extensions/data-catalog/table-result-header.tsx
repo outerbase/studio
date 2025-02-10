@@ -17,16 +17,24 @@ export default function DataCatalogResultHeader({
   driver,
 }: DataCatalogResultHeaderProps) {
   const column = driver.getColumn(schemaName, tableName, columnName);
-  const [definition, setDefinition] = useState(column?.definition ?? "");
+  const [definition, setDefinition] = useState(() => column?.body ?? "");
   const [loading, setLoading] = useState(false);
 
   const onSaveClicked = useCallback(() => {
+    if (!column) return;
     setLoading(true);
+
     driver
-      .updateColumn(schemaName, tableName, columnName, {
-        definition,
-        hideFromEzql: column?.hideFromEzql ?? false,
-        samples: column?.samples ?? [],
+      .updateColumn(schemaName, tableName, {
+        flags: column.flags,
+        body: definition,
+        column: column.column,
+        sample_data: column.sample_data,
+        schema: column.schema,
+        table: column.table,
+        virtual_key_column: column.virtualKeyColumn,
+        virtual_key_schema: column.virtualKeySchema,
+        virtual_key_table: column.virtualKeyTable,
       })
       .then()
       .catch()

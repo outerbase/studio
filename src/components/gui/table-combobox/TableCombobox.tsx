@@ -44,7 +44,7 @@ export default function TableCombobox({
               "flex w-full justify-between"
             )}
           >
-            {value ?? "No table selected"}
+            {value || "No table selected"}
             <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
           </div>
         )}
