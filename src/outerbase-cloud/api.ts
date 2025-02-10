@@ -90,7 +90,7 @@ export async function createOuterbaseDashboard(
     "POST",
     {
       name,
-      base_id: baseId ?? null,
+      base_id: baseId ?? "",
       chart_ids: [],
       data: {
         version: 3,
