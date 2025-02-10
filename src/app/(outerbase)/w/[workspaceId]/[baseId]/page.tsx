@@ -8,8 +8,10 @@ import {
   createPostgreSQLExtensions,
   createSQLiteExtensions,
 } from "@/core/standard-extension";
+import DataCatalogExtension from "@/extensions/data-catalog";
 import { getOuterbaseBase } from "@/outerbase-cloud/api";
 import { OuterbaseAPISource } from "@/outerbase-cloud/api-type";
+import DataCatalogOuterbaseDriver from "@/outerbase-cloud/data-catalog-driver";
 import { OuterbaseMySQLDriver } from "@/outerbase-cloud/database/mysql";
 import { OuterbasePostgresDriver } from "@/outerbase-cloud/database/postgresql";
 import { OuterbaseSqliteDriver } from "@/outerbase-cloud/database/sqlite";
@@ -46,27 +48,40 @@ export default function OuterbaseSourcePage() {
     const outerbaseConfig = {
       workspaceId,
       sourceId: source.id,
-      baseId: "",
+      baseId,
       token: localStorage.getItem("ob-token") ?? "",
     };
+
+    const outerbaseSpecifiedDrivers = [
+      new DataCatalogExtension(new DataCatalogOuterbaseDriver(outerbaseConfig)),
+    ];
 
     if (dialect === "postgres") {
       return [
         new OuterbasePostgresDriver(outerbaseConfig),
-        new StudioExtensionManager(createPostgreSQLExtensions()),
+        new StudioExtensionManager([
+          ...createPostgreSQLExtensions(),
+          ...outerbaseSpecifiedDrivers,
+        ]),
       ];
     } else if (dialect === "mysql") {
       return [
         new OuterbaseMySQLDriver(outerbaseConfig),
-        new StudioExtensionManager(createMySQLExtensions()),
+        new StudioExtensionManager([
+          ...createMySQLExtensions(),
+          ...outerbaseSpecifiedDrivers,
+        ]),
       ];
     }
 
     return [
       new OuterbaseSqliteDriver(outerbaseConfig),
-      new StudioExtensionManager(createSQLiteExtensions()),
+      new StudioExtensionManager([
+        ...createSQLiteExtensions(),
+        ...outerbaseSpecifiedDrivers,
+      ]),
     ];
-  }, [workspaceId, source]);
+  }, [workspaceId, source, baseId]);
 
   if (!outerbaseDriver || !savedDocDriver) {
     return <PageLoading>Loading Base ...</PageLoading>;
