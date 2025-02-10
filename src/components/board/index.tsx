@@ -79,16 +79,8 @@ export default function Board({
     >
       <div className="relative flex flex-1 flex-col">
         <BoardFilter
-          filters={value.data.filters}
-          onFilters={(v) =>
-            onChange({
-              ...value,
-              data: {
-                ...value.data,
-                filters: v,
-              },
-            })
-          }
+          value={value}
+          onChange={onChange}
           editMode={editMode}
           onChangeEditMode={setEditMode}
           interval={interval}
