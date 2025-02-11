@@ -13,7 +13,7 @@ import {
   getOuterbaseSchemas,
   updateOuerbaseDefinition,
   updateOuterbaseDataCatalogVirtualColumn,
-} from "./api";
+} from "./api-data-catalog";
 import {
   OuterbaseDatabaseConfig,
   OuterbaseDataCatalogComment,
