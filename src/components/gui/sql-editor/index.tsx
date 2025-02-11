@@ -17,6 +17,7 @@ import CodeMirror, {
 } from "@uiw/react-codemirror";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
+import { createVariableHighlightPlugin } from "@/components/editor/sql-editor/variable-highlight-plugin";
 import { SupportedDialect } from "@/drivers/base-driver";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
@@ -30,6 +31,8 @@ import SqlStatementHighlightPlugin from "./statement-highlight";
 import useCodeEditorTheme from "./use-editor-theme";
 
 interface SqlEditorProps {
+  highlightVariable?: boolean;
+  variableList?: string[];
   value: string;
   dialect: SupportedDialect;
   readOnly?: boolean;
@@ -57,6 +60,8 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       readOnly,
       fontSize,
       onFontSizeChanged,
+      variableList,
+      highlightVariable,
     }: SqlEditorProps,
     ref
   ) {
@@ -164,6 +169,12 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
         }),
         keyExtensions,
         indentUnit.of("  "),
+        highlightVariable
+          ? createVariableHighlightPlugin({
+              variables: variableList ?? [],
+              language: sqlDialect,
+            })
+          : undefined,
         sqlDialect,
         tooltipExtension,
         tableNameHighlightPlugin,
@@ -182,6 +193,8 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       keyExtensions,
       schema,
       tableNameHighlightPlugin,
+      (variableList ?? []).join(","),
+      highlightVariable,
     ]);
 
     return (

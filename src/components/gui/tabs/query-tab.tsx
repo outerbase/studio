@@ -1,47 +1,5 @@
-import { format } from "sql-formatter";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  LucideGrid,
-  LucideMessageSquareWarning,
-  LucidePlay,
-} from "lucide-react";
 import SqlEditor from "@/components/gui/sql-editor";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { KEY_BINDING } from "@/lib/key-matcher";
-import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import QueryProgressLog from "../query-progress-log";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import {
-  MultipleQueryProgress,
-  MultipleQueryResult,
-  multipleQuery,
-} from "@/lib/sql/multiple-query";
-import WindowTabs, { useTabsContext, WindowTabItemProps } from "../windows-tab";
-import QueryResult from "../tabs-result/query-result-tab";
-import { useSchema } from "@/context/schema-provider";
-import SaveDocButton from "../save-doc-button";
-import {
-  SavedDocData,
-  SavedDocInput,
-} from "@/drivers/saved-doc/saved-doc-driver";
-import { TAB_PREFIX_SAVED_QUERY } from "@/const";
-import { toast } from "sonner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  resolveToNearestStatement,
-  splitSqlQuery,
-} from "../sql-editor/statement-highlight";
-import { CaretDown } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,12 +7,54 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { isExplainQueryPlan } from "../query-explanation";
-import ExplainResultTab from "../tabs-result/explain-result-tab";
-import { tokenizeSql } from "@/lib/sql/tokenizer";
-import { QueryPlaceholder } from "./query-placeholder";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TAB_PREFIX_SAVED_QUERY } from "@/const";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
+import {
+  SavedDocData,
+  SavedDocInput,
+} from "@/drivers/saved-doc/saved-doc-driver";
 import { escapeSqlValue, extractInputValue } from "@/drivers/sqlite/sql-helper";
+import { KEY_BINDING } from "@/lib/key-matcher";
+import {
+  multipleQuery,
+  MultipleQueryProgress,
+  MultipleQueryResult,
+} from "@/lib/sql/multiple-query";
+import { tokenizeSql } from "@/lib/sql/tokenizer";
 import { sendAnalyticEvents } from "@/lib/tracking";
+import { cn } from "@/lib/utils";
+import { CaretDown } from "@phosphor-icons/react";
+import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import {
+  LucideGrid,
+  LucideMessageSquareWarning,
+  LucidePlay,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { format } from "sql-formatter";
+import { isExplainQueryPlan } from "../query-explanation";
+import QueryProgressLog from "../query-progress-log";
+import SaveDocButton from "../save-doc-button";
+import {
+  resolveToNearestStatement,
+  splitSqlQuery,
+} from "../sql-editor/statement-highlight";
+import ExplainResultTab from "../tabs-result/explain-result-tab";
+import QueryResult from "../tabs-result/query-result-tab";
+import WindowTabs, { useTabsContext, WindowTabItemProps } from "../windows-tab";
+import { QueryPlaceholder } from "./query-placeholder";
 
 interface QueryWindowProps {
   initialCode?: string;
@@ -290,7 +290,7 @@ export default function QueryWindow({
         title: "Summary",
         icon: LucideMessageSquareWarning,
         component: (
-          <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+          <div className="h-full w-full overflow-x-hidden overflow-y-auto">
             <QueryProgressLog progress={progress} />
           </div>
         ),
@@ -309,16 +309,24 @@ export default function QueryWindow({
     );
   }, [progress, queryTabIndex, data, databaseDriver]);
 
+  const onCursorChange = useCallback(
+    (_: unknown, line: number, col: number) => {
+      setLineNumber(line);
+      setColumnNumber(col);
+    },
+    []
+  );
+
   return (
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
-        <div className="absolute left-0 right-0 top-0 bottom-0 flex flex-col">
-          <div className="border-b pl-3 pr-1 py-3 flex dark:bg-neutral-950 bg-neutral-50">
-            <div className="text-sm shrink-0 items-center flex text-secondary-foreground p-1">
+        <div className="absolute top-0 right-0 bottom-0 left-0 flex flex-col">
+          <div className="flex border-b bg-neutral-50 py-3 pr-1 pl-3 dark:bg-neutral-950">
+            <div className="text-secondary-foreground flex shrink-0 items-center p-1 text-sm">
               {namespaceName} /
             </div>
-            <div className="inline-block relative">
-              <span className="inline-block text-sm p-1 outline-hidden font-semibold min-w-[175px] border border-background opacity-0">
+            <div className="relative inline-block">
+              <span className="border-background inline-block min-w-[175px] border p-1 text-sm font-semibold opacity-0 outline-hidden">
                 &nbsp;{name}
               </span>
               <input
@@ -329,7 +337,7 @@ export default function QueryWindow({
                 }}
                 placeholder="Please name your query"
                 spellCheck="false"
-                className="absolute top-0 right-0 left-0 bottom-0 text-sm p-1 outline-hidden font-semibold focus:border-secondary-foreground rounded bg-transparent"
+                className="focus:border-secondary-foreground absolute top-0 right-0 bottom-0 left-0 rounded bg-transparent p-1 text-sm font-semibold outline-hidden"
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
               />
@@ -354,7 +362,7 @@ export default function QueryWindow({
                     "rounded-r-none"
                   )}
                 >
-                  <LucidePlay className="w-4 h-4 mr-2" />
+                  <LucidePlay className="mr-2 h-4 w-4" />
                   Run
                 </button>
                 <DropdownMenu>
@@ -393,10 +401,7 @@ export default function QueryWindow({
               schema={autoCompleteSchema}
               fontSize={fontSize}
               onFontSizeChanged={setFontSize}
-              onCursorChange={(_, line, col) => {
-                setLineNumber(line);
-                setColumnNumber(col);
-              }}
+              onCursorChange={onCursorChange}
               onKeyDown={(e) => {
                 if (KEY_BINDING.run.match(e)) {
                   onRunClicked();
@@ -409,9 +414,9 @@ export default function QueryWindow({
               }}
             />
           </div>
-          <div className="grow-0 shrink-0">
-            <div className="flex gap-1 pb-1 px-2">
-              <div className="grow items-center flex text-xs mr-2 gap-2 pl-4">
+          <div className="shrink-0 grow-0">
+            <div className="flex gap-1 px-2 pb-1">
+              <div className="mr-2 flex grow items-center gap-2 pl-4 text-xs">
                 <div>Ln {lineNumber}</div>
                 <div>Col {columnNumber + 1}</div>
               </div>
@@ -437,7 +442,7 @@ export default function QueryWindow({
                 </TooltipTrigger>
                 <TooltipContent className="p-4">
                   <p className="mb-2">
-                    <span className="inline-block py-1 px-2 rounded bg-secondary text-secondary-foreground">
+                    <span className="bg-secondary text-secondary-foreground inline-block rounded px-2 py-1">
                       {KEY_BINDING.format.toString()}
                     </span>
                   </p>
