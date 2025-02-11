@@ -32,7 +32,11 @@ import useCodeEditorTheme from "./use-editor-theme";
 
 interface SqlEditorProps {
   highlightVariable?: boolean;
-  variableList?: string[];
+
+  /**
+   * Comma seprated variable name list
+   */
+  variableList?: string;
   value: string;
   dialect: SupportedDialect;
   readOnly?: boolean;
@@ -171,7 +175,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
         indentUnit.of("  "),
         highlightVariable
           ? createVariableHighlightPlugin({
-              variables: variableList ?? [],
+              variables: variableList ?? "",
               language: sqlDialect,
             })
           : undefined,
@@ -193,7 +197,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       keyExtensions,
       schema,
       tableNameHighlightPlugin,
-      (variableList ?? []).join(","),
+      variableList,
       highlightVariable,
     ]);
 

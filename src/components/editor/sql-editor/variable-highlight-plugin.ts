@@ -66,18 +66,20 @@ export function createVariableHighlightPlugin({
   variables,
   language,
 }: {
-  variables: string[];
+  variables: string;
   language: LanguageSupport;
 }) {
+  const variableList = variables.split(",").map((v) => v.trim());
+
   function handlebarCompletion(context: CompletionContext) {
     const node = syntaxTree(context.state).resolveInner(context.pos);
 
-    let ptr: SyntaxNode | null | undefined = node.parent;
+    const ptr: SyntaxNode | null | undefined = node.parent;
 
     if (ptr?.type.name === "Braces" || ptr?.type.name === "Brackets") {
       return {
         from: node.from + 1,
-        options: variables.map((variableName) => ({
+        options: variableList.map((variableName) => ({
           label: variableName,
           type: "variable",
           boost: 1000,
@@ -92,9 +94,11 @@ export function createVariableHighlightPlugin({
   const extensions = [
     variableHighlightView,
     variableHighlightTheme,
-    language.language.data.of({
-      autocomplete: handlebarCompletion,
-    }),
+    variableList
+      ? language.language.data.of({
+          autocomplete: handlebarCompletion,
+        })
+      : undefined,
   ].filter(Boolean);
 
   return extensions;
