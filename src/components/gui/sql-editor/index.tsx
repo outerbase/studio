@@ -193,7 +193,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       keyExtensions,
       schema,
       tableNameHighlightPlugin,
-      (variableList ?? []).join(","),
+      variableList,
       highlightVariable,
     ]);
 
