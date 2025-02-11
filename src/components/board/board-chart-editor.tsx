@@ -90,9 +90,22 @@ export default function BoardChartEditor({
             return produce(prev, (draft) => {
               draft.params.layers[0].sql = sql;
               if (newResult.headers?.length > 0) {
-                const columns = newResult.headers.map((header) => header.name);
-                draft.params.options.xAxisKey = columns.pop();
-                draft.params.options.yAxisKeys = columns;
+                if (newResult.rows.length > 0) {
+                  const xAxisKeys = [];
+                  const yAxisKeys = [];
+                  // study each column value and try to guess the type
+                  for (const column of newResult.headers) {
+                    if (column.type === 2) {
+                      // it is number type
+                      yAxisKeys.push(column.name);
+                    } else {
+                      xAxisKeys.push(column.name);
+                    }
+                  }
+                  draft.params.options.xAxisKey =
+                    xAxisKeys.length > 0 ? xAxisKeys[0] : "";
+                  draft.params.options.yAxisKeys = yAxisKeys;
+                }
               }
             });
           });
