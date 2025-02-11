@@ -1,5 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { produce } from "immer";
 import {
   EditIcon,
   EllipsisVertical,
@@ -47,7 +48,11 @@ export function BoardCanvas({
   editMode,
   setEditMode,
 }: BoardProps) {
-  const { onLayoutRemove } = useBoardContext();
+  const {
+    storage,
+    value: boardValue,
+    onChange: onBoardChange,
+  } = useBoardContext();
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -92,7 +97,19 @@ export function BoardCanvas({
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
       onclick: (key?: string) => {
-        onLayoutRemove(key || "");
+        if (storage && onBoardChange && boardValue) {
+          storage.remove(key || "").then(() => {
+            const newValue = produce(boardValue, (draft) => {
+              draft.layout = draft.layout.filter((f) => f.i !== key);
+              draft.charts = draft.charts.filter((f) => f.id !== key);
+            });
+
+            storage.save(newValue).then(() => {});
+
+            // Do something here
+            onBoardChange(newValue);
+          });
+        }
       },
     },
   ];

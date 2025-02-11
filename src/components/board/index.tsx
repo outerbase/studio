@@ -1,4 +1,5 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
+import { IBoardStorageDriver } from "@/drivers/board-storage/base";
 import { useEffect, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
@@ -21,25 +22,19 @@ export type BoardEditorMode = "ADD_CHART" | "REARRANGING_CHART" | null;
 interface Props {
   value: DashboardProps;
   sources?: BoardSourceDriver;
+  storage?: IBoardStorageDriver;
   interval: number;
   onChange: (value: DashboardProps) => void;
   onChangeInterval: (v: number) => void;
-  onLayoutSave: () => void;
-  onLayoutCancel: () => void;
-  onRemove: (key: string) => void;
-  onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
 }
 
 export default function Board({
   value,
   sources,
+  storage,
   interval,
   onChange,
   onChangeInterval,
-  onLayoutCancel,
-  onLayoutSave,
-  onRemove,
-  onAddChart,
 }: Props) {
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
@@ -75,12 +70,11 @@ export default function Board({
   return (
     <BoardProvider
       sources={sources}
+      storage={storage}
+      onChange={onChange}
       lastRunTimestamp={lastRunTimestamp}
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
-      onAddChart={onAddChart}
-      onLayoutSave={onLayoutSave}
-      onLayoutRemove={onRemove}
       value={value}
     >
       <div className="relative flex flex-1 flex-col">
@@ -96,7 +90,7 @@ export default function Board({
           }}
           onCancel={() => {
             setEditMode(null);
-            onLayoutCancel();
+            // onLayoutCancel();
           }}
         />
         <div className="relative flex-1">

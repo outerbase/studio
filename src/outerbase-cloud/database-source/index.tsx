@@ -1,5 +1,5 @@
 import { ChartValue } from "@/components/chart/chart-type";
-import { BoardDriver } from "@/drivers/board-source/board-driver";
+import { BoardDriver } from "@/drivers/board-storage/base";
 import {
   OuterbaseAPIDashboardDetail,
   OuterbaseAPIWorkspace,
