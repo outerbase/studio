@@ -9,6 +9,7 @@ import {
 import { OuterbaseAPIUser } from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 
 interface Props {
   user: OuterbaseAPIUser;
@@ -28,8 +29,13 @@ export default function UserFormInput({ user }: Props) {
       first_name: userData.first_name,
       last_name: userData.last_name,
     })
-      .then(() => refreshSession())
-      .catch(() => {})
+      .then(() => {
+        toast.success("Profile updated");
+        refreshSession();
+      })
+      .catch((error) => {
+        toast.error(error?.message);
+      })
       .finally(() => {
         setLoading(undefined);
       });
@@ -41,7 +47,11 @@ export default function UserFormInput({ user }: Props) {
       new_password: newPassword,
       old_password: currentPassword,
     })
-      .then(() => refreshSession())
+      .then(() => {
+        toast.success("Password updated");
+        refreshSession();
+      })
+      .catch((error) => toast.error(error?.message))
       .finally(() => {
         setLoading(undefined);
       });
@@ -105,6 +115,7 @@ export default function UserFormInput({ user }: Props) {
           onValueChange={setCurrentPassword}
           id="currentpassword"
           size="lg"
+          type="password"
         />
       </Label>
       <Label title="New Password" htmlFor="lastname">
@@ -113,8 +124,10 @@ export default function UserFormInput({ user }: Props) {
           id="lastname"
           size="lg"
           onValueChange={setNewPassword}
+          type="password"
         />
       </Label>
+
       <Button
         loading={loading === "login_method"}
         disabled={!newPassword || !currentPassword}

@@ -15,7 +15,7 @@ export async function updateOuterbaseUserPassword(data: {
   new_password: string;
   old_password: string;
 }) {
-  return await requestOuterbase(`/api/v1/me/profile/password`, "POST", data);
+  return await requestOuterbase(`/api/v1/me/profile/password`, "PUT", data);
 }
 
 export async function updateOuterbaseUserFlag(editor_theme: string) {
