@@ -20,6 +20,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { BoardFilterDialog, DEFAULT_DATE_FILTER } from "./board-filter-dialog";
+import { useBoardContext } from "./board-provider";
 import { BoardTool } from "./board-tool/board-tool";
 import { BoardToolbar } from "./board-tool/board-toolbar";
 
@@ -29,13 +30,14 @@ interface Props {
   interval: number;
   onChangeInterval: (v: number) => void;
   onRefresh?: () => void;
-  onSave: () => void;
+  // onSave: () => void;
   onCancel: () => void;
   value: DashboardProps;
   onChange: (v: DashboardProps) => void;
 }
 
 export function BoardFilter(props: Props) {
+  const { onLayoutSave } = useBoardContext();
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(true);
   const [selectIndex, setSelectIndex] = useState<number | undefined>(undefined);
@@ -230,7 +232,10 @@ export function BoardFilter(props: Props) {
           onChange={props.onChangeInterval}
           onRefresh={props.onRefresh}
           mode={props.editMode}
-          onSave={props.onSave}
+          onSave={() => {
+            props.onChangeEditMode(null);
+            onLayoutSave();
+          }}
           onCancel={props.onCancel}
           value={props.value}
           onChangeValue={props.onChange}

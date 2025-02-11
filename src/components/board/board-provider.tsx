@@ -19,6 +19,8 @@ interface BoardContextProps {
   value?: DashboardProps;
   sources?: BoardSourceDriver;
   onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
+  onLayoutSave: () => void;
+  onLayoutRemove: (key: string) => void;
   setting?: BoardContextSettingProps;
   lastRunTimestamp: number;
   setBoardMode: Dispatch<SetStateAction<BoardEditorMode>>;
@@ -30,6 +32,8 @@ const BoardContext = createContext<BoardContextProps>({
   onAddChart: async () => {
     return undefined;
   },
+  onLayoutSave: () => {},
+  onLayoutRemove: () => {},
 });
 
 export function useBoardContext() {

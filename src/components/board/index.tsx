@@ -79,6 +79,8 @@ export default function Board({
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
       onAddChart={onAddChart}
+      onLayoutSave={onLayoutSave}
+      onLayoutRemove={onRemove}
       value={value}
     >
       <div className="relative flex flex-1 flex-col">
@@ -96,10 +98,6 @@ export default function Board({
             setEditMode(null);
             onLayoutCancel();
           }}
-          onSave={() => {
-            setEditMode(null);
-            onLayoutSave();
-          }}
         />
         <div className="relative flex-1">
           <BoardCanvas
@@ -112,7 +110,6 @@ export default function Board({
             }}
             editMode={editMode}
             setEditMode={setEditMode}
-            onRemove={onRemove}
           />
         </div>
 

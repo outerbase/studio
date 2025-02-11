@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import BoardChart from "./board-chart";
+import { useBoardContext } from "./board-provider";
 import "./board-style.css";
 
 export interface BoardChartLayout {
@@ -36,7 +37,6 @@ interface BoardProps {
   onChange: (v: ReactGridLayout.Layout[]) => void;
   editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
   setEditMode?: (mode: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
-  onRemove: (key: string) => void;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -46,8 +46,8 @@ export function BoardCanvas({
   onChange,
   editMode,
   setEditMode,
-  onRemove,
 }: BoardProps) {
+  const { onLayoutRemove } = useBoardContext();
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -92,7 +92,7 @@ export function BoardCanvas({
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
       onclick: (key?: string) => {
-        onRemove(key || "");
+        onLayoutRemove(key || "");
       },
     },
   ];
@@ -145,7 +145,7 @@ export function BoardCanvas({
                   buttonVariants({ variant: "default", size: "icon" }),
                   "cancelSelectorName h-6 w-6 cursor-pointer rounded-full"
                 )}
-                onClick={() => onRemove(_.i)}
+                onClick={() => onLayoutRemove(_.i)}
               >
                 <Trash2 className="h-4 w-4" />
               </button>

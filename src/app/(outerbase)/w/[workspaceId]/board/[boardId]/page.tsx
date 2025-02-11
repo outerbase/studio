@@ -7,7 +7,6 @@ import { deleteChartDialog } from "@/components/board/board-delete-dialog";
 import { ChartValue } from "@/components/chart/chart-type";
 
 import { getOuterbaseDashboard } from "@/outerbase-cloud/api";
-import { createOuterbaseDashboardChart } from "@/outerbase-cloud/api-board";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
 import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
 import { produce } from "immer";
@@ -75,27 +74,9 @@ function BoardPageEditor({
 
   const onAddChart = useCallback(
     async (chartValue: ChartValue) => {
-      if (!chartValue.source_id) return;
-      if (!chartValue.type) return;
-
-      return createOuterbaseDashboardChart(workspaceId, {
-        source_id: chartValue.source_id,
-        params: {
-          ...chartValue.params,
-          source_id: chartValue.source_id,
-          workspace_id: workspaceId,
-          layers: chartValue.params.layers.map((layer) => {
-            return {
-              ...layer,
-              type: chartValue.type!,
-            };
-          }),
-        },
-        type: chartValue.type,
-        name: chartValue.name ?? "",
-      });
+      return boardSources?.onAddChart(boardId, chartValue, value);
     },
-    [workspaceId]
+    [boardId, boardSources, value]
   );
 
   if (!boardSources) {
