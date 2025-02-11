@@ -30,7 +30,6 @@ interface Props {
   interval: number;
   onChangeInterval: (v: number) => void;
   onRefresh?: () => void;
-  // onSave: () => void;
   onCancel: () => void;
   value: DashboardProps;
   onChange: (v: DashboardProps) => void;
