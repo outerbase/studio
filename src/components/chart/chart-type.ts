@@ -30,7 +30,7 @@ interface ChartOptions {
   xAxisLabel?: string;
   yAxisLabel?: string;
   xAxisKey?: string;
-  yAxisKeys?: string[];
+  yAxisKeys: string[];
   yAxisKeyColors?: Record<string, string>;
   xAxisLabelDisplay?: ChartLabelDisplayX;
   yAxisLabelDisplay?: ChartLabelDisplayY;
