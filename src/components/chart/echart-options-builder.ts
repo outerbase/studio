@@ -26,6 +26,10 @@ export default class EchartOptionsBuilder {
     this.chartValue = value;
   }
 
+  setChartData(data: ChartData[]) {
+    this.chartData = data;
+  }
+
   getChartType() {
     return this.chartValue.type;
   }
