@@ -93,15 +93,28 @@ export default function BoardChartEditor({
                 if (newResult.rows.length > 0) {
                   const xAxisKeys = [];
                   const yAxisKeys = [];
+                  const firstRecord = newResult.rows[0];
+                  const columnType = getColumnType(firstRecord);
                   // study each column value and try to guess the type
-                  for (const column of newResult.headers) {
-                    if (column.type === 2) {
-                      // it is number type
-                      yAxisKeys.push(column.name);
-                    } else {
-                      xAxisKeys.push(column.name);
+                  if (columnType) {
+                    for (const column of newResult.headers) {
+                      if (columnType[column.name] === "number") {
+                        yAxisKeys.push(column.name);
+                      } else {
+                        xAxisKeys.push(column.name);
+                      }
+                    }
+                  } else {
+                    // if there is no column type, we will just use the first column as xAxisKey
+                    for (let i = 0; i < newResult.headers.length; i++) {
+                      if (i === 0) {
+                        xAxisKeys.push(newResult.headers[i].name);
+                      } else {
+                        yAxisKeys.push(newResult.headers[i].name);
+                      }
                     }
                   }
+
                   draft.params.options.xAxisKey =
                     xAxisKeys.length > 0 ? xAxisKeys[0] : "";
                   draft.params.options.yAxisKeys = yAxisKeys;
@@ -255,4 +268,13 @@ export default function BoardChartEditor({
       </div>
     </div>
   );
+}
+
+function getColumnType(firstRecord: any): Record<string, string> {
+  const columnTypes: Record<string, string> = {};
+  const keys = Object.keys(firstRecord);
+  for (const key of keys) {
+    columnTypes[key] = typeof firstRecord[key];
+  }
+  return columnTypes;
 }
