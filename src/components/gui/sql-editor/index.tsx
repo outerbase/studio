@@ -17,6 +17,7 @@ import CodeMirror, {
 } from "@uiw/react-codemirror";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
+import { PromptPlugin } from "@/components/editor/prompt-plugin";
 import { createVariableHighlightPlugin } from "@/components/editor/sql-editor/variable-highlight-plugin";
 import { SupportedDialect } from "@/drivers/base-driver";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
@@ -190,6 +191,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           const columnNumber = pos - line.from;
           if (onCursorChange) onCursorChange(pos, lineNumber, columnNumber);
         }),
+        PromptPlugin,
       ].filter(Boolean) as Extension[];
     }, [
       dialect,
