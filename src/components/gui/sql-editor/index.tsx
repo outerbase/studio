@@ -204,7 +204,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
     return (
       <CodeMirror
         ref={ref}
-        autoFocus
+        autoFocus={!readOnly}
         readOnly={readOnly}
         onKeyDown={onKeyDown}
         basicSetup={{
