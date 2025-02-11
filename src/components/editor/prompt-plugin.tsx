@@ -1,48 +1,69 @@
-import { StateEffect, StateField } from "@codemirror/state";
+import {
+  Compartment,
+  EditorState,
+  StateEffect,
+  StateField,
+} from "@codemirror/state";
 import {
   Decoration,
-  DecorationSet,
   EditorView,
   keymap,
   ViewPlugin,
-  ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
-import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { resolveToNearestStatement } from "../gui/sql-editor/statement-highlight";
+import { CodeMirrorPromptWidget } from "./prompt-widget";
 
 // Effect to add/remove prompt widget
-const togglePromptEffect = StateEffect.define<{ pos: number | null }>();
-
-// StateField to track prompt widget position
-const promptField = StateField.define<{ pos: number | null }>({
-  create: () => ({ pos: null }),
-  update(value, tr) {
-    for (let e of tr.effects) {
-      if (e.is(togglePromptEffect)) {
-        return { pos: e.value.pos }; // Update position
-      }
-    }
-    return value;
-  },
-});
+const effectHidePrompt = StateEffect.define();
+const effectShowPrompt = StateEffect.define<{
+  lineNumber: number;
+  from: number;
+  to: number;
+}>();
 
 // React-based Widget for Inline Prompt
 class PromptWidget extends WidgetType {
+  protected container: HTMLDivElement;
+
   constructor(
-    public pos: number,
-    public view: EditorView
+    public plugin: CodeMirrorPromptPlugin,
+    public from: number,
+    public to: number
   ) {
     super();
+
+    plugin.lock();
+
+    this.container = document.createElement("div");
+
+    this.container.style.padding = "10px";
+
+    this.container.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    this.container.addEventListener("mousedown", (e) => {
+      e.stopPropagation();
+    });
+
+    this.container.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+    });
+
+    createRoot(this.container).render(<CodeMirrorPromptWidget />);
   }
 
   toDOM() {
-    const container = document.createElement("span");
-    createRoot(container).render(
-      <InlinePrompt pos={this.pos} view={this.view} />
-    );
+    console.log("dom dom dom");
+    return this.container;
+  }
 
-    return container;
+  destroy() {
+    // Clean up when the widget is destroyed
+    this.plugin.unlock();
+    console.log("destroy");
   }
 
   ignoreEvent() {
@@ -50,97 +71,170 @@ class PromptWidget extends WidgetType {
   }
 }
 
-// React Component for the Inline Textbox
-const InlinePrompt = ({ pos, view }: { pos: number; view: EditorView }) => {
-  const [input, setInput] = useState("");
+export class CodeMirrorPromptPlugin {
+  protected isOpen = false;
 
-  useEffect(() => {
-    // Focus the input when it appears
-    const inputElement = document.getElementById("copilot-input");
-    inputElement?.focus();
-  }, []);
+  /**
+   * This is for locking when prompt is open. This is to prevent
+   * a lot of complication dealing with updated selected text and
+   * cursor position.
+   */
+  protected lockCompartment = new Compartment();
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      console.log("User submitted prompt:", input);
-      view.dispatch({ effects: togglePromptEffect.of({ pos: null }) }); // Remove the widget
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      view.dispatch({ effects: togglePromptEffect.of({ pos: null }) }); // Cancel prompt
-    }
-  };
+  /**
+   * This is for showing the diff mode when we got response from
+   * AI agent.
+   */
+  protected diffCompartment = new Compartment();
 
-  return (
-    <input
-      id="copilot-input"
-      type="text"
-      value={input}
-      onChange={(e) => setInput(e.target.value)}
-      onKeyDown={handleKeyDown}
-      style={{
-        border: "1px solid gray",
-        padding: "2px",
-        borderRadius: "3px",
-        fontSize: "14px",
-        width: "150px",
-      }}
-    />
-  );
-};
+  protected view?: EditorView;
 
-// ViewPlugin to render the widget
-const promptPlugin = ViewPlugin.fromClass(
-  class {
-    decorations: DecorationSet;
-
-    constructor(view: EditorView) {
-      this.decorations = this.getDecorations(view);
-    }
-
-    update(update: ViewUpdate) {
-      if (
-        update.docChanged ||
-        update.transactions.some((tr) =>
-          tr.effects.some((e) => e.is(togglePromptEffect))
-        )
-      ) {
-        this.decorations = this.getDecorations(update.view);
+  public lock() {
+    requestAnimationFrame(() => {
+      if (this.view) {
+        this.view.dispatch({
+          effects: this.lockCompartment.reconfigure([
+            EditorState.readOnly.of(true),
+          ]),
+        });
       }
-    }
+    });
+  }
 
-    getDecorations(view: EditorView): DecorationSet {
-      const { pos } = view.state.field(promptField);
-      if (pos === null) return Decoration.none;
+  public unlock() {
+    requestAnimationFrame(() => {
+      if (this.view) {
+        this.view.dispatch({
+          effects: this.lockCompartment.reconfigure([]),
+        });
+      }
+    });
+  }
 
-      const widgetDeco = Decoration.widget({
-        widget: new PromptWidget(pos, view),
-        side: 1, // Ensure it appears at the correct position
+  public closePrompt() {
+    this.view?.dispatch({
+      effects: [effectHidePrompt.of(null)],
+    });
+  }
+
+  protected openPrompt(v: EditorView) {
+    const currentCursor = v.state.selection.main.from;
+    const currentCursorLine = v.state.doc.lineAt(currentCursor);
+    const nearestA = resolveToNearestStatement(
+      v.state,
+      v.state.selection.main.from
+    );
+    const nearestB = resolveToNearestStatement(
+      v.state,
+      v.state.selection.main.to
+    );
+
+    const startLine = v.state.doc.lineAt(nearestA?.from ?? 0);
+    const endLine = v.state.doc.lineAt(nearestB?.to ?? v.state.doc.length);
+
+    setTimeout(() => {
+      if (v.state.selection.main.from === v.state.selection.main.to) {
+        // We need to find a way to know if user want to generate new query
+        // or user want to improve the existing query.
+
+        // We determine if user want to generate new query if it is in empty line
+        // and it is not in the middle of statement
+        if (currentCursor < startLine.from || currentCursor > endLine.to) {
+          v.dispatch({
+            effects: [
+              effectShowPrompt.of({
+                lineNumber: currentCursorLine.number,
+                from: currentCursorLine.from,
+                to: currentCursorLine.to,
+              }),
+            ],
+            selection: { anchor: currentCursor, head: currentCursor },
+          });
+          return true;
+        }
+      }
+
+      v.dispatch({
+        effects: [
+          effectShowPrompt.of({
+            lineNumber: startLine.number,
+            from: startLine.from,
+            to: endLine.to,
+          }),
+          // effectSelectedPromptLine.of(
+          //   Array.from(
+          //     { length: endLine.number - startLine.number + 1 },
+          //     (_, i) => startLine.number + i
+          //   )
+          // ),
+        ],
+        selection: { anchor: startLine.from, head: startLine.from },
       });
+    }, 50);
+  }
 
-      return Decoration.set([widgetDeco.range(pos)]);
-    }
-  },
-  { decorations: (v) => v.decorations }
-);
+  /**
+   * This is cheap trick to get the view instance from the plugin.
+   * If there is a better way to do this, please let me know.
+   */
+  protected getViewInstance(self: CodeMirrorPromptPlugin) {
+    return ViewPlugin.fromClass(
+      class {
+        constructor(view: EditorView) {
+          self.view = view;
+        }
+      }
+    );
+  }
 
-// Function to show/hide prompt
-const togglePrompt = (view: EditorView) => {
-  const state = view.state;
-  const cursorPos = state.selection.main.head;
-  view.dispatch({ effects: togglePromptEffect.of({ pos: cursorPos }) });
-};
-
-export const PromptPlugin = [
-  promptField,
-  promptPlugin,
-  keymap.of([
-    {
-      key: "Ctrl-i",
-      run: (v) => {
-        togglePrompt(v);
-        return true;
+  protected getStateFieldPrompt(self: CodeMirrorPromptPlugin) {
+    return StateField.define({
+      create: () => {
+        return Decoration.none;
       },
-    },
-  ]),
-];
+
+      update(v, tr) {
+        for (const e of tr.effects) {
+          if (e.is(effectShowPrompt)) {
+            return Decoration.set([
+              Decoration.widget({
+                widget: new PromptWidget(self, e.value.from, e.value.to),
+                side: -10,
+                block: true,
+              }).range(e.value.from),
+            ]);
+          } else if (e.is(effectHidePrompt)) {
+            return Decoration.none;
+          }
+        }
+
+        if (tr.docChanged) {
+          return v.map(tr.changes);
+        }
+
+        return v;
+      },
+
+      provide: (f) => EditorView.decorations.from(f),
+    });
+  }
+
+  getExtensions() {
+    return [
+      this.lockCompartment.of([]),
+      this.diffCompartment.of([]),
+      this.getStateFieldPrompt(this),
+      this.getViewInstance(this),
+      keymap.of([
+        {
+          key: "Ctrl-b",
+          mac: "Cmd-b",
+          run: (v) => {
+            this.openPrompt(v);
+            return true;
+          },
+        },
+      ]),
+    ];
+  }
+}

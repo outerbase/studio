@@ -17,7 +17,7 @@ import CodeMirror, {
 } from "@uiw/react-codemirror";
 import { forwardRef, KeyboardEventHandler, useMemo } from "react";
 
-import { PromptPlugin } from "@/components/editor/prompt-plugin";
+import { CodeMirrorPromptPlugin } from "@/components/editor/prompt-plugin";
 import { createVariableHighlightPlugin } from "@/components/editor/sql-editor/variable-highlight-plugin";
 import { SupportedDialect } from "@/drivers/base-driver";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
@@ -38,6 +38,12 @@ interface SqlEditorProps {
    * Comma seprated variable name list
    */
   variableList?: string;
+
+  /**
+   * Prompt Support
+   */
+  enablePrompt?: boolean;
+
   value: string;
   dialect: SupportedDialect;
   readOnly?: boolean;
@@ -67,6 +73,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       onFontSizeChanged,
       variableList,
       highlightVariable,
+      enablePrompt,
     }: SqlEditorProps,
     ref
   ) {
@@ -78,6 +85,10 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       }
       return createSQLTableNameHighlightPlugin([]);
     }, [schema]);
+
+    const promptPlugin = useMemo(() => {
+      return enablePrompt ? new CodeMirrorPromptPlugin() : null;
+    }, [enablePrompt]);
 
     const keyExtensions = useMemo(() => {
       return keymap.of([
@@ -191,7 +202,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
           const columnNumber = pos - line.from;
           if (onCursorChange) onCursorChange(pos, lineNumber, columnNumber);
         }),
-        PromptPlugin,
+        promptPlugin ? promptPlugin.getExtensions() : undefined,
       ].filter(Boolean) as Extension[];
     }, [
       dialect,
@@ -201,6 +212,7 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       tableNameHighlightPlugin,
       variableList,
       highlightVariable,
+      promptPlugin,
     ]);
 
     return (
