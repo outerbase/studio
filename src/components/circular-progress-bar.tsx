@@ -35,7 +35,7 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           cy={size / 2}
         />
         <circle
-          className="text-blue-600"
+          className="text-blue-600 transition-all"
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
@@ -47,9 +47,6 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           cy={size / 2}
         />
       </svg>
-      {/* <span className="absolute text-xs text-blue-700">
-        {Math.round(progress)}
-      </span> */}
     </div>
   );
 };

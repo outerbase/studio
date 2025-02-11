@@ -1,5 +1,6 @@
 import { CircularProgressBar } from "@/components/circular-progress-bar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -67,10 +68,10 @@ export function BoardButtonMenu(props: Props) {
   if (props.mode === "REARRANGING_CHART") {
     return (
       <div className="flex items-center gap-2">
-        <Button variant={"secondary"} size={"sm"} onClick={props.onCancel}>
+        <Button variant={"secondary"} onClick={props.onCancel}>
           Cancel
         </Button>
-        <Button variant={"default"} size={"sm"} onClick={props.onSave}>
+        <Button variant={"primary"} onClick={props.onSave}>
           Save
         </Button>
       </div>
@@ -155,8 +156,7 @@ export function BoardButtonMenu(props: Props) {
       </DropdownMenu>
       <div>
         <Button
-          variant={"default"}
-          size="sm"
+          variant={"primary"}
           onClick={() => {
             setBoardMode("ADD_CHART");
           }}

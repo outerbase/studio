@@ -48,7 +48,7 @@ export default function EmptyTermDefinition() {
               </div>
               {item.title}
             </div>
-            <div className="mt-1 ml-10 text-sm font-normal">
+            <div className="mt-1 ml-10 text-base font-normal">
               {item.describtion}
             </div>
           </div>

@@ -1,11 +1,12 @@
 import SchemaNameSelect from "@/components/gui/schema-editor/schema-name-select";
 import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/orbit/input";
+import { Toggle } from "@/components/orbit/toggle";
 import { useConfig } from "@/context/config-provider";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTableSchema } from "@/drivers/base-driver";
-import { useCallback, useEffect, useState } from "react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import DataCatalogExtension from ".";
 import DataCatalogTableAccordion from "./data-catalog-table-accordion";
 
@@ -21,18 +22,6 @@ export default function DataCatalogModelTab() {
     extensions.getExtension<DataCatalogExtension>("data-catalog");
 
   const driver = dataCatalogExtension?.driver;
-
-  const onRefresh = useCallback(() => {
-    if (!selectedSchema) return [];
-    const result = (schema[selectedSchema] || [])
-      .filter((table) => table.type === "table")
-      .map((table) => table.tableSchema)
-      .filter(Boolean) as DatabaseTableSchema[];
-
-    result.sort((a, b) => a.tableName!.localeCompare(b.tableName!));
-
-    setSchemas(result);
-  }, [schema, selectedSchema]);
 
   useEffect(() => {
     if (!driver) return;
@@ -54,7 +43,7 @@ export default function DataCatalogModelTab() {
     const unsubscribe = driver.addEventListener(onRefresh);
 
     return () => unsubscribe;
-  }, [onRefresh, driver, schema, selectedSchema]);
+  }, [driver, schema, selectedSchema]);
 
   if (!driver) {
     return <div>Missing driver</div>;
@@ -69,19 +58,19 @@ export default function DataCatalogModelTab() {
             onChange={setSelectedSchema}
           />
           <div className="ml-2 flex items-center gap-2">
-            <Checkbox
-              checked={hasDefinitionOnly}
-              onCheckedChange={() => setHasDefinitionOnly(!hasDefinitionOnly)}
+            <Toggle
+              toggled={hasDefinitionOnly}
+              size="sm"
+              onChange={setHasDefinitionOnly}
             />
-            <label className="text-sm">Definition only?</label>
+            <label className="text-base">Definition only?</label>
           </div>
           <ToolbarFiller />
           <div>
             <Input
               value={search}
-              onChange={(e) => {
-                setSearch(e.currentTarget.value);
-              }}
+              onValueChange={setSearch}
+              preText={<MagnifyingGlass className="mr-2" />}
               placeholder="Search tables, columns"
             />
           </div>

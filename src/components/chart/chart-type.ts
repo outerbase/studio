@@ -42,7 +42,7 @@ interface ChartOptions {
   theme?: string;
 }
 
-interface ChartParams {
+export interface ChartParams {
   id?: string;
   name?: string;
   type?: ChartType;

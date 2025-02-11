@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import { Toggle } from "@/components/orbit/toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,13 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
-import {
-  Edit3,
-  LucideMoreHorizontal,
-  ToggleLeftIcon,
-  ToggleRightIcon,
-  Trash,
-} from "lucide-react";
+import { Edit3, LucideMoreHorizontal, Trash } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface Props {
@@ -34,7 +29,6 @@ export default function VirtualJoinColumn({
   onEditRelationship,
   onDeletRelatinship,
 }: Props) {
-  const [loading, setLoading] = useState(false);
   const [isActive, setIsActive] = useState<boolean>(() => {
     if (data.flags) {
       return data?.flags.isActive;
@@ -44,7 +38,6 @@ export default function VirtualJoinColumn({
 
   const handleClickToggle = useCallback(() => {
     setIsActive(!isActive);
-    setLoading(true);
     onToggleHideFromEzql(
       {
         ...data,
@@ -53,40 +46,33 @@ export default function VirtualJoinColumn({
           isActive: !isActive,
         },
       },
-      // call me back when finish update column
-      () => {
-        setLoading(false);
-      },
+      // call me back when you're done
+      () => {},
       true
     );
-  }, [data]);
+  }, [data, isActive, onToggleHideFromEzql]);
 
   return (
     <div
       className={cn(
-        "border-accent flex border-t pt-2 pb-2 text-sm",
+        "border-accent flex items-center border-t pt-2 pb-2",
         isActive ? "opacity-100" : "opacity-50"
       )}
     >
-      <Button
-        disabled={loading}
-        onClick={handleClickToggle}
-        size={"icon"}
-        variant="ghost"
-      >
-        {isActive ? (
-          <ToggleRightIcon className="text-black dark:text-green-500" />
-        ) : (
-          <ToggleLeftIcon className="text-gray-400" />
-        )}
-      </Button>
+      <Toggle size="sm" toggled={isActive} onChange={handleClickToggle} />
 
-      <div className="flex w-[150px] items-center p-2">
+      <div className="flex w-[150px] items-center p-2 text-base">
         Virtual Relationship
       </div>
-      <div className="flex w-[150px] items-center p-2">{data.column}</div>
-      <div className="flex w-[150px] items-center p-2">{data.table}</div>
-      <div className="flex w-[150px] items-center p-2">{data.body}</div>
+      <div className="flex w-[150px] items-center p-2 text-base">
+        {data.column}
+      </div>
+      <div className="flex w-[150px] items-center p-2 text-base">
+        {data.table}
+      </div>
+      <div className="flex w-[150px] items-center p-2 text-base">
+        {data.body}
+      </div>
       <div className="flex-1" />
       {
         //=================
@@ -95,7 +81,7 @@ export default function VirtualJoinColumn({
       }
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost">
+          <Button size="base" variant="ghost">
             <LucideMoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

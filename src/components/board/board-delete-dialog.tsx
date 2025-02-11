@@ -1,4 +1,5 @@
-import { deleteOuterbaseDashboardChart } from "@/outerbase-cloud/api";
+import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
+import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 import CopyableText from "../copyable-text";
@@ -14,29 +15,32 @@ import {
 
 export const deleteChartDialog = createDialog<
   {
-    workspaceId: string;
     chartId: string;
+    boardId: string;
     chartName: string;
+    value: OuterbaseAPIDashboardDetail;
+    source: OuterbaseBoardSourceDriver | undefined;
   },
   string | undefined
 >(
-  ({ close, chartName, workspaceId, chartId }) => {
+  ({ close, chartName, chartId, source, boardId, value }) => {
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
 
-    const deleteClicked = useCallback(() => {
+    const deleteClicked = useCallback(async () => {
       if (name !== chartName) return;
 
       setLoading(true);
 
-      deleteOuterbaseDashboardChart(workspaceId, chartId)
-        .then(() => {
-          close(chartId);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, [chartName, chartId, close, name, workspaceId]);
+      if (source) {
+        source
+          .onLayoutRemove(chartId, boardId, value)
+          .then(() => close(chartId))
+          .finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    }, [name, chartName, source, chartId, boardId, value, close]);
 
     return (
       <>

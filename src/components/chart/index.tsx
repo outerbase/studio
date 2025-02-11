@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@/lib/utils";
 import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
 import { useTheme } from "next-themes";
@@ -173,10 +174,11 @@ const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
       const currentDomRef = domRef.current;
       const chartInstance =
         echarts.getInstanceByDom(currentDomRef) || echarts.init(currentDomRef);
-      // chartInstance.clear();
 
       const chartBuilder = chartBuilderRef.current;
       chartBuilder.setTheme((forcedTheme ?? resolvedTheme) as "light" | "dark");
+
+      chartInstance.setOption(chartBuilder.getChartOptions(), true);
 
       // handle resize event
       const resizeObserver = new ResizeObserver((entries) => {
@@ -186,7 +188,9 @@ const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
               const { width, height } = entry.contentRect;
               chartBuilder.chartHeight = height;
               chartBuilder.chartWidth = width;
+
               chartInstance.resize();
+
               if (timerRef.current) {
                 clearTimeout(timerRef.current);
               }
@@ -244,8 +248,13 @@ export default function Chart(props: OuterbaseChartProps) {
   }
 
   return (
-    <div className="flex h-full w-full p-6" style={backGroundStyle}>
-      <div className="dark:shadow-accent flex h-full w-full flex-col rounded-lg p-2 shadow-2xl backdrop-blur-lg backdrop-brightness-100 dark:backdrop-brightness-100">
+    <div className="flex h-full w-full flex-1 p-6" style={backGroundStyle}>
+      <div
+        className={cn("flex h-full w-full flex-col rounded-lg p-2", {
+          "dark:shadow-accent shadow-2xl backdrop-blur-lg backdrop-brightness-100 dark:backdrop-brightness-100":
+            props.value.params.options?.backgroundType === "image",
+        })}
+      >
         <h1
           className="mb-4 text-lg font-semibold"
           style={{ color: props.value.params.options?.foreground }}

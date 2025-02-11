@@ -36,4 +36,4 @@ Outerbase Studio Desktop is a lightweight Electron wrapper for the Outerbase Stu
 - **Schema Editor**: It allows you to quickly create, modify, and remove table columns with just a few clicks without writing any SQL.
 - **Connection Manager**: It includes a flexible connection manager, allowing you to store your connections locally in your browser. You can also store them on a server and share your connections across multiple devices.
 
-The features mentioned above are just a few of the many we offer. Give it a try to explore everything we have in store.
+The features mentioned above are just a few of the many we offer. Give it a try to explore everything we have in store

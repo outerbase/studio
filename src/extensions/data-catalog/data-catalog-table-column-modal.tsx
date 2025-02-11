@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   DialogDescription,
   DialogFooter,
@@ -90,14 +90,14 @@ export default function DataCatalogTableColumnModal({
         setLoading(false);
         onClose();
       });
-  }, [driver, column, onClose, schemaName, tableName]);
+  }, [driver, column, onClose, schemaName, tableName, modelColumn]);
 
   return (
     <>
       <DialogHeader>
         <DialogTitle>Column Metadata</DialogTitle>
       </DialogHeader>
-      <DialogDescription>
+      <DialogDescription className="text-base">
         Add metadata to this column to help your team and AI understand its
         purpose. Include detailed descriptions and examples of sample data to
         make the data more clear and easier to use.
@@ -123,11 +123,7 @@ export default function DataCatalogTableColumnModal({
           <div className="flex items-center justify-between gap-2">
             <Label>Sample Data</Label>
             <div>
-              <Button
-                size="sm"
-                variant={"outline"}
-                onClick={onAutomaticSampleData}
-              >
+              <Button size="sm" onClick={onAutomaticSampleData}>
                 {sampleLoading ? (
                   <LucideLoader className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -153,10 +149,12 @@ export default function DataCatalogTableColumnModal({
       </div>
 
       <DialogFooter>
-        <Button disabled={loading} onClick={onSaveUpdateColumn}>
-          {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-          Save
-        </Button>
+        <Button
+          loading={loading}
+          title="Save"
+          disabled={loading || !column.body}
+          onClick={onSaveUpdateColumn}
+        />
       </DialogFooter>
     </>
   );

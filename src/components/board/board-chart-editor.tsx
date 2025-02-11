@@ -3,6 +3,7 @@ import { DatabaseSchemas } from "@/drivers/base-driver";
 import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { useCallback, useMemo, useState } from "react";
+import { DashboardProps } from ".";
 import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
 import EditChartMenu from "../chart/edit-chart-menu";
@@ -14,7 +15,11 @@ import { MenuBar } from "../orbit/menu-bar";
 import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
 
-export default function BoardChartEditor() {
+export default function BoardChartEditor({
+  onChange,
+}: {
+  onChange: (value: DashboardProps) => void;
+}) {
   const [value, setValue] = useState<ChartValue>({
     model: "chart",
     type: "line",
@@ -28,7 +33,7 @@ export default function BoardChartEditor() {
     params: {
       type: "line",
       id: "",
-      name: "",
+      name: "New Chart",
       model: "chart",
       apiKey: "",
       layers: [
@@ -53,12 +58,16 @@ export default function BoardChartEditor() {
   const [selectedSchema, setSelectedSchema] = useState("");
   const [displayType, setDisplayType] = useState("chart");
   const [loading, setLoading] = useState(false);
-
   const autoCompletion = useMemo(() => {
     return generateAutoComplete(selectedSchema, schema);
   }, [schema, selectedSchema]);
 
-  const { sources: sourceDriver } = useBoardContext();
+  const {
+    sources: sourceDriver,
+    setBoardMode,
+    value: chartList,
+    onAddChart,
+  } = useBoardContext();
   const [result, setResult] = useState<OptimizeTableState>();
 
   const onRunClicked = useCallback(() => {
@@ -70,7 +79,6 @@ export default function BoardChartEditor() {
       sourceDriver
         .query(sourceId, sql)
         .then((newResult) => {
-          setLoading(false);
           setResult(
             OptimizeTableState.createFromResult({
               result: newResult,
@@ -89,14 +97,19 @@ export default function BoardChartEditor() {
             });
           });
         })
-        .catch();
+        .catch(() => {
+          console.log("error");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [value, sourceDriver, schema]);
 
   return (
-    <div className="flex flex-1 border-t">
-      <div className="flex flex-1 flex-col">
-        <div className="h-1/2 border-b">
+    <div className="flex flex-1 overflow-hidden border-t">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="h-1/2 overflow-x-hidden border-b">
           {result && displayType === "table" && <ResultTable data={result} />}
           {result && displayType === "chart" && (
             <Chart data={result.getAllRows().map((r) => r.raw)} value={value} />
@@ -106,6 +119,9 @@ export default function BoardChartEditor() {
           <div className="flex gap-2 border-b px-4 py-2">
             <BoardSourcePicker
               value={value?.source_id}
+              usedSourceId={(chartList?.charts ?? []).map(
+                (c) => c.source_id || ""
+              )}
               onChange={(newSourceId) => {
                 setValue((prev) =>
                   produce(prev, (draft) => {
@@ -155,7 +171,7 @@ export default function BoardChartEditor() {
               </Button>
             </div>
           </div>
-          <div>
+          <div className="flex-1">
             <SqlEditor
               dialect="sqlite"
               value={value.params.layers[0].sql}
@@ -171,12 +187,58 @@ export default function BoardChartEditor() {
           </div>
         </div>
       </div>
-      <div className="w-[370px] overflow-x-hidden overflow-y-auto border-l p-4">
-        <EditChartMenu
-          value={value}
-          onChange={setValue}
-          columns={result?.getHeaders().map((header) => header.name) ?? []}
-        />
+      <div className="flex w-[370px] shrink-0 flex-col overflow-x-hidden overflow-y-auto border-l">
+        <div className="overflow-y-auto p-4">
+          <EditChartMenu
+            value={value}
+            onChange={setValue}
+            columns={result?.getHeaders().map((header) => header.name) ?? []}
+          />
+        </div>
+        <div className="flex justify-end gap-2 border-t p-4">
+          <Button
+            variant="primary"
+            onClick={() => {
+              onAddChart(value).then((newChart) => {
+                if (!newChart) return;
+
+                console.log("onchange", onChange);
+
+                onChange(
+                  produce(chartList!, (draft) => {
+                    if (!draft?.charts) draft.charts = [];
+                    draft?.charts.push(newChart);
+
+                    if (!draft?.layout) draft.layout = [];
+
+                    let y = 0;
+                    for (const layout of draft.layout)
+                      y = Math.max(y, layout.y + layout.h);
+
+                    draft.layout.push({
+                      x: 0,
+                      y,
+                      w: 2,
+                      h: 2,
+                      i: newChart.id!,
+                    });
+                  })
+                );
+
+                setBoardMode(null);
+              });
+            }}
+          >
+            Save Changes
+          </Button>
+          <Button
+            onClick={() => {
+              setBoardMode(null);
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
     </div>
   );

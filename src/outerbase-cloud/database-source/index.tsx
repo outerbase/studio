@@ -1,4 +1,8 @@
-import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
+import { BoardDriver } from "@/drivers/board-source/board-driver";
+import {
+  OuterbaseAPIDashboardDetail,
+  OuterbaseAPIWorkspace,
+} from "@/outerbase-cloud/api-type";
 import { createOuterbaseDatabaseDriver } from "@/outerbase-cloud/database/utils";
 import {
   BaseDriver,
@@ -9,8 +13,11 @@ import {
   BoardSource,
   BoardSourceDriver,
 } from "../../drivers/board-source/base-source";
+import { updateOuterbaseDashboard } from "../api";
 
-export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
+export default class OuterbaseBoardSourceDriver
+  implements BoardSourceDriver, BoardDriver
+{
   protected workspace: OuterbaseAPIWorkspace;
   protected sourceDrivers: Record<string, BaseDriver> = {};
   protected cacheSchemas: Record<
@@ -85,5 +92,42 @@ export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
 
   cleanup(): void {
     // do nothing
+  }
+
+  async onLayoutSave(
+    boardId: string,
+    value: OuterbaseAPIDashboardDetail
+  ): Promise<unknown> {
+    const input = {
+      base_id: null,
+      chart_ids: Array.from(new Set(value.charts.map((v) => v.id))),
+      data: (value as any).data,
+      layout: value.layout.map(({ w, h, i, x, y }) => ({ w, h, x, y, i })),
+      directory_index: (value as any).directory_index,
+      name: value.name,
+      type: value.type,
+    };
+
+    return await updateOuterbaseDashboard(this.workspace.name, boardId, input);
+  }
+
+  async onLayoutRemove(
+    chartId: string,
+    boardId: string,
+    value: OuterbaseAPIDashboardDetail
+  ): Promise<unknown> {
+    const input = {
+      ...value,
+      chart_ids: value.chart_ids.filter((f) => f !== chartId),
+      layout: value.layout.filter((f) => f.i !== chartId),
+    };
+    console.log(input);
+    return true;
+    // await deleteOuterbaseDashboardChart(this.workspace.name, chartId);
+    // return await this.onLayoutSave(boardId, {
+    //   ...value,
+    //   chart_ids: value.chart_ids.filter((f) => f !== chartId),
+    //   layout: value.layout.filter((f) => f.i !== chartId),
+    // });
   }
 }

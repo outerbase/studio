@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -49,7 +49,7 @@ export default function DataCatalogTableAccordion({
     (id: string) => {
       driver.deleteVirtualColumn(table.schemaName, table.tableName!, id);
     },
-    [driver, modelTable, table]
+    [driver, table]
   );
 
   const onToggleHideFromEzql = useCallback(
@@ -167,9 +167,9 @@ export default function DataCatalogTableAccordion({
               </div>
 
               {tableMetadata && (
-                <div className="mt-1 mb-2">
+                <div className="mt-2 mb-2">
                   {tableMetadata.alias !== table.tableName && (
-                    <div className="text-xs font-medium text-neutral-500">
+                    <div className="text-sm font-medium text-neutral-500">
                       The table formerly known as{" "}
                       <span className="text-white italic">
                         {table.tableName}
@@ -177,7 +177,9 @@ export default function DataCatalogTableAccordion({
                     </div>
                   )}
                   {tableMetadata?.body && (
-                    <div className="mt-1">{tableMetadata?.body}</div>
+                    <div className="mt-2 text-base font-semibold">
+                      {tableMetadata?.body}
+                    </div>
                   )}
                 </div>
               )}
@@ -186,7 +188,7 @@ export default function DataCatalogTableAccordion({
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
+                  <Button size="base" variant="ghost">
                     <LucideMoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>

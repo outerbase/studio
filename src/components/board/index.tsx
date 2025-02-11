@@ -27,6 +27,7 @@ interface Props {
   onLayoutSave: () => void;
   onLayoutCancel: () => void;
   onRemove: (key: string) => void;
+  onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
 }
 
 export default function Board({
@@ -38,6 +39,7 @@ export default function Board({
   onLayoutCancel,
   onLayoutSave,
   onRemove,
+  onAddChart,
 }: Props) {
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
@@ -76,8 +78,10 @@ export default function Board({
       lastRunTimestamp={lastRunTimestamp}
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
+      onAddChart={onAddChart}
+      value={value}
     >
-      <div className="flex flex-1 flex-col">
+      <div className="relative flex flex-1 flex-col">
         <BoardFilter
           value={value}
           onChange={onChange}
@@ -98,12 +102,6 @@ export default function Board({
           }}
         />
         <div className="relative flex-1">
-          {editMode === "ADD_CHART" && (
-            <div className="bg-background absolute top-0 right-0 bottom-0 left-0 z-10 flex">
-              <BoardChartEditor />
-            </div>
-          )}
-
           <BoardCanvas
             value={value}
             onChange={(v) => {
@@ -117,6 +115,12 @@ export default function Board({
             onRemove={onRemove}
           />
         </div>
+
+        {editMode === "ADD_CHART" && (
+          <div className="bg-background fixed top-14 bottom-0 left-0 z-50 flex w-screen">
+            <BoardChartEditor onChange={onChange} />
+          </div>
+        )}
       </div>
     </BoardProvider>
   );
