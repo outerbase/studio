@@ -72,7 +72,7 @@ export default function PasswordResetPage() {
 
   return (
     <div className="flex h-[100vh]">
-      <div className="bg-right-[20vh] flex h-full w-full flex-col overflow-hidden bg-neutral-950 bg-gradient-to-r from-neutral-950 from-70% to-neutral-900 bg-[60vw] bg-no-repeat">
+      <div className="bg-right-[20vh] flex h-full w-full flex-col overflow-hidden bg-neutral-950 bg-gradient-to-r bg-[url('/assets/reset-password-orb.webp')] from-neutral-950 from-70% to-neutral-900 bg-[60vw] bg-no-repeat">
         <div className="flex items-start p-8" />
         <div className="items start flex flex-1">
           <div className="flex h-full flex-1 items-center">
