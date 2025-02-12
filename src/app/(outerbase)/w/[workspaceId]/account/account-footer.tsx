@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { isValidEmail } from "@/lib/validation";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Check, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -16,11 +17,6 @@ export default function AccountFooter() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
-
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  };
 
   const copyToClipboard = async () => {
     if (!session) return;

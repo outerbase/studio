@@ -23,3 +23,22 @@ export async function updateOuterbaseUserFlag(editor_theme: string) {
     editor_theme,
   });
 }
+
+export async function requestResetPassword(data: { email: string }) {
+  return await requestOuterbase(
+    `/api/v1/auth/password_reset/request`,
+    "POST",
+    data
+  );
+}
+
+export async function resetPassword(data: {
+  password: string;
+  reset_token: string;
+}) {
+  return await requestOuterbase(
+    `/api/v1/auth/password_reset/submit`,
+    "POST",
+    data
+  );
+}
