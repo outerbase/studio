@@ -1,19 +1,25 @@
 import { generateAutoComplete } from "@/context/schema-provider";
-import { DatabaseResultSet, DatabaseSchemas } from "@/drivers/base-driver";
+import {
+  DatabaseResultSet,
+  DatabaseSchemas,
+  SupportedDialect,
+} from "@/drivers/base-driver";
+import { fillVariables } from "@/lib/sql/fill-variables";
+import { tokenizeSql } from "@/lib/sql/tokenizer";
 import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { useTheme } from "next-themes";
 import { useCallback, useMemo, useState } from "react";
 import { DashboardProps } from ".";
 import Chart from "../chart";
-import { ChartValue, DEFAULT_THEME, THEMES } from "../chart/chart-type";
-import { generateGradientColors } from "../chart/echart-options-builder";
+import { ChartValue } from "../chart/chart-type";
 import EditChartMenu from "../chart/edit-chart-menu";
 import ResultTable from "../gui/query-result-table";
 import SqlEditor from "../gui/sql-editor";
 import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
 import { Button } from "../orbit/button";
 import { MenuBar } from "../orbit/menu-bar";
+import { createAutoBoardChartValue } from "./board-auto-value";
 import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
 
@@ -25,22 +31,14 @@ export default function BoardChartEditor({
   const [value, setValue] = useState<ChartValue>({
     model: "chart",
     type: "line",
-    connection_id: "",
-    created_at: "",
-    id: "",
-    source_id: "",
-    updated_at: "",
-    workspace_id: "",
     name: "New Chart",
     params: {
       type: "line",
-      id: "",
       name: "New Chart",
       model: "chart",
-      apiKey: "",
       layers: [
         {
-          type: "sql",
+          type: "line",
           sql: "",
         },
       ],
@@ -48,11 +46,6 @@ export default function BoardChartEditor({
         yAxisKeys: [],
         xAxisKey: "",
       },
-      source_id: "",
-      created_at: "",
-      updated_at: "",
-      workspace_id: "",
-      connection_id: "",
     },
   });
 
@@ -76,90 +69,12 @@ export default function BoardChartEditor({
   const initialChartValue = useCallback(
     (newResult: DatabaseResultSet, sql: string) => {
       setValue((prev) => {
-        return produce(prev, (draft) => {
-          draft.params.layers[0].sql = sql;
-          if (newResult.headers?.length > 0) {
-            const columns = newResult.headers.map((header) => header.name);
-
-            if (newResult.rows.length > 0) {
-              const xAxisKeys = [];
-              const yAxisKeys = [];
-              const firstRecord = newResult.rows[0];
-              const columnType = getColumnType(firstRecord);
-              // study each column value and try to guess the type
-              if (columnType) {
-                for (const column of columns) {
-                  if (columnType[column] === "number") {
-                    yAxisKeys.push(column);
-                  } else {
-                    xAxisKeys.push(column);
-                  }
-                }
-              } else {
-                // if there is no column type, we will just use the first column as xAxisKey
-                for (let i = 0; i < newResult.headers.length; i++) {
-                  if (i === 0) {
-                    xAxisKeys.push(newResult.headers[i].name);
-                  } else {
-                    yAxisKeys.push(newResult.headers[i].name);
-                  }
-                }
-              }
-
-              draft.params.options.xAxisKey =
-                xAxisKeys.length > 0 ? xAxisKeys[0] : "";
-              draft.params.options.yAxisKeys = yAxisKeys;
-            }
-
-            // initial yAxisKeyColors
-            const axisColors = Object.keys(
-              draft.params.options.yAxisKeyColors ?? {}
-            );
-            const appTheme: "light" | "dark" = (forcedTheme ||
-              resolvedTheme) as "light" | "dark";
-            const themeColor =
-              THEMES[DEFAULT_THEME].colors?.[appTheme ?? "light"];
-            if (axisColors.length === 0 && columns.length > 0) {
-              // Add default yAxisKeyColors
-              const colors = generateGradientColors(
-                themeColor[0],
-                themeColor[1],
-                columns.length
-              );
-              const newColors = columns.reduce(
-                (acc, col, i) => {
-                  acc[col] = colors[i];
-                  return acc;
-                },
-                {} as Record<string, string>
-              );
-
-              draft.params.options.theme = DEFAULT_THEME;
-              draft.params.options.yAxisKeyColors = newColors;
-            } else if (
-              axisColors.length > 0 &&
-              columns.length > axisColors.length
-            ) {
-              // Add new yAxisKeyColors
-              const colors = generateGradientColors(
-                themeColor[0],
-                themeColor[1],
-                columns.length + 5
-              );
-
-              for (let i = 0; i < columns.length; i++) {
-                if (
-                  draft.params.options.yAxisKeyColors &&
-                  !draft.params.options.yAxisKeyColors[columns[i]]
-                ) {
-                  draft.params.options.yAxisKeyColors[columns[i]] = colors[
-                    i
-                  ] as string;
-                }
-              }
-            }
-          }
-        });
+        return createAutoBoardChartValue(
+          prev,
+          newResult,
+          sql,
+          forcedTheme || resolvedTheme || ""
+        );
       });
     },
     [forcedTheme, resolvedTheme]
@@ -168,11 +83,29 @@ export default function BoardChartEditor({
   const onRunClicked = useCallback(() => {
     const sql = value?.params.layers[0].sql ?? "";
     const sourceId = value?.source_id ?? "";
-
     if (sourceDriver && sourceId) {
+      const dialect =
+        sourceDriver.sourceList().find((s) => s.id === sourceId)?.type ??
+        "sqlite";
+
+      const sqlTokens = tokenizeSql(sql, dialect as SupportedDialect);
+      const variables: Record<string, string> = (
+        chartList?.data.filters ?? []
+      ).reduce(
+        (acc, filter) => {
+          acc[filter.name] = (filter.value || filter.defaultValue) ?? "";
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      const sqlWithVariables = fillVariables(sqlTokens, variables)
+        .map((t) => t.value)
+        .join("");
+
       setLoading(true);
       sourceDriver
-        .query(sourceId, sql)
+        .query(sourceId, sqlWithVariables)
         .then((newResult) => {
           setResult(
             OptimizeTableState.createFromResult({
@@ -297,6 +230,10 @@ export default function BoardChartEditor({
           <div className="flex-1">
             <SqlEditor
               dialect="sqlite"
+              highlightVariable
+              variableList={(chartList?.data.filters ?? [])
+                .map((f) => f.name)
+                .join(",")}
               value={value.params.layers[0].sql}
               schema={autoCompletion}
               onChange={(e) => {
@@ -333,13 +270,4 @@ export default function BoardChartEditor({
       </div>
     </div>
   );
-}
-
-function getColumnType(firstRecord: any): Record<string, string> {
-  const columnTypes: Record<string, string> = {};
-  const keys = Object.keys(firstRecord);
-  for (const key of keys) {
-    columnTypes[key] = typeof firstRecord[key];
-  }
-  return columnTypes;
 }
