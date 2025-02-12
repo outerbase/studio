@@ -1,4 +1,5 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
+import { IBoardStorageDriver } from "@/drivers/board-storage/base";
 import { noop } from "lodash";
 import {
   createContext,
@@ -8,7 +9,6 @@ import {
   useContext,
 } from "react";
 import { BoardEditorMode, DashboardProps } from ".";
-import { ChartValue } from "../chart/chart-type";
 
 interface BoardContextSettingProps {
   autoRefresh: string[];
@@ -17,19 +17,21 @@ interface BoardContextSettingProps {
 
 interface BoardContextProps {
   value?: DashboardProps;
+  onChange?: (value: DashboardProps) => void;
   sources?: BoardSourceDriver;
-  onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
+  storage?: IBoardStorageDriver;
   setting?: BoardContextSettingProps;
   lastRunTimestamp: number;
   setBoardMode: Dispatch<SetStateAction<BoardEditorMode>>;
+  filterValue: Record<string, string>;
+  onFilterValueChange?: (value: Record<string, string>) => void;
 }
 
 const BoardContext = createContext<BoardContextProps>({
   lastRunTimestamp: 0,
   setBoardMode: noop,
-  onAddChart: async () => {
-    return undefined;
-  },
+  filterValue: {},
+  onFilterValueChange: noop,
 });
 
 export function useBoardContext() {

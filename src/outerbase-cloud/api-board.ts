@@ -16,3 +16,18 @@ export async function createOuterbaseDashboardChart(
     options
   );
 }
+
+export async function updateOuterbaseDashboardChart(
+  workspaceId: string,
+  chartId: string,
+  options: {
+    type: string;
+    source_id: string;
+    params: ChartParams;
+    name: string;
+  }
+): Promise<ChartValue>{
+  return requestOuterbase<ChartValue>(
+    `/api/v1/workspace/${workspaceId}/chart/${chartId}`, 'PUT', options
+  )
+}

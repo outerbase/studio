@@ -21,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import BoardChart from "./board-chart";
+import { deleteChartDialog } from "./board-delete-dialog";
+import { useBoardContext } from "./board-provider";
 import "./board-style.css";
 
 export interface BoardChartLayout {
@@ -36,7 +38,6 @@ interface BoardProps {
   onChange: (v: ReactGridLayout.Layout[]) => void;
   editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
   setEditMode?: (mode: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
-  onRemove: (key: string) => void;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -46,8 +47,12 @@ export function BoardCanvas({
   onChange,
   editMode,
   setEditMode,
-  onRemove,
 }: BoardProps) {
+  const {
+    storage,
+    value: boardValue,
+    onChange: onBoardChange,
+  } = useBoardContext();
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
     {
@@ -64,6 +69,25 @@ export function BoardCanvas({
       icon: <RectangleHorizontal className="h-4 w-4" />,
     },
   ];
+
+  const onRemove = useCallback(
+    async (key?: string) => {
+      if (storage && onBoardChange && boardValue) {
+        const find = value.charts.find((f) => f.id === key);
+        const valueAfterDelete = await deleteChartDialog.show({
+          chartId: key ?? "",
+          chartName: find?.name ?? "",
+          storage,
+          value: boardValue,
+        });
+        if (valueAfterDelete) {
+          storage.save(valueAfterDelete).then();
+          onBoardChange(valueAfterDelete);
+        }
+      }
+    },
+    [boardValue, onBoardChange, storage, value.charts]
+  );
 
   const menus = [
     {
@@ -91,9 +115,7 @@ export function BoardCanvas({
     {
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
-      onclick: (key?: string) => {
-        onRemove(key || "");
-      },
+      onclick: onRemove,
     },
   ];
 

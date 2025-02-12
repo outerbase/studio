@@ -1,4 +1,5 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
+import { IBoardStorageDriver } from "@/drivers/board-storage/base";
 import { useEffect, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
@@ -20,26 +21,24 @@ export type BoardEditorMode = "ADD_CHART" | "REARRANGING_CHART" | null;
 
 interface Props {
   value: DashboardProps;
+  filterValue: Record<string, string>;
+  onFilterValueChange?: (value: Record<string, string>) => void;
   sources?: BoardSourceDriver;
+  storage?: IBoardStorageDriver;
   interval: number;
   onChange: (value: DashboardProps) => void;
   onChangeInterval: (v: number) => void;
-  onLayoutSave: () => void;
-  onLayoutCancel: () => void;
-  onRemove: (key: string) => void;
-  onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
 }
 
 export default function Board({
   value,
   sources,
+  storage,
   interval,
   onChange,
   onChangeInterval,
-  onLayoutCancel,
-  onLayoutSave,
-  onRemove,
-  onAddChart,
+  filterValue,
+  onFilterValueChange,
 }: Props) {
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
@@ -74,12 +73,15 @@ export default function Board({
 
   return (
     <BoardProvider
+      filterValue={filterValue}
       sources={sources}
+      storage={storage}
+      onChange={onChange}
       lastRunTimestamp={lastRunTimestamp}
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
-      onAddChart={onAddChart}
       value={value}
+      onFilterValueChange={onFilterValueChange}
     >
       <div className="relative flex flex-1 flex-col">
         <BoardFilter
@@ -94,11 +96,7 @@ export default function Board({
           }}
           onCancel={() => {
             setEditMode(null);
-            onLayoutCancel();
-          }}
-          onSave={() => {
-            setEditMode(null);
-            onLayoutSave();
+            // onLayoutCancel();
           }}
         />
         <div className="relative flex-1">
@@ -112,9 +110,14 @@ export default function Board({
             }}
             editMode={editMode}
             setEditMode={setEditMode}
-            onRemove={onRemove}
           />
         </div>
+
+        {editMode === "ADD_CHART" && (
+          <div className="bg-background fixed top-14 bottom-0 left-0 z-50 flex w-screen">
+            <BoardChartEditor onChange={onChange} />
+          </div>
+        )}
 
         {editMode === "ADD_CHART" && (
           <div className="bg-background fixed top-14 bottom-0 left-0 z-50 flex w-screen">
