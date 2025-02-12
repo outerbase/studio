@@ -1,5 +1,4 @@
 import { ChartValue } from "@/components/chart/chart-type";
-import { BoardDriver } from "@/drivers/board-storage/base";
 import {
   OuterbaseAPIDashboardDetail,
   OuterbaseAPIWorkspace,
@@ -20,9 +19,7 @@ import {
 } from "../api";
 import { createOuterbaseDashboardChart } from "../api-board";
 
-export default class OuterbaseBoardSourceDriver
-  implements BoardSourceDriver, BoardDriver
-{
+export default class OuterbaseBoardSourceDriver implements BoardSourceDriver {
   protected workspace: OuterbaseAPIWorkspace;
   protected sourceDrivers: Record<string, BaseDriver> = {};
   protected cacheSchemas: Record<

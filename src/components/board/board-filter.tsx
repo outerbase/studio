@@ -2,7 +2,6 @@
 import { produce } from "immer";
 import {
   CalendarDays,
-  Check,
   Ellipsis,
   ListFilter,
   ListOrdered,
@@ -11,15 +10,16 @@ import {
 import { useCallback, useState } from "react";
 import { DashboardProps } from ".";
 import { buttonVariants } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { BoardFilterDialog, DEFAULT_DATE_FILTER } from "./board-filter-dialog";
+import { BoardFilterDialog } from "./board-filter-dialog";
+import { BoardFilterDate } from "./board-filter/board-filter-date";
+import { BoardFilterEnum } from "./board-filter/board-filter-enum";
+import { BoardFilterInput } from "./board-filter/board-filter-input";
 import { useBoardContext } from "./board-provider";
 import { BoardTool } from "./board-tool/board-tool";
 import { BoardToolbar } from "./board-tool/board-toolbar";
@@ -36,7 +36,7 @@ interface Props {
 }
 
 export function BoardFilter(props: Props) {
-  const { onLayoutSave } = useBoardContext();
+  const { storage, filterValue, onFilterValueChange } = useBoardContext();
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(true);
   const [selectIndex, setSelectIndex] = useState<number | undefined>(undefined);
@@ -56,6 +56,13 @@ export function BoardFilter(props: Props) {
     setOpen(true);
   }, [props]);
 
+  const onSave = useCallback(() => {
+    if (storage) {
+      props.onChangeEditMode(null);
+      storage.save(props.value);
+    }
+  }, [props, storage]);
+
   const mapFilterItem = props.value.data.filters.map((x, i) => {
     const icon =
       x.type === "search" ? (
@@ -67,104 +74,45 @@ export function BoardFilter(props: Props) {
       );
     const input =
       x.type === "search" ? (
-        <input
-          placeholder={`Enter ${x.name}`}
-          value={x.defaultValue}
+        <BoardFilterInput
+          name={x.name}
+          value={filterValue[x.name] ?? x.defaultValue}
           onChange={(v) => {
-            const data = structuredClone(props.value.data.filters);
-            data[i].defaultValue = v.target.value;
-            const value = produce(props.value, (draft) => {
-              draft.data.filters = data;
-            });
-            props.onChange(value);
+            if (!onFilterValueChange) return;
+            onFilterValueChange(
+              produce(filterValue, (draft) => {
+                draft[x.name] = v;
+              })
+            );
           }}
-          className="max-w-14 outline-0"
         />
       ) : x.type === "enum" ? (
-        <div className="z-100">
-          <Popover>
-            <PopoverTrigger asChild>
-              <div
-                className={
-                  x.defaultValue
-                    ? "px-2 py-1"
-                    : "text-muted-foreground px-2 py-1"
-                }
-              >
-                <div>{x.defaultValue || `Select ${x.name}`}</div>
-              </div>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto">
-              {x.value.split(",").map((v, idx) => {
-                return (
-                  <div
-                    key={v + idx}
-                    className="flex items-center justify-center gap-2"
-                  >
-                    <Checkbox
-                      id={v + idx}
-                      checked={x.defaultValue.split(",").includes(v)}
-                      onCheckedChange={(checked) => {
-                        const valueString = x.defaultValue.split(",");
-                        const data = structuredClone(props.value.data.filters);
-
-                        if (checked) {
-                          data[i].defaultValue = [...valueString, v]
-                            .filter((f) => !!f)
-                            .join(",");
-                        } else {
-                          valueString.filter((f) => f !== v);
-                          data[i].defaultValue = valueString
-                            .filter((f) => f !== v)
-                            .join(",");
-                        }
-                        const value = produce(props.value, (draft) => {
-                          draft.data.filters = data;
-                        });
-                        props.onChange(value);
-                      }}
-                    />
-                    <label htmlFor={v + idx}>{v}</label>
-                  </div>
-                );
-              })}
-            </PopoverContent>
-          </Popover>
-        </div>
+        <BoardFilterEnum
+          name={x.name}
+          enums={x.value.split(",")}
+          value={filterValue[x.name] ?? x.defaultValue}
+          onChange={(v) => {
+            if (!onFilterValueChange) return;
+            onFilterValueChange(
+              produce(filterValue, (draft) => {
+                draft[x.name] = v;
+              })
+            );
+          }}
+        />
       ) : (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div
-              className={
-                x.defaultValue ? "px-2 py-1" : "text-muted-foreground px-2 py-1"
-              }
-            >
-              <div>{x.defaultValue || `Select ${x.name}`}</div>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {DEFAULT_DATE_FILTER.map((date) => {
-              return (
-                <DropdownMenuItem
-                  key={date}
-                  onClick={() => {
-                    const data = structuredClone(props.value.data.filters);
-                    data[i].defaultValue = date;
-                    const value = produce(props.value, (draft) => {
-                      draft.data.filters = data;
-                    });
-                    props.onChange(value);
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    {date}
-                    {date === x.defaultValue && <Check className="h-3 w-3" />}
-                  </div>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <BoardFilterDate
+          name={x.name}
+          value={filterValue[x.name] ?? x.defaultValue}
+          onChange={(v) => {
+            if (!onFilterValueChange) return;
+            onFilterValueChange(
+              produce(filterValue, (draft) => {
+                draft[x.name] = v;
+              })
+            );
+          }}
+        />
       );
     return (
       <div
@@ -206,7 +154,12 @@ export function BoardFilter(props: Props) {
                     (_, idx) => idx !== i
                   );
                 });
-                props.onChange(value);
+                storage
+                  ?.save(value)
+                  .then()
+                  .finally(() => {
+                    props.onChange(value);
+                  });
               }}
             >
               Remove
@@ -231,10 +184,7 @@ export function BoardFilter(props: Props) {
           onChange={props.onChangeInterval}
           onRefresh={props.onRefresh}
           mode={props.editMode}
-          onSave={() => {
-            props.onChangeEditMode(null);
-            onLayoutSave();
-          }}
+          onSave={onSave}
           onCancel={props.onCancel}
           value={props.value}
           onChangeValue={props.onChange}
@@ -270,7 +220,12 @@ export function BoardFilter(props: Props) {
                 const value = produce(props.value, (draft) => {
                   draft.data.filters = data;
                 });
-                props.onChange(value);
+                storage
+                  ?.save(value)
+                  .then()
+                  .finally(() => {
+                    props.onChange(value);
+                  });
               }}
             />
           )}

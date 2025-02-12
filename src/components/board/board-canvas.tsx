@@ -1,6 +1,5 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { produce } from "immer";
 import {
   EditIcon,
   EllipsisVertical,
@@ -22,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import BoardChart from "./board-chart";
+import { deleteChartDialog } from "./board-delete-dialog";
 import { useBoardContext } from "./board-provider";
 import "./board-style.css";
 
@@ -70,6 +70,25 @@ export function BoardCanvas({
     },
   ];
 
+  const onRemove = useCallback(
+    async (key?: string) => {
+      if (storage && onBoardChange && boardValue) {
+        const find = value.charts.find((f) => f.id === key);
+        const valueAfterDelete = await deleteChartDialog.show({
+          chartId: key ?? "",
+          chartName: find?.name ?? "",
+          storage,
+          value: boardValue,
+        });
+        if (valueAfterDelete) {
+          storage.save(valueAfterDelete).then();
+          onBoardChange(valueAfterDelete);
+        }
+      }
+    },
+    [boardValue, onBoardChange, storage, value.charts]
+  );
+
   const menus = [
     {
       name: "Edit chart",
@@ -96,21 +115,7 @@ export function BoardCanvas({
     {
       name: "Delete chart",
       icon: <Trash2 className="h-4 w-4" />,
-      onclick: (key?: string) => {
-        if (storage && onBoardChange && boardValue) {
-          storage.remove(key || "").then(() => {
-            const newValue = produce(boardValue, (draft) => {
-              draft.layout = draft.layout.filter((f) => f.i !== key);
-              draft.charts = draft.charts.filter((f) => f.id !== key);
-            });
-
-            storage.save(newValue).then(() => {});
-
-            // Do something here
-            onBoardChange(newValue);
-          });
-        }
-      },
+      onclick: onRemove,
     },
   ];
 
@@ -162,7 +167,7 @@ export function BoardCanvas({
                   buttonVariants({ variant: "default", size: "icon" }),
                   "cancelSelectorName h-6 w-6 cursor-pointer rounded-full"
                 )}
-                onClick={() => onLayoutRemove(_.i)}
+                onClick={() => onRemove(_.i)}
               >
                 <Trash2 className="h-4 w-4" />
               </button>

@@ -14,7 +14,6 @@ import useSWR, { KeyedMutator } from "swr";
 
 function BoardPageEditor({
   initialValue,
-  mutate,
 }: {
   initialValue: OuterbaseAPIDashboardDetail;
   mutate: KeyedMutator<OuterbaseAPIDashboardDetail>;
@@ -37,58 +36,23 @@ function BoardPageEditor({
       currentWorkspace.short_name,
       boardId
     );
-  }, [currentWorkspace]);
+  }, [boardId, currentWorkspace]);
 
   const [value, setValue] = useState(initialValue);
-
-  // const onSave = useCallback(() => {
-  //   boardSources?.onLayoutSave(boardId, value).then().finally(mutate);
-  // }, [boardSources, boardId, value, mutate]);
-
-  // const onRemove = useCallback(
-  //   async (key: string) => {
-  //     const chart = value.charts.find((f) => f.id === key);
-  //     if (chart) {
-  //       const deleteChartId = await deleteChartDialog.show({
-  //         chartId: key,
-  //         chartName: chart.name,
-  //         boardId,
-  //         value,
-  //         source: boardSources,
-  //       });
-
-  //       if (deleteChartId) {
-  //         setValue((prev) => {
-  //           return produce(prev, (draft) => {
-  //             draft.chart_ids = prev.chart_ids.filter(
-  //               (f) => f !== deleteChartId
-  //             );
-  //             draft.layout = prev.layout.filter((f) => f.i !== deleteChartId);
-  //             draft.charts = prev.charts.filter((f) => f.id !== deleteChartId);
-  //           });
-  //         });
-  //         mutate();
-  //       }
-  //     }
-  //   },
-  //   [value, boardId, boardSources, mutate]
-  // );
-
-  // const onAddChart = useCallback(
-  //   async (chartValue: ChartValue) => {
-  //     return boardSources?.onAddChart(boardId, chartValue, value);
-  //   },
-  //   [boardId, boardSources, value]
-  // );
+  const [filter, setFilter] = useState({});
 
   if (!boardSources) {
     return <div>Loading Workspace....</div>;
   }
 
+  console.log("xxx", filter);
+
   return (
     <Board
       value={value as any}
       onChange={setValue as any}
+      filterValue={filter}
+      onFilterValueChange={setFilter}
       sources={boardSources}
       storage={storageDriver}
       interval={interval}

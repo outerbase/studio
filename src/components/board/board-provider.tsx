@@ -23,11 +23,15 @@ interface BoardContextProps {
   setting?: BoardContextSettingProps;
   lastRunTimestamp: number;
   setBoardMode: Dispatch<SetStateAction<BoardEditorMode>>;
+  filterValue: Record<string, string>;
+  onFilterValueChange?: (value: Record<string, string>) => void;
 }
 
 const BoardContext = createContext<BoardContextProps>({
   lastRunTimestamp: 0,
   setBoardMode: noop,
+  filterValue: {},
+  onFilterValueChange: noop,
 });
 
 export function useBoardContext() {

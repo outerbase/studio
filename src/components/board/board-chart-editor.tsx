@@ -66,7 +66,7 @@ export default function BoardChartEditor({
     sources: sourceDriver,
     setBoardMode,
     value: chartList,
-    onAddChart,
+    storage,
   } = useBoardContext();
   const [result, setResult] = useState<OptimizeTableState>();
 
@@ -105,6 +105,37 @@ export default function BoardChartEditor({
         });
     }
   }, [value, sourceDriver, schema]);
+
+  const onAddChart = useCallback(async () => {
+    if (storage) {
+      setLoading(true);
+      const newChart = await storage.add(value);
+      if (newChart) {
+        const newValue = produce(chartList!, (draft) => {
+          if (!draft?.charts) draft.charts = [];
+          draft?.charts.push(newChart);
+
+          if (!draft?.layout) draft.layout = [];
+
+          let y = 0;
+          for (const layout of draft.layout)
+            y = Math.max(y, layout.y + layout.h);
+
+          draft.layout.push({
+            x: 0,
+            y,
+            w: 2,
+            h: 2,
+            i: newChart.id!,
+          });
+        });
+        await storage.save(newValue);
+        onChange(newValue);
+        setBoardMode(null);
+        setLoading(false);
+      }
+    }
+  }, [chartList, onChange, setBoardMode, storage, value]);
 
   return (
     <div className="flex flex-1 overflow-hidden border-t">
@@ -196,39 +227,7 @@ export default function BoardChartEditor({
           />
         </div>
         <div className="flex justify-end gap-2 border-t p-4">
-          <Button
-            variant="primary"
-            onClick={() => {
-              onAddChart(value).then((newChart) => {
-                if (!newChart) return;
-
-                console.log("onchange", onChange);
-
-                onChange(
-                  produce(chartList!, (draft) => {
-                    if (!draft?.charts) draft.charts = [];
-                    draft?.charts.push(newChart);
-
-                    if (!draft?.layout) draft.layout = [];
-
-                    let y = 0;
-                    for (const layout of draft.layout)
-                      y = Math.max(y, layout.y + layout.h);
-
-                    draft.layout.push({
-                      x: 0,
-                      y,
-                      w: 2,
-                      h: 2,
-                      i: newChart.id!,
-                    });
-                  })
-                );
-
-                setBoardMode(null);
-              });
-            }}
-          >
+          <Button variant="primary" onClick={onAddChart}>
             Save Changes
           </Button>
           <Button

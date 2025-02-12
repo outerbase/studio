@@ -21,6 +21,8 @@ export type BoardEditorMode = "ADD_CHART" | "REARRANGING_CHART" | null;
 
 interface Props {
   value: DashboardProps;
+  filterValue: Record<string, string>;
+  onFilterValueChange?: (value: Record<string, string>) => void;
   sources?: BoardSourceDriver;
   storage?: IBoardStorageDriver;
   interval: number;
@@ -35,6 +37,8 @@ export default function Board({
   interval,
   onChange,
   onChangeInterval,
+  filterValue,
+  onFilterValueChange,
 }: Props) {
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
@@ -69,6 +73,7 @@ export default function Board({
 
   return (
     <BoardProvider
+      filterValue={filterValue}
       sources={sources}
       storage={storage}
       onChange={onChange}
@@ -76,6 +81,7 @@ export default function Board({
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
       value={value}
+      onFilterValueChange={onFilterValueChange}
     >
       <div className="relative flex flex-1 flex-col">
         <BoardFilter

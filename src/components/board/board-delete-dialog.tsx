@@ -1,7 +1,8 @@
-import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
-import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
+import { IBoardStorageDriver } from "@/drivers/board-storage/base";
+import { produce } from "immer";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
+import { DashboardProps } from ".";
 import CopyableText from "../copyable-text";
 import { createDialog } from "../create-dialog";
 import LabelInput from "../label-input";
@@ -16,14 +17,13 @@ import {
 export const deleteChartDialog = createDialog<
   {
     chartId: string;
-    boardId: string;
     chartName: string;
-    value: OuterbaseAPIDashboardDetail;
-    source: OuterbaseBoardSourceDriver | undefined;
+    storage: IBoardStorageDriver | undefined;
+    value: DashboardProps | undefined;
   },
-  string | undefined
+  DashboardProps | undefined
 >(
-  ({ close, chartName, chartId, source, boardId, value }) => {
+  ({ close, chartName, chartId, storage, value }) => {
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
 
@@ -32,15 +32,23 @@ export const deleteChartDialog = createDialog<
 
       setLoading(true);
 
-      if (source) {
-        source
-          .onLayoutRemove(chartId, boardId, value)
-          .then(() => close(chartId))
-          .finally(() => setLoading(false));
+      if (storage) {
+        if (value) {
+          storage
+            .remove(chartId)
+            .then(() => {
+              const newValue = produce(value, (draft) => {
+                draft.layout = draft.layout.filter((f) => f.i !== chartId);
+                draft.charts = draft.charts.filter((f) => f.id !== chartId);
+              });
+              close(newValue);
+            })
+            .finally(() => setLoading(false));
+        }
       } else {
         setLoading(false);
       }
-    }, [name, chartName, source, chartId, boardId, value, close]);
+    }, [name, chartName, storage, value, chartId, close]);
 
     return (
       <>
@@ -84,5 +92,5 @@ export const deleteChartDialog = createDialog<
       </>
     );
   },
-  { defaultValue: "close" }
+  { defaultValue: undefined }
 );
