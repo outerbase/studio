@@ -70,7 +70,7 @@ const lineChartValue: ChartValue = {
     ],
     options: {
       xAxisKey: undefined,
-      yAxisKeys: undefined,
+      yAxisKeys: [],
       xAxisLabel: undefined,
       yAxisLabel: "cust sellers",
       backgroundType: "none",

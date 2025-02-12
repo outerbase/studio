@@ -1,11 +1,13 @@
 import { generateAutoComplete } from "@/context/schema-provider";
-import { DatabaseSchemas } from "@/drivers/base-driver";
+import { DatabaseResultSet, DatabaseSchemas } from "@/drivers/base-driver";
 import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
+import { useTheme } from "next-themes";
 import { useCallback, useMemo, useState } from "react";
 import { DashboardProps } from ".";
 import Chart from "../chart";
-import { ChartValue } from "../chart/chart-type";
+import { ChartValue, DEFAULT_THEME, THEMES } from "../chart/chart-type";
+import { generateGradientColors } from "../chart/echart-options-builder";
 import EditChartMenu from "../chart/edit-chart-menu";
 import ResultTable from "../gui/query-result-table";
 import SqlEditor from "../gui/sql-editor";
@@ -58,6 +60,7 @@ export default function BoardChartEditor({
   const [selectedSchema, setSelectedSchema] = useState("");
   const [displayType, setDisplayType] = useState("chart");
   const [loading, setLoading] = useState(false);
+  const { forcedTheme, resolvedTheme } = useTheme();
   const autoCompletion = useMemo(() => {
     return generateAutoComplete(selectedSchema, schema);
   }, [schema, selectedSchema]);
@@ -69,6 +72,98 @@ export default function BoardChartEditor({
     onAddChart,
   } = useBoardContext();
   const [result, setResult] = useState<OptimizeTableState>();
+
+  const initialChartValue = useCallback(
+    (newResult: DatabaseResultSet, sql: string) => {
+      setValue((prev) => {
+        return produce(prev, (draft) => {
+          draft.params.layers[0].sql = sql;
+          if (newResult.headers?.length > 0) {
+            const columns = newResult.headers.map((header) => header.name);
+
+            if (newResult.rows.length > 0) {
+              const xAxisKeys = [];
+              const yAxisKeys = [];
+              const firstRecord = newResult.rows[0];
+              const columnType = getColumnType(firstRecord);
+              // study each column value and try to guess the type
+              if (columnType) {
+                for (const column of columns) {
+                  if (columnType[column] === "number") {
+                    yAxisKeys.push(column);
+                  } else {
+                    xAxisKeys.push(column);
+                  }
+                }
+              } else {
+                // if there is no column type, we will just use the first column as xAxisKey
+                for (let i = 0; i < newResult.headers.length; i++) {
+                  if (i === 0) {
+                    xAxisKeys.push(newResult.headers[i].name);
+                  } else {
+                    yAxisKeys.push(newResult.headers[i].name);
+                  }
+                }
+              }
+
+              draft.params.options.xAxisKey =
+                xAxisKeys.length > 0 ? xAxisKeys[0] : "";
+              draft.params.options.yAxisKeys = yAxisKeys;
+            }
+
+            // initial yAxisKeyColors
+            const axisColors = Object.keys(
+              draft.params.options.yAxisKeyColors ?? {}
+            );
+            const appTheme: "light" | "dark" = (forcedTheme ||
+              resolvedTheme) as "light" | "dark";
+            const themeColor =
+              THEMES[DEFAULT_THEME].colors?.[appTheme ?? "light"];
+            if (axisColors.length === 0 && columns.length > 0) {
+              // Add default yAxisKeyColors
+              const colors = generateGradientColors(
+                themeColor[0],
+                themeColor[1],
+                columns.length
+              );
+              const newColors = columns.reduce(
+                (acc, col, i) => {
+                  acc[col] = colors[i];
+                  return acc;
+                },
+                {} as Record<string, string>
+              );
+
+              draft.params.options.theme = DEFAULT_THEME;
+              draft.params.options.yAxisKeyColors = newColors;
+            } else if (
+              axisColors.length > 0 &&
+              columns.length > axisColors.length
+            ) {
+              // Add new yAxisKeyColors
+              const colors = generateGradientColors(
+                themeColor[0],
+                themeColor[1],
+                columns.length + 5
+              );
+
+              for (let i = 0; i < columns.length; i++) {
+                if (
+                  draft.params.options.yAxisKeyColors &&
+                  !draft.params.options.yAxisKeyColors[columns[i]]
+                ) {
+                  draft.params.options.yAxisKeyColors[columns[i]] = colors[
+                    i
+                  ] as string;
+                }
+              }
+            }
+          }
+        });
+      });
+    },
+    [forcedTheme, resolvedTheme]
+  );
 
   const onRunClicked = useCallback(() => {
     const sql = value?.params.layers[0].sql ?? "";
@@ -86,16 +181,7 @@ export default function BoardChartEditor({
               schemas: schema,
             })
           );
-          setValue((prev) => {
-            return produce(prev, (draft) => {
-              draft.params.layers[0].sql = sql;
-              if (newResult.headers?.length > 0) {
-                const columns = newResult.headers.map((header) => header.name);
-                draft.params.options.xAxisKey = columns.pop();
-                draft.params.options.yAxisKeys = columns;
-              }
-            });
-          });
+          initialChartValue(newResult, sql);
         })
         .catch(() => {
           console.log("error");
@@ -104,7 +190,13 @@ export default function BoardChartEditor({
           setLoading(false);
         });
     }
-  }, [value, sourceDriver, schema]);
+  }, [
+    value?.params.layers,
+    value?.source_id,
+    sourceDriver,
+    schema,
+    initialChartValue,
+  ]);
 
   return (
     <div className="flex flex-1 overflow-hidden border-t">
@@ -242,4 +334,13 @@ export default function BoardChartEditor({
       </div>
     </div>
   );
+}
+
+function getColumnType(firstRecord: any): Record<string, string> {
+  const columnTypes: Record<string, string> = {};
+  const keys = Object.keys(firstRecord);
+  for (const key of keys) {
+    columnTypes[key] = typeof firstRecord[key];
+  }
+  return columnTypes;
 }

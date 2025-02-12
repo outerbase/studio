@@ -7,7 +7,13 @@ import {
   ScatterSeriesOption,
   SeriesOption,
 } from "echarts";
-import { ChartData, ChartValue, ThemeColors, THEMES } from "./chart-type";
+import {
+  ChartData,
+  ChartValue,
+  DEFAULT_THEME,
+  ThemeColors,
+  THEMES,
+} from "./chart-type";
 
 export default class EchartOptionsBuilder {
   private chartValue: ChartValue;
@@ -26,6 +32,10 @@ export default class EchartOptionsBuilder {
     this.chartValue = value;
   }
 
+  setChartData(data: ChartData[]) {
+    this.chartData = data;
+  }
+
   getChartType() {
     return this.chartValue.type;
   }
@@ -34,51 +44,34 @@ export default class EchartOptionsBuilder {
     this.theme = theme as "dark" | "light";
   }
 
-  private getColorValues(): string[] {
-    let colors: string[] = [];
+  private getColorRange(): string[] {
+    const axisKeyColors = this.getAxisKeyColors();
+    const keys = this.chartValue.params.options?.yAxisKeys ?? this.columns;
+    return keys.map((key) => axisKeyColors[key] as string);
+  }
 
-    if (!this.chartValue.params.options.theme) {
-      colors = Object.keys(
-        this.chartValue.params.options?.yAxisKeyColors || {}
-      ).map(
-        (key) => this.chartValue.params.options.yAxisKeyColors?.[key] as string
+  private getAxisKeyColors(): Record<string, string> {
+    if (this.chartValue.params.options?.yAxisKeyColors) {
+      return this.chartValue.params.options.yAxisKeyColors;
+    } else {
+      // return default colors
+      const selectedTheme = (this.chartValue.params.options?.theme ??
+        DEFAULT_THEME) as ThemeColors;
+      const appTheme: "light" | "dark" = this.theme;
+      const themeColor = THEMES[selectedTheme].colors?.[appTheme ?? "light"];
+      const colors = generateGradientColors(
+        themeColor[0],
+        themeColor[1],
+        this.columns.length
       );
-
-      // If the user has already set the colors, return them
-      if (colors.length >= this.columns.length) {
-        return colors;
-      }
-
-      // If the user has set some colors, but not enough, generate the rest
-      if (colors.length >= 2 && colors.length < this.columns.length) {
-        const startColor = colors[0];
-        const endColor = colors[1];
-        return [
-          ...colors,
-          ...generateGradientColors(
-            startColor,
-            endColor,
-            this.columns.length - colors.length
-          ),
-        ];
-      }
+      return this.columns.reduce(
+        (acc, col, i) => {
+          acc[col] = colors[i];
+          return acc;
+        },
+        {} as Record<string, string>
+      );
     }
-
-    const colorTheme =
-      this.chartValue.params.options.theme ?? ("neonPunk" as ThemeColors);
-    const values = THEMES[colorTheme as ThemeColors];
-
-    if (!values) {
-      throw new Error(`Theme "${colorTheme}" does not exist`);
-    }
-
-    const colorRange = values.colors[this.theme];
-
-    return generateGradientColors(
-      colorRange[0],
-      colorRange[1],
-      this.columns.length
-    );
   }
 
   private getTextColor(): string {
@@ -124,14 +117,14 @@ export default class EchartOptionsBuilder {
           shape: "polygon",
           indicator: this.columns.map((name) => ({ name })),
         },
-        series: this.columns.map((col, index) => ({
+        series: this.columns.map((col) => ({
           type: "radar",
           data: [
             {
               value: formattedSource.map((item) => Number(item[col])), // throws away precision of bigint?!
               name: col,
               itemStyle: {
-                color: this.getColorValues()[index],
+                color: this.getAxisKeyColors()[col],
               },
             },
           ],
@@ -347,7 +340,7 @@ export default class EchartOptionsBuilder {
             name: item[this.columns[0]] as string,
             value: item[this.columns[1]] as number,
           })),
-          color: this.getColorValues(),
+          color: this.getColorRange(),
         });
         break;
       case "pie":
@@ -368,10 +361,10 @@ export default class EchartOptionsBuilder {
           label: {
             show: this.chartValue.params?.options?.xAxisLabelHidden !== true,
             formatter: "{b}: {c} ({d}%)",
-            color: this.theme === "dark" ? "#fff" : "#000", // Set label text color to white
+            color: this.getTextColor(),
             textBorderColor: "transparent", // Remove text border
           },
-          color: this.getColorValues(),
+          color: this.getColorRange(),
           tooltip: {
             trigger: "item",
             borderColor: this.theme === "dark" ? "#FFFFFF08" : "#00000010", // fix issue where 'item' tooltips were a different color than the rest (maybe it matched the series color)
@@ -390,7 +383,7 @@ export default class EchartOptionsBuilder {
     seriesType: T["type"],
     additionalOptions: Partial<Omit<T, "type">> = {}
   ): T[] {
-    return this.columns.slice(1).map((col, index) => {
+    return this.columns.slice(1).map((col) => {
       const baseSeries = {
         name: col,
         type: seriesType,
@@ -399,7 +392,7 @@ export default class EchartOptionsBuilder {
             ? { x: col, y: this.columns[0] } // For bar charts
             : { x: this.columns[0], y: col }, // For other chart types
         itemStyle: {
-          color: this.getColorValues()[index], // does NOT impact pie charts
+          color: this.getAxisKeyColors()[col],
         },
         symbol: "circle",
         ...additionalOptions,
