@@ -1,6 +1,11 @@
 "use client";
-import { createContext, PropsWithChildren, useContext } from "react";
-import useSWR from "swr";
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+} from "react";
+import useSWR, { mutate } from "swr";
 import { getOuterbaseSession } from "../../outerbase-cloud/api";
 import {
   OuterbaseAPISession,
@@ -14,10 +19,12 @@ interface OuterebaseSessionContextProps {
     session: OuterbaseAPISession;
     user: OuterbaseAPIUser;
   };
+  refreshSession: () => Promise<void>;
 }
 
 const OuterbaseSessionContext = createContext<OuterebaseSessionContextProps>({
   isLoading: true,
+  refreshSession: async () => {},
 });
 
 export function useSession() {
@@ -40,9 +47,14 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
     }
   );
 
+  const refreshSession = useCallback(async () => {
+    if (!token) return;
+    await mutate("session-" + token);
+  }, [token]);
+
   return (
     <OuterbaseSessionContext.Provider
-      value={{ session: data, isLoading, token }}
+      value={{ session: data, isLoading, token, refreshSession }}
     >
       {children}
     </OuterbaseSessionContext.Provider>

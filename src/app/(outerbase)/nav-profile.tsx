@@ -11,8 +11,10 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useSession } from "./session-provider";
+import { useWorkspaces } from "./workspace-provider";
 
 export default function NavigationProfile() {
+  const { currentWorkspace } = useWorkspaces();
   const { resolvedTheme, forcedTheme, setTheme } = useTheme();
   const { session } = useSession();
   const router = useRouter();
@@ -56,7 +58,12 @@ export default function NavigationProfile() {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="justify-between">
+        <DropdownMenuItem
+          className="justify-between"
+          onClick={() => {
+            router.push(`/w/${currentWorkspace?.short_name}/account`);
+          }}
+        >
           Account Setting
           <Gear size={20} />
         </DropdownMenuItem>
