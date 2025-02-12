@@ -111,7 +111,7 @@ export default function ChartSeries({
                     themeColor[1],
                     columns.length
                   );
-                  const newColors = prev.params.options.yAxisKeys?.reduce(
+                  const newColors = columns?.reduce(
                     (acc, col, i) => {
                       acc[col] = colors[i];
                       return acc;
