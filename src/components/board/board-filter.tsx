@@ -25,8 +25,6 @@ import { BoardTool } from "./board-tool/board-tool";
 import { BoardToolbar } from "./board-tool/board-toolbar";
 
 interface Props {
-  editMode: "ADD_CHART" | "REARRANGING_CHART" | null;
-  onChangeEditMode: (v: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
   interval: number;
   onChangeInterval: (v: number) => void;
   onRefresh?: () => void;
@@ -36,7 +34,8 @@ interface Props {
 }
 
 export function BoardFilter(props: Props) {
-  const { storage, filterValue, onFilterValueChange } = useBoardContext();
+  const { storage, filterValue, onFilterValueChange, setBoardMode } =
+    useBoardContext();
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(true);
   const [selectIndex, setSelectIndex] = useState<number | undefined>(undefined);
@@ -58,10 +57,10 @@ export function BoardFilter(props: Props) {
 
   const onSave = useCallback(() => {
     if (storage) {
-      props.onChangeEditMode(null);
+      setBoardMode(null);
       storage.save(props.value);
     }
-  }, [props, storage]);
+  }, [props, storage, setBoardMode]);
 
   const mapFilterItem = props.value.data.filters.map((x, i) => {
     const icon =
@@ -172,10 +171,8 @@ export function BoardFilter(props: Props) {
 
   return (
     <>
-      <BoardTool
-        editMode={props.editMode}
-        setEditMode={props.onChangeEditMode}
-      />
+      <BoardTool />
+
       <div className="sticky top-0 z-50 bg-neutral-100 px-1 pt-0 pb-2 dark:bg-neutral-950">
         <BoardToolbar
           show={show}
@@ -183,7 +180,6 @@ export function BoardFilter(props: Props) {
           interval={props.interval}
           onChange={props.onChangeInterval}
           onRefresh={props.onRefresh}
-          mode={props.editMode}
           onSave={onSave}
           onCancel={props.onCancel}
           value={props.value}

@@ -36,22 +36,17 @@ export interface BoardChartLayout {
 interface BoardProps {
   value: DashboardProps;
   onChange: (v: ReactGridLayout.Layout[]) => void;
-  editMode?: "ADD_CHART" | "REARRANGING_CHART" | null;
-  setEditMode?: (mode: "ADD_CHART" | "REARRANGING_CHART" | null) => void;
 }
 
 const ReactGridLayout = WidthProvider(RGL);
 
-export function BoardCanvas({
-  value,
-  onChange,
-  editMode,
-  setEditMode,
-}: BoardProps) {
+export function BoardCanvas({ value, onChange }: BoardProps) {
   const {
     storage,
     value: boardValue,
     onChange: onBoardChange,
+    boardMode,
+    setBoardMode,
   } = useBoardContext();
   const sizes = [
     { w: 1, h: 1, name: "1", icon: <Square className="h-3 w-3" /> },
@@ -93,7 +88,12 @@ export function BoardCanvas({
     {
       name: "Edit chart",
       icon: <EditIcon className="h-4 w-4" />,
-      onclick: () => {},
+      onclick: (key: string) => {
+        setBoardMode({
+          mode: "ADD_CHART",
+          chart: structuredClone(value.charts.find((f) => f.id === key)),
+        });
+      },
     },
     {
       name: "Refresh data",
@@ -104,7 +104,7 @@ export function BoardCanvas({
       name: "Rearrange layout",
       icon: <ImageUpscale className="h-4 w-4" />,
       onclick: () => {
-        setEditMode && setEditMode("REARRANGING_CHART");
+        setBoardMode({ mode: "REARRANGING_CHART" });
       },
     },
     {
@@ -133,13 +133,13 @@ export function BoardCanvas({
     return (
       <div
         key={_.i}
-        className="group bg-background relative flex items-center justify-center overflow-hidden rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
+        className="group bg-background relative flex items-center justify-center rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
         data-grid={_}
       >
         <BoardChart
           value={value.charts.find((chart) => chart.id === _.i) as any}
         />
-        {editMode === "REARRANGING_CHART" ? (
+        {boardMode?.mode === "REARRANGING_CHART" ? (
           <>
             <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
               {sizes.map((x, index) => {
@@ -213,8 +213,8 @@ export function BoardCanvas({
         className="layout overflow-x-hidden"
         layout={value.layout}
         onLayoutChange={onChange}
-        isDraggable={editMode === "REARRANGING_CHART"}
-        isResizable={editMode === "REARRANGING_CHART"}
+        isDraggable={boardMode?.mode === "REARRANGING_CHART"}
+        isResizable={boardMode?.mode === "REARRANGING_CHART"}
         compactType={"vertical"}
       >
         {mapItem}
