@@ -35,6 +35,11 @@ END;
           // do some fake delay
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
+          // random error
+          if (Math.random() < 0.2) {
+            throw new Error("Random error");
+          }
+
           const lines = selectedText?.split("\n") || [];
 
           for (let i = 0; i < lines.length; i++) {

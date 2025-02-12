@@ -27,6 +27,7 @@ export function CodeMirrorPromptWidget({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [previousPrompt, setPreviousPrompt] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [height, setHeight] = useState(60);
   const [prompt, setPrompt] = useState("");
@@ -54,13 +55,26 @@ export function CodeMirrorPromptWidget({
   const triggerSubmit = useCallback(() => {
     if (onSubmit) {
       setLoading(true);
+      setError("");
       cancelTriggered.current = false;
 
       onSubmit(prompt)
-        .then()
+        .then(() => {
+          if (!cancelTriggered.current) {
+            setPreviousPrompt(prompt);
+          }
+        })
+        .catch((e) => {
+          if (!cancelTriggered.current) {
+            if (e instanceof Error) {
+              setError(e.message);
+            }
+
+            setError(e.toString());
+          }
+        })
         .finally(() => {
           setLoading(false);
-          if (!cancelTriggered.current) setPreviousPrompt(prompt);
         });
     }
   }, [onSubmit, prompt]);
@@ -147,6 +161,9 @@ export function CodeMirrorPromptWidget({
           </button>
         </div>
       </div>
+
+      {error && <div className="p-2 text-sm text-red-500">{error}</div>}
+
       <div className="flex h-10 items-center gap-1 p-2">
         {(showSubmitButton || showSubmitEditButton) && (
           <Button
