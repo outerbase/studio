@@ -29,6 +29,34 @@ END;
         value={value}
         onChange={setValue}
         enablePrompt
+        onPrompt={async (prompt, selected) => {
+          const selectedText = selected?.text;
+
+          // do some fake delay
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          const lines = selectedText?.split("\n") || [];
+
+          for (let i = 0; i < lines.length; i++) {
+            if (Math.random() > 0.5) {
+              lines.splice(i, 0, "some random text " + Math.random());
+              i++;
+            }
+          }
+
+          for (let i = 0; i < 5; i++) {
+            // add random lines at the end
+            if (Math.random() > 0.5) {
+              lines.push("some random text " + Math.random());
+            }
+          }
+
+          // randomly remove lines
+          const finalLines = lines.filter(() => Math.random() > 0.35);
+          console.log(finalLines);
+
+          return finalLines.join("\n");
+        }}
       />
     </div>
   );
