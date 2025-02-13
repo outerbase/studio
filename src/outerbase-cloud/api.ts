@@ -231,3 +231,23 @@ export async function getOuterbaseEmbedChart(
 
   return await result.json();
 }
+
+export async function outerbaseLoginGoogle(code: string) {
+  const body = {
+    action: "sign_in",
+    code,
+  };
+
+  const result = await fetch(
+    `${process.env.NEXT_PUBLIC_OB_API}/api/v1/auth/oauth/google`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return result;
+}
