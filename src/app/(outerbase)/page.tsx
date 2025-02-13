@@ -1,27 +1,14 @@
 "use client";
 
-import { Avatar } from "@/components/orbit/avatar";
 import Banner from "@/components/orbit/banner";
 import RippleFilter from "@/components/orbit/banner/ripple-filter";
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
 import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import {
-  CaretDown,
-  Clock,
-  Database,
-  MagnifyingGlass,
-  Plus,
-} from "@phosphor-icons/react";
+import { Clock, Database, MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import RecentResource from "./recent-page";
 import { useSession } from "./session-provider";
+import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function OuterbaseMainPage() {
@@ -30,32 +17,9 @@ export default function OuterbaseMainPage() {
 
   return (
     <div className="flex h-screen w-screen">
-      <div className="w-[250px] border-r">
+      <div className="w-[250px] shrink-0 border-r">
         <div className="px-2 py-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <div
-                className={cn(
-                  buttonVariants({
-                    size: "lg",
-                    variant: "ghost",
-                  }),
-                  "flex items-center justify-start gap-2 p-1"
-                )}
-              >
-                <Avatar username="Guest" as="div" />
-                <div className="flex-1 text-left text-sm">Guest</div>
-                <div>
-                  <CaretDown weight="bold" className="h-3 w-3" />
-                </div>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[250px]">
-              <DropdownMenuItem>Account Setting</DropdownMenuItem>
-              <DropdownMenuItem>Theme</DropdownMenuItem>
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SidebarProfile />
         </div>
 
         <div className="px-2">
@@ -128,7 +92,9 @@ export default function OuterbaseMainPage() {
           <SidebarMenuItem text="Setting" />
         </div>
       </div>
-      <div></div>
+      <div className="flex min-h-screen w-full flex-col bg-neutral-50 dark:bg-neutral-950">
+        <RecentResource />
+      </div>
     </div>
   );
 }
