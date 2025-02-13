@@ -7,24 +7,23 @@ import { Input } from "@/components/orbit/input";
 import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
 import { Clock, Database, MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import RecentResource from "./recent-page";
-import { useSession } from "./session-provider";
 import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function OuterbaseMainPage() {
-  const { token, isLoading, session } = useSession();
   const { workspaces } = useWorkspaces();
 
   return (
     <div className="flex h-screen w-screen">
       <div className="w-[250px] shrink-0 border-r">
-        <div className="px-2 py-4">
+        <div className="px-2 py-2">
           <SidebarProfile />
         </div>
 
         <div className="px-2">
           <Input
             size="base"
+            className="bg-secondary"
             placeholder="Search for anything"
             preText={<MagnifyingGlass className="mr-2" />}
           />
