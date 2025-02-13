@@ -14,6 +14,7 @@ import {
 } from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import DataCatalogDriver from "./driver";
 
 interface DataCatalogTableColumnModalProps {
@@ -85,9 +86,14 @@ export default function TableMetadataModal({
       ...metadataInput,
       alias: metadataInput.alias || tableName,
     } as unknown as OuterbaseDataCatalogVirtualColumnInput;
-
     driver
       .updateTable(schemaName, tableName, metaInput, data?.id)
+      .then(() => {
+        toast.success(`Metatdata ${data?.id ? "updated" : "created"}`);
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      })
       .finally(() => {
         setLoading(false);
         onClose();
