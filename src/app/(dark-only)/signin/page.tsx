@@ -24,7 +24,7 @@ export default function SigninPage() {
 
   const onLoginClicked = useCallback(() => {
     setLoading(true);
-
+    // loginGoogle().then((r) => console.l )
     loginOuterbaseByPassword(email, password)
       .then((session) => {
         localStorage.setItem("session", JSON.stringify(session));
@@ -79,9 +79,24 @@ export default function SigninPage() {
           </svg>
 
           <h1 className="text-2xl font-bold">Welcome back</h1>
-          <p>Sign in to your existing account</p>
+          <p className="text-base text-neutral-400">
+            Sign in to your existing account
+          </p>
         </div>
+        <Button
+          onClick={() => {
+            router.push("/login/google");
+          }}
+          size="lg"
+          className="justify-center"
+        >
+          <img src="/google.png" width="18px" height="18px" alt="google" />
+          Continue with google
+        </Button>
 
+        <div className="items-center justify-center text-center text-sm">
+          Or
+        </div>
         <form
           onSubmit={(e) => {
             onLoginClicked();
