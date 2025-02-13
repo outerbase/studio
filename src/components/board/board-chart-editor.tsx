@@ -6,7 +6,6 @@ import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { DashboardProps } from ".";
 import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
@@ -19,6 +18,7 @@ import { MenuBar } from "../orbit/menu-bar";
 import { createAutoBoardChartValue } from "./board-auto-value";
 import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
+import BoardSqlErrorLog from "./board-sql-error-log";
 
 export default function BoardChartEditor({
   onChange,
@@ -60,6 +60,7 @@ export default function BoardChartEditor({
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [selectedSchema, setSelectedSchema] = useState("");
   const [displayType, setDisplayType] = useState("chart");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -93,6 +94,7 @@ export default function BoardChartEditor({
       const sqlWithVariables = fillVariables(sql, resolvedFilterValue, dialect);
 
       setLoading(true);
+      setErrorMessage(null);
       sourceDriver
         .query(sourceId, sqlWithVariables)
         .then((newResult) => {
@@ -106,8 +108,7 @@ export default function BoardChartEditor({
           initialChartValue(newResult, sql);
         })
         .catch((e) => {
-          if (e instanceof Error) toast(e.message);
-          else toast("Unexpected error");
+          setErrorMessage(e.toString());
         })
         .finally(() => {
           setLoading(false);
@@ -187,10 +188,13 @@ export default function BoardChartEditor({
     <div className="flex flex-1 overflow-hidden border-t">
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="h-1/2 overflow-x-hidden border-b">
-          {result && displayType === "table" && <ResultTable data={result} />}
-          {result && displayType === "chart" && (
+          {result && displayType === "table" && !errorMessage && (
+            <ResultTable data={result} />
+          )}
+          {result && displayType === "chart" && !errorMessage && (
             <Chart data={result.getAllRows().map((r) => r.raw)} value={value} />
           )}
+          {errorMessage && <BoardSqlErrorLog value={errorMessage} />}
         </div>
         <div className="h-1/2 overflow-x-hidden">
           <div className="flex gap-2 border-b px-4 py-2">
