@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import { Blend, ChevronDown, Edit3, LucideMoreHorizontal } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import DataCatalogTableColumn from "./data-catalog-table-column";
 import DataCatalogDriver from "./driver";
 import TableMetadataModal from "./table-metadata-modal";
@@ -77,6 +78,12 @@ export default function DataCatalogTableAccordion({
           modelColumn.id,
           isVirtual
         )
+        .then(() => {
+          toast.success(
+            `${modelColumn.column} is turned ${modelColumn.flags.isActive ? "on" : "off"}`
+          );
+        })
+        .catch((error) => toast.error(error.message))
         .finally(() => {
           cb && cb();
         });
