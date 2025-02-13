@@ -204,6 +204,7 @@ export default function EditChartMenu({
         <p className="mb-1.5 text-sm font-bold opacity-70">Text</p>
         <textarea
           className="h-[200px] w-full rounded-md border p-2"
+          value={value.params.options.text}
           onChange={(v) =>
             onChange((prev) => {
               return produce(prev, (draft) => {
@@ -214,7 +215,7 @@ export default function EditChartMenu({
         />
       </div>
     );
-  }, [onChange, value.type]);
+  }, [onChange, value.params.options.text, value.type]);
 
   const textColorSection = useMemo(() => {
     return (
