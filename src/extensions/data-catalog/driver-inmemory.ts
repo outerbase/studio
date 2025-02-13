@@ -77,7 +77,7 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
             ...(data as unknown as OuterbaseDataCatalogComment),
           });
         }
-      } else {
+      } else if (data.column) {
         table.columns[data.column] = {
           ...table.columns[data.column],
           ...data,
