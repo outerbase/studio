@@ -1,5 +1,6 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
-import { useEffect, useState } from "react";
+import { IBoardStorageDriver } from "@/drivers/board-storage/base";
+import { useEffect, useMemo, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
 import BoardChartEditor from "./board-chart-editor";
@@ -16,30 +17,31 @@ export interface DashboardProps {
   };
 }
 
-export type BoardEditorMode = "ADD_CHART" | "REARRANGING_CHART" | null;
+export type BoardEditorMode = {
+  mode: "ADD_CHART" | "REARRANGING_CHART";
+  chart?: ChartValue;
+} | null;
 
 interface Props {
   value: DashboardProps;
+  filterValue: Record<string, string>;
+  onFilterValueChange?: (value: Record<string, string>) => void;
   sources?: BoardSourceDriver;
+  storage?: IBoardStorageDriver;
   interval: number;
   onChange: (value: DashboardProps) => void;
   onChangeInterval: (v: number) => void;
-  onLayoutSave: () => void;
-  onLayoutCancel: () => void;
-  onRemove: (key: string) => void;
-  onAddChart: (value: ChartValue) => Promise<ChartValue | undefined>;
 }
 
 export default function Board({
   value,
   sources,
+  storage,
   interval,
   onChange,
   onChangeInterval,
-  onLayoutCancel,
-  onLayoutSave,
-  onRemove,
-  onAddChart,
+  filterValue,
+  onFilterValueChange,
 }: Props) {
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
@@ -72,21 +74,36 @@ export default function Board({
     };
   }, [interval]);
 
+  const resolvedFilterValue = useMemo(() => {
+    const tmp = structuredClone(filterValue);
+
+    value.data.filters.forEach((f) => {
+      if (!tmp[f.name]) {
+        tmp[f.name] = f.defaultValue;
+      }
+    });
+
+    return tmp;
+  }, [value, filterValue]);
+
   return (
     <BoardProvider
+      filterValue={filterValue}
       sources={sources}
+      storage={storage}
+      onChange={onChange}
       lastRunTimestamp={lastRunTimestamp}
       setting={{ autoRefresh, name: value.name }}
       setBoardMode={setEditMode}
-      onAddChart={onAddChart}
+      boardMode={editMode}
       value={value}
+      resolvedFilterValue={resolvedFilterValue}
+      onFilterValueChange={onFilterValueChange}
     >
       <div className="relative flex flex-1 flex-col">
         <BoardFilter
           value={value}
           onChange={onChange}
-          editMode={editMode}
-          onChangeEditMode={setEditMode}
           interval={interval}
           onChangeInterval={onChangeInterval}
           onRefresh={() => {
@@ -94,11 +111,6 @@ export default function Board({
           }}
           onCancel={() => {
             setEditMode(null);
-            onLayoutCancel();
-          }}
-          onSave={() => {
-            setEditMode(null);
-            onLayoutSave();
           }}
         />
         <div className="relative flex-1">
@@ -110,15 +122,15 @@ export default function Board({
                 layout: v,
               });
             }}
-            editMode={editMode}
-            setEditMode={setEditMode}
-            onRemove={onRemove}
           />
         </div>
 
-        {editMode === "ADD_CHART" && (
+        {editMode?.mode === "ADD_CHART" && (
           <div className="bg-background fixed top-14 bottom-0 left-0 z-50 flex w-screen">
-            <BoardChartEditor onChange={onChange} />
+            <BoardChartEditor
+              onChange={onChange}
+              initialValue={editMode?.chart}
+            />
           </div>
         )}
       </div>

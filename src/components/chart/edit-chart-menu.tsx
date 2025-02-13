@@ -124,7 +124,7 @@ export default function EditChartMenu({
             onSumit={(v) => {
               onChange((prev) => {
                 return produce(prev, (draft) => {
-                  draft.params.options.xAxisLabel = v;
+                  draft.params.options.xAxisLabel = v === "" ? undefined : v;
                 });
               });
             }}

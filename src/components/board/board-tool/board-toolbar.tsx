@@ -42,7 +42,6 @@ export function BoardToolbar(props: Props) {
       <div className="flex w-1/3 items-end justify-end">
         <BoardButtonMenu
           interval={props.interval}
-          mode={props.mode}
           onChangeInterval={props.onChange}
           onRefresh={props.onRefresh}
           onCancel={props.onCancel}

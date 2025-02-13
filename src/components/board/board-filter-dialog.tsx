@@ -89,7 +89,7 @@ export function BoardFilterDialog(props: Props) {
               <SelectContent>
                 <SelectItem value="search">Search</SelectItem>
                 <SelectItem value="enum">Multi-select ENUM</SelectItem>
-                <SelectItem value="date">Date Rang</SelectItem>
+                <SelectItem value="date">Date Range</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -180,7 +180,7 @@ export function BoardFilterDialog(props: Props) {
             disabled={!allowAddFilter}
             onClick={onAddFilter}
           >
-            Add Filter
+            Save Filter
           </Button>
           <Button type="button" variant={"secondary"} onClick={props.onClose}>
             Cancel

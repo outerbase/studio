@@ -1,8 +1,16 @@
 import { generateAutoComplete } from "@/context/schema-provider";
-import { DatabaseSchemas } from "@/drivers/base-driver";
+import {
+  DatabaseResultSet,
+  DatabaseSchemas,
+  SupportedDialect,
+} from "@/drivers/base-driver";
+import { fillVariables } from "@/lib/sql/fill-variables";
+import { tokenizeSql } from "@/lib/sql/tokenizer";
 import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
-import { useCallback, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { DashboardProps } from ".";
 import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
@@ -12,72 +20,90 @@ import SqlEditor from "../gui/sql-editor";
 import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
 import { Button } from "../orbit/button";
 import { MenuBar } from "../orbit/menu-bar";
+import { createAutoBoardChartValue } from "./board-auto-value";
 import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
 
 export default function BoardChartEditor({
   onChange,
+  initialValue,
 }: {
   onChange: (value: DashboardProps) => void;
+  initialValue?: ChartValue;
 }) {
-  const [value, setValue] = useState<ChartValue>({
-    model: "chart",
-    type: "line",
-    connection_id: "",
-    created_at: "",
-    id: "",
-    source_id: "",
-    updated_at: "",
-    workspace_id: "",
-    name: "New Chart",
-    params: {
-      type: "line",
-      id: "",
-      name: "New Chart",
-      model: "chart",
-      apiKey: "",
-      layers: [
-        {
-          type: "sql",
-          sql: "",
-        },
-      ],
-      options: {
-        yAxisKeys: [],
-        xAxisKey: "",
-      },
-      source_id: "",
-      created_at: "",
-      updated_at: "",
-      workspace_id: "",
-      connection_id: "",
-    },
+  const {
+    sources: sourceDriver,
+    setBoardMode,
+    value: boardValue,
+    storage,
+    resolvedFilterValue,
+  } = useBoardContext();
+  const [result, setResult] = useState<OptimizeTableState>();
+
+  const [value, setValue] = useState<ChartValue>(() => {
+    if (initialValue) return initialValue;
+
+    if (boardValue?.charts && boardValue.charts.length) {
+      return {
+        ...NEW_CHART_EMPTY_VALUE,
+        source_id: boardValue?.charts[0].source_id,
+      };
+    }
+
+    const sourceList = sourceDriver?.sourceList() ?? [];
+    if (sourceList.length) {
+      return {
+        ...NEW_CHART_EMPTY_VALUE,
+        source_id: sourceList[0].id,
+      };
+    }
+
+    return NEW_CHART_EMPTY_VALUE;
   });
 
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [selectedSchema, setSelectedSchema] = useState("");
   const [displayType, setDisplayType] = useState("chart");
+
   const [loading, setLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const { forcedTheme, resolvedTheme } = useTheme();
   const autoCompletion = useMemo(() => {
     return generateAutoComplete(selectedSchema, schema);
   }, [schema, selectedSchema]);
 
-  const {
-    sources: sourceDriver,
-    setBoardMode,
-    value: chartList,
-    onAddChart,
-  } = useBoardContext();
-  const [result, setResult] = useState<OptimizeTableState>();
+  const initialChartValue = useCallback(
+    (newResult: DatabaseResultSet, sql: string) => {
+      setValue((prev) => {
+        return createAutoBoardChartValue(
+          prev,
+          newResult,
+          sql,
+          forcedTheme || resolvedTheme || ""
+        );
+      });
+    },
+    [forcedTheme, resolvedTheme]
+  );
 
   const onRunClicked = useCallback(() => {
     const sql = value?.params.layers[0].sql ?? "";
     const sourceId = value?.source_id ?? "";
-
     if (sourceDriver && sourceId) {
+      const dialect =
+        sourceDriver.sourceList().find((s) => s.id === sourceId)?.type ??
+        "sqlite";
+
+      const sqlTokens = tokenizeSql(sql, dialect as SupportedDialect);
+
+      const sqlWithVariables = fillVariables(sqlTokens, resolvedFilterValue)
+        .map((t) => t.value)
+        .join("");
+
       setLoading(true);
       sourceDriver
-        .query(sourceId, sql)
+        .query(sourceId, sqlWithVariables)
         .then((newResult) => {
           setResult(
             OptimizeTableState.createFromResult({
@@ -86,25 +112,85 @@ export default function BoardChartEditor({
               schemas: schema,
             })
           );
-          setValue((prev) => {
-            return produce(prev, (draft) => {
-              draft.params.layers[0].sql = sql;
-              if (newResult.headers?.length > 0) {
-                const columns = newResult.headers.map((header) => header.name);
-                draft.params.options.xAxisKey = columns.pop();
-                draft.params.options.yAxisKeys = columns;
-              }
-            });
-          });
+          initialChartValue(newResult, sql);
         })
-        .catch(() => {
-          console.log("error");
+        .catch((e) => {
+          if (e instanceof Error) toast(e.message);
+          else toast("Unexpected error");
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [value, sourceDriver, schema]);
+  }, [
+    value?.params.layers,
+    value?.source_id,
+    sourceDriver,
+    schema,
+    initialChartValue,
+    resolvedFilterValue,
+  ]);
+
+  // Ensure that we will run the query when we
+  // try to edit an existing chart
+  const runOnce = useRef(false);
+  useEffect(() => {
+    if (runOnce.current) return;
+
+    runOnce.current = true;
+    if (initialValue) {
+      onRunClicked();
+    }
+  }, [onRunClicked, initialValue]);
+
+  const onAddChart = useCallback(async () => {
+    if (storage) {
+      setSaveLoading(true);
+
+      // Decide if we are updating or creating a new chart
+      if (value.id) {
+        const newValue = produce(boardValue!, (draft) => {
+          const index = draft?.charts.findIndex((c) => c.id === value.id);
+          if (index === -1) return;
+
+          draft.charts[index] = value;
+        });
+
+        await storage.update(value.id, value);
+        await storage.save(newValue);
+
+        onChange(newValue);
+        setBoardMode(null);
+        setSaveLoading(false);
+      } else {
+        const newChart = await storage.add(value);
+        if (newChart) {
+          const newValue = produce(boardValue!, (draft) => {
+            if (!draft?.charts) draft.charts = [];
+            draft?.charts.push(newChart);
+
+            if (!draft?.layout) draft.layout = [];
+
+            let y = 0;
+            for (const layout of draft.layout)
+              y = Math.max(y, layout.y + layout.h);
+
+            draft.layout.push({
+              x: 0,
+              y,
+              w: 2,
+              h: 2,
+              i: newChart.id!,
+            });
+          });
+          await storage.save(newValue);
+          onChange(newValue);
+          setBoardMode(null);
+          setSaveLoading(false);
+        }
+      }
+    }
+  }, [boardValue, onChange, setBoardMode, storage, value]);
 
   return (
     <div className="flex flex-1 overflow-hidden border-t">
@@ -119,7 +205,7 @@ export default function BoardChartEditor({
           <div className="flex gap-2 border-b px-4 py-2">
             <BoardSourcePicker
               value={value?.source_id}
-              usedSourceId={(chartList?.charts ?? []).map(
+              usedSourceId={(boardValue?.charts ?? []).map(
                 (c) => c.source_id || ""
               )}
               onChange={(newSourceId) => {
@@ -174,6 +260,10 @@ export default function BoardChartEditor({
           <div className="flex-1">
             <SqlEditor
               dialect="sqlite"
+              highlightVariable
+              variableList={(boardValue?.data.filters ?? [])
+                .map((f) => f.name)
+                .join(",")}
               value={value.params.layers[0].sql}
               schema={autoCompletion}
               onChange={(e) => {
@@ -196,39 +286,7 @@ export default function BoardChartEditor({
           />
         </div>
         <div className="flex justify-end gap-2 border-t p-4">
-          <Button
-            variant="primary"
-            onClick={() => {
-              onAddChart(value).then((newChart) => {
-                if (!newChart) return;
-
-                console.log("onchange", onChange);
-
-                onChange(
-                  produce(chartList!, (draft) => {
-                    if (!draft?.charts) draft.charts = [];
-                    draft?.charts.push(newChart);
-
-                    if (!draft?.layout) draft.layout = [];
-
-                    let y = 0;
-                    for (const layout of draft.layout)
-                      y = Math.max(y, layout.y + layout.h);
-
-                    draft.layout.push({
-                      x: 0,
-                      y,
-                      w: 2,
-                      h: 2,
-                      i: newChart.id!,
-                    });
-                  })
-                );
-
-                setBoardMode(null);
-              });
-            }}
-          >
+          <Button variant="primary" onClick={onAddChart} loading={saveLoading}>
             Save Changes
           </Button>
           <Button
@@ -243,3 +301,24 @@ export default function BoardChartEditor({
     </div>
   );
 }
+
+const NEW_CHART_EMPTY_VALUE: ChartValue = {
+  model: "chart",
+  type: "line",
+  name: "New Chart",
+  params: {
+    type: "line",
+    name: "New Chart",
+    model: "chart",
+    layers: [
+      {
+        type: "line",
+        sql: "",
+      },
+    ],
+    options: {
+      yAxisKeys: [],
+      xAxisKey: "",
+    },
+  },
+};

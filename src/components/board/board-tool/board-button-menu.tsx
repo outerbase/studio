@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { useBoardContext } from "../board-provider";
 
 interface Props {
-  mode?: "ADD_CHART" | "REARRANGING_CHART" | null;
   interval: number;
   onChangeInterval: (interval: number) => void;
   onRefresh?: () => void;
@@ -62,10 +61,10 @@ function useAutoRefresh(interval: number) {
 }
 
 export function BoardButtonMenu(props: Props) {
-  const { setting, setBoardMode } = useBoardContext();
+  const { setting, setBoardMode, boardMode } = useBoardContext();
   const timeleft = useAutoRefresh(props.interval);
 
-  if (props.mode === "REARRANGING_CHART") {
+  if (boardMode?.mode === "REARRANGING_CHART") {
     return (
       <div className="flex items-center gap-2">
         <Button variant={"secondary"} onClick={props.onCancel}>
@@ -158,7 +157,9 @@ export function BoardButtonMenu(props: Props) {
         <Button
           variant={"primary"}
           onClick={() => {
-            setBoardMode("ADD_CHART");
+            setBoardMode({
+              mode: "ADD_CHART",
+            });
           }}
         >
           Add Chart

@@ -51,11 +51,15 @@ export default function ChartYAxisSection({
       <div className="flex items-center justify-between gap-2">
         <SimpleInput
           value={value.params.options?.yAxisLabel}
-          placeholder={"Y Axis Label"}
+          placeholder={
+            value.params.options?.yAxisKeys?.length > 0
+              ? value.params.options?.yAxisKeys[0]
+              : "Y Axis Label"
+          }
           onSumit={(v) => {
             onChange((prev) => {
               return produce(prev, (draft) => {
-                draft.params.options.yAxisLabel = v;
+                draft.params.options.yAxisLabel = v === "" ? undefined : v;
               });
             });
           }}

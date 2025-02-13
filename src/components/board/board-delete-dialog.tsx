@@ -1,6 +1,8 @@
-import { deleteOuterbaseDashboardChart } from "@/outerbase-cloud/api";
+import { IBoardStorageDriver } from "@/drivers/board-storage/base";
+import { produce } from "immer";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
+import { DashboardProps } from ".";
 import CopyableText from "../copyable-text";
 import { createDialog } from "../create-dialog";
 import LabelInput from "../label-input";
@@ -14,29 +16,39 @@ import {
 
 export const deleteChartDialog = createDialog<
   {
-    workspaceId: string;
     chartId: string;
     chartName: string;
+    storage: IBoardStorageDriver | undefined;
+    value: DashboardProps | undefined;
   },
-  string | undefined
+  DashboardProps | undefined
 >(
-  ({ close, chartName, workspaceId, chartId }) => {
+  ({ close, chartName, chartId, storage, value }) => {
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
 
-    const deleteClicked = useCallback(() => {
+    const deleteClicked = useCallback(async () => {
       if (name !== chartName) return;
 
       setLoading(true);
 
-      deleteOuterbaseDashboardChart(workspaceId, chartId)
-        .then(() => {
-          close(chartId);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, [chartName, chartId, close, name, workspaceId]);
+      if (storage) {
+        if (value) {
+          storage
+            .remove(chartId)
+            .then(() => {
+              const newValue = produce(value, (draft) => {
+                draft.layout = draft.layout.filter((f) => f.i !== chartId);
+                draft.charts = draft.charts.filter((f) => f.id !== chartId);
+              });
+              close(newValue);
+            })
+            .finally(() => setLoading(false));
+        }
+      } else {
+        setLoading(false);
+      }
+    }, [name, chartName, storage, value, chartId, close]);
 
     return (
       <>
@@ -80,5 +92,5 @@ export const deleteChartDialog = createDialog<
       </>
     );
   },
-  { defaultValue: "close" }
+  { defaultValue: undefined }
 );
