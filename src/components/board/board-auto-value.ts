@@ -7,7 +7,8 @@ export function createAutoBoardChartValue(
   prev: ChartValue,
   newResult: DatabaseResultSet,
   sql: string,
-  theme: string
+  theme: string,
+  suggestChartType: boolean
 ): ChartValue {
   return produce(prev, (draft) => {
     draft.params.layers[0].sql = sql;
@@ -42,6 +43,53 @@ export function createAutoBoardChartValue(
         draft.params.options.xAxisKey =
           xAxisKeys.length > 0 ? xAxisKeys[0] : "";
         draft.params.options.yAxisKeys = yAxisKeys;
+
+        if (suggestChartType) {
+          // recommend chart type
+          if (
+            newResult.rows.length === 1 &&
+            newResult.headers.length === 1 &&
+            xAxisKeys.length === 0 &&
+            yAxisKeys.length === 1
+          ) {
+            draft.type = "single_value";
+            draft.params.type = "single_value";
+          } else if (
+            (xAxisKeys.length === 0 && yAxisKeys.length > 1) ||
+            newResult.rows.length > 100
+          ) {
+            draft.type = "table";
+            draft.params.type = "table";
+          } else if (xAxisKeys.length > 0 && yAxisKeys.length > 1) {
+            if (newResult.rows.length > 10) {
+              draft.type = "line";
+              draft.params.type = "line";
+            } else {
+              draft.type = "column";
+              draft.params.type = "column";
+            }
+          } else if (
+            xAxisKeys.length > 0 &&
+            yAxisKeys.length === 1 &&
+            newResult.rows.length < 10
+          ) {
+            draft.type = "pie";
+            draft.params.type = "pie";
+          } else if (
+            xAxisKeys.length === 1 &&
+            yAxisKeys.length === 0 &&
+            newResult.rows.length === 1
+          ) {
+            draft.type = "text";
+            draft.params.type = "text";
+            draft.params.options.text = newResult.rows[0][
+              xAxisKeys[0]
+            ] as string;
+          } else {
+            draft.type = "line";
+            draft.params.type = "line";
+          }
+        }
       }
 
       // initial yAxisKeyColors
