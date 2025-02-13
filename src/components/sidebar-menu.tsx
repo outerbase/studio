@@ -1,8 +1,10 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 interface SidebarMenuItemProps {
   text: string;
+  badge?: ReactElement;
   onClick?: () => void;
   href?: string;
   selected?: boolean;
@@ -17,11 +19,12 @@ export function SidebarMenuItem({
   text,
   onClick,
   icon: IconComponent,
+  badge,
   href,
   selected,
 }: SidebarMenuItemProps) {
   const className =
-    "flex p-2 pl-4 text-sm hover:cursor-pointer hover:bg-secondary";
+    "flex p-2 pl-4 text-sm hover:cursor-pointer hover:bg-secondary h-8 items-center";
 
   const body = (
     <>
@@ -30,7 +33,10 @@ export function SidebarMenuItem({
       ) : (
         <span className="mr-2 h-4 w-4"></span>
       )}
-      {text}
+
+      <span className="flex-1 text-left">{text}</span>
+
+      {badge && badge}
     </>
   );
 
