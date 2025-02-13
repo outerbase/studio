@@ -1,6 +1,4 @@
-import { SupportedDialect } from "@/drivers/base-driver";
-import { fillVariables } from "@/lib/sql/fill-variables";
-import { tokenizeSql } from "@/lib/sql/tokenizer";
+import { fillVariables, SupportedDialect } from "@outerbase/sdk-transform";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
@@ -17,15 +15,11 @@ export default function BoardChart({ value }: { value: ChartValue }) {
 
   const finalSql = useMemo(() => {
     return fillVariables(
-      tokenizeSql(
-        sql,
-        (sources?.sourceList().find((s) => s.id === sourceId)?.type ??
-          "sqlite") as unknown as SupportedDialect
-      ),
-      resolvedFilterValue
-    )
-      .map((t) => t.value)
-      .join("");
+      sql,
+      resolvedFilterValue,
+      (sources?.sourceList().find((s) => s.id === sourceId)?.type ??
+        "sqlite") as unknown as SupportedDialect
+    );
   }, [sql, sources, sourceId, resolvedFilterValue]);
 
   useEffect(() => {

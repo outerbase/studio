@@ -1,11 +1,7 @@
 import { generateAutoComplete } from "@/context/schema-provider";
-import {
-  DatabaseResultSet,
-  DatabaseSchemas,
-  SupportedDialect,
-} from "@/drivers/base-driver";
-import { fillVariables } from "@/lib/sql/fill-variables";
-import { tokenizeSql } from "@/lib/sql/tokenizer";
+import { DatabaseResultSet, DatabaseSchemas } from "@/drivers/base-driver";
+
+import { fillVariables, SupportedDialect } from "@outerbase/sdk-transform";
 import { ChartBar, Play, Table } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { useTheme } from "next-themes";
@@ -91,15 +87,10 @@ export default function BoardChartEditor({
     const sql = value?.params.layers[0].sql ?? "";
     const sourceId = value?.source_id ?? "";
     if (sourceDriver && sourceId) {
-      const dialect =
-        sourceDriver.sourceList().find((s) => s.id === sourceId)?.type ??
-        "sqlite";
+      const dialect = (sourceDriver.sourceList().find((s) => s.id === sourceId)
+        ?.type ?? "sqlite") as SupportedDialect;
 
-      const sqlTokens = tokenizeSql(sql, dialect as SupportedDialect);
-
-      const sqlWithVariables = fillVariables(sqlTokens, resolvedFilterValue)
-        .map((t) => t.value)
-        .join("");
+      const sqlWithVariables = fillVariables(sql, resolvedFilterValue, dialect);
 
       setLoading(true);
       sourceDriver
