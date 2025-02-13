@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { SupportedDialect } from "@/drivers/base-driver";
+import { fillVariables } from "@/lib/sql/fill-variables";
+import { tokenizeSql } from "@/lib/sql/tokenizer";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
 import { useBoardContext } from "./board-provider";
@@ -6,21 +9,34 @@ import { useBoardContext } from "./board-provider";
 export default function BoardChart({ value }: { value: ChartValue }) {
   const [data, setData] = useState<Record<string, unknown>[] | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
-  const { sources, lastRunTimestamp } = useBoardContext();
+  const { sources, lastRunTimestamp, resolvedFilterValue } = useBoardContext();
   const [loading, setLoading] = useState(false);
 
   const sql = value.params.layers[0].sql;
   const sourceId = value.source_id;
 
+  const finalSql = useMemo(() => {
+    return fillVariables(
+      tokenizeSql(
+        sql,
+        (sources?.sourceList().find((s) => s.id === sourceId)?.type ??
+          "sqlite") as unknown as SupportedDialect
+      ),
+      resolvedFilterValue
+    )
+      .map((t) => t.value)
+      .join("");
+  }, [sql, sources, sourceId, resolvedFilterValue]);
+
   useEffect(() => {
-    if (!sources || !sourceId || !sql) {
+    if (!sources || !sourceId || !finalSql) {
       return;
     }
 
     setLoading(true);
 
     sources
-      .query(sourceId, sql)
+      .query(sourceId, finalSql)
       .then((v) => {
         setData(v.rows);
       })
@@ -30,7 +46,7 @@ export default function BoardChart({ value }: { value: ChartValue }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [sources, sourceId, sql, lastRunTimestamp, loaderRef]);
+  }, [sources, sourceId, finalSql, lastRunTimestamp, loaderRef]);
 
   useEffect(() => {
     if (loaderRef.current && loading) {

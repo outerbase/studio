@@ -6,11 +6,13 @@ import {
   DatabaseTableColumn,
   DatabaseTableColumnConstraint,
   DatabaseTableSchema,
+  DatabaseTableSchemaChange,
   DatabaseTriggerSchema,
   DatabaseViewSchema,
   DriverFlags,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
+import { generateMySqlSchemaChange } from "../mysql/generate-schema";
 import { escapeSqlValue } from "../sqlite/sql-helper";
 
 interface PostgresSchemaRow {
@@ -77,7 +79,7 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
       supportRowId: false,
       supportBigInt: false,
       supportModifyColumn: false,
-      supportCreateUpdateTable: false,
+      supportCreateUpdateTable: true,
       supportCreateUpdateDatabase: false,
       supportInsertReturning: true,
       supportUpdateReturning: true,
@@ -352,8 +354,8 @@ WHERE
     throw new Error("Not implemented");
   }
 
-  createUpdateTableSchema(): string[] {
-    throw new Error("Not implemented");
+  createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
+    return generateMySqlSchemaChange(this, change);
   }
 
   createUpdateDatabaseSchema(): string[] {

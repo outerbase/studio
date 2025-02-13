@@ -1,6 +1,6 @@
 import { SupportedDialect } from "@/drivers/base-driver";
 
-interface Token {
+export interface Token {
   type: string;
   value: string;
 }
@@ -47,6 +47,14 @@ const tokenTypes: {
     type: "PLACEHOLDER",
     findToken: (input) => {
       const regex = /^:[a-zA-Z_][a-zA-Z0-9_]*/;
+      const match = regex.exec(input);
+      return match?.[0] ?? null;
+    },
+  },
+  {
+    type: "OUTERBASE_PLACEHOLDER",
+    findToken: (input) => {
+      const regex = /^\{\{[a-zA-Z0-9_]+\}\}/;
       const match = regex.exec(input);
       return match?.[0] ?? null;
     },

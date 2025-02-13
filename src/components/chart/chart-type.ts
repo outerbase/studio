@@ -30,7 +30,7 @@ interface ChartOptions {
   xAxisLabel?: string;
   yAxisLabel?: string;
   xAxisKey?: string;
-  yAxisKeys?: string[];
+  yAxisKeys: string[];
   yAxisKeyColors?: Record<string, string>;
   xAxisLabelDisplay?: ChartLabelDisplayX;
   yAxisLabelDisplay?: ChartLabelDisplayY;
@@ -177,3 +177,4 @@ export const THEMES: Record<
 };
 
 export const outerBaseUrl = "https://app.outerbase.com";
+export const DEFAULT_THEME = "afterburn";

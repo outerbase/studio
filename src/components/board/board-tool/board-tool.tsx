@@ -1,52 +1,34 @@
+import { Button } from "@/components/orbit/button";
 import { ChartLine, ImageUpscale } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "../../ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+import { useBoardContext } from "../board-provider";
 
-interface Props {
-  editMode: "ADD_CHART" | "REARRANGING_CHART" | null;
-  setEditMode: (v: "ADD_CHART" | "REARRANGING_CHART") => void;
-}
+export function BoardTool() {
+  const { boardMode, setBoardMode } = useBoardContext();
 
-export function BoardTool(props: Props) {
+  if (boardMode?.mode === "ADD_CHART") {
+    return null;
+  }
+
   return (
-    <div className="reveal animate-revealMenu fixed bottom-6 left-[50%] z-100 flex -translate-x-[50%] rounded-xl bg-neutral-800 p-1 text-neutral-100 shadow-lg dark:bg-white dark:text-neutral-900">
-      <ToggleGroup
-        type="single"
-        size={"sm"}
-        value={props.editMode as string}
-        onValueChange={props.setEditMode}
+    <div className="reveal animate-revealMenu fixed bottom-6 left-[50%] z-100 flex -translate-x-[50%] gap-1 rounded-xl bg-neutral-800 p-1 text-neutral-100 shadow-lg dark:bg-white dark:text-neutral-900">
+      <Button
+        variant="primary"
+        shape="square"
+        onClick={() => setBoardMode({ mode: "ADD_CHART" })}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <ToggleGroupItem
-              value="ADD_CHART"
-              className={
-                props.editMode === "ADD_CHART"
-                  ? "bg-white/15 dark:bg-black/10"
-                  : ""
-              }
-            >
-              <ChartLine className="h-4 w-4" />
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipContent>Add Chart</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <ToggleGroupItem
-              value="REARRANGING_CHART"
-              className={
-                props.editMode === "REARRANGING_CHART"
-                  ? "bg-white/15 dark:bg-black/10"
-                  : ""
-              }
-            >
-              <ImageUpscale className="h-4 w-4" />
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipContent>Rearranging charts</TooltipContent>
-        </Tooltip>
-      </ToggleGroup>
+        <ChartLine className="h-4 w-4" />
+      </Button>
+
+      <Button
+        shape="square"
+        variant="primary"
+        onClick={() =>
+          setBoardMode(boardMode?.mode ? null : { mode: "REARRANGING_CHART" })
+        }
+        toggled={boardMode?.mode === "REARRANGING_CHART"}
+      >
+        <ImageUpscale className="h-4 w-4" />
+      </Button>
     </div>
   );
 }

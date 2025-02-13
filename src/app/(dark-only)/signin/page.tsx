@@ -120,7 +120,7 @@ export default function SigninPage() {
           </Button>
         </form>
 
-        <Link href="#" className="text-sm">
+        <Link href="/password_reset" className="text-sm">
           Forget password
         </Link>
       </div>

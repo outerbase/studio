@@ -2,7 +2,7 @@ import { DatabaseSchemas } from "@/drivers/base-driver";
 import { BoardSource } from "@/drivers/board-source/base-source";
 import { OuterbaseAPIError } from "@/outerbase-cloud/api-type";
 import { CaretDown, WarningCircle } from "@phosphor-icons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader } from "../orbit/loader";
 import { getDatabaseIcon } from "../resource-card/utils";
 import { Button } from "../ui/button";
@@ -49,32 +49,40 @@ export default function BoardSourcePicker({
     (newSelectedSource: BoardSource) => {
       if (onChange && sourceDriver) {
         onChange(newSelectedSource.id);
-
-        setLoadingSchema(true);
-        setSchemaError(undefined);
-
-        sourceDriver
-          .schemas(newSelectedSource.id)
-          .then((loadedSchema) => {
-            if (onSchemaLoad) {
-              onSchemaLoad(loadedSchema);
-            }
-          })
-          .catch((e) => {
-            if (e instanceof OuterbaseAPIError) {
-              setSchemaError(e);
-            } else {
-              setSchemaError(new OuterbaseAPIError(e.message));
-            }
-          })
-          .finally(() => {
-            setLoadingSchema(false);
-          });
       }
       setOpen(false);
     },
     [onChange, sourceDriver, onSchemaLoad]
   );
+
+  const previousValue = useRef<string>("");
+  useEffect(() => {
+    if (!sourceDriver || !value) return;
+
+    if (previousValue.current === value) return;
+    previousValue.current = value;
+
+    setLoadingSchema(true);
+    setSchemaError(undefined);
+
+    sourceDriver
+      .schemas(value)
+      .then((loadedSchema) => {
+        if (onSchemaLoad) {
+          onSchemaLoad(loadedSchema);
+        }
+      })
+      .catch((e) => {
+        if (e instanceof OuterbaseAPIError) {
+          setSchemaError(e);
+        } else {
+          setSchemaError(new OuterbaseAPIError(e.message));
+        }
+      })
+      .finally(() => {
+        setLoadingSchema(false);
+      });
+  }, [value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

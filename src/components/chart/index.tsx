@@ -168,6 +168,7 @@ const ChartComponent = ({ value, data }: OuterbaseChartProps) => {
       chartBuilderRef.current = new EchartOptionsBuilder(value, data);
     } else {
       chartBuilderRef.current.setChartValue(value);
+      chartBuilderRef.current.setChartData(data);
     }
 
     if (domRef.current) {
