@@ -9,6 +9,7 @@ import {
 import { CaretDown } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import NewResourceButton from "./new-resource-button";
+import ResourceCardLoading from "./resource-card-loading";
 import { useWorkspaces } from "./workspace-provider";
 
 interface ResourceItem {
@@ -21,7 +22,7 @@ interface ResourceItem {
 }
 
 export default function RecentResource() {
-  const { workspaces } = useWorkspaces();
+  const { workspaces, loading: workspaceLoading } = useWorkspaces();
 
   const recentBases = useMemo(() => {
     return workspaces
@@ -89,10 +90,19 @@ export default function RecentResource() {
           />
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex grid grid-cols-1 flex-wrap gap-4 min-[700px]:grid-cols-2 min-[900px]:grid-cols-3 min-[1200px]:grid-cols-4 min-[1500px]:grid-cols-5 min-[1800px]:grid-cols-6 min-[2100px]:grid-cols-7">
+          {workspaceLoading && (
+            <>
+              <ResourceCardLoading />
+              <ResourceCardLoading />
+              <ResourceCardLoading />
+              <ResourceCardLoading />
+            </>
+          )}
+
           {resources.map((resource) => (
             <ResourceCard
-              className="w-[275px]"
+              className="w-full"
               key={resource.id}
               color="default"
               icon={getDatabaseIcon(resource.type)}

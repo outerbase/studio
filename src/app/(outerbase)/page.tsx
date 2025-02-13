@@ -4,14 +4,26 @@ import Banner from "@/components/orbit/banner";
 import RippleFilter from "@/components/orbit/banner/ripple-filter";
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
-import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
-import { Clock, Database, MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import {
+  SidebarMenuHeader,
+  SidebarMenuItem,
+  SidebarMenuLoadingItem,
+} from "@/components/sidebar-menu";
+import {
+  Cardholder,
+  Clock,
+  Database,
+  Gear,
+  MagnifyingGlass,
+  Plus,
+  Star,
+} from "@phosphor-icons/react";
 import RecentResource from "./recent-page";
 import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function OuterbaseMainPage() {
-  const { workspaces } = useWorkspaces();
+  const { workspaces, loading: workspaceLoading } = useWorkspaces();
 
   return (
     <div className="flex h-screen w-screen">
@@ -31,6 +43,7 @@ export default function OuterbaseMainPage() {
 
         <div className="flex flex-col border-b py-2">
           <SidebarMenuItem text="Recent" icon={Clock} />
+          <SidebarMenuItem text="Favorite" icon={Star} />
         </div>
 
         <div className="flex flex-col border-b pb-2">
@@ -52,7 +65,13 @@ export default function OuterbaseMainPage() {
             );
           })}
 
-          <div></div>
+          {workspaceLoading && (
+            <>
+              <SidebarMenuLoadingItem />
+              <SidebarMenuLoadingItem />
+              <SidebarMenuLoadingItem />
+            </>
+          )}
 
           <SidebarMenuItem text={"New Workspace"} icon={Plus} />
 
@@ -87,8 +106,8 @@ export default function OuterbaseMainPage() {
           </div>
         </div>
         <div className="flex flex-col">
-          <SidebarMenuItem text="Billing" />
-          <SidebarMenuItem text="Setting" />
+          <SidebarMenuItem text="Billing" icon={Cardholder} />
+          <SidebarMenuItem text="Setting" icon={Gear} />
         </div>
       </div>
       <div className="flex min-h-screen w-full flex-col bg-neutral-50 dark:bg-neutral-950">

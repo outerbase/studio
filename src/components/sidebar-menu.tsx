@@ -15,6 +15,22 @@ interface SidebarMenuHeader {
   text: string;
 }
 
+export function SidebarMenuLoadingItem() {
+  const className =
+    "flex p-2 pl-4 text-sm hover:cursor-pointer h-8 items-center";
+
+  return (
+    <div className={className}>
+      <span className="mr-2 h-4 w-4">
+        <span className="bg-muted inline-flex h-4 w-4 animate-pulse rounded-full"></span>
+      </span>
+      <span className="flex flex-1 items-center text-left">
+        <span className="bg-muted mr-5 inline-flex h-3 w-full animate-pulse rounded-sm"></span>
+      </span>
+    </div>
+  );
+}
+
 export function SidebarMenuItem({
   text,
   onClick,

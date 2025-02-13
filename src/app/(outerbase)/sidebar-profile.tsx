@@ -23,7 +23,7 @@ import { useWorkspaces } from "./workspace-provider";
 export default function SidebarProfile() {
   const { currentWorkspace } = useWorkspaces();
   const { resolvedTheme, forcedTheme, setTheme } = useTheme();
-  const { session } = useSession();
+  const { session, isLoading } = useSession();
   const router = useRouter();
 
   const theme = forcedTheme ?? resolvedTheme;
@@ -59,7 +59,17 @@ export default function SidebarProfile() {
           )}
         >
           <Avatar username="Guest" as="div" />
-          <div className="flex-1 text-left text-sm">Guest</div>
+          {!isLoading && (
+            <div className="flex-1 text-left text-sm">
+              {session
+                ? session.user.first_name + " " + session?.user.last_name
+                : "Guest"}
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="bg-muted h-4 w-16 animate-pulse rounded-sm" />
+          )}
           <div>
             <CaretDown weight="bold" className="h-3 w-3" />
           </div>
