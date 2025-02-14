@@ -2,7 +2,7 @@ import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import { MenuBar } from "@/components/orbit/menu-bar";
 import { CaretDown } from "@phosphor-icons/react";
 import { useMemo } from "react";
-import NewResourceButton from "./new-resource-button";
+import NavigationHeader from "./nav-header";
 import {
   getResourceItemPropsFromBase,
   ResourceItemList,
@@ -25,12 +25,7 @@ export default function RecentResource() {
 
   return (
     <>
-      <div className="bg-background flex h-12 items-center border-b px-4">
-        <div className="flex-1 text-base">Recent</div>
-        <div>
-          <NewResourceButton />
-        </div>
-      </div>
+      <NavigationHeader title="Recent" />
       <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
         <div className="mb-8 flex gap-4">
           <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">

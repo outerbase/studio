@@ -12,15 +12,17 @@ import {
   Plus,
   Star,
 } from "@phosphor-icons/react";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 import NavigationSigninBanner from "./nav-signin-banner";
 import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function NavigationLayout({ children }: PropsWithChildren) {
+  const router = useRouter();
   const { workspaces, loading: workspaceLoading } = useWorkspaces();
   const pathname = usePathname();
+  const { workspaceId } = useParams<{ workspaceId?: string }>();
 
   return (
     <div className="flex h-screen w-screen">
@@ -57,6 +59,10 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
                 key={workspace.id}
                 text={workspace.name}
                 icon={Database}
+                onClick={() => {
+                  router.push(`/w/${workspace.short_name}`);
+                }}
+                selected={workspace.short_name === workspaceId}
                 badge={
                   <span className="mr-2 rounded border px-1.5 py-0.5 text-xs">
                     Free
