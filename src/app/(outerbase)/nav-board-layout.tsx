@@ -7,7 +7,7 @@ import {
 } from "@/components/sidebar-menu";
 import { useOuterbaseDashboardList } from "@/outerbase-cloud/hook";
 import { ChartBar, GlobeSimple, MagnifyingGlass } from "@phosphor-icons/react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PropsWithChildren, useMemo } from "react";
 import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
@@ -17,7 +17,6 @@ export default function NavigationDashboardLayout({
 }: PropsWithChildren) {
   const router = useRouter();
   const { currentWorkspace, loading: workspaceLoading } = useWorkspaces();
-  const pathname = usePathname();
 
   const { data: dashboardList, isLoading: dashboardLoading } =
     useOuterbaseDashboardList();
