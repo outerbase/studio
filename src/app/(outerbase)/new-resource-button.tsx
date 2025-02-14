@@ -78,6 +78,7 @@ export default function NewResourceButton() {
   const rightSideResourceType = RESOURCE_TYPE_LIST.slice(7);
 
   const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
 
   const allResourceType = (
     <>
@@ -181,26 +182,37 @@ export default function NewResourceButton() {
   }, [search]);
 
   return (
-    <DropdownMenu onOpenChange={() => setSearch("")} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="primary">
-          New Resource <CaretDown />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[500px]">
-        <div className="p-2">
-          <Input
-            placeholder="Search"
-            autoFocus
-            className="bg-secondary w-full"
-            value={search}
-            onValueChange={setSearch}
-            preText={<MagnifyingGlass className="mr-2" />}
-          />
-        </div>
+    <>
+      <DropdownMenu
+        onOpenChange={(openState) => {
+          setSearch("");
+          setOpen(openState);
+        }}
+        modal={false}
+      >
+        <DropdownMenuTrigger asChild>
+          <Button variant="primary" className={open ? "z-25" : ""}>
+            New Resource <CaretDown />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[500px] shadow-xl">
+          <div className="p-2">
+            <Input
+              placeholder="Search"
+              autoFocus
+              className="bg-secondary w-full"
+              value={search}
+              onValueChange={setSearch}
+              preText={<MagnifyingGlass className="mr-2" />}
+            />
+          </div>
 
-        {search ? resourceSearch : allResourceType}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {search ? resourceSearch : allResourceType}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {open && (
+        <div className="fixed top-0 right-0 bottom-0 left-0 z-20 backdrop-blur-sm"></div>
+      )}
+    </>
   );
 }

@@ -126,12 +126,15 @@ export default function Board({
         </div>
 
         {editMode?.mode === "ADD_CHART" && (
-          <div className="bg-background fixed top-14 bottom-0 left-0 z-50 flex w-screen">
-            <BoardChartEditor
-              onChange={onChange}
-              initialValue={editMode?.chart}
-            />
-          </div>
+          <>
+            <div className="fixed top-0 left-0 z-50 h-full w-full backdrop-blur-sm"></div>
+            <div className="bg-background fixed top-[5%] right-[5%] bottom-[5%] left-[5%] z-50 flex overflow-hidden rounded-lg border-2">
+              <BoardChartEditor
+                onChange={onChange}
+                initialValue={editMode?.chart}
+              />
+            </div>
+          </>
         )}
       </div>
     </BoardProvider>

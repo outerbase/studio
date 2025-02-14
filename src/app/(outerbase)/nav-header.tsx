@@ -26,7 +26,7 @@ export default function NavigationHeader({ title }: NavigationHeaderProps) {
           Billing
         </li>
 
-        <li className="mr-6 flex flex-1 items-center justify-end font-bold">
+        <li className="flex flex-1 items-center justify-end font-bold">
           {title}
         </li>
       </ul>

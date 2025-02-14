@@ -12,8 +12,8 @@ export default function BoardChart({ value }: { value: ChartValue }) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const sql = value.params.layers[0].sql;
-  const sourceId = value.source_id;
+  const sql = (value?.params?.layers ?? [])[0]?.sql ?? "";
+  const sourceId = value?.source_id;
 
   const finalSql = useMemo(() => {
     return fillVariables(

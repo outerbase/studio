@@ -73,12 +73,16 @@ export default function BoardChartEditor({
   const initialChartValue = useCallback(
     (newResult: DatabaseResultSet, sql: string) => {
       setValue((prev) => {
-        return createAutoBoardChartValue(
-          prev,
-          newResult,
-          sql,
-          forcedTheme || resolvedTheme || ""
-        );
+        try {
+          return createAutoBoardChartValue(
+            prev,
+            newResult,
+            sql,
+            forcedTheme || resolvedTheme || ""
+          );
+        } catch {
+          return prev;
+        }
       });
     },
     [forcedTheme, resolvedTheme]

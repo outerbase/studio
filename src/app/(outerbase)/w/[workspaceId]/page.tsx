@@ -23,7 +23,7 @@ import {
 import { useWorkspaces } from "../../workspace-provider";
 
 export default function WorkspaceListPage() {
-  const { currentWorkspace } = useWorkspaces();
+  const { currentWorkspace, loading: workspaceLoading } = useWorkspaces();
   const { data: dashboardList } = useOuterbaseDashboardList();
 
   const bases = useMemo(() => {
@@ -91,7 +91,7 @@ export default function WorkspaceListPage() {
           {dashboards.length > 0 && (
             <h2 className="text-base font-bold">Bases</h2>
           )}
-          <ResourceItemList resources={bases} />
+          <ResourceItemList resources={bases} loading={workspaceLoading} />
         </div>
       </NavigationLayout>
     </>
