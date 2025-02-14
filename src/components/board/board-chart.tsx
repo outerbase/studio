@@ -1,31 +1,27 @@
-import { SupportedDialect } from "@/drivers/base-driver";
-import { fillVariables } from "@/lib/sql/fill-variables";
-import { tokenizeSql } from "@/lib/sql/tokenizer";
+import { fillVariables, SupportedDialect } from "@outerbase/sdk-transform";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Chart from "../chart";
 import { ChartValue } from "../chart/chart-type";
 import { useBoardContext } from "./board-provider";
+import BoardSqlErrorLog from "./board-sql-error-log";
 
 export default function BoardChart({ value }: { value: ChartValue }) {
   const [data, setData] = useState<Record<string, unknown>[] | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const { sources, lastRunTimestamp, resolvedFilterValue } = useBoardContext();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const sql = value.params.layers[0].sql;
   const sourceId = value.source_id;
 
   const finalSql = useMemo(() => {
     return fillVariables(
-      tokenizeSql(
-        sql,
-        (sources?.sourceList().find((s) => s.id === sourceId)?.type ??
-          "sqlite") as unknown as SupportedDialect
-      ),
-      resolvedFilterValue
-    )
-      .map((t) => t.value)
-      .join("");
+      sql,
+      resolvedFilterValue,
+      (sources?.sourceList().find((s) => s.id === sourceId)?.type ??
+        "sqlite") as unknown as SupportedDialect
+    );
   }, [sql, sources, sourceId, resolvedFilterValue]);
 
   useEffect(() => {
@@ -34,6 +30,7 @@ export default function BoardChart({ value }: { value: ChartValue }) {
     }
 
     setLoading(true);
+    setErrorMessage(null);
 
     sources
       .query(sourceId, finalSql)
@@ -41,7 +38,7 @@ export default function BoardChart({ value }: { value: ChartValue }) {
         setData(v.rows);
       })
       .catch((e) => {
-        console.error(e);
+        setErrorMessage(e.toString());
       })
       .finally(() => {
         setLoading(false);
@@ -78,9 +75,10 @@ export default function BoardChart({ value }: { value: ChartValue }) {
           ></div>
         </div>
       )}
-      {data ? (
+      {data && !errorMessage && (
         <Chart className="h-full w-full" value={value} data={data} />
-      ) : null}
+      )}
+      {errorMessage && <BoardSqlErrorLog value={errorMessage} />}
     </>
   );
 }
