@@ -37,7 +37,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Line"
-          suggested={value.suggestedChartType.includes("line")}
+          suggested={value.suggestedChartType?.includes("line") || false}
         />
         <ChartTypeButton
           icon={<ChartBar />}
@@ -50,7 +50,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Column"
-          suggested={value.suggestedChartType.includes("column")}
+          suggested={value.suggestedChartType?.includes("column") || false}
         />
         <ChartTypeButton
           icon={<ChartBarHorizontal />}
@@ -63,7 +63,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Bar"
-          suggested={value.suggestedChartType.includes("bar")}
+          suggested={value.suggestedChartType?.includes("bar") || false}
         />
         <ChartTypeButton
           icon={<ChartScatter />}
@@ -76,7 +76,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="scatter"
-          suggested={value.suggestedChartType.includes("scatter")}
+          suggested={value.suggestedChartType?.includes("scatter") || false}
         />
         <ChartTypeButton
           icon={<TextT />}
@@ -89,7 +89,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Text"
-          suggested={value.suggestedChartType.includes("text")}
+          suggested={value.suggestedChartType?.includes("text") || false}
         />
         <ChartTypeButton
           icon={<NumberCircleOne weight="bold" />}
@@ -102,7 +102,9 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Single Value"
-          suggested={value.suggestedChartType.includes("single_value")}
+          suggested={
+            value.suggestedChartType?.includes("single_value") || false
+          }
         />
         <ChartTypeButton
           icon={<Table />}
@@ -115,7 +117,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Table"
-          suggested={value.suggestedChartType.includes("table")}
+          suggested={value.suggestedChartType?.includes("table") || false}
         />
         <ChartTypeButton
           icon={<ChartPieSlice weight="bold" />}
@@ -128,7 +130,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Pie"
-          suggested={value.suggestedChartType.includes("pie")}
+          suggested={value.suggestedChartType?.includes("pie") || false}
         />
         <ChartTypeButton
           icon={<ChartPolar />}
@@ -141,7 +143,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Radar"
-          suggested={value.suggestedChartType.includes("radar")}
+          suggested={value.suggestedChartType?.includes("radar") || false}
         />
         <ChartTypeButton
           icon={<Funnel />}
@@ -154,7 +156,7 @@ export default function ChartTypeSelection({
             });
           }}
           tooltipText="Funnel"
-          suggested={value.suggestedChartType.includes("funnel")}
+          suggested={value.suggestedChartType?.includes("funnel") || false}
         />
       </div>
     </section>
