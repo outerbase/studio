@@ -15,7 +15,6 @@ import SqlEditor from "../gui/sql-editor";
 import OptimizeTableState from "../gui/table-optimized/OptimizeTableState";
 import { Button } from "../orbit/button";
 import { MenuBar } from "../orbit/menu-bar";
-import { Toggle } from "../ui/toggle";
 import { createAutoBoardChartValue } from "./board-auto-value";
 import { useBoardContext } from "./board-provider";
 import BoardSourcePicker from "./board-source-picker";
@@ -61,7 +60,6 @@ export default function BoardChartEditor({
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [selectedSchema, setSelectedSchema] = useState("");
   const [displayType, setDisplayType] = useState("chart");
-  const [suggestChartType, setSuggestChartType] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -79,12 +77,11 @@ export default function BoardChartEditor({
           prev,
           newResult,
           sql,
-          forcedTheme || resolvedTheme || "",
-          suggestChartType
+          forcedTheme || resolvedTheme || ""
         );
       });
     },
-    [forcedTheme, resolvedTheme, suggestChartType]
+    [forcedTheme, resolvedTheme]
   );
 
   const onRunClicked = useCallback(() => {
@@ -216,7 +213,6 @@ export default function BoardChartEditor({
               onSchemaLoad={(loadedSchema) => {
                 setSchema(loadedSchema.schema);
                 setSelectedSchema(loadedSchema.selectedSchema ?? "");
-                console.log(loadedSchema);
               }}
             />
 
@@ -244,11 +240,6 @@ export default function BoardChartEditor({
                   },
                 ]}
               />
-            </div>
-            <div>
-              <Toggle onClick={() => setSuggestChartType(!suggestChartType)}>
-                Suggest Chart
-              </Toggle>
             </div>
 
             <div className="flex-1"></div>
@@ -307,7 +298,8 @@ export default function BoardChartEditor({
 
 const NEW_CHART_EMPTY_VALUE: ChartValue = {
   model: "chart",
-  type: "line",
+  type: undefined,
+  suggestedChartType: [],
   name: "New Chart",
   params: {
     type: "line",

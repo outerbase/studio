@@ -51,6 +51,7 @@ const data: ChartData[] = [
 ];
 
 const lineChartValue: ChartValue = {
+  suggestedChartType: [],
   connection_id: null,
   created_at: "2025-01-31T08:44:04.868Z",
   id: "94019f17-a1e0-4db2-b89e-4457cbed3ce4",

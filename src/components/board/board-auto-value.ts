@@ -1,14 +1,19 @@
 import { DatabaseResultSet } from "@/drivers/base-driver";
 import { produce } from "immer";
-import { ChartValue, DEFAULT_THEME, THEMES } from "../chart/chart-type";
+import { isDate } from "lodash";
+import {
+  ChartType,
+  ChartValue,
+  DEFAULT_THEME,
+  THEMES,
+} from "../chart/chart-type";
 import { generateGradientColors } from "../chart/echart-options-builder";
 
 export function createAutoBoardChartValue(
   prev: ChartValue,
   newResult: DatabaseResultSet,
   sql: string,
-  theme: string,
-  suggestChartType: boolean
+  theme: string
 ): ChartValue {
   return produce(prev, (draft) => {
     draft.params.layers[0].sql = sql;
@@ -16,10 +21,11 @@ export function createAutoBoardChartValue(
       const columns = newResult.headers.map((header) => header.name);
 
       if (newResult.rows.length > 0) {
-        const xAxisKeys = [];
-        const yAxisKeys = [];
+        const xAxisKeys: string[] = [];
+        const yAxisKeys: string[] = [];
         const firstRecord = newResult.rows[0];
         const columnType = getColumnType(firstRecord);
+
         // study each column value and try to guess the type
         if (columnType) {
           for (const column of columns) {
@@ -28,6 +34,9 @@ export function createAutoBoardChartValue(
             } else {
               xAxisKeys.push(column);
             }
+          }
+          if (xAxisKeys.length === 0 && yAxisKeys.length > 1) {
+            xAxisKeys.push(yAxisKeys.shift() as string);
           }
         } else {
           // if there is no column type, we will just use the first column as xAxisKey
@@ -40,55 +49,25 @@ export function createAutoBoardChartValue(
           }
         }
 
-        draft.params.options.xAxisKey =
-          xAxisKeys.length > 0 ? xAxisKeys[0] : "";
-        draft.params.options.yAxisKeys = yAxisKeys;
+        if (draft.params.options.xAxisKey === "") {
+          draft.params.options.xAxisKey =
+            xAxisKeys.length > 0 ? xAxisKeys[0] : "";
+        }
 
-        if (suggestChartType) {
-          // recommend chart type
-          if (
-            newResult.rows.length === 1 &&
-            newResult.headers.length === 1 &&
-            xAxisKeys.length === 0 &&
-            yAxisKeys.length === 1
-          ) {
-            draft.type = "single_value";
-            draft.params.type = "single_value";
-          } else if (
-            (xAxisKeys.length === 0 && yAxisKeys.length > 1) ||
-            newResult.rows.length > 100
-          ) {
-            draft.type = "table";
-            draft.params.type = "table";
-          } else if (xAxisKeys.length > 0 && yAxisKeys.length > 1) {
-            if (newResult.rows.length > 10) {
-              draft.type = "line";
-              draft.params.type = "line";
-            } else {
-              draft.type = "column";
-              draft.params.type = "column";
-            }
-          } else if (
-            xAxisKeys.length > 0 &&
-            yAxisKeys.length === 1 &&
-            newResult.rows.length < 10
-          ) {
-            draft.type = "pie";
-            draft.params.type = "pie";
-          } else if (
-            xAxisKeys.length === 1 &&
-            yAxisKeys.length === 0 &&
-            newResult.rows.length === 1
-          ) {
-            draft.type = "text";
-            draft.params.type = "text";
-            draft.params.options.text = newResult.rows[0][
-              xAxisKeys[0]
-            ] as string;
-          } else {
-            draft.type = "line";
-            draft.params.type = "line";
-          }
+        if (draft.params.options.yAxisKeys.length === 0) {
+          draft.params.options.yAxisKeys = yAxisKeys;
+        }
+
+        const suggestedChartTypes = suggestChartType(
+          xAxisKeys,
+          yAxisKeys,
+          newResult.rows
+        );
+
+        draft.suggestedChartType = suggestedChartTypes;
+        if (draft.type === undefined) {
+          draft.type = suggestedChartTypes[0];
+          draft.params.type = suggestedChartTypes[0];
         }
       }
 
@@ -143,4 +122,128 @@ function getColumnType(firstRecord: any): Record<string, string> {
     columnTypes[key] = typeof firstRecord[key];
   }
   return columnTypes;
+}
+
+function suggestChartType(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): ChartType[] {
+  const suggestedChartTypes: ChartType[] = [];
+
+  if (isSuitableForSingleValue(rows)) {
+    suggestedChartTypes.push("single_value");
+  }
+  if (isSuitableForPieChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("pie");
+  }
+  if (isSuitableForLineChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("line");
+  }
+  if (isSuitableForColumnChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("column");
+  }
+  if (isSuitableForBarChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("bar");
+  }
+  if (isSuitableForFunnelChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("funnel");
+  }
+  if (isSuitableForScatterChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("scatter");
+  }
+  if (isSuitableForTable(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("table");
+  }
+  if (isSuitTableForRadarChart(xAxisKeys, yAxisKeys, rows)) {
+    suggestedChartTypes.push("radar");
+  }
+  if (suggestedChartTypes.length === 0) {
+    suggestedChartTypes.push("line");
+  }
+  return suggestedChartTypes;
+}
+
+function isSuitableForLineChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  if (rows.length < 20) return false;
+  const hasTimeSeries = xAxisKeys.some((key) => isDate(rows[0][key]));
+  return hasTimeSeries && yAxisKeys.length > 0;
+}
+
+function isSuitableForColumnChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  if (rows.length >= 20) return false;
+  return xAxisKeys.length > 0 && yAxisKeys.length > 0 && rows.length > 1;
+}
+
+function isSuitableForBarChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  if (rows.length >= 20) return false;
+  return xAxisKeys.length === 1 && yAxisKeys.length === 1 && rows.length > 1;
+}
+
+function isSuitableForPieChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  return xAxisKeys.length === 1 && yAxisKeys.length === 1 && rows.length > 1;
+}
+
+function isSuitableForFunnelChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  return isSuitableForPieChart(xAxisKeys, yAxisKeys, rows);
+}
+
+function isSuitableForScatterChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  if (xAxisKeys.length === 1 && yAxisKeys.length === 1 && rows.length > 1) {
+    if (
+      typeof rows[0][xAxisKeys[0]] === "number" &&
+      typeof rows[0][yAxisKeys[0]] === "number"
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isSuitableForTable(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  if (rows.length >= 20 || xAxisKeys.length + yAxisKeys.length > 2) return true;
+  return false;
+}
+
+function isSuitableForSingleValue(rows: any[]): boolean {
+  return rows.length === 1;
+}
+
+function isSuitTableForRadarChart(
+  xAxisKeys: string[],
+  yAxisKeys: string[],
+  rows: any[]
+): boolean {
+  if (yAxisKeys.length > 2 && rows.length > 1) {
+    return true;
+  }
+  return false;
 }
