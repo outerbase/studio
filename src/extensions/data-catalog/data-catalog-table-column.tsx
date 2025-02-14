@@ -45,6 +45,7 @@ export default function DataCatalogTableColumn({
     table.tableName!,
     column.name
   );
+
   const definition = modelColumn?.body;
 
   const [open, setOpen] = useState(false);
@@ -74,7 +75,7 @@ export default function DataCatalogTableColumn({
     return [];
   }, [modelColumn]);
 
-  if (hasDefinitionOnly && !definition) {
+  if ((hasDefinitionOnly && !definition) || !modelColumn) {
     return null;
   }
 

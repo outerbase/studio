@@ -105,7 +105,7 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
           } else {
             table.virtualJoin?.push(result);
           }
-        } else {
+        } else if (data.column) {
           table.columns[data.column] = {
             ...table.columns[data.column],
             ...result,

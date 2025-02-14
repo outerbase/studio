@@ -28,13 +28,14 @@ export function transformOuterbaseSchema(
 
         columns: schema.columns.reduce(
           (columnsAcc, col) => {
-            const comment = comments.find(
-              (c) =>
+            const comment = comments.find((c) => {
+              return (
                 c.schema === schema.schema &&
                 c.table === schema.name &&
                 c.column === col.name &&
                 !c.flags.isVirtualKey
-            );
+              );
+            });
 
             if (comment) {
               columnsAcc[col.name] = comment;
@@ -49,7 +50,6 @@ export function transformOuterbaseSchema(
           (c) =>
             c.schema === schema.schema &&
             c.table === schema.name &&
-            c.virtualKeyColumn &&
             c.flags.isVirtualKey
         ),
         metadata: tableMetadata,
