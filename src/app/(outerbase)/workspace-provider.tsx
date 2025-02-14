@@ -83,7 +83,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       });
 
       mutate(newData, {
-        revalidate: true,
+        revalidate: false,
         optimisticData: newData,
       });
     },

@@ -64,6 +64,11 @@ export interface OuterbaseAPIWorkspace {
   short_name: string;
   id: string;
   bases: OuterbaseAPIBase[];
+  is_enterprise: boolean;
+  subscription: {
+    status: "active" | "inactive";
+    plan: "starter" | "growth";
+  };
 }
 
 export interface OuterbaseAPIDashboard {
