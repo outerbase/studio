@@ -4,8 +4,10 @@ import {
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
+import { timeSince } from "@/lib/utils-datetime";
 import {
   OuterbaseAPIBase,
+  OuterbaseAPIDashboard,
   OuterbaseAPIWorkspace,
 } from "@/outerbase-cloud/api-type";
 import ResourceCardLoading from "./resource-card-loading";
@@ -32,6 +34,19 @@ export function getResourceItemPropsFromBase(
   };
 }
 
+export function getResourceItemPropsFromBoard(
+  workspace: OuterbaseAPIWorkspace,
+  board: OuterbaseAPIDashboard
+): ResourceItemProps {
+  return {
+    id: board.id,
+    type: "board",
+    name: board.name,
+    href: `/w/${workspace?.short_name}/board/${board.id}`,
+    lastUsed: new Date(board.updated_at).getTime(),
+  };
+}
+
 export function ResourceItemList({
   resources,
   loading,
@@ -50,19 +65,23 @@ export function ResourceItemList({
         </>
       )}
 
-      {resources.map((resource) => (
-        <ResourceCard
-          className="w-full"
-          key={resource.id}
-          color="default"
-          icon={getDatabaseIcon(resource.type)}
-          href={resource.href}
-          title={resource.name}
-          subtitle={getDatabaseFriendlyName(resource.type)}
-          visual={getDatabaseVisual(resource.type)}
-          status={resource.status}
-        />
-      ))}
+      {resources.map((resource) => {
+        const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
+
+        return (
+          <ResourceCard
+            className="w-full"
+            key={resource.id}
+            color="default"
+            icon={getDatabaseIcon(resource.type)}
+            href={resource.href}
+            title={resource.name}
+            subtitle={getDatabaseFriendlyName(resource.type)}
+            visual={getDatabaseVisual(resource.type)}
+            status={status}
+          />
+        );
+      })}
     </div>
   );
 }

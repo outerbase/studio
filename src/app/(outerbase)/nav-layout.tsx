@@ -45,6 +45,9 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
             text="Recent"
             icon={Clock}
             selected={pathname === "/"}
+            onClick={() => {
+              router.push("/");
+            }}
           />
           <SidebarMenuItem text="Favorite" icon={Star} />
         </div>
@@ -59,9 +62,13 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
                 key={workspace.id}
                 text={workspace.name}
                 icon={Database}
-                onClick={() => {
-                  router.push(`/w/${workspace.short_name}`);
-                }}
+                onClick={
+                  workspace.short_name === workspaceId
+                    ? undefined
+                    : () => {
+                        router.push(`/w/${workspace.short_name}`);
+                      }
+                }
                 selected={workspace.short_name === workspaceId}
                 badge={
                   <span className="mr-2 rounded border px-1.5 py-0.5 text-xs">
@@ -80,12 +87,16 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
             </>
           )}
 
-          <SidebarMenuItem text={"New Workspace"} icon={Plus} />
+          <SidebarMenuItem
+            text={"New Workspace"}
+            icon={Plus}
+            onClick={() => router.push("/new-workspace")}
+          />
         </div>
 
         <NavigationSigninBanner />
       </div>
-      <div className="flex min-h-screen w-full flex-col bg-neutral-50 dark:bg-neutral-950">
+      <div className="flex min-h-screen w-full flex-col overflow-y-auto bg-neutral-50 dark:bg-neutral-950">
         {children}
       </div>
     </div>

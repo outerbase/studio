@@ -15,7 +15,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { timeSince } from "@/lib/utils-datetime";
 import { getOuterbaseDashboardList } from "@/outerbase-cloud/api";
 import {
   CalendarDots,
@@ -72,9 +71,6 @@ export default function WorkspaceListPageClient() {
       type: base.sources[0]?.type ?? "database",
       name: base.name,
       href: `/w/${currentWorkspace?.short_name}/${base.short_name}`,
-      status: base.last_analytics_event?.created_at
-        ? `Last viewed ${timeSince(new Date(base.last_analytics_event?.created_at))} ago`
-        : undefined,
     }));
 
     const boardResources = (boards?.items ?? [])
@@ -84,7 +80,6 @@ export default function WorkspaceListPageClient() {
         type: "board",
         name: board.name,
         href: `/w/${currentWorkspace?.short_name}/board/${board.id}`,
-        status: `Last updated ${timeSince(new Date(board?.updated_at ?? ""))} ago`,
       }));
 
     let allResources = [...baseResources, ...boardResources];

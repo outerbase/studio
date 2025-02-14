@@ -1,25 +1,41 @@
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import { MenuBar } from "@/components/orbit/menu-bar";
+import { useOuterbaseDashboardList } from "@/outerbase-cloud/hook";
 import { CaretDown } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import NavigationHeader from "./nav-header";
 import {
   getResourceItemPropsFromBase,
+  getResourceItemPropsFromBoard,
   ResourceItemList,
 } from "./resource-item-helper";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function RecentResource() {
   const { workspaces, loading: workspaceLoading } = useWorkspaces();
+  const { data: dashboardList } = useOuterbaseDashboardList();
 
   const recentBases = useMemo(() => {
-    return workspaces
+    const bases = workspaces
       .map((w) => w.bases.map((base) => getResourceItemPropsFromBase(w, base)))
-      .flat()
-      .sort((a, b) => {
-        return b.lastUsed - a.lastUsed;
-      });
-  }, [workspaces]);
+      .flat();
+
+    const dashboards = workspaces
+      .map((w) => {
+        return (
+          dashboardList
+            ?.filter(
+              (board) => board.workspace_id === w.id && board.base_id === null
+            )
+            .map((board) => {
+              return getResourceItemPropsFromBoard(w, board);
+            }) ?? []
+        );
+      })
+      .flat();
+
+    return [...bases, ...dashboards].sort((a, b) => b.lastUsed - a.lastUsed);
+  }, [workspaces, dashboardList]);
 
   const resources = recentBases;
 

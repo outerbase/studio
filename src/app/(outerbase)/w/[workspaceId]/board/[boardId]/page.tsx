@@ -1,8 +1,9 @@
 "use client";
 
-import { NavigationBar } from "@/app/(outerbase)/nav";
+import NavigationLayout from "@/app/(outerbase)/nav-layout";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
+import { Loader } from "@/components/orbit/loader";
 import OuterbaseBoardStorageDriver from "@/drivers/board-storage/outerbase";
 
 import { getOuterbaseDashboard } from "@/outerbase-cloud/api";
@@ -70,16 +71,15 @@ export default function BoardPage() {
     return getOuterbaseDashboard(workspaceId, boardId);
   });
 
-  if (!data) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden">
-      <NavigationBar />
+    <NavigationLayout>
       <div className="flex flex-1 overflow-x-hidden overflow-y-auto">
-        <BoardPageEditor initialValue={data} mutate={mutate} />
+        {data ? (
+          <BoardPageEditor initialValue={data} mutate={mutate} />
+        ) : (
+          <Loader />
+        )}
       </div>
-    </div>
+    </NavigationLayout>
   );
 }

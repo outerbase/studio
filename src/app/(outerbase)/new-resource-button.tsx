@@ -181,13 +181,13 @@ export default function NewResourceButton() {
   }, [search]);
 
   return (
-    <DropdownMenu onOpenChange={() => setSearch("")}>
+    <DropdownMenu onOpenChange={() => setSearch("")} modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="primary">
           New Resource <CaretDown />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[500px]">
+      <DropdownMenuContent align="start" className="w-[500px]">
         <div className="p-2">
           <Input
             placeholder="Search"
