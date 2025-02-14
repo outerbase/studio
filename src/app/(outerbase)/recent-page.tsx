@@ -17,7 +17,11 @@ export default function RecentResource() {
 
   const recentBases = useMemo(() => {
     const bases = workspaces
-      .map((w) => w.bases.map((base) => getResourceItemPropsFromBase(w, base)))
+      .map((w) =>
+        w.bases
+          .filter(Boolean)
+          .map((base) => getResourceItemPropsFromBase(w, base))
+      )
       .flat();
 
     const dashboards = workspaces

@@ -30,7 +30,9 @@ export function getResourceItemPropsFromBase(
     type: base.sources[0]?.type ?? "database",
     name: base.name,
     href: `/w/${workspace.short_name}/${base.short_name}`,
-    lastUsed: new Date(base.last_analytics_event.created_at).getTime(),
+    lastUsed: base.last_analytics_event?.created_at
+      ? new Date(base.last_analytics_event?.created_at).getTime()
+      : 0,
   };
 }
 
