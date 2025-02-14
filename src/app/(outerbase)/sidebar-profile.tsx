@@ -32,7 +32,7 @@ export default function SidebarProfile() {
     // Remove all the session data
     localStorage.removeItem("session");
     localStorage.removeItem("ob-token");
-    router.push("/signin");
+    router.refresh();
   }, [router]);
 
   const onThemeToggleClicked = useCallback(

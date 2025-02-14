@@ -6,11 +6,21 @@ type BannerProps = {
   className: string;
   filter: React.ReactNode;
   image: string;
+  onClick?: () => void;
 };
 
-const Banner = ({ children, className, filter, image }: BannerProps) => {
+const Banner = ({
+  children,
+  className,
+  filter,
+  image,
+  onClick,
+}: BannerProps) => {
   return (
-    <div className="group relative aspect-video w-full cursor-pointer overflow-hidden rounded-lg bg-neutral-800 p-6 shadow-xl after:absolute after:top-0 after:left-0 after:size-full after:rounded-lg after:border-4 after:border-white/20">
+    <div
+      onClick={onClick}
+      className="group relative aspect-video w-full cursor-pointer overflow-hidden rounded-lg bg-neutral-800 p-6 shadow-xl after:absolute after:top-0 after:left-0 after:size-full after:rounded-lg after:border-4 after:border-white/20"
+    >
       <div className="dither absolute top-0 left-0 z-10 size-full" />
 
       {children}

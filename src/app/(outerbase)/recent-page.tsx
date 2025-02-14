@@ -1,45 +1,20 @@
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import { MenuBar } from "@/components/orbit/menu-bar";
-import ResourceCard from "@/components/resource-card";
-import {
-  getDatabaseFriendlyName,
-  getDatabaseIcon,
-  getDatabaseVisual,
-} from "@/components/resource-card/utils";
 import { CaretDown } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import NewResourceButton from "./new-resource-button";
-import ResourceCardLoading from "./resource-card-loading";
+import {
+  getResourceItemPropsFromBase,
+  ResourceItemList,
+} from "./resource-item-helper";
 import { useWorkspaces } from "./workspace-provider";
-
-interface ResourceItem {
-  id: string;
-  type: string;
-  name: string;
-  href: string;
-  status?: string;
-  lastUsed: number;
-}
 
 export default function RecentResource() {
   const { workspaces, loading: workspaceLoading } = useWorkspaces();
 
   const recentBases = useMemo(() => {
     return workspaces
-      .map((w) =>
-        w.bases.map(
-          (base) =>
-            ({
-              id: base.id,
-              type: base.sources[0]?.type ?? "database",
-              name: base.name,
-              href: `/w/${w.short_name}/${base.short_name}`,
-              lastUsed: new Date(
-                base.last_analytics_event.created_at
-              ).getTime(),
-            }) as ResourceItem
-        )
-      )
+      .map((w) => w.bases.map((base) => getResourceItemPropsFromBase(w, base)))
       .flat()
       .sort((a, b) => {
         return b.lastUsed - a.lastUsed;
@@ -90,30 +65,7 @@ export default function RecentResource() {
           />
         </div>
 
-        <div className="flex grid grid-cols-1 flex-wrap gap-4 min-[700px]:grid-cols-2 min-[900px]:grid-cols-3 min-[1200px]:grid-cols-4 min-[1500px]:grid-cols-5 min-[1800px]:grid-cols-6 min-[2100px]:grid-cols-7">
-          {workspaceLoading && (
-            <>
-              <ResourceCardLoading />
-              <ResourceCardLoading />
-              <ResourceCardLoading />
-              <ResourceCardLoading />
-            </>
-          )}
-
-          {resources.map((resource) => (
-            <ResourceCard
-              className="w-full"
-              key={resource.id}
-              color="default"
-              icon={getDatabaseIcon(resource.type)}
-              href={resource.href}
-              title={resource.name}
-              subtitle={getDatabaseFriendlyName(resource.type)}
-              visual={getDatabaseVisual(resource.type)}
-              status={resource.status}
-            />
-          ))}
-        </div>
+        <ResourceItemList resources={resources} loading={workspaceLoading} />
       </div>
     </>
   );
