@@ -249,12 +249,12 @@ export interface OuterbaseDefinitionInput {
 
 export interface OuterbaseDataCatalogVirtualColumnInput {
   body: string;
-  column: string;
+  column?: string;
   flags: OuterbaseDataCatalogFlag;
   sample_data: string;
   schema: string;
   table: string;
-  virtual_key_column: string;
+  virtual_key_column?: string;
   virtual_key_schema: string;
   virtual_key_table: string;
 }
