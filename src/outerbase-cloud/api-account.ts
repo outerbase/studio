@@ -42,3 +42,9 @@ export async function resetPassword(data: {
     data
   );
 }
+
+export async function requestOuterbaseOneTimePassword(data: {
+  number: string;
+}) {
+  return await requestOuterbase(`/api/v1/me/phone`, "POST", data);
+}
