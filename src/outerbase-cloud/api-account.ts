@@ -42,3 +42,9 @@ export async function resetPassword(data: {
     data
   );
 }
+
+export async function requestOuterbaseGoogleLoginUrl() {
+  return await fetch(`${process.env.NEXT_PUBLIC_OB_API}/auth/oauth/google`, {
+    method: "GET",
+  });
+}
