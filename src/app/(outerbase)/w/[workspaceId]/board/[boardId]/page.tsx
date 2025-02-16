@@ -2,7 +2,7 @@
 
 import NavigationDashboardLayout from "@/app/(outerbase)/nav-board-layout";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
-import Board from "@/components/board";
+import Board, { DashboardProps } from "@/components/board";
 import { Loader } from "@/components/orbit/loader";
 import { WEBSITE_NAME } from "@/const";
 import OuterbaseBoardStorageDriver from "@/drivers/board-storage/outerbase";
@@ -40,7 +40,7 @@ function BoardPageEditor({
     );
   }, [boardId, currentWorkspace]);
 
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState<DashboardProps>(initialValue);
   const [filter, setFilter] = useState({});
 
   if (!boardSources) {
@@ -49,8 +49,8 @@ function BoardPageEditor({
 
   return (
     <Board
-      value={value as any}
-      onChange={setValue as any}
+      value={value}
+      onChange={setValue}
       filterValue={filter}
       onFilterValueChange={setFilter}
       sources={boardSources}

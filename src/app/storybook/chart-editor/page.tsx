@@ -53,7 +53,6 @@ const data: ChartData[] = [
 const lineChartValue: ChartValue = {
   suggestedChartType: [],
   connection_id: null,
-  created_at: "2025-01-31T08:44:04.868Z",
   id: "94019f17-a1e0-4db2-b89e-4457cbed3ce4",
   model: "chart",
   name: "New Chart",
@@ -87,7 +86,6 @@ const lineChartValue: ChartValue = {
   },
   source_id: "856a1855-2bee-4d87-9756-a783088c0568",
   type: "line",
-  updated_at: "2025-02-09T07:58:17.571Z",
   workspace_id: "3db2e96f-ee43-412d-be09-25fc02d3a463",
 };
 

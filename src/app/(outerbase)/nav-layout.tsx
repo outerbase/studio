@@ -54,7 +54,11 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
 
         <div className="flex flex-col border-b pb-2">
           <SidebarMenuHeader text="Workspace" />
-          <SidebarMenuItem text="Local Workspace" icon={Database} />
+          <SidebarMenuItem
+            text="Local Workspace"
+            icon={Database}
+            href="/local"
+          />
 
           {workspaces.map((workspace) => {
             return (

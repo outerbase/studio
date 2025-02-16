@@ -11,7 +11,8 @@ import {
   SortDescending,
   Users,
 } from "@phosphor-icons/react";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
 import NavigationHeader from "../../nav-header";
 import NavigationLayout from "../../nav-layout";
 import NewResourceButton from "../../new-resource-button";
@@ -21,10 +22,13 @@ import {
   ResourceItemList,
 } from "../../resource-item-helper";
 import { useWorkspaces } from "../../workspace-provider";
+import { createBoardDialog } from "./dialog-board-create";
 
 export default function WorkspaceListPage() {
+  const router = useRouter();
   const { currentWorkspace, loading: workspaceLoading } = useWorkspaces();
-  const { data: dashboardList } = useOuterbaseDashboardList();
+  const { data: dashboardList, mutate: refreshDashboardList } =
+    useOuterbaseDashboardList();
 
   const bases = useMemo(() => {
     if (!currentWorkspace) return [];
@@ -52,6 +56,23 @@ export default function WorkspaceListPage() {
     );
   }, [currentWorkspace, dashboardList]);
 
+  const onCreateBoardClicked = useCallback(() => {
+    if (!currentWorkspace) return;
+
+    createBoardDialog
+      .show({
+        workspaceId: currentWorkspace.id,
+      })
+      .then((createdBoard) => {
+        if (!createdBoard) return;
+
+        refreshDashboardList();
+        router.push(
+          `/w/${currentWorkspace.short_name}/board/${createdBoard.id}`
+        );
+      });
+  }, [currentWorkspace, router, refreshDashboardList]);
+
   return (
     <>
       <title>{currentWorkspace?.name ?? "Untitled"}</title>
@@ -60,7 +81,7 @@ export default function WorkspaceListPage() {
 
         <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
           <div className="flex gap-2">
-            <NewResourceButton />
+            <NewResourceButton onCreateBoard={onCreateBoardClicked} />
 
             <Input
               preText={<MagnifyingGlass className="mr-2" />}

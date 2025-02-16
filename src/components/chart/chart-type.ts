@@ -59,7 +59,6 @@ export interface ChartParams {
 
 export interface ChartValue {
   connection_id?: string | null;
-  created_at?: string;
   id?: string;
   model?: string;
   name?: string;
@@ -67,7 +66,6 @@ export interface ChartValue {
   source_id?: string;
   type?: ChartType;
   suggestedChartType?: ChartType[];
-  updated_at?: string;
   workspace_id?: string;
   description?: string;
 }
