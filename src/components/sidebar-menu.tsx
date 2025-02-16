@@ -1,8 +1,10 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 interface SidebarMenuItemProps {
   text: string;
+  badge?: ReactElement;
   onClick?: () => void;
   href?: string;
   selected?: boolean;
@@ -13,15 +15,32 @@ interface SidebarMenuHeader {
   text: string;
 }
 
+export function SidebarMenuLoadingItem() {
+  const className =
+    "flex p-2 pl-4 text-sm hover:cursor-pointer h-8 items-center";
+
+  return (
+    <div className={className}>
+      <span className="mr-2 h-4 w-4">
+        <span className="bg-muted inline-flex h-4 w-4 animate-pulse rounded-full"></span>
+      </span>
+      <span className="flex flex-1 items-center text-left">
+        <span className="bg-muted mr-5 inline-flex h-3 w-full animate-pulse rounded-sm"></span>
+      </span>
+    </div>
+  );
+}
+
 export function SidebarMenuItem({
   text,
   onClick,
   icon: IconComponent,
+  badge,
   href,
   selected,
 }: SidebarMenuItemProps) {
   const className =
-    "flex p-2 pl-4 text-sm hover:cursor-pointer hover:bg-secondary";
+    "flex p-2 pl-4 text-sm hover:cursor-pointer hover:bg-secondary h-8 items-center";
 
   const body = (
     <>
@@ -30,7 +49,10 @@ export function SidebarMenuItem({
       ) : (
         <span className="mr-2 h-4 w-4"></span>
       )}
-      {text}
+
+      <span className="flex-1 text-left">{text}</span>
+
+      {badge && badge}
     </>
   );
 

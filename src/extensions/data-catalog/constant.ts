@@ -1,6 +1,7 @@
-export const defaultVirtualColumn = {
+import { OuterbaseDataCatalogVirtualColumnInput } from "@/outerbase-cloud/api-type";
+
+export const defaultVirtualColumn: OuterbaseDataCatalogVirtualColumnInput = {
   body: "",
-  column: "",
   flags: {
     isActive: true,
     isVirtualKey: true,

@@ -64,6 +64,11 @@ export interface OuterbaseAPIWorkspace {
   short_name: string;
   id: string;
   bases: OuterbaseAPIBase[];
+  is_enterprise: boolean;
+  subscription: {
+    status: "active" | "inactive";
+    plan: "starter" | "growth";
+  };
 }
 
 export interface OuterbaseAPIDashboard {
@@ -249,12 +254,12 @@ export interface OuterbaseDefinitionInput {
 
 export interface OuterbaseDataCatalogVirtualColumnInput {
   body: string;
-  column: string;
+  column?: string;
   flags: OuterbaseDataCatalogFlag;
   sample_data: string;
   schema: string;
   table: string;
-  virtual_key_column: string;
+  virtual_key_column?: string;
   virtual_key_schema: string;
   virtual_key_table: string;
 }

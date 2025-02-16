@@ -1,10 +1,7 @@
 "use client";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/orbit/button";
-import {
-  getOuterbaseWorkspace,
-  loginOuterbaseByPassword,
-} from "@/outerbase-cloud/api";
+import { loginOuterbaseByPassword } from "@/outerbase-cloud/api";
 import {
   OuterbaseAPIError,
   OuterbaseAPISession,
@@ -50,14 +47,7 @@ export default function SigninPage() {
       return;
     }
 
-    getOuterbaseWorkspace()
-      .then((w) => {
-        router.push(`/w/${w.items[0].short_name}`);
-      })
-      .catch(console.error)
-      .finally(() => {
-        setLoading(false);
-      });
+    router.push("/");
   }, [session, router]);
 
   return (

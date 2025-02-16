@@ -1,4 +1,6 @@
 import { useState } from "react";
+import useSWR from "swr";
+import { getOuterbaseDashboardList } from "./api";
 import { OuterbaseAPIError } from "./api-type";
 
 export default function useOuterbaseMutation<
@@ -24,4 +26,22 @@ export default function useOuterbaseMutation<
   };
 
   return { loading, trigger, error };
+}
+
+export function useOuterbaseDashboardList() {
+  const { data, isLoading } = useSWR(
+    "/dashboards",
+    async () => {
+      const result = await getOuterbaseDashboardList();
+      return result.items;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 5000,
+      revalidateIfStale: false,
+    }
+  );
+
+  return { data, isLoading };
 }

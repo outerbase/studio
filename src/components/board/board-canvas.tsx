@@ -133,7 +133,7 @@ export function BoardCanvas({ value, onChange }: BoardProps) {
     return (
       <div
         key={_.i}
-        className="group bg-background relative flex items-center justify-center rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
+        className="group bg-background relative flex items-center justify-center overflow-hidden rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
         data-grid={_}
       >
         <BoardChart
@@ -141,7 +141,7 @@ export function BoardCanvas({ value, onChange }: BoardProps) {
         />
         {boardMode?.mode === "REARRANGING_CHART" ? (
           <>
-            <div className="absolute top-4 right-4 z-40 hidden gap-2 group-hover:flex">
+            <div className="absolute top-2 right-2 z-40 hidden gap-2 group-hover:flex">
               {sizes.map((x, index) => {
                 return (
                   <button
@@ -161,7 +161,7 @@ export function BoardCanvas({ value, onChange }: BoardProps) {
                 );
               })}
             </div>
-            <div className="absolute -top-2 -left-2 z-40 hidden group-hover:block">
+            <div className="absolute top-2 left-2 z-40 hidden group-hover:block">
               <button
                 className={cn(
                   buttonVariants({ variant: "default", size: "icon" }),
@@ -205,7 +205,7 @@ export function BoardCanvas({ value, onChange }: BoardProps) {
   });
 
   return (
-    <div className="bg-neutral-100 dark:bg-neutral-950">
+    <div className="min-h-full bg-neutral-100 dark:bg-neutral-950">
       <ReactGridLayout
         cols={4}
         rowHeight={220}

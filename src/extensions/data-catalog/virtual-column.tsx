@@ -68,7 +68,7 @@ export default function VirtualJoinColumn({
         {data.column}
       </div>
       <div className="flex w-[150px] items-center p-2 text-base">
-        {data.table}
+        {data.virtualKeyTable}
       </div>
       <div className="flex w-[150px] items-center p-2 text-base">
         {data.body}

@@ -52,7 +52,7 @@ export default function BoardSourcePicker({
       }
       setOpen(false);
     },
-    [onChange, sourceDriver, onSchemaLoad]
+    [onChange, sourceDriver]
   );
 
   const previousValue = useRef<string>("");
@@ -82,7 +82,7 @@ export default function BoardSourcePicker({
       .finally(() => {
         setLoadingSchema(false);
       });
-  }, [value]);
+  }, [value, onSchemaLoad, sourceDriver]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

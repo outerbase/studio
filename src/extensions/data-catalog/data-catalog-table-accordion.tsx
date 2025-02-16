@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import { Blend, ChevronDown, Edit3, LucideMoreHorizontal } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import DataCatalogTableColumn from "./data-catalog-table-column";
 import DataCatalogDriver from "./driver";
 import TableMetadataModal from "./table-metadata-modal";
@@ -38,11 +39,11 @@ export default function DataCatalogTableAccordion({
   hasDefinitionOnly,
 }: DataCatalogTableAccordionProps) {
   const modelTable = driver.getTable(table.schemaName, table.tableName!);
-  const [open, setOpen] = useState(false);
+  const [collapsible, setCollapsible] = useState(false);
   const [seletedColumn, setSelectedColumn] = useState<
     OuterbaseDataCatalogComment | undefined
   >();
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   const [openVirtualModal, setOpenVirtaulModal] = useState(false);
 
   const onDeletRelationship = useCallback(
@@ -77,6 +78,14 @@ export default function DataCatalogTableAccordion({
           modelColumn.id,
           isVirtual
         )
+        .then(() => {
+          let msg = `${modelColumn.column} is turned ${modelColumn.flags.isActive ? "on" : "off"}`;
+          if (isVirtual) {
+            msg = "Virtual relationship status updated.";
+          }
+          toast.success(msg);
+        })
+        .catch((error) => toast.error(error.message))
         .finally(() => {
           cb && cb();
         });
@@ -107,6 +116,13 @@ export default function DataCatalogTableAccordion({
     return true;
   }, [search, table]);
 
+  const virtualJoins = useMemo(() => {
+    if (modelTable?.virtualJoin && modelTable.virtualJoin.length > 0) {
+      return modelTable.virtualJoin;
+    }
+    return [];
+  }, [modelTable]);
+
   // this will work only toggle check box
   if (hasDefinitionOnly) {
     const columnsDefinition = table.columns
@@ -131,34 +147,41 @@ export default function DataCatalogTableAccordion({
 
   return (
     <>
-      <Dialog open={visible} onOpenChange={setVisible}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          {visible && (
+          {open && (
             <TableMetadataModal
               driver={driver}
               schemaName={table.schemaName}
               tableName={table.tableName!}
               data={tableMetadata}
               onClose={() => {
-                setVisible(false);
+                setOpen(false);
               }}
             />
           )}
         </DialogContent>
       </Dialog>
-      <VirtualJoinModal
-        driver={driver}
-        data={seletedColumn}
-        open={openVirtualModal}
-        tableName={table.tableName!}
-        schemaName={table.schemaName}
-        onOpenChange={setOpenVirtaulModal}
-        onClose={() => {
-          setOpenVirtaulModal(false);
-          setSelectedColumn(undefined);
-        }}
-      />
-      <Collapsible open={open} onOpenChange={setOpen}>
+
+      <Dialog open={openVirtualModal} onOpenChange={setOpenVirtaulModal}>
+        <DialogContent>
+          {openVirtualModal && (
+            <VirtualJoinModal
+              driver={driver}
+              data={seletedColumn}
+              tableName={table.tableName!}
+              schemaName={table.schemaName}
+              onSuccess={() => setCollapsible(true)}
+              onClose={() => {
+                setOpenVirtaulModal(false);
+                setSelectedColumn(undefined);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Collapsible open={collapsible} onOpenChange={setCollapsible}>
         <div className="rounded-xl border border-neutral-200 bg-white/50 p-3 hover:border-neutral-300 hover:bg-white dark:border-neutral-800/50 dark:bg-neutral-900 dark:text-white dark:hover:border-neutral-800 dark:hover:bg-neutral-800">
           <div className="flex p-2">
             <div>
@@ -196,7 +219,7 @@ export default function DataCatalogTableAccordion({
                   <DropdownMenuItem
                     className="gap-1"
                     onClick={() => {
-                      setVisible(true);
+                      setOpen(true);
                     }}
                   >
                     Edit Metadata
@@ -205,6 +228,7 @@ export default function DataCatalogTableAccordion({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    disabled={modelTable?.virtualJoin.length === 0}
                     onClick={() => {
                       setOpenVirtaulModal(true);
                       setSelectedColumn(undefined);
@@ -221,7 +245,7 @@ export default function DataCatalogTableAccordion({
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 transform transition-transform duration-200",
-                    open ? "rotate-180" : "rotate-0"
+                    collapsible ? "rotate-180" : "rotate-0"
                   )}
                 />
               </CollapsibleTrigger>
@@ -241,27 +265,25 @@ export default function DataCatalogTableAccordion({
                 />
               );
             })}
-            {modelTable?.virtualJoin && modelTable.virtualJoin.length > 0 && (
+            {virtualJoins.length > 0 && (
               <div className="rounded-xl border border-neutral-200 p-3 hover:bg-white dark:border-neutral-800/50 dark:bg-neutral-950 dark:text-white">
                 <div className="p-3 font-bold">Relationships</div>
-                <div className="">
-                  {modelTable.virtualJoin?.map((column) => {
-                    return (
-                      <VirtualJoinColumn
-                        data={column}
-                        key={column.id}
-                        onEditRelationship={() => {
-                          setOpenVirtaulModal(true);
-                          setSelectedColumn(column);
-                        }}
-                        onToggleHideFromEzql={onToggleHideFromEzql}
-                        onDeletRelatinship={() => {
-                          onDeletRelationship(column.id);
-                        }}
-                      />
-                    );
-                  })}
-                </div>
+                {virtualJoins.map((column) => {
+                  return (
+                    <VirtualJoinColumn
+                      data={column}
+                      key={column.id}
+                      onEditRelationship={() => {
+                        setOpenVirtaulModal(true);
+                        setSelectedColumn(column);
+                      }}
+                      onToggleHideFromEzql={onToggleHideFromEzql}
+                      onDeletRelatinship={() => {
+                        onDeletRelationship(column.id);
+                      }}
+                    />
+                  );
+                })}
               </div>
             )}
           </CollapsibleContent>

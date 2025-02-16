@@ -960,3 +960,29 @@
   background-color: #888;
   /* Color of the scrollbar thumb on hover */
 }
+
+/* SVG filters */
+.pixelate {
+  filter: url(#pixelate);
+}
+
+/* Ripple filter */
+.ripple {
+  filter: url(#ripple);
+}
+
+.float {
+  animation: float 5s linear infinite alternate;
+}
+
+@keyframes float {
+  to {
+    transform: translate(5px, 15px);
+  }
+}
+
+@keyframes refresh {
+  to {
+    transform: rotate(360deg) scale(0.9);
+  }
+}

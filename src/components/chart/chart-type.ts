@@ -66,6 +66,7 @@ export interface ChartValue {
   params: ChartParams;
   source_id?: string;
   type?: ChartType;
+  suggestedChartType?: ChartType[];
   updated_at?: string;
   workspace_id?: string;
   description?: string;

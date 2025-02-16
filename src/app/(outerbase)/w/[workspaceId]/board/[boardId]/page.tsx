@@ -1,8 +1,10 @@
 "use client";
 
-import { NavigationBar } from "@/app/(outerbase)/nav";
+import NavigationDashboardLayout from "@/app/(outerbase)/nav-board-layout";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import Board from "@/components/board";
+import { Loader } from "@/components/orbit/loader";
+import { WEBSITE_NAME } from "@/const";
 import OuterbaseBoardStorageDriver from "@/drivers/board-storage/outerbase";
 
 import { getOuterbaseDashboard } from "@/outerbase-cloud/api";
@@ -45,8 +47,6 @@ function BoardPageEditor({
     return <div>Loading Workspace....</div>;
   }
 
-  console.log("xxx", filter);
-
   return (
     <Board
       value={value as any}
@@ -70,16 +70,16 @@ export default function BoardPage() {
     return getOuterbaseDashboard(workspaceId, boardId);
   });
 
-  if (!data) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden">
-      <NavigationBar />
-      <div className="flex flex-1 overflow-x-hidden overflow-y-auto">
-        <BoardPageEditor initialValue={data} mutate={mutate} />
+    <NavigationDashboardLayout>
+      <title>{data?.name ?? WEBSITE_NAME}</title>
+      <div className="relative flex flex-1 overflow-x-hidden overflow-y-auto">
+        {data ? (
+          <BoardPageEditor initialValue={data} mutate={mutate} />
+        ) : (
+          <Loader />
+        )}
       </div>
-    </div>
+    </NavigationDashboardLayout>
   );
 }
