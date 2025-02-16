@@ -12,8 +12,9 @@ import {
   DriverFlags,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
-import { generateMySqlSchemaChange } from "../mysql/generate-schema";
 import { escapeSqlValue } from "../sqlite/sql-helper";
+import { generatePostgresSchemaChange } from "./generate-schema";
+import { POSTGRES_DATA_TYPE_SUGGESTION } from "./postgres-data-type";
 
 interface PostgresSchemaRow {
   catalog_name: string;
@@ -59,9 +60,7 @@ interface PostgresConstraintRow {
 }
 
 export default abstract class PostgresLikeDriver extends CommonSQLImplement {
-  columnTypeSelector: ColumnTypeSelector = {
-    type: "text",
-  };
+  columnTypeSelector: ColumnTypeSelector = POSTGRES_DATA_TYPE_SUGGESTION;
 
   escapeId(id: string) {
     return `"${id.replace(/"/g, '""')}"`;
@@ -84,7 +83,18 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
       supportInsertReturning: true,
       supportUpdateReturning: true,
       supportCreateUpdateTrigger: false,
+      supportUseStatement: true,
     };
+  }
+
+  async getCurrentSchema(): Promise<string | null> {
+    const result = (await this.query("SHOW search_path")) as unknown as {
+      rows: { search_path?: string | null }[];
+    };
+
+    const db = result.rows[0].search_path!.split(",")[0];
+
+    return db === this.escapeId("$user") ? "public" : db;
   }
 
   async schemas(): Promise<DatabaseSchemas> {
@@ -296,7 +306,9 @@ WHERE
     ).rows as unknown as PostgresConstraintRow[];
 
     const constraintRecord: Record<string, DatabaseTableColumnConstraint> = {};
-    for (const constraint of constraintResult) {
+    for (const constraint of constraintResult.filter(
+      (f) => f.column_name !== null
+    )) {
       const key = constraint.constraint_name;
       const constraintItem = constraintRecord[key] || {
         name: constraint.constraint_name,
@@ -323,10 +335,17 @@ WHERE
           ],
           columns: [constraint.column_name],
         };
+      } else if (constraint.constraint_type === "UNIQUE") {
+        constraintItem.unique = true;
+        constraintItem.uniqueColumns = [constraint.column_name];
       }
 
       constraintRecord[key] = constraintItem;
     }
+
+    const pkColumn =
+      Object.values(constraintRecord).find((c) => c.primaryKey)
+        ?.primaryColumns ?? [];
 
     const tableSchema: DatabaseTableSchema = {
       columns: columnsResult.map((column) => ({
@@ -336,12 +355,11 @@ WHERE
           notNull: column.is_nullable === "NO",
           defaultValue: column.column_default,
           generatedExpression: column.generation_expression,
+          primaryKey: pkColumn.includes(column.column_name),
         },
       })),
       constraints: Object.values(constraintRecord),
-      pk:
-        Object.values(constraintRecord).find((c) => c.primaryKey)
-          ?.primaryColumns ?? [],
+      pk: pkColumn,
       autoIncrement: false,
       schemaName,
       tableName,
@@ -355,7 +373,7 @@ WHERE
   }
 
   createUpdateTableSchema(change: DatabaseTableSchemaChange): string[] {
-    return generateMySqlSchemaChange(this, change);
+    return generatePostgresSchemaChange(this, change);
   }
 
   createUpdateDatabaseSchema(): string[] {

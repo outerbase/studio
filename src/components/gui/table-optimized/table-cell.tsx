@@ -1,8 +1,8 @@
-import OptimizeTableState from "./OptimizeTableState";
+import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 import { OptimizeTableHeaderWithIndexProps } from ".";
 import tableResultCellRenderer from "../table-result/render-cell";
-import { useMemo } from "react";
-import { cn } from "@/lib/utils";
+import OptimizeTableState from "./OptimizeTableState";
 
 export default function OptimizeTableCell({
   state,
