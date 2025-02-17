@@ -20,13 +20,20 @@ import {
   getResourceItemPropsFromBase,
   getResourceItemPropsFromBoard,
   ResourceItemList,
+  ResourceItemProps,
 } from "../../resource-item-helper";
 import { useWorkspaces } from "../../workspace-provider";
+import { deleteBaseDialog } from "./dialog-base-delete";
 import { createBoardDialog } from "./dialog-board-create";
+import { deleteBoardDialog } from "./dialog-board-delete";
 
 export default function WorkspaceListPage() {
   const router = useRouter();
-  const { currentWorkspace, loading: workspaceLoading } = useWorkspaces();
+  const {
+    currentWorkspace,
+    loading: workspaceLoading,
+    refreshWorkspace,
+  } = useWorkspaces();
   const { data: dashboardList, mutate: refreshDashboardList } =
     useOuterbaseDashboardList();
 
@@ -55,6 +62,42 @@ export default function WorkspaceListPage() {
         }) ?? []
     );
   }, [currentWorkspace, dashboardList]);
+
+  const onDeleteBoardClicked = useCallback(
+    (deletedResource: ResourceItemProps) => {
+      if (!currentWorkspace) return;
+
+      deleteBoardDialog
+        .show({
+          workspaceId: currentWorkspace.id,
+          boardId: deletedResource.id,
+          boardName: deletedResource.name,
+        })
+        .then(() => {
+          refreshDashboardList();
+        })
+        .catch();
+    },
+    [currentWorkspace, refreshDashboardList]
+  );
+
+  const onDeleteBaseClicked = useCallback(
+    (deletedResource: ResourceItemProps) => {
+      if (!currentWorkspace) return;
+
+      deleteBaseDialog
+        .show({
+          workspaceId: currentWorkspace.id,
+          baseId: deletedResource.id,
+          baseName: deletedResource.name,
+        })
+        .then(() => {
+          refreshWorkspace();
+        })
+        .catch();
+    },
+    [currentWorkspace, refreshWorkspace]
+  );
 
   const onCreateBoardClicked = useCallback(() => {
     if (!currentWorkspace) return;
@@ -106,6 +149,8 @@ export default function WorkspaceListPage() {
             bases={bases}
             boards={dashboards}
             loading={workspaceLoading}
+            onBoardRemove={onDeleteBoardClicked}
+            onBaseRemove={onDeleteBaseClicked}
           />
         </div>
       </NavigationLayout>

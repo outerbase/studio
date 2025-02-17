@@ -1,14 +1,12 @@
 "use client";
-import { Input } from "@/components/orbit/input";
 import {
   SidebarMenuHeader,
   SidebarMenuItem,
   SidebarMenuLoadingItem,
 } from "@/components/sidebar-menu";
-import { ChartBar, GlobeSimple, MagnifyingGlass } from "@phosphor-icons/react";
+import { CaretLeft, ChartBar } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
-import SidebarProfile from "./sidebar-profile";
 
 interface NavigationDashboardLayoutProps {
   boards?: {
@@ -34,34 +32,17 @@ export default function NavigationDashboardLayout({
   return (
     <div className="flex h-screen w-screen">
       <div className="w-[250px] shrink-0 border-r">
-        <div className="px-2 py-2">
-          <SidebarProfile />
+        <div
+          className="flex h-12 cursor-pointer items-center gap-2 border-b px-2 text-base font-bold"
+          onClick={() => {
+            if (backHref) router.push(backHref);
+          }}
+        >
+          <CaretLeft weight="bold" />
+          <span>{workspaceName}</span>
         </div>
 
-        <div className="px-2">
-          <Input
-            size="base"
-            className="bg-secondary"
-            placeholder="Search for anything"
-            preText={<MagnifyingGlass className="mr-2" />}
-          />
-        </div>
-
-        {!loading && (
-          <div className="text-primary mt-2 border-b p-3 py-4">
-            <div
-              className="flex cursor-pointer items-center gap-2"
-              onClick={() => {
-                if (backHref) router.push(backHref);
-              }}
-            >
-              <GlobeSimple weight="bold" className="h-5 w-5" />
-              <span className="font-semibold">{workspaceName}</span>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-col border-b pb-2">
+        <div className="flex flex-col pb-2">
           <SidebarMenuHeader text="Dashboards" />
 
           {(boards ?? []).map((board) => {
