@@ -360,7 +360,7 @@ WHERE
       })),
       constraints: Object.values(constraintRecord),
       pk: pkColumn,
-      autoIncrement: false,
+      autoIncrement: true,
       schemaName,
       tableName,
     };

@@ -14,9 +14,10 @@ function wrapParen(str: string) {
 
 function generateCreateColumn(
   driver: BaseDriver,
-  col: DatabaseTableColumn
+  col: DatabaseTableColumn,
+  edit?: boolean
 ): string {
-  const tokens: string[] = [driver.escapeId(col.name), col.type];
+  const tokens: string[] = edit ? [driver.escapeId(col.name), "TYPE", col.type, "USING", `${driver.escapeId(col.name)}::${col.type}`]: [driver.escapeId(col.name), col.type];
 
   if (col.constraint?.primaryKey) {
     tokens.push(
@@ -157,7 +158,12 @@ export function generatePostgresSchemaChange(
 
       // check if there is any changed except name
       if (!isEqual(omit(col.old, ["name"]), omit(col.new, ["name"]))) {
-        lines.push(`MODIFY COLUMN ${generateCreateColumn(driver, col.new)}`);
+        lines.push(`ALTER COLUMN ${generateCreateColumn(driver, {
+          name: col.new.name,
+          type: col.new.type,
+          pk: col.new.pk,
+          constraint: {}
+        }, true)}`);
       }
     }
   }
