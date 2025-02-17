@@ -72,11 +72,15 @@ export async function deleteOuterbaseTwoFactorAuth() {
 }
 
 export async function requestOuterbase2FAPhone(id: string) {
-  return await requestOuterbase(`/api/v1/me/phone/${id}/request`);
+  return await requestOuterbase(`/api/v1/me/phone/${id}/request`, "POST");
 }
 
 export async function verifyOuterbaseOTP(token: string) {
   return await requestOuterbase("/api/v1/auth/mfa/otp/verify", "POST", {
     token,
   });
+}
+
+export async function submitVerifyPhone2FA(id: string, data: { code: string }) {
+  return await requestOuterbase(`/api/v1/me/phone/${id}/submit`, "POST", data);
 }

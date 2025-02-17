@@ -6,6 +6,7 @@ import {
   deleteOuterbaseTwoFactorAuth,
   requestOuterbase2FAPhone,
   requestOuterbaseTwoFactorAuth,
+  submitVerifyPhone2FA,
   verifyOuterbase2FAOTP,
 } from "@/outerbase-cloud/api-account";
 import { CheckCircle2 } from "lucide-react";
@@ -97,6 +98,7 @@ export default function TwoFactorAuth() {
   const [sms, setSMS] = useState<ISMS>();
   const [qrcode, setQrcode] = useState<QRCode>();
   const [deleting, setDeleting] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const onClear = () => {
     setDeleting(false);
@@ -118,17 +120,17 @@ export default function TwoFactorAuth() {
   );
 
   const onSendRequestPhone2FA = useCallback(() => {
-    setLoading(true);
+    setSending(true);
     requestOuterbaseTwoFactorAuth("phone", {
       number: prefix + phone,
     })
       .then((r) => {
-        setLoading(false);
-        setSMS(r as ISMS);
-        requestOuterbase2FAPhone((r as ISMS).id).then(() => {});
+        requestOuterbase2FAPhone((r as ISMS).id).then(() => {
+          setSMS(r as ISMS);
+          setSending(false);
+        });
       })
-      .catch()
-      .finally();
+      .catch(() => setSending(false));
   }, [prefix, phone]);
 
   const onRequestOuterbaseTwoFactorAuth = useCallback(
@@ -163,6 +165,27 @@ export default function TwoFactorAuth() {
         toast.error(error.message);
       });
   }, [qrcode, verifyCode, onRefreshSession]);
+
+  const onSubmitPhone2FA = useCallback(() => {
+    if (!sms) return;
+    setLoading(true);
+    submitVerifyPhone2FA(sms?.id, { code: verifyCode })
+      .then(() => {
+        onRefreshSession("2FA enabled");
+      })
+      .catch((error) => {
+        setLoading(false);
+        toast.error(error.message);
+      });
+  }, [sms, verifyCode, onRefreshSession]);
+
+  function handleSave() {
+    if (twoFactorType === "otp") {
+      onVerifyOuterbaseOTP();
+    } else {
+      onSubmitPhone2FA();
+    }
+  }
 
   const onDeleteTwoFactor = useCallback(() => {
     setDeleting(true);
@@ -263,7 +286,7 @@ export default function TwoFactorAuth() {
                 variant="primary"
                 title="Sent Code"
                 shape="base"
-                loading={loading}
+                loading={sending}
                 className="rounded-4xl"
                 onClick={onSendRequestPhone2FA}
               />
@@ -282,7 +305,7 @@ export default function TwoFactorAuth() {
           code={verifyCode}
           loading={loading}
           onChange={setVerifyCode}
-          onSave={onVerifyOuterbaseOTP}
+          onSave={handleSave}
           onCancel={onClear}
         />
       </div>
