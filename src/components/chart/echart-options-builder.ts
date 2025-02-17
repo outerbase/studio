@@ -419,7 +419,7 @@ export default class EchartOptionsBuilder {
   }
 }
 
-function isDate(dateString: string): boolean {
+export function isDate(dateString: string): boolean {
   if (!isNaN(Number(dateString))) {
     // this is number
     return false;

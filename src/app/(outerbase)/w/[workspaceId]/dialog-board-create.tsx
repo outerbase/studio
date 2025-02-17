@@ -1,6 +1,6 @@
 import { createDialog } from "@/components/create-dialog";
 import LabelInput from "@/components/label-input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   DialogDescription,
   DialogFooter,

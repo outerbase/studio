@@ -58,9 +58,11 @@ export async function deleteOuterbaseBase(workspaceId: string, baseId: string) {
   );
 }
 
-export async function getOuterbaseDashboardList(workspaceId: string) {
+export async function getOuterbaseDashboardList(workspaceId?: string) {
   return requestOuterbase<OuterbaseAPIDashboardListResponse>(
-    `/api/v1/workspace/${workspaceId}/dashboard`
+    workspaceId
+      ? `/api/v1/workspace/${workspaceId}/dashboard`
+      : "/api/v1/workspace/dashboard"
   );
 }
 

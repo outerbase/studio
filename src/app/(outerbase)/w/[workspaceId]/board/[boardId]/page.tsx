@@ -1,13 +1,16 @@
 "use client";
 
-import { NavigationBar } from "@/app/(outerbase)/nav";
+import NavigationDashboardLayout from "@/app/(outerbase)/nav-board-layout";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
-import Board from "@/components/board";
+import Board, { DashboardProps } from "@/components/board";
+import { Loader } from "@/components/orbit/loader";
+import { WEBSITE_NAME } from "@/const";
 import OuterbaseBoardStorageDriver from "@/drivers/board-storage/outerbase";
 
 import { getOuterbaseDashboard } from "@/outerbase-cloud/api";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
 import OuterbaseBoardSourceDriver from "@/outerbase-cloud/database-source";
+import { useOuterbaseDashboardList } from "@/outerbase-cloud/hook";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import useSWR, { KeyedMutator } from "swr";
@@ -38,19 +41,17 @@ function BoardPageEditor({
     );
   }, [boardId, currentWorkspace]);
 
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState<DashboardProps>(initialValue);
   const [filter, setFilter] = useState({});
 
   if (!boardSources) {
     return <div>Loading Workspace....</div>;
   }
 
-  console.log("xxx", filter);
-
   return (
     <Board
-      value={value as any}
-      onChange={setValue as any}
+      value={value}
+      onChange={setValue}
       filterValue={filter}
       onFilterValueChange={setFilter}
       sources={boardSources}
@@ -70,16 +71,44 @@ export default function BoardPage() {
     return getOuterbaseDashboard(workspaceId, boardId);
   });
 
-  if (!data) {
-    return <div>Loading...</div>;
-  }
+  const { currentWorkspace, loading: workspaceLoading } = useWorkspaces();
+  const { data: dashboardList, isLoading: dashboardLoading } =
+    useOuterbaseDashboardList();
+
+  const dashboards = useMemo(() => {
+    if (!currentWorkspace) return [];
+    if (!dashboardList) return [];
+
+    const tmp = (dashboardList ?? []).filter(
+      (board) =>
+        board.workspace_id === currentWorkspace.id && board.base_id === null
+    );
+
+    tmp.sort((a, b) => a.name.localeCompare(b.name));
+    return tmp.map((board) => {
+      return {
+        id: board.id,
+        name: board.name,
+        href: `/w/${currentWorkspace.short_name}/board/${board.id}`,
+      };
+    });
+  }, [dashboardList, currentWorkspace]);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden">
-      <NavigationBar />
-      <div className="flex flex-1 overflow-x-hidden overflow-y-auto">
-        <BoardPageEditor initialValue={data} mutate={mutate} />
+    <NavigationDashboardLayout
+      loading={workspaceLoading || dashboardLoading}
+      boards={dashboards}
+      workspaceName={currentWorkspace?.name}
+      backHref={`/w/${workspaceId}`}
+    >
+      <title>{data?.name ?? WEBSITE_NAME}</title>
+      <div className="relative flex flex-1 overflow-x-hidden overflow-y-auto">
+        {data ? (
+          <BoardPageEditor initialValue={data} mutate={mutate} />
+        ) : (
+          <Loader />
+        )}
       </div>
-    </div>
+    </NavigationDashboardLayout>
   );
 }

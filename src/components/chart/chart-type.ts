@@ -59,14 +59,13 @@ export interface ChartParams {
 
 export interface ChartValue {
   connection_id?: string | null;
-  created_at?: string;
   id?: string;
   model?: string;
   name?: string;
   params: ChartParams;
   source_id?: string;
   type?: ChartType;
-  updated_at?: string;
+  suggestedChartType?: ChartType[];
   workspace_id?: string;
   description?: string;
 }

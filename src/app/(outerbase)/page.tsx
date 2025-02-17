@@ -1,33 +1,39 @@
 "use client";
 
-import PageLoading from "@/components/page-loading";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import NavigationLayout from "./nav-layout";
+import { ResourceItemList } from "./resource-item-helper";
 import { useSession } from "./session-provider";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function OuterbaseMainPage() {
-  const { token, isLoading, session } = useSession();
-  const { workspaces } = useWorkspaces();
   const router = useRouter();
+  const { isLoading: sessionLoading, session } = useSession();
+  const { workspaces, loading: workspaceLoading } = useWorkspaces();
 
   useEffect(() => {
-    // If there is no token, it means user has not logged in before.
-    // We will forward them to local workspace.
-    if (!token) {
-      router.push("/w/local-workspace");
-      return;
-    } else if (!isLoading && session && workspaces) {
-      // Valid session, we will forward to the first workspace
-      if (workspaces.length) {
-        router.push(`/w/${workspaces[0].short_name}`);
-      }
-    } else if (!isLoading && !session) {
-      // Invalid session, it might be expired session. We will
-      // ask them for login again
-      router.push("/signin");
-    }
-  }, [token, session, isLoading, workspaces, router]);
+    if (sessionLoading) return;
 
-  return <PageLoading>Loading Session</PageLoading>;
+    // Invalid session, go to local connection
+    if (!session) {
+      router.push("/local");
+    }
+
+    if (workspaceLoading) return;
+    if (!workspaces) return;
+
+    // Redirect to the first workspace
+    if (workspaces.length > 0) {
+      router.push(`/w/${workspaces[0].short_name}`);
+    }
+  }, [session, sessionLoading, workspaceLoading, workspaces, router]);
+
+  return (
+    <NavigationLayout>
+      <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
+        <ResourceItemList boards={[]} bases={[]} loading />
+      </div>
+    </NavigationLayout>
+  );
 }

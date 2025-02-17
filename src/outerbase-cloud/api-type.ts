@@ -1,3 +1,5 @@
+import { DashboardProps } from "@/components/board";
+import { ChartValue } from "@/components/chart/chart-type";
 import { ColumnHeader, ResultStat } from "@outerbase/sdk-transform";
 
 export interface OuterbaseDatabaseConfig {
@@ -64,6 +66,11 @@ export interface OuterbaseAPIWorkspace {
   short_name: string;
   id: string;
   bases: OuterbaseAPIBase[];
+  is_enterprise: boolean;
+  subscription: {
+    status: "active" | "inactive";
+    plan: "starter" | "growth";
+  };
 }
 
 export interface OuterbaseAPIDashboard {
@@ -76,15 +83,6 @@ export interface OuterbaseAPIDashboard {
   type: "dashboard";
   name: string;
   workspace_id: string;
-  layout: {
-    h: number;
-    i: string;
-    w: number;
-    x: number;
-    y: number;
-    max_h: number;
-    max_w: number;
-  }[];
 }
 
 export interface OuterbaseAPIQuery {
@@ -94,36 +92,8 @@ export interface OuterbaseAPIQuery {
   query: string;
   source_id: string;
 }
-export interface OuterbaseAPIDashboardChart {
-  connection_id: string | null;
-  created_at: string;
-  id: string;
-  model: "chart";
-  name: string;
-  params: {
-    id: string;
-    name: string;
-    type: string;
-    model: string;
-    apiKey: string;
-    layers: {
-      sql: string;
-      type: string;
-    }[];
-    options: {
-      xAxisKey: string;
-    };
-    source_id: string;
-    created_at: string;
-    updated_at: string;
-    workspace_id: string;
-    connection_id: string | null;
-  };
+export interface OuterbaseAPIDashboardChart extends ChartValue {
   result?: OuterbaseAPIQueryRaw;
-  source_id: string;
-  type: string;
-  updated_at: string;
-  workspace_id: string;
 }
 
 export interface OuterbaseAPISession {
@@ -147,9 +117,9 @@ export interface OuterbaseAPIUser {
   first_name: string;
 }
 
-export interface OuterbaseAPIDashboardDetail extends OuterbaseAPIDashboard {
-  charts: OuterbaseAPIDashboardChart[];
-}
+export interface OuterbaseAPIDashboardDetail
+  extends OuterbaseAPIDashboard,
+    DashboardProps {}
 
 export interface OuterbaseAPIWorkspaceResponse {
   items: OuterbaseAPIWorkspace[];
@@ -249,12 +219,12 @@ export interface OuterbaseDefinitionInput {
 
 export interface OuterbaseDataCatalogVirtualColumnInput {
   body: string;
-  column: string;
+  column?: string;
   flags: OuterbaseDataCatalogFlag;
   sample_data: string;
   schema: string;
   table: string;
-  virtual_key_column: string;
+  virtual_key_column?: string;
   virtual_key_schema: string;
   virtual_key_table: string;
 }

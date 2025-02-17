@@ -1,6 +1,6 @@
 "use client";
-import { NavigationBar } from "@/app/(outerbase)/nav";
 import { useSession } from "@/app/(outerbase)/session-provider";
+import NavigationLayout from "../nav-layout";
 import AccountFooter from "./account-footer";
 import TwoFactorAuth from "./two-factor-auth";
 import UserAvatar from "./user-avatar";
@@ -12,10 +12,8 @@ export default function AccountPage() {
   if (!session?.user) return <div>You are not login!</div>;
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      <NavigationBar />
-
-      <main className="mx-auto flex max-w-sm flex-col overflow-x-hidden overflow-y-auto pt-20 pb-10">
+    <NavigationLayout>
+      <main className="flex max-w-sm flex-col p-8">
         <div className="flex flex-col gap-5">
           <h1 className="text-primary text-2xl font-bold">Account Setting</h1>
           <h2 className="mt-5 text-xl font-medium text-balance text-neutral-800 dark:text-neutral-100">
@@ -27,6 +25,6 @@ export default function AccountPage() {
           <AccountFooter />
         </div>
       </main>
-    </div>
+    </NavigationLayout>
   );
 }
