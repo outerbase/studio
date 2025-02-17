@@ -150,6 +150,9 @@ export interface OuterbaseAPIUser {
   email: string;
   last_name: string;
   first_name: string;
+  has_otp: boolean;
+  has_password: boolean;
+  has_verified_phone: boolean;
 }
 
 export interface OuterbaseAPIDashboardDetail extends OuterbaseAPIDashboard {

@@ -1,7 +1,10 @@
 "use client";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/orbit/button";
-import { loginOuterbaseByPassword } from "@/outerbase-cloud/api";
+import {
+  getOuterbaseSession,
+  loginOuterbaseByPassword,
+} from "@/outerbase-cloud/api";
 import {
   OuterbaseAPIError,
   OuterbaseAPISession,
@@ -23,9 +26,14 @@ export default function SigninPage() {
     setLoading(true);
 
     loginOuterbaseByPassword(email, password)
-      .then((session) => {
-        localStorage.setItem("session", JSON.stringify(session));
+      .then(async (session) => {
         localStorage.setItem("ob-token", session.token);
+        localStorage.setItem("session", JSON.stringify(session));
+
+        const { user } = await getOuterbaseSession();
+        if (user.has_otp) {
+          localStorage.setItem("continue-redirect", "/verify");
+        }
 
         setSession(session);
       })
@@ -42,7 +50,6 @@ export default function SigninPage() {
 
     const redirect = localStorage.getItem("continue-redirect");
     if (redirect) {
-      localStorage.removeItem("continue-redirect");
       router.push(redirect);
       return;
     }
