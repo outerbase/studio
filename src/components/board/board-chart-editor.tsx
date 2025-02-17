@@ -98,7 +98,6 @@ export default function BoardChartEditor({
       const sqlWithVariables = fillVariables(sql, resolvedFilterValue, dialect);
 
       setLoading(true);
-      setErrorMessage(null);
       sourceDriver
         .query(sourceId, sqlWithVariables)
         .then((newResult) => {
@@ -109,6 +108,7 @@ export default function BoardChartEditor({
               schemas: schema,
             })
           );
+          setErrorMessage(null);
           initialChartValue(newResult, sql);
         })
         .catch((e) => {
