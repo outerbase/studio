@@ -4,6 +4,8 @@ import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
 } from "@/app/(theme)/connect/saved-connection-storage";
+import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
+import { CaretDown } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import NavigationHeader from "../nav-header";
 import NavigationLayout from "../nav-layout";
@@ -47,10 +49,6 @@ export default function LocalConnectionPage() {
     );
   }, [dashboardList]);
 
-  const allResources = useMemo(() => {
-    return [...baseResources, ...dashboardResources];
-  }, [dashboardResources, baseResources]);
-
   const onCreateBoardClicked = useCallback(() => {
     createLocalBoardDialog.show({}).then(() => {
       refreshDashboard(undefined, { revalidate: true });
@@ -65,7 +63,30 @@ export default function LocalConnectionPage() {
           <NewResourceButton onCreateBoard={onCreateBoardClicked} />
         </div>
 
-        <ResourceItemList resources={allResources} />
+        <div className="my-4 flex gap-4">
+          <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">
+            <SQLiteIcon className="h-10 w-10" />
+            <div className="flex flex-col gap-1 text-left">
+              <span className="text-base font-bold">SQLite Playgorund</span>
+              <span className="text-sm">
+                Launch in-memory SQLite on browser
+              </span>
+            </div>
+            <CaretDown className="ml-4 h-4 w-4" />
+          </button>
+
+          <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">
+            <MySQLIcon className="h-10 w-10" />
+            <div className="flex flex-col gap-1 text-left">
+              <span className="text-base font-bold">MySQL Playgorund</span>
+              <span className="text-sm">
+                Spin up cloud MySQL sandbox instance
+              </span>
+            </div>
+          </button>
+        </div>
+
+        <ResourceItemList boards={dashboardResources} bases={baseResources} />
       </div>
     </NavigationLayout>
   );

@@ -49,7 +49,7 @@ export function getResourceItemPropsFromBoard(
   };
 }
 
-export function ResourceItemList({
+function ResourceItemSection({
   resources,
   loading,
 }: {
@@ -85,5 +85,29 @@ export function ResourceItemList({
         );
       })}
     </div>
+  );
+}
+
+export function ResourceItemList({
+  bases,
+  boards,
+  loading,
+}: {
+  bases: ResourceItemProps[];
+  boards: ResourceItemProps[];
+  loading?: boolean;
+}) {
+  return (
+    <>
+      {boards.length > 0 && (
+        <>
+          <h2 className="text-base font-bold">Boards</h2>
+          <ResourceItemSection resources={boards} />
+        </>
+      )}
+
+      {boards.length > 0 && <h2 className="text-base font-bold">Bases</h2>}
+      <ResourceItemSection resources={bases} loading={loading} />
+    </>
   );
 }

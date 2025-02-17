@@ -5,13 +5,7 @@ import {
   SidebarMenuItem,
   SidebarMenuLoadingItem,
 } from "@/components/sidebar-menu";
-import {
-  Clock,
-  Database,
-  MagnifyingGlass,
-  Plus,
-  Star,
-} from "@phosphor-icons/react";
+import { Database, MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 import NavigationSigninBanner from "./nav-signin-banner";
@@ -40,21 +34,10 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           />
         </div>
 
-        <div className="flex flex-col border-b py-2">
-          <SidebarMenuItem
-            text="Recent"
-            icon={Clock}
-            selected={pathname === "/"}
-            onClick={() => {
-              router.push("/");
-            }}
-          />
-          <SidebarMenuItem text="Favorite" icon={Star} />
-        </div>
-
         <div className="flex flex-col border-b pb-2">
           <SidebarMenuHeader text="Workspace" />
           <SidebarMenuItem
+            selected={pathname === "/local"}
             text="Local Workspace"
             icon={Database}
             href="/local"

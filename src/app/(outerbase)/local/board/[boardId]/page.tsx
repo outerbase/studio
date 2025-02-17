@@ -1,4 +1,5 @@
 "use client";
+import NavigationDashboardLayout from "@/app/(outerbase)/nav-board-layout";
 import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import Board, { DashboardProps } from "@/components/board";
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
@@ -50,10 +51,29 @@ export default function LocalBoardPage() {
     boardId: string;
   }>();
 
-  const { data } = useLocalDashboardList();
+  const { data, isLoading } = useLocalDashboardList();
   const board = data?.find((b) => b.id === boardId);
+
+  const dashboardList = useMemo(() => {
+    return (data ?? []).map((board) => {
+      return {
+        href: `/local/board/${board.id}`,
+        name: board.content.name,
+        id: board.id,
+      };
+    });
+  }, [data]);
 
   if (!board) return <div>Loading...</div>;
 
-  return <LocalBoardWithDataPage initialValue={board.content} />;
+  return (
+    <NavigationDashboardLayout
+      boards={dashboardList}
+      workspaceName="Local"
+      loading={isLoading}
+      backHref="/local"
+    >
+      <LocalBoardWithDataPage initialValue={board.content} />
+    </NavigationDashboardLayout>
+  );
 }

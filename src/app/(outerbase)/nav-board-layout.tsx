@@ -5,36 +5,31 @@ import {
   SidebarMenuItem,
   SidebarMenuLoadingItem,
 } from "@/components/sidebar-menu";
-import { useOuterbaseDashboardList } from "@/outerbase-cloud/hook";
 import { ChartBar, GlobeSimple, MagnifyingGlass } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren } from "react";
 import SidebarProfile from "./sidebar-profile";
-import { useWorkspaces } from "./workspace-provider";
+
+interface NavigationDashboardLayoutProps {
+  boards?: {
+    name: string;
+    id: string;
+    href: string;
+  }[];
+  workspaceName?: string;
+  backHref?: string;
+  loading?: boolean;
+}
 
 export default function NavigationDashboardLayout({
   children,
-}: PropsWithChildren) {
+  backHref,
+  boards,
+  workspaceName,
+  loading,
+}: PropsWithChildren<NavigationDashboardLayoutProps>) {
   const router = useRouter();
-  const { currentWorkspace, loading: workspaceLoading } = useWorkspaces();
-
-  const { data: dashboardList, isLoading: dashboardLoading } =
-    useOuterbaseDashboardList();
-
   const { boardId } = useParams<{ boardId?: string }>();
-
-  const dashboards = useMemo(() => {
-    if (!currentWorkspace) return [];
-    if (!dashboardList) return [];
-
-    const tmp = (dashboardList ?? []).filter(
-      (board) =>
-        board.workspace_id === currentWorkspace.id && board.base_id === null
-    );
-
-    tmp.sort((a, b) => a.name.localeCompare(b.name));
-    return tmp;
-  }, [dashboardList, currentWorkspace]);
 
   return (
     <div className="flex h-screen w-screen">
@@ -52,14 +47,16 @@ export default function NavigationDashboardLayout({
           />
         </div>
 
-        {currentWorkspace && (
+        {!loading && (
           <div className="text-primary mt-2 border-b p-3 py-4">
             <div
               className="flex cursor-pointer items-center gap-2"
-              onClick={() => router.push(`/w/${currentWorkspace.short_name}`)}
+              onClick={() => {
+                if (backHref) router.push(backHref);
+              }}
             >
               <GlobeSimple weight="bold" className="h-5 w-5" />
-              <span className="font-semibold">{currentWorkspace.name}</span>
+              <span className="font-semibold">{workspaceName}</span>
             </div>
           </div>
         )}
@@ -67,7 +64,7 @@ export default function NavigationDashboardLayout({
         <div className="flex flex-col border-b pb-2">
           <SidebarMenuHeader text="Dashboards" />
 
-          {dashboards.map((board) => {
+          {(boards ?? []).map((board) => {
             return (
               <SidebarMenuItem
                 key={board.id}
@@ -75,15 +72,13 @@ export default function NavigationDashboardLayout({
                 text={board.name ?? "Untitled"}
                 icon={ChartBar}
                 onClick={() => {
-                  router.push(
-                    `/w/${currentWorkspace?.short_name}/board/${board.id}`
-                  );
+                  router.push(board.href);
                 }}
               />
             );
           })}
 
-          {(workspaceLoading || dashboardLoading) && (
+          {loading && (
             <>
               <SidebarMenuLoadingItem />
               <SidebarMenuLoadingItem />

@@ -102,17 +102,11 @@ export default function WorkspaceListPage() {
             />
           </div>
 
-          {dashboards.length > 0 && (
-            <>
-              <h2 className="text-base font-bold">Boards</h2>
-              <ResourceItemList resources={dashboards} />
-            </>
-          )}
-
-          {dashboards.length > 0 && (
-            <h2 className="text-base font-bold">Bases</h2>
-          )}
-          <ResourceItemList resources={bases} loading={workspaceLoading} />
+          <ResourceItemList
+            bases={bases}
+            boards={dashboards}
+            loading={workspaceLoading}
+          />
         </div>
       </NavigationLayout>
     </>
