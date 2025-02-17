@@ -31,9 +31,9 @@ import {
   MultipleQueryProgress,
   MultipleQueryResult,
 } from "@/lib/sql/multiple-query";
-import { tokenizeSql } from "@/lib/sql/tokenizer";
 import { sendAnalyticEvents } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
+import { tokenizeSql } from "@outerbase/sdk-transform";
 import { CaretDown } from "@phosphor-icons/react";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import {
