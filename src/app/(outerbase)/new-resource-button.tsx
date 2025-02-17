@@ -73,7 +73,11 @@ const RESOURCE_TYPE_LIST: ResourceType[] = [
   { name: "Redshift", icon: Database, enterprise: true },
 ];
 
-export default function NewResourceButton() {
+interface NewResourceProps {
+  onCreateBoard?: () => void;
+}
+
+export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
   const leftSideResourceType = RESOURCE_TYPE_LIST.slice(0, 7);
   const rightSideResourceType = RESOURCE_TYPE_LIST.slice(7);
 
@@ -83,7 +87,10 @@ export default function NewResourceButton() {
   const allResourceType = (
     <>
       <div className="flex gap-4 p-2">
-        <button className="bg-secondary flex w-[250px] items-center gap-4 rounded p-2 px-4 text-left text-base">
+        <button
+          className="bg-secondary flex w-[250px] cursor-pointer items-center gap-4 rounded p-2 px-4 text-left text-base"
+          onClick={onCreateBoard}
+        >
           <ChartBar className="h-8 w-8" />
           <div>
             <div className="font-semibold">Board</div>

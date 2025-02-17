@@ -59,14 +59,21 @@ export function SidebarMenuItem({
   if (href) {
     if (href.startsWith("https://")) {
       return (
-        <Link href={href} className={className} target="_blank">
+        <Link
+          href={href}
+          className={cn(className, selected ? "bg-selected" : "")}
+          target="_blank"
+        >
           {body}
         </Link>
       );
     }
 
     return (
-      <Link href={href} className={className}>
+      <Link
+        href={href}
+        className={cn(className, selected ? "bg-selected" : "")}
+      >
         {body}
       </Link>
     );

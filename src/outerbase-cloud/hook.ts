@@ -29,7 +29,7 @@ export default function useOuterbaseMutation<
 }
 
 export function useOuterbaseDashboardList() {
-  const { data, isLoading } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     "/dashboards",
     async () => {
       const result = await getOuterbaseDashboardList();
@@ -43,5 +43,5 @@ export function useOuterbaseDashboardList() {
     }
   );
 
-  return { data, isLoading };
+  return { data, isLoading, mutate };
 }
