@@ -7,15 +7,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { createOuterbaseDashboard } from "@/outerbase-cloud/api";
-import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
+import { LocalDashboardData } from "@/indexdb";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
+import { createLocalDashboard } from "./hooks";
 
-export const createBoardDialog = createDialog<
-  { workspaceId: string },
-  OuterbaseAPIDashboardDetail | undefined
->(({ close, workspaceId }) => {
+export const createLocalBoardDialog = createDialog<
+  object,
+  LocalDashboardData | undefined
+>(({ close }) => {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
 
@@ -24,14 +24,14 @@ export const createBoardDialog = createDialog<
 
     setLoading(true);
 
-    createOuterbaseDashboard(workspaceId, undefined, name)
+    createLocalDashboard(name)
       .then((createdBoard) => {
         close(createdBoard);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [close, name, workspaceId]);
+  }, [close, name]);
 
   return (
     <>

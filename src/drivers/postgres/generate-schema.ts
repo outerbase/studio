@@ -17,7 +17,15 @@ function generateCreateColumn(
   col: DatabaseTableColumn,
   edit?: boolean
 ): string {
-  const tokens: string[] = edit ? [driver.escapeId(col.name), "TYPE", col.type, "USING", `${driver.escapeId(col.name)}::${col.type}`]: [driver.escapeId(col.name), col.type];
+  const tokens: string[] = edit
+    ? [
+        driver.escapeId(col.name),
+        "TYPE",
+        col.type,
+        "USING",
+        `${driver.escapeId(col.name)}::${col.type}`,
+      ]
+    : [driver.escapeId(col.name), col.type];
 
   if (col.constraint?.primaryKey) {
     tokens.push(
@@ -100,7 +108,7 @@ function generateCreateColumn(
   if (foreignTableName && foreignColumnName) {
     tokens.push(
       [
-        "REFERENCES",
+        "FOREIGN KEY REFERENCES",
         driver.escapeId(foreignTableName) +
           `(${driver.escapeId(foreignColumnName)})`,
       ].join(" ")
@@ -127,6 +135,28 @@ function generateConstraintScript(
       `(${con.foreignKey.foreignColumns?.map(driver.escapeId).join(", ")})`
     );
   }
+}
+
+function generateConstraintModifyScript(
+  driver: BaseDriver,
+  con: DatabaseTableColumnConstraint,
+  tableName: string
+) {
+  let keyName = "";
+  if (con?.primaryKey) {
+    keyName = `${tableName}_pkey`;
+  }
+  if (con?.foreignKey) {
+    keyName = `${tableName}_${con.foreignKey.foreignTableName}_${con.foreignKey.columns?.join("")}_fkey`;
+  }
+  if (con.unique) {
+    keyName = `${tableName}_${con.uniqueColumns?.join("")}_key`;
+  }
+
+  return [
+    `DROP CONSTRAINT IF EXISTS ${keyName}`,
+    `ADD CONSTRAINT ${keyName} ${generateConstraintScript(driver, con)}`,
+  ];
 }
 
 //https://www.postgresql.org/docs/current/sql-createtable.html
@@ -158,12 +188,35 @@ export function generatePostgresSchemaChange(
 
       // check if there is any changed except name
       if (!isEqual(omit(col.old, ["name"]), omit(col.new, ["name"]))) {
-        lines.push(`ALTER COLUMN ${generateCreateColumn(driver, {
-          name: col.new.name,
-          type: col.new.type,
-          pk: col.new.pk,
-          constraint: {}
-        }, true)}`);
+        lines.push(
+          `ALTER COLUMN ${generateCreateColumn(
+            driver,
+            {
+              name: col.new.name,
+              type: col.new.type,
+              pk: col.new.pk,
+              constraint: {},
+            },
+            true
+          )}`
+        );
+        if (col.new.constraint) {
+          for (const s of generateConstraintModifyScript(
+            driver,
+            {
+              ...col.new.constraint,
+              primaryColumns: [col.new.name],
+              uniqueColumns: [col.new.name],
+              foreignKey: {
+                ...col.new.constraint.foreignKey,
+                columns: [col.new.name],
+              },
+            },
+            change.name.old ?? ""
+          )) {
+            lines.push(s);
+          }
+        }
       }
     }
   }
