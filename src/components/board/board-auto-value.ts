@@ -26,6 +26,8 @@ export function createAutoBoardChartValue(
         const firstRecord = newResult.rows[0];
         const columnType = getColumnType(firstRecord);
 
+        // remove the previous xAxisKey and yAxisKeys
+
         // study each column value and try to guess the type
         if (columnType) {
           for (const column of columns) {

@@ -102,7 +102,7 @@ export default function BoardPage() {
       backHref={`/w/${workspaceId}`}
     >
       <title>{data?.name ?? WEBSITE_NAME}</title>
-      <div className="relative flex flex-1 overflow-x-hidden overflow-y-auto">
+      <div className="relative overflow-x-hidden overflow-y-auto">
         {data ? (
           <BoardPageEditor initialValue={data} mutate={mutate} />
         ) : (

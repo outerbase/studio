@@ -21,7 +21,6 @@ import { BoardFilterDate } from "./board-filter/board-filter-date";
 import { BoardFilterEnum } from "./board-filter/board-filter-enum";
 import { BoardFilterInput } from "./board-filter/board-filter-input";
 import { useBoardContext } from "./board-provider";
-import { BoardTool } from "./board-tool/board-tool";
 import { BoardToolbar } from "./board-tool/board-toolbar";
 
 interface Props {
@@ -171,8 +170,6 @@ export function BoardFilter(props: Props) {
 
   return (
     <>
-      <BoardTool />
-
       <div className="sticky top-0 z-50 bg-neutral-100 px-1 pt-0 pb-2 dark:bg-neutral-950">
         <BoardToolbar
           show={show}

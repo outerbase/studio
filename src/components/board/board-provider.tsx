@@ -4,7 +4,6 @@ import { noop } from "lodash";
 import {
   createContext,
   Dispatch,
-  MutableRefObject,
   PropsWithChildren,
   SetStateAction,
   useContext,
@@ -28,7 +27,6 @@ interface BoardContextProps {
   filterValue: Record<string, string>;
   onFilterValueChange?: (value: Record<string, string>) => void;
   resolvedFilterValue: Record<string, string>;
-  refMainBoard: MutableRefObject<HTMLDivElement | null>;
 }
 
 const BoardContext = createContext<BoardContextProps>({
@@ -38,7 +36,6 @@ const BoardContext = createContext<BoardContextProps>({
   filterValue: {},
   onFilterValueChange: noop,
   resolvedFilterValue: {},
-  refMainBoard: { current: null },
 });
 
 export function useBoardContext() {

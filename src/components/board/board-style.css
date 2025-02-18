@@ -120,7 +120,7 @@
 
 .reveal {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(0);
 }
 
 .animate-revealMenu {
@@ -129,8 +129,8 @@
 
 @keyframes revealMenu {
   0% {
-    opacity: 100%;
-    transform: translateY(100px) translateX(-40%);
+    opacity: 0%;
+    transform: translateY(-100px) translateX(-40%);
   }
   100% {
     opacity: 100%;
