@@ -44,7 +44,17 @@ export default class EchartOptionsBuilder {
     this.theme = theme as "dark" | "light";
   }
 
-  private getColorRange(): string[] {
+  private getColorRange(theme?: ThemeColors, numColors?: number): string[] {
+    if (theme) {
+      const themeColor = THEMES[theme].colors?.[this.theme ?? "light"];
+      const colors = generateGradientColors(
+        themeColor[0],
+        themeColor[1],
+        numColors || 20
+      );
+      return colors;
+    }
+
     const axisKeyColors = this.getAxisKeyColors();
     const keys = this.chartValue.params.options?.yAxisKeys ?? this.columns;
     return keys.map((key) => axisKeyColors[key] as string);
@@ -340,7 +350,11 @@ export default class EchartOptionsBuilder {
             name: item[this.columns[0]] as string,
             value: item[this.columns[1]] as number,
           })),
-          color: this.getColorRange(),
+          color: this.getColorRange(
+            (this.chartValue.params.options?.theme ??
+              DEFAULT_THEME) as ThemeColors,
+            this.chartData.length
+          ),
         });
         break;
       case "pie":
@@ -364,7 +378,11 @@ export default class EchartOptionsBuilder {
             color: this.getTextColor(),
             textBorderColor: "transparent", // Remove text border
           },
-          color: this.getColorRange(),
+          color: this.getColorRange(
+            (this.chartValue.params.options?.theme ??
+              DEFAULT_THEME) as ThemeColors,
+            this.chartData.length
+          ),
           tooltip: {
             trigger: "item",
             borderColor: this.theme === "dark" ? "#FFFFFF08" : "#00000010", // fix issue where 'item' tooltips were a different color than the rest (maybe it matched the series color)
