@@ -205,7 +205,7 @@ export function BoardCanvas({ value, onChange }: BoardProps) {
   });
 
   return (
-    <div className="min-h-full bg-neutral-100 dark:bg-neutral-950">
+    <div className="bg-neutral-100 dark:bg-neutral-950">
       <ReactGridLayout
         cols={4}
         rowHeight={220}
