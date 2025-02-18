@@ -12,6 +12,7 @@ import NavigationLayout from "../nav-layout";
 import NewResourceButton from "../new-resource-button";
 import { ResourceItemList, ResourceItemProps } from "../resource-item-helper";
 import { createLocalBoardDialog } from "./dialog-board-create";
+import { deleteLocalBoardDialog } from "./dialog-board-delete";
 import { useLocalDashboardList } from "./hooks";
 
 export default function LocalConnectionPage() {
@@ -49,18 +50,25 @@ export default function LocalConnectionPage() {
     );
   }, [dashboardList]);
 
-  const onCreateBoardClicked = useCallback(() => {
+  const onBoardCreate = useCallback(() => {
     createLocalBoardDialog.show({}).then(() => {
-      refreshDashboard(undefined, { revalidate: true });
+      refreshDashboard();
     });
   }, [refreshDashboard]);
 
+  const onBoardRemove = useCallback((deletedResource: ResourceItemProps) => {
+    deleteLocalBoardDialog
+      .show({ boardId: deletedResource.id, boardName: deletedResource.name })
+      .then()
+      .catch();
+  }, []);
+
   return (
     <NavigationLayout>
-      <NavigationHeader title={"Local Worksapce"} />
+      <NavigationHeader />
       <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
         <div className="flex gap-2">
-          <NewResourceButton onCreateBoard={onCreateBoardClicked} />
+          <NewResourceButton onCreateBoard={onBoardCreate} />
         </div>
 
         <div className="my-4 flex gap-4">
@@ -86,7 +94,11 @@ export default function LocalConnectionPage() {
           </button>
         </div>
 
-        <ResourceItemList boards={dashboardResources} bases={baseResources} />
+        <ResourceItemList
+          boards={dashboardResources}
+          bases={baseResources}
+          onBoardRemove={onBoardRemove}
+        />
       </div>
     </NavigationLayout>
   );

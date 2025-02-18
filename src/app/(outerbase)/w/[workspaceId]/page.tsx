@@ -120,7 +120,7 @@ export default function WorkspaceListPage() {
     <>
       <title>{currentWorkspace?.name ?? "Untitled"}</title>
       <NavigationLayout>
-        <NavigationHeader title={currentWorkspace?.name ?? "Untitled"} />
+        <NavigationHeader />
 
         <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
           <div className="flex gap-2">

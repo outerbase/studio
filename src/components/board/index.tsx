@@ -1,6 +1,6 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import { IBoardStorageDriver } from "@/drivers/board-storage/base";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
 import BoardChartEditor from "./board-chart-editor";
@@ -43,6 +43,7 @@ export default function Board({
   filterValue,
   onFilterValueChange,
 }: Props) {
+  const refMainBoard = useRef<HTMLDivElement | null>(null);
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
   const autoRefresh = [
@@ -99,8 +100,9 @@ export default function Board({
       value={value}
       resolvedFilterValue={resolvedFilterValue}
       onFilterValueChange={onFilterValueChange}
+      refMainBoard={refMainBoard}
     >
-      <div className="relative flex flex-1 flex-col">
+      <div className="relative flex flex-1 flex-col" ref={refMainBoard}>
         <BoardFilter
           value={value}
           onChange={onChange}
@@ -135,6 +137,15 @@ export default function Board({
               />
             </div>
           </>
+        )}
+
+        {editMode?.mode === "ADD_CHART" && (
+          <div className="bg-background fixed top-14 bottom-0 left-0 z-50 flex w-screen">
+            <BoardChartEditor
+              onChange={onChange}
+              initialValue={editMode?.chart}
+            />
+          </div>
         )}
       </div>
     </BoardProvider>

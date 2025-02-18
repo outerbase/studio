@@ -1,12 +1,12 @@
-import { OptimizeTableCellRenderProps } from "../table-optimized";
+import BlobCell from "@/components/gui/table-cell/blob-cell";
 import { DatabaseValue } from "@/drivers/base-driver";
-import TextCell from "../table-cell/text-cell";
 import parseSafeJson from "@/lib/json-safe";
-import NumberCell from "../table-cell/number-cell";
+import { ColumnType } from "@outerbase/sdk-transform";
 import BigNumberCell from "../table-cell/big-number-cell";
 import GenericCell from "../table-cell/generic-cell";
-import BlobCell from "@/components/gui/table-cell/blob-cell";
-import { ColumnType } from "@outerbase/sdk-transform";
+import NumberCell from "../table-cell/number-cell";
+import TextCell from "../table-cell/text-cell";
+import { OptimizeTableCellRenderProps } from "../table-optimized";
 
 function detectTextEditorType(
   value: DatabaseValue<string>

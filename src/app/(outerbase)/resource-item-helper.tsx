@@ -12,6 +12,7 @@ import {
   OuterbaseAPIWorkspace,
 } from "@/outerbase-cloud/api-type";
 import { Trash } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
 import ResourceCardLoading from "./resource-card-loading";
 
 export interface ResourceItemProps {
@@ -70,33 +71,43 @@ export function ResourceItemList({
         <>
           <h2 className="text-base font-bold">Boards</h2>
           <div className="flex grid grid-cols-1 flex-wrap gap-4 min-[700px]:grid-cols-2 min-[900px]:grid-cols-3 min-[1200px]:grid-cols-4 min-[1500px]:grid-cols-5 min-[1800px]:grid-cols-6 min-[2100px]:grid-cols-7">
-            {boards.map((resource: ResourceItemProps) => {
-              const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
+            <AnimatePresence initial={false}>
+              {boards.map((resource: ResourceItemProps) => {
+                const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
 
-              return (
-                <ResourceCard
-                  className="w-full"
-                  key={resource.id}
-                  color="default"
-                  icon={getDatabaseIcon(resource.type)}
-                  href={resource.href}
-                  title={resource.name}
-                  subtitle={getDatabaseFriendlyName(resource.type)}
-                  visual={getDatabaseVisual(resource.type)}
-                  status={status}
-                >
-                  <DropdownMenuItem
-                    className="text-red-500 focus:text-red-500"
-                    onClick={() => {
-                      if (onBoardRemove) onBoardRemove(resource);
-                    }}
+                return (
+                  <motion.div
+                    key={resource.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <Trash size={16} className="mr-2" />
-                    Remove board
-                  </DropdownMenuItem>
-                </ResourceCard>
-              );
-            })}
+                    <ResourceCard
+                      className="w-full"
+                      color="default"
+                      key={resource.id}
+                      icon={getDatabaseIcon(resource.type)}
+                      href={resource.href}
+                      title={resource.name}
+                      subtitle={getDatabaseFriendlyName(resource.type)}
+                      visual={getDatabaseVisual(resource.type)}
+                      status={status}
+                    >
+                      <DropdownMenuItem
+                        className="text-red-500 focus:text-red-500"
+                        onClick={() => {
+                          if (onBoardRemove) onBoardRemove(resource);
+                        }}
+                      >
+                        <Trash size={16} className="mr-2" />
+                        Remove board
+                      </DropdownMenuItem>
+                    </ResourceCard>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         </>
       )}
@@ -113,33 +124,42 @@ export function ResourceItemList({
           </>
         )}
 
-        {bases.map((resource: ResourceItemProps) => {
-          const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
+        <AnimatePresence initial={false}>
+          {bases.map((resource: ResourceItemProps) => {
+            const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
 
-          return (
-            <ResourceCard
-              className="w-full"
-              key={resource.id}
-              color="default"
-              icon={getDatabaseIcon(resource.type)}
-              href={resource.href}
-              title={resource.name}
-              subtitle={getDatabaseFriendlyName(resource.type)}
-              visual={getDatabaseVisual(resource.type)}
-              status={status}
-            >
-              <DropdownMenuItem
-                className="text-red-500 focus:text-red-500"
-                onClick={() => {
-                  if (onBaseRemove) onBaseRemove(resource);
-                }}
+            return (
+              <motion.div
+                key={resource.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.3 }}
               >
-                <Trash size={16} className="mr-2" />
-                Remove base
-              </DropdownMenuItem>
-            </ResourceCard>
-          );
-        })}
+                <ResourceCard
+                  className="w-full"
+                  color="default"
+                  icon={getDatabaseIcon(resource.type)}
+                  href={resource.href}
+                  title={resource.name}
+                  subtitle={getDatabaseFriendlyName(resource.type)}
+                  visual={getDatabaseVisual(resource.type)}
+                  status={status}
+                >
+                  <DropdownMenuItem
+                    className="text-red-500 focus:text-red-500"
+                    onClick={() => {
+                      if (onBaseRemove) onBaseRemove(resource);
+                    }}
+                  >
+                    <Trash size={16} className="mr-2" />
+                    Remove base
+                  </DropdownMenuItem>
+                </ResourceCard>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </>
   );

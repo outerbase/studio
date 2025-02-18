@@ -1,5 +1,5 @@
 import { LocalDashboardData, localDb } from "@/indexdb";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 export function useLocalDashboardList() {
   return useSWR(
@@ -33,4 +33,9 @@ export async function createLocalDashboard(boardName: string) {
 
   await localDb.table("board").add({ id, content: data });
   return data;
+}
+
+export async function deleteLocalDashboard(boardId: string) {
+  await localDb.table("board").delete(boardId);
+  mutate("/dashboards/local");
 }

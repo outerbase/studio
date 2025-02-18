@@ -1,11 +1,11 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
-import SchemaEditor from "../schema-editor";
 import { createTableSchemaDraft } from "@/lib/sql/sql-generate.schema";
 import { cloneDeep } from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import SchemaEditor from "../schema-editor";
+import SchemaSaveDialog from "../schema-editor/schema-save-dialog";
 
 interface SchemaEditorTabProps {
   tableName?: string;
@@ -89,6 +89,7 @@ export default function SchemaEditorTab({
       </div>
     );
   }
+
   return (
     <>
       {isSaving && (

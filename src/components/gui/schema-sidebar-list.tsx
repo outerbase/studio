@@ -1,15 +1,15 @@
+import { useConfig } from "@/context/config-provider";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
+import { OpenContextMenuList } from "@/core/channel-builtin";
+import { scc } from "@/core/command";
+import { DatabaseSchemaItem } from "@/drivers/base-driver";
+import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
+import { Table } from "@phosphor-icons/react";
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
-import { useSchema } from "@/context/schema-provider";
 import { ListView, ListViewItem } from "../listview";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { Table } from "@phosphor-icons/react";
 import SchemaCreateDialog from "./schema-editor/schema-create";
-import { scc } from "@/core/command";
-import { useConfig } from "@/context/config-provider";
-import { OpenContextMenuList } from "@/core/channel-builtin";
-import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
 
 interface SchemaListProps {
   search: string;
@@ -266,11 +266,19 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
             });
           } else if (item.data.type === "schema") {
             if (databaseDriver.getFlags().supportUseStatement) {
-              databaseDriver
-                .query("USE " + databaseDriver.escapeId(item.name))
-                .then(() => {
-                  refresh();
-                });
+              const dialect = databaseDriver.getFlags().dialect;
+              const switch_keyword =
+                dialect === "postgres" ? "SET search_path TO " : "USE ";
+              const name = [databaseDriver.escapeId(item.name)];
+              if (dialect === "postgres") {
+                name.push(databaseDriver.escapeId("$user"));
+                if (item.name !== "public") {
+                  name.push(databaseDriver.escapeId("public"));
+                }
+              }
+              databaseDriver.query(switch_keyword + name.join(",")).then(() => {
+                refresh();
+              });
             }
           }
         }}
