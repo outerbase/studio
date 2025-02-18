@@ -1,5 +1,6 @@
 "use client";
-import { NavigationBar } from "@/app/(outerbase)/nav";
+import NavigationHeader from "@/app/(outerbase)/nav-header";
+import NavigationLayout from "@/app/(outerbase)/nav-layout";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import { Loader } from "@/components/orbit/loader";
 import WorkspaceDeleteSection from "./delete";
@@ -11,8 +12,8 @@ export default function WorkspaceBillingPage() {
   const { currentWorkspace } = useWorkspaces();
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      <NavigationBar />
+    <NavigationLayout>
+      <NavigationHeader />
 
       <div className="container mt-10 flex flex-col p-4">
         <h1 className="text-lg font-bold">Workspace settings</h1>
@@ -31,6 +32,6 @@ export default function WorkspaceBillingPage() {
           </div>
         )}
       </div>
-    </div>
+    </NavigationLayout>
   );
 }

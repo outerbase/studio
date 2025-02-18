@@ -118,6 +118,16 @@ export default function SidebarProfile() {
               Log out <SignOut size={20} />
             </DropdownMenuItem>
           )}
+          {!session && (
+            <DropdownMenuItem
+              onClick={() => {
+                router.push("/signin");
+              }}
+              className="justify-between"
+            >
+              Log in
+            </DropdownMenuItem>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

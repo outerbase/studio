@@ -1,7 +1,6 @@
 import { OuterbaseSessionProvider } from "@/app/(outerbase)/session-provider";
 import ClientOnly from "@/components/client-only";
 import ThemeLayout from "../(theme)/theme_layout";
-import AuthProvider from "./auth-provider";
 import { WorkspaceProvider } from "./workspace-provider";
 
 export default function OuterbaseLayout({
@@ -13,9 +12,7 @@ export default function OuterbaseLayout({
     <ThemeLayout>
       <ClientOnly>
         <OuterbaseSessionProvider>
-          <AuthProvider>
-            <WorkspaceProvider>{children}</WorkspaceProvider>
-          </AuthProvider>
+          <WorkspaceProvider>{children}</WorkspaceProvider>
         </OuterbaseSessionProvider>
       </ClientOnly>
     </ThemeLayout>
