@@ -53,9 +53,8 @@ const TextComponent = ({ value }: OuterbaseChartProps) => {
 
 const SingleValueComponent = ({ value, data }: OuterbaseChartProps) => {
   const firstRecord = data.length > 0 ? data[0] : null;
-  let firstRecordValue = firstRecord
-    ? firstRecord[value.params.options.xAxisKey ?? ""]
-    : "";
+  const keys = Object.keys(firstRecord ?? {});
+  let firstRecordValue = firstRecord ? firstRecord[keys[0] ?? ""] : "";
   const formattedValue = value.params.options?.format;
 
   if (formattedValue === "percent") {
