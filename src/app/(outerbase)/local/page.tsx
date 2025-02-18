@@ -6,7 +6,9 @@ import {
 } from "@/app/(theme)/connect/saved-connection-storage";
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import { CaretDown } from "@phosphor-icons/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import useSWR from "swr";
+import { LOCAL_CONNECTION_TEMPLATES } from "../base-template";
 import NavigationHeader from "../nav-header";
 import NavigationLayout from "../nav-layout";
 import NewResourceButton from "../new-resource-button";
@@ -16,11 +18,12 @@ import { deleteLocalBoardDialog } from "./dialog-board-delete";
 import { useLocalDashboardList } from "./hooks";
 
 export default function LocalConnectionPage() {
-  const [baseResources, setBaseResources] = useState<ResourceItemProps[]>([]);
+  const { isLoading, data: baseResources } = useSWR(
+    "/local/bases",
+    async () => {
+      const tmp = await SavedConnectionLocalStorage.getList();
 
-  useEffect(() => {
-    setBaseResources(
-      SavedConnectionLocalStorage.getList().map((conn: SavedConnectionItem) => {
+      return tmp.map((conn: SavedConnectionItem) => {
         return {
           href: `/client/s/${conn.driver}?p=${conn.id}`,
           name: conn.name,
@@ -29,9 +32,9 @@ export default function LocalConnectionPage() {
           type: conn.driver,
           status: "",
         } as ResourceItemProps;
-      })
-    );
-  }, []);
+      });
+    }
+  );
 
   // Getting the board from indexdb
   const { data: dashboardList, mutate: refreshDashboard } =
@@ -68,7 +71,10 @@ export default function LocalConnectionPage() {
       <NavigationHeader />
       <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
         <div className="flex gap-2">
-          <NewResourceButton onCreateBoard={onBoardCreate} />
+          <NewResourceButton
+            onCreateBoard={onBoardCreate}
+            templates={LOCAL_CONNECTION_TEMPLATES}
+          />
         </div>
 
         <div className="my-4 flex gap-4">
@@ -96,7 +102,8 @@ export default function LocalConnectionPage() {
 
         <ResourceItemList
           boards={dashboardResources}
-          bases={baseResources}
+          bases={baseResources ?? []}
+          loading={isLoading}
           onBoardRemove={onBoardRemove}
         />
       </div>

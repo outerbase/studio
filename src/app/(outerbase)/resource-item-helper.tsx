@@ -124,42 +124,44 @@ export function ResourceItemList({
           </>
         )}
 
-        <AnimatePresence initial={false}>
-          {bases.map((resource: ResourceItemProps) => {
-            const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
+        {bases.length > 0 && (
+          <AnimatePresence initial={false}>
+            {bases.map((resource: ResourceItemProps) => {
+              const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
 
-            return (
-              <motion.div
-                key={resource.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ResourceCard
-                  className="w-full"
-                  color="default"
-                  icon={getDatabaseIcon(resource.type)}
-                  href={resource.href}
-                  title={resource.name}
-                  subtitle={getDatabaseFriendlyName(resource.type)}
-                  visual={getDatabaseVisual(resource.type)}
-                  status={status}
+              return (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <DropdownMenuItem
-                    className="text-red-500 focus:text-red-500"
-                    onClick={() => {
-                      if (onBaseRemove) onBaseRemove(resource);
-                    }}
+                  <ResourceCard
+                    className="w-full"
+                    color="default"
+                    icon={getDatabaseIcon(resource.type)}
+                    href={resource.href}
+                    title={resource.name}
+                    subtitle={getDatabaseFriendlyName(resource.type)}
+                    visual={getDatabaseVisual(resource.type)}
+                    status={status}
                   >
-                    <Trash size={16} className="mr-2" />
-                    Remove base
-                  </DropdownMenuItem>
-                </ResourceCard>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                    <DropdownMenuItem
+                      className="text-red-500 focus:text-red-500"
+                      onClick={() => {
+                        if (onBaseRemove) onBaseRemove(resource);
+                      }}
+                    >
+                      <Trash size={16} className="mr-2" />
+                      Remove base
+                    </DropdownMenuItem>
+                  </ResourceCard>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
       </div>
     </>
   );

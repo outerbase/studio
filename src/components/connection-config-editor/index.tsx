@@ -10,6 +10,10 @@
  */
 
 import { cn } from "@/lib/utils";
+import { produce } from "immer";
+import { Input } from "../orbit/input";
+import { Label } from "../orbit/label";
+import { Textarea } from "../ui/textarea";
 
 export function ConnectionConfigEditor({
   template,
@@ -17,19 +21,74 @@ export function ConnectionConfigEditor({
   value,
 }: ConnectionConfigEditorProps) {
   return (
-    <div>
+    <div className="flex w-full flex-col gap-4">
+      <Label title="Name">
+        <Input
+          size="lg"
+          placeholder="Connection name"
+          value={value.name}
+          onChange={(e) => {
+            onChange(
+              produce(value, (draft) => {
+                draft.name = e.target.value as never;
+              })
+            );
+          }}
+        />
+      </Label>
+
       {template.map((row, index) => {
         return (
-          <div key={index} className={"flex flex-row"}>
+          <div key={index} className={"flex flex-row gap-4"}>
             {row.columns.map((column, index) => {
+              let content = <div />;
+
+              if (column.type === "text" || column.type === "password") {
+                content = (
+                  <Label title={column.label} required={column.required}>
+                    <Input
+                      size="lg"
+                      placeholder={column.placeholder}
+                      value={(value[column.name] as string) ?? ""}
+                      onChange={(e) => {
+                        onChange(
+                          produce(value, (draft) => {
+                            draft[column.name] = e.target.value as never;
+                          })
+                        );
+                      }}
+                    />
+                  </Label>
+                );
+              } else if (column.type === "textarea") {
+                content = (
+                  <Label title={column.label} required={column.required}>
+                    <Textarea
+                      className="resize-none"
+                      placeholder={column.placeholder}
+                      value={(value[column.name] as string) ?? ""}
+                      onChange={(e) => {
+                        onChange(
+                          produce(value, (draft) => {
+                            draft[column.name] = e.target.value as never;
+                          })
+                        );
+                      }}
+                    />
+                  </Label>
+                );
+              } else if (column.type === "checkbox") {
+                content = (
+                  <label className="mx-1 flex flex-1 gap-2 text-base select-none">
+                    <input type="checkbox" checked className="scale-125" />
+                    {column.label}
+                  </label>
+                );
+              }
+
               return (
-                <div key={index} className={cn("flex flex-col", column.size)}>
-                  <label>{column.label}</label>
-                  <input
-                    type={column.type}
-                    required={column.required}
-                    placeholder={column.placeholder}
-                  />
+                <div key={index} className={cn("flex-1", column.size)}>
+                  {content}
                 </div>
               );
             })}
@@ -61,7 +120,7 @@ interface CommonConnectionConfigColumn {
   name: keyof CommonConnectionConfig;
   label: string;
   type: "text" | "password" | "file" | "textarea" | "checkbox";
-  required: boolean;
+  required?: boolean;
   placeholder?: string;
   size?: string;
 }
@@ -70,10 +129,11 @@ type CommonConnectionConfigTemplateRow = {
   columns: CommonConnectionConfigColumn[];
 };
 
-type CommonConnectionConfigTemplate = CommonConnectionConfigTemplateRow[];
+export type CommonConnectionConfigTemplate =
+  CommonConnectionConfigTemplateRow[];
 
 interface ConnectionConfigEditorProps {
   template: CommonConnectionConfigTemplate;
-  value?: CommonConnectionConfig;
+  value: CommonConnectionConfig;
   onChange: (value: CommonConnectionConfig) => void;
 }
