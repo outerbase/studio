@@ -2,13 +2,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
-  PopoverTrigger,
   PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
 import { ChevronsUpDown } from "lucide-react";
 import { ChangeEvent, useCallback, useMemo } from "react";
 import { Input } from "../../ui/input";
-import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
 
 export default function ColumnDefaultValueInput({
   constraint,
@@ -19,6 +20,7 @@ export default function ColumnDefaultValueInput({
   disabled?: boolean;
   onChange: (constraint: DatabaseTableColumnConstraint) => void;
 }>) {
+  const { databaseDriver } = useDatabaseDriver();
   const display = useMemo(() => {
     if (
       constraint?.defaultValue !== undefined &&
@@ -115,12 +117,12 @@ export default function ColumnDefaultValueInput({
 
   return (
     <Popover>
-      <PopoverTrigger className="h-full flex w-full">
-        <div className="flex text-left px-2 py-2 text-sm h-full bg-background">
-          <div className="grow w-[150px] overflow-hidden mr-2">
+      <PopoverTrigger className="flex h-full w-full">
+        <div className="bg-background flex h-full px-2 py-2 text-left text-sm">
+          <div className="mr-2 w-[150px] grow overflow-hidden">
             {display || "EMPTY STRING"}
           </div>
-          <div className="text-gray-400 flex items-center">
+          <div className="flex items-center text-gray-400">
             <ChevronsUpDown size={14} />
           </div>
         </div>
@@ -136,15 +138,17 @@ export default function ColumnDefaultValueInput({
             />
             <Label htmlFor="no-default-value">No Default Value</Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="auto-increment"
-              disabled={disabled}
-              checked={!!constraint?.autoIncrement}
-              onCheckedChange={onAutoIncrementChange}
-            />
-            <Label htmlFor="auto-increment">Autoincrement</Label>
-          </div>
+          {databaseDriver.getFlags().dialect !== "postgres" && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="auto-increment"
+                disabled={disabled}
+                checked={!!constraint?.autoIncrement}
+                onCheckedChange={onAutoIncrementChange}
+              />
+              <Label htmlFor="auto-increment">Autoincrement</Label>
+            </div>
+          )}
           <div className="flex items-center space-x-2">
             <Checkbox
               id="custom-value"
@@ -154,7 +158,7 @@ export default function ColumnDefaultValueInput({
             />
             <Label htmlFor="custom-value">Custom Value</Label>
           </div>
-          <div className="flex mt-2 mb-2">
+          <div className="mt-2 mb-2 flex">
             <Input
               readOnly={disabled}
               placeholder="Default Value"
@@ -171,7 +175,7 @@ export default function ColumnDefaultValueInput({
             />
             <Label htmlFor="custom-expression">Custom Expression</Label>
           </div>
-          <div className="flex mt-2 mb-2">
+          <div className="mt-2 mb-2 flex">
             <Input
               readOnly={disabled}
               placeholder="Expression"
