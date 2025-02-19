@@ -1,10 +1,6 @@
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
 import {
-  getDatabaseFriendlyName,
-  getDatabaseIcon,
-} from "@/components/resource-card/utils";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -13,80 +9,69 @@ import { cn } from "@/lib/utils";
 import { CaretDown, ChartBar, MagnifyingGlass } from "@phosphor-icons/react";
 import Link from "next/link";
 import { PropsWithChildren, useMemo, useState } from "react";
-import { ConnectionTemplateList } from "./base-template";
 
 function CreateResourceItem({
-  children,
-  href,
-}: PropsWithChildren<{ href: string }>) {
-  return (
-    <Link
-      prefetch={false}
-      href={href}
-      className={
-        "bg-secondary flex w-full cursor-pointer items-center justify-start rounded p-2 text-base"
-      }
-    >
-      {children}
-    </Link>
-  );
-}
-
-function CreateResourceItemSearch({
-  children,
   selected,
-  href,
-}: PropsWithChildren<{ selected?: boolean; href: string }>) {
+  data,
+}: PropsWithChildren<{ data: NewResourceType; selected?: boolean }>) {
+  if (data.comingSoon) {
+    return (
+      <div
+        className={cn(
+          "text-muted-foreground flex w-full cursor-pointer items-center justify-start rounded p-2 text-base",
+          { "bg-secondary": selected },
+          data.colorClassName
+        )}
+      >
+        <data.icon className="mr-2 h-6 w-6" />
+        <span className="flex-1 text-left">{data.name}</span>
+        {data.comingSoon && (
+          <span className="text-primary-foreground rounded border bg-zinc-500 px-1.5 py-0.5 text-xs">
+            Coming Soon
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <Link
       prefetch={false}
-      href={href}
+      href={data.href}
       className={cn(
         "hover:bg-secondary flex w-full cursor-pointer items-center justify-start rounded p-2 text-base",
-        { "bg-secondary": selected }
+        { "bg-secondary": selected },
+        data.colorClassName
       )}
     >
-      {children}
+      <data.icon className="mr-2 h-6 w-6" />
+      <span className="flex-1 text-left">{data.name}</span>
     </Link>
   );
 }
 
-interface ResourceType {
+export interface NewResourceType {
   name: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   href: string;
-  enterprise?: boolean;
+  comingSoon?: boolean;
+  colorClassName?: string;
+  thirdParty?: boolean;
 }
 interface NewResourceProps {
   onCreateBoard?: () => void;
-  templates: Record<string, ConnectionTemplateList>;
+  templates: NewResourceType[];
 }
 
-export default function NewResourceButton({
+export default function NewResourceType({
   onCreateBoard,
   templates,
 }: NewResourceProps) {
   const resourceTypeList = useMemo(() => {
-    const tmp = Object.entries(templates).map(([key]) => {
-      return {
-        name: getDatabaseFriendlyName(key),
-        icon: getDatabaseIcon(key),
-        enterprise: false,
-        href: `/local/new-base/${key}`,
-      } as ResourceType;
-    });
-
-    tmp.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
-
+    const tmp = [...templates];
+    tmp.sort((a, b) => a.name.localeCompare(b.name));
     return tmp;
   }, [templates]);
-
-  const [leftSideResourceType, rightSideResourceType] = useMemo(() => {
-    const split = Math.floor(resourceTypeList.length / 2);
-    return [resourceTypeList.slice(0, split), resourceTypeList.slice(split)];
-  }, [resourceTypeList]);
 
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -120,26 +105,45 @@ export default function NewResourceButton({
 
       <div className="my-2 flex">
         <div className="flex w-1/2 flex-col gap-2 px-2">
-          {leftSideResourceType.map((resource) => (
-            <CreateResourceItem key={resource.name} href={resource.href}>
-              <resource.icon className="mr-2 h-6 w-6" />
-              <span>{resource.name}</span>
-            </CreateResourceItem>
-          ))}
+          {resourceTypeList
+            .filter((resource) => !resource.thirdParty)
+            .filter((_, idx) => idx % 2 === 0)
+            .map((resource) => (
+              <CreateResourceItem key={resource.name} data={resource} />
+            ))}
         </div>
 
         <div className="flex w-1/2 flex-col gap-2 px-2">
-          {rightSideResourceType.map((resource) => (
-            <CreateResourceItem key={resource.name} href={resource.href}>
-              <resource.icon className="mr-2 h-6 w-6" />
-              <span className="flex-1 text-left">{resource.name}</span>
-              {resource.enterprise && (
-                <span className="text-primary-foreground rounded border bg-zinc-500 px-1.5 py-0.5 text-sm">
-                  Enterprise
-                </span>
-              )}
-            </CreateResourceItem>
-          ))}
+          {resourceTypeList
+            .filter((resource) => !resource.thirdParty)
+            .filter((_, idx) => idx % 2 === 1)
+            .map((resource) => (
+              <CreateResourceItem key={resource.name} data={resource} />
+            ))}
+        </div>
+      </div>
+
+      <h2 className="border-t px-3 py-2 pt-4 text-base font-semibold">
+        Third party integrations
+      </h2>
+
+      <div className="my- flex">
+        <div className="flex w-1/2 flex-col gap-2 px-2">
+          {resourceTypeList
+            .filter((resource) => !!resource.thirdParty)
+            .filter((_, idx) => idx % 2 === 0)
+            .map((resource) => (
+              <CreateResourceItem key={resource.name} data={resource} />
+            ))}
+        </div>
+
+        <div className="flex w-1/2 flex-col gap-2 px-2">
+          {resourceTypeList
+            .filter((resource) => !!resource.thirdParty)
+            .filter((_, idx) => idx % 2 === 1)
+            .map((resource) => (
+              <CreateResourceItem key={resource.name} data={resource} />
+            ))}
         </div>
       </div>
 
@@ -174,25 +178,17 @@ export default function NewResourceButton({
     }
 
     return (
-      <div className="flex flex-col px-2 pb-2">
+      <div className="flex flex-col gap-0.5 px-2 pb-2">
         {filteredResource
           .sort((a, b) => {
             return a.name.localeCompare(b.name);
           })
           .map((resource, resourceIdx) => (
-            <CreateResourceItemSearch
-              href={resource.href}
+            <CreateResourceItem
               key={resource.name}
+              data={resource}
               selected={resourceIdx === 0}
-            >
-              <resource.icon className="mr-2 h-6 w-6" />
-              <span className="flex-1 text-left">{resource.name}</span>
-              {resource.enterprise && (
-                <span className="text-primary-foreground rounded border bg-zinc-500 px-1.5 py-0.5 text-sm">
-                  Enterprise
-                </span>
-              )}
-            </CreateResourceItemSearch>
+            />
           ))}
       </div>
     );

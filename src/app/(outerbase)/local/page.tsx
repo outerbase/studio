@@ -4,19 +4,134 @@ import {
   SavedConnectionItem,
   SavedConnectionLocalStorage,
 } from "@/app/(theme)/connect/saved-connection-storage";
-import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
-import { CaretDown } from "@phosphor-icons/react";
+import {
+  CloudflareIcon,
+  MySQLIcon,
+  PostgreIcon,
+  SQLiteIcon,
+} from "@/components/icons/outerbase-icon";
+import {
+  DigitalOceanIcon,
+  NeonIcon,
+  StarbaseIcon,
+  SupabaseIcon,
+  TursoIcon,
+} from "@/components/resource-card/icon";
+import { CaretDown, Database } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
-import { LOCAL_CONNECTION_TEMPLATES } from "../base-template";
 import NavigationLayout from "../nav-layout";
-import NewResourceButton from "../new-resource-button";
+import NewResourceButton, { NewResourceType } from "../new-resource-button";
 import { ResourceItemList, ResourceItemProps } from "../resource-item-helper";
 import { deleteLocalBaseDialog } from "./dialog-base-delete";
 import { createLocalBoardDialog } from "./dialog-board-create";
 import { deleteLocalBoardDialog } from "./dialog-board-delete";
 import { useLocalDashboardList } from "./hooks";
+
+const RESOURCE_TYPE_LIST: NewResourceType[] = [
+  {
+    name: "Supabase",
+    icon: SupabaseIcon,
+    href: "",
+    comingSoon: true,
+    thirdParty: true,
+  },
+  {
+    name: "Cloudflare",
+    icon: CloudflareIcon,
+    href: "",
+    thirdParty: true,
+    comingSoon: true,
+  },
+  {
+    name: "Cloudflare (Manual)",
+    icon: CloudflareIcon,
+    href: "/local/new-base/cloudflare-d1",
+  },
+  {
+    name: "Neon",
+    icon: NeonIcon,
+    href: "",
+    comingSoon: true,
+    thirdParty: true,
+  },
+  {
+    name: "StarbaseDB",
+    icon: StarbaseIcon,
+    href: "/local/new-base/starbase",
+  },
+  {
+    name: "Turso/LibSQL (Manual)",
+    icon: TursoIcon,
+    href: "/local/new-base/turso",
+  },
+  {
+    name: "Turso",
+    icon: TursoIcon,
+    thirdParty: true,
+    comingSoon: true,
+    href: "/local/new-base/turso",
+  },
+  {
+    name: "DigitalOcean",
+    icon: DigitalOceanIcon,
+    comingSoon: true,
+    href: "/local/new-base/digitalocean",
+    thirdParty: true,
+  },
+  {
+    name: "Postgres",
+    icon: PostgreIcon,
+    href: "/local/new-base/postgres",
+  },
+  {
+    name: "Motherduck",
+    icon: Database,
+    href: "",
+    comingSoon: true,
+  },
+  {
+    name: "SQL Server",
+    icon: Database,
+    href: "",
+    comingSoon: true,
+  },
+  {
+    name: "MySQL",
+    icon: MySQLIcon,
+    href: "/local/new-base/mysql",
+  },
+  {
+    name: "Clickhouse",
+    icon: Database,
+    comingSoon: true,
+    href: "",
+  },
+  {
+    name: "Snowflake",
+    icon: Database,
+    comingSoon: true,
+    href: "",
+  },
+  {
+    name: "BigQuery",
+    icon: Database,
+    comingSoon: true,
+    href: "",
+  },
+  {
+    name: "Redshift",
+    icon: Database,
+    comingSoon: true,
+    href: "",
+  },
+  {
+    name: "SQLite",
+    icon: SQLiteIcon,
+    href: "/local/new-base/sqlite-filehandler",
+  },
+];
 
 export default function LocalConnectionPage() {
   const router = useRouter();
@@ -88,7 +203,7 @@ export default function LocalConnectionPage() {
         <div className="flex gap-2">
           <NewResourceButton
             onCreateBoard={onBoardCreate}
-            templates={LOCAL_CONNECTION_TEMPLATES}
+            templates={RESOURCE_TYPE_LIST}
           />
         </div>
 

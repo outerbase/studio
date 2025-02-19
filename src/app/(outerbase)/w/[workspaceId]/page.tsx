@@ -126,7 +126,7 @@ export default function WorkspaceListPage() {
           <div className="flex gap-2">
             <NewResourceButton
               onCreateBoard={onCreateBoardClicked}
-              templates={{}}
+              templates={[]}
             />
 
             <Input
