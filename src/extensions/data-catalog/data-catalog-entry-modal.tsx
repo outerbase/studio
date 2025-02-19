@@ -9,14 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { useCallback, useState } from "react";
 import DataCatalogDriver, { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
   driver?: DataCatalogDriver;
   onClose: () => void;
-  definition?: OuterbaseDataCatalogDefinition;
+  definition?: DataCatalogTermDefinition;
 }
 
 export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
@@ -28,13 +27,8 @@ export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
 
   const saveTermDefinition = useCallback(() => {
     setLoading(true);
-    const data = {
-      ...formData,
-      id: definition?.id || undefined,
-    };
-
     driver
-      ?.updateTermDefinition(data)
+      ?.updateTermDefinition(formData)
       .then()
       .finally(() => onClose());
   }, [formData, driver, definition, onClose]);
@@ -44,7 +38,7 @@ export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
 
     setDeleting(true);
     driver
-      ?.deleteTermDefinition(definition.id)
+      ?.deleteTermDefinition(definition.id!)
       .then()
       .finally(() => onClose());
   }
