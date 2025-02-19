@@ -15,6 +15,7 @@ import {
 
 export function getDatabaseFriendlyName(type: string) {
   if (type === "sqlite") return "SQLite";
+  if (type === "sqlite-filehandler") return "SQLite";
   if (type === "mysql") return "MySQL";
   if (type === "postgres") return "PostgreSQL";
   if (type === "rqlite") return "rqlite";

@@ -44,8 +44,12 @@ export default function LocalNewBasePage() {
 
     // Redirect to the connection page
     mutate("/local/bases");
-    router.push(`/client/s/${driver}?p=${tmp.id}`);
-  }, [template, value, router, driver]);
+    router.push(
+      tmp.driver === "sqlite-filehandler"
+        ? `/playground/client?s=${tmp.id}`
+        : `/client/s/${tmp.driver ?? "turso"}?p=${tmp.id}`
+    );
+  }, [template, value, router]);
 
   if (!template) {
     return <div>Invalid driver</div>;

@@ -29,7 +29,10 @@ export default function LocalConnectionPage() {
 
     return tmp.map((conn: SavedConnectionItem) => {
       return {
-        href: `/client/s/${conn.driver}?p=${conn.id}`,
+        href:
+          conn.driver === "sqlite-filehandler"
+            ? `/playground/client?s=${conn.id}`
+            : `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`,
         name: conn.name,
         lastUsed: 0,
         id: conn.id,

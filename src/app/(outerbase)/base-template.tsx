@@ -4,6 +4,7 @@ import {
 } from "@/components/connection-config-editor";
 import { CLOUDFLARE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/cloudflare";
 import { RQLITE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/rqlite";
+import { SQLITE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/sqlite";
 import { TURSO_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/turso";
 import { SavedConnectionItemConfig } from "../(theme)/connect/saved-connection-storage";
 
@@ -93,6 +94,26 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
       return {
         name: value.name,
         driver: "rqlite",
+        config: {
+          url: value.host,
+          username: value.username,
+          password: value.password,
+        },
+      };
+    },
+  },
+  "sqlite-filehandler": {
+    template: SQLITE_CONNECTION_TEMPLATE,
+    from: (value: SavedConnectionItemConfig): CommonConnectionConfig => {
+      return {
+        name: value.name,
+        filehandler: value.config.filehandler,
+      };
+    },
+    to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
+      return {
+        name: value.name,
+        driver: "sqlite-filehandler",
         config: {
           url: value.host,
           username: value.username,

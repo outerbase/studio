@@ -36,6 +36,24 @@ export default function LocalEditBasePage() {
     router.push("/local");
   }, [template, value, router, baseId]);
 
+  const onConnect = useCallback(() => {
+    if (!template) return;
+
+    setLoading(true);
+    const tmp = SavedConnectionLocalStorage.save({
+      storage: "local",
+      ...template.to(value),
+    });
+
+    // Redirect to the connection page
+    mutate("/local/bases");
+    router.push(
+      tmp.driver === "sqlite-filehandler"
+        ? `/playground/client?s=${tmp.id}`
+        : `/client/s/${tmp.driver ?? "turso"}?p=${tmp.id}`
+    );
+  }, [template, value, router]);
+
   // Loading the base
   useEffect(() => {
     const config = SavedConnectionLocalStorage.get(baseId);
@@ -86,7 +104,7 @@ export default function LocalEditBasePage() {
 
       <div className="bg-background sticky bottom-0 mt-12 border-t px-2 py-6">
         <div className="container flex gap-3">
-          <Button variant="primary" size="lg">
+          <Button variant="primary" size="lg" onClick={onConnect}>
             <ArrowRight />
             Connect
           </Button>

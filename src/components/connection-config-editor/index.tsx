@@ -11,6 +11,8 @@
 
 import { cn } from "@/lib/utils";
 import { produce } from "immer";
+import { CommonDialogProvider } from "../common-dialog";
+import FileHandlerPicker from "../filehandler-picker";
 import { Input } from "../orbit/input";
 import { Label } from "../orbit/label";
 import { Textarea } from "../ui/textarea";
@@ -85,6 +87,25 @@ export function ConnectionConfigEditor({
                     <input type="checkbox" checked className="scale-125" />
                     {column.label}
                   </label>
+                );
+              } else if (column.type === "file") {
+                content = (
+                  <Label title={column.label} required={column.required}>
+                    <div>
+                      <CommonDialogProvider>
+                        <FileHandlerPicker
+                          value={value[column.name] as string}
+                          onChange={(fileId) => {
+                            onChange(
+                              produce(value, (draft) => {
+                                draft[column.name] = fileId as never;
+                              })
+                            );
+                          }}
+                        />
+                      </CommonDialogProvider>
+                    </div>
+                  </Label>
                 );
               }
 
