@@ -1,12 +1,13 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import { IBoardStorageDriver } from "@/drivers/board-storage/base";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChartValue } from "../chart/chart-type";
 import { BoardCanvas } from "./board-canvas";
 import BoardChartEditor from "./board-chart-editor";
 import { BoardFilter } from "./board-filter";
 import { BoardFilterProps } from "./board-filter-dialog";
 import { BoardProvider } from "./board-provider";
+import { BoardTool } from "./board-tool/board-tool";
 
 export interface DashboardProps {
   charts: ChartValue[];
@@ -43,7 +44,6 @@ export default function Board({
   filterValue,
   onFilterValueChange,
 }: Props) {
-  const refMainBoard = useRef<HTMLDivElement | null>(null);
   const [editMode, setEditMode] = useState<BoardEditorMode>(null);
 
   const autoRefresh = [
@@ -100,9 +100,8 @@ export default function Board({
       value={value}
       resolvedFilterValue={resolvedFilterValue}
       onFilterValueChange={onFilterValueChange}
-      refMainBoard={refMainBoard}
     >
-      <div className="relative flex flex-1 flex-col" ref={refMainBoard}>
+      <div className="relative h-auto w-full">
         <BoardFilter
           value={value}
           onChange={onChange}
@@ -115,18 +114,15 @@ export default function Board({
             setEditMode(null);
           }}
         />
-        <div className="relative flex-1">
-          <BoardCanvas
-            value={value}
-            onChange={(v) => {
-              onChange({
-                ...value,
-                layout: v,
-              });
-            }}
-          />
-        </div>
-
+        <BoardCanvas
+          value={value}
+          onChange={(v) => {
+            onChange({
+              ...value,
+              layout: v,
+            });
+          }}
+        />
         {editMode?.mode === "ADD_CHART" && (
           <>
             <div className="fixed top-0 left-0 z-50 h-full w-full backdrop-blur-sm"></div>
@@ -148,6 +144,7 @@ export default function Board({
           </div>
         )}
       </div>
+      <BoardTool />
     </BoardProvider>
   );
 }

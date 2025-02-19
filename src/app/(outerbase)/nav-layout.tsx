@@ -1,17 +1,10 @@
 "use client";
-import { Input } from "@/components/orbit/input";
 import {
   SidebarMenuHeader,
   SidebarMenuItem,
   SidebarMenuLoadingItem,
 } from "@/components/sidebar-menu";
-import {
-  Clock,
-  Database,
-  MagnifyingGlass,
-  Plus,
-  Star,
-} from "@phosphor-icons/react";
+import { Database, Plus } from "@phosphor-icons/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 import NavigationSigninBanner from "./nav-signin-banner";
@@ -31,30 +24,23 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           <SidebarProfile />
         </div>
 
-        <div className="px-2">
+        {/* <div className="px-2">
           <Input
             size="base"
             className="bg-secondary"
             placeholder="Search for anything"
             preText={<MagnifyingGlass className="mr-2" />}
           />
-        </div>
-
-        <div className="flex flex-col border-b py-2">
-          <SidebarMenuItem
-            text="Recent"
-            icon={Clock}
-            selected={pathname === "/"}
-            onClick={() => {
-              router.push("/");
-            }}
-          />
-          <SidebarMenuItem text="Favorite" icon={Star} />
-        </div>
+        </div> */}
 
         <div className="flex flex-col border-b pb-2">
           <SidebarMenuHeader text="Workspace" />
-          <SidebarMenuItem text="Local Workspace" icon={Database} />
+          <SidebarMenuItem
+            selected={pathname === "/local"}
+            text="Local Workspace"
+            icon={Database}
+            href="/local"
+          />
 
           {workspaces.map((workspace) => {
             return (

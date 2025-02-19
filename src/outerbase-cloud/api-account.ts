@@ -1,4 +1,5 @@
 import { requestOuterbase } from "./api";
+import { OuterbaseAPIResponse } from "./api-type";
 
 export interface OuterbaseUserProfileInput {
   first_name: string;
@@ -41,4 +42,45 @@ export async function resetPassword(data: {
     "POST",
     data
   );
+}
+
+export async function requestOuterbaseTwoFactorAuth(
+  type: "otp" | "phone",
+  data: {
+    number?: string;
+  }
+) {
+  return await requestOuterbase(`/api/v1/me/${type}`, "POST", data);
+}
+
+export async function verifyOuterbase2FAOTP(data: {
+  otp_id: string;
+  token: string;
+}) {
+  return await requestOuterbase<OuterbaseAPIResponse>(
+    `/api/v1/me/otp/verify`,
+    "POST",
+    data
+  );
+}
+
+export async function deleteOuterbaseTwoFactorAuth() {
+  return await requestOuterbase<OuterbaseAPIResponse>(
+    "/api/v1/me/otp",
+    "DELETE"
+  );
+}
+
+export async function requestOuterbase2FAPhone(id: string) {
+  return await requestOuterbase(`/api/v1/me/phone/${id}/request`, "POST");
+}
+
+export async function verifyOuterbaseOTP(token: string) {
+  return await requestOuterbase("/api/v1/auth/mfa/otp/verify", "POST", {
+    token,
+  });
+}
+
+export async function submitVerifyPhone2FA(id: string, data: { code: string }) {
+  return await requestOuterbase(`/api/v1/me/phone/${id}/submit`, "POST", data);
 }
