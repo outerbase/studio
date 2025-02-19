@@ -3,9 +3,11 @@ import {
   CommonConnectionConfigTemplate,
 } from "@/components/connection-config-editor";
 import { CLOUDFLARE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/cloudflare";
+import { GENERIC_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/generic";
 import { RQLITE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/rqlite";
 import { SQLITE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/sqlite";
 import { TURSO_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/turso";
+import { OuterbaseAPISourceInput } from "@/outerbase-cloud/api-type";
 import { SavedConnectionItemConfig } from "../(theme)/connect/saved-connection-storage";
 
 export interface ConnectionTemplateList<T = any> {
@@ -20,7 +22,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
 > = {
   "cloudflare-d1": {
     template: CLOUDFLARE_CONNECTION_TEMPLATE,
-    from: (value: SavedConnectionItemConfig): CommonConnectionConfig => {
+    from: (value) => {
       return {
         name: value.name,
         database: value.config.database,
@@ -28,7 +30,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
         username: value.config.username,
       };
     },
-    to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
+    to: (value) => {
       return {
         name: value.name,
         driver: "cloudflare-d1",
@@ -42,14 +44,14 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
   },
   turso: {
     template: TURSO_CONNECTION_TEMPLATE,
-    from: (value: SavedConnectionItemConfig): CommonConnectionConfig => {
+    from: (value) => {
       return {
         name: value.name,
         host: value.config.url,
         token: value.config.token,
       };
     },
-    to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
+    to: (value) => {
       return {
         name: value.name,
         driver: "turso",
@@ -62,14 +64,14 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
   },
   starbase: {
     template: TURSO_CONNECTION_TEMPLATE,
-    from: (value: SavedConnectionItemConfig): CommonConnectionConfig => {
+    from: (value) => {
       return {
         name: value.name,
         host: value.config.url,
         token: value.config.token,
       };
     },
-    to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
+    to: (value) => {
       return {
         driver: "starbase",
         name: value.name,
@@ -82,7 +84,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
   },
   rqlite: {
     template: RQLITE_CONNECTION_TEMPLATE,
-    from: (value: SavedConnectionItemConfig): CommonConnectionConfig => {
+    from: (value) => {
       return {
         name: value.name,
         host: value.config.url,
@@ -90,7 +92,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
         password: value.config.password,
       };
     },
-    to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
+    to: (value) => {
       return {
         name: value.name,
         driver: "rqlite",
@@ -104,18 +106,50 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
   },
   "sqlite-filehandler": {
     template: SQLITE_CONNECTION_TEMPLATE,
-    from: (value: SavedConnectionItemConfig): CommonConnectionConfig => {
+    from: (value) => {
       return {
         name: value.name,
         filehandler: value.config.filehandler,
       };
     },
-    to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
+    to: (value) => {
       return {
         name: value.name,
         driver: "sqlite-filehandler",
         config: {
           filehandler: value.filehandler,
+        },
+      };
+    },
+  },
+};
+
+export const REMOTE_CONNECTION_TEMPLATES: Record<
+  string,
+  ConnectionTemplateList<{ source: OuterbaseAPISourceInput; name: string }>
+> = {
+  mysql: {
+    template: GENERIC_CONNECTION_TEMPLATE,
+    from: (value) => {
+      return {
+        name: value.name,
+        host: value.source.host,
+        username: value.source.user,
+        database: value.source.database,
+        port: value.source.port,
+      };
+    },
+    to: (value) => {
+      return {
+        name: value.name,
+        source: {
+          host: value.host,
+          user: value.username,
+          password: value.password,
+          database: value.database,
+          port: value.port,
+          type: "mysql",
+          base_id: "",
         },
       };
     },

@@ -45,6 +45,21 @@ export interface OuterbaseAPIQueryRaw {
 export interface OuterbaseAPIAnalyticEvent {
   created_at: string;
 }
+
+export interface OuterbaseAPISourceInput {
+  host?: string;
+  user?: string;
+  password?: string;
+  port?: string;
+  database?: string;
+  type: string;
+  ssl_config?: {
+    require: boolean;
+    rejectUnauthorized: boolean;
+  };
+  base_id: string;
+}
+
 export interface OuterbaseAPISource {
   model: "source";
   type: string;
