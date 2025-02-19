@@ -216,6 +216,16 @@ export async function loginOuterbaseByPassword(
   });
 }
 
+export async function resgisterOuterbaseByPassword(
+  email: string,
+  password: string
+) {
+  return requestOuterbase<OuterbaseAPISession>('/api/v1/auth/register', 'POST', {
+    email,
+    password
+  })
+}
+
 export async function getOuterbaseEmbedChart(
   chartId: string,
   apiKey: string

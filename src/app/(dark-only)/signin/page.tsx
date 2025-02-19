@@ -120,6 +120,15 @@ export default function SigninPage() {
         <Link href="/password_reset" className="text-sm">
           Forget password
         </Link>
+        <div className="mt-4 text-center text-sm text-neutral-400">
+          {`Don't have an account?`}{" "}
+          <Link
+            className="text-neutral-300 transition delay-75 ease-in-out hover:text-neutral-100"
+            href={"/signup"}
+          >
+            Sign Up
+          </Link>
+        </div>
       </div>
 
       <LoginBaseSpaceship />
