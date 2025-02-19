@@ -115,9 +115,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
         name: value.name,
         driver: "sqlite-filehandler",
         config: {
-          url: value.host,
-          username: value.username,
-          password: value.password,
+          filehandler: value.filehandler,
         },
       };
     },

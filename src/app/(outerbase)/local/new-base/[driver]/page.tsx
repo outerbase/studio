@@ -44,7 +44,7 @@ export default function LocalNewBasePage() {
 
     // Redirect to the connection page
     mutate("/local/bases");
-    router.push(
+    router.replace(
       tmp.driver === "sqlite-filehandler"
         ? `/playground/client?s=${tmp.id}`
         : `/client/s/${tmp.driver ?? "turso"}?p=${tmp.id}`
