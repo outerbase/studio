@@ -4,14 +4,17 @@ import {
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { timeSince } from "@/lib/utils-datetime";
 import {
   OuterbaseAPIBase,
   OuterbaseAPIDashboard,
   OuterbaseAPIWorkspace,
 } from "@/outerbase-cloud/api-type";
-import { Trash } from "@phosphor-icons/react";
+import { Pencil, Trash } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import ResourceCardLoading from "./resource-card-loading";
 
@@ -58,12 +61,14 @@ export function ResourceItemList({
   loading,
   onBoardRemove,
   onBaseRemove,
+  onBaseEdit,
 }: {
   bases: ResourceItemProps[];
   boards: ResourceItemProps[];
   loading?: boolean;
   onBoardRemove?: (item: ResourceItemProps) => void;
   onBaseRemove?: (item: ResourceItemProps) => void;
+  onBaseEdit?: (item: ResourceItemProps) => void;
 }) {
   return (
     <>
@@ -138,6 +143,7 @@ export function ResourceItemList({
                   transition={{ duration: 0.3 }}
                 >
                   <ResourceCard
+                    key={resource.id}
                     className="w-full"
                     color="default"
                     icon={getDatabaseIcon(resource.type)}
@@ -147,6 +153,15 @@ export function ResourceItemList({
                     visual={getDatabaseVisual(resource.type)}
                     status={status}
                   >
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (onBaseEdit) onBaseEdit(resource);
+                      }}
+                    >
+                      <Pencil size={16} className="mr-2" />
+                      Edit base
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="text-red-500 focus:text-red-500"
                       onClick={() => {

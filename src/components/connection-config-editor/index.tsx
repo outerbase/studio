@@ -24,6 +24,7 @@ export function ConnectionConfigEditor({
     <div className="flex w-full flex-col gap-4">
       <Label title="Name">
         <Input
+          autoFocus
           size="lg"
           placeholder="Connection name"
           value={value.name}
@@ -64,6 +65,7 @@ export function ConnectionConfigEditor({
                 content = (
                   <Label title={column.label} required={column.required}>
                     <Textarea
+                      rows={4}
                       className="resize-none"
                       placeholder={column.placeholder}
                       value={(value[column.name] as string) ?? ""}

@@ -6,35 +6,38 @@ import {
 } from "@/app/(theme)/connect/saved-connection-storage";
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import { CaretDown } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { LOCAL_CONNECTION_TEMPLATES } from "../base-template";
-import NavigationHeader from "../nav-header";
 import NavigationLayout from "../nav-layout";
 import NewResourceButton from "../new-resource-button";
 import { ResourceItemList, ResourceItemProps } from "../resource-item-helper";
+import { deleteLocalBaseDialog } from "./dialog-base-delete";
 import { createLocalBoardDialog } from "./dialog-board-create";
 import { deleteLocalBoardDialog } from "./dialog-board-delete";
 import { useLocalDashboardList } from "./hooks";
 
 export default function LocalConnectionPage() {
-  const { isLoading, data: baseResources } = useSWR(
-    "/local/bases",
-    async () => {
-      const tmp = await SavedConnectionLocalStorage.getList();
+  const router = useRouter();
+  const {
+    isLoading,
+    data: baseResources,
+    mutate: refreshBase,
+  } = useSWR("/local/bases", async () => {
+    const tmp = SavedConnectionLocalStorage.getList();
 
-      return tmp.map((conn: SavedConnectionItem) => {
-        return {
-          href: `/client/s/${conn.driver}?p=${conn.id}`,
-          name: conn.name,
-          lastUsed: 0,
-          id: conn.id,
-          type: conn.driver,
-          status: "",
-        } as ResourceItemProps;
-      });
-    }
-  );
+    return tmp.map((conn: SavedConnectionItem) => {
+      return {
+        href: `/client/s/${conn.driver}?p=${conn.id}`,
+        name: conn.name,
+        lastUsed: 0,
+        id: conn.id,
+        type: conn.driver,
+        status: "",
+      } as ResourceItemProps;
+    });
+  });
 
   // Getting the board from indexdb
   const { data: dashboardList, mutate: refreshDashboard } =
@@ -59,6 +62,16 @@ export default function LocalConnectionPage() {
     });
   }, [refreshDashboard]);
 
+  const onBaseRemove = useCallback(
+    (deletedResource: ResourceItemProps) => {
+      deleteLocalBaseDialog
+        .show({ baseId: deletedResource.id, baseName: deletedResource.name })
+        .then(refreshBase)
+        .catch();
+    },
+    [refreshBase]
+  );
+
   const onBoardRemove = useCallback((deletedResource: ResourceItemProps) => {
     deleteLocalBoardDialog
       .show({ boardId: deletedResource.id, boardName: deletedResource.name })
@@ -68,7 +81,6 @@ export default function LocalConnectionPage() {
 
   return (
     <NavigationLayout>
-      <NavigationHeader />
       <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
         <div className="flex gap-2">
           <NewResourceButton
@@ -105,6 +117,10 @@ export default function LocalConnectionPage() {
           bases={baseResources ?? []}
           loading={isLoading}
           onBoardRemove={onBoardRemove}
+          onBaseRemove={onBaseRemove}
+          onBaseEdit={(resource) => {
+            router.push(`/local/edit-base/${resource.id}`);
+          }}
         />
       </div>
     </NavigationLayout>

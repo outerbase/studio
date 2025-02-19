@@ -1,6 +1,7 @@
 "use client";
 
 import { LOCAL_CONNECTION_TEMPLATES } from "@/app/(outerbase)/base-template";
+import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
@@ -8,14 +9,43 @@ import {
 import { Button } from "@/components/orbit/button";
 import { getDatabaseFriendlyName } from "@/components/resource-card/utils";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
+import { mutate } from "swr";
 
 export default function LocalNewBasePage() {
   const { driver } = useParams<{ driver: string }>();
+  const router = useRouter();
   const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
+  const [loading, setLoading] = useState(false);
 
-  const template = LOCAL_CONNECTION_TEMPLATES[driver];
+  const template = useMemo(() => {
+    return LOCAL_CONNECTION_TEMPLATES[driver];
+  }, [driver]);
+
+  const onSave = useCallback(() => {
+    setLoading(true);
+    SavedConnectionLocalStorage.save({
+      storage: "local",
+      ...template.to(value),
+    });
+
+    // Redirect to the connection page
+    mutate("/local/bases");
+    router.push("/local");
+  }, [template, value, router]);
+
+  const onConnect = useCallback(() => {
+    setLoading(true);
+    const tmp = SavedConnectionLocalStorage.save({
+      storage: "local",
+      ...template.to(value),
+    });
+
+    // Redirect to the connection page
+    mutate("/local/bases");
+    router.push(`/client/s/${driver}?p=${tmp.id}`);
+  }, [template, value, router, driver]);
 
   if (!template) {
     return <div>Invalid driver</div>;
@@ -51,17 +81,23 @@ export default function LocalNewBasePage() {
 
       <div className="bg-background sticky bottom-0 mt-12 border-t px-2 py-6">
         <div className="container flex gap-3">
-          <Button variant="primary" size="lg">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={onConnect}
+            disabled={loading}
+          >
             <ArrowRight />
             Connect
           </Button>
-          <Button variant="secondary" size="lg">
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={onSave}
+            disabled={loading}
+          >
             <FloppyDisk />
             Save
-          </Button>
-          <Button variant="secondary" size="lg">
-            <ArrowRight />
-            Test
           </Button>
         </div>
       </div>

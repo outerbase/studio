@@ -70,6 +70,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
     },
     to: (value: CommonConnectionConfig): SavedConnectionItemConfig => {
       return {
+        driver: "starbase",
         name: value.name,
         config: {
           url: value.host,

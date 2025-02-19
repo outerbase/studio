@@ -1,6 +1,5 @@
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
-import { StarbaseIcon } from "@/components/resource-card/icon";
 import {
   getDatabaseFriendlyName,
   getDatabaseIcon,
@@ -11,12 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import {
-  ArrowLeft,
-  CaretDown,
-  ChartBar,
-  MagnifyingGlass,
-} from "@phosphor-icons/react";
+import { CaretDown, ChartBar, MagnifyingGlass } from "@phosphor-icons/react";
 import Link from "next/link";
 import { PropsWithChildren, useMemo, useState } from "react";
 import { ConnectionTemplateList } from "./base-template";
@@ -111,13 +105,13 @@ export default function NewResourceButton({
           </div>
         </button>
 
-        <button className="flex w-[200px] items-center gap-4 rounded bg-gradient-to-r from-blue-800 to-indigo-900 p-2 px-4 text-left text-base text-white">
+        {/* <button className="flex w-[200px] items-center gap-4 rounded bg-gradient-to-r from-blue-800 to-indigo-900 p-2 px-4 text-left text-base text-white">
           <StarbaseIcon className="h-8 w-8" />
           <div>
             <div className="font-semibold">StarbaseDB</div>
             <div className="text-sm">Free 10GB SQLite</div>
           </div>
-        </button>
+        </button> */}
       </div>
 
       <h2 className="px-3 py-2 text-base font-semibold">
@@ -149,14 +143,14 @@ export default function NewResourceButton({
         </div>
       </div>
 
-      <h2 className="mt-4 px-3 py-1 text-base">Or use connection string</h2>
+      {/* <h2 className="mt-4 px-3 py-1 text-base">Or use connection string</h2>
       <div className="mx-2 my-2 flex">
         <Input
           className="bg-secondary w-full"
           postText={<ArrowLeft className="mr-2" />}
           placeholder="postgres://testing"
         />
-      </div>
+      </div> */}
     </>
   );
 
