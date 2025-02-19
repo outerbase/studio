@@ -5,8 +5,6 @@ import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import { Loader } from "@/components/orbit/loader";
 import WorkspaceDeleteSection from "./delete";
 import WorkspaceDetailSection from "./detail";
-import WorkspaceGatewaySection from "./gateway";
-import WorkspaceMemberSection from "./members";
 
 export default function WorkspaceBillingPage() {
   const { currentWorkspace } = useWorkspaces();
@@ -21,8 +19,8 @@ export default function WorkspaceBillingPage() {
         {currentWorkspace ? (
           <>
             <WorkspaceDetailSection workspace={currentWorkspace} />
-            <WorkspaceMemberSection />
-            <WorkspaceGatewaySection />
+            {/* <WorkspaceMemberSection />
+            <WorkspaceGatewaySection /> */}
             <WorkspaceDeleteSection workspace={currentWorkspace} />
           </>
         ) : (

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Cardholder, Database, Gear } from "@phosphor-icons/react";
+import { Database, Gear } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useWorkspaces } from "./workspace-provider";
@@ -15,7 +15,7 @@ export default function NavigationHeader() {
 
   return (
     <div className="bg-background flex h-12 flex-col gap-1 border-b px-6">
-      <nav className="flex h-full gap-2 text-base">
+      <nav className="flex h-full gap-2 text-sm">
         <Link
           className={
             pathname.endsWith(workspaceId) ? selectedTabClassName : tabClassName
@@ -36,7 +36,7 @@ export default function NavigationHeader() {
           <Gear />
           Settings
         </Link>
-        <Link
+        {/* <Link
           className={
             pathname.endsWith(`/${workspaceId}/billing`)
               ? selectedTabClassName
@@ -46,7 +46,7 @@ export default function NavigationHeader() {
         >
           <Cardholder />
           Billing
-        </Link>
+        </Link> */}
 
         <div className="flex flex-1 items-center justify-end font-bold">
           {currentWorkspace?.name ?? ""}

@@ -1,11 +1,10 @@
 "use client";
-import { Input } from "@/components/orbit/input";
 import {
   SidebarMenuHeader,
   SidebarMenuItem,
   SidebarMenuLoadingItem,
 } from "@/components/sidebar-menu";
-import { Database, MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { Database, Plus } from "@phosphor-icons/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 import NavigationSigninBanner from "./nav-signin-banner";
@@ -25,14 +24,14 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           <SidebarProfile />
         </div>
 
-        <div className="px-2">
+        {/* <div className="px-2">
           <Input
             size="base"
             className="bg-secondary"
             placeholder="Search for anything"
             preText={<MagnifyingGlass className="mr-2" />}
           />
-        </div>
+        </div> */}
 
         <div className="flex flex-col border-b pb-2">
           <SidebarMenuHeader text="Workspace" />
