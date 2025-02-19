@@ -275,8 +275,8 @@ export interface SavedConnectionItem {
 }
 
 export interface SavedConnectionItemConfigConfig {
-  token: string;
-  url: string;
+  token?: string;
+  url?: string;
   username?: string;
   password?: string;
   database?: string;

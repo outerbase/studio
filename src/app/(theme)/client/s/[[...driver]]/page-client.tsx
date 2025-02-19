@@ -1,14 +1,14 @@
 "use client";
 import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
+import MyStudio from "@/components/my-studio";
+import CloudflareD1Driver from "@/drivers/cloudflare-d1-driver";
 import RqliteDriver from "@/drivers/rqlite-driver";
+import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
+import StarbaseDriver from "@/drivers/starbase-driver";
 import TursoDriver from "@/drivers/turso-driver";
 import ValtownDriver from "@/drivers/valtown-driver";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import MyStudio from "@/components/my-studio";
-import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
-import CloudflareD1Driver from "@/drivers/cloudflare-d1-driver";
-import StarbaseDriver from "@/drivers/starbase-driver";
 
 export default function ClientPageBody() {
   const params = useSearchParams();
@@ -24,12 +24,12 @@ export default function ClientPageBody() {
     if (!conn) return null;
     if (conn.driver === "rqlite") {
       return new RqliteDriver(
-        conn.config.url,
+        conn.config.url!,
         conn.config.username,
         conn.config.password
       );
     } else if (conn.driver === "valtown") {
-      return new ValtownDriver(conn.config.token);
+      return new ValtownDriver(conn.config.token!);
     } else if (conn.driver === "cloudflare-d1") {
       return new CloudflareD1Driver("/proxy/d1", {
         Authorization: "Bearer " + conn.config.token,
@@ -43,7 +43,7 @@ export default function ClientPageBody() {
       });
     }
 
-    return new TursoDriver(conn.config.url, conn.config.token, true);
+    return new TursoDriver(conn.config.url!, conn.config.token!, true);
   }, [conn]);
 
   const docDriver = useMemo(() => {

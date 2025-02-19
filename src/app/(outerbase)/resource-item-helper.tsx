@@ -4,14 +4,17 @@ import {
   getDatabaseIcon,
   getDatabaseVisual,
 } from "@/components/resource-card/utils";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { timeSince } from "@/lib/utils-datetime";
 import {
   OuterbaseAPIBase,
   OuterbaseAPIDashboard,
   OuterbaseAPIWorkspace,
 } from "@/outerbase-cloud/api-type";
-import { Trash } from "@phosphor-icons/react";
+import { Pencil, Trash } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import ResourceCardLoading from "./resource-card-loading";
 
@@ -58,12 +61,14 @@ export function ResourceItemList({
   loading,
   onBoardRemove,
   onBaseRemove,
+  onBaseEdit,
 }: {
   bases: ResourceItemProps[];
   boards: ResourceItemProps[];
   loading?: boolean;
   onBoardRemove?: (item: ResourceItemProps) => void;
   onBaseRemove?: (item: ResourceItemProps) => void;
+  onBaseEdit?: (item: ResourceItemProps) => void;
 }) {
   return (
     <>
@@ -124,42 +129,54 @@ export function ResourceItemList({
           </>
         )}
 
-        <AnimatePresence initial={false}>
-          {bases.map((resource: ResourceItemProps) => {
-            const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
+        {bases.length > 0 && (
+          <AnimatePresence initial={false}>
+            {bases.map((resource: ResourceItemProps) => {
+              const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
 
-            return (
-              <motion.div
-                key={resource.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ResourceCard
-                  className="w-full"
-                  color="default"
-                  icon={getDatabaseIcon(resource.type)}
-                  href={resource.href}
-                  title={resource.name}
-                  subtitle={getDatabaseFriendlyName(resource.type)}
-                  visual={getDatabaseVisual(resource.type)}
-                  status={status}
+              return (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <DropdownMenuItem
-                    className="text-red-500 focus:text-red-500"
-                    onClick={() => {
-                      if (onBaseRemove) onBaseRemove(resource);
-                    }}
+                  <ResourceCard
+                    key={resource.id}
+                    className="w-full"
+                    color="default"
+                    icon={getDatabaseIcon(resource.type)}
+                    href={resource.href}
+                    title={resource.name}
+                    subtitle={getDatabaseFriendlyName(resource.type)}
+                    visual={getDatabaseVisual(resource.type)}
+                    status={status}
                   >
-                    <Trash size={16} className="mr-2" />
-                    Remove base
-                  </DropdownMenuItem>
-                </ResourceCard>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (onBaseEdit) onBaseEdit(resource);
+                      }}
+                    >
+                      <Pencil size={16} className="mr-2" />
+                      Edit base
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-red-500 focus:text-red-500"
+                      onClick={() => {
+                        if (onBaseRemove) onBaseRemove(resource);
+                      }}
+                    >
+                      <Trash size={16} className="mr-2" />
+                      Remove base
+                    </DropdownMenuItem>
+                  </ResourceCard>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
       </div>
     </>
   );

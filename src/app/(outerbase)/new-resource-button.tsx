@@ -1,85 +1,92 @@
-import { MySQLIcon, PostgreIcon } from "@/components/icons/outerbase-icon";
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
 import {
-  CloudflareIcon,
-  DigitalOceanIcon,
-  NeonIcon,
-  StarbaseIcon,
-  SupabaseIcon,
-} from "@/components/resource-card/icon";
+  getDatabaseFriendlyName,
+  getDatabaseIcon,
+} from "@/components/resource-card/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import {
-  ArrowLeft,
-  CaretDown,
-  ChartBar,
-  Database,
-  MagnifyingGlass,
-} from "@phosphor-icons/react";
+import { CaretDown, ChartBar, MagnifyingGlass } from "@phosphor-icons/react";
+import Link from "next/link";
 import { PropsWithChildren, useMemo, useState } from "react";
+import { ConnectionTemplateList } from "./base-template";
 
-function CreateResourceItem({ children }: PropsWithChildren) {
+function CreateResourceItem({
+  children,
+  href,
+}: PropsWithChildren<{ href: string }>) {
   return (
-    <button
+    <Link
+      prefetch={false}
+      href={href}
       className={
-        "bg-secondary flex w-full items-center justify-start rounded p-2 text-base"
+        "bg-secondary flex w-full cursor-pointer items-center justify-start rounded p-2 text-base"
       }
     >
       {children}
-    </button>
+    </Link>
   );
 }
 
 function CreateResourceItemSearch({
   children,
   selected,
-}: PropsWithChildren<{ selected?: boolean }>) {
+  href,
+}: PropsWithChildren<{ selected?: boolean; href: string }>) {
   return (
-    <button
+    <Link
+      prefetch={false}
+      href={href}
       className={cn(
-        "hover:bg-secondary flex w-full items-center justify-start rounded p-2 text-base",
+        "hover:bg-secondary flex w-full cursor-pointer items-center justify-start rounded p-2 text-base",
         { "bg-secondary": selected }
       )}
     >
       {children}
-    </button>
+    </Link>
   );
 }
 
 interface ResourceType {
   name: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  href: string;
   enterprise?: boolean;
 }
-
-const RESOURCE_TYPE_LIST: ResourceType[] = [
-  { name: "Supabase", icon: SupabaseIcon },
-  { name: "Cloudflare", icon: CloudflareIcon },
-  { name: "Neon", icon: NeonIcon },
-  { name: "StarbaseDB", icon: StarbaseIcon },
-  { name: "DigitalOcean", icon: DigitalOceanIcon },
-  { name: "Postgres", icon: PostgreIcon },
-  { name: "Motherduck", icon: Database },
-  { name: "SQL Server", icon: Database },
-  { name: "MySQL", icon: MySQLIcon },
-  { name: "Clickhouse", icon: Database, enterprise: true },
-  { name: "Snowflake", icon: Database, enterprise: true },
-  { name: "BigQuery", icon: Database, enterprise: true },
-  { name: "Redshift", icon: Database, enterprise: true },
-];
-
 interface NewResourceProps {
   onCreateBoard?: () => void;
+  templates: Record<string, ConnectionTemplateList>;
 }
 
-export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
-  const leftSideResourceType = RESOURCE_TYPE_LIST.slice(0, 7);
-  const rightSideResourceType = RESOURCE_TYPE_LIST.slice(7);
+export default function NewResourceButton({
+  onCreateBoard,
+  templates,
+}: NewResourceProps) {
+  const resourceTypeList = useMemo(() => {
+    const tmp = Object.entries(templates).map(([key]) => {
+      return {
+        name: getDatabaseFriendlyName(key),
+        icon: getDatabaseIcon(key),
+        enterprise: false,
+        href: `/local/new-base/${key}`,
+      } as ResourceType;
+    });
+
+    tmp.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    return tmp;
+  }, [templates]);
+
+  const [leftSideResourceType, rightSideResourceType] = useMemo(() => {
+    const split = Math.floor(resourceTypeList.length / 2);
+    return [resourceTypeList.slice(0, split), resourceTypeList.slice(split)];
+  }, [resourceTypeList]);
 
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -98,13 +105,13 @@ export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
           </div>
         </button>
 
-        <button className="flex w-[200px] items-center gap-4 rounded bg-gradient-to-r from-blue-800 to-indigo-900 p-2 px-4 text-left text-base text-white">
+        {/* <button className="flex w-[200px] items-center gap-4 rounded bg-gradient-to-r from-blue-800 to-indigo-900 p-2 px-4 text-left text-base text-white">
           <StarbaseIcon className="h-8 w-8" />
           <div>
             <div className="font-semibold">StarbaseDB</div>
             <div className="text-sm">Free 10GB SQLite</div>
           </div>
-        </button>
+        </button> */}
       </div>
 
       <h2 className="px-3 py-2 text-base font-semibold">
@@ -114,7 +121,7 @@ export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
       <div className="my-2 flex">
         <div className="flex w-1/2 flex-col gap-2 px-2">
           {leftSideResourceType.map((resource) => (
-            <CreateResourceItem key={resource.name}>
+            <CreateResourceItem key={resource.name} href={resource.href}>
               <resource.icon className="mr-2 h-6 w-6" />
               <span>{resource.name}</span>
             </CreateResourceItem>
@@ -123,7 +130,7 @@ export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
 
         <div className="flex w-1/2 flex-col gap-2 px-2">
           {rightSideResourceType.map((resource) => (
-            <CreateResourceItem key={resource.name}>
+            <CreateResourceItem key={resource.name} href={resource.href}>
               <resource.icon className="mr-2 h-6 w-6" />
               <span className="flex-1 text-left">{resource.name}</span>
               {resource.enterprise && (
@@ -136,23 +143,25 @@ export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
         </div>
       </div>
 
-      <h2 className="mt-4 px-3 py-1 text-base">Or use connection string</h2>
+      {/* <h2 className="mt-4 px-3 py-1 text-base">Or use connection string</h2>
       <div className="mx-2 my-2 flex">
         <Input
           className="bg-secondary w-full"
           postText={<ArrowLeft className="mr-2" />}
           placeholder="postgres://testing"
         />
-      </div>
+      </div> */}
     </>
   );
 
   const resourceSearch = useMemo(() => {
-    const filteredResource = RESOURCE_TYPE_LIST.filter((resource) =>
-      resource.name.toLowerCase().includes(search.toLowerCase())
-    ).sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
+    const filteredResource = resourceTypeList
+      .filter((resource) =>
+        resource.name.toLowerCase().includes(search.toLowerCase())
+      )
+      .sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
 
     if (filteredResource.length === 0) {
       return (
@@ -172,6 +181,7 @@ export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
           })
           .map((resource, resourceIdx) => (
             <CreateResourceItemSearch
+              href={resource.href}
               key={resource.name}
               selected={resourceIdx === 0}
             >
@@ -186,7 +196,7 @@ export default function NewResourceButton({ onCreateBoard }: NewResourceProps) {
           ))}
       </div>
     );
-  }, [search]);
+  }, [search, resourceTypeList]);
 
   return (
     <>
