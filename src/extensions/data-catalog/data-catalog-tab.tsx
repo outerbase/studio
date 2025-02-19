@@ -2,10 +2,10 @@ import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import { Button } from "@/components/orbit/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useConfig } from "@/context/config-provider";
-import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { useEffect, useState } from "react";
 import DataCatalogExtension from ".";
 import { DataCatalogEntryModal } from "./data-catalog-entry-modal";
+import { DataCatalogTermDefinition } from "./driver";
 import EmptyTermDefinition from "./empty-definition";
 import TermDefinitionList from "./term-definition-list";
 
@@ -17,12 +17,11 @@ export default function DataCatalogTab() {
 
   const [open, setOpen] = useState(false);
 
-  const [dataCatalog, setDataCatalog] = useState<
-    OuterbaseDataCatalogDefinition[]
-  >([]);
+  const [dataCatalog, setDataCatalog] = useState<DataCatalogTermDefinition[]>(
+    []
+  );
 
-  const [definition, setDefinition] =
-    useState<OuterbaseDataCatalogDefinition>();
+  const [definition, setDefinition] = useState<DataCatalogTermDefinition>();
 
   useEffect(() => {
     if (!driver) return;
@@ -32,9 +31,7 @@ export default function DataCatalogTab() {
 
     getDataCatalog();
 
-    const unsubscribe = driver.addEventListener(getDataCatalog);
-
-    return () => unsubscribe;
+    return driver.listen(getDataCatalog);
   }, [driver]);
 
   function onOpenModal() {
