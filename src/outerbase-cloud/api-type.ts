@@ -221,13 +221,15 @@ export interface OuterbaseDefinitionInput {
 }
 
 export interface OuterbaseDataCatalogVirtualColumnInput {
+  alias?: string;
   body: string;
   column?: string;
   flags: OuterbaseDataCatalogFlag;
   sample_data: string;
   schema: string;
   table: string;
+  unit?: string | null;
   virtual_key_column?: string;
-  virtual_key_schema: string;
-  virtual_key_table: string;
+  virtual_key_schema?: string;
+  virtual_key_table?: string;
 }

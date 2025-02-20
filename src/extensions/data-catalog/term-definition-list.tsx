@@ -1,9 +1,9 @@
-import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { Edit3 } from "lucide-react";
+import { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
-  onSelect: (item: OuterbaseDataCatalogDefinition) => void;
-  data: OuterbaseDataCatalogDefinition[];
+  onSelect: (item: DataCatalogTermDefinition) => void;
+  data: DataCatalogTermDefinition[];
 }
 export default function TermDefinitionList({ data, onSelect }: Props) {
   return (

@@ -8,60 +8,35 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import { OuterbaseDataCatalogVirtualColumnInput } from "@/outerbase-cloud/api-type";
 import { MagicWand } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
-import { defaultVirtualColumn } from "./constant";
-import DataCatalogDriver from "./driver";
+import { useDataCatalogContext } from "./data-model-tab";
+import { DataCatalogColumnInput } from "./driver";
 
 interface DataCatalogTableColumnModalProps {
-  driver: DataCatalogDriver;
   schemaName: string;
   tableName: string;
   columnName: string;
   onClose: () => void;
 }
 export default function DataCatalogTableColumnModal({
-  driver,
   schemaName,
   tableName,
   columnName,
   onClose,
 }: DataCatalogTableColumnModalProps) {
+  const { driver } = useDataCatalogContext();
   const modelColumn = driver.getColumn(schemaName, tableName, columnName);
+
   const { databaseDriver } = useDatabaseDriver();
-  const [column, setColumn] = useState<OuterbaseDataCatalogVirtualColumnInput>(
-    () => {
-      if (modelColumn) {
-        return {
-          body: modelColumn.body,
-          column: modelColumn.column,
-          flags: modelColumn.flags,
-          sample_data: modelColumn.sample_data,
-          schema: modelColumn.schema,
-          table: modelColumn.table,
-          virtual_key_column: modelColumn.virtualKeyColumn,
-          virtual_key_schema: modelColumn.virtualKeySchema,
-          virtual_key_table: modelColumn.virtualKeyTable,
-        };
-      } else {
-        return {
-          ...defaultVirtualColumn,
-          flags: {
-            isActive: true,
-            isVirtualKey: false,
-          },
-          schema: schemaName,
-          table: tableName,
-          column: columnName,
-          virtual_key_schema: schemaName,
-          virtual_key_table: tableName,
-        };
-      }
-    }
-  );
+  const [column, setColumn] = useState<DataCatalogColumnInput>(() => ({
+    definition: modelColumn?.definition || "",
+    samples: modelColumn?.samples || [],
+    hide: modelColumn?.hide || false,
+  }));
+
   const [loading, setLoading] = useState(false);
   const [sampleLoading, setSampleLoading] = useState(false);
 
@@ -74,7 +49,8 @@ export default function DataCatalogTableColumnModal({
       .then((r) => {
         setColumn((prev) =>
           produce(prev, (draft) => {
-            draft.sample_data = r.rows.map((row) => row[columnName]).join(", ");
+            const row = r.rows.map((row) => row[columnName]);
+            draft.samples = row as string[];
           })
         );
       })
@@ -83,14 +59,21 @@ export default function DataCatalogTableColumnModal({
 
   const onSaveUpdateColumn = useCallback(() => {
     setLoading(true);
+
+    const data: DataCatalogColumnInput = {
+      definition: column.definition,
+      samples: column.samples,
+      hide: column.hide,
+    };
+
     driver
-      .updateColumn(schemaName, tableName, column, modelColumn?.id)
+      .updateColumn(schemaName, tableName, columnName, data)
       .then()
       .finally(() => {
         setLoading(false);
         onClose();
       });
-  }, [driver, column, onClose, schemaName, tableName, modelColumn]);
+  }, [driver, column, columnName, onClose, schemaName, tableName]);
 
   return (
     <>
@@ -107,11 +90,11 @@ export default function DataCatalogTableColumnModal({
           <Label>Column Description</Label>
           <Textarea
             rows={4}
-            value={column.body}
+            value={column.definition}
             onChange={(e) => {
               setColumn((prev) =>
                 produce(prev, (draft) => {
-                  draft.body = e.target.value;
+                  draft.definition = e.target.value;
                 })
               );
             }}
@@ -135,11 +118,11 @@ export default function DataCatalogTableColumnModal({
           </div>
           <Textarea
             rows={4}
-            value={column.sample_data}
+            value={column.samples}
             onChange={(e) => {
               setColumn((prev) => {
                 return produce(prev, (draft) => {
-                  draft.sample_data = e.target.value;
+                  draft.samples = e.target.value.split(",");
                 });
               });
             }}
@@ -152,7 +135,7 @@ export default function DataCatalogTableColumnModal({
         <Button
           loading={loading}
           title="Save"
-          disabled={loading || !column.body}
+          disabled={loading || !column.definition}
           onClick={onSaveUpdateColumn}
         />
       </DialogFooter>

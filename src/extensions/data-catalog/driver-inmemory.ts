@@ -200,6 +200,21 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
     }
     return this.definitions;
   }
+  async addTermDefinition(
+    data: Omit<DataCatalogTermDefinition, "id">
+  ): Promise<DataCatalogTermDefinition | undefined> {
+    await this.delay();
+
+    if (!this.definitions) {
+      this.definitions = [];
+    }
+    const definitions = this.definitions;
+    const id = nanoid();
+    definitions.unshift({ ...data, id });
+    this.notify();
+
+    return { ...data, id };
+  }
 
   async updateTermDefinition(
     data: DataCatalogTermDefinition
@@ -210,15 +225,14 @@ export default class DataCatalogInmemoryDriver implements DataCatalogDriver {
       this.definitions = [];
     }
 
-    const dataCatalog = this.definitions;
+    const definitions = this.definitions;
 
-    const existingIndex = dataCatalog.findIndex((term) => term.id === data.id);
+    const existingIndex = definitions.findIndex((term) => term.id === data.id);
 
     if (existingIndex !== -1) {
-      dataCatalog[existingIndex] = { ...dataCatalog[existingIndex], ...data };
-    } else {
-      dataCatalog.unshift({ ...data, id: nanoid() });
+      definitions[existingIndex] = { ...definitions[existingIndex], ...data };
     }
+
     this.notify();
 
     return data;

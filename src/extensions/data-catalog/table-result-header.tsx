@@ -1,6 +1,7 @@
+import { Button } from "@/components/orbit/button";
 import { Textarea } from "@/components/ui/textarea";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import DataCatalogDriver from "./driver";
 
 interface DataCatalogResultHeaderProps {
@@ -17,7 +18,7 @@ export default function DataCatalogResultHeader({
   driver,
 }: DataCatalogResultHeaderProps) {
   const column = driver.getColumn(schemaName, tableName, columnName);
-  const [definition, setDefinition] = useState(() => column?.body ?? "");
+  const [definition, setDefinition] = useState("");
   const [loading, setLoading] = useState(false);
 
   const onSaveClicked = useCallback(() => {
@@ -25,34 +26,31 @@ export default function DataCatalogResultHeader({
     setLoading(true);
 
     driver
-      .updateColumn(schemaName, tableName, {
-        flags: column.flags,
-        body: definition,
-        column: column.column,
-        sample_data: column.sample_data,
-        schema: column.schema,
-        table: column.table,
-        virtual_key_column: column.virtualKeyColumn,
-        virtual_key_schema: column.virtualKeySchema,
-        virtual_key_table: column.virtualKeyTable,
+      .updateColumn(schemaName, tableName, columnName, {
+        definition,
+        hide: column.hide || false,
+        samples: column.samples,
       })
-      .then()
+      .then(() => {
+        toast.success("updated");
+      })
       .catch()
       .finally(() => setLoading(false));
-  }, [driver, definition, column, schemaName, tableName]);
+  }, [driver, definition, column, columnName, schemaName, tableName]);
 
   return (
     <div className="flex flex-col gap-2 border-b p-2 text-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-semibold">Data Catalog</h2>
-        <button
-          className="bg-primary text-primary-foreground flex cursor-pointer items-center rounded p-1 px-3 text-xs"
+        <h2 className="text-base font-semibold">Data Catalog</h2>
+
+        <Button
+          loading={loading}
+          title="Save"
+          shape="base"
+          variant="primary"
+          size="sm"
           onClick={onSaveClicked}
-          disabled={loading}
-        >
-          {loading && <LucideLoader className="mr-1 h-3 w-3 animate-spin" />}
-          Save
-        </button>
+        />
       </div>
 
       <Textarea

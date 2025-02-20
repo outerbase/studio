@@ -1,5 +1,5 @@
 export interface DataCatalogTermDefinition {
-  id?: string;
+  id: string;
   name: string;
   definition?: string;
   otherNames?: string;
@@ -27,11 +27,16 @@ export interface DataCatalogTableRelationship {
   hide: boolean;
 }
 
+export interface DataCatalogTableMetadata extends DataCatalogColumn {
+  alias?: string;
+}
+
 export interface DataCatalogTable {
   schemaName: string;
   tableName: string;
   columns: DataCatalogColumn[];
   relations: DataCatalogTableRelationship[];
+  metadata?: DataCatalogTableMetadata;
 }
 
 export type DataCatalogSchemas = Record<
@@ -54,7 +59,7 @@ export default abstract class DataCatalogDriver {
   abstract updateTable(
     schemaName: string,
     tableName: string,
-    data: DataCatalogColumn
+    data: DataCatalogTableMetadata
   ): Promise<DataCatalogTable | undefined>;
 
   abstract getColumn(
@@ -77,6 +82,10 @@ export default abstract class DataCatalogDriver {
   abstract updateVirtualJoin(
     data: DataCatalogTableRelationship
   ): Promise<boolean>;
+
+  abstract addTermDefinition(
+    data: Omit<DataCatalogTermDefinition, "id">
+  ): Promise<DataCatalogTermDefinition | undefined>;
 
   abstract updateTermDefinition(
     data: DataCatalogTermDefinition

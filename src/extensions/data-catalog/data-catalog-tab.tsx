@@ -14,19 +14,17 @@ export default function DataCatalogTab() {
   const dataCatalogExtension =
     extensions.getExtension<DataCatalogExtension>("data-catalog");
   const driver = dataCatalogExtension?.driver;
-
-  const [open, setOpen] = useState(false);
-
-  const [dataCatalog, setDataCatalog] = useState<DataCatalogTermDefinition[]>(
+  const [definitions, setDefinitions] = useState<DataCatalogTermDefinition[]>(
     []
   );
+  const [open, setOpen] = useState(false);
 
   const [definition, setDefinition] = useState<DataCatalogTermDefinition>();
 
   useEffect(() => {
     if (!driver) return;
     const getDataCatalog = () => {
-      setDataCatalog(driver?.getTermDefinitions() || []);
+      setDefinitions(driver?.getTermDefinitions() || []);
     };
 
     getDataCatalog();
@@ -67,21 +65,21 @@ export default function DataCatalogTab() {
       <div className="flex-1 gap-5 overflow-scroll p-10 pb-0">
         <div className="w-[450px]">
           <div className="text-3xl font-bold">
-            {dataCatalog?.length === 0
+            {definitions?.length === 0
               ? "Get started with Data Catalog"
               : "Definitions"}
           </div>
           <div className="text-base">
-            {dataCatalog?.length === 0
+            {definitions?.length === 0
               ? " Provide explanations for terminology in your schema. EZQL will use this to make running queries more efficient and accurate."
               : "Defined terms to be used in your product."}
           </div>
         </div>
-        {dataCatalog?.length === 0 ? (
+        {definitions?.length === 0 ? (
           <EmptyTermDefinition />
         ) : (
           <TermDefinitionList
-            data={dataCatalog}
+            data={definitions}
             onSelect={(item) => {
               setDefinition(item);
               setOpen(true);
@@ -90,7 +88,7 @@ export default function DataCatalogTab() {
         )}
         <Button
           title={
-            dataCatalog?.length === 0 ? "Create your first entry" : "Add Entry"
+            definitions?.length === 0 ? "Create your first entry" : "Add Entry"
           }
           className="mt-10 mb-10"
           onClick={onOpenModal}

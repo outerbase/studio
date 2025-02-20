@@ -14,68 +14,52 @@ import {
   DatabaseTableSchema,
 } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
-import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import { Edit3, EyeOff, LucideMoreHorizontal } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import DataCatalogTableColumnModal from "./data-catalog-table-column-modal";
-import DataCatalogDriver from "./driver";
+import { useDataCatalogContext } from "./data-model-tab";
 
 interface DataCatalogTableColumnProps {
   table: DatabaseTableSchema;
   column: DatabaseTableColumn;
-  driver: DataCatalogDriver;
-  search?: string;
   hasDefinitionOnly?: boolean;
-  onToggleHideFromEzql: (
-    column?: OuterbaseDataCatalogComment,
-    cb?: () => void
-  ) => void;
 }
 
 export default function DataCatalogTableColumn({
   column,
   table,
-  driver,
-  search,
   hasDefinitionOnly,
-  onToggleHideFromEzql,
 }: DataCatalogTableColumnProps) {
+  const { driver, search } = useDataCatalogContext();
+
   const modelColumn = driver.getColumn(
     table.schemaName,
     table.tableName!,
     column.name
   );
-
-  const definition = modelColumn?.body;
-
   const [open, setOpen] = useState(false);
   const [hideFromEzql, setHideFromEzql] = useState<boolean>(() => {
-    if (modelColumn?.flags) {
-      return modelColumn.flags.isActive;
-    }
-    return true;
+    return modelColumn?.hide ?? false;
   });
 
   const handleClickToggle = useCallback(() => {
-    if (!modelColumn) return;
-    setHideFromEzql(!hideFromEzql);
-    onToggleHideFromEzql({
-      ...modelColumn,
-      flags: {
-        ...modelColumn.flags,
-        isActive: !hideFromEzql,
-      },
-    });
-  }, [modelColumn, hideFromEzql, onToggleHideFromEzql]);
+    driver
+      .updateColumn(table.schemaName, table.tableName!, column.name, {
+        samples: modelColumn?.samples ?? [],
+        definition: modelColumn?.definition ?? "",
+        hide: !hideFromEzql,
+      })
+      .then(() =>
+        toast.success(
+          `${column.name} is turned ${!hideFromEzql ? "on" : "off"}`
+        )
+      )
+      .catch(() => toast.error("Failed to update column"));
+    setHideFromEzql((prev) => !prev);
+  }, [modelColumn, driver, hideFromEzql, table, column, setHideFromEzql]);
 
-  const sampleData = useMemo(() => {
-    if (modelColumn?.sample_data) {
-      return modelColumn.sample_data.split(",").map((s) => s.trim());
-    }
-    return [];
-  }, [modelColumn]);
-
-  if ((hasDefinitionOnly && !definition) || !modelColumn) {
+  if (hasDefinitionOnly) {
     return null;
   }
 
@@ -92,12 +76,12 @@ export default function DataCatalogTableColumn({
         <HighlightText text={column.name} highlight={search} />
       </div>
       <div className="text-muted-foreground flex-1 p-2 text-base">
-        {definition || "No description"}
+        {modelColumn?.definition || "No description"}
       </div>
       <div className="w-[150px] p-2">
-        {sampleData.length > 0 && (
+        {modelColumn && modelColumn?.samples.length > 0 && (
           <span className="bg-secondary rounded p-1 px-2 text-sm">
-            {sampleData.length} sample data
+            {modelColumn?.samples.length} sample data
           </span>
         )}
       </div>
@@ -140,7 +124,6 @@ export default function DataCatalogTableColumn({
         <DialogContent>
           {open && (
             <DataCatalogTableColumnModal
-              driver={driver}
               schemaName={table.schemaName}
               tableName={table.tableName!}
               columnName={column.name}

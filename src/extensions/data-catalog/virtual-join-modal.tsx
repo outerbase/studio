@@ -1,3 +1,4 @@
+import { createDialog } from "@/components/create-dialog";
 import TableColumnCombobox from "@/components/gui/table-combobox/TableColumnCombobox";
 import TableCombobox from "@/components/gui/table-combobox/TableCombobox";
 import { Button } from "@/components/orbit/button";
@@ -8,97 +9,62 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  OuterbaseDataCatalogComment,
-  OuterbaseDataCatalogVirtualColumnInput,
-} from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { defaultVirtualColumn } from "./constant";
-import DataCatalogDriver from "./driver";
+import DataCatalogDriver, { DataCatalogTableRelationship } from "./driver";
 
-interface Props {
-  driver: DataCatalogDriver;
-  schemaName: string;
-  tableName: string;
-  data?: OuterbaseDataCatalogComment;
-  onClose: () => void;
-  onSuccess: () => void;
+interface IRelationship extends Omit<DataCatalogTableRelationship, "id"> {
+  id?: string;
 }
-
-export default function VirtualJoinModal({
-  tableName,
-  schemaName,
-  driver,
-  data,
-  onClose,
-  onSuccess,
-}: Props) {
+export const virtualJoinDialog = createDialog<{
+  driver: DataCatalogDriver;
+  relation: IRelationship;
+}>(({ driver, relation, close }) => {
   const [loading, setLoading] = useState(false);
-  const [virtualColumnInput, setVirtaulColumnInput] =
-    useState<OuterbaseDataCatalogVirtualColumnInput>(() => {
-      if (data) {
-        return {
-          ...data,
-          body: data.body,
-          flags: data.flags,
-          sample_data: data.sample_data,
-          schema: data.schema,
-          table: data.table,
-          virtual_key_column: data.virtualKeyColumn,
-          virtual_key_schema: data.virtualKeySchema,
-          virtual_key_table: data.virtualKeyTable,
-        };
-      } else {
-        return {
-          ...defaultVirtualColumn,
-          schema: schemaName,
-          table: tableName,
-          virtual_key_schema: schemaName,
-        };
-      }
-    });
+  const [value, setValue] = useState<IRelationship>(() =>
+    structuredClone(relation)
+  );
 
   const createUpdateVirtualJoin = useCallback(() => {
-    if (!driver) return;
     setLoading(true);
-    driver
-      .updateColumn(
-        schemaName,
-        tableName,
-        virtualColumnInput,
-        data ? data.id : undefined, // when there is data.ID that mean update column
-        true // make it true for update update virtual column
-      )
-      .then(() => {
-        onSuccess();
-        toast.success(`Virtaul join ${data?.id ? "updated" : "created"}`);
-      })
-      .catch((error) => toast.error(error.message))
-      .finally(() => {
-        setLoading(false);
-        onClose();
-      });
-  }, [
-    driver,
-    schemaName,
-    onSuccess,
-    tableName,
-    virtualColumnInput,
-    data,
-    onClose,
-  ]);
+
+    if (value?.id) {
+      // Update
+      driver
+        .updateVirtualJoin({ ...value, id: value.id })
+        .then(() => {
+          close(undefined);
+          toast.success("Virtaul join updated");
+        })
+        .catch()
+        .finally(() => setLoading(false));
+    } else {
+      // Create
+      driver
+        .addVirtualJoin(value)
+        .then(() => {
+          close(undefined);
+          toast.success("Virtaul join created");
+        })
+        .catch()
+        .finally(() => setLoading(false));
+    }
+  }, [driver, value, close]);
 
   const disabled = useMemo(
-    () => !virtualColumnInput.body || !virtualColumnInput.virtual_key_table,
-    [virtualColumnInput]
+    () =>
+      !value.referenceTableName ||
+      !value.referenceColumnName ||
+      !value.columnName,
+    [value]
   );
+
   return (
     <>
       <DialogHeader>
         <DialogTitle>
-          {data ? "Edit" : "Add Relationship"} to {tableName}
+          {value.id ? "Edit" : "Add Relationship"} to {value.tableName}
         </DialogTitle>
       </DialogHeader>
       <DialogDescription className="text-base">
@@ -112,14 +78,13 @@ export default function VirtualJoinModal({
           <Label>Column</Label>
         </div>
         <TableColumnCombobox
-          value={virtualColumnInput.column}
-          schemaName={schemaName}
-          tableName={tableName}
+          value={value.columnName}
+          schemaName={value.schemaName}
+          tableName={value.tableName}
           onChange={(value) => {
-            setVirtaulColumnInput((prev) =>
+            setValue((prev) =>
               produce(prev, (draft) => {
-                draft.column = value;
-                draft.virtual_key_column = value;
+                draft.columnName = value;
               })
             );
           }}
@@ -130,13 +95,13 @@ export default function VirtualJoinModal({
             <Label>Relationship Table</Label>
           </div>
           <TableCombobox
-            value={virtualColumnInput.virtual_key_table}
-            schemaName={schemaName}
+            value={value.referenceTableName}
+            schemaName={value.schemaName}
             onChange={(value) => {
-              setVirtaulColumnInput((prev) =>
+              setValue((prev) =>
                 produce(prev, (draft) => {
-                  draft.virtual_key_table = value;
-                  draft.body = draft.body !== value ? "" : draft.body;
+                  draft.referenceTableName = value;
+                  draft.referenceColumnName = "";
                 })
               );
             }}
@@ -148,13 +113,13 @@ export default function VirtualJoinModal({
             <Label>Relationship Column</Label>
           </div>
           <TableColumnCombobox
-            value={virtualColumnInput.body}
-            schemaName={schemaName}
-            tableName={virtualColumnInput.virtual_key_table}
+            value={value.referenceColumnName}
+            schemaName={value.schemaName}
+            tableName={value.referenceTableName}
             onChange={(value) => {
-              setVirtaulColumnInput((prev) =>
+              setValue((prev) =>
                 produce(prev, (draft) => {
-                  draft.body = value;
+                  draft.referenceColumnName = value;
                 })
               );
             }}
@@ -168,11 +133,11 @@ export default function VirtualJoinModal({
           variant="secondary"
           disabled={disabled}
           onClick={createUpdateVirtualJoin}
-          title={data ? "Edit Relationship" : "Create Relationship"}
+          title={value.id ? "Edit Relationship" : "Create Relationship"}
         />
 
         <div className="flex-1" />
       </DialogFooter>
     </>
   );
-}
+});
