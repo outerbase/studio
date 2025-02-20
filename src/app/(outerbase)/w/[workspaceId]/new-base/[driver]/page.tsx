@@ -6,32 +6,70 @@ import {
 } from "@/components/connection-config-editor";
 import { Button } from "@/components/orbit/button";
 import { getDatabaseFriendlyName } from "@/components/resource-card/utils";
+import {
+  createOuterbaseBase,
+  createOuterbaseConnection,
+  createOuterbaseSource,
+  testOuterbaseSource,
+} from "@/outerbase-cloud/api-workspace";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 export default function WorkspaceNewBasePage() {
-  const { driver } = useParams<{ driver: string }>();
+  const { driver, workspaceId } = useParams<{
+    driver: string;
+    workspaceId: string;
+  }>();
+  const router = useRouter();
   const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const template = useMemo(() => {
     return REMOTE_CONNECTION_TEMPLATES[driver];
   }, [driver]);
 
-  const onSave = useCallback(() => {
-    setLoading(true);
+  const onSave = useCallback(
+    (overrideRedirect?: string) => {
+      setLoading(true);
+      setError("");
 
-    // @TODO: Save the connection to Outerbase API
-    // @TODO: Redirect to workspace page
-  }, []);
+      const { name: baseName, source } = template.to(value);
 
-  const onConnect = useCallback(() => {
-    setLoading(true);
+      const runSave = async () => {
+        await testOuterbaseSource(workspaceId, source);
+        const baseResponse = await createOuterbaseBase(workspaceId, baseName);
+        const connResponse = await createOuterbaseConnection(
+          workspaceId,
+          baseResponse.id,
+          baseName
+        );
 
-    // @TODO: Save the connection to Outerbase API
-    // @TODO: Redirect to base page
-  }, []);
+        await createOuterbaseSource(workspaceId, {
+          ...source,
+          base_id: baseResponse.id,
+          connection_id: connResponse.id,
+        });
+
+        router.replace(
+          overrideRedirect ?? `/w/${workspaceId}/${baseResponse.short_name}`
+        );
+      };
+
+      runSave()
+        .then()
+        .catch((e) => {
+          if (e instanceof Error) {
+            setError(e.message);
+          } else {
+            setError(e.toString());
+          }
+        })
+        .finally(() => setLoading(false));
+    },
+    [workspaceId, template, value, router]
+  );
 
   if (!template) {
     return <div>Invalid driver</div>;
@@ -55,6 +93,12 @@ export default function WorkspaceNewBasePage() {
 
         <div>
           <div className="w-1/2">
+            {error && (
+              <div className="mb-4 rounded border border-red-500 bg-red-100 p-2 text-base dark:bg-red-500 dark:text-white">
+                {error}
+              </div>
+            )}
+
             <ConnectionConfigEditor
               template={template.template}
               value={value}
@@ -68,18 +112,21 @@ export default function WorkspaceNewBasePage() {
       <div className="bg-background sticky bottom-0 mt-12 border-t px-2 py-6">
         <div className="container flex gap-3">
           <Button
+            loading={loading}
             variant="primary"
             size="lg"
-            onClick={onConnect}
+            onClick={() => onSave()}
             disabled={loading}
           >
             <ArrowRight />
             Connect
           </Button>
+
           <Button
+            loading={loading}
             variant="secondary"
             size="lg"
-            onClick={onSave}
+            onClick={() => onSave(`/w/${workspaceId}`)}
             disabled={loading}
           >
             <FloppyDisk />

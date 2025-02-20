@@ -154,4 +154,57 @@ export const REMOTE_CONNECTION_TEMPLATES: Record<
       };
     },
   },
+  postgres: {
+    template: GENERIC_CONNECTION_TEMPLATE,
+    from: (value) => {
+      return {
+        name: value.name,
+        host: value.source.host,
+        username: value.source.user,
+        database: value.source.database,
+        port: value.source.port,
+      };
+    },
+    to: (value) => {
+      return {
+        name: value.name,
+        source: {
+          host: value.host,
+          user: value.username,
+          password: value.password,
+          database: value.database,
+          port: value.port,
+          type: "postgres",
+          base_id: "",
+        },
+      };
+    },
+  },
+
+  starbasedb: {
+    template: TURSO_CONNECTION_TEMPLATE,
+    from: (value) => {
+      return {
+        name: value.name,
+        host: value.source.host,
+        username: value.source.user,
+        database: value.source.database,
+        port: value.source.port,
+      };
+    },
+    to: (value) => {
+      return {
+        name: value.name,
+        source: {
+          host: value.host,
+          user: value.username,
+          password: value.password,
+          database: value.database,
+          port: value.port,
+          type: "starbasedb",
+          base_id: "",
+        },
+      };
+    },
+  },
 };

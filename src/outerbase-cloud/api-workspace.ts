@@ -1,6 +1,7 @@
 import { requestOuterbase } from "./api";
 import {
   OuterbaseAPIBase,
+  OuterbaseAPIConnection,
   OuterbaseAPISource,
   OuterbaseAPISourceInput,
   OuterbaseAPIWorkspace,
@@ -38,13 +39,38 @@ export function createOuterbaseBase(workspaceId: string, name: string) {
   );
 }
 
-export function createOuterbaseSource(
+export function createOuterbaseConnection(
   workspaceId: string,
   baseId: string,
+  name: string
+) {
+  return requestOuterbase<OuterbaseAPIConnection>(
+    `/api/v1/workspace/${workspaceId}/connection`,
+    "POST",
+    {
+      name,
+      baseId,
+    }
+  );
+}
+
+export function testOuterbaseSource(
+  workspaceId: string,
+  source: OuterbaseAPISourceInput
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/source/credential/test`,
+    "POST",
+    source
+  );
+}
+
+export function createOuterbaseSource(
+  workspaceId: string,
   source: OuterbaseAPISourceInput
 ) {
   return requestOuterbase<OuterbaseAPISource>(
-    `/api/v1/workspace/${workspaceId}/base/${baseId}/source`,
+    `/api/v1/workspace/${workspaceId}/source`,
     "POST",
     source
   );

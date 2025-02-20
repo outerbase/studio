@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { CaretDown, ChartBar, MagnifyingGlass } from "@phosphor-icons/react";
 import Link from "next/link";
 import { PropsWithChildren, useMemo, useState } from "react";
+import { getCreateResourceTypeList } from "./new-resource-list";
 
 function CreateResourceItem({
   selected,
@@ -60,18 +61,18 @@ export interface NewResourceType {
 }
 interface NewResourceProps {
   onCreateBoard?: () => void;
-  templates: NewResourceType[];
+  workspaceId?: string;
 }
 
 export default function NewResourceType({
   onCreateBoard,
-  templates,
+  workspaceId,
 }: NewResourceProps) {
   const resourceTypeList = useMemo(() => {
-    const tmp = [...templates];
+    const tmp = getCreateResourceTypeList(workspaceId);
     tmp.sort((a, b) => a.name.localeCompare(b.name));
     return tmp;
-  }, [templates]);
+  }, [workspaceId]);
 
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);

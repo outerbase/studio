@@ -15,6 +15,7 @@ import { CommonDialogProvider } from "../common-dialog";
 import FileHandlerPicker from "../filehandler-picker";
 import { Input } from "../orbit/input";
 import { Label } from "../orbit/label";
+import { Toggle } from "../orbit/toggle";
 import { Textarea } from "../ui/textarea";
 
 export function ConnectionConfigEditor({
@@ -83,8 +84,19 @@ export function ConnectionConfigEditor({
                 );
               } else if (column.type === "checkbox") {
                 content = (
-                  <label className="mx-1 flex flex-1 gap-2 text-base select-none">
-                    <input type="checkbox" checked className="scale-125" />
+                  <label className="mx-1 flex flex-1 items-center justify-start gap-2 text-base select-none">
+                    <Toggle
+                      size="sm"
+                      onChange={(checked) => {
+                        onChange(
+                          produce(value, (draft) => {
+                            draft[column.name] = checked as never;
+                          })
+                        );
+                      }}
+                      toggled={!!value[column.name]}
+                    />
+
                     {column.label}
                   </label>
                 );
