@@ -34,14 +34,14 @@ export default function OptimizeTableCell({
     if (isRemoved) {
       cellBackgroundColor = "bg-red-200 dark:bg-red-800";
     } else if (isChanged) {
-      cellBackgroundColor = "bg-yellow-200 dark:bg-orange-600";
+      cellBackgroundColor = "bg-yellow-200 dark:bg-yellow-600";
     } else if (isNew) {
       cellBackgroundColor = "bg-green-200 dark:bg-green-700";
     } else {
       cellBackgroundColor = "";
     }
   } else if (isChanged) {
-    cellBackgroundColor = "bg-yellow-100 dark:bg-orange-700";
+    cellBackgroundColor = "bg-[#ffe693] dark:bg-[#916b20]";
   } else if (isNew) {
     cellBackgroundColor = "bg-green-100 dark:bg-green-900";
   } else if (isRemoved) {
