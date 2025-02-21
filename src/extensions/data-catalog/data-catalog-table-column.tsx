@@ -39,8 +39,8 @@ export default function DataCatalogTableColumn({
     column.name
   );
   const [open, setOpen] = useState(false);
-  const [hideFromEzql, setHideFromEzql] = useState<boolean>(() => {
-    return modelColumn?.hide ?? false;
+  const [enabled, setEnabled] = useState<boolean>(() => {
+    return modelColumn?.hide ?? true;
   });
 
   const handleClickToggle = useCallback(() => {
@@ -48,16 +48,14 @@ export default function DataCatalogTableColumn({
       .updateColumn(table.schemaName, table.tableName!, column.name, {
         samples: modelColumn?.samples ?? [],
         definition: modelColumn?.definition ?? "",
-        hide: !hideFromEzql,
+        hide: !enabled,
       })
       .then(() =>
-        toast.success(
-          `${column.name} is turned ${!hideFromEzql ? "on" : "off"}`
-        )
+        toast.success(`${column.name} is turned ${!enabled ? "on" : "off"}`)
       )
       .catch(() => toast.error("Failed to update column"));
-    setHideFromEzql((prev) => !prev);
-  }, [modelColumn, driver, hideFromEzql, table, column, setHideFromEzql]);
+    setEnabled((prev) => !prev);
+  }, [modelColumn, driver, enabled, table, column]);
 
   if (hasDefinitionOnly) {
     return null;
@@ -68,10 +66,10 @@ export default function DataCatalogTableColumn({
       key={column.name}
       className={cn(
         "border-accent flex items-center border-t pt-2 pb-2 text-sm",
-        hideFromEzql ? "opacity-100" : "opacity-50"
+        enabled ? "opacity-100" : "opacity-50"
       )}
     >
-      <Toggle size="sm" toggled={hideFromEzql} onChange={handleClickToggle} />
+      <Toggle size="sm" toggled={enabled} onChange={handleClickToggle} />
       <div className="flex w-[150px] items-center p-2 text-base">
         <HighlightText text={column.name} highlight={search} />
       </div>
@@ -91,7 +89,7 @@ export default function DataCatalogTableColumn({
         //=================
       }
       <DropdownMenu>
-        <DropdownMenuTrigger asChild disabled={!hideFromEzql}>
+        <DropdownMenuTrigger asChild disabled={!enabled}>
           <Button variant="ghost">
             <LucideMoreHorizontal className="h-4 w-4" />
           </Button>
