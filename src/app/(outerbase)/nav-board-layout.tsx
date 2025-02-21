@@ -31,7 +31,7 @@ export default function NavigationDashboardLayout({
 
   return (
     <div className="flex h-screen w-screen">
-      <div className="w-[250px] shrink-0 border-r">
+      <div className="w-[250px] shrink-0 border-r overflow-hidden flex flex-col">
         <div
           className="flex h-12 cursor-pointer items-center gap-2 border-b px-2 text-base font-bold"
           onClick={() => {
@@ -42,7 +42,7 @@ export default function NavigationDashboardLayout({
           <span>{workspaceName}</span>
         </div>
 
-        <div className="flex flex-col pb-2">
+        <div className="flex flex-1 flex-col pb-2 overflow-scroll">
           <SidebarMenuHeader text="Dashboards" />
 
           {(boards ?? []).map((board) => {

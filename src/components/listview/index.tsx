@@ -220,7 +220,7 @@ function renderList<T>(props: ListViewRendererProps<T>): React.ReactElement {
                   {item.progressBarValue && item.progressBarMax && (
                     <div className="text-muted-foreground relative flex h-full w-[50px] items-center">
                       <div
-                        className="h-[20px] rounded-sm border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+                        className="h-[20px] rounded-sm border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800"
                         style={{
                           width:
                             Math.max(

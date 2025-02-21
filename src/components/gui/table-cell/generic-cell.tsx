@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import { isLinkString } from "@/lib/validation";
-import DisplayLinkCell from "./display-link-cell";
-import { cn } from "@/lib/utils";
-import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
-import { LucideArrowUpRight, LucideLoader } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DatabaseResultSet, DatabaseValue } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
+import { DatabaseResultSet, DatabaseValue } from "@/drivers/base-driver";
 import { convertDatabaseValueToString } from "@/drivers/sqlite/sql-helper";
+import { cn } from "@/lib/utils";
+import { isLinkString } from "@/lib/validation";
 import { ColumnType } from "@outerbase/sdk-transform";
+import { LucideArrowUpRight, LucideLoader } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import DisplayLinkCell from "./display-link-cell";
 
 interface TableCellProps<T = unknown> {
   align?: "left" | "right";
@@ -182,7 +182,7 @@ export default function GenericCell({
   const isAlignRight = align === "right";
 
   const textBaseStyle = cn(
-    "flex grow text-gray-500",
+    "flex grow text-neutral-500",
     isAlignRight ? "justify-end" : ""
   );
 
@@ -225,7 +225,7 @@ export default function GenericCell({
         <span
           className={cn(
             "flex-1 overflow-hidden text-ellipsis whitespace-nowrap",
-            "text-green-600 dark:text-green-500"
+            "text-neutral-950 dark:text-neutral-50"
           )}
         >
           {value}

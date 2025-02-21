@@ -52,14 +52,14 @@ function Header({
 
   if (internalState.getSelectedColIndex().includes(colIndex)) {
     if (internalState.isFullSelectionCol(colIndex)) {
-      textClass = "grow line-clamp-1 font-mono font-bold text-white font-bold";
+      textClass = "grow line-clamp-1 font-mono font-bold text-black dark:text-white font-bold";
       thClass =
-        "flex grow items-center px-2 overflow-hidden bg-blue-600 dark:bg-blue-900";
+        "flex grow items-center px-2 overflow-hidden bg-neutral-100 dark:bg-neutral-900";
     } else {
       textClass =
         "grow line-clamp-1 font-mono font-bold dark:text-white font-bold";
       thClass =
-        "flex grow items-center px-2 overflow-hidden bg-blue-200 dark:bg-blue-400";
+        "flex grow items-center px-2 overflow-hidden bg-neutral-100 dark:bg-neutral-900";
     }
   }
 

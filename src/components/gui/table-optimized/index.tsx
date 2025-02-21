@@ -145,19 +145,19 @@ function renderCellList({
 
     let textClass =
       "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono";
-    let tdClass = "sticky left-0 bg-zinc-100 dark:bg-zinc-900";
+    let tdClass = "sticky left-0 bg-neutral-50 dark:bg-neutral-950";
 
     if (internalState.getSelectedRowIndex().includes(absoluteRowIndex)) {
       if (internalState.isFullSelectionRow(absoluteRowIndex)) {
         textClass = cn(
           "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono",
-          "bg-blue-600 border-red-900  text-white font-bold"
+          "bg-neutral-100 dark:bg-neutral-900 border-red-900 text-black dark:text-white font-bold"
         );
-        tdClass = "sticky left-0 bg-blue-600 dark:bg-blue-800";
+        tdClass = "sticky left-0 bg-neutral-100 dark:bg-blue-800";
       } else {
         textClass =
           "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono dark:text-white font-bold";
-        tdClass = "sticky left-0 bg-blue-200 dark:bg-blue-400";
+        tdClass = "sticky left-0 bg-neutral-100 dark:bg-neutral-900";
       }
     }
 

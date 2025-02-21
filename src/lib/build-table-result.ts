@@ -241,13 +241,13 @@ export function pipeColumnIcon(headers: OptimizeTableHeaderProps[]) {
   for (const header of headers) {
     if (header.metadata.isPrimaryKey) {
       header.display.icon = LucideKey;
-      header.display.iconClassName = "text-red-500";
+      header.display.iconClassName = "text-neutral-950 dark:text-neutral-50";
     } else if (header.metadata.referenceTo) {
       header.display.icon = LucideKeySquare;
-      header.display.iconClassName = "text-yellow-500";
+      header.display.iconClassName = "text-neutral-950 dark:text-neutral-50";
     } else if (header.metadata.columnSchema?.constraint?.generatedExpression) {
       header.display.icon = LucideSigma;
-      header.display.iconClassName = "text-blue-500";
+      header.display.iconClassName = "text-neutral-950 dark:text-neutral-50";
     }
   }
 }
