@@ -2,7 +2,7 @@ import { DatabaseResultStat } from "@/drivers/base-driver";
 
 export default function ResultStats({ stats }: { stats: DatabaseResultStat }) {
   return (
-    <div className="text-xs p-2 flex">
+    <div className="text-sm p-2 flex">
       {stats.queryDurationMs !== null && (
         <div className="px-2 border-r">
           <span className="font-semibold">Query Duration</span>:{" "}
@@ -24,8 +24,8 @@ export default function ResultStats({ stats }: { stats: DatabaseResultStat }) {
       )}
 
       {!!stats.rowsAffected && (
-        <div className="px-2 border-r">
-          <span className="font-semibold text-xs">Affected Rows</span>:{" "}
+        <div className="px-2">
+          <span className="font-semibold">Affected Rows</span>:{" "}
           {stats.rowsAffected}
         </div>
       )}

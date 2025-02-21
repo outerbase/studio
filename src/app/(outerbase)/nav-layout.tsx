@@ -20,7 +20,7 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="flex h-screen w-screen">
-      <div className="w-[250px] shrink-0 border-r">
+      <div className="w-[250px] shrink-0 border-r overflow-hidden flex flex-col">
         <div className="px-2 py-2">
           <SidebarProfile />
         </div>
@@ -34,7 +34,7 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           />
         </div>
 
-        <div className="flex flex-col border-b pb-2">
+        <div className="flex flex-1 flex-col border-b pb-2 overflow-scroll">
           <SidebarMenuHeader text="Workspace" />
           <SidebarMenuItem
             selected={pathname === "/local"}
@@ -58,7 +58,7 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
                 }
                 selected={workspace.short_name === workspaceId}
                 badge={
-                  <span className="mr-2 rounded border px-1.5 py-0.5 text-xs">
+                  <span className="mr-2 rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-sm font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
                     Free
                   </span>
                 }

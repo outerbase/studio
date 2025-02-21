@@ -1,22 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
 import ResultTable from "@/components/gui/query-result-table";
-import { Button } from "@/components/ui/button";
-import {
-  LucideArrowLeft,
-  LucideArrowRight,
-  LucideDelete,
-  LucideFilter,
-  LucidePlus,
-  LucideRefreshCcw,
-  LucideSaveAll,
-} from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { commitChange } from "@/lib/sql/sql-execute-helper";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,24 +6,38 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
+// import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useAutoComplete } from "@/context/auto-complete-provider";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
 import {
   ColumnSortOption,
   DatabaseResultStat,
   DatabaseTableSchema,
 } from "@/drivers/base-driver";
-import { useAutoComplete } from "@/context/auto-complete-provider";
-import OpacityLoading from "../loading-opacity";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import ResultStats from "../result-stat";
-import useTableResultColumnFilter from "../table-result/filter-column";
-import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
-import { useCurrentTab } from "../windows-tab";
 import { KEY_BINDING } from "@/lib/key-matcher";
-import { Toolbar, ToolbarButton } from "../toolbar";
+import { commitChange } from "@/lib/sql/sql-execute-helper";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
+import {
+  LucideArrowLeft,
+  LucideArrowRight,
+  LucideRefreshCcw
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import AggregateResultButton from "../aggregate-result/aggregate-result-button";
 import ExportResultButton from "../export/export-result-button";
-import { useSchema } from "@/context/schema-provider";
+import OpacityLoading from "../loading-opacity";
+import ResultStats from "../result-stat";
+import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import useTableResultColumnFilter from "../table-result/filter-column";
+import { Toolbar } from "../toolbar";
+import { useCurrentTab } from "../windows-tab";
 
 interface TableDataContentProps {
   tableName: string;
@@ -222,56 +218,27 @@ export default function TableDataWindow({
       )}
       <div className="shrink-0 grow-0 border-b border-neutral-200 py-2 dark:border-neutral-800">
         <Toolbar>
-          <ToolbarButton
-            text="Commit"
-            icon={<LucideSaveAll className="h-4 w-4" />}
-            tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
-            disabled={!changeNumber || isExecuting}
-            loading={isExecuting}
-            onClick={onCommit}
-            badge={changeNumber ? changeNumber.toString() : ""}
-          />
+          <div className="flex flex-1 items-center gap-2 ml-2">
+            <Button
+              variant={"secondary"}
+              onClick={() => setRevision((prev) => prev + 1)}
+              disabled={loading}
+            >
+              <LucideRefreshCcw className="h-4 w-4" />
+            </Button>
 
-          <ToolbarButton
-            text="Discard Change"
-            tooltip={`Dicard all changes (${KEY_BINDING.discard.toString()})`}
-            destructive
-            disabled={!changeNumber}
-            onClick={onDiscard}
-          />
+            <Button variant={"secondary"} onClick={onNewRow} className="flex items-center gap-1">
+              <div className="text-sm">Add row</div>
+            </Button>
 
-          <div className="mx-1">
-            <Separator orientation="vertical" />
+            <Button variant={"secondary"} onClick={onRemoveRow}>
+              <div className="text-sm">Delete row</div>
+            </Button>
           </div>
 
-          {filterColumnButton}
-
-          <div className="mx-1">
-            <Separator orientation="vertical" />
-          </div>
-
-          <Button variant={"ghost"} size={"sm"} onClick={onNewRow}>
-            <LucidePlus className="h-4 w-4 text-green-600" />
-          </Button>
-
-          <Button variant={"ghost"} size={"sm"} onClick={onRemoveRow}>
-            <LucideDelete className="h-4 w-4 text-red-600" />
-          </Button>
-
-          <Button
-            variant={"ghost"}
-            size={"sm"}
-            onClick={() => setRevision((prev) => prev + 1)}
-            disabled={loading}
-          >
-            <LucideRefreshCcw className="h-4 w-4 text-green-600" />
-          </Button>
-
-          <div className="mx-2 flex grow">
-            <div className="flex w-full items-center overflow-hidden rounded bg-secondary">
-              <div className="flex h-full items-center bg-neutral-200 px-2 text-sm text-gray-500 dark:bg-neutral-800">
-                <LucideFilter className="h-4 w-4 text-black dark:text-white" />
-              </div>
+          <div className="mx-2 flex grow max-w-1/3">
+            <div className="flex w-full items-center overflow-hidden rounded bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800">
+              {filterColumnButton}
               <input
                 type="text"
                 placeholder="eg: id=5"
@@ -282,84 +249,44 @@ export default function TableDataWindow({
                     setWhere(e.currentTarget.value);
                   }
                 }}
-                className="h-full grow bg-inherit p-1 pl-2 pr-2 font-mono text-sm outline-hidden"
+                className="h-full grow p-2 pl-3 pr-2 font-mono text-sm outline-hidden"
               />
             </div>
           </div>
 
-          <div>
-            <Separator orientation="vertical" />
-          </div>
-
-          <Button
-            variant={"ghost"}
-            size={"sm"}
-            disabled={finalOffset === 0 || loading}
-            onClick={() => {
-              setFinalOffset(finalOffset - finalLimit);
-              setOffset((finalOffset - finalLimit).toString());
-            }}
-          >
-            <LucideArrowLeft className="h-4 w-4" />
-          </Button>
-
-          <div className="flex gap-2">
-            <Tooltip>
-              <TooltipTrigger>
-                <input
-                  value={limit}
-                  onChange={(e) => setLimit(e.currentTarget.value)}
-                  onBlur={(e) => {
-                    try {
-                      const finalValue = parseInt(e.currentTarget.value);
-                      if (finalValue !== finalLimit) {
-                        setFinalLimit(finalValue);
-                      }
-                    } catch (e) {
-                      setLimit(finalLimit.toString());
-                    }
-                  }}
-                  style={{ width: 50 }}
-                  className="h-full rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-800"
-                  alt="Limit"
-                />
-              </TooltipTrigger>
-              <TooltipContent>Limit</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger>
-                <input
-                  value={offset}
-                  onChange={(e) => setOffset(e.currentTarget.value)}
-                  onBlur={(e) => {
-                    try {
-                      const finalValue = parseInt(e.currentTarget.value);
-                      if (finalValue !== finalOffset) {
-                        setFinalOffset(finalValue);
-                      }
-                    } catch (e) {
-                      setOffset(finalOffset.toString());
-                    }
-                  }}
-                  style={{ width: 50 }}
-                  className="h-full rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-800"
-                  alt="Offset"
-                />
-              </TooltipTrigger>
-              <TooltipContent>Offset</TooltipContent>
-            </Tooltip>
-          </div>
-
-          <Button variant={"ghost"} size={"sm"} disabled={loading}>
-            <LucideArrowRight
-              className="h-4 w-4"
-              onClick={() => {
-                setFinalOffset(finalOffset + finalLimit);
-                setOffset((finalOffset + finalLimit).toString());
-              }}
+          <div className="flex-1 flex flex-row-reverse items-center gap-2 mr-2">
+            {/* <ToolbarButton
+              text="Save"
+              // icon={<LucideSaveAll className="h-4 w-4" />}
+              tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
+              disabled={!changeNumber || isExecuting}
+              loading={isExecuting}
+              onClick={onCommit}
+              badge={changeNumber ? changeNumber.toString() : ""}
             />
-          </Button>
+
+            <ToolbarButton
+              text="Discard"
+              tooltip={`Dicard all changes (${KEY_BINDING.discard.toString()})`}
+              destructive
+              disabled={!changeNumber}
+              onClick={onDiscard}
+            /> */}
+            
+
+              { changeNumber ?
+                <>
+                  <Button variant={"primary"} onClick={onCommit} loading={isExecuting} disabled={!changeNumber || isExecuting}>
+                    <div className="text-sm">Save {changeNumber ? changeNumber.toString() : ""} changes</div>
+                  </Button>
+                  
+                  <Button variant={"destructive"} onClick={onDiscard}>
+                    <div className="text-sm">Discard</div>
+                  </Button>
+                </>
+                : <></>
+              }
+          </div>
         </Toolbar>
       </div>
       <div className="relative grow overflow-hidden">
@@ -381,16 +308,89 @@ export default function TableDataWindow({
         ) : null}
       </div>
       {stat && data && (
-        <div className="flex shrink-0 justify-between border-t">
-          <div className="flex p-1">
-            <ResultStats stats={stat} />
+        <div className="flex shrink-0 h-12 justify-between border-t">
+          <div className="flex p-1 px-2 items-center">
             <div>
               <ExportResultButton data={data} />
             </div>
+            <ResultStats stats={stat} />
           </div>
           <div className="p-1 pr-3">
             <AggregateResultButton data={data} />
           </div>
+          
+            <div className="flex items-center gap-2 mr-3">
+              <Button
+                variant={"secondary"}
+                size={"sm"}
+                disabled={finalOffset === 0 || loading}
+                onClick={() => {
+                  setFinalOffset(finalOffset - finalLimit);
+                  setOffset((finalOffset - finalLimit).toString());
+                }}
+                style={{ width: 32, height: 32 }}
+              >
+                <LucideArrowLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex gap-2">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <input
+                      value={limit}
+                      onChange={(e) => setLimit(e.currentTarget.value)}
+                      onBlur={(e) => {
+                        try {
+                          const finalValue = parseInt(e.currentTarget.value);
+                          if (finalValue !== finalLimit) {
+                            setFinalLimit(finalValue);
+                          }
+                        } catch (e) {
+                          setLimit(finalLimit.toString());
+                        }
+                      }}
+                      style={{ width: 50 }}
+                      className="h-8 rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-900"
+                      alt="Limit"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Limit</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <input
+                      value={offset}
+                      onChange={(e) => setOffset(e.currentTarget.value)}
+                      onBlur={(e) => {
+                        try {
+                          const finalValue = parseInt(e.currentTarget.value);
+                          if (finalValue !== finalOffset) {
+                            setFinalOffset(finalValue);
+                          }
+                        } catch (e) {
+                          setOffset(finalOffset.toString());
+                        }
+                      }}
+                      style={{ width: 50 }}
+                      className="h-full rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-900"
+                      alt="Offset"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Offset</TooltipContent>
+                </Tooltip>
+              </div>
+
+              <Button variant={"secondary"} size={"sm"} disabled={loading} style={{ width: 32, height: 32 }}>
+                <LucideArrowRight
+                  className="h-4 w-4"
+                  onClick={() => {
+                    setFinalOffset(finalOffset + finalLimit);
+                    setOffset((finalOffset + finalLimit).toString());
+                  }}
+                />
+              </Button>
+            </div>
         </div>
       )}
     </div>

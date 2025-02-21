@@ -258,7 +258,7 @@
     --primary: black;
     --primary-foreground: white;
 
-    --secondary: #f1f5f9;
+    --secondary: #f5f5f5;
     --secondary-foreground: #444;
 
     --muted: #eee;
@@ -277,7 +277,8 @@
     --radius: 0.5rem;
 
     --selected: #e2e8f0;
-    --scroll-bar: #e2e8f0;
+    --scroll-bar: #d4d4d4;
+    --scroll-bar-hover: #ccc;
   }
 
   .dark {
@@ -314,13 +315,14 @@
 
     --selected: #222;
     --scroll-bar: #353535;
+    --scroll-bar-hover: #444;
   }
 }
 
 @layer utilities {
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   /* Track */
@@ -330,12 +332,18 @@
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 8px;
+  }
+
+  /* Show thumb on container hover */
+  *:hover::-webkit-scrollbar-thumb {
     background: var(--scroll-bar);
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--scroll-bar);
+    background: var(--scroll-bar-hover);
   }
 }
 

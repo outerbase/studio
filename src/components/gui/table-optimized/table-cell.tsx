@@ -28,7 +28,7 @@ export default function OptimizeTableCell({
     return { zIndex: 15, left: state.gutterColumnWidth + "px" };
   }, [state.gutterColumnWidth, isSticky]);
 
-  let cellBackgroundColor = "bg-background";
+  let cellBackgroundColor = "bg-transparent";
 
   if (isSelected) {
     if (isRemoved) {
@@ -38,7 +38,7 @@ export default function OptimizeTableCell({
     } else if (isNew) {
       cellBackgroundColor = "bg-green-200 dark:bg-green-700";
     } else {
-      cellBackgroundColor = "bg-blue-100 dark:bg-sky-900";
+      cellBackgroundColor = "";
     }
   } else if (isChanged) {
     cellBackgroundColor = "bg-yellow-100 dark:bg-orange-700";
@@ -49,11 +49,11 @@ export default function OptimizeTableCell({
   }
 
   const cellClassName = cn(
-    "box-border",
-    isSelected && "border-blue-300 dark:border-blue-500",
-    isBorderBottom && "border-b border-b-blue-500",
-    isBorderRight && "border-r border-r-blue-500",
-    isFocus && "shadow-[0_0_0_1px_rgba(0,0,255,0.5)_inset]",
+    "box-border hover:bg-neutral-100 dark:hover:bg-neutral-800",
+    isSelected && "border-neutral-950 dark:border-neutral-50",
+    isBorderBottom && "border-b border-b-neutral-950 dark:border-b-neutral-50",
+    isBorderRight && "border-r border-r-neutral-950 dark:border-r-neutral-50",
+    isFocus && "shadow-[0_0_0_1px_rgba(0,0,0,0.5)_inset] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset]",
     isSticky && "sticky",
     cellBackgroundColor
   );
