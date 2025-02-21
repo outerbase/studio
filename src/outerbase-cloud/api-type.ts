@@ -133,6 +133,7 @@ export interface OuterbaseAPISession {
   oauth_verified_at: string | null;
   expires_at: string | null;
   token: string;
+  email_verified_at: string | null;
 }
 
 export interface OuterbaseAPIUser {
