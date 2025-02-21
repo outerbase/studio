@@ -18,7 +18,7 @@ export default function DataCatalogResultHeader({
   driver,
 }: DataCatalogResultHeaderProps) {
   const column = driver.getColumn(schemaName, tableName, columnName);
-  const [definition, setDefinition] = useState("");
+  const [definition, setDefinition] = useState(column?.definition || "");
   const [loading, setLoading] = useState(false);
 
   const onSaveClicked = useCallback(() => {
