@@ -14,20 +14,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DatabaseTableSchema } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
-import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import { Blend, ChevronDown, Edit3, LucideMoreHorizontal } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useMemo, useState } from "react";
 import DataCatalogTableColumn from "./data-catalog-table-column";
+import { useDataCatalogContext } from "./data-model-tab";
 import DataCatalogDriver from "./driver";
 import TableMetadataModal from "./table-metadata-modal";
 import VirtualJoinColumn from "./virtual-column";
-import VirtualJoinModal from "./virtual-join-modal";
+import { virtualJoinDialog } from "./virtual-join-modal";
 
 interface DataCatalogTableAccordionProps {
   table: DatabaseTableSchema;
   driver: DataCatalogDriver;
-  search?: string;
   columnName?: string;
   hasDefinitionOnly?: boolean;
 }
@@ -35,69 +33,16 @@ interface DataCatalogTableAccordionProps {
 export default function DataCatalogTableAccordion({
   table,
   driver,
-  search,
   hasDefinitionOnly,
 }: DataCatalogTableAccordionProps) {
   const modelTable = driver.getTable(table.schemaName, table.tableName!);
+  const virtualJoinList = modelTable?.relations ?? [];
+
   const [collapsible, setCollapsible] = useState(false);
-  const [seletedColumn, setSelectedColumn] = useState<
-    OuterbaseDataCatalogComment | undefined
-  >();
+  const { search } = useDataCatalogContext();
   const [open, setOpen] = useState(false);
-  const [openVirtualModal, setOpenVirtaulModal] = useState(false);
 
-  const onDeletRelationship = useCallback(
-    (id: string) => {
-      driver.deleteVirtualColumn(table.schemaName, table.tableName!, id);
-    },
-    [driver, table]
-  );
-
-  const onToggleHideFromEzql = useCallback(
-    (
-      modelColumn?: OuterbaseDataCatalogComment,
-      cb?: () => void,
-      isVirtual?: boolean
-    ) => {
-      if (!modelColumn) return;
-      driver
-        .updateColumn(
-          table.schemaName,
-          table.tableName!,
-          {
-            flags: modelColumn.flags,
-            body: modelColumn.body,
-            column: modelColumn.column,
-            sample_data: modelColumn.sample_data,
-            schema: modelColumn.schema,
-            table: modelColumn.table,
-            virtual_key_column: modelColumn.virtualKeyColumn,
-            virtual_key_schema: modelColumn.virtualKeySchema,
-            virtual_key_table: modelColumn.virtualKeyTable,
-          },
-          modelColumn.id,
-          isVirtual
-        )
-        .then(() => {
-          let msg = `${modelColumn.column} is turned ${modelColumn.flags.isActive ? "on" : "off"}`;
-          if (isVirtual) {
-            msg = "Virtual relationship status updated.";
-          }
-          toast.success(msg);
-        })
-        .catch((error) => toast.error(error.message))
-        .finally(() => {
-          cb && cb();
-        });
-    },
-    [driver, table]
-  );
-
-  const tableMetadata = useMemo(() => {
-    if (modelTable && modelTable.metadata) {
-      return modelTable.metadata;
-    }
-  }, [modelTable]);
+  const tableMetadata = modelTable?.metadata;
 
   // Check if any of the column match?
   const matchColumns = useMemo(() => {
@@ -116,13 +61,6 @@ export default function DataCatalogTableAccordion({
     return true;
   }, [search, table]);
 
-  const virtualJoins = useMemo(() => {
-    if (modelTable?.virtualJoin && modelTable.virtualJoin.length > 0) {
-      return modelTable.virtualJoin;
-    }
-    return [];
-  }, [modelTable]);
-
   // this will work only toggle check box
   if (hasDefinitionOnly) {
     const columnsDefinition = table.columns
@@ -132,10 +70,9 @@ export default function DataCatalogTableAccordion({
           table.tableName!,
           col.name
         );
-        return !!modelColumn?.body;
+        return modelColumn?.definition;
       })
       .filter(Boolean);
-
     if (columnsDefinition.length === 0) {
       return null;
     }
@@ -151,30 +88,11 @@ export default function DataCatalogTableAccordion({
         <DialogContent>
           {open && (
             <TableMetadataModal
-              driver={driver}
               schemaName={table.schemaName}
               tableName={table.tableName!}
               data={tableMetadata}
               onClose={() => {
                 setOpen(false);
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={openVirtualModal} onOpenChange={setOpenVirtaulModal}>
-        <DialogContent>
-          {openVirtualModal && (
-            <VirtualJoinModal
-              driver={driver}
-              data={seletedColumn}
-              tableName={table.tableName!}
-              schemaName={table.schemaName}
-              onSuccess={() => setCollapsible(true)}
-              onClose={() => {
-                setOpenVirtaulModal(false);
-                setSelectedColumn(undefined);
               }}
             />
           )}
@@ -199,9 +117,9 @@ export default function DataCatalogTableAccordion({
                       </span>
                     </div>
                   )}
-                  {tableMetadata?.body && (
+                  {tableMetadata?.definition && (
                     <div className="mt-2 text-base font-semibold">
-                      {tableMetadata?.body}
+                      {tableMetadata?.definition}
                     </div>
                   )}
                 </div>
@@ -228,10 +146,18 @@ export default function DataCatalogTableAccordion({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    disabled={modelTable?.virtualJoin.length === 0}
                     onClick={() => {
-                      setOpenVirtaulModal(true);
-                      setSelectedColumn(undefined);
+                      virtualJoinDialog.show({
+                        driver,
+                        relation: {
+                          schemaName: table.schemaName,
+                          tableName: table.tableName || "",
+                          referenceTableName: "",
+                          referenceColumnName: "",
+                          columnName: "",
+                          hide: false,
+                        },
+                      });
                     }}
                     className="gap-1"
                   >
@@ -256,33 +182,17 @@ export default function DataCatalogTableAccordion({
               return (
                 <DataCatalogTableColumn
                   key={column.name}
-                  table={table}
                   column={column}
-                  driver={driver}
-                  search={search}
+                  table={table}
                   hasDefinitionOnly={hasDefinitionOnly}
-                  onToggleHideFromEzql={onToggleHideFromEzql}
                 />
               );
             })}
-            {virtualJoins.length > 0 && (
+            {virtualJoinList.length > 0 && (
               <div className="rounded-xl border border-neutral-200 p-3 hover:bg-white dark:border-neutral-800/50 dark:bg-neutral-950 dark:text-white">
                 <div className="p-3 font-bold">Relationships</div>
-                {virtualJoins.map((column) => {
-                  return (
-                    <VirtualJoinColumn
-                      data={column}
-                      key={column.id}
-                      onEditRelationship={() => {
-                        setOpenVirtaulModal(true);
-                        setSelectedColumn(column);
-                      }}
-                      onToggleHideFromEzql={onToggleHideFromEzql}
-                      onDeletRelatinship={() => {
-                        onDeletRelationship(column.id);
-                      }}
-                    />
-                  );
+                {virtualJoinList.map((column) => {
+                  return <VirtualJoinColumn data={column} key={column.id} />;
                 })}
               </div>
             )}

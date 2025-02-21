@@ -8,88 +8,58 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  OuterbaseDataCatalogComment,
-  OuterbaseDataCatalogVirtualColumnInput,
-} from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import DataCatalogDriver from "./driver";
+import { useDataCatalogContext } from "./data-model-tab";
+import { DataCatalogTableMetadata } from "./driver";
 
 interface DataCatalogTableColumnModalProps {
-  driver: DataCatalogDriver;
   schemaName: string;
   tableName: string;
   onClose: () => void;
-  data?: OuterbaseDataCatalogComment;
+  data?: DataCatalogTableMetadata;
 }
 
-interface TableMetadataInput {
-  alias: string;
-  body: string;
-  flags: { isActive: boolean; isVirtualKey: boolean };
-  sample_data: string;
-  schema: string;
-  table: string;
-  unit: string | null;
-  virtual_key_column: string;
-  virtual_key_schema: string;
-  virtual_key_table: string;
-}
-
-const defaultMetadata: TableMetadataInput = {
-  alias: "",
-  body: "",
-  flags: { isActive: true, isVirtualKey: false },
-  sample_data: "",
-  schema: "",
-  table: "",
-  unit: null,
-  virtual_key_column: "",
-  virtual_key_schema: "",
-  virtual_key_table: "",
-};
 export default function TableMetadataModal({
-  driver,
   schemaName,
   tableName,
   onClose,
   data,
 }: DataCatalogTableColumnModalProps) {
-  const [metadataInput, setMetadataInput] = useState<TableMetadataInput>(() => {
-    if (data) {
+  const { driver } = useDataCatalogContext();
+  const [metadataInput, setMetadataInput] = useState<DataCatalogTableMetadata>(
+    () => {
+      if (data) return data;
       return {
-        alias: data.alias || "",
-        body: data.body,
-        flags: data.flags,
-        sample_data: data.sample_data,
-        schema: data.schema,
-        table: data.table,
-        unit: data.unit,
-        virtual_key_column: "",
-        virtual_key_schema: "",
-        virtual_key_table: "",
+        alias: tableName,
+        definition: "",
+        columnName: "",
+        tableName: tableName,
+        samples: [],
+        schemaName: schemaName,
+        hide: false,
       };
     }
-    return {
-      ...defaultMetadata,
-      alias: tableName,
-    };
-  });
+  );
 
   const [loading, setLoading] = useState(false);
 
   const onSaveUpdateColumn = useCallback(() => {
     setLoading(true);
-    const metaInput = {
-      ...metadataInput,
-      alias: metadataInput.alias || tableName,
-    } as unknown as OuterbaseDataCatalogVirtualColumnInput;
+
     driver
-      .updateTable(schemaName, tableName, metaInput, data?.id)
+      .updateTable(schemaName, tableName, {
+        alias: metadataInput.alias,
+        definition: metadataInput.definition,
+        tableName: tableName,
+        schemaName: schemaName,
+        columnName: metadataInput.columnName,
+        samples: [],
+        hide: true,
+      })
       .then(() => {
-        toast.success(`Metatdata ${data?.id ? "updated" : "created"}`);
+        toast.success(`Metatdata ${data ? "updated" : "created"}`);
       })
       .catch((error) => {
         toast.error(error.message);
@@ -127,12 +97,12 @@ export default function TableMetadataModal({
         <div className="flex flex-col gap-2">
           <Label className="text-sm">Table Description</Label>
           <Textarea
-            value={metadataInput.body}
+            value={metadataInput.definition}
             rows={4}
             onChange={(e) => {
               setMetadataInput((prev) => {
                 return produce(prev, (draft) => {
-                  draft.body = e.target.value;
+                  draft.definition = e.target.value;
                 });
               });
             }}

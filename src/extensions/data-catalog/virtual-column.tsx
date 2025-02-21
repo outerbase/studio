@@ -8,49 +8,56 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { OuterbaseDataCatalogComment } from "@/outerbase-cloud/api-type";
 import { Edit3, LucideMoreHorizontal, Trash } from "lucide-react";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { useDataCatalogContext } from "./data-model-tab";
+import { DataCatalogTableRelationship } from "./driver";
+import { virtualJoinDialog } from "./virtual-join-modal";
 
 interface Props {
-  data: OuterbaseDataCatalogComment;
-  onDeletRelatinship: () => void;
-  onEditRelationship: () => void;
-  onToggleHideFromEzql: (
-    column?: OuterbaseDataCatalogComment,
-    cb?: () => void,
-    isVirtual?: boolean
-  ) => void;
+  data: DataCatalogTableRelationship;
 }
 
-export default function VirtualJoinColumn({
-  data,
-  onToggleHideFromEzql,
-  onEditRelationship,
-  onDeletRelatinship,
-}: Props) {
-  const [isActive, setIsActive] = useState<boolean>(() => {
-    if (data.flags) {
-      return data?.flags.isActive;
-    }
-    return true;
-  });
+export default function VirtualJoinColumn({ data }: Props) {
+  const { driver } = useDataCatalogContext();
+  const [isActive, setIsActive] = useState<boolean>(() => data.hide);
+
+  const onDeletRelationship = useCallback(() => {
+    driver
+      .deleteVirtualColumn(data.id)
+      .catch((error) => toast.error(error.message));
+  }, [driver, data.id]);
 
   const handleClickToggle = useCallback(() => {
-    setIsActive(!isActive);
-    onToggleHideFromEzql(
-      {
-        ...data,
-        flags: {
-          ...data.flags,
-          isActive: !isActive,
-        },
-      },
-      // call me back when you're done
-      () => {},
-      true
-    );
-  }, [data, isActive, onToggleHideFromEzql]);
+    const newActiveState = !isActive;
+
+    setIsActive(newActiveState);
+    const column = {
+      hide: newActiveState,
+      schemaName: data.schemaName,
+      tableName: data.tableName,
+      columnName: data.columnName,
+      referenceTableName: data.referenceTableName,
+      referenceColumnName: data.referenceColumnName,
+    };
+    if (data.id) {
+      driver
+        .updateVirtualJoin({ ...column, id: data.id })
+        .then(() => {
+          toast.success(
+            `${data.columnName} is turned ${isActive ? "off" : "on"}`
+          );
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      driver.addVirtualJoin(column).then(() => {
+        toast.success(`${data.columnName} is turned on`);
+      });
+    }
+  }, [driver, data, isActive]);
 
   return (
     <div
@@ -65,14 +72,13 @@ export default function VirtualJoinColumn({
         Virtual Relationship
       </div>
       <div className="flex w-[150px] items-center p-2 text-base">
-        {data.column}
+        {data.referenceColumnName}
       </div>
+
       <div className="flex w-[150px] items-center p-2 text-base">
-        {data.virtualKeyTable}
+        {data.referenceTableName}
       </div>
-      <div className="flex w-[150px] items-center p-2 text-base">
-        {data.body}
-      </div>
+
       <div className="flex-1" />
       {
         //=================
@@ -86,13 +92,24 @@ export default function VirtualJoinColumn({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="p-2">
-          <DropdownMenuItem className="gap-5" onClick={onEditRelationship}>
+          <DropdownMenuItem
+            className="gap-5"
+            onClick={() => {
+              virtualJoinDialog
+                .show({
+                  driver,
+                  relation: data,
+                })
+                .then()
+                .catch();
+            }}
+          >
             Edit Relationship
             <div className="flex-1" />
             <Edit3 className="h-4 w-4" />
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="gap-5" onClick={onDeletRelatinship}>
+          <DropdownMenuItem className="gap-5" onClick={onDeletRelationship}>
             Delete Virtual FK
             <div className="flex-1" />
             <Trash className="h-4 w-4" />

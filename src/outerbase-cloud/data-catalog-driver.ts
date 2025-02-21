@@ -1,6 +1,9 @@
 import DataCatalogDriver, {
-  DataCatalogModelTable,
-  DataCatalogSchemas,
+  DataCatalogColumn,
+  DataCatalogColumnInput,
+  DataCatalogTable,
+  DataCatalogTableMetadata,
+  DataCatalogTableRelationship,
   DataCatalogTermDefinition,
 } from "@/extensions/data-catalog/driver";
 import {
@@ -10,7 +13,6 @@ import {
   deleteOuterbaseDefinition,
   getOuterbaseBaseComments,
   getOuterbaseDefinitions,
-  getOuterbaseSchemas,
   updateOuerbaseDefinition,
   updateOuterbaseDataCatalogVirtualColumn,
 } from "./api-data-catalog";
@@ -20,11 +22,10 @@ import {
   OuterbaseDataCatalogDefinition,
   OuterbaseDataCatalogVirtualColumnInput,
 } from "./api-type";
-import { transformOuterbaseSchema } from "./util";
 
 export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
-  private schemas: DataCatalogSchemas = {};
   private definitions: OuterbaseDataCatalogDefinition[] = [];
+  protected comments: OuterbaseDataCatalogComment[] = [];
   protected config: OuterbaseDatabaseConfig;
   private subscribers: Set<() => void> = new Set();
 
@@ -33,30 +34,25 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
   }
 
   async load(): Promise<{
-    schemas: DataCatalogSchemas;
     definitions: OuterbaseDataCatalogDefinition[];
   }> {
     const { sourceId, workspaceId, baseId } = this.config;
-    const [schemas, comments, definition] = await Promise.all([
-      getOuterbaseSchemas(workspaceId, sourceId, baseId),
+    const [comments, definition] = await Promise.all([
       getOuterbaseBaseComments(workspaceId, sourceId, baseId!),
       getOuterbaseDefinitions(workspaceId, baseId!),
     ]);
-    const transformedSchemas = transformOuterbaseSchema(
-      schemas,
-      comments.items
-    );
-    this.schemas = transformedSchemas;
+
     this.definitions = definition.items;
+    this.comments = comments.items;
+
     return {
-      schemas: this.schemas,
       definitions: this.definitions,
     };
   }
 
   private async createUpdateColumn(
-    data: OuterbaseDataCatalogVirtualColumnInput,
-    id?: string
+    id: string | undefined,
+    data: OuterbaseDataCatalogVirtualColumnInput
   ) {
     if (id) {
       return await updateOuterbaseDataCatalogVirtualColumn(
@@ -74,188 +70,308 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
     }
   }
 
+  private getCommentById(id: string): OuterbaseDataCatalogComment | undefined {
+    return this.comments.find((c) => c.id === id);
+  }
+
+  private getComment(
+    schemaName: string,
+    tableName: string,
+    columnName: string,
+    isVirtualKey: boolean
+  ): OuterbaseDataCatalogComment | undefined {
+    const normalizedSchemaName = schemaName.toLowerCase();
+    const normalizedTableName = tableName.toLowerCase();
+    const normalizedColumnName = columnName.toLowerCase();
+    if (this.comments.length === 0) return;
+    const comment = this.comments.find(
+      (c) =>
+        c.schema?.toLowerCase() === normalizedSchemaName &&
+        c.table?.toLowerCase() === normalizedTableName &&
+        c.column?.toLowerCase() === normalizedColumnName &&
+        c.flags.isVirtualKey === isVirtualKey
+    );
+
+    return comment;
+  }
+
   async updateColumn(
     schemaName: string,
     tableName: string,
-    data: OuterbaseDataCatalogVirtualColumnInput,
-    commentId?: string,
-    isVirtual?: boolean
-  ): Promise<OuterbaseDataCatalogComment> {
-    const result = await this.createUpdateColumn(data, commentId);
+    columnName: string,
+    data: DataCatalogColumnInput
+  ): Promise<DataCatalogColumn> {
+    // Check if it exists in the outerbase comment
+    const comment = this.getComment(schemaName, tableName, columnName, false);
+    const inputData: OuterbaseDataCatalogVirtualColumnInput = {
+      body: data.definition,
+      column: columnName,
+      schema: schemaName,
+      table: tableName,
+      sample_data: data.samples.join(","),
+      flags: {
+        isActive: data.hide,
+        isVirtualKey: false,
+      },
+      virtual_key_column: "",
+      virtual_key_schema: "",
+      virtual_key_table: "",
+    };
 
+    const result = await this.createUpdateColumn(comment?.id, inputData);
     if (result) {
-      const normalizedSchemaName = schemaName.toLowerCase();
-      const normalizedTableName = tableName.toLowerCase();
+      const updatedComments = this.comments;
+      const index = updatedComments.findIndex((c) => c.id === comment?.id);
+      if (index > -1) {
+        updatedComments[index] = {
+          ...updatedComments[index],
+          ...result,
+        };
 
-      if (
-        this.schemas[normalizedSchemaName] &&
-        this.schemas[normalizedSchemaName][normalizedTableName]
-      ) {
-        const table = this.schemas[normalizedSchemaName][normalizedTableName];
-
-        if (isVirtual) {
-          const index = table.virtualJoin.findIndex(
-            (vc) => vc.id === commentId
-          );
-          if (index > -1) {
-            table.virtualJoin[index] = {
-              ...table.virtualJoin[index],
-              ...result,
-            };
-          } else {
-            table.virtualJoin?.push(result);
-          }
-        } else if (data.column) {
-          table.columns[data.column] = {
-            ...table.columns[data.column],
-            ...result,
-          };
-        }
-        // notify update driver
-        this.notify();
+        this.comments = updatedComments;
+      } else {
+        this.comments.unshift(result);
       }
     }
 
-    return result;
+    //notify update driver
+
+    this.notify();
+
+    return {
+      ...data,
+      columnName,
+      tableName,
+      schemaName,
+    };
   }
 
-  async deleteVirtualColumn(
-    schemaName: string,
-    tableName: string,
-    id: string
-  ): Promise<boolean> {
+  async addVirtualJoin(
+    data: Omit<DataCatalogTableRelationship, "id">
+  ): Promise<DataCatalogTableRelationship> {
+    const inputData: OuterbaseDataCatalogVirtualColumnInput = {
+      body: "",
+      column: data.columnName,
+      schema: data.schemaName,
+      table: data.tableName,
+      sample_data: "",
+      flags: {
+        isActive: true,
+        isVirtualKey: true,
+      },
+      virtual_key_column: data.referenceColumnName,
+      virtual_key_schema: data.schemaName,
+      virtual_key_table: data.referenceTableName,
+    };
+    const result = await this.createUpdateColumn(undefined, inputData);
+    if (result) {
+      this.comments.unshift(result);
+      //notify update driver
+      this.notify();
+    }
+    return {
+      id: result.id,
+      schemaName: result.schema,
+      tableName: result.table,
+      columnName: result.column,
+      referenceTableName: result.virtualKeyTable,
+      referenceColumnName: result.virtualKeyColumn,
+      hide: result.flags.isActive,
+    };
+  }
+
+  async deleteVirtualColumn(id: string): Promise<boolean> {
     const success = await deleteOutebaseDataCatalogVirtualColumn(
       this.config.workspaceId,
       this.config.sourceId,
       id
     );
-    if (success) {
-      const normalizedSchemaName = schemaName.toLowerCase();
-      const normalizedTableName = tableName.toLowerCase();
 
-      if (
-        this.schemas[normalizedSchemaName] &&
-        this.schemas[normalizedSchemaName][normalizedTableName]
-      ) {
-        const table = this.schemas[normalizedSchemaName][normalizedTableName];
-        table.virtualJoin =
-          table.virtualJoin?.filter((vc) => vc.id !== id) || [];
-        // notify update driver
-        this.notify();
-      }
+    if (success) {
+      const updatedComments = this.comments.filter((c) => c.id !== id);
+      this.comments = updatedComments;
+      //notify update driver
+      this.notify();
     }
 
     return success;
   }
 
-  async updateTable(
-    schemaName: string,
-    tableName: string,
-    data: OuterbaseDataCatalogVirtualColumnInput,
-    commentId: string
-  ): Promise<DataCatalogModelTable | undefined> {
-    const result = await this.createUpdateColumn(data, commentId);
+  async updateVirtualJoin(
+    data: DataCatalogTableRelationship
+  ): Promise<boolean> {
+    const comment = this.getCommentById(data.id);
+    if (!comment) return false;
 
-    if (result) {
-      const normalizedSchemaName = schemaName.toLowerCase();
-      const normalizedTableName = tableName.toLowerCase();
-
-      if (!this.schemas[normalizedSchemaName]) {
-        this.schemas[normalizedSchemaName] = {};
-      }
-
-      const schemas = this.schemas[normalizedSchemaName];
-
-      if (!schemas[normalizedTableName]) {
-        schemas[normalizedTableName] = {
-          schemaName: normalizedSchemaName,
-          tableName: normalizedTableName,
-          columns: {},
-          virtualJoin: [],
-        };
-      }
-      const table = schemas[normalizedTableName];
-
-      this.schemas[schemaName][tableName] = {
-        ...table,
-        metadata: result,
-      };
-
-      this.notify();
-      return schemas[normalizedTableName];
-    }
-  }
-
-  async updateTermDefinition(
-    data: DataCatalogTermDefinition
-  ): Promise<OuterbaseDataCatalogDefinition | undefined> {
-    if (!data) return;
-    let result;
-    const inputData = {
-      name: data.name,
-      otherNames: data.otherNames,
-      definition: data.definition!,
+    const inputData: OuterbaseDataCatalogVirtualColumnInput = {
+      body: comment.body,
+      column: data.columnName,
+      schema: data.schemaName,
+      table: data.tableName,
+      sample_data: comment.sample_data,
+      flags: {
+        isActive: data.hide,
+        isVirtualKey: true,
+      },
+      virtual_key_column: data.referenceColumnName,
+      virtual_key_schema: data.schemaName,
+      virtual_key_table: data.referenceTableName,
     };
-    if (data.id) {
-      result = await updateOuerbaseDefinition(
-        this.config.workspaceId,
-        this.config.baseId!,
-        data.id,
-        inputData
-      );
-    } else {
-      result = await createOuterbaseDefinition(
-        this.config.workspaceId,
-        this.config.baseId!,
-        inputData
-      );
-    }
 
+    const result = await this.createUpdateColumn(comment.id, inputData);
     if (result) {
-      const updatedDefinitions = this.definitions;
-      const index = updatedDefinitions.findIndex((def) => def.id === data.id);
+      const updatedComments = this.comments;
+      const index = updatedComments.findIndex((c) => c.id === comment.id);
       if (index > -1) {
-        updatedDefinitions[index] = {
-          ...updatedDefinitions[index],
-          ...data,
+        updatedComments[index] = {
+          ...updatedComments[index],
+          ...result,
         };
-        this.definitions = updatedDefinitions;
+        this.comments = updatedComments;
       } else {
-        this.definitions.unshift(result);
+        this.comments.unshift(result);
       }
       //notify update driver
       this.notify();
+      return true;
     }
-    return result;
+
+    return false;
+  }
+
+  async updateTable(
+    schemaName: string,
+    tableName: string,
+    data: DataCatalogTableMetadata
+  ): Promise<DataCatalogTable | undefined> {
+    const normalizedSchemaName = schemaName.toLowerCase();
+    const normalizedTableName = tableName.toLowerCase();
+    const comment = this.comments.find(
+      (c) =>
+        c.schema?.toLowerCase() === normalizedSchemaName &&
+        c.table?.toLowerCase() === normalizedTableName &&
+        !c.flags.isVirtualKey &&
+        !!c.alias
+    );
+
+    const inputData: OuterbaseDataCatalogVirtualColumnInput = {
+      alias: data.alias,
+      body: data.definition,
+      schema: schemaName,
+      table: tableName,
+      sample_data: data.samples.join(","),
+      flags: {
+        isActive: data.hide,
+        isVirtualKey: false,
+      },
+      virtual_key_column: "",
+      virtual_key_table: "",
+      virtual_key_schema: "",
+    };
+    const result = await this.createUpdateColumn(comment?.id, inputData);
+
+    if (result) {
+      const updatedComments = this.comments;
+      const index = updatedComments.findIndex((c) => c.id === comment?.id);
+      if (index > -1) {
+        updatedComments[index] = {
+          ...updatedComments[index],
+          ...result,
+        };
+        this.comments = updatedComments;
+      } else {
+        this.comments.unshift(result);
+      }
+    }
+    const table = this.getTable(schemaName, tableName);
+
+    this.notify();
+    //notify update driver
+
+    return table;
   }
 
   getColumn(
     schemaName: string,
     tableName: string,
     columnName: string
-  ): OuterbaseDataCatalogComment | undefined {
-    const normalizedColumnName = columnName.toLowerCase();
-    const table = this.getTable(schemaName, tableName);
-    return table?.columns[normalizedColumnName];
+  ): DataCatalogColumn | undefined {
+    const comment = this.getComment(schemaName, tableName, columnName, false);
+    if (!comment) return;
+    return {
+      schemaName: comment.schema,
+      tableName: comment.table,
+      columnName: comment.column,
+      definition: comment.body,
+      samples:
+        comment.sample_data && comment.sample_data.trim()
+          ? comment.sample_data.split(",")
+          : [],
+      hide: comment.flags.isActive,
+    };
   }
 
   getTable(
     schemaName: string,
     tableName: string
-  ): DataCatalogModelTable | undefined {
+  ): DataCatalogTable | undefined {
     const normalizedSchemaName = schemaName.toLowerCase();
     const normalizedTableName = tableName.toLowerCase();
+    const columns = this.comments.filter(
+      (c) =>
+        c.schema?.toLowerCase() === normalizedSchemaName &&
+        c.table?.toLowerCase() === normalizedTableName &&
+        !c.flags.isVirtualKey
+    );
 
-    if (!this.schemas[normalizedSchemaName]) {
-      return;
-    }
+    const relations = this.comments.filter(
+      (c) =>
+        c.schema?.toLowerCase() === normalizedSchemaName &&
+        c.table?.toLowerCase() === normalizedTableName &&
+        c.flags?.isVirtualKey
+    );
 
-    const schemas = this.schemas[normalizedSchemaName];
-    if (!schemas[normalizedTableName]) {
-      return;
-    }
+    const metadata = this.comments.find(
+      (c) =>
+        c.schema?.toLowerCase() === normalizedSchemaName &&
+        c.table?.toLowerCase() === normalizedTableName &&
+        !c.flags.isVirtualKey &&
+        !!c.alias
+    );
 
-    const table = schemas[normalizedTableName];
+    const table: DataCatalogTable = {
+      schemaName,
+      tableName,
+      columns: columns.map((c) => ({
+        schemaName: c.schema,
+        tableName: c.table,
+        columnName: c.column,
+        definition: c.body,
+        samples: c.sample_data.split(","),
+        hide: c.flags.isActive,
+      })),
+      relations: relations.map((c) => ({
+        id: c.id,
+        schemaName: c.schema,
+        tableName: c.table,
+        columnName: c.column,
+        referenceTableName: c.virtualKeyTable,
+        referenceColumnName: c.virtualKeyColumn,
+        hide: c.flags.isActive,
+      })),
+      metadata: metadata
+        ? {
+            tableName: metadata.table,
+            alias: metadata.alias || "",
+            definition: metadata.body,
+            columnName: metadata.column,
+            schemaName: metadata.schema,
+            samples: [],
+            hide: false,
+          }
+        : undefined,
+    };
+
     return table;
   }
 
@@ -266,6 +382,60 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
     return this.definitions;
   }
 
+  async addTermDefinition(
+    data: Omit<DataCatalogTermDefinition, "id">
+  ): Promise<DataCatalogTermDefinition | undefined> {
+    if (!data) return;
+    const inputData = {
+      name: data.name,
+      otherNames: data.otherNames,
+      definition: data.definition!,
+    };
+
+    const result = await createOuterbaseDefinition(
+      this.config.workspaceId,
+      this.config.baseId!,
+      inputData
+    );
+
+    if (result) {
+      this.definitions.unshift(result);
+      //notify update driver
+      this.notify();
+    }
+    return result;
+  }
+  async updateTermDefinition(
+    data: DataCatalogTermDefinition
+  ): Promise<OuterbaseDataCatalogDefinition | undefined> {
+    if (!data) return;
+    const inputData = {
+      name: data.name,
+      otherNames: data.otherNames,
+      definition: data.definition!,
+    };
+
+    const result = await updateOuerbaseDefinition(
+      this.config.workspaceId,
+      this.config.baseId!,
+      data.id,
+      inputData
+    );
+    if (result) {
+      const updatedDefinitions = this.definitions;
+      const index = updatedDefinitions.findIndex((def) => def.id === data.id);
+      updatedDefinitions[index] = {
+        ...updatedDefinitions[index],
+        ...result,
+      };
+      this.definitions = updatedDefinitions;
+
+      //notify update driver
+      this.notify();
+    }
+    return result;
+  }
+
   async deleteTermDefinition(id: string): Promise<boolean> {
     try {
       await deleteOuterbaseDefinition(
@@ -273,6 +443,7 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
         this.config.baseId!,
         id
       );
+
       const newDefinitions = this.definitions.filter((def) => def.id !== id);
       this.definitions = newDefinitions;
       //notify update driver
@@ -283,13 +454,11 @@ export default class DataCatalogOuterbaseDriver implements DataCatalogDriver {
     }
   }
 
-  addEventListener(callback: () => void) {
-    this.subscribers.add(callback);
-    return () => this.removeEventListener(callback);
-  }
-
-  removeEventListener(callback: () => void) {
-    this.subscribers.delete(callback);
+  listen(cb: () => void): () => void {
+    this.subscribers.add(cb);
+    return () => {
+      this.subscribers.delete(cb);
+    };
   }
 
   // Notify all subscribers
