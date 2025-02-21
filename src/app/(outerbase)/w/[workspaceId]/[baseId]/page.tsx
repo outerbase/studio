@@ -24,6 +24,7 @@ export default function OuterbaseSourcePage() {
     workspaceId: string;
     baseId: string;
   }>();
+  const [name, setName] = useState<string>("");
   const [source, setSource] = useState<OuterbaseAPISource>();
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function OuterbaseSourcePage() {
     getOuterbaseBase(workspaceId, baseId).then((base) => {
       if (!base) return;
       setSource(base.sources[0]);
+      setName(base.name);
     });
   }, [workspaceId, baseId]);
 
@@ -93,7 +95,7 @@ export default function OuterbaseSourcePage() {
       driver={outerbaseDriver}
       docDriver={savedDocDriver}
       extensions={extensions}
-      name="Storybook Testing"
+      name={name}
     />
   );
 }

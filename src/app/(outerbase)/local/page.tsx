@@ -5,7 +5,13 @@ import {
   SavedConnectionLocalStorage,
 } from "@/app/(theme)/connect/saved-connection-storage";
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CaretDown } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
@@ -89,18 +95,71 @@ export default function LocalConnectionPage() {
         </div>
 
         <div className="my-4 flex gap-4">
-          <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">
-            <SQLiteIcon className="h-10 w-10" />
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-base font-bold">SQLite Playgorund</span>
-              <span className="text-sm">
-                Launch in-memory SQLite on browser
-              </span>
-            </div>
-            <CaretDown className="ml-4 h-4 w-4" />
-          </button>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <button className="bg-background dark:bg-secondary flex cursor-pointer items-center gap-2 rounded-lg border p-4">
+                <SQLiteIcon className="h-10 w-10" />
+                <div className="flex flex-col gap-1 text-left">
+                  <span className="text-base font-bold">SQLite Playground</span>
+                  <span className="text-sm">
+                    Launch in-memory SQLite on browser
+                  </span>
+                </div>
+                <CaretDown className="ml-4 h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="flex w-[500px] flex-col gap-4 p-4"
+              align="start"
+            >
+              <Link
+                href="/playground/client"
+                className="bg-secondary hover:bg-primary hover:text-primary-foreground flex cursor-pointer flex-col gap-2 rounded p-2 py-4 text-base font-bold"
+              >
+                Open Empty SQLite Database
+              </Link>
 
-          <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">
+              <div className="flex gap-4">
+                <Link
+                  href="/playground/client?template=northwind"
+                  className="bg-secondary hover:bg-primary hover:text-primary-foreground flex cursor-pointer flex-col gap-2 rounded p-2 text-left text-base"
+                >
+                  <span className="font-bold">Northwind</span>
+                  <span className="text-sm">
+                    The Northwind Database is a sample business database for
+                    learning SQL queries and database design.
+                  </span>
+                </Link>
+
+                <Link
+                  href="/playground/client?template=chinook"
+                  className="bg-secondary hover:bg-primary hover:text-primary-foreground flex cursor-pointer flex-col gap-2 rounded p-2 text-left text-base"
+                >
+                  <span className="font-bold">Chinook</span>
+                  <span className="text-sm">
+                    The Chinook Database is a sample digital media store
+                    database for learning and practicing SQL queries.
+                  </span>
+                </Link>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            className="bg-background dark:bg-secondary flex cursor-pointer items-center gap-2 rounded-lg border p-4"
+            onClick={() => {
+              // Random 8 character alphabeth string
+              const roomName = new Array(8)
+                .fill("a")
+                .map(
+                  () =>
+                    "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)]
+                )
+                .join("");
+
+              router.push(`/playground/mysql/${roomName}`);
+            }}
+          >
             <MySQLIcon className="h-10 w-10" />
             <div className="flex flex-col gap-1 text-left">
               <span className="text-base font-bold">MySQL Playgorund</span>
