@@ -8,7 +8,7 @@ import { RQLITE_CONNECTION_TEMPLATE } from "@/components/connection-config-edito
 import { SQLITE_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/sqlite";
 import { TURSO_CONNECTION_TEMPLATE } from "@/components/connection-config-editor/template/turso";
 import { OuterbaseAPISourceInput } from "@/outerbase-cloud/api-type";
-import { SavedConnectionItemConfig } from "../(theme)/connect/saved-connection-storage";
+import { SavedConnectionRawLocalStorage } from "../(theme)/connect/saved-connection-storage";
 
 export interface ConnectionTemplateList<T = any> {
   template: CommonConnectionConfigTemplate;
@@ -18,27 +18,25 @@ export interface ConnectionTemplateList<T = any> {
 
 export const LOCAL_CONNECTION_TEMPLATES: Record<
   string,
-  ConnectionTemplateList<SavedConnectionItemConfig>
+  ConnectionTemplateList<SavedConnectionRawLocalStorage>
 > = {
   "cloudflare-d1": {
     template: CLOUDFLARE_CONNECTION_TEMPLATE,
     from: (value) => {
       return {
         name: value.name,
-        database: value.config.database,
-        token: value.config.token,
-        username: value.config.username,
+        database: value.database,
+        token: value.token,
+        username: value.username,
       };
     },
     to: (value) => {
       return {
         name: value.name,
         driver: "cloudflare-d1",
-        config: {
-          database: value.database,
-          token: value.token,
-          username: value.username,
-        },
+        database: value.database,
+        token: value.token,
+        username: value.username,
       };
     },
   },
@@ -47,18 +45,16 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
     from: (value) => {
       return {
         name: value.name,
-        host: value.config.url,
-        token: value.config.token,
+        host: value.url,
+        token: value.token,
       };
     },
     to: (value) => {
       return {
         name: value.name,
         driver: "turso",
-        config: {
-          url: value.host,
-          token: value.token,
-        },
+        url: value.host,
+        token: value.token,
       };
     },
   },
@@ -67,18 +63,16 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
     from: (value) => {
       return {
         name: value.name,
-        host: value.config.url,
-        token: value.config.token,
+        host: value.url,
+        token: value.token,
       };
     },
     to: (value) => {
       return {
         driver: "starbase",
         name: value.name,
-        config: {
-          url: value.host,
-          token: value.token,
-        },
+        url: value.host,
+        token: value.token,
       };
     },
   },
@@ -87,20 +81,18 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
     from: (value) => {
       return {
         name: value.name,
-        host: value.config.url,
-        username: value.config.username,
-        password: value.config.password,
+        host: value.url,
+        username: value.username,
+        password: value.password,
       };
     },
     to: (value) => {
       return {
         name: value.name,
         driver: "rqlite",
-        config: {
-          url: value.host,
-          username: value.username,
-          password: value.password,
-        },
+        url: value.host,
+        username: value.username,
+        password: value.password,
       };
     },
   },
@@ -109,16 +101,14 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
     from: (value) => {
       return {
         name: value.name,
-        filehandler: value.config.filehandler,
+        filehandler: value.file_handler,
       };
     },
     to: (value) => {
       return {
         name: value.name,
         driver: "sqlite-filehandler",
-        config: {
-          filehandler: value.filehandler,
-        },
+        filehandler: value.filehandler,
       };
     },
   },

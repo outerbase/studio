@@ -1,4 +1,3 @@
-import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import CopyableText from "@/components/copyable-text";
 import { createDialog } from "@/components/create-dialog";
 import LabelInput from "@/components/label-input";
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
+import { removeLocalConnection } from "./hooks";
 
 export const deleteLocalBaseDialog = createDialog<{
   baseId: string;
@@ -19,13 +19,13 @@ export const deleteLocalBaseDialog = createDialog<{
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
 
-  const deleteClicked = useCallback(() => {
+  const deleteClicked = useCallback(async () => {
     if (name !== baseName) return;
 
     setLoading(true);
-
-    SavedConnectionLocalStorage.remove(baseId);
+    await removeLocalConnection(baseId);
     setLoading(false);
+
     close(undefined);
   }, [name, baseId, close, baseName]);
 

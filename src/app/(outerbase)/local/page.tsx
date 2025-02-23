@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  SavedConnectionItem,
-  SavedConnectionLocalStorage,
-} from "@/app/(theme)/connect/saved-connection-storage";
 import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import {
   DropdownMenu,
@@ -14,38 +10,38 @@ import { CaretDown } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import useSWR from "swr";
 import NavigationLayout from "../nav-layout";
 import NewResourceButton from "../new-resource-button";
 import { ResourceItemList, ResourceItemProps } from "../resource-item-helper";
 import { deleteLocalBaseDialog } from "./dialog-base-delete";
 import { createLocalBoardDialog } from "./dialog-board-create";
 import { deleteLocalBoardDialog } from "./dialog-board-delete";
-import { useLocalDashboardList } from "./hooks";
+import { useLocalConnectionList, useLocalDashboardList } from "./hooks";
 
 export default function LocalConnectionPage() {
   const router = useRouter();
-  const {
-    isLoading,
-    data: baseResources,
-    mutate: refreshBase,
-  } = useSWR("/local/bases", async () => {
-    const tmp = SavedConnectionLocalStorage.getList();
 
-    return tmp.map((conn: SavedConnectionItem) => {
+  const {
+    data: localBases,
+    isLoading,
+    mutate: refreshBase,
+  } = useLocalConnectionList();
+
+  const baseResources = useMemo(() => {
+    return (localBases ?? []).map((conn) => {
       return {
         href:
-          conn.driver === "sqlite-filehandler"
+          conn.content.driver === "sqlite-filehandler"
             ? `/playground/client?s=${conn.id}`
-            : `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`,
-        name: conn.name,
-        lastUsed: 0,
+            : `/client/s/${conn.content.driver ?? "turso"}?p=${conn.id}`,
+        name: conn.content.name,
+        lastUsed: conn.updated_at,
         id: conn.id,
-        type: conn.driver,
+        type: conn.content.driver,
         status: "",
       } as ResourceItemProps;
     });
-  });
+  }, [localBases]);
 
   // Getting the board from indexdb
   const { data: dashboardList, mutate: refreshDashboard } =

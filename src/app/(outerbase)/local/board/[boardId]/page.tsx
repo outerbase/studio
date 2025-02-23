@@ -1,6 +1,5 @@
 "use client";
 import NavigationDashboardLayout from "@/app/(outerbase)/nav-board-layout";
-import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import Board, { DashboardProps } from "@/components/board";
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import LocalBoardSource from "@/drivers/board-source/local";
@@ -8,7 +7,7 @@ import LocalBoardStorage from "@/drivers/board-storage/local";
 import { LocalDashboardData } from "@/indexdb";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useLocalDashboardList } from "../../hooks";
+import { getLocalConnectionList, useLocalDashboardList } from "../../hooks";
 
 function LocalBoardWithDataPage({
   initialValue,
@@ -26,8 +25,9 @@ function LocalBoardWithDataPage({
 
   // Loading the local board source
   useEffect(() => {
-    const sources = SavedConnectionLocalStorage.getDetailList();
-    setBoardSources(new LocalBoardSource(sources));
+    getLocalConnectionList().then((sources) => {
+      setBoardSources(new LocalBoardSource(sources.map((s) => s.content)));
+    });
   }, []);
 
   if (!boardSources) return <div>Loading</div>;
