@@ -108,7 +108,7 @@ export const LOCAL_CONNECTION_TEMPLATES: Record<
       return {
         name: value.name,
         driver: "sqlite-filehandler",
-        filehandler: value.filehandler,
+        file_handler: value.filehandler,
       };
     },
   },

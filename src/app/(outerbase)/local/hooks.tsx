@@ -138,6 +138,21 @@ export async function updateLocalConnection(
   return data;
 }
 
+export async function updateLocalConnectionUsed(id: string) {
+  const oldData = await localDb.connection.get(id);
+  if (!oldData) return;
+
+  const data = {
+    ...oldData,
+    updated_at: Date.now(),
+  };
+
+  await localDb.connection.put(data);
+  mutate("/connections/local");
+
+  return data;
+}
+
 export async function getLocalConnectionList() {
   return await localDb.connection.toCollection().toArray();
 }

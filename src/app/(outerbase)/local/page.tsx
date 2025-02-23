@@ -11,7 +11,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import NavigationLayout from "../nav-layout";
-import NewResourceButton from "../new-resource-button";
 import { ResourceItemList, ResourceItemProps } from "../resource-item-helper";
 import { deleteLocalBaseDialog } from "./dialog-base-delete";
 import { createLocalBoardDialog } from "./dialog-board-create";
@@ -86,11 +85,7 @@ export default function LocalConnectionPage() {
   return (
     <NavigationLayout>
       <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
-        <div className="flex gap-2">
-          <NewResourceButton onCreateBoard={onBoardCreate} />
-        </div>
-
-        <div className="my-4 flex gap-4">
+        <div className="mb-4 flex gap-4">
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button className="bg-background dark:bg-secondary flex cursor-pointer items-center gap-2 rounded-lg border p-4">
@@ -175,6 +170,7 @@ export default function LocalConnectionPage() {
           onBaseEdit={(resource) => {
             router.push(`/local/edit-base/${resource.id}`);
           }}
+          onBoardCreate={onBoardCreate}
         />
       </div>
     </NavigationLayout>

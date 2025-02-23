@@ -1,14 +1,23 @@
 "use client";
-import { useLocalConnection } from "@/app/(outerbase)/local/hooks";
+import {
+  updateLocalConnectionUsed,
+  useLocalConnection,
+} from "@/app/(outerbase)/local/hooks";
 import MyStudio from "@/components/my-studio";
 import { createLocalDriver } from "@/drivers/helpers";
 import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function ClientPageBody() {
   const params = useSearchParams();
-  const { data: conn } = useLocalConnection(params.get("p") ?? "");
+  const baseId = params.get("p") ?? "";
+  const { data: conn } = useLocalConnection(baseId);
+
+  useEffect(() => {
+    if (!baseId) return;
+    updateLocalConnectionUsed(baseId).then().catch();
+  }, [baseId]);
 
   const driver = useMemo(() => {
     if (!conn) return null;
