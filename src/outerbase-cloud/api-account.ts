@@ -84,3 +84,7 @@ export async function verifyOuterbaseOTP(token: string) {
 export async function submitVerifyPhone2FA(id: string, data: { code: string }) {
   return await requestOuterbase(`/api/v1/me/phone/${id}/submit`, "POST", data);
 }
+
+export async function deleteOuterbaseUser() {
+  return await requestOuterbase("/api/v1/me", "DELETE");
+}

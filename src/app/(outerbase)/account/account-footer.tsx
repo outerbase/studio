@@ -6,17 +6,21 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { isValidEmail } from "@/lib/validation";
-import { DialogTitle } from "@radix-ui/react-dialog";
+import { deleteOuterbaseUser } from "@/outerbase-cloud/api-account";
 import { Check, Copy } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export default function AccountFooter() {
-  const { session } = useSession();
+  const { session, logout } = useSession();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const copyToClipboard = async () => {
     if (!session) return;
@@ -27,15 +31,35 @@ export default function AccountFooter() {
       console.error("Failed to copy:", error);
     }
   };
+
   const onClose = () => {
     setCopied(false);
     setOpen(false);
     setEmail("");
+    setLoading(false);
   };
+
+  const onDeleteOuerbaseUser = useCallback(() => {
+    setLoading(true);
+    deleteOuterbaseUser()
+      .then(() => {
+        onClose();
+        logout();
+      })
+      .catch((err) => {
+        setLoading(false);
+        toast.error(err.message);
+      });
+  }, [logout]);
+
   const fullName = useMemo(() => {
     if (!session) return;
     return session?.user.first_name + " " + session?.user.last_name;
   }, [session]);
+
+  const disabled = useMemo(() => {
+    return !isValidEmail(email) || email !== session?.user.email;
+  }, [email, session]);
 
   return (
     <>
@@ -48,9 +72,12 @@ export default function AccountFooter() {
         }}
       >
         <DialogContent className="justify-items-start">
-          <DialogTitle>
-            Confirm deletion of {fullName}&apos; account
-          </DialogTitle>
+          <DialogHeader>
+            <DialogTitle>
+              Confirm deletion of {fullName}&apos; account
+            </DialogTitle>
+          </DialogHeader>
+
           <DialogDescription className="text-base">
             Deleting this account will delete all Bases and Workspaces and
             revoke all connections made to your databases. All members will lose
@@ -76,9 +103,11 @@ export default function AccountFooter() {
           </Label>
           <div className="flex flex-row gap-5">
             <Button
-              disabled={!isValidEmail(email)}
-              onClick={onClose}
+              loading={loading}
+              disabled={disabled}
+              onClick={onDeleteOuerbaseUser}
               variant="destructive"
+              shape="base"
               title="I understand, delete my account"
             />
             <Button variant="secondary" onClick={onClose} title="Cancel" />
