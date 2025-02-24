@@ -5,13 +5,10 @@ import {
   getOuterbaseSession,
   loginOuterbaseByPassword,
 } from "@/outerbase-cloud/api";
-import {
-  OuterbaseAPIError,
-  OuterbaseAPISession,
-} from "@/outerbase-cloud/api-type";
+import { OuterbaseAPIError } from "@/outerbase-cloud/api-type";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { LoginBaseSpaceship } from "./starbase-portal";
 
 export default function SigninPage() {
@@ -20,7 +17,6 @@ export default function SigninPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [session, setSession] = useState<OuterbaseAPISession>();
 
   const onLoginClicked = useCallback(() => {
     setLoading(true);
@@ -31,11 +27,14 @@ export default function SigninPage() {
         localStorage.setItem("session", JSON.stringify(session));
 
         const { user } = await getOuterbaseSession();
+
         if (user.has_otp) {
-          localStorage.setItem("continue-redirect", "/verify");
+          router.push("/verify");
+          return;
         }
 
-        setSession(session);
+        const redirect = localStorage.getItem("continue-redirect");
+        router.push(redirect ?? "/");
       })
       .catch((e) => {
         setLoading(false);
@@ -43,19 +42,7 @@ export default function SigninPage() {
           setError(e.description);
         }
       });
-  }, [email, password]);
-
-  useEffect(() => {
-    if (!session) return;
-
-    const redirect = localStorage.getItem("continue-redirect");
-    if (redirect) {
-      router.push(redirect);
-      return;
-    }
-
-    router.push("/");
-  }, [session, router]);
+  }, [email, password, router]);
 
   return (
     <>
@@ -104,7 +91,7 @@ export default function SigninPage() {
             onChange={(e) => setPassword(e.currentTarget.value)}
           />
 
-          {error && <div className="text-red-400">{error}</div>}
+          {error && <div className="text-base text-red-400">{error}</div>}
 
           <Button
             loading={loading}

@@ -44,7 +44,12 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
   const { token } = useSession();
 
   const { data, isLoading, mutate } = useSWR(
-    token ? "workspaces" : undefined,
+    // The workspace cache depends on the token.
+    // Including the token in the key ensures the cache is user-specific.
+    // Without this, the cache might be shared between different users,
+    // causing a brief period where the workspace data is incorrect
+    // when a user logs out and another logs in.
+    token ? `/workspaces?=${token}` : undefined,
     () => {
       return getOuterbaseWorkspace();
     },

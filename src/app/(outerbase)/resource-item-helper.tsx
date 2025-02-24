@@ -91,13 +91,13 @@ export function ResourceItemList({
 
   const baseMatchedCount = useMemo(() => {
     return bases.filter((base) =>
-      base.name.toLowerCase().includes(search.toLowerCase())
+      (base.name ?? "").toLowerCase().includes(search.toLowerCase())
     ).length;
   }, [bases, search]);
 
   const boardMatchedCount = useMemo(() => {
     return boards.filter((board) =>
-      board.name.toLowerCase().includes(search.toLowerCase())
+      (board.name ?? "").toLowerCase().includes(search.toLowerCase())
     ).length;
   }, [boards, search]);
 
@@ -146,7 +146,9 @@ export function ResourceItemList({
                     exit={{ opacity: 0, scale: 0.5 }}
                     transition={{ duration: 0.3 }}
                     className={
-                      resource.name.toLowerCase().includes(search.toLowerCase())
+                      (resource.name ?? "")
+                        .toLowerCase()
+                        .includes(search.toLowerCase())
                         ? ""
                         : "hidden"
                     }
@@ -207,7 +209,9 @@ export function ResourceItemList({
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ duration: 0.3 }}
                   className={
-                    resource.name.toLowerCase().includes(search.toLowerCase())
+                    (resource.name ?? "")
+                      .toLowerCase()
+                      .includes(search.toLowerCase())
                       ? ""
                       : "hidden"
                   }

@@ -26,6 +26,8 @@ export default function OuterbaseMainPage() {
     // Redirect to the first workspace
     if (workspaces.length > 0) {
       router.push(`/w/${workspaces[0].short_name}`);
+    } else {
+      router.push("/local");
     }
   }, [session, sessionLoading, workspaceLoading, workspaces, router]);
 

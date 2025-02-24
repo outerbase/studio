@@ -8,18 +8,20 @@ import { Database, Plus } from "@phosphor-icons/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 import NavigationSigninBanner from "./nav-signin-banner";
+import { useSession } from "./session-provider";
 import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function NavigationLayout({ children }: PropsWithChildren) {
   const router = useRouter();
+  const { session } = useSession();
   const { workspaces, loading: workspaceLoading } = useWorkspaces();
   const pathname = usePathname();
   const { workspaceId } = useParams<{ workspaceId?: string }>();
 
   return (
     <div className="flex h-screen w-screen">
-      <div className="w-[250px] shrink-0 border-r overflow-hidden flex flex-col">
+      <div className="flex w-[250px] shrink-0 flex-col overflow-hidden border-r">
         <div className="px-2 py-2">
           <SidebarProfile />
         </div>
@@ -33,7 +35,7 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           />
         </div> */}
 
-        <div className="flex flex-1 flex-col border-b pb-2 overflow-scroll">
+        <div className="flex flex-1 flex-col overflow-scroll border-b pb-2">
           <SidebarMenuHeader text="Workspace" />
           <SidebarMenuItem
             selected={pathname === "/local"}
@@ -76,7 +78,14 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           <SidebarMenuItem
             text={"New Workspace"}
             icon={Plus}
-            onClick={() => router.push("/new-workspace")}
+            onClick={() => {
+              if (session?.user) {
+                router.push("/new-workspace");
+              } else {
+                localStorage.setItem("continue-redirect", "/new-workspace");
+                router.push("/signin");
+              }
+            }}
           />
         </div>
 

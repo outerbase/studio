@@ -59,6 +59,7 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   const logout = useCallback(() => {
     localStorage.removeItem("session");
     localStorage.removeItem("ob-token");
+
     router.push("/signin");
   }, [router]);
 

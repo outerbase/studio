@@ -18,8 +18,12 @@ export default function VerifyPage() {
     setLoading(true);
     verifyOuterbaseOTP(code)
       .then(() => {
-        localStorage.removeItem("continue-redirect");
-        router.push("/");
+        if (localStorage.getItem("continue-redirect")) {
+          router.push(localStorage.getItem("continue-redirect") ?? "/");
+          localStorage.removeItem("continue-redirect");
+        } else {
+          router.push("/");
+        }
       })
       .catch((err) => setError(err.message))
       .finally(() => {
