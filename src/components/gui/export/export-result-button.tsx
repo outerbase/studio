@@ -1,9 +1,6 @@
-import { Button, buttonVariants } from "../../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import OptimizeTableState, {
-  TableSelectionRange,
-} from "../table-optimized/OptimizeTableState";
-import { useCallback, useEffect, useMemo, useState } from "react";
+// import { Button, buttonVariants } from "../../ui/button";
+import { Button } from "@/components/orbit/button";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -12,8 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { getFormatHandlers } from "@/lib/export-helper";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import OptimizeTableState, {
+  TableSelectionRange,
+} from "../table-optimized/OptimizeTableState";
 
 export type ExportTarget = "clipboard" | "file";
 type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";
@@ -230,12 +231,9 @@ export default function ExportResultButton({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
-        <div
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-          onClick={() => setOpen(!open)}
-        >
-          Export
-        </div>
+        <Button variant={"secondary"} onClick={() => setOpen(!open)}>
+          <div className="text-sm">Export</div>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 min-w[550px] w-[550px]">
         <div>

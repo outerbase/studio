@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
-import { Button, buttonVariants } from "./ui/button";
 import { localDb } from "@/indexdb";
-import { LucideFile, LucideFolderClosed } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
-import { unsupportFileHandlerDialogContent } from "./screen-dropzone";
+import { LucideFile, LucideFolderClosed } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useCommonDialog } from "./common-dialog";
+import { unsupportFileHandlerDialogContent } from "./screen-dropzone";
+import { Button, buttonVariants } from "./ui/button";
 
 /**
  * Cleanup file handler from indexdb database when
  * it is no longer needed.
  */
 async function cleanupFileHandler() {
-  const connectionList = SavedConnectionLocalStorage.getDetailList();
   const validHandlerIds = new Set(
-    connectionList.map((c) => c.config?.filehandler).filter(Boolean) as string[]
+    (await localDb.connection.toCollection().toArray())
+      .map((c) => c.content.file_handler)
+      .filter(Boolean) as string[]
   );
 
   const fileHandlerList = (await localDb.file_handler.toArray()).map(
@@ -97,10 +97,10 @@ export default function FileHandlerPicker({
         onClick={onChangeFile}
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "w-full justify-start cursor-pointer"
+          "w-full cursor-pointer justify-start"
         )}
       >
-        <LucideFile className="w-4 h-4 mr-2" />
+        <LucideFile className="mr-2 h-4 w-4" />
         {handler.name}
       </div>
     );
@@ -108,7 +108,7 @@ export default function FileHandlerPicker({
 
   return (
     <Button onClick={onChangeFile} variant={"outline"}>
-      <LucideFolderClosed className="w-4 h-4 mr-2" />
+      <LucideFolderClosed className="mr-2 h-4 w-4" />
       Open File
     </Button>
   );

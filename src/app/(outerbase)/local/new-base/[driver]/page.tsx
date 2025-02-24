@@ -1,7 +1,6 @@
 "use client";
 
 import { LOCAL_CONNECTION_TEMPLATES } from "@/app/(outerbase)/base-template";
-import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
@@ -12,6 +11,7 @@ import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { mutate } from "swr";
+import { createLocalConnection } from "../../hooks";
 
 export default function LocalNewBasePage() {
   const { driver } = useParams<{ driver: string }>();
@@ -23,31 +23,22 @@ export default function LocalNewBasePage() {
     return LOCAL_CONNECTION_TEMPLATES[driver];
   }, [driver]);
 
-  const onSave = useCallback(() => {
+  const onSave = useCallback(async () => {
     setLoading(true);
-    SavedConnectionLocalStorage.save({
-      storage: "local",
-      ...template.to(value),
-    });
-
-    // Redirect to the connection page
-    mutate("/local/bases");
+    await createLocalConnection(template.to(value));
     router.push("/local");
   }, [template, value, router]);
 
-  const onConnect = useCallback(() => {
+  const onConnect = useCallback(async () => {
     setLoading(true);
-    const tmp = SavedConnectionLocalStorage.save({
-      storage: "local",
-      ...template.to(value),
-    });
+    const newConnection = await createLocalConnection(template.to(value));
 
     // Redirect to the connection page
     mutate("/local/bases");
     router.replace(
-      tmp.driver === "sqlite-filehandler"
-        ? `/playground/client?s=${tmp.id}`
-        : `/client/s/${tmp.driver ?? "turso"}?p=${tmp.id}`
+      newConnection.content.driver === "sqlite-filehandler"
+        ? `/playground/client?s=${newConnection.id}`
+        : `/client/s/${newConnection.content.driver ?? "turso"}?p=${newConnection.id}`
     );
   }, [template, value, router]);
 

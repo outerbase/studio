@@ -1,10 +1,10 @@
-import { SavedConnectionItemDetail } from "@/app/(theme)/connect/saved-connection-storage";
+import { SavedConnectionRawLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import { BaseDriver, DatabaseResultSet, DatabaseSchemas } from "../base-driver";
 import { createLocalDriver } from "../helpers";
 import { BoardSource, BoardSourceDriver } from "./base-source";
 
 export default class LocalBoardSource extends BoardSourceDriver {
-  protected sources: SavedConnectionItemDetail[];
+  protected sources: SavedConnectionRawLocalStorage[];
   protected drivers: Record<string, BaseDriver> = {};
 
   protected cacheSchemas: Record<
@@ -15,7 +15,7 @@ export default class LocalBoardSource extends BoardSourceDriver {
     }
   > = {};
 
-  constructor(sources: SavedConnectionItemDetail[]) {
+  constructor(sources: SavedConnectionRawLocalStorage[]) {
     super();
     this.sources = sources;
   }
@@ -23,7 +23,7 @@ export default class LocalBoardSource extends BoardSourceDriver {
   sourceList(): BoardSource[] {
     return this.sources.map((source) => {
       return {
-        id: source.id,
+        id: source.id!,
         name: source.name,
         type: source.driver ?? "sqlite",
       };

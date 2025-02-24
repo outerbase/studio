@@ -57,7 +57,9 @@ export interface OuterbaseAPISourceInput {
     require: boolean;
     rejectUnauthorized: boolean;
   };
+  starbasedb_options?: { database_path: string; database_token: string };
   base_id: string;
+  connection_id?: string;
 }
 
 export interface OuterbaseAPISource {
@@ -73,6 +75,17 @@ export interface OuterbaseAPIBase {
   id: string;
   sources: OuterbaseAPISource[];
   last_analytics_event: OuterbaseAPIAnalyticEvent;
+}
+
+export interface OuterbaseAPIConnection {
+  base_id: string;
+  created_at: string;
+  description: string;
+  id: string;
+  model: "connection";
+  name: string;
+  updated_at: string;
+  workspace_id: string;
 }
 
 export interface OuterbaseAPIWorkspace {
@@ -237,13 +250,15 @@ export interface OuterbaseDefinitionInput {
 }
 
 export interface OuterbaseDataCatalogVirtualColumnInput {
+  alias?: string;
   body: string;
   column?: string;
   flags: OuterbaseDataCatalogFlag;
   sample_data: string;
   schema: string;
   table: string;
+  unit?: string | null;
   virtual_key_column?: string;
-  virtual_key_schema: string;
-  virtual_key_table: string;
+  virtual_key_schema?: string;
+  virtual_key_table?: string;
 }

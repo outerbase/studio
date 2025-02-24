@@ -1,3 +1,5 @@
+import { Input } from "@/components/orbit/input";
+import { MenuBar } from "@/components/orbit/menu-bar";
 import ResourceCard from "@/components/resource-card";
 import {
   getDatabaseFriendlyName,
@@ -14,8 +16,19 @@ import {
   OuterbaseAPIDashboard,
   OuterbaseAPIWorkspace,
 } from "@/outerbase-cloud/api-type";
-import { Pencil, Trash } from "@phosphor-icons/react";
+import {
+  CalendarDots,
+  Eye,
+  MagnifyingGlass,
+  Pencil,
+  SortAscending,
+  SortDescending,
+  Trash,
+  Users,
+} from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import NewResourceButton from "./new-resource-button";
 import ResourceCardLoading from "./resource-card-loading";
 
 export interface ResourceItemProps {
@@ -62,6 +75,8 @@ export function ResourceItemList({
   onBoardRemove,
   onBaseRemove,
   onBaseEdit,
+  onBoardCreate,
+  workspaceId,
 }: {
   bases: ResourceItemProps[];
   boards: ResourceItemProps[];
@@ -69,10 +84,53 @@ export function ResourceItemList({
   onBoardRemove?: (item: ResourceItemProps) => void;
   onBaseRemove?: (item: ResourceItemProps) => void;
   onBaseEdit?: (item: ResourceItemProps) => void;
+  onBoardCreate?: () => void;
+  workspaceId?: string;
 }) {
+  const [search, setSearch] = useState("");
+
+  const baseMatchedCount = useMemo(() => {
+    return bases.filter((base) =>
+      base.name.toLowerCase().includes(search.toLowerCase())
+    ).length;
+  }, [bases, search]);
+
+  const boardMatchedCount = useMemo(() => {
+    return boards.filter((board) =>
+      board.name.toLowerCase().includes(search.toLowerCase())
+    ).length;
+  }, [boards, search]);
+
   return (
     <>
-      {boards.length > 0 && (
+      <div className="mb-4 flex gap-2">
+        <NewResourceButton
+          onCreateBoard={onBoardCreate}
+          workspaceId={workspaceId}
+        />
+
+        <MenuBar
+          size="lg"
+          items={[
+            { value: "all", content: <SortAscending size={16} /> },
+            { value: "recent", content: <SortDescending size={16} /> },
+            { value: "updated", content: <CalendarDots size={16} /> },
+            { value: "created", content: <Eye size={16} /> },
+            { value: "name", content: <Users size={16} /> },
+          ]}
+        />
+
+        <div className="flex-1"></div>
+
+        <Input
+          value={search}
+          onValueChange={setSearch}
+          preText={<MagnifyingGlass className="mr-2" />}
+          placeholder="Search"
+        />
+      </div>
+
+      {boardMatchedCount > 0 && (
         <>
           <h2 className="text-base font-bold">Boards</h2>
           <div className="flex grid grid-cols-1 flex-wrap gap-4 min-[700px]:grid-cols-2 min-[900px]:grid-cols-3 min-[1200px]:grid-cols-4 min-[1500px]:grid-cols-5 min-[1800px]:grid-cols-6 min-[2100px]:grid-cols-7">
@@ -87,6 +145,11 @@ export function ResourceItemList({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                     transition={{ duration: 0.3 }}
+                    className={
+                      resource.name.toLowerCase().includes(search.toLowerCase())
+                        ? ""
+                        : "hidden"
+                    }
                   >
                     <ResourceCard
                       className="w-full"
@@ -117,7 +180,9 @@ export function ResourceItemList({
         </>
       )}
 
-      {boards.length > 0 && <h2 className="text-base font-bold">Bases</h2>}
+      {boardMatchedCount > 0 && baseMatchedCount > 0 && (
+        <h2 className="text-base font-bold">Bases</h2>
+      )}
 
       <div className="flex grid grid-cols-1 flex-wrap gap-4 min-[700px]:grid-cols-2 min-[900px]:grid-cols-3 min-[1200px]:grid-cols-4 min-[1500px]:grid-cols-5 min-[1800px]:grid-cols-6 min-[2100px]:grid-cols-7">
         {loading && (
@@ -141,6 +206,11 @@ export function ResourceItemList({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ duration: 0.3 }}
+                  className={
+                    resource.name.toLowerCase().includes(search.toLowerCase())
+                      ? ""
+                      : "hidden"
+                  }
                 >
                   <ResourceCard
                     key={resource.id}

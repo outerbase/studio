@@ -1,6 +1,17 @@
 "use client";
-import { saveAs } from "file-saver";
+import { Studio } from "@/components/gui/studio";
+import {
+  Toolbar,
+  ToolbarButton,
+  ToolbarSeparator,
+} from "@/components/gui/toolbar";
+import ScreenDropZone from "@/components/screen-dropzone";
+import { StudioExtensionManager } from "@/core/extension-manager";
+import { createSQLiteExtensions } from "@/core/standard-extension";
 import SqljsDriver from "@/drivers/sqljs-driver";
+import { localDb } from "@/indexdb";
+import downloadFileFromUrl from "@/lib/download-file";
+import { saveAs } from "file-saver";
 import {
   FolderOpenIcon,
   LucideFile,
@@ -8,23 +19,11 @@ import {
   RefreshCcw,
   Save,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Database, SqlJsStatic } from "sql.js";
-import ScreenDropZone from "@/components/screen-dropzone";
 import { toast } from "sonner";
-import downloadFileFromUrl from "@/lib/download-file";
-import { useSearchParams } from "next/navigation";
-import { localDb } from "@/indexdb";
-import { SavedConnectionLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
-import { Studio } from "@/components/gui/studio";
-import {
-  Toolbar,
-  ToolbarButton,
-  ToolbarSeparator,
-} from "@/components/gui/toolbar";
-import { StudioExtensionManager } from "@/core/extension-manager";
-import { createSQLiteExtensions } from "@/core/standard-extension";
+import { Database, SqlJsStatic } from "sql.js";
 
 const SQLITE_FILE_EXTENSIONS =
   ".db,.sdb,.sqlite,.db3,.s3db,.sqlite3,.sl3,.db2,.s2db,.sqlite2,.sl2";
@@ -337,10 +336,10 @@ export default function PlaygroundEditorBody({
  * @returns
  */
 async function loadDatabaseFileHandlerFromSessionId(sessionId: string) {
-  const session = SavedConnectionLocalStorage.get(sessionId);
+  const session = await localDb.connection.get(sessionId);
   if (!session) return;
 
-  const fileHandlerId = session?.config.filehandler;
+  const fileHandlerId = session?.content?.file_handler;
   if (!fileHandlerId) return;
 
   const sessionData = await localDb.file_handler.get(fileHandlerId);

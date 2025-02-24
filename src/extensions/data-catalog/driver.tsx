@@ -1,74 +1,98 @@
-import {
-  OuterbaseDataCatalogComment,
-  OuterbaseDataCatalogDefinition,
-  OuterbaseDataCatalogVirtualColumnInput,
-} from "@/outerbase-cloud/api-type";
-
 export interface DataCatalogTermDefinition {
-  id?: string;
+  id: string;
   name: string;
   definition?: string;
   otherNames?: string;
 }
-export interface DataCatalogModelTable {
+
+export interface DataCatalogColumnInput {
+  definition: string;
+  samples: string[];
+  hide: boolean;
+}
+
+export interface DataCatalogColumn extends DataCatalogColumnInput {
   schemaName: string;
   tableName: string;
+  columnName: string;
+}
 
-  virtualJoin: OuterbaseDataCatalogComment[];
-  columns: Record<string, OuterbaseDataCatalogComment>;
-  metadata?: OuterbaseDataCatalogComment;
+export interface DataCatalogTableRelationship {
+  id: string;
+  schemaName: string;
+  tableName: string;
+  columnName: string;
+  referenceTableName: string;
+  referenceColumnName: string;
+  hide: boolean;
+}
+
+export interface DataCatalogTableMetadata extends DataCatalogColumn {
+  alias?: string;
+}
+
+export interface DataCatalogTable {
+  schemaName: string;
+  tableName: string;
+  columns: DataCatalogColumn[];
+  relations: DataCatalogTableRelationship[];
+  metadata?: DataCatalogTableMetadata;
 }
 
 export type DataCatalogSchemas = Record<
   string,
-  Record<string, DataCatalogModelTable>
+  Record<string, DataCatalogTable>
 >;
 
 export default abstract class DataCatalogDriver {
   abstract load(): Promise<{
-    schemas: DataCatalogSchemas;
-    definitions: OuterbaseDataCatalogDefinition[];
+    definitions: DataCatalogTermDefinition[];
   }>;
+
   abstract updateColumn(
     schemaName: string,
     tableName: string,
-    data: OuterbaseDataCatalogVirtualColumnInput,
-    commentId?: string,
-    isVirtual?: boolean
-  ): Promise<OuterbaseDataCatalogComment>;
+    columnName: string,
+    data: DataCatalogColumnInput
+  ): Promise<DataCatalogColumn>;
 
   abstract updateTable(
     schemaName: string,
     tableName: string,
-    data: OuterbaseDataCatalogVirtualColumnInput,
-    commentId?: string
-  ): Promise<DataCatalogModelTable | undefined>;
+    data: DataCatalogTableMetadata
+  ): Promise<DataCatalogTable | undefined>;
 
   abstract getColumn(
     schemaName: string,
     tableName: string,
     columnName: string
-  ): OuterbaseDataCatalogComment | undefined;
+  ): DataCatalogColumn | undefined;
 
   abstract getTable(
     schemaName: string,
     tableName: string
-  ): DataCatalogModelTable | undefined;
+  ): DataCatalogTable | undefined;
+
+  abstract deleteVirtualColumn(id: string): Promise<boolean>;
+
+  abstract addVirtualJoin(
+    data: Omit<DataCatalogTableRelationship, "id">
+  ): Promise<DataCatalogTableRelationship>;
+
+  abstract updateVirtualJoin(
+    data: DataCatalogTableRelationship
+  ): Promise<boolean>;
+
+  abstract addTermDefinition(
+    data: Omit<DataCatalogTermDefinition, "id">
+  ): Promise<DataCatalogTermDefinition | undefined>;
 
   abstract updateTermDefinition(
     data: DataCatalogTermDefinition
   ): Promise<DataCatalogTermDefinition | undefined>;
 
-  abstract getTermDefinitions(): OuterbaseDataCatalogDefinition[];
-
+  abstract getTermDefinitions(): DataCatalogTermDefinition[];
   abstract deleteTermDefinition(id: string): Promise<boolean>;
 
-  abstract deleteVirtualColumn(
-    schemaName: string,
-    tableName: string,
-    id: string
-  ): Promise<boolean>;
-
-  abstract addEventListener(cb: () => void): void;
-  abstract removeEventListener(cb: () => void): void;
+  abstract listen(cb: () => void): () => void;
 }

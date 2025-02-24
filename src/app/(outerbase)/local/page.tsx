@@ -1,161 +1,46 @@
 "use client";
 
+import { MySQLIcon, SQLiteIcon } from "@/components/icons/outerbase-icon";
 import {
-  SavedConnectionItem,
-  SavedConnectionLocalStorage,
-} from "@/app/(theme)/connect/saved-connection-storage";
-import {
-  CloudflareIcon,
-  MySQLIcon,
-  PostgreIcon,
-  SQLiteIcon,
-} from "@/components/icons/outerbase-icon";
-import {
-  DigitalOceanIcon,
-  NeonIcon,
-  StarbaseIcon,
-  SupabaseIcon,
-  TursoIcon,
-} from "@/components/resource-card/icon";
-import { CaretDown, Database } from "@phosphor-icons/react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CaretDown } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import useSWR from "swr";
 import NavigationLayout from "../nav-layout";
-import NewResourceButton, { NewResourceType } from "../new-resource-button";
 import { ResourceItemList, ResourceItemProps } from "../resource-item-helper";
 import { deleteLocalBaseDialog } from "./dialog-base-delete";
 import { createLocalBoardDialog } from "./dialog-board-create";
 import { deleteLocalBoardDialog } from "./dialog-board-delete";
-import { useLocalDashboardList } from "./hooks";
-
-const RESOURCE_TYPE_LIST: NewResourceType[] = [
-  {
-    name: "Supabase",
-    icon: SupabaseIcon,
-    href: "",
-    comingSoon: true,
-    thirdParty: true,
-  },
-  {
-    name: "Cloudflare",
-    icon: CloudflareIcon,
-    href: "",
-    thirdParty: true,
-    comingSoon: true,
-  },
-  {
-    name: "Cloudflare (Manual)",
-    icon: CloudflareIcon,
-    href: "/local/new-base/cloudflare-d1",
-  },
-  {
-    name: "Neon",
-    icon: NeonIcon,
-    href: "",
-    comingSoon: true,
-    thirdParty: true,
-  },
-  {
-    name: "StarbaseDB",
-    icon: StarbaseIcon,
-    href: "/local/new-base/starbase",
-  },
-  {
-    name: "Turso/LibSQL (Manual)",
-    icon: TursoIcon,
-    href: "/local/new-base/turso",
-  },
-  {
-    name: "Turso",
-    icon: TursoIcon,
-    thirdParty: true,
-    comingSoon: true,
-    href: "/local/new-base/turso",
-  },
-  {
-    name: "DigitalOcean",
-    icon: DigitalOceanIcon,
-    comingSoon: true,
-    href: "/local/new-base/digitalocean",
-    thirdParty: true,
-  },
-  {
-    name: "Postgres",
-    icon: PostgreIcon,
-    href: "/local/new-base/postgres",
-  },
-  {
-    name: "Motherduck",
-    icon: Database,
-    href: "",
-    comingSoon: true,
-  },
-  {
-    name: "SQL Server",
-    icon: Database,
-    href: "",
-    comingSoon: true,
-  },
-  {
-    name: "MySQL",
-    icon: MySQLIcon,
-    href: "/local/new-base/mysql",
-  },
-  {
-    name: "Clickhouse",
-    icon: Database,
-    comingSoon: true,
-    href: "",
-  },
-  {
-    name: "Snowflake",
-    icon: Database,
-    comingSoon: true,
-    href: "",
-  },
-  {
-    name: "BigQuery",
-    icon: Database,
-    comingSoon: true,
-    href: "",
-  },
-  {
-    name: "Redshift",
-    icon: Database,
-    comingSoon: true,
-    href: "",
-  },
-  {
-    name: "SQLite",
-    icon: SQLiteIcon,
-    href: "/local/new-base/sqlite-filehandler",
-  },
-];
+import { useLocalConnectionList, useLocalDashboardList } from "./hooks";
 
 export default function LocalConnectionPage() {
   const router = useRouter();
-  const {
-    isLoading,
-    data: baseResources,
-    mutate: refreshBase,
-  } = useSWR("/local/bases", async () => {
-    const tmp = SavedConnectionLocalStorage.getList();
 
-    return tmp.map((conn: SavedConnectionItem) => {
+  const {
+    data: localBases,
+    isLoading,
+    mutate: refreshBase,
+  } = useLocalConnectionList();
+
+  const baseResources = useMemo(() => {
+    return (localBases ?? []).map((conn) => {
       return {
         href:
-          conn.driver === "sqlite-filehandler"
+          conn.content.driver === "sqlite-filehandler"
             ? `/playground/client?s=${conn.id}`
-            : `/client/s/${conn.driver ?? "turso"}?p=${conn.id}`,
-        name: conn.name,
-        lastUsed: 0,
+            : `/client/s/${conn.content.driver ?? "turso"}?p=${conn.id}`,
+        name: conn.content.name,
+        lastUsed: conn.updated_at,
         id: conn.id,
-        type: conn.driver,
+        type: conn.content.driver,
         status: "",
       } as ResourceItemProps;
     });
-  });
+  }, [localBases]);
 
   // Getting the board from indexdb
   const { data: dashboardList, mutate: refreshDashboard } =
@@ -200,26 +85,72 @@ export default function LocalConnectionPage() {
   return (
     <NavigationLayout>
       <div className="flex flex-1 flex-col content-start gap-4 overflow-x-hidden overflow-y-auto p-4">
-        <div className="flex gap-2">
-          <NewResourceButton
-            onCreateBoard={onBoardCreate}
-            templates={RESOURCE_TYPE_LIST}
-          />
-        </div>
+        <div className="mb-4 flex gap-4">
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <button className="bg-background dark:bg-secondary flex cursor-pointer items-center gap-2 rounded-lg border p-4">
+                <SQLiteIcon className="h-10 w-10" />
+                <div className="flex flex-col gap-1 text-left">
+                  <span className="text-base font-bold">SQLite Playground</span>
+                  <span className="text-sm">
+                    Launch in-memory SQLite on browser
+                  </span>
+                </div>
+                <CaretDown className="ml-4 h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="flex w-[500px] flex-col gap-4 p-4"
+              align="start"
+            >
+              <Link
+                href="/playground/client"
+                className="bg-secondary hover:bg-primary hover:text-primary-foreground flex cursor-pointer flex-col gap-2 rounded p-2 py-4 text-base font-bold"
+              >
+                Open Empty SQLite Database
+              </Link>
 
-        <div className="my-4 flex gap-4">
-          <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">
-            <SQLiteIcon className="h-10 w-10" />
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-base font-bold">SQLite Playgorund</span>
-              <span className="text-sm">
-                Launch in-memory SQLite on browser
-              </span>
-            </div>
-            <CaretDown className="ml-4 h-4 w-4" />
-          </button>
+              <div className="flex gap-4">
+                <Link
+                  href="/playground/client?template=northwind"
+                  className="bg-secondary hover:bg-primary hover:text-primary-foreground flex cursor-pointer flex-col gap-2 rounded p-2 text-left text-base"
+                >
+                  <span className="font-bold">Northwind</span>
+                  <span className="text-sm">
+                    The Northwind Database is a sample business database for
+                    learning SQL queries and database design.
+                  </span>
+                </Link>
 
-          <button className="bg-background dark:bg-secondary flex items-center gap-2 rounded-lg border p-4">
+                <Link
+                  href="/playground/client?template=chinook"
+                  className="bg-secondary hover:bg-primary hover:text-primary-foreground flex cursor-pointer flex-col gap-2 rounded p-2 text-left text-base"
+                >
+                  <span className="font-bold">Chinook</span>
+                  <span className="text-sm">
+                    The Chinook Database is a sample digital media store
+                    database for learning and practicing SQL queries.
+                  </span>
+                </Link>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            className="bg-background dark:bg-secondary flex cursor-pointer items-center gap-2 rounded-lg border p-4"
+            onClick={() => {
+              // Random 8 character alphabeth string
+              const roomName = new Array(8)
+                .fill("a")
+                .map(
+                  () =>
+                    "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)]
+                )
+                .join("");
+
+              router.push(`/playground/mysql/${roomName}`);
+            }}
+          >
             <MySQLIcon className="h-10 w-10" />
             <div className="flex flex-col gap-1 text-left">
               <span className="text-base font-bold">MySQL Playgorund</span>
@@ -239,6 +170,7 @@ export default function LocalConnectionPage() {
           onBaseEdit={(resource) => {
             router.push(`/local/edit-base/${resource.id}`);
           }}
+          onBoardCreate={onBoardCreate}
         />
       </div>
     </NavigationLayout>

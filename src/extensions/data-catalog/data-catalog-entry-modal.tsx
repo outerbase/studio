@@ -9,42 +9,53 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { OuterbaseDataCatalogDefinition } from "@/outerbase-cloud/api-type";
 import { useCallback, useState } from "react";
 import DataCatalogDriver, { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
   driver?: DataCatalogDriver;
   onClose: () => void;
-  definition?: OuterbaseDataCatalogDefinition;
+  definition?: DataCatalogTermDefinition;
+}
+
+interface TermDefinitionInut extends Omit<DataCatalogTermDefinition, "id"> {
+  id?: string;
 }
 
 export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<DataCatalogTermDefinition>(() => ({
-    ...definition,
-  }));
+  const [formData, setFormData] = useState<TermDefinitionInut>(
+    () => definition
+  );
 
   const saveTermDefinition = useCallback(() => {
     setLoading(true);
-    const data = {
-      ...formData,
-      id: definition?.id || undefined,
-    };
 
-    driver
-      ?.updateTermDefinition(data)
-      .then()
-      .finally(() => onClose());
-  }, [formData, driver, definition, onClose]);
+    if (formData.id) {
+      driver
+        ?.updateTermDefinition({ ...formData, id: formData.id })
+        .then()
+        .finally(() => onClose());
+    } else {
+      driver
+        ?.addTermDefinition({
+          name: formData.name,
+          definition: formData.definition,
+          otherNames: formData.otherNames,
+        })
+        .then()
+        .finally(() => onClose());
+    }
+  }, [formData, driver, onClose]);
 
   function onDelete() {
     if (!definition) return;
 
     setDeleting(true);
+
     driver
-      ?.deleteTermDefinition(definition.id)
+      ?.deleteTermDefinition(definition.id!)
       .then()
       .finally(() => onClose());
   }
@@ -77,7 +88,7 @@ export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
             </Label>
           </div>
           <Input
-            value={formData.name}
+            value={formData?.name || ""}
             placeholder="Add a name"
             className="w-full"
             onValueChange={(value) => onChangeValue(value, "name")}
@@ -88,7 +99,7 @@ export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
             <Label className="text-right text-sm">Other Names</Label>
           </div>
           <Input
-            value={formData.otherNames}
+            value={formData?.otherNames || ""}
             placeholder="Add other names"
             className="w-full"
             onChange={(e) => onChangeValue(e.currentTarget.value, "otherNames")}
@@ -100,7 +111,7 @@ export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
           </Label>
           <Textarea
             rows={4}
-            value={formData.definition}
+            value={formData?.definition || ""}
             className="text-base"
             placeholder="Add a definition"
             onChange={(e) => onChangeValue(e.currentTarget.value, "definition")}
@@ -110,7 +121,7 @@ export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
       <DialogFooter>
         <Button
           loading={loading}
-          disabled={loading || !formData.name || !formData.definition}
+          disabled={loading || !formData?.name || !formData?.definition}
           onClick={saveTermDefinition}
           title={definition ? "Save Change" : "Add Entry"}
           shape="base"

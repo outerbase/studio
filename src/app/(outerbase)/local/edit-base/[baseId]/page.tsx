@@ -3,10 +3,7 @@ import {
   ConnectionTemplateList,
   LOCAL_CONNECTION_TEMPLATES,
 } from "@/app/(outerbase)/base-template";
-import {
-  SavedConnectionItemConfig,
-  SavedConnectionLocalStorage,
-} from "@/app/(theme)/connect/saved-connection-storage";
+import { SavedConnectionRawLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
@@ -15,7 +12,7 @@ import { Button } from "@/components/orbit/button";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { mutate } from "swr";
+import { getLocalConnection, updateLocalConnection } from "../../hooks";
 
 export default function LocalEditBasePage() {
   const router = useRouter();
@@ -24,50 +21,39 @@ export default function LocalEditBasePage() {
   const [loading, setLoading] = useState(true);
   const [databaseName, setDatabaseName] = useState("");
   const [template, setTemplate] =
-    useState<ConnectionTemplateList<SavedConnectionItemConfig>>();
+    useState<ConnectionTemplateList<SavedConnectionRawLocalStorage>>();
 
-  const onSave = useCallback(() => {
+  const onSave = useCallback(async () => {
     if (!template) return;
-
-    SavedConnectionLocalStorage.update(baseId, template.to(value));
-
-    // Redirect to the connection page
-    mutate("/local/bases");
+    await updateLocalConnection(baseId, template.to(value));
     router.push("/local");
   }, [template, value, router, baseId]);
 
-  const onConnect = useCallback(() => {
+  const onConnect = useCallback(async () => {
     if (!template) return;
-
     setLoading(true);
-    const tmp = SavedConnectionLocalStorage.save({
-      storage: "local",
-      ...template.to(value),
-    });
-
-    // Redirect to the connection page
-    mutate("/local/bases");
+    const tmp = await updateLocalConnection(baseId, template.to(value));
     router.push(
-      tmp.driver === "sqlite-filehandler"
-        ? `/playground/client?s=${tmp.id}`
-        : `/client/s/${tmp.driver ?? "turso"}?p=${tmp.id}`
+      tmp?.content.driver === "sqlite-filehandler"
+        ? `/playground/client?s=${tmp?.content.id}`
+        : `/client/s/${tmp?.content.driver ?? "turso"}?p=${tmp?.content.id}`
     );
-  }, [template, value, router]);
+  }, [template, value, router, baseId]);
 
   // Loading the base
   useEffect(() => {
-    const config = SavedConnectionLocalStorage.get(baseId);
+    getLocalConnection(baseId).then((config) => {
+      if (!config) return;
 
-    if (!config) return;
+      // Check for the template
+      const template = LOCAL_CONNECTION_TEMPLATES[config.content.driver ?? ""];
+      if (!template) return;
 
-    // Check for the template
-    const template = LOCAL_CONNECTION_TEMPLATES[config.driver ?? ""];
-    if (!template) return;
-
-    setDatabaseName(config.name ?? "");
-    setTemplate(template);
-    setValue(template.from(config));
-    setLoading(false);
+      setDatabaseName(config.content.name ?? "");
+      setTemplate(template);
+      setValue(template.from(config.content));
+      setLoading(false);
+    });
   }, [baseId]);
 
   if (loading || !template) return <div>Loading....</div>;
