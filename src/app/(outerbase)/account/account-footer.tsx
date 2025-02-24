@@ -12,11 +12,13 @@ import {
 import { isValidEmail } from "@/lib/validation";
 import { deleteOuterbaseUser } from "@/outerbase-cloud/api-account";
 import { Check, Copy } from "lucide-react";
+import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export default function AccountFooter() {
-  const { session, logout } = useSession();
+  const { session } = useSession();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
@@ -44,13 +46,13 @@ export default function AccountFooter() {
     deleteOuterbaseUser()
       .then(() => {
         onClose();
-        logout();
+        router.push("/signout");
       })
       .catch((err) => {
         setLoading(false);
         toast.error(err.message);
       });
-  }, [logout]);
+  }, [router]);
 
   const fullName = useMemo(() => {
     if (!session) return;

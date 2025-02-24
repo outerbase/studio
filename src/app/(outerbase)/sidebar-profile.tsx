@@ -27,10 +27,7 @@ export default function SidebarProfile() {
   const theme = forcedTheme ?? resolvedTheme;
 
   const onLogoutClicked = useCallback(() => {
-    // Remove all the session data
-    localStorage.removeItem("session");
-    localStorage.removeItem("ob-token");
-    router.refresh();
+    router.push("/signout");
   }, [router]);
 
   const onThemeToggleClicked = useCallback(

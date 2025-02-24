@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import {
   createContext,
   PropsWithChildren,
@@ -35,11 +34,14 @@ export function useSession() {
 }
 
 export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
-  const router = useRouter();
   const token =
     typeof window !== "undefined" ? localStorage.getItem("ob-token") || "" : "";
 
-  const { data, isLoading } = useSWR(
+  const {
+    data,
+    isLoading,
+    mutate: mutateSession,
+  } = useSWR(
     token ? "session-" + token : undefined,
     () => {
       return getOuterbaseSession();
@@ -59,9 +61,8 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
   const logout = useCallback(() => {
     localStorage.removeItem("session");
     localStorage.removeItem("ob-token");
-
-    router.push("/signin");
-  }, [router]);
+    mutateSession(undefined, false);
+  }, [mutateSession]);
 
   return (
     <OuterbaseSessionContext.Provider

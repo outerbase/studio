@@ -20,10 +20,7 @@ export default function NavigationProfile() {
   const theme = forcedTheme ?? resolvedTheme;
 
   const onLogoutClicked = useCallback(() => {
-    // Remove all the session data
-    localStorage.removeItem("session");
-    localStorage.removeItem("ob-token");
-    router.push("/signin");
+    router.push("/signout");
   }, [router]);
 
   const onThemeToggleClicked = useCallback(
