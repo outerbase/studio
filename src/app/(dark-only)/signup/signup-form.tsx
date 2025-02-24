@@ -26,14 +26,13 @@ export function SignupForm() {
 
     registerOuterbaseByPassword(email, password)
       .then((session) => {
-        localStorage.setItem("session", JSON.stringify(session));
+        localStorage.setItem("ob-token", session.token);
+        localStorage.setItem("session", JSON.stringify({ ...session, email }));
         //Alway error 403
-        verifyOuterbaseRequestEmail().then((res) => {
-          if (res.success) {
-            setLoading(false);
-            localStorage.setItem("continue-redirect", "?verify=true");
-            setSession(session);
-          }
+        verifyOuterbaseRequestEmail().then(() => {
+          setLoading(false);
+          localStorage.setItem("continue-redirect", "/signup?verify=true");
+          setSession(session);
         });
       })
       .catch((e) => {

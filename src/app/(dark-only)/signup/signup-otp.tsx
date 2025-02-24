@@ -17,11 +17,9 @@ export function SignupOtp() {
     if (code.length < 6) return;
     setLoading(true);
     verifyOuterbaseSubmitEmail(code)
-      .then((res) => {
-        if (res.success) {
-          localStorage.removeItem("continue-redirect");
-          router.push("/");
-        }
+      .then(() => {
+        localStorage.removeItem("continue-redirect");
+        router.push("/");
       })
       .catch((err) => setError(err.message))
       .finally(() => {
@@ -32,7 +30,7 @@ export function SignupOtp() {
   useEffect(() => {
     const session = localStorage.getItem("session");
     if (!session) return;
-    const { user } = JSON.parse(session);
+    const user = JSON.parse(session);
     setEmail(user.email);
   }, []);
 

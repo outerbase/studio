@@ -231,10 +231,7 @@ export async function registerOuterbaseByPassword(
 }
 
 export async function verifyOuterbaseRequestEmail() {
-  return requestOuterbase<{ response: unknown; success: boolean }>(
-    "/api/v1/me/email/verify/request",
-    "POST"
-  );
+  return requestOuterbase("/api/v1/me/email/verify/request", "POST");
 }
 
 export async function verifyOuterbaseSubmitEmail(
