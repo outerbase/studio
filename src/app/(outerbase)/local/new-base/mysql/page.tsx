@@ -3,7 +3,7 @@ import { useSession } from "@/app/(outerbase)/session-provider";
 import { useWorkspaces } from "@/app/(outerbase)/workspace-provider";
 import { Button } from "@/components/orbit/button";
 import { Loader } from "@/components/orbit/loader";
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowLeft, Folder } from "@phosphor-icons/react";
 import Link from "next/link";
 
 function LocalMySQLCloudSection() {
@@ -12,15 +12,15 @@ function LocalMySQLCloudSection() {
 
   if (isLoading || loading) {
     return (
-      <div className="flex w-1/2 flex-col gap-4 border-r p-4">
-        <Loader />
+      <div className="flex min-h-[300px] w-1/2 flex-col items-center justify-center gap-4 p-4">
+        <Loader size={40} />
       </div>
     );
   }
 
   if (!session?.user) {
     return (
-      <div className="flex w-1/2 flex-col gap-4 border-r p-4">
+      <div className="flex w-1/2 flex-col gap-4 p-4">
         <h1 className="text-lg font-bold">Outerbase Cloud</h1>
 
         <div>
@@ -49,15 +49,20 @@ function LocalMySQLCloudSection() {
   }
 
   return (
-    <div className="flex w-1/2 flex-col gap-4 border-r p-4">
-      <h1 className="text-lg font-bold">Outerbase Cloud</h1>
-      <p>Please select the workspace</p>
+    <div className="flex w-1/2 flex-col gap-2 p-4">
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold">Outerbase Cloud</h1>
+        <p>Please select the workspace</p>
+      </div>
+
       {(workspaces ?? []).map((workspace) => {
         return (
           <Link
             key={workspace.id}
+            className="bg-secondary hover:border-primary flex cursor-pointer items-center gap-2 rounded border border-2 p-4 text-base"
             href={`/w/${workspace.short_name}/new-base/mysql`}
           >
+            <Folder weight="bold" size={20} />
             {workspace.name}
           </Link>
         );
@@ -76,30 +81,40 @@ export default function LocalMySQLNewBasePage() {
         </Button>
       </div>
 
-      <div className="mb-12 p-4">
-        It is not possible to run MySQL from browser.
-        <br /> Please use the desktop app or our cloud services.
+      <div className="mb-8 p-4 text-xl leading-8">
+        Running MySQL from a browser is not possible.
+        <br /> Please use the desktop app or our cloud services instead.
       </div>
 
-      <div className="flex">
+      <div className="mb-8 flex">
         <LocalMySQLCloudSection />
 
         <div className="flex w-1/2 flex-col gap-4 p-4">
-          <h1 className="text-lg font-bold">Desktop App</h1>
-
-          <div>Connect locally with our desktop app</div>
-
           <div>
-            <Button
-              variant="primary"
-              className="inline-flex"
-              size="lg"
-              href="https://github.com/outerbase/studio-desktop/releases"
-              as="link"
-            >
-              Download Desktop App
-            </Button>
+            <h1 className="text-2xl font-bold">Desktop App</h1>
+            <p>Connect locally with our desktop app</p>
           </div>
+
+          <Link
+            href="https://github.com/outerbase/studio-desktop/releases"
+            className="relative w-full"
+          >
+            <img
+              src="/outerbase-banner.jpg"
+              alt=""
+              className="w-full rounded-lg"
+            />
+
+            <div className="bg-opacity-50 absolute right-0 bottom-0 left-0 flex cursor-pointer flex-col gap-2 rounded-lg bg-black p-4 text-white">
+              <div className="text-2xl font-bold">Download the desktop app</div>
+              <p className="text-base">
+                Outerbase Studio Desktop is a lightweight Electron wrapper for
+                the Outerbase Studio web version. It enables support for drivers
+                that aren&apos;t feasible in a browser environment, such as
+                MySQL and PostgreSQL.
+              </p>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
