@@ -18,13 +18,11 @@ import {
 } from "@/outerbase-cloud/api-type";
 import {
   CalendarDots,
-  Eye,
   MagnifyingGlass,
   Pencil,
   SortAscending,
   SortDescending,
   Trash,
-  Users,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
@@ -68,6 +66,21 @@ export function getResourceItemPropsFromBoard(
   };
 }
 
+type SortedType = "name_asc" | "name_desc" | "recent";
+
+function sortResources(resources: ResourceItemProps[], sorted: SortedType) {
+  return resources.sort((a, b) => {
+    if (sorted === "name_asc") {
+      return (a.name ?? "").localeCompare(b.name ?? "");
+    } else if (sorted === "name_desc") {
+      return (b.name ?? "").localeCompare(a.name ?? "");
+    } else if (sorted === "recent") {
+      return b.lastUsed - a.lastUsed;
+    }
+    return 0;
+  });
+}
+
 export function ResourceItemList({
   bases,
   boards,
@@ -88,6 +101,15 @@ export function ResourceItemList({
   workspaceId?: string;
 }) {
   const [search, setSearch] = useState("");
+  const [sorted, setSorted] = useState<SortedType>("name_asc");
+
+  const sortedBases = useMemo(() => {
+    return sortResources(bases, sorted);
+  }, [sorted, bases]);
+
+  const sortedBoards = useMemo(() => {
+    return sortResources(boards, sorted);
+  }, [sorted, boards]);
 
   const baseMatchedCount = useMemo(() => {
     return bases.filter((base) =>
@@ -111,12 +133,14 @@ export function ResourceItemList({
 
         <MenuBar
           size="lg"
+          value={sorted}
+          onChange={(newSortOrder: string) =>
+            setSorted(newSortOrder as SortedType)
+          }
           items={[
-            { value: "all", content: <SortAscending size={16} /> },
-            { value: "recent", content: <SortDescending size={16} /> },
-            { value: "updated", content: <CalendarDots size={16} /> },
-            { value: "created", content: <Eye size={16} /> },
-            { value: "name", content: <Users size={16} /> },
+            { value: "name_asc", content: <SortAscending size={16} /> },
+            { value: "name_desc", content: <SortDescending size={16} /> },
+            { value: "recent", content: <CalendarDots size={16} /> },
           ]}
         />
 
@@ -135,7 +159,7 @@ export function ResourceItemList({
           <h2 className="text-base font-bold">Boards</h2>
           <div className="flex grid grid-cols-1 flex-wrap gap-4 min-[700px]:grid-cols-2 min-[900px]:grid-cols-3 min-[1200px]:grid-cols-4 min-[1500px]:grid-cols-5 min-[1800px]:grid-cols-6 min-[2100px]:grid-cols-7">
             <AnimatePresence initial={false}>
-              {boards.map((resource: ResourceItemProps) => {
+              {sortedBoards.map((resource: ResourceItemProps) => {
                 const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
 
                 return (
@@ -198,7 +222,7 @@ export function ResourceItemList({
 
         {bases.length > 0 && (
           <AnimatePresence initial={false}>
-            {bases.map((resource: ResourceItemProps) => {
+            {sortedBases.map((resource: ResourceItemProps) => {
               const status = `Last updated ${timeSince(resource.lastUsed)} ago`;
 
               return (
