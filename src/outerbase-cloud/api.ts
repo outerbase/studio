@@ -216,6 +216,36 @@ export async function loginOuterbaseByPassword(
   });
 }
 
+export async function registerOuterbaseByPassword(
+  email: string,
+  password: string
+) {
+  return requestOuterbase<OuterbaseAPISession>(
+    "/api/v1/auth/register",
+    "POST",
+    {
+      email,
+      password,
+    }
+  );
+}
+
+export async function verifyOuterbaseRequestEmail() {
+  return requestOuterbase("/api/v1/me/email/verify/request", "POST");
+}
+
+export async function verifyOuterbaseSubmitEmail(
+  email_confirmation_token: string
+) {
+  return requestOuterbase<{ response: unknown; success: boolean }>(
+    "/api/v1/me/email/verify/submit",
+    "POST",
+    {
+      email_confirmation_token,
+    }
+  );
+}
+
 export async function getOuterbaseEmbedChart(
   chartId: string,
   apiKey: string
