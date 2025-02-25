@@ -4,21 +4,11 @@ import OuterbaseLogo from "@/components/icons/outerbase";
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
 import { Label } from "@/components/orbit/label";
+import { strippedWorkspaceName } from "@/lib/utils";
 import { createOuterbaseWorkspace } from "@/outerbase-cloud/api-workspace";
 import useOuterbaseMutation from "@/outerbase-cloud/hook";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-
-export function strippedWorkspaceName(value: string) {
-  return value
-    .replace(
-      /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-      ""
-    )
-    .replace(/[^a-zA-Z 0-9]/g, "")
-    .replace(/[^A-Z0-9]/gi, "-")
-    ?.toLowerCase();
-}
 
 const FRIENDLY_ERROR_NAME: Record<string, string> = {
   SHORT_NAME_TAKEN: "Workspace URL is unavailable.",

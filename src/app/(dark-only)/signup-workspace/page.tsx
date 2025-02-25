@@ -5,11 +5,11 @@ import LabelInput from "@/components/label-input";
 import { Button } from "@/components/orbit/button";
 import { Label } from "@/components/orbit/label";
 import { Select } from "@/components/orbit/select";
+import { strippedWorkspaceName } from "@/lib/utils";
 import { updateOuterbaseUserProfile } from "@/outerbase-cloud/api-account";
 import { createOuterbaseWorkspace } from "@/outerbase-cloud/api-workspace";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { strippedWorkspaceName } from "../new-workspace/page";
 import { LoginBaseSpaceship } from "../signin/starbase-portal";
 import { SpaceshipContentContainer } from "../spaceship-container";
 
