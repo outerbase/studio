@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 export type SelectProps = {
   className?: string;
-  options: string[];
+  options: { value: string; label: string }[];
   placeholder?: string;
   setValue: (value: string) => void;
   size?: "sm" | "base" | "lg";
@@ -26,6 +26,9 @@ export const Select = ({
           "ob-size-base !pr-8": size === "base",
           "ob-size-lg !pr-9": size === "lg",
         },
+        {
+          "!text-muted-foreground": !value,
+        },
         className
       )}
       style={{
@@ -40,10 +43,10 @@ export const Select = ({
       }}
       value={value}
     >
-      {placeholder && <option value={undefined}>{placeholder}</option>}
+      {placeholder && <option value={""}>{placeholder}</option>}
       {options.map((option, index) => (
-        <option value={option} key={index}>
-          {option}
+        <option value={option.value} key={index}>
+          {option.label}
         </option>
       ))}
     </select>

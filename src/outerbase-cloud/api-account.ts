@@ -1,3 +1,4 @@
+import { mutate } from "swr";
 import { requestOuterbase } from "./api";
 import { OuterbaseAPIResponse } from "./api-type";
 
@@ -9,7 +10,12 @@ export interface OuterbaseUserProfileInput {
 export async function updateOuterbaseUserProfile(
   data: OuterbaseUserProfileInput
 ) {
-  return await requestOuterbase(`/api/v1/me/profile`, "POST", data);
+  const result = await requestOuterbase(`/api/v1/me/profile`, "POST", data);
+
+  mutate("session-" + localStorage.getItem("ob-token"));
+  localStorage.setItem("session", JSON.stringify(result));
+
+  return result;
 }
 
 export async function updateOuterbaseUserPassword(data: {

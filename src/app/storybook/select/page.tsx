@@ -7,20 +7,17 @@ import { Select } from "@/components/orbit/select";
 import { useState } from "react";
 
 const dbs = [
-  "SQLite",
-  "MySQL",
-  "Postgres",
-  "LibSQL",
-  "MongoDB",
-  "Clickhouse",
-  "BigQuery",
-  "Snowflake",
-  "MSSql",
-  "Redshift",
+  { value: "SQLite", label: "SQLite" },
+  { value: "MySQL", label: "MySQL" },
+  { value: "Postgres", label: "Postgres" },
+  { value: "LibSQL", label: "LibSQL" },
+  { value: "MongoDB", label: "MongoDB" },
+  { value: "Clickhouse", label: "Clickhouse" },
+  { value: "BigQuery", label: "BigQuery" },
 ];
 
 export default function SelectStorybook() {
-  const [value, setValue] = useState(dbs[0]);
+  const [value, setValue] = useState(dbs[0].value);
 
   return (
     <Section>
