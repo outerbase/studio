@@ -28,7 +28,20 @@ export default function ChartYAxisSection({
       <div>
         <Select
           size="lg"
-          options={["Left", "Right", "Hidden"]}
+          options={[
+            {
+              value: "Left",
+              label: "Left",
+            },
+            {
+              value: "Right",
+              label: "Right",
+            },
+            {
+              value: "Hidden",
+              label: "Hidden",
+            },
+          ]}
           setValue={function (value: string): void {
             onChange((prev) => {
               return produce(prev, (draft) => {

@@ -98,7 +98,10 @@ export default function EditChartMenu({
         <Select
           size="lg"
           className="w-full"
-          options={columns}
+          options={columns.map((col) => ({
+            value: col,
+            label: col,
+          }))}
           value={value.params.options?.xAxisKey ?? ""}
           setValue={function (value: string): void {
             onChange((prev) => {
@@ -172,16 +175,16 @@ export default function EditChartMenu({
           className="w-full"
           size="lg"
           options={[
-            "None",
-            "Percent",
-            "Number",
-            "Decimal",
-            "Date",
-            "Time",
-            "Dollar",
-            "Euro",
-            "Pound",
-            "Yen",
+            { value: "None", label: "None" },
+            { value: "Percent", label: "Percent" },
+            { value: "Number", label: "Number" },
+            { value: "Decimal", label: "Decimal" },
+            { value: "Date", label: "Date" },
+            { value: "Time", label: "Time" },
+            { value: "Dollar", label: "Dollar" },
+            { value: "Euro", label: "Euro" },
+            { value: "Pound", label: "Pound" },
+            { value: "Yen", label: "Yen" },
           ]}
           setValue={function (value: string): void {
             onChange((prev) => {
@@ -224,7 +227,11 @@ export default function EditChartMenu({
         <Select
           className="w-full"
           size="lg"
-          options={["Automatic", "White", "Black"]}
+          options={[
+            { value: "Automatic", label: "Automatic" },
+            { value: "White", label: "White" },
+            { value: "Black", label: "Black" },
+          ]}
           setValue={function (value: string): void {
             onChange((prev) => {
               return produce(prev, (draft) => {

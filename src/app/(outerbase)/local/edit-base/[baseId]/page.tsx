@@ -1,13 +1,10 @@
 "use client";
-import {
-  ConnectionTemplateList,
-  LOCAL_CONNECTION_TEMPLATES,
-} from "@/app/(outerbase)/base-template";
-import { SavedConnectionRawLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
+import { ConnectionTemplateList } from "@/app/(outerbase)/base-template";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
 } from "@/components/connection-config-editor";
+import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
@@ -20,19 +17,19 @@ export default function LocalEditBasePage() {
   const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
   const [loading, setLoading] = useState(true);
   const [databaseName, setDatabaseName] = useState("");
-  const [template, setTemplate] =
-    useState<ConnectionTemplateList<SavedConnectionRawLocalStorage>>();
+  const [template, setTemplate] = useState<ConnectionTemplateList>();
 
   const onSave = useCallback(async () => {
-    if (!template) return;
-    await updateLocalConnection(baseId, template.to(value));
+    if (!template?.localTo) return;
+    await updateLocalConnection(baseId, template.localTo(value));
     router.push("/local");
   }, [template, value, router, baseId]);
 
   const onConnect = useCallback(async () => {
-    if (!template) return;
+    if (!template?.localTo) return;
+
     setLoading(true);
-    const tmp = await updateLocalConnection(baseId, template.to(value));
+    const tmp = await updateLocalConnection(baseId, template.localTo(value));
     router.push(
       tmp?.content.driver === "sqlite-filehandler"
         ? `/playground/client?s=${tmp?.content.id}`
@@ -46,12 +43,13 @@ export default function LocalEditBasePage() {
       if (!config) return;
 
       // Check for the template
-      const template = LOCAL_CONNECTION_TEMPLATES[config.content.driver ?? ""];
-      if (!template) return;
+      const template =
+        ConnectionTemplateDictionary[config.content.driver ?? ""];
+      if (!template?.localFrom) return;
 
       setDatabaseName(config.content.name ?? "");
       setTemplate(template);
-      setValue(template.from(config.content));
+      setValue(template.localFrom(config.content));
       setLoading(false);
     });
   }, [baseId]);
