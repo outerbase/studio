@@ -56,6 +56,7 @@ export function ConnectionConfigEditor({
                     <Label title={column.label} required={column.required}>
                       <Input
                         size="lg"
+                        type={column.type}
                         placeholder={column.placeholder}
                         value={(value[column.name] as string) ?? ""}
                         onChange={(e) => {
