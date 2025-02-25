@@ -76,7 +76,7 @@ export function BoardFilterDialog(props: Props) {
         </DialogHeader>
         <div className="flex flex-col gap-2">
           <div className="mb-2">
-            <div className="mb-1 text-xs font-medium">Select filter type</div>
+            <div className="mb-1 text-sm font-medium">Select filter type</div>
             <Select
               value={props.filter.type}
               onValueChange={(v) =>
@@ -94,7 +94,7 @@ export function BoardFilterDialog(props: Props) {
             </Select>
           </div>
           <div className="mb-2">
-            <div className="mb-1 text-xs font-medium">Filter name*</div>
+            <div className="mb-1 text-sm font-medium">Filter name*</div>
             <Input
               placeholder="Enter filter name"
               value={props.filter.name}
@@ -105,7 +105,7 @@ export function BoardFilterDialog(props: Props) {
           </div>
           {props.filter.type === "enum" && (
             <div className="mb-2">
-              <div className="mb-1 text-xs font-medium">
+              <div className="mb-1 text-sm font-medium">
                 Values*
                 <div>
                   <small className="text-muted-foreground">
@@ -123,14 +123,12 @@ export function BoardFilterDialog(props: Props) {
             </div>
           )}
           <div className="mb-2">
-            <div className="mb-1 text-xs font-medium">
+            <div className="mb-1 text-sm font-medium">
               Default value (optional)
-              <div>
-                <small className="text-muted-foreground">
-                  If this field is left empty, no filter will be applied by
-                  default
-                </small>
-              </div>
+              <p className="text-muted-foreground text-sm">
+                If this field is left empty, no filter will be applied by
+                default
+              </p>
             </div>
             {props.filter.type === "search" ? (
               <Input

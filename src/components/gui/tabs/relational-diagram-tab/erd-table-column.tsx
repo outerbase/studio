@@ -15,7 +15,7 @@ export default function ERDTableColumn({
   column: ERDSchemaNodeColumnProps;
 }) {
   return (
-    <TableRow className="group relative text-xs">
+    <TableRow className="group relative text-sm">
       <TableCell className="h-[30px] p-0 pr-6 pl-2 font-mono text-sm font-light">
         <BaseHandle
           id={column.title}

@@ -184,11 +184,11 @@ function decimalDescription(_: string, parameters?: string[]) {
     return `<div>
     <div class="mb-2">Fixed-point number</div>
     <div class='inline-block'>
-      <div class="text-xs">Precision</div>
+      <div class="text-sm">Precision</div>
       <div class="inline-block border-t-4 border-t-primary font-mono text-lg">
         <span>${exampleBeforeDot}</span><strong>.</strong><span class="inline-block border-b-4 border-b-primary">${exampleAfterDot}</span>
       </div>
-      <div class="text-xs text-right">Scale</div>
+      <div class="text-sm text-right">Scale</div>
     </div>
   </div>`;
   }

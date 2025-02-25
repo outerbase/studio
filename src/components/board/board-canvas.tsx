@@ -133,7 +133,7 @@ export function BoardCanvas({ value, onChange }: BoardProps) {
     return (
       <div
         key={_.i}
-        className="group bg-background relative flex items-center justify-center overflow-hidden rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
+        className="group relative flex items-center justify-center overflow-hidden rounded-xl bg-white shadow hover:bg-gray-50 dark:bg-neutral-900 dark:text-white"
         data-grid={_}
       >
         <BoardChart

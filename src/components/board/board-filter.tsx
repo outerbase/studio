@@ -115,7 +115,7 @@ export function BoardFilter(props: Props) {
     return (
       <div
         key={i}
-        className="bg-secondary flex items-center rounded-md text-xs"
+        className="bg-secondary flex items-center rounded-md text-sm"
       >
         <div className="border-background flex items-center gap-1 border-r-[1px] border-solid px-2 py-1">
           {icon}

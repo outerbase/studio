@@ -1,10 +1,10 @@
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { useSchema } from "@/context/schema-provider";
-import { useCallback, useEffect, useState } from "react";
-import { ChevronDown, Loader, MoreHorizontal, RefreshCcw } from "lucide-react";
-import { GitBranch, Minus, Plus, Table } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { useCommonDialog } from "@/components/common-dialog";
+import {
+  Toolbar,
+  ToolbarButton,
+  ToolbarSeparator,
+} from "@/components/gui/toolbar";
+import { DoltIcon } from "@/components/icons/outerbase-icon";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,20 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useDoltCreateBranchModal from "./dolt-create-branch";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
+import { cn } from "@/lib/utils";
+import { GitBranch, Minus, Plus, Table } from "@phosphor-icons/react";
+import { ChevronDown, Loader, MoreHorizontal, RefreshCcw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useCommonDialog } from "@/components/common-dialog";
-import { DoltIcon } from "@/components/icons/outerbase-icon";
-import {
-  Toolbar,
-  ToolbarSeparator,
-  ToolbarButton,
-} from "@/components/gui/toolbar";
+import useDoltCreateBranchModal from "./dolt-create-branch";
 
 interface DoltStatusResultItem {
   table_name: string;
@@ -61,7 +61,7 @@ function DoltCommitLog({
         content: (
           <div className="flex flex-col gap-2">
             <p>Are you sure you want to reset to this commit?</p>
-            <div className="p-4 border shadow-sm rounded text-sm flex flex-col gap-1">
+            <div className="flex flex-col gap-1 rounded border p-4 text-sm shadow-sm">
               <div className="font-semibold">{commit.message}</div>
               <div className="font-mono">{commit.commit_hash}</div>
             </div>
@@ -87,31 +87,31 @@ function DoltCommitLog({
   );
 
   return (
-    <div className="w-full overflow-y-auto overflow-x-hidden">
+    <div className="w-full overflow-x-hidden overflow-y-auto">
       {createBranchModal}
 
-      <div className="pl-4 flex flex-col w-full py-4">
+      <div className="flex w-full flex-col py-4 pl-4">
         {commitList.map((commit) => (
           <div
             key={commit.commit_hash}
-            className="relative flex fgap-1 border-l-2 border-blue-500 p-2 pl-4 ml-2"
+            className="fgap-1 relative ml-2 flex border-l-2 border-blue-500 p-2 pl-4"
           >
-            <div className="w-4 h-4 bg-background border-4 border-blue-500 rounded-full absolute -left-[9px] top-[10px]"></div>
+            <div className="bg-background absolute top-[10px] -left-[9px] h-4 w-4 rounded-full border-4 border-blue-500"></div>
 
             <div className="flex-1 overflow-hidden">
-              <span className="flex-1 text-xs line-clamp-1 font-semibold">
+              <span className="line-clamp-1 flex-1 text-sm font-semibold">
                 {commit.message}
               </span>
 
-              <span className="flex-1 text-xs font-mono line-clamp-1">
+              <span className="line-clamp-1 flex-1 font-mono text-sm">
                 {commit.commit_hash}
               </span>
 
-              <div className="text-xs mt-1 flex gap-2 overflow-hidden">
+              <div className="mt-1 flex gap-2 overflow-hidden text-sm">
                 <div className="text-muted-foreground line-clamp-1">
                   {commit.date}
                 </div>
-                <div className="text-blue-700 dark:text-blue-400 line-clamp-1">
+                <div className="line-clamp-1 text-blue-700 dark:text-blue-400">
                   {commit.committer}
                 </div>
               </div>
@@ -121,7 +121,7 @@ function DoltCommitLog({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="ghost">
-                    <MoreHorizontal className="w-4 h-4" />
+                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" align="end">
@@ -137,7 +137,7 @@ function DoltCommitLog({
                   <DropdownMenuItem
                     onClick={() => openCreateBranch(commit.commit_hash)}
                   >
-                    <GitBranch className="w-4 h-4 mr-2" />
+                    <GitBranch className="mr-2 h-4 w-4" />
                     Create Branch
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -208,18 +208,18 @@ function DoltChangeItem({
   }
 
   if (loading) {
-    action = <Loader className="w-4 h-4 animate-spin cursor-pointer" />;
+    action = <Loader className="h-4 w-4 animate-spin cursor-pointer" />;
   } else if (status.staged > 0) {
     action = (
       <Minus
-        className="w-4 h-4 cursor-pointer"
+        className="h-4 w-4 cursor-pointer"
         onClick={() => onResetClicked(status.table_name)}
       />
     );
   } else {
     action = (
       <Plus
-        className="w-4 h-4 cursor-pointer"
+        className="h-4 w-4 cursor-pointer"
         onClick={() => onStageClicked(status.table_name)}
       />
     );
@@ -286,7 +286,7 @@ function DoltChanges({
 
   return (
     <div>
-      <div className="p-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 p-4">
         <Input
           placeholder="Commit message"
           value={commitMessage}
@@ -300,15 +300,15 @@ function DoltChanges({
           size={"sm"}
           onClick={onCommitClicked}
         >
-          {loading && <Loader className="w-4 h-4 animate-spin mr-2" />}
+          {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
           Commit
         </Button>
       </div>
 
       {stagedItems.length > 0 && (
         <>
-          <div className="p-4 py-0 text-xs font-semibold mb-1">STAGES</div>
-          <div className="px-4 pb-2 flex flex-col">
+          <div className="mb-1 p-4 py-0 text-sm font-semibold">STAGES</div>
+          <div className="flex flex-col px-4 pb-2">
             {stagedItems.map((status) => {
               return (
                 <DoltChangeItem
@@ -324,8 +324,8 @@ function DoltChanges({
 
       {changedItems.length > 0 && (
         <>
-          <div className="p-4 py-0 text-xs font-semibold mb-1">CHANGES</div>
-          <div className="px-4 flex flex-col">
+          <div className="mb-1 p-4 py-0 text-sm font-semibold">CHANGES</div>
+          <div className="flex flex-col px-4">
             {changedItems.map((status) => {
               return (
                 <DoltChangeItem
@@ -396,7 +396,7 @@ export default function DoltSidebar() {
 
   if (!currentSchemaName) {
     return (
-      <div className="flex flex-col w-full p-4 justify-center items-center text-muted-foreground text-sm gap-4">
+      <div className="text-muted-foreground flex w-full flex-col items-center justify-center gap-4 p-4 text-sm">
         <DoltIcon className="text-green-500" />
 
         <p className="text-center">
@@ -410,16 +410,16 @@ export default function DoltSidebar() {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden w-full">
+    <div className="flex w-full flex-col overflow-hidden">
       {createBranchModal}
-      <div className="p-1 border-b">
+      <div className="border-b p-1">
         <Toolbar>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" variant={"outline"}>
-                <GitBranch className="w-4 h-4 mr-2" />
+                <GitBranch className="mr-2 h-4 w-4" />
                 {selectedBranch}
-                <ChevronDown className="w-3 h-3 ml-2" />
+                <ChevronDown className="ml-2 h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" align="start">
@@ -428,7 +428,7 @@ export default function DoltSidebar() {
                   openCreateBranchModal();
                 }}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 New Branch
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -437,10 +437,10 @@ export default function DoltSidebar() {
                   key={branch}
                   onClick={() => onCheckoutBranch(branch)}
                 >
-                  <GitBranch className="w-4 h-4 mr-2" />
+                  <GitBranch className="mr-2 h-4 w-4" />
                   {branch}
                   {branch === selectedBranch && (
-                    <span className="text-yellow-500 font-mono ml-2 text-sm">
+                    <span className="ml-2 font-mono text-sm text-yellow-500">
                       Current
                     </span>
                   )}
@@ -452,7 +452,7 @@ export default function DoltSidebar() {
           <ToolbarButton
             onClick={refreshDoltSchema}
             text="Refresh"
-            icon={<RefreshCcw className="w-4 h-4" />}
+            icon={<RefreshCcw className="h-4 w-4" />}
           />
         </Toolbar>
       </div>

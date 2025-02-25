@@ -7,9 +7,9 @@ import {
 import { Database, Plus } from "@phosphor-icons/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
+import NavigationProfile from "./nav-profile";
 import NavigationSigninBanner from "./nav-signin-banner";
 import { useSession } from "./session-provider";
-import SidebarProfile from "./sidebar-profile";
 import { useWorkspaces } from "./workspace-provider";
 
 export default function NavigationLayout({ children }: PropsWithChildren) {
@@ -23,7 +23,7 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
     <div className="flex h-screen w-screen">
       <div className="flex w-[250px] shrink-0 flex-col overflow-hidden border-r">
         <div className="px-2 py-2">
-          <SidebarProfile />
+          <NavigationProfile />
         </div>
 
         {/* <div className="px-2">

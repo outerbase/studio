@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { LucideCode, LucideLoader, LucideSave } from "lucide-react";
-import React from "react";
 import CodePreview from "../../components/gui/code-preview";
 
 interface Props {
@@ -20,12 +19,12 @@ interface Props {
 export function ViewController(props: Props) {
   const { onSave, onDiscard, isExecuting, disabled, previewScript } = props;
   return (
-    <div className="p-1 flex gap-2">
+    <div className="flex gap-2 p-1">
       <Button variant="ghost" onClick={onSave} disabled={disabled} size={"sm"}>
         {isExecuting ? (
-          <LucideLoader className="w-4 h-4 mr-2 animate-spin" />
+          <LucideLoader className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <LucideSave className="w-4 h-4 mr-2" />
+          <LucideSave className="mr-2 h-4 w-4" />
         )}
         Save
       </Button>
@@ -46,12 +45,12 @@ export function ViewController(props: Props) {
       <Popover>
         <PopoverTrigger>
           <div className={buttonVariants({ size: "sm", variant: "ghost" })}>
-            <LucideCode className="w-4 h-4 mr-1" />
+            <LucideCode className="mr-1 h-4 w-4" />
             SQL Preview
           </div>
         </PopoverTrigger>
         <PopoverContent style={{ width: 500 }}>
-          <div className="text-xs font-semibold mb-1">SQL Preview</div>
+          <div className="mb-1 text-sm font-semibold">SQL Preview</div>
           <div style={{ maxHeight: 400 }} className="overflow-y-auto">
             <CodePreview code={previewScript} />
           </div>
