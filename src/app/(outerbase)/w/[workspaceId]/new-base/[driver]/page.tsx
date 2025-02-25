@@ -1,9 +1,9 @@
 "use client";
-import { REMOTE_CONNECTION_TEMPLATES } from "@/app/(outerbase)/base-template";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
 } from "@/components/connection-config-editor";
+import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
 import { getDatabaseFriendlyName } from "@/components/resource-card/utils";
 import {
@@ -27,15 +27,17 @@ export default function WorkspaceNewBasePage() {
   const [error, setError] = useState("");
 
   const template = useMemo(() => {
-    return REMOTE_CONNECTION_TEMPLATES[driver];
+    return ConnectionTemplateDictionary[driver];
   }, [driver]);
 
   const onSave = useCallback(
     (overrideRedirect?: string) => {
+      if (!template.remoteFrom || !template.remoteTo) return;
+
       setLoading(true);
       setError("");
 
-      const { name: baseName, source } = template.to(value);
+      const { name: baseName, source } = template.remoteTo(value);
 
       const runSave = async () => {
         await testOuterbaseSource(workspaceId, source);
@@ -71,7 +73,7 @@ export default function WorkspaceNewBasePage() {
     [workspaceId, template, value, router]
   );
 
-  if (!template) {
+  if (!template.remoteFrom || !template.remoteTo) {
     return <div>Invalid driver</div>;
   }
 
@@ -91,22 +93,17 @@ export default function WorkspaceNewBasePage() {
           <div>Connect to {getDatabaseFriendlyName(driver)} database</div>
         </div>
 
-        <div>
-          <div className="w-1/2">
-            {error && (
-              <div className="mb-4 rounded border border-red-500 bg-red-100 p-2 text-base dark:bg-red-500 dark:text-white">
-                {error}
-              </div>
-            )}
-
-            <ConnectionConfigEditor
-              template={template.template}
-              value={value}
-              onChange={setValue}
-            />
+        {error && (
+          <div className="mb-4 rounded border border-red-500 bg-red-100 p-2 text-base lg:w-1/2 dark:bg-red-500 dark:text-white">
+            {error}
           </div>
-          <div></div>
-        </div>
+        )}
+
+        <ConnectionConfigEditor
+          template={template}
+          value={value}
+          onChange={setValue}
+        />
       </div>
 
       <div className="bg-background sticky bottom-0 mt-12 border-t px-2 py-6">

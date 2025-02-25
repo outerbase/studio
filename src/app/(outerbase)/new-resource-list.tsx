@@ -7,9 +7,11 @@ import {
   CloudflareIcon,
   DigitalOceanIcon,
   NeonIcon,
+  RQLiteIcon,
   StarbaseIcon,
   SupabaseIcon,
   TursoIcon,
+  ValTownIcon,
 } from "@/components/resource-card/icon";
 import { NewResourceType } from "./new-resource-button";
 
@@ -89,6 +91,16 @@ export function getCreateResourceTypeList(
       name: "SQLite",
       icon: SQLiteIcon,
       href: workspaceId ? "" : "/local/new-base/sqlite-filehandler",
+    },
+    {
+      name: "val.town",
+      icon: ValTownIcon,
+      href: workspaceId ? "" : "/local/new-base/valtown",
+    },
+    {
+      name: "rqlite",
+      icon: RQLiteIcon,
+      href: workspaceId ? "" : "/local/new-base/rqlite",
     },
   ].filter((resource) => resource.href || resource.comingSoon);
 }

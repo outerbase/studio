@@ -1,6 +1,7 @@
+import { ConnectionTemplateList } from "@/app/(outerbase)/base-template";
 import { CommonConnectionConfigTemplate } from "..";
 
-export const CLOUDFLARE_CONNECTION_TEMPLATE: CommonConnectionConfigTemplate = [
+const template: CommonConnectionConfigTemplate = [
   {
     columns: [
       {
@@ -35,3 +36,25 @@ export const CLOUDFLARE_CONNECTION_TEMPLATE: CommonConnectionConfigTemplate = [
     ],
   },
 ];
+
+export const CloudflareConnectionTemplate: ConnectionTemplateList = {
+  localFrom: (value) => {
+    return {
+      name: value.name,
+      database: value.database,
+      token: value.token,
+      username: value.username,
+    };
+  },
+  localTo: (value) => {
+    return {
+      name: value.name,
+      driver: "cloudflare-d1",
+      database: value.database,
+      token: value.token,
+      username: value.username,
+    };
+  },
+  template,
+  instruction: <div></div>,
+};

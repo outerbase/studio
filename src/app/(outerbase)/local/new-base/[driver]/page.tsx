@@ -1,10 +1,10 @@
 "use client";
 
-import { LOCAL_CONNECTION_TEMPLATES } from "@/app/(outerbase)/base-template";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
 } from "@/components/connection-config-editor";
+import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
 import { getDatabaseFriendlyName } from "@/components/resource-card/utils";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
@@ -20,18 +20,24 @@ export default function LocalNewBasePage() {
   const [loading, setLoading] = useState(false);
 
   const template = useMemo(() => {
-    return LOCAL_CONNECTION_TEMPLATES[driver];
+    return ConnectionTemplateDictionary[driver];
   }, [driver]);
 
   const onSave = useCallback(async () => {
+    if (!template?.localTo) return;
+
     setLoading(true);
-    await createLocalConnection(template.to(value));
+    await createLocalConnection(template.localTo(value));
     router.push("/local");
   }, [template, value, router]);
 
   const onConnect = useCallback(async () => {
+    if (!template?.localFrom) return;
+
     setLoading(true);
-    const newConnection = await createLocalConnection(template.to(value));
+    const newConnection = await createLocalConnection(
+      template.localFrom(value)
+    );
 
     // Redirect to the connection page
     mutate("/local/bases");
@@ -42,7 +48,7 @@ export default function LocalNewBasePage() {
     );
   }, [template, value, router]);
 
-  if (!template) {
+  if (!template?.localTo || !template?.localFrom) {
     return <div>Invalid driver</div>;
   }
 
@@ -62,16 +68,11 @@ export default function LocalNewBasePage() {
           <div>Connect to {getDatabaseFriendlyName(driver)} database</div>
         </div>
 
-        <div>
-          <div className="w-1/2">
-            <ConnectionConfigEditor
-              template={template.template}
-              value={value}
-              onChange={setValue}
-            />
-          </div>
-          <div></div>
-        </div>
+        <ConnectionConfigEditor
+          template={template}
+          value={value}
+          onChange={setValue}
+        />
       </div>
 
       <div className="bg-background sticky bottom-0 mt-12 border-t px-2 py-6">

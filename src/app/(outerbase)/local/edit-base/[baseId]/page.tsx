@@ -76,16 +76,11 @@ export default function LocalEditBasePage() {
           </div>
         </div>
 
-        <div>
-          <div className="w-1/2">
-            <ConnectionConfigEditor
-              template={template.template}
-              value={value}
-              onChange={setValue}
-            />
-          </div>
-          <div></div>
-        </div>
+        <ConnectionConfigEditor
+          template={template}
+          value={value}
+          onChange={setValue}
+        />
       </div>
 
       <div className="bg-background sticky bottom-0 mt-12 border-t px-2 py-6">

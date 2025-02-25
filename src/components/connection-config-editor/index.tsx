@@ -9,6 +9,7 @@
  * Users can customize the templates to suit their specific requirements.
  */
 
+import { ConnectionTemplateList } from "@/app/(outerbase)/base-template";
 import { cn } from "@/lib/utils";
 import { produce } from "immer";
 import { CommonDialogProvider } from "../common-dialog";
@@ -23,113 +24,119 @@ export function ConnectionConfigEditor({
   onChange,
   value,
 }: ConnectionConfigEditorProps) {
+  const templateRow = template.template;
+
   return (
-    <div className="flex w-full flex-col gap-4">
-      <Label title="Name">
-        <Input
-          autoFocus
-          size="lg"
-          placeholder="Connection name"
-          value={value.name}
-          onChange={(e) => {
-            onChange(
-              produce(value, (draft) => {
-                draft.name = e.target.value as never;
-              })
-            );
-          }}
-        />
-      </Label>
-
-      {template.map((row, index) => {
-        return (
-          <div key={index} className={"flex flex-row gap-4"}>
-            {row.columns.map((column, index) => {
-              let content = <div />;
-
-              if (column.type === "text" || column.type === "password") {
-                content = (
-                  <Label title={column.label} required={column.required}>
-                    <Input
-                      size="lg"
-                      placeholder={column.placeholder}
-                      value={(value[column.name] as string) ?? ""}
-                      onChange={(e) => {
-                        onChange(
-                          produce(value, (draft) => {
-                            draft[column.name] = e.target.value as never;
-                          })
-                        );
-                      }}
-                    />
-                  </Label>
-                );
-              } else if (column.type === "textarea") {
-                content = (
-                  <Label title={column.label} required={column.required}>
-                    <Textarea
-                      rows={4}
-                      className="resize-none"
-                      placeholder={column.placeholder}
-                      value={(value[column.name] as string) ?? ""}
-                      onChange={(e) => {
-                        onChange(
-                          produce(value, (draft) => {
-                            draft[column.name] = e.target.value as never;
-                          })
-                        );
-                      }}
-                    />
-                  </Label>
-                );
-              } else if (column.type === "checkbox") {
-                content = (
-                  <label className="mx-1 flex flex-1 items-center justify-start gap-2 text-base select-none">
-                    <Toggle
-                      size="sm"
-                      onChange={(checked) => {
-                        onChange(
-                          produce(value, (draft) => {
-                            draft[column.name] = checked as never;
-                          })
-                        );
-                      }}
-                      toggled={!!value[column.name]}
-                    />
-
-                    {column.label}
-                  </label>
-                );
-              } else if (column.type === "file") {
-                content = (
-                  <Label title={column.label} required={column.required}>
-                    <div>
-                      <CommonDialogProvider>
-                        <FileHandlerPicker
-                          value={value[column.name] as string}
-                          onChange={(fileId) => {
-                            onChange(
-                              produce(value, (draft) => {
-                                draft[column.name] = fileId as never;
-                              })
-                            );
-                          }}
-                        />
-                      </CommonDialogProvider>
-                    </div>
-                  </Label>
-                );
-              }
-
-              return (
-                <div key={index} className={cn("flex-1", column.size)}>
-                  {content}
-                </div>
+    <div className="flex w-full gap-4">
+      <div className="flex w-1/2 grow-0 flex-col gap-4">
+        <Label title="Name">
+          <Input
+            autoFocus
+            size="lg"
+            placeholder="Connection name"
+            value={value.name}
+            onChange={(e) => {
+              onChange(
+                produce(value, (draft) => {
+                  draft.name = e.target.value as never;
+                })
               );
-            })}
-          </div>
-        );
-      })}
+            }}
+          />
+        </Label>
+
+        {templateRow.map((row, index) => {
+          return (
+            <div key={index} className={"flex flex-row gap-4"}>
+              {row.columns.map((column, index) => {
+                let content = <div />;
+
+                if (column.type === "text" || column.type === "password") {
+                  content = (
+                    <Label title={column.label} required={column.required}>
+                      <Input
+                        size="lg"
+                        placeholder={column.placeholder}
+                        value={(value[column.name] as string) ?? ""}
+                        onChange={(e) => {
+                          onChange(
+                            produce(value, (draft) => {
+                              draft[column.name] = e.target.value as never;
+                            })
+                          );
+                        }}
+                      />
+                    </Label>
+                  );
+                } else if (column.type === "textarea") {
+                  content = (
+                    <Label title={column.label} required={column.required}>
+                      <Textarea
+                        rows={4}
+                        className="resize-none"
+                        placeholder={column.placeholder}
+                        value={(value[column.name] as string) ?? ""}
+                        onChange={(e) => {
+                          onChange(
+                            produce(value, (draft) => {
+                              draft[column.name] = e.target.value as never;
+                            })
+                          );
+                        }}
+                      />
+                    </Label>
+                  );
+                } else if (column.type === "checkbox") {
+                  content = (
+                    <label className="mx-1 flex flex-1 items-center justify-start gap-2 text-base select-none">
+                      <Toggle
+                        size="sm"
+                        onChange={(checked) => {
+                          onChange(
+                            produce(value, (draft) => {
+                              draft[column.name] = checked as never;
+                            })
+                          );
+                        }}
+                        toggled={!!value[column.name]}
+                      />
+
+                      {column.label}
+                    </label>
+                  );
+                } else if (column.type === "file") {
+                  content = (
+                    <Label title={column.label} required={column.required}>
+                      <div>
+                        <CommonDialogProvider>
+                          <FileHandlerPicker
+                            value={value[column.name] as string}
+                            onChange={(fileId) => {
+                              onChange(
+                                produce(value, (draft) => {
+                                  draft[column.name] = fileId as never;
+                                })
+                              );
+                            }}
+                          />
+                        </CommonDialogProvider>
+                      </div>
+                    </Label>
+                  );
+                }
+
+                return (
+                  <div key={index} className={cn("flex-1", column.size)}>
+                    {content}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="w-1/2 grow-0">{template.instruction}</div>
     </div>
   );
 }
@@ -168,7 +175,7 @@ export type CommonConnectionConfigTemplate =
   CommonConnectionConfigTemplateRow[];
 
 interface ConnectionConfigEditorProps {
-  template: CommonConnectionConfigTemplate;
+  template: ConnectionTemplateList;
   value: CommonConnectionConfig;
   onChange: (value: CommonConnectionConfig) => void;
 }
