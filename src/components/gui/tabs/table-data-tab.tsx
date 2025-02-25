@@ -27,7 +27,7 @@ import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 import {
   LucideArrowLeft,
   LucideArrowRight,
-  LucideRefreshCcw
+  LucideRefreshCcw,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import AggregateResultButton from "../aggregate-result/aggregate-result-button";
@@ -218,7 +218,7 @@ export default function TableDataWindow({
       )}
       <div className="shrink-0 grow-0 border-b border-neutral-200 py-2 dark:border-neutral-800">
         <Toolbar>
-          <div className="flex flex-1 items-center gap-2 ml-2">
+          <div className="ml-2 flex flex-1 items-center gap-2">
             <Button
               variant={"secondary"}
               onClick={() => setRevision((prev) => prev + 1)}
@@ -227,7 +227,11 @@ export default function TableDataWindow({
               <LucideRefreshCcw className="h-4 w-4" />
             </Button>
 
-            <Button variant={"secondary"} onClick={onNewRow} className="flex items-center gap-1">
+            <Button
+              variant={"secondary"}
+              onClick={onNewRow}
+              className="flex items-center gap-1"
+            >
               <div className="text-sm">Add row</div>
             </Button>
 
@@ -236,8 +240,8 @@ export default function TableDataWindow({
             </Button>
           </div>
 
-          <div className="mx-2 flex grow max-w-1/3">
-            <div className="flex w-full items-center overflow-hidden rounded bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800">
+          <div className="mx-2 flex max-w-1/3 grow">
+            <div className="flex w-full items-center overflow-hidden rounded border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950">
               {filterColumnButton}
               <input
                 type="text"
@@ -249,12 +253,12 @@ export default function TableDataWindow({
                     setWhere(e.currentTarget.value);
                   }
                 }}
-                className="h-full grow p-2 pl-3 pr-2 font-mono text-sm outline-hidden"
+                className="h-full grow p-2 pr-2 pl-3 font-mono text-sm outline-hidden"
               />
             </div>
           </div>
 
-          <div className="flex-1 flex flex-row-reverse items-center gap-2 mr-2">
+          <div className="mr-2 flex flex-1 flex-row-reverse items-center gap-2">
             {/* <ToolbarButton
               text="Save"
               // icon={<LucideSaveAll className="h-4 w-4" />}
@@ -272,20 +276,27 @@ export default function TableDataWindow({
               disabled={!changeNumber}
               onClick={onDiscard}
             /> */}
-            
 
-              { changeNumber ?
-                <>
-                  <Button variant={"primary"} onClick={onCommit} loading={isExecuting} disabled={!changeNumber || isExecuting}>
-                    <div className="text-sm">Save {changeNumber ? changeNumber.toString() : ""} changes</div>
-                  </Button>
-                  
-                  <Button variant={"destructive"} onClick={onDiscard}>
-                    <div className="text-sm">Discard</div>
-                  </Button>
-                </>
-                : <></>
-              }
+            {changeNumber ? (
+              <>
+                <Button
+                  variant={"primary"}
+                  onClick={onCommit}
+                  loading={isExecuting}
+                  disabled={!changeNumber || isExecuting}
+                >
+                  <div className="text-sm">
+                    Save {changeNumber ? changeNumber.toString() : ""} changes
+                  </div>
+                </Button>
+
+                <Button variant={"destructive"} onClick={onDiscard}>
+                  <div className="text-sm">Discard</div>
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
           </div>
         </Toolbar>
       </div>
@@ -308,8 +319,8 @@ export default function TableDataWindow({
         ) : null}
       </div>
       {stat && data && (
-        <div className="flex shrink-0 h-12 justify-between border-t">
-          <div className="flex p-1 px-2 items-center">
+        <div className="flex h-12 shrink-0 justify-between border-t">
+          <div className="flex items-center p-1 px-2">
             <div>
               <ExportResultButton data={data} />
             </div>
@@ -318,79 +329,84 @@ export default function TableDataWindow({
           <div className="p-1 pr-3">
             <AggregateResultButton data={data} />
           </div>
-          
-            <div className="flex items-center gap-2 mr-3">
-              <Button
-                variant={"secondary"}
-                size={"sm"}
-                disabled={finalOffset === 0 || loading}
-                onClick={() => {
-                  setFinalOffset(finalOffset - finalLimit);
-                  setOffset((finalOffset - finalLimit).toString());
-                }}
-                style={{ width: 32, height: 32 }}
-              >
-                <LucideArrowLeft className="h-4 w-4" />
-              </Button>
 
-              <div className="flex gap-2">
-                <Tooltip>
-                  <TooltipTrigger>
-                    <input
-                      value={limit}
-                      onChange={(e) => setLimit(e.currentTarget.value)}
-                      onBlur={(e) => {
-                        try {
-                          const finalValue = parseInt(e.currentTarget.value);
-                          if (finalValue !== finalLimit) {
-                            setFinalLimit(finalValue);
-                          }
-                        } catch (e) {
-                          setLimit(finalLimit.toString());
+          <div className="mr-3 flex items-center gap-2">
+            <Button
+              variant={"secondary"}
+              size={"sm"}
+              disabled={finalOffset === 0 || loading}
+              onClick={() => {
+                setFinalOffset(finalOffset - finalLimit);
+                setOffset((finalOffset - finalLimit).toString());
+              }}
+              style={{ width: 32, height: 32 }}
+            >
+              <LucideArrowLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex gap-2">
+              <Tooltip>
+                <TooltipTrigger>
+                  <input
+                    value={limit}
+                    onChange={(e) => setLimit(e.currentTarget.value)}
+                    onBlur={(e) => {
+                      try {
+                        const finalValue = parseInt(e.currentTarget.value);
+                        if (finalValue !== finalLimit) {
+                          setFinalLimit(finalValue);
                         }
-                      }}
-                      style={{ width: 50 }}
-                      className="h-8 rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-900"
-                      alt="Limit"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>Limit</TooltipContent>
-                </Tooltip>
+                      } catch (e) {
+                        setLimit(finalLimit.toString());
+                      }
+                    }}
+                    style={{ width: 50 }}
+                    className="h-8 rounded bg-neutral-200 p-1 pr-2 pl-2 text-xs dark:bg-neutral-900"
+                    alt="Limit"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Limit</TooltipContent>
+              </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger>
-                    <input
-                      value={offset}
-                      onChange={(e) => setOffset(e.currentTarget.value)}
-                      onBlur={(e) => {
-                        try {
-                          const finalValue = parseInt(e.currentTarget.value);
-                          if (finalValue !== finalOffset) {
-                            setFinalOffset(finalValue);
-                          }
-                        } catch (e) {
-                          setOffset(finalOffset.toString());
+              <Tooltip>
+                <TooltipTrigger>
+                  <input
+                    value={offset}
+                    onChange={(e) => setOffset(e.currentTarget.value)}
+                    onBlur={(e) => {
+                      try {
+                        const finalValue = parseInt(e.currentTarget.value);
+                        if (finalValue !== finalOffset) {
+                          setFinalOffset(finalValue);
                         }
-                      }}
-                      style={{ width: 50 }}
-                      className="h-full rounded bg-neutral-200 p-1 pl-2 pr-2 text-xs dark:bg-neutral-900"
-                      alt="Offset"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>Offset</TooltipContent>
-                </Tooltip>
-              </div>
-
-              <Button variant={"secondary"} size={"sm"} disabled={loading} style={{ width: 32, height: 32 }}>
-                <LucideArrowRight
-                  className="h-4 w-4"
-                  onClick={() => {
-                    setFinalOffset(finalOffset + finalLimit);
-                    setOffset((finalOffset + finalLimit).toString());
-                  }}
-                />
-              </Button>
+                      } catch (e) {
+                        setOffset(finalOffset.toString());
+                      }
+                    }}
+                    style={{ width: 50 }}
+                    className="h-full rounded bg-neutral-200 p-1 pr-2 pl-2 text-xs dark:bg-neutral-900"
+                    alt="Offset"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Offset</TooltipContent>
+              </Tooltip>
             </div>
+
+            <Button
+              variant={"secondary"}
+              size={"sm"}
+              disabled={loading}
+              style={{ width: 32, height: 32 }}
+            >
+              <LucideArrowRight
+                className="h-4 w-4"
+                onClick={() => {
+                  setFinalOffset(finalOffset + finalLimit);
+                  setOffset((finalOffset + finalLimit).toString());
+                }}
+              />
+            </Button>
+          </div>
         </div>
       )}
     </div>
