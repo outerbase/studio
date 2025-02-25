@@ -59,9 +59,12 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
                 }
                 selected={workspace.short_name === workspaceId}
                 badge={
-                  <span className="mr-2 rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-sm font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
-                    Free
-                  </span>
+                  !workspace.is_enterprise &&
+                  workspace.subscription.plan === "starter" ? (
+                    <span className="mr-2 rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-sm font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+                      Free
+                    </span>
+                  ) : undefined
                 }
               />
             );

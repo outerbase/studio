@@ -17,7 +17,7 @@ export default function SignoutPage() {
   }, [router, logout]);
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-4">
       <Loader size={40} />
       <p>Signing out....</p>
     </div>
