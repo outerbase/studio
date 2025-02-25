@@ -32,12 +32,10 @@ export default function LocalNewBasePage() {
   }, [template, value, router]);
 
   const onConnect = useCallback(async () => {
-    if (!template?.localFrom) return;
+    if (!template?.localTo) return;
 
     setLoading(true);
-    const newConnection = await createLocalConnection(
-      template.localFrom(value)
-    );
+    const newConnection = await createLocalConnection(template.localTo(value));
 
     // Redirect to the connection page
     mutate("/local/bases");
