@@ -50,6 +50,7 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
       revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      errorRetryCount: 0,
     }
   );
 

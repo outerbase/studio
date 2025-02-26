@@ -57,6 +57,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      errorRetryCount: 0,
     }
   );
 

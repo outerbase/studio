@@ -2,5 +2,5 @@
 import { CloudDriverSupportOnly } from "../cloud-support-only";
 
 export default function LocalMySQLNewBasePage() {
-  return <CloudDriverSupportOnly type="mysql" />;
+  return <CloudDriverSupportOnly type="postgres" />;
 }
