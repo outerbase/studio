@@ -32,7 +32,7 @@ function MyStudioInternal({
   const dialet = driver.getFlags().dialect;
 
   const goBack = useCallback(() => {
-    router.push("/connect");
+    router.push("/");
   }, [router]);
 
   const extensions = useMemo(() => {
