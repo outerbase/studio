@@ -2,6 +2,7 @@ import { Input } from "@/components/orbit/input";
 import { MenuBar } from "@/components/orbit/menu-bar";
 import ResourceCard from "@/components/resource-card";
 import {
+  getDatabaseColor,
   getDatabaseFriendlyName,
   getDatabaseIcon,
   getDatabaseVisual,
@@ -36,6 +37,7 @@ export interface ResourceItemProps {
   href: string;
   status?: string;
   lastUsed: number;
+  color?: string;
 }
 
 export function getResourceItemPropsFromBase(
@@ -46,6 +48,7 @@ export function getResourceItemPropsFromBase(
     id: base.id,
     type: base.sources[0]?.type ?? "database",
     name: base.name,
+    color: getDatabaseColor(base.sources[0]?.type ?? "database"),
     href: `/w/${workspace.short_name}/${base.short_name}`,
     lastUsed: base.last_analytics_event?.created_at
       ? new Date(base.last_analytics_event?.created_at).getTime()
@@ -243,7 +246,7 @@ export function ResourceItemList({
                   <ResourceCard
                     key={resource.id}
                     className="w-full"
-                    color="default"
+                    color={resource.color ?? "default"}
                     icon={getDatabaseIcon(resource.type)}
                     href={resource.href}
                     title={resource.name}

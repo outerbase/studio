@@ -4,6 +4,7 @@ import {
   PostgreIcon,
   RqliteIcon,
   SQLiteIcon,
+  TursoIcon,
 } from "../icons/outerbase-icon";
 import { CloudflareIcon, StarbaseIcon, ValTownIcon } from "./icon";
 import {
@@ -41,8 +42,9 @@ export function getDatabaseIcon(type: string) {
   if (type === "cloudflare" || type === "cloudflare-d1") return CloudflareIcon;
   if (type === "valtown") return ValTownIcon;
   if (type === "starbasedb" || type === "starbase") return StarbaseIcon;
-  if (type === "libsql" || type === "turso") return SQLiteIcon;
+  if (type === "libsql" || type === "turso") return TursoIcon;
   if (type === "rqlite") return RqliteIcon;
+  if (type === "sqlite") return SQLiteIcon;
   if (type === "board") return ChartBar;
 
   return Database;
@@ -55,4 +57,11 @@ export function getDatabaseVisual(type: string) {
   if (type === "board") return BoardVisual;
 
   return GeneralVisual;
+}
+
+export function getDatabaseColor(type: string) {
+  if (type === "cloudflare" || type === "cloudflare-d1") return "yellow";
+  if (type === "starbasedb" || type === "starbase") return "rainbow";
+  if (type === "libsql" || type === "turso") return "green";
+  return "default";
 }

@@ -38,6 +38,7 @@ export default function LocalConnectionPage() {
         id: conn.id,
         type: conn.content.driver,
         status: "",
+        color: conn.content.label || "default",
       } as ResourceItemProps;
     });
   }, [localBases]);
