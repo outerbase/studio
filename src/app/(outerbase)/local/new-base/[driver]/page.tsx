@@ -3,6 +3,7 @@
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
+  validateTemplate,
 } from "@/components/connection-config-editor";
 import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
@@ -18,6 +19,9 @@ export default function LocalNewBasePage() {
   const router = useRouter();
   const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
   const [loading, setLoading] = useState(false);
+  const [validateErrors, setValidateErrors] = useState<Record<string, string>>(
+    {}
+  );
 
   const template = useMemo(() => {
     return ConnectionTemplateDictionary[driver];
@@ -26,6 +30,10 @@ export default function LocalNewBasePage() {
   const onSave = useCallback(async () => {
     if (!template?.localTo) return;
 
+    const errors = validateTemplate(value, template);
+    setValidateErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setLoading(true);
     await createLocalConnection(template.localTo(value));
     router.push("/local");
@@ -33,6 +41,10 @@ export default function LocalNewBasePage() {
 
   const onConnect = useCallback(async () => {
     if (!template?.localTo) return;
+
+    const errors = validateTemplate(value, template);
+    setValidateErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setLoading(true);
     const newConnection = await createLocalConnection(template.localTo(value));
@@ -70,6 +82,7 @@ export default function LocalNewBasePage() {
           template={template}
           value={value}
           onChange={setValue}
+          errors={validateErrors}
         />
       </div>
 

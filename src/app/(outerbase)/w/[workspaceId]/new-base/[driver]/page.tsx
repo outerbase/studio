@@ -2,6 +2,7 @@
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
+  validateTemplate,
 } from "@/components/connection-config-editor";
 import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
@@ -25,6 +26,9 @@ export default function WorkspaceNewBasePage() {
   const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [validateErrors, setValidateErrors] = useState<Record<string, string>>(
+    {}
+  );
 
   const template = useMemo(() => {
     return ConnectionTemplateDictionary[driver];
@@ -33,6 +37,10 @@ export default function WorkspaceNewBasePage() {
   const onSave = useCallback(
     (overrideRedirect?: string) => {
       if (!template.remoteFrom || !template.remoteTo) return;
+
+      const errors = validateTemplate(value, template);
+      setValidateErrors(errors);
+      if (Object.keys(errors).length > 0) return;
 
       setLoading(true);
       setError("");
@@ -103,6 +111,7 @@ export default function WorkspaceNewBasePage() {
           template={template}
           value={value}
           onChange={setValue}
+          errors={validateErrors}
         />
       </div>
 

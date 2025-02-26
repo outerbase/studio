@@ -3,6 +3,7 @@ import { ConnectionTemplateList } from "@/app/(outerbase)/base-template";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
+  validateTemplate,
 } from "@/components/connection-config-editor";
 import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
@@ -18,15 +19,27 @@ export default function LocalEditBasePage() {
   const [loading, setLoading] = useState(true);
   const [databaseName, setDatabaseName] = useState("");
   const [template, setTemplate] = useState<ConnectionTemplateList>();
+  const [validateErrors, setValidateErrors] = useState<Record<string, string>>(
+    {}
+  );
 
   const onSave = useCallback(async () => {
     if (!template?.localTo) return;
+
+    const errors = validateTemplate(value, template);
+    setValidateErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     await updateLocalConnection(baseId, template.localTo(value));
     router.push("/local");
   }, [template, value, router, baseId]);
 
   const onConnect = useCallback(async () => {
     if (!template?.localTo) return;
+
+    const errors = validateTemplate(value, template);
+    setValidateErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setLoading(true);
     const tmp = await updateLocalConnection(baseId, template.localTo(value));
@@ -78,6 +91,7 @@ export default function LocalEditBasePage() {
           template={template}
           value={value}
           onChange={setValue}
+          errors={validateErrors}
         />
       </div>
 

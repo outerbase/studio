@@ -19,17 +19,41 @@ import { Label } from "../orbit/label";
 import { Toggle } from "../orbit/toggle";
 import { Textarea } from "../ui/textarea";
 
+export function validateTemplate(
+  value: CommonConnectionConfig,
+  template: ConnectionTemplateList
+): Record<string, string> {
+  const templateRow = template.template;
+
+  const validationErrors: Record<string, string> = {};
+
+  if (!value.name) {
+    validationErrors["name"] = "Name is required";
+  }
+
+  for (const row of templateRow) {
+    for (const column of row.columns) {
+      if (column.required && !value[column.name]) {
+        validationErrors[column.name] = `${column.label} is required`;
+      }
+    }
+  }
+
+  return validationErrors;
+}
+
 export function ConnectionConfigEditor({
   template,
   onChange,
   value,
+  errors,
 }: ConnectionConfigEditorProps) {
   const templateRow = template.template;
 
   return (
     <div className="flex w-full gap-4">
       <div className="flex w-1/2 grow-0 flex-col gap-4">
-        <Label title="Name">
+        <Label title="Name" requiredDescription={errors?.["name"]} required>
           <Input
             autoFocus
             size="lg"
@@ -53,7 +77,11 @@ export function ConnectionConfigEditor({
 
                 if (column.type === "text" || column.type === "password") {
                   content = (
-                    <Label title={column.label} required={column.required}>
+                    <Label
+                      title={column.label}
+                      required={column.required}
+                      requiredDescription={errors?.[column.name]}
+                    >
                       <Input
                         size="lg"
                         type={column.type}
@@ -71,7 +99,11 @@ export function ConnectionConfigEditor({
                   );
                 } else if (column.type === "textarea") {
                   content = (
-                    <Label title={column.label} required={column.required}>
+                    <Label
+                      title={column.label}
+                      required={column.required}
+                      requiredDescription={errors?.[column.name]}
+                    >
                       <Textarea
                         rows={4}
                         className="resize-none"
@@ -107,7 +139,11 @@ export function ConnectionConfigEditor({
                   );
                 } else if (column.type === "file") {
                   content = (
-                    <Label title={column.label} required={column.required}>
+                    <Label
+                      title={column.label}
+                      required={column.required}
+                      requiredDescription={errors?.[column.name]}
+                    >
                       <div>
                         <CommonDialogProvider>
                           <FileHandlerPicker
@@ -179,4 +215,5 @@ interface ConnectionConfigEditorProps {
   template: ConnectionTemplateList;
   value: CommonConnectionConfig;
   onChange: (value: CommonConnectionConfig) => void;
+  errors?: Record<string, string>;
 }
