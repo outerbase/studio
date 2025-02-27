@@ -1,7 +1,4 @@
-import {
-  type ColumnHeader,
-  ColumnType
-} from "@outerbase/sdk-transform";
+import { type ColumnHeader, ColumnType } from "@outerbase/sdk-transform";
 
 export type InValue =
   | null
@@ -296,6 +293,7 @@ export abstract class BaseDriver {
   abstract close(): void;
 
   abstract query(stmt: string): Promise<DatabaseResultSet>;
+  abstract batch(stmts: string[]): Promise<DatabaseResultSet[]>;
   abstract transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
 
   abstract schemas(): Promise<DatabaseSchemas>;

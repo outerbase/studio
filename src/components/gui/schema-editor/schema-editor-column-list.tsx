@@ -1,3 +1,24 @@
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import {
+  DatabaseTableColumn,
+  DatabaseTableColumnChange,
+  DatabaseTableColumnConstraint,
+  DatabaseTableSchemaChange,
+} from "@/drivers/base-driver";
+import { checkSchemaColumnChange } from "@/lib/sql/sql-generate.schema";
+import { cn } from "@/lib/utils";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { LucidePlus, LucideTrash2 } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import {
   DropdownMenu,
@@ -7,7 +28,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
-import { LucidePlus, LucideTrash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,34 +35,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { CSS } from "@dnd-kit/utilities";
-import { Checkbox } from "@/components/ui/checkbox";
+import ColumnCheckPopup from "./column-check-popup";
+import ColumnCollation from "./column-collation";
 import ColumnDefaultValueInput from "./column-default-value-input";
-import {
-  DatabaseTableColumn,
-  DatabaseTableColumnChange,
-  DatabaseTableColumnConstraint,
-  DatabaseTableSchemaChange,
-} from "@/drivers/base-driver";
-import { cn } from "@/lib/utils";
-import ColumnPrimaryKeyPopup from "./column-pk-popup";
-import ColumnUniquePopup from "./column-unique-popup";
 import ColumnForeignKeyPopup from "./column-fk-popup";
 import ColumnGeneratingPopup from "./column-generate-popup";
-import ColumnCheckPopup from "./column-check-popup";
-import { Button } from "@/components/ui/button";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import ColumnPrimaryKeyPopup from "./column-pk-popup";
 import ColumnTypeSelector from "./column-type-selector";
-import ColumnCollation from "./column-collation";
-import { checkSchemaColumnChange } from "@/lib/sql/sql-generate.schema";
+import ColumnUniquePopup from "./column-unique-popup";
 
 export type ColumnChangeEvent = (
   newValue: Partial<DatabaseTableColumn> | null
@@ -120,7 +120,7 @@ function ColumnItemType({
         onValueChange={onChange}
         disabled={disabled}
       >
-        <SelectTrigger className="bg-inherit border-0 rounded-none shadow-none text-sm">
+        <SelectTrigger className="rounded-none border-0 bg-inherit text-sm shadow-none">
           <SelectValue placeholder="Select datatype" />
         </SelectTrigger>
         <SelectContent>
@@ -206,17 +206,17 @@ function ColumnItem({
       <td
         ref={setActivatorNodeRef}
         {...listeners}
-        className={cn("border-l border-t border-b")}
+        className={cn("border-t border-b border-l")}
       >
         <div
-          className={cn("w-[12px] h-[30px] ml-1 rounded", highlightClassName)}
+          className={cn("ml-1 h-[30px] w-[12px] rounded", highlightClassName)}
         ></div>
       </td>
-      <td className="border-r border-t border-b">
+      <td className="border-t border-r border-b">
         <input
           value={column.name}
           onChange={(e) => change({ name: e.currentTarget.value })}
-          className="p-2 text-sm outline-hidden w-[150px] bg-inherit"
+          className="w-[150px] bg-inherit p-2 text-sm outline-hidden"
           spellCheck={false}
         />
       </td>
@@ -236,7 +236,7 @@ function ColumnItem({
           disabled={disabled}
         />
       </td>
-      <td className="border text-center w-[50px]">
+      <td className="w-[50px] border text-center">
         <Checkbox
           disabled={disabled}
           checked={!column.constraint?.notNull}
@@ -290,8 +290,8 @@ function ColumnItem({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-1 shadow-sm border rounded">
-                <LucidePlus className="w-4 h-4" />
+              <button className="rounded border p-1 shadow-sm">
+                <LucidePlus className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -374,14 +374,14 @@ function ColumnItem({
           />
         </td>
       )}
-      <td className="px-1 border">
+      <td className="border px-1">
         <button
           className="p-1"
           onClick={() => {
             change(null);
           }}
         >
-          <LucideTrash2 className="w-4 h-4 text-red-500" />
+          <LucideTrash2 className="h-4 w-4 text-red-500" />
         </button>
       </td>
     </tr>
@@ -449,7 +449,7 @@ export default function SchemaEditorColumnList({
         onDragEnd={handleDragEnd}
         modifiers={[restrictToVerticalAxis]}
       >
-        <table className="w-full rounded overflow-hidden">
+        <table className="w-full overflow-hidden rounded">
           <thead>
             <tr>
               <td className={cn(headerStyle, "w-[20px]")}></td>
@@ -486,9 +486,9 @@ export default function SchemaEditorColumnList({
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={headerCounter} className="px-4 py-2 border">
+              <td colSpan={headerCounter} className="border px-4 py-2">
                 <Button size="sm" onClick={onAddColumn}>
-                  <LucidePlus className="w-4 h-4 mr-1" /> Add Column
+                  <LucidePlus className="mr-1 h-4 w-4" /> Add Column
                 </Button>
               </td>
             </tr>

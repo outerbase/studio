@@ -4,6 +4,7 @@ const pkg = require("./package.json");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   reactStrictMode: false,
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   env: {
@@ -19,4 +20,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withMDX(nextConfig);
+module.exports = { ...withMDX(nextConfig), output: "standalone" };

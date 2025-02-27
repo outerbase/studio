@@ -1,9 +1,3 @@
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
-import { BaseDriver } from "@/drivers/base-driver";
-import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
-import { Studio } from "./gui/studio";
-import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import {
   createMySQLExtensions,
@@ -11,6 +5,12 @@ import {
   createSQLiteExtensions,
   createStandardExtensions,
 } from "@/core/standard-extension";
+import { BaseDriver } from "@/drivers/base-driver";
+import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
+import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
+import { Studio } from "./gui/studio";
 
 interface MyStudioProps {
   name: string;
@@ -32,7 +32,7 @@ function MyStudioInternal({
   const dialet = driver.getFlags().dialect;
 
   const goBack = useCallback(() => {
-    router.push("/connect");
+    router.push("/");
   }, [router]);
 
   const extensions = useMemo(() => {

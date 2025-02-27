@@ -1,9 +1,6 @@
-import { Button, buttonVariants } from "../../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import OptimizeTableState, {
-  TableSelectionRange,
-} from "../table-optimized/OptimizeTableState";
-import { useCallback, useEffect, useMemo, useState } from "react";
+// import { Button, buttonVariants } from "../../ui/button";
+import { Button } from "@/components/orbit/button";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -12,8 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { getFormatHandlers } from "@/lib/export-helper";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import OptimizeTableState, {
+  TableSelectionRange,
+} from "../table-optimized/OptimizeTableState";
 
 export type ExportTarget = "clipboard" | "file";
 type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";
@@ -229,18 +230,15 @@ export default function ExportResultButton({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <div
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-          onClick={() => setOpen(!open)}
-        >
-          Export
-        </div>
+      <PopoverTrigger asChild>
+        <Button variant={"secondary"} onClick={() => setOpen(!open)}>
+          <div className="text-sm">Export</div>
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 min-w[550px] w-[550px]">
+      <PopoverContent className="min-w[550px] w-[550px] p-0">
         <div>
-          <div className="border-b p-4 flex flex-col gap-2">
-            <h1 className="font-bold text-lg">Export</h1>
+          <div className="flex flex-col gap-2 border-b p-4">
+            <h1 className="text-lg font-bold">Export</h1>
 
             <small>Export target</small>
 
@@ -262,8 +260,8 @@ export default function ExportResultButton({
             </RadioGroup>
           </div>
 
-          <div className="flex grow border-b mb-2">
-            <div className="flex flex-col px-4 p-2 border-r">
+          <div className="mb-2 flex grow border-b">
+            <div className="flex flex-col border-r p-2 px-4">
               <small>Output format</small>
               <RadioGroup
                 className="mt-2 flex flex-col gap-3"
@@ -332,7 +330,7 @@ export default function ExportResultButton({
               </RadioGroup>
             </div>
             <div className="grow">
-              <div className="flex grow px-4 p-2 flex-col border-b">
+              <div className="flex grow flex-col border-b p-2 px-4">
                 <small>Selection</small>
                 <div>
                   <RadioGroup
@@ -410,16 +408,16 @@ export default function ExportResultButton({
                   </RadioGroup>
                 </div>
               </div>
-              <div className="flex grow ml-2 p-2 flex-col">
+              <div className="ml-2 flex grow flex-col p-2">
                 <small>Options</small>
-                <div className="flex flex-col space-y-2 mt-2">
+                <div className="mt-2 flex flex-col space-y-2">
                   <div className="flex items-center space-x-4">
                     <span className="w-[120px] text-sm">Field separator:</span>
-                    <div className="flex items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600 h-[28px] w-[120px]">
+                    <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
                       <input
                         disabled={format !== "delimited"}
                         type="text"
-                        className="bg-transparent flex-1 outline-hidden text-sm font-light"
+                        className="flex-1 bg-transparent text-sm font-light outline-hidden"
                         value={exportOptions?.fieldSeparator || ""}
                         onChange={(e) => {
                           setExportOptions({
@@ -432,11 +430,11 @@ export default function ExportResultButton({
                   </div>
                   <div className="flex items-center space-x-4">
                     <span className="w-[120px] text-sm">Line terminator:</span>
-                    <div className="flex items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600 h-[28px] w-[120px]">
+                    <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
                       <input
                         disabled={format !== "delimited"}
                         type="text"
-                        className="bg-transparent flex-1 outline-hidden text-sm font-light"
+                        className="flex-1 bg-transparent text-sm font-light outline-hidden"
                         value={exportOptions?.lineTerminator || ""}
                         onChange={(e) => {
                           setExportOptions({
@@ -450,11 +448,11 @@ export default function ExportResultButton({
 
                   <div className="flex items-center space-x-4">
                     <span className="w-[120px] text-sm">Encloser:</span>
-                    <div className="flex items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600 h-[28px] w-[120px]">
+                    <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
                       <input
                         disabled={format !== "delimited"}
                         type="text"
-                        className="bg-transparent flex-1 outline-hidden text-sm font-light"
+                        className="flex-1 bg-transparent text-sm font-light outline-hidden"
                         value={exportOptions?.encloser || ""}
                         onChange={(e) => {
                           setExportOptions({
@@ -470,7 +468,7 @@ export default function ExportResultButton({
             </div>
           </div>
         </div>
-        <div className="p-2 pt-0 px-4">
+        <div className="p-2 px-4 pt-0">
           <Button size="sm" onClick={onExportClicked}>
             Export
           </Button>

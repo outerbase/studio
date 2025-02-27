@@ -1,5 +1,5 @@
-import { SavedDocNamespace } from "./drivers/saved-doc/saved-doc-driver";
 import { DatabaseResultSet } from "./drivers/base-driver";
+import { SavedDocNamespace } from "./drivers/saved-doc/saved-doc-driver";
 
 export {};
 
@@ -23,5 +23,14 @@ interface OuterbaseIPC {
 declare global {
   interface Window {
     outerbaseIpc?: OuterbaseIPC;
+    showOuterbaseDialog: Record<
+      string,
+      (props: {
+        component: FunctionComponent;
+        options: unknown;
+        resolve: (props: unknown) => void;
+        defaultCloseValue: unknown;
+      }) => void
+    >;
   }
 }

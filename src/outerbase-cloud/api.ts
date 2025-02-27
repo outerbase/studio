@@ -51,9 +51,18 @@ export async function getOuterbaseBase(workspaceId: string, baseId: string) {
   return baseList.items[0];
 }
 
-export async function getOuterbaseDashboardList(workspaceId: string) {
+export async function deleteOuterbaseBase(workspaceId: string, baseId: string) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/base/${baseId}`,
+    "DELETE"
+  );
+}
+
+export async function getOuterbaseDashboardList(workspaceId?: string) {
   return requestOuterbase<OuterbaseAPIDashboardListResponse>(
-    `/api/v1/workspace/${workspaceId}/dashboard`
+    workspaceId
+      ? `/api/v1/workspace/${workspaceId}/dashboard`
+      : "/api/v1/workspace/dashboard"
   );
 }
 
@@ -66,6 +75,63 @@ export async function getOuterbaseDashboard(
   );
 }
 
+export async function createOuterbaseDashboard(
+  workspaceId: string,
+  baseId: string | undefined,
+  name: string
+) {
+  return requestOuterbase<OuterbaseAPIDashboardDetail>(
+    `/api/v1/workspace/${workspaceId}/dashboard` +
+      (baseId ? `?baseId=${baseId}` : ""),
+    "POST",
+    {
+      name,
+      base_id: baseId ?? "",
+      chart_ids: [],
+      data: {
+        version: 3,
+        filters: [],
+        isWorkspaceScoped: !baseId,
+      },
+      layout: [],
+      directory_index: 0,
+      type: "dashboard",
+    }
+  );
+}
+
+export async function deleteOuterbaseDashboard(
+  workspaceId: string,
+  dashboardId: string
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`,
+    "DELETE"
+  );
+}
+
+export async function updateOuterbaseDashboard(
+  workspaceId: string,
+  dashboardId: string,
+  data: any
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/dashboard/${dashboardId}`,
+    "PUT",
+    data
+  );
+}
+
+export async function deleteOuterbaseDashboardChart(
+  workspaceId: string,
+  chartId: string
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/chart/${chartId}`,
+    "DELETE"
+  );
+}
+
 export async function runOuterbaseQueryRaw(
   workspaceId: string,
   sourceId: string,
@@ -75,6 +141,18 @@ export async function runOuterbaseQueryRaw(
     `/api/v1/workspace/${workspaceId}/source/${sourceId}/query/raw`,
     "POST",
     { query }
+  );
+}
+
+export async function runOuterbaseQueryBatch(
+  workspaceId: string,
+  sourceId: string,
+  queries: string[]
+) {
+  return requestOuterbase<OuterbaseAPIQueryRaw[]>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/query/batch`,
+    "POST",
+    { query: queries }
   );
 }
 
@@ -100,22 +178,22 @@ export async function createOuterbaseQuery(
 }
 
 export async function deleteOuterbaseQuery(
-  worksaceId: string,
+  workspaceId: string,
   queryId: string
 ) {
   return requestOuterbase(
-    `/api/v1/workspace/${worksaceId}/query/${queryId}`,
+    `/api/v1/workspace/${workspaceId}/query/${queryId}`,
     "DELETE"
   );
 }
 
 export async function updateOuterbaseQuery(
-  worksaceId: string,
+  workspaceId: string,
   queryId: string,
   options: { name: string; query: string }
 ) {
   return requestOuterbase<OuterbaseAPIQuery>(
-    `/api/v1/workspace/${worksaceId}/query/${queryId}`,
+    `/api/v1/workspace/${workspaceId}/query/${queryId}`,
     "PUT",
     options
   );
@@ -136,6 +214,36 @@ export async function loginOuterbaseByPassword(
     email,
     password,
   });
+}
+
+export async function registerOuterbaseByPassword(
+  email: string,
+  password: string
+) {
+  return requestOuterbase<OuterbaseAPISession>(
+    "/api/v1/auth/register",
+    "POST",
+    {
+      email,
+      password,
+    }
+  );
+}
+
+export async function verifyOuterbaseRequestEmail() {
+  return requestOuterbase("/api/v1/me/email/verify/request", "POST");
+}
+
+export async function verifyOuterbaseSubmitEmail(
+  email_confirmation_token: string
+) {
+  return requestOuterbase<{ response: unknown; success: boolean }>(
+    "/api/v1/me/email/verify/submit",
+    "POST",
+    {
+      email_confirmation_token,
+    }
+  );
 }
 
 export async function getOuterbaseEmbedChart(

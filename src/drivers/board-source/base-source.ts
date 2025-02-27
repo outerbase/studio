@@ -1,3 +1,4 @@
+import { BaseDriver, DatabaseResultSet, DatabaseSchemas } from "../base-driver";
 
 export interface BoardSource {
   id: string;
@@ -7,6 +8,13 @@ export interface BoardSource {
 
 export abstract class BoardSourceDriver {
   abstract sourceList(): BoardSource[];
-  abstract query(sourceId: string, statement: string): Promise<Record<string, unknown>[]>
+  abstract getDriver(sourceId: string): BaseDriver;
+  abstract query(
+    sourceId: string,
+    statement: string
+  ): Promise<DatabaseResultSet>;
+  abstract schemas(
+    sourceId: string
+  ): Promise<{ schema: DatabaseSchemas; selectedSchema?: string }>;
   abstract cleanup(): void;
 }

@@ -7,7 +7,6 @@ import {
   ValtownIcon,
 } from "@/components/icons/outerbase-icon";
 import { ApiUser } from "@/lib/api/api-database-response";
-import parseSafeJson from "@/lib/json-safe";
 import { FunctionComponent } from "react";
 
 export interface DriverDetailField {
@@ -275,8 +274,8 @@ export interface SavedConnectionItem {
 }
 
 export interface SavedConnectionItemConfigConfig {
-  token: string;
-  url: string;
+  token?: string;
+  url?: string;
   username?: string;
   password?: string;
   database?: string;
@@ -299,152 +298,17 @@ export type SavedConnectionItemDetail = {
   id: string;
 } & SavedConnectionItemWithoutId;
 
-interface SavedConnectionRawLocalStorage {
-  id: string;
+export interface SavedConnectionRawLocalStorage {
+  id?: string;
   name: string;
-  url: string;
-  token: string;
-  username: string;
-  password: string;
-  database: string;
+  url?: string;
+  token?: string;
+  username?: string;
+  password?: string;
+  database?: string;
   driver?: SupportedDriver;
   label?: SavedConnectionLabel;
   file_handler?: string;
   description?: string;
-  last_used: number;
-}
-
-function configToRaw(
-  id: string,
-  data: SavedConnectionItemConfig
-): SavedConnectionRawLocalStorage {
-  return {
-    id,
-    name: data.name,
-    driver: data.driver ?? "turso",
-    url: data.config?.url ?? "",
-    token: data.config?.token ?? "",
-    file_handler: data.config?.filehandler,
-    username: data.config?.username ?? "",
-    password: data.config?.password ?? "",
-    database: data.config?.database ?? "",
-    label: data.label,
-    last_used: Date.now(),
-    description: data.description ?? "",
-  };
-}
-
-function mapRaw(data: SavedConnectionRawLocalStorage): SavedConnectionItem {
-  return {
-    storage: "local",
-    label: data.label,
-    driver: data.driver ?? "turso",
-    id: data.id,
-    name: data.name,
-    description: data.description ?? "",
-  };
-}
-
-function mapDetailRaw(
-  data: SavedConnectionRawLocalStorage
-): SavedConnectionItemDetail {
-  return {
-    storage: "local",
-    id: data.id,
-    driver: data.driver,
-    name: data.name,
-    description: data.description,
-    label: data.label,
-    config: {
-      token: data.token,
-      url: data.url,
-      password: data.password,
-      username: data.username,
-      database: data.database,
-      filehandler: data.file_handler,
-    },
-  };
-}
-
-function getAllConnections() {
-  return parseSafeJson<SavedConnectionRawLocalStorage[]>(
-    localStorage.getItem("connections"),
-    []
-  );
-}
-
-export class SavedConnectionLocalStorage {
-  static getList(): SavedConnectionItem[] {
-    return parseSafeJson<SavedConnectionRawLocalStorage[]>(
-      localStorage.getItem("connections"),
-      []
-    ).map(mapRaw);
-  }
-
-  static getDetailList(): SavedConnectionItemDetail[] {
-    return parseSafeJson<SavedConnectionRawLocalStorage[]>(
-      localStorage.getItem("connections"),
-      []
-    ).map(mapDetailRaw);
-  }
-
-  static remove(id: string) {
-    const tmp = getAllConnections().filter((conn) => conn.id !== id);
-    localStorage.setItem("connections", JSON.stringify(tmp));
-  }
-
-  static update(
-    id: string,
-    data: SavedConnectionItemConfig
-  ): SavedConnectionItem {
-    const tmp = getAllConnections().map((t) => {
-      if (t.id === id) {
-        return configToRaw(id, data);
-      }
-
-      return t;
-    });
-
-    localStorage.setItem("connections", JSON.stringify(tmp));
-
-    return {
-      id,
-      name: data.name,
-      storage: "local",
-      description: data.description,
-      label: data.label,
-    };
-  }
-
-  static save(conn: SavedConnectionItemWithoutId): SavedConnectionItem {
-    const uuid = crypto.randomUUID();
-    const previousConnList = getAllConnections();
-
-    localStorage.setItem(
-      "connections",
-      JSON.stringify([
-        configToRaw(uuid, conn),
-        ...previousConnList,
-      ] as SavedConnectionRawLocalStorage[])
-    );
-
-    return {
-      id: uuid,
-      name: conn.name,
-      driver: conn.driver,
-      storage: "local",
-      description: conn.description,
-      label: conn.label,
-    };
-  }
-
-  static get(id: string) {
-    const found = parseSafeJson<SavedConnectionRawLocalStorage[]>(
-      localStorage.getItem("connections"),
-      []
-    ).find((raw) => raw.id === id);
-
-    if (found) return mapDetailRaw(found);
-    return null;
-  }
+  last_used?: number;
 }

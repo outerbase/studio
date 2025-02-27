@@ -1,85 +1,63 @@
 import { ToolbarFiller } from "@/components/gui/toolbar";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
+import { Input } from "@/components/orbit/input";
 import {
-  Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { LucideLoader } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import DataCatalogDriver, { DataCatalogTermDefinition } from "./driver";
 
 interface Props {
   driver?: DataCatalogDriver;
-  open: boolean;
-  onSuccess: () => void;
-  onClose: (open: boolean) => void;
-  selectedTermDefinition?: DataCatalogTermDefinition;
+  onClose: () => void;
+  definition?: DataCatalogTermDefinition;
 }
 
-export function DataCatalogEntryModal({
-  open,
-  onClose,
-  driver,
-  onSuccess,
-  selectedTermDefinition,
-}: Props) {
+interface TermDefinitionInut extends Omit<DataCatalogTermDefinition, "id"> {
+  id?: string;
+}
+
+export function DataCatalogEntryModal({ onClose, driver, definition }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<DataCatalogTermDefinition>({
-    id: "",
-    name: "",
-    otherName: "",
-    definition: "",
-  });
-
-  const clear = useCallback(() => {
-    setLoading(false);
-    setDeleting(false);
-    onClose(false);
-    setFormData({
-      id: "",
-      name: "",
-      otherName: "",
-      definition: "",
-    });
-  }, [onClose]);
-
-  useEffect(() => {
-    if (selectedTermDefinition) {
-      setFormData(selectedTermDefinition);
-    } else {
-      clear();
-    }
-  }, [selectedTermDefinition, clear]);
+  const [formData, setFormData] = useState<TermDefinitionInut>(
+    () => definition
+  );
 
   const saveTermDefinition = useCallback(() => {
     setLoading(true);
-    const data = {
-      ...formData,
-      id: selectedTermDefinition?.id || String(Date.now() * 1000), // Use existing ID if editing
-    };
 
-    driver
-      ?.updateTermDefinition(data)
-      .then(() => onSuccess())
-      .finally(() => clear());
-  }, [formData, driver, onSuccess, clear, selectedTermDefinition]);
+    if (formData.id) {
+      driver
+        ?.updateTermDefinition({ ...formData, id: formData.id })
+        .then()
+        .finally(() => onClose());
+    } else {
+      driver
+        ?.addTermDefinition({
+          name: formData.name,
+          definition: formData.definition,
+          otherNames: formData.otherNames,
+        })
+        .then()
+        .finally(() => onClose());
+    }
+  }, [formData, driver, onClose]);
 
   function onDelete() {
-    if (!selectedTermDefinition) return;
+    if (!definition) return;
 
     setDeleting(true);
+
     driver
-      ?.deleteTermDefinition(selectedTermDefinition.id)
-      .then(() => onSuccess())
-      .finally(() => clear());
+      ?.deleteTermDefinition(definition.id!)
+      .then()
+      .finally(() => onClose());
   }
 
   const onChangeValue = useCallback(
@@ -93,80 +71,73 @@ export function DataCatalogEntryModal({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
-            {selectedTermDefinition ? "Edit Term" : "Add Term"}
-          </DialogTitle>
-          <DialogDescription>
-            {selectedTermDefinition
-              ? "Modify the existing term definition."
-              : "Add terms to your Data Dictionary to help your team and AI understand important business terminology."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="items-center gap-4">
-            <Label className="text-right text-xs">
+    <>
+      <DialogHeader>
+        <DialogTitle>{definition ? "Edit Term" : "Add Term"}</DialogTitle>
+      </DialogHeader>
+      <DialogDescription className="text-base">
+        {definition
+          ? "Modify the existing term definition."
+          : "Add terms to your Data Dictionary to help your team and AI understand important business terminology."}
+      </DialogDescription>
+      <div className="grid gap-4 py-4">
+        <div className="gap-4">
+          <div>
+            <Label className="text-right text-sm">
               Dictionary Term <span className="text-red-400">*</span>
             </Label>
-            <Input
-              value={formData.name}
-              placeholder="Add a name"
-              className="col-span-3"
-              onChange={(e) => onChangeValue(e.currentTarget.value, "name")}
-            />
           </div>
-          <div className="items-center gap-4">
-            <Label className="text-right text-xs">Other Names</Label>
-            <Input
-              value={formData.otherName}
-              className="col-span-3"
-              placeholder="Add other names"
-              onChange={(e) =>
-                onChangeValue(e.currentTarget.value, "otherName")
-              }
-            />
-          </div>
-          <div className="items-center gap-4">
-            <Label className="text-right text-xs">
-              Definition <span className="text-red-400">*</span>
-            </Label>
-            <Textarea
-              rows={4}
-              value={formData.definition}
-              className="col-span-3"
-              placeholder="Add a definition"
-              onChange={(e) =>
-                onChangeValue(e.currentTarget.value, "definition")
-              }
-            />
-          </div>
+          <Input
+            value={formData?.name || ""}
+            placeholder="Add a name"
+            className="w-full"
+            onValueChange={(value) => onChangeValue(value, "name")}
+          />
         </div>
-        <DialogFooter>
+        <div className="gap-4">
+          <div>
+            <Label className="text-right text-sm">Other Names</Label>
+          </div>
+          <Input
+            value={formData?.otherNames || ""}
+            placeholder="Add other names"
+            className="w-full"
+            onChange={(e) => onChangeValue(e.currentTarget.value, "otherNames")}
+          />
+        </div>
+        <div className="gap-4">
+          <Label className="text-right text-sm">
+            Definition <span className="text-red-400">*</span>
+          </Label>
+          <Textarea
+            rows={4}
+            value={formData?.definition || ""}
+            className="text-base"
+            placeholder="Add a definition"
+            onChange={(e) => onChangeValue(e.currentTarget.value, "definition")}
+          />
+        </div>
+      </div>
+      <DialogFooter>
+        <Button
+          loading={loading}
+          disabled={loading || !formData?.name || !formData?.definition}
+          onClick={saveTermDefinition}
+          title={definition ? "Save Change" : "Add Entry"}
+          shape="base"
+        />
+        {definition && (
           <Button
-            disabled={loading || !formData.name || !formData.definition}
-            onClick={saveTermDefinition}
-            type="submit"
-          >
-            {loading && <LucideLoader className="mr-1 h-4 w-4 animate-spin" />}
-            {selectedTermDefinition ? "Save Change" : "Add Entry"}
-          </Button>
-          {selectedTermDefinition && (
-            <Button
-              disabled={deleting}
-              onClick={onDelete}
-              variant="destructive"
-            >
-              {deleting && (
-                <LucideLoader className="mr-1 h-4 w-4 animate-spin" />
-              )}
-              Delete
-            </Button>
-          )}
-          <ToolbarFiller />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            loading={deleting}
+            disabled={deleting}
+            onClick={onDelete}
+            variant="destructive"
+            title="Delete"
+            shape="base"
+          />
+        )}
+        <ToolbarFiller />
+      </DialogFooter>
+    </>
   );
 }

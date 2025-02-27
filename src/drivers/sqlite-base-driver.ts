@@ -329,16 +329,31 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const orderPart =
       options.orderBy && options.orderBy.length > 0
         ? options.orderBy
-            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-            .join(", ")
+          .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+          .join(", ")
         : "";
 
-    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
-      whereRaw ? ` WHERE ${whereRaw} ` : ""
-    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${whereRaw ? ` WHERE ${whereRaw} ` : ""
+      } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+
+    let data = await this.query(sql);
+
+    // If data does not have any header, we will inject the header from schema
+    if (data.headers.length === 0 && data.rows.length === 0) {
+      data = {
+        ...data,
+        headers: schema.columns.map((col) => {
+          return {
+            name: col.name,
+            originalType: col.type,
+            displayName: col.name,
+          };
+        }),
+      };
+    }
 
     return {
-      data: await this.query(sql),
+      data,
       schema,
     };
   }

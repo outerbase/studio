@@ -13,7 +13,7 @@ export default class ColumnDescriptorExtension extends StudioExtension {
         title: "",
         component: (
           <div className="p-2">
-            <div className="rounded bg-yellow-200 p-2 text-xs text-black">
+            <div className="rounded bg-yellow-200 p-2 text-sm text-black">
               <h2 className="font-semibold">Foreign Key</h2>
               <p className="mt-1 font-mono">
                 {header.metadata.referenceTo.table}.
@@ -33,7 +33,7 @@ export default class ColumnDescriptorExtension extends StudioExtension {
 
       const generatedInfo = generatedExpression ? (
         <div className="p-2">
-          <div className="rounded bg-blue-200 p-2 text-xs text-black">
+          <div className="rounded bg-blue-200 p-2 text-sm text-black">
             <h2 className="font-semibold">Generated Expression</h2>
             <pre className="text-sm">
               <code>{generatedExpression}</code>

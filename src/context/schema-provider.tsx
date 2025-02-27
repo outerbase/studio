@@ -1,3 +1,5 @@
+import ConnectingDialog from "@/components/gui/connection-dialog";
+import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import {
   PropsWithChildren,
   createContext,
@@ -7,10 +9,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import ConnectingDialog from "@/components/gui/connection-dialog";
-import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
-import { useDatabaseDriver } from "./driver-provider";
 import { useAutoComplete } from "./auto-complete-provider";
+import { useDatabaseDriver } from "./driver-provider";
 
 type AutoCompletionSchema = Record<string, Record<string, string[]> | string[]>;
 
@@ -46,7 +46,7 @@ function generateAutoCompleteFromSchemaItems(
     );
 }
 
-function generateAutoComplete(
+export function generateAutoComplete(
   currentSchemaName: string,
   schema: DatabaseSchemas
 ) {

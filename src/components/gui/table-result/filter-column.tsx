@@ -1,12 +1,4 @@
-import { useEffect, useState } from "react";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { Button } from "@/components/ui/button";
-import { Check, ListChecks, LucideSettings2 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+// import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
@@ -14,7 +6,18 @@ import {
   CommandItem,
   CommandSeparator,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Check, ListChecks, LucideSettings2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import OptimizeTableState from "../table-optimized/OptimizeTableState";
+
+import { Button } from "@/components/orbit/button";
+
 
 export default function useTableResultColumnFilter({
   state,
@@ -36,11 +39,11 @@ export default function useTableResultColumnFilter({
   const filterColumnButton = (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={"ghost"} size={"sm"}>
-          <LucideSettings2 className="mr-2 h-4 w-4" />
+        <Button variant={"secondary"} size={"sm"} className="ml-[3px] bg-neutral-200 border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700 flex items-center gap-1">
+          <LucideSettings2 className="h-3 w-4" />
           Columns
           {!!columnFilterBadge && (
-            <span className="ml-2 h-4 w-4 rounded-full bg-primary text-[10px] text-primary text-primary-foreground">
+            <span className="h-4 w-4 ml-1 transform-y-[-2px] rounded-[1px] bg-neutral-700 border border-neutral-600 text-[11px] text-secondary text-secondary-foreground">
               {columnFilterBadge}
             </span>
           )}

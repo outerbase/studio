@@ -1,18 +1,18 @@
-import { LucideCode, LucideCopy, LucidePlus, LucideSave } from "lucide-react";
-import { Separator } from "../../ui/separator";
-import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
-import { Button, buttonVariants } from "../../ui/button";
-import SchemaEditorColumnList from "./schema-editor-column-list";
-import { Input } from "../../ui/input";
-import SchemaEditorConstraintList from "./schema-editor-constraint-list";
-import { ColumnsProvider } from "./column-provider";
-import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import CodePreview from "../code-preview";
-import { toast } from "sonner";
-import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import { useDatabaseDriver } from "@/context/driver-provider";
-import SchemaNameSelect from "./schema-name-select";
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import { checkSchemaChange } from "@/lib/sql/sql-generate.schema";
+import { LucideCode, LucideCopy, LucidePlus, LucideSave } from "lucide-react";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
+import { toast } from "sonner";
+import { Button, buttonVariants } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import { Separator } from "../../ui/separator";
+import CodePreview from "../code-preview";
+import { ColumnsProvider } from "./column-provider";
+import SchemaEditorColumnList from "./schema-editor-column-list";
+import SchemaEditorConstraintList from "./schema-editor-constraint-list";
+import SchemaNameSelect from "./schema-name-select";
 
 interface Props {
   onSave: () => void;
@@ -34,17 +34,17 @@ export default function SchemaEditor({
     const newColumn =
       value.columns.length === 0
         ? {
-          name: "id",
-          type: databaseDriver.columnTypeSelector.idTypeName ?? "INTEGER",
-          constraint: {
-            primaryKey: true,
-          },
-        }
+            name: "id",
+            type: databaseDriver.columnTypeSelector.idTypeName ?? "INTEGER",
+            constraint: {
+              primaryKey: true,
+            },
+          }
         : {
-          name: "column",
-          type: databaseDriver.columnTypeSelector.textTypeName ?? "TEXT",
-          constraint: {},
-        };
+            name: "column",
+            type: databaseDriver.columnTypeSelector.textTypeName ?? "TEXT",
+            constraint: {},
+          };
 
     onChange({
       ...value,
@@ -72,16 +72,16 @@ export default function SchemaEditor({
   }, [databaseDriver]);
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="grow-0 shrink-0">
-        <div className="p-1 flex gap-2">
+    <div className="flex h-full w-full flex-col">
+      <div className="shrink-0 grow-0">
+        <div className="flex gap-2 p-1">
           <Button
             variant="ghost"
             onClick={onSave}
             disabled={!hasChange || !value.name?.new || !value.schemaName}
             size={"sm"}
           >
-            <LucideSave className="w-4 h-4 mr-2" />
+            <LucideSave className="mr-2 h-4 w-4" />
             Save
           </Button>
           <Button
@@ -99,7 +99,7 @@ export default function SchemaEditor({
           </div>
 
           <Button variant="ghost" onClick={onAddColumn} size={"sm"}>
-            <LucidePlus className="w-4 h-4 mr-1" />
+            <LucidePlus className="mr-1 h-4 w-4" />
             Add Column
           </Button>
 
@@ -110,12 +110,12 @@ export default function SchemaEditor({
           <Popover>
             <PopoverTrigger>
               <div className={buttonVariants({ size: "sm", variant: "ghost" })}>
-                <LucideCode className="w-4 h-4 mr-1" />
+                <LucideCode className="mr-1 h-4 w-4" />
                 SQL Preview
               </div>
             </PopoverTrigger>
             <PopoverContent style={{ width: 500 }}>
-              <div className="text-xs font-semibold mb-1">SQL Preview</div>
+              <div className="mb-1 text-xs font-semibold">SQL Preview</div>
               <div style={{ maxHeight: 400 }} className="overflow-y-auto">
                 <CodePreview code={previewScript} />
               </div>
@@ -128,7 +128,7 @@ export default function SchemaEditor({
                 <div
                   className={buttonVariants({ size: "sm", variant: "ghost" })}
                 >
-                  <LucideCode className="w-4 h-4 mr-1" />
+                  <LucideCode className="mr-1 h-4 w-4" />
                   Create Script
                 </div>
               </PopoverTrigger>
@@ -143,12 +143,12 @@ export default function SchemaEditor({
                     );
                   }}
                 >
-                  <LucideCopy className="w-4 h-4 mr-2" />
+                  <LucideCopy className="mr-2 h-4 w-4" />
                   Copy
                 </Button>
                 <div
                   style={{ maxHeight: 400 }}
-                  className="overflow-y-auto mt-2"
+                  className="mt-2 overflow-y-auto"
                 >
                   <CodePreview code={value.createScript} />
                 </div>
@@ -157,9 +157,9 @@ export default function SchemaEditor({
           )}
         </div>
 
-        <div className="flex items-center mx-3 mt-3 mb-4 ml-5 gap-2">
+        <div className="mx-3 mt-3 mb-4 ml-5 flex items-center gap-2">
           <div>
-            <div className="text-xs font-medium mb-1">Table Name</div>
+            <div className="mb-1 text-xs font-medium">Table Name</div>
             <Input
               placeholder="Table Name"
               value={value.name.new ?? value.name.old ?? ""}
@@ -176,7 +176,7 @@ export default function SchemaEditor({
             />
           </div>
           <div>
-            <div className="text-xs font-medium mb-1">Schema</div>
+            <div className="mb-1 text-xs font-medium">Schema</div>
             <SchemaNameSelect
               readonly={!isCreateScript}
               value={value.schemaName}

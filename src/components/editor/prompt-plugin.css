@@ -1,0 +1,43 @@
+.prompt-line-preview {
+  background: #abf7b1;
+}
+
+.prompt-line-selected {
+  background: #f5f5f5;
+}
+
+.dark .prompt-line-selected {
+  background: #222;
+}
+
+.cm-deletedChunk {
+  background-color: #fab1a0 !important;
+}
+
+.dark .cm-deletedChunk {
+  background-color: #b54b4b !important;
+}
+
+.cm-changedLine {
+  background-color: #55efc4 !important;
+}
+
+.cm-changedLine {
+  background-color: #55efc4 !important;
+}
+
+.dark .cm-changedLine {
+  background-color: #2f6542 !important;
+}
+
+.cm-insertedLine .cm-changedText {
+  background: none !important;
+}
+
+.cm-deletedChunk .cm-deletedText {
+  background: none !important;
+}
+
+.cm-deletedChunk del {
+  text-decoration: none !important;
+}

@@ -1,20 +1,15 @@
-import { OuterbaseSessionProvider } from "@/app/(outerbase)/session-provider";
-import ClientOnly from "@/components/client-only";
-import ThemeLayout from "../../../(theme)/theme_layout";
-import { WorkspaceProvider } from "../../workspace-provider";
+import { DialogProvider } from "@/components/create-dialog";
+import AuthProvider from "../../auth-provider";
 
-export default function RootLayout({
+export default function OuterbaseLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <ThemeLayout>
-      <ClientOnly>
-        <OuterbaseSessionProvider>
-          <WorkspaceProvider>{children}</WorkspaceProvider>
-        </OuterbaseSessionProvider>
-      </ClientOnly>
-    </ThemeLayout>
+    <AuthProvider>
+      {children}
+      <DialogProvider slot="workspace" />
+    </AuthProvider>
   );
 }

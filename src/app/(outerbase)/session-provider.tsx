@@ -1,7 +1,11 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
-import { createContext, PropsWithChildren, useContext, useEffect } from "react";
-import useSWR from "swr";
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+} from "react";
+import useSWR, { mutate } from "swr";
 import { getOuterbaseSession } from "../../outerbase-cloud/api";
 import {
   OuterbaseAPISession,
@@ -9,26 +13,35 @@ import {
 } from "../../outerbase-cloud/api-type";
 
 interface OuterebaseSessionContextProps {
-  session: OuterbaseAPISession;
-  user: OuterbaseAPIUser;
+  isLoading: boolean;
+  token?: string;
+  session?: {
+    session: OuterbaseAPISession;
+    user: OuterbaseAPIUser;
+  };
+  logout: () => void;
+  refreshSession: () => Promise<void>;
 }
 
-const OuterbaseSessionContext = createContext<{
-  session: OuterbaseAPISession;
-  user: OuterbaseAPIUser;
-}>({} as OuterebaseSessionContextProps);
+const OuterbaseSessionContext = createContext<OuterebaseSessionContextProps>({
+  isLoading: true,
+  logout: () => {},
+  refreshSession: async () => {},
+});
 
 export function useSession() {
   return useContext(OuterbaseSessionContext);
 }
 
 export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
-  const router = useRouter();
-  const pathname = usePathname();
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("ob-token") : "";
+    typeof window !== "undefined" ? localStorage.getItem("ob-token") || "" : "";
 
-  const { data, isLoading } = useSWR(
+  const {
+    data,
+    isLoading,
+    mutate: mutateSession,
+  } = useSWR(
     token ? "session-" + token : undefined,
     () => {
       return getOuterbaseSession();
@@ -37,24 +50,24 @@ export function OuterbaseSessionProvider({ children }: PropsWithChildren) {
       revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      errorRetryCount: 0,
     }
   );
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (!data?.session || !data?.user) {
-      localStorage.setItem("continue-redirect", pathname);
-      router.push("/signin");
-    }
-  }, [isLoading, data, pathname, router]);
+  const refreshSession = useCallback(async () => {
+    if (!token) return;
+    await mutate("session-" + token);
+  }, [token]);
 
-  if (isLoading || !data) {
-    return <div>Session Loading...</div>;
-  }
+  const logout = useCallback(() => {
+    localStorage.removeItem("session");
+    localStorage.removeItem("ob-token");
+    mutateSession(undefined, false);
+  }, [mutateSession]);
 
   return (
     <OuterbaseSessionContext.Provider
-      value={{ session: data?.session, user: data?.user }}
+      value={{ session: data, isLoading, token, logout, refreshSession }}
     >
       {children}
     </OuterbaseSessionContext.Provider>

@@ -15,12 +15,6 @@ export const env = createEnv({
     DATABASE_ANALYTIC_URL: z.string().optional(),
     DATABASE_ANALYTIC_AUTH_TOKEN: z.string().optional(),
 
-    GITHUB_CLIENT_ID: z.string().optional(),
-    GITHUB_CLIENT_SECRET: z.string().optional(),
-
-    GOOGLE_CLIENT_ID: z.string().optional(),
-    GOOGLE_CLIENT_SECRET: z.string().optional(),
-
     ENCRYPTION_KEY: z.string().min(30).optional(),
   },
 

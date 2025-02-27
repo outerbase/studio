@@ -1,10 +1,7 @@
-import { get_database } from "@/db";
-import PlaygroundEditorBody from "./page-client";
-import { eq, sql } from "drizzle-orm";
-import { dbDataset } from "@/db/schema-dataset";
+import ClientOnly from "@/components/client-only";
 import { Metadata } from "next";
 import ThemeLayout from "../../theme_layout";
-import ClientOnly from "@/components/client-only";
+import PlaygroundEditorBody from "./page-client";
 
 export const metadata: Metadata = {
   title:
@@ -37,22 +34,14 @@ export default async function PlaygroundEditor(props: PlaygroundEditorProps) {
   const templateName = searchParams.template;
   let templateFile: string | null = null;
 
+  // We will hardcode the template given that we already removed the database
+  // but we want to keep the template working.
+
   if (templateName) {
-    const db = get_database();
-    const templateInfo = await db.query.dbDataset.findFirst({
-      where: eq(dbDataset.id, templateName),
-    });
-
-    if (templateInfo) {
-      templateFile = templateInfo.source;
-
-      // Update the template used
-      await db
-        .update(dbDataset)
-        .set({
-          used: sql`${dbDataset.used} + 1`,
-        })
-        .where(eq(dbDataset.id, templateName));
+    if (templateName === "chinook") {
+      templateFile = "https://r2.invisal.com/sample/chinook.db";
+    } else if (templateName === "northwind") {
+      templateFile = "https://r2.invisal.com/sample/northwind.db";
     }
   } else if (searchParams.url) {
     templateFile = searchParams.url;

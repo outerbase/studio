@@ -19,7 +19,7 @@ import {
 export interface BoardFilterProps {
   type: string;
   name: string;
-  default_value: string;
+  defaultValue: string;
   value: string;
   new?: boolean;
 }
@@ -34,7 +34,7 @@ interface Props {
 const DEFAULT_EMPTY = {
   type: "search",
   name: "",
-  default_value: "",
+  defaultValue: "",
   value: "",
 };
 
@@ -76,7 +76,7 @@ export function BoardFilterDialog(props: Props) {
         </DialogHeader>
         <div className="flex flex-col gap-2">
           <div className="mb-2">
-            <div className="mb-1 text-xs font-medium">Select filter type</div>
+            <div className="mb-1 text-sm font-medium">Select filter type</div>
             <Select
               value={props.filter.type}
               onValueChange={(v) =>
@@ -89,12 +89,12 @@ export function BoardFilterDialog(props: Props) {
               <SelectContent>
                 <SelectItem value="search">Search</SelectItem>
                 <SelectItem value="enum">Multi-select ENUM</SelectItem>
-                <SelectItem value="date">Date Rang</SelectItem>
+                <SelectItem value="date">Date Range</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="mb-2">
-            <div className="mb-1 text-xs font-medium">Filter name*</div>
+            <div className="mb-1 text-sm font-medium">Filter name*</div>
             <Input
               placeholder="Enter filter name"
               value={props.filter.name}
@@ -105,7 +105,7 @@ export function BoardFilterDialog(props: Props) {
           </div>
           {props.filter.type === "enum" && (
             <div className="mb-2">
-              <div className="mb-1 text-xs font-medium">
+              <div className="mb-1 text-sm font-medium">
                 Values*
                 <div>
                   <small className="text-muted-foreground">
@@ -123,32 +123,30 @@ export function BoardFilterDialog(props: Props) {
             </div>
           )}
           <div className="mb-2">
-            <div className="mb-1 text-xs font-medium">
+            <div className="mb-1 text-sm font-medium">
               Default value (optional)
-              <div>
-                <small className="text-muted-foreground">
-                  If this field is left empty, no filter will be applied by
-                  default
-                </small>
-              </div>
+              <p className="text-muted-foreground text-sm">
+                If this field is left empty, no filter will be applied by
+                default
+              </p>
             </div>
             {props.filter.type === "search" ? (
               <Input
                 placeholder="Enter default value"
-                value={props.filter.default_value}
+                value={props.filter.defaultValue}
                 onChange={(v) =>
                   props.onFilter({
                     ...props.filter,
-                    default_value: v.target.value,
+                    defaultValue: v.target.value,
                   })
                 }
               />
             ) : (
               <Select
                 disabled={default_value.length === 0}
-                value={props.filter.default_value}
+                value={props.filter.defaultValue}
                 onValueChange={(v) =>
-                  props.onFilter({ ...props.filter, default_value: v })
+                  props.onFilter({ ...props.filter, defaultValue: v })
                 }
               >
                 <SelectTrigger>
@@ -180,7 +178,7 @@ export function BoardFilterDialog(props: Props) {
             disabled={!allowAddFilter}
             onClick={onAddFilter}
           >
-            Add Filter
+            Save Filter
           </Button>
           <Button type="button" variant={"secondary"} onClick={props.onClose}>
             Cancel
