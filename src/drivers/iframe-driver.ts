@@ -6,17 +6,17 @@ import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
 type ParentResponseData =
   | {
-      type: "query";
-      id: number;
-      data: DatabaseResultSet;
-      error?: string;
-    }
+    type: "query";
+    id: number;
+    data: DatabaseResultSet;
+    error?: string;
+  }
   | {
-      type: "transaction";
-      id: number;
-      data: DatabaseResultSet[];
-      error?: string;
-    };
+    type: "transaction";
+    id: number;
+    data: DatabaseResultSet[];
+    error?: string;
+  };
 
 type PromiseResolveReject = {
   resolve: (value: any) => void;
@@ -29,6 +29,10 @@ class IframeConnection {
 
   listen() {
     const handler = (e: MessageEvent<ParentResponseData>) => {
+      // Make no sense to handle message with no matching id
+      // This throw a lot of error in console for some reason
+      if (!this.queryPromise[e.data.id]) return;
+
       if (e.data.error) {
         this.queryPromise[e.data.id].reject(e.data.error);
         delete this.queryPromise[e.data.id];
@@ -124,7 +128,7 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
     this.conn.listen();
   }
 
-  close(): void {}
+  close(): void { }
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
@@ -147,7 +151,7 @@ export class IframeMySQLDriver extends MySQLLikeDriver {
     this.conn.listen();
   }
 
-  close(): void {}
+  close(): void { }
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
@@ -179,7 +183,7 @@ export class IframePostgresDriver extends PostgresLikeDriver {
     this.conn.listen();
   }
 
-  close(): void {}
+  close(): void { }
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
