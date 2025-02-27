@@ -1,6 +1,6 @@
 {
-  "name": "@libsqlstudio/studio",
-  "version": "0.9.2",
+  "name": "@outerbase/studio",
+  "version": "0.10",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3008",
