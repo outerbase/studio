@@ -18,7 +18,11 @@
     "format:fix": "prettier --write .",
     "lint": "next lint",
     "lint:fix": "next lint --fix .",
-    "dialect": "node build-dialect.js"
+    "dialect": "node build-dialect.js",
+    "build:worker": "opennextjs-cloudflare",
+    "dev:worker": "wrangler dev --port 8771",
+    "preview:worker": "npm run build:worker && npm run dev:worker",
+    "deploy:worker": "npm run build:worker && wrangler deploy"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
@@ -101,6 +105,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^0.5.6",
     "@tailwindcss/postcss": "^4.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
