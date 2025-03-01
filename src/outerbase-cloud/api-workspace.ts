@@ -75,3 +75,13 @@ export function createOuterbaseSource(
     source
   );
 }
+
+export async function updateOuterbaseSchemas(
+  workspaceId: string,
+  sourceId: string
+) {
+  // 
+  return await requestOuterbase<unknown>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/schema?baseId=`, "POST"
+  );
+}

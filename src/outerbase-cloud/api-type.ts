@@ -66,6 +66,7 @@ export interface OuterbaseAPISource {
   model: "source";
   type: string;
   id: string;
+  base_id: string;
 }
 export interface OuterbaseAPIBase {
   model: "base";
@@ -151,7 +152,7 @@ export interface OuterbaseAPIUser {
 
 export interface OuterbaseAPIDashboardDetail
   extends OuterbaseAPIDashboard,
-    DashboardProps {}
+  DashboardProps { }
 
 export interface OuterbaseAPIWorkspaceResponse {
   items: OuterbaseAPIWorkspace[];
