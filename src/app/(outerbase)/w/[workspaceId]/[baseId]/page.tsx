@@ -9,6 +9,7 @@ import {
   createSQLiteExtensions,
 } from "@/core/standard-extension";
 import DataCatalogExtension from "@/extensions/data-catalog";
+import OuterbaseExtension from "@/extensions/outerbase";
 import { getOuterbaseBase } from "@/outerbase-cloud/api";
 import { OuterbaseAPISource } from "@/outerbase-cloud/api-type";
 import DataCatalogOuterbaseDriver from "@/outerbase-cloud/data-catalog-driver";
@@ -50,11 +51,12 @@ export default function OuterbaseSourcePage() {
     const outerbaseConfig = {
       workspaceId,
       sourceId: source.id,
-      baseId,
+      baseId: source.base_id,
       token: localStorage.getItem("ob-token") ?? "",
     };
 
     const outerbaseSpecifiedDrivers = [
+      new OuterbaseExtension(outerbaseConfig),
       new DataCatalogExtension(new DataCatalogOuterbaseDriver(outerbaseConfig)),
     ];
 
@@ -83,7 +85,7 @@ export default function OuterbaseSourcePage() {
         ...outerbaseSpecifiedDrivers,
       ]),
     ];
-  }, [workspaceId, source, baseId]);
+  }, [workspaceId, source]);
 
   if (!outerbaseDriver || !savedDocDriver) {
     return <PageLoading>Loading Base ...</PageLoading>;

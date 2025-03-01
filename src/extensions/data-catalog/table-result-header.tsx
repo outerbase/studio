@@ -22,17 +22,16 @@ export default function DataCatalogResultHeader({
   const [loading, setLoading] = useState(false);
 
   const onSaveClicked = useCallback(() => {
-    if (!column) return;
     setLoading(true);
 
     driver
       .updateColumn(schemaName, tableName, columnName, {
         definition,
-        hide: column.hide || false,
-        samples: column.samples,
+        hide: column?.hide || false,
+        samples: column?.samples ?? [],
       })
       .then(() => {
-        toast.success("updated");
+        toast.success("Column Definition Updated");
       })
       .catch()
       .finally(() => setLoading(false));

@@ -11,11 +11,11 @@ import {
 
 export async function getOuterbaseSchemas(
   workspaceId: string,
-  sourceId: string,
-  baseId?: string
+  sourceId: string
 ) {
+  // 
   return await requestOuterbase<Record<string, OuterbaseDataCatalogSchemas[]>>(
-    `/api/v1/workspace/${workspaceId}/source/${sourceId}/schema?baseId=${baseId}`
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/schema?baseId=`
   );
 }
 

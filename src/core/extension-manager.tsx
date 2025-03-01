@@ -1,5 +1,5 @@
 import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
-import { DatabaseSchemaItem } from "@/drivers/base-driver";
+import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
 import { BeforeQueryPipeline } from "./query-pipeline";
@@ -31,6 +31,8 @@ type QueryHeaderResultMenuHandler = (
   header: OptimizeTableHeaderProps
 ) => StudioExtensionMenuItem | undefined;
 
+type AfterFetchSchemaHandler = (schema: DatabaseSchemas) => void;
+
 type QueryResultCellMenuHandler = () => StudioExtensionMenuItem | undefined;
 
 export class StudioExtensionContext {
@@ -38,6 +40,7 @@ export class StudioExtensionContext {
 
   protected beforeQueryHandlers: BeforeQueryHandler[] = [];
   protected afterQueryHandlers: AfterQueryHandler[] = [];
+  protected afterFetchSchemaHandlers: AfterFetchSchemaHandler[] = [];
 
   protected queryResultHeaderContextMenu: QueryHeaderResultMenuHandler[] = [];
   protected queryResultCellContextMenu: QueryResultCellMenuHandler[] = [];
@@ -56,6 +59,10 @@ export class StudioExtensionContext {
 
   registerAfterQuery(handler: AfterQueryHandler) {
     this.afterQueryHandlers.push(handler);
+  }
+
+  registerAfterFetchSchema(handler: AfterFetchSchemaHandler) {
+    this.afterFetchSchemaHandlers.push(handler);
   }
 
   registerSidebar(option: RegisterSidebarOption) {
@@ -123,6 +130,12 @@ export class StudioExtensionManager extends StudioExtensionContext {
     return this.queryResultCellContextMenu
       .map((handler) => handler())
       .filter(Boolean) as StudioExtensionMenuItem[];
+  }
+
+  triggerAfterFetchSchemaCallback(schema: DatabaseSchemas) {
+    for (const handler of this.afterFetchSchemaHandlers) {
+      handler(schema);
+    }
   }
 
   async beforeQuery(payload: BeforeQueryPipeline) {

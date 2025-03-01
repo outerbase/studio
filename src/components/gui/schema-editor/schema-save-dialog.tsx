@@ -5,20 +5,20 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import CodePreview from "../code-preview";
 import { Button } from "@/components/ui/button";
+import { useDatabaseDriver } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
+import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import {
   LucideAlertCircle,
   LucideLoader,
   LucideSave,
   LucideTableProperties,
 } from "lucide-react";
-import { useTabsContext } from "../windows-tab";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { useSchema } from "@/context/schema-provider";
 import { useCallback, useState } from "react";
+import CodePreview from "../code-preview";
 import SchemaEditorTab from "../tabs/schema-editor-tab";
-import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import { useTabsContext } from "../windows-tab";
 
 export default function SchemaSaveDialog({
   schema,
@@ -42,8 +42,9 @@ export default function SchemaSaveDialog({
     databaseDriver
       .transaction(previewScript)
       .then(() => {
+        refreshSchema();
+
         if (schema.name.new !== schema.name.old) {
-          refreshSchema();
           replaceCurrentTab({
             component: (
               <SchemaEditorTab
@@ -83,8 +84,8 @@ export default function SchemaSaveDialog({
         <AlertDialogTitle>Preview</AlertDialogTitle>
 
         {errorMessage && (
-          <div className="text-sm text-red-500 font-mono flex gap-4 justify-end items-end">
-            <LucideAlertCircle className="w-12 h-12" />
+          <div className="flex items-end justify-end gap-4 font-mono text-sm text-red-500">
+            <LucideAlertCircle className="h-12 w-12" />
             <p>{errorMessage}</p>
           </div>
         )}
@@ -95,9 +96,9 @@ export default function SchemaSaveDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button onClick={onSave}>
             {isExecuting ? (
-              <LucideLoader className="w-4 h-4 mr-2 animate-spin" />
+              <LucideLoader className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <LucideSave className="w-4 h-4 mr-2" />
+              <LucideSave className="mr-2 h-4 w-4" />
             )}
             Continue
           </Button>
