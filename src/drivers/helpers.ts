@@ -1,5 +1,6 @@
 import { SavedConnectionRawLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import CloudflareD1Driver from "./cloudflare-d1-driver";
+import CloudflareWAEDriver from "./database/cloudflare-wae";
 import RqliteDriver from "./rqlite-driver";
 import StarbaseDriver from "./starbase-driver";
 import TursoDriver from "./turso-driver";
@@ -21,6 +22,8 @@ export function createLocalDriver(conn: SavedConnectionRawLocalStorage) {
       Authorization: "Bearer " + (conn.token ?? ""),
       "x-starbase-url": conn.url ?? "",
     });
+  } else if (conn.driver === "cloudflare-wae") {
+    return new CloudflareWAEDriver(conn.username!, conn.token!);
   }
 
   return new TursoDriver(conn.url!, conn.token!, true);
