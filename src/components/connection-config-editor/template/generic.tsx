@@ -33,6 +33,7 @@ export const GENERIC_CONNECTION_TEMPLATE: CommonConnectionConfigTemplate = [
         name: "password",
         label: "Password",
         type: "password",
+        required: true,
         placeholder: "Database password",
       },
     ],

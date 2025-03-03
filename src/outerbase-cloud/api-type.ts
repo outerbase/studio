@@ -152,7 +152,7 @@ export interface OuterbaseAPIUser {
 
 export interface OuterbaseAPIDashboardDetail
   extends OuterbaseAPIDashboard,
-  DashboardProps { }
+    DashboardProps {}
 
 export interface OuterbaseAPIWorkspaceResponse {
   items: OuterbaseAPIWorkspace[];

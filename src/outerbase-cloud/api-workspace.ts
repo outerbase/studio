@@ -1,3 +1,4 @@
+import { mutate } from "swr";
 import { requestOuterbase } from "./api";
 import {
   OuterbaseAPIBase,
@@ -65,6 +66,18 @@ export function testOuterbaseSource(
   );
 }
 
+export function updateOuterbaseSource(
+  workspaceId: string,
+  sourceId: string,
+  source: OuterbaseAPISourceInput
+) {
+  return requestOuterbase<OuterbaseAPISource>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}`,
+    "PUT",
+    source
+  );
+}
+
 export function createOuterbaseSource(
   workspaceId: string,
   source: OuterbaseAPISourceInput
@@ -80,8 +93,32 @@ export async function updateOuterbaseSchemas(
   workspaceId: string,
   sourceId: string
 ) {
-  // 
   return await requestOuterbase<unknown>(
-    `/api/v1/workspace/${workspaceId}/source/${sourceId}/schema?baseId=`, "POST"
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/schema?baseId=`,
+    "POST"
+  );
+}
+
+export async function getOuterbaseBaseCredential(
+  workspaceId: string,
+  sourceId: string
+) {
+  return await requestOuterbase<OuterbaseAPISourceInput>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}/credential`,
+    "GET"
+  );
+}
+
+export async function updateOuterbaseCredential(
+  workspaceId: string,
+  sourceId: string,
+  source: OuterbaseAPISourceInput
+) {
+  mutate("/source/${sourceId}/credential");
+
+  return await requestOuterbase<OuterbaseAPISourceInput>(
+    `/api/v1/workspace/${workspaceId}/source/${sourceId}`,
+    "PUT",
+    source
   );
 }
