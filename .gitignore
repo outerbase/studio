@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.open-next
 **/node_modules
 /.pnp
 .pnp.js

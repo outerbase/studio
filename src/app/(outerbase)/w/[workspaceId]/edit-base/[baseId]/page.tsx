@@ -1,4 +1,5 @@
 "use client";
+import { ConnectionTemplateList } from "@/app/(outerbase)/base-template";
 import {
   CommonConnectionConfig,
   ConnectionConfigEditor,
@@ -6,33 +7,48 @@ import {
 } from "@/components/connection-config-editor";
 import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { Button } from "@/components/orbit/button";
-import { getDatabaseFriendlyName } from "@/components/resource-card/utils";
+import { Loader } from "@/components/orbit/loader";
 import {
-  createOuterbaseBase,
-  createOuterbaseConnection,
-  createOuterbaseSource,
-  testOuterbaseSource,
-} from "@/outerbase-cloud/api-workspace";
+  OuterbaseAPIBase,
+  OuterbaseAPISourceInput,
+} from "@/outerbase-cloud/api-type";
+import { updateOuterbaseSource } from "@/outerbase-cloud/api-workspace";
+import {
+  useOuterbaseBase,
+  useOuterbaseBaseCredential,
+} from "@/outerbase-cloud/hook";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-export default function WorkspaceNewBasePage() {
-  const { driver, workspaceId } = useParams<{
-    driver: string;
-    workspaceId: string;
-  }>();
+function WorkspaceEditBaseBody({
+  base,
+  credential,
+  template,
+}: {
+  base: OuterbaseAPIBase;
+  credential: OuterbaseAPISourceInput;
+  template: ConnectionTemplateList;
+}) {
   const router = useRouter();
-  const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+
+  const [value, setValue] = useState<CommonConnectionConfig>(() => {
+    if (!template.remoteFrom) throw new Error("Invalid driver");
+
+    return template.remoteFrom({
+      source: credential,
+      name: base.name,
+    });
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [validateErrors, setValidateErrors] = useState<Record<string, string>>(
     {}
   );
 
-  const template = useMemo(() => {
-    return ConnectionTemplateDictionary[driver];
-  }, [driver]);
+  useEffect(() => {});
 
   const onSave = useCallback(
     (overrideRedirect?: string) => {
@@ -45,25 +61,17 @@ export default function WorkspaceNewBasePage() {
       setLoading(true);
       setError("");
 
-      const { name: baseName, source } = template.remoteTo(value);
+      const { source } = template.remoteTo(value);
 
       const runSave = async () => {
-        await testOuterbaseSource(workspaceId, source);
-        const baseResponse = await createOuterbaseBase(workspaceId, baseName);
-        const connResponse = await createOuterbaseConnection(
+        await updateOuterbaseSource(
           workspaceId,
-          baseResponse.id,
-          baseName
+          base.sources[0]?.id ?? "",
+          source
         );
 
-        await createOuterbaseSource(workspaceId, {
-          ...source,
-          base_id: baseResponse.id,
-          connection_id: connResponse.id,
-        });
-
         router.replace(
-          overrideRedirect ?? `/w/${workspaceId}/${baseResponse.short_name}`
+          overrideRedirect ?? `/w/${workspaceId}/${base.short_name}`
         );
       };
 
@@ -78,7 +86,7 @@ export default function WorkspaceNewBasePage() {
         })
         .finally(() => setLoading(false));
     },
-    [workspaceId, template, value, router]
+    [workspaceId, template, value, router, base]
   );
 
   if (!template.remoteFrom || !template.remoteTo) {
@@ -103,7 +111,7 @@ export default function WorkspaceNewBasePage() {
         </div>
 
         <div className="mb-8 text-2xl font-bold">
-          <div>Connect to {getDatabaseFriendlyName(driver)} database</div>
+          <div>Editing {base.name} base</div>
         </div>
 
         {error && (
@@ -146,5 +154,49 @@ export default function WorkspaceNewBasePage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function WorkspaceEditBasePage() {
+  const { workspaceId, baseId } = useParams<{
+    baseId: string;
+    workspaceId: string;
+  }>();
+
+  const { isLoading: isBaseLoading, data: base } = useOuterbaseBase(
+    workspaceId,
+    baseId
+  );
+
+  const { isLoading: isCredentialLoading, data: credential } =
+    useOuterbaseBaseCredential(workspaceId, base?.sources[0]?.id ?? "");
+
+  const template = useMemo(() => {
+    if (!credential) return null;
+    return ConnectionTemplateDictionary[credential.type];
+  }, [credential]);
+
+  if (isBaseLoading || isCredentialLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Loader size={60} />
+      </div>
+    );
+  }
+
+  if (!template) {
+    return <div>Unknown driver</div>;
+  }
+
+  if (!credential || !base) {
+    return <div>Fill to get credential</div>;
+  }
+
+  return (
+    <WorkspaceEditBaseBody
+      template={template}
+      credential={credential}
+      base={base}
+    />
   );
 }

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import useSWR from "swr";
-import { getOuterbaseDashboardList } from "./api";
+import { getOuterbaseBase, getOuterbaseDashboardList } from "./api";
 import { OuterbaseAPIError } from "./api-type";
+import { getOuterbaseBaseCredential } from "./api-workspace";
 
 export default function useOuterbaseMutation<
   Arguments extends unknown[] = unknown[],
@@ -34,6 +35,45 @@ export function useOuterbaseDashboardList() {
     async () => {
       const result = await getOuterbaseDashboardList();
       return result.items;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 5000,
+      revalidateIfStale: false,
+    }
+  );
+
+  return { data, isLoading, mutate };
+}
+
+export function useOuterbaseBase(workspaceId: string, baseId: string) {
+  const { data, isLoading, mutate } = useSWR(
+    `/base/${baseId}`,
+    async () => {
+      const result = await getOuterbaseBase(workspaceId, baseId);
+      return result;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 5000,
+      revalidateIfStale: false,
+    }
+  );
+
+  return { data, isLoading, mutate };
+}
+
+export function useOuterbaseBaseCredential(
+  workspaceId: string,
+  sourceId: string
+) {
+  const { data, isLoading, mutate } = useSWR(
+    sourceId ? `/source/${sourceId}/credential` : null,
+    async () => {
+      const result = await getOuterbaseBaseCredential(workspaceId, sourceId);
+      return result;
     },
     {
       revalidateOnFocus: false,

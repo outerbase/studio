@@ -39,6 +39,11 @@ export function getCreateResourceTypeList(
       href: workspaceId ? "" : "/local/new-base/cloudflare-d1",
     },
     {
+      name: "Worker Analytics Engine",
+      icon: CloudflareIcon,
+      href: workspaceId ? "" : "/local/new-base/cloudflare-wae",
+    },
+    {
       name: "Neon",
       icon: NeonIcon,
       href: workspaceId ? "" : "",

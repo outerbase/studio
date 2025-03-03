@@ -7,9 +7,8 @@ export async function POST(req: NextRequest) {
 
   // Get the account id and database id from header
   const accountId = headerStore.get("x-account-id");
-  const databaseId = headerStore.get("x-database-id");
 
-  if (!accountId || !databaseId) {
+  if (!accountId) {
     return NextResponse.json(
       {
         error: "Please provide account id or database id",
@@ -29,29 +28,27 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/raw`;
+    const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`;
 
-    const response: { errors: { message: string }[] } = await (
-      await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: authorizationHeader,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(await req.json()),
-      })
-    ).json();
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: authorizationHeader,
+        "Content-Type": "text/plain",
+      },
+      body: await req.text(),
+    });
 
-    if (response.errors && response.errors.length > 0) {
+    if (!response.ok) {
       return NextResponse.json(
         {
-          error: response.errors[0].message,
+          error: await response.text(),
         },
-        { status: HttpStatus.INTERNAL_SERVER_ERROR }
+        { status: response.status }
       );
     }
 
-    return NextResponse.json(response);
+    return NextResponse.json(await response.json());
   } catch (e) {
     return NextResponse.json(
       {

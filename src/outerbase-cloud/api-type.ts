@@ -66,6 +66,7 @@ export interface OuterbaseAPISource {
   model: "source";
   type: string;
   id: string;
+  base_id: string;
 }
 export interface OuterbaseAPIBase {
   model: "base";

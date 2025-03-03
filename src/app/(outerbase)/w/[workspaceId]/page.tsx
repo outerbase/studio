@@ -1,8 +1,10 @@
 "use client";
 
+import { ConnectionTemplateDictionary } from "@/components/connection-config-editor/template";
 import { useOuterbaseDashboardList } from "@/outerbase-cloud/hook";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import NavigationHeader from "../../nav-header";
 import NavigationLayout from "../../nav-layout";
 import {
@@ -105,6 +107,21 @@ export default function WorkspaceListPage() {
       });
   }, [currentWorkspace, router, refreshDashboardList]);
 
+  const onBaseEditClicked = useCallback(
+    (editResource: ResourceItemProps) => {
+      if (!currentWorkspace) return;
+      if (ConnectionTemplateDictionary[editResource.type ?? ""] === undefined) {
+        toast("Editing this type of resource is not supported at the moment.");
+        return;
+      }
+
+      router.push(
+        `/w/${currentWorkspace.short_name}/edit-base/${editResource.id}`
+      );
+    },
+    [currentWorkspace, router]
+  );
+
   return (
     <>
       <title>{currentWorkspace?.name ?? "Untitled"}</title>
@@ -119,6 +136,7 @@ export default function WorkspaceListPage() {
             onBoardRemove={onDeleteBoardClicked}
             onBaseRemove={onDeleteBaseClicked}
             onBoardCreate={onCreateBoardClicked}
+            onBaseEdit={onBaseEditClicked}
             workspaceId={currentWorkspace?.short_name}
           />
         </div>
