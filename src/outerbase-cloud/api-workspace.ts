@@ -2,6 +2,7 @@ import { mutate } from "swr";
 import { requestOuterbase } from "./api";
 import {
   OuterbaseAPIBase,
+  OuterbaseAPIBaseCredential,
   OuterbaseAPIConnection,
   OuterbaseAPISource,
   OuterbaseAPISourceInput,
@@ -103,7 +104,7 @@ export async function getOuterbaseBaseCredential(
   workspaceId: string,
   sourceId: string
 ) {
-  return await requestOuterbase<OuterbaseAPISourceInput>(
+  return await requestOuterbase<OuterbaseAPIBaseCredential>(
     `/api/v1/workspace/${workspaceId}/source/${sourceId}/credential`,
     "GET"
   );
