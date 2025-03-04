@@ -15,9 +15,13 @@ export class OuterbaseMySQLDriver extends MySQLLikeDriver {
     };
   }
 
-  constructor({ workspaceId, sourceId }: OuterbaseDatabaseConfig) {
+  constructor(
+    { workspaceId, sourceId }: OuterbaseDatabaseConfig,
+    selectedDatabase?: string
+  ) {
     super();
 
+    this.selectedDatabase = selectedDatabase ?? "";
     this.workspaceId = workspaceId;
     this.sourceId = sourceId;
   }

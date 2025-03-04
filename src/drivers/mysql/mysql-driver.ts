@@ -128,6 +128,11 @@ function mapColumn(column: MySqlColumn): DatabaseTableColumn {
 export default abstract class MySQLLikeDriver extends CommonSQLImplement {
   columnTypeSelector: ColumnTypeSelector = MYSQL_DATA_TYPE_SUGGESTION;
 
+  // If this is specified, we only show the tables in this database
+  // Outerbase Cloud does not support the USE statement because it runs in non-interactive mode
+  // It does not make sense to show other databases.
+  selectedDatabase: string = "";
+
   escapeId(id: string) {
     return `\`${id.replace(/`/g, "``")}\``;
   }
@@ -138,14 +143,13 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
 
   getFlags(): DriverFlags {
     return {
-      defaultSchema: "",
-      optionalSchema: false,
+      defaultSchema: this.selectedDatabase,
+      optionalSchema: this.selectedDatabase ? true : false,
       supportBigInt: false,
       supportModifyColumn: true,
       supportCreateUpdateTable: true,
-      supportCreateUpdateDatabase: true,
+      supportCreateUpdateDatabase: this.selectedDatabase ? false : true,
       dialect: "mysql",
-
       supportUseStatement: true,
       supportRowId: false,
       supportInsertReturning: false,
@@ -167,22 +171,29 @@ export default abstract class MySQLLikeDriver extends CommonSQLImplement {
   }
 
   async schemas(): Promise<DatabaseSchemas> {
-    const schemaSql =
-      "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+    const schemaSql = this.selectedDatabase
+      ? `SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = ${this.escapeValue(this.selectedDatabase)}`
+      : "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
 
-    const tableSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, DATA_LENGTH, INDEX_LENGTH FROM information_schema.tables WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+    const tableSql = this.selectedDatabase
+      ? `SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, DATA_LENGTH, INDEX_LENGTH FROM information_schema.tables WHERE TABLE_SCHEMA = ${this.escapeValue(this.selectedDatabase)}`
+      : "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, DATA_LENGTH, INDEX_LENGTH FROM information_schema.tables WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
 
-    const columnSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.columns WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+    const columnSql = this.selectedDatabase
+      ? `SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.columns WHERE TABLE_SCHEMA = ${this.escapeValue(this.selectedDatabase)}`
+      : "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, EXTRA, COLUMN_KEY, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.columns WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
 
-    const constraintSql =
-      "SELECT TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE FROM information_schema.table_constraints WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys') AND CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY')";
+    const constraintSql = this.selectedDatabase
+      ? `SELECT TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE FROM information_schema.table_constraints WHERE TABLE_SCHEMA = ${this.escapeValue(this.selectedDatabase)} AND CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY')`
+      : "SELECT TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE FROM information_schema.table_constraints WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys') AND CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY')";
 
-    const constraintColumnsSql = `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')`;
+    const constraintColumnsSql = this.selectedDatabase
+      ? `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA = ${this.escapeValue(this.selectedDatabase)}`
+      : `SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_SCHEMA, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.key_column_usage WHERE TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')`;
 
-    const triggerSql =
-      "SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
+    const triggerSql = this.selectedDatabase
+      ? `SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA = ${this.escapeValue(this.selectedDatabase)}`
+      : "SELECT * from information_schema.triggers WHERE TRIGGER_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')";
 
     const result = await this.batch([
       schemaSql,
