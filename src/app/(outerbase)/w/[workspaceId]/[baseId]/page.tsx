@@ -10,7 +10,10 @@ import {
 } from "@/core/standard-extension";
 import DataCatalogExtension from "@/extensions/data-catalog";
 import OuterbaseExtension from "@/extensions/outerbase";
-import { getOuterbaseBase } from "@/outerbase-cloud/api";
+import {
+  getOuterbaseBase,
+  sendOuterbaseBaseAnalytics,
+} from "@/outerbase-cloud/api";
 import { OuterbaseAPIBaseCredential } from "@/outerbase-cloud/api-type";
 import { getOuterbaseBaseCredential } from "@/outerbase-cloud/api-workspace";
 import DataCatalogOuterbaseDriver from "@/outerbase-cloud/data-catalog-driver";
@@ -47,6 +50,11 @@ export default function OuterbaseSourcePage() {
     if (!workspaceId || !credential?.id || !baseId) return null;
     return new OuterbaseQueryDriver(workspaceId, baseId, credential.id);
   }, [workspaceId, baseId, credential?.id]);
+
+  // We need to send analytics to update the last used time
+  useEffect(() => {
+    sendOuterbaseBaseAnalytics(workspaceId, baseId).then().catch();
+  }, [workspaceId, baseId]);
 
   const [outerbaseDriver, extensions] = useMemo(() => {
     if (!workspaceId || !credential) return [null, null];
