@@ -1,15 +1,19 @@
-"use client";
+import { createDialog } from "@/components/create-dialog";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/orbit/button";
+import {
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   getAgentFromLocalStorage,
   updateAgentFromLocalStorage,
 } from "@/lib/ai-agent-storage";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import NavigationLayout from "../nav-layout";
 
-export default function LocalSettingPage() {
+export const localSettingDialog = createDialog(({ close }) => {
   const [token, setToken] = useState<string>("");
 
   useEffect(() => {
@@ -30,34 +34,34 @@ export default function LocalSettingPage() {
       token,
     });
 
-    toast("Setting saved!");
-  }, [token]);
+    close(undefined);
+  }, [token, close]);
 
   return (
-    <NavigationLayout>
-      <div className="flex max-w-[600px] flex-col gap-4 p-8">
-        <h1 className="text-xl font-bold">Local Setting</h1>
+    <>
+      <DialogHeader>
+        <DialogTitle>Local Setting</DialogTitle>
 
-        <p className="text-base">
+        <DialogDescription>
           Bring your OpenAI token to enable the AI assistant. Your token is
           stored in localStorage. We do not store your token on our server.
-        </p>
+        </DialogDescription>
+      </DialogHeader>
 
-        <LabelInput
-          type="password"
-          label="Token"
-          placeholder="Token"
-          size="lg"
-          value={token}
-          onValueChange={setToken}
-        />
+      <LabelInput
+        type="password"
+        label="Token"
+        placeholder="Token"
+        size="lg"
+        value={token}
+        onValueChange={setToken}
+      />
 
-        <div>
-          <Button size="lg" variant="primary" onClick={onSaveClicked}>
-            Save
-          </Button>
-        </div>
-      </div>
-    </NavigationLayout>
+      <DialogFooter>
+        <Button size="lg" variant="primary" onClick={onSaveClicked}>
+          Save
+        </Button>
+      </DialogFooter>
+    </>
   );
-}
+});

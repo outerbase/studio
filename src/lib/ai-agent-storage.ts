@@ -1,6 +1,7 @@
 import { ChatGPTDriver } from "@/drivers/agent/chatgpt";
 import { BaseDriver } from "@/drivers/base-driver";
 import { useMemo } from "react";
+import useSWR, { mutate } from "swr";
 
 export interface LocalAgentType {
   provider: "openai";
@@ -28,15 +29,19 @@ export function getAgentFromLocalStorage(): LocalAgentType | undefined {
 
 export function updateAgentFromLocalStorage(data: LocalAgentType) {
   localStorage.setItem("agent", JSON.stringify(data));
+  mutate("/local-agent-setting", data);
 }
 
 export function useAgentFromLocalStorage(databaseDriver?: BaseDriver | null) {
+  const { data: agentConfig } = useSWR(
+    "/local-agent-setting",
+    getAgentFromLocalStorage
+  );
+
   return useMemo(() => {
     if (!databaseDriver) return undefined;
-
-    const agentConfig = getAgentFromLocalStorage();
     if (!agentConfig) return undefined;
 
     return new ChatGPTDriver(databaseDriver, agentConfig.token);
-  }, [databaseDriver]);
+  }, [databaseDriver, agentConfig]);
 }
