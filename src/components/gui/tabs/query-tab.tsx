@@ -1,3 +1,4 @@
+import { PromptSelectedFragment } from "@/components/editor/prompt-plugin";
 import SqlEditor from "@/components/gui/sql-editor";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
+import { useConfig } from "@/context/config-provider";
 import { useDatabaseDriver } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import {
@@ -89,6 +91,9 @@ export default function QueryWindow({
   );
   const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
   const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
+
+  const { agentDriver } = useConfig();
+  const { schema } = useSchema();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -317,6 +322,26 @@ export default function QueryWindow({
     []
   );
 
+  const promptConversationIds = useRef<Record<string, string>>({});
+  const onPrompt = useCallback(
+    async (promptQuery: string, option: PromptSelectedFragment) => {
+      if (!agentDriver) return "";
+
+      const agentResponse = await agentDriver.promptInline(
+        promptQuery,
+        promptConversationIds.current[option.sessionId],
+        {
+          selected: option?.text ?? "",
+          schema: schema,
+        }
+      );
+
+      promptConversationIds.current[option.sessionId] = agentResponse.id;
+      return agentResponse.result;
+    },
+    [agentDriver, schema]
+  );
+
   return (
     <ResizablePanelGroup direction="vertical">
       <ResizablePanel style={{ position: "relative" }}>
@@ -394,6 +419,8 @@ export default function QueryWindow({
           </div>
           <div className="grow overflow-hidden p-2">
             <SqlEditor
+              enablePrompt={!!agentDriver}
+              onPrompt={onPrompt}
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
               value={code}
