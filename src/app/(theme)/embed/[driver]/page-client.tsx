@@ -13,6 +13,7 @@ import {
 } from "@/drivers/iframe-driver";
 import ElectronSavedDocs from "@/drivers/saved-doc/electron-saved-doc";
 import DoltExtension from "@/extensions/dolt";
+import LocalSettingSidebar from "@/extensions/local-setting-sidebar";
 import { useAgentFromLocalStorage } from "@/lib/ai-agent-storage";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -79,9 +80,9 @@ function createDatabaseDriver(driverName: string) {
 
 function createEmbedExtensions(driverName: string) {
   if (driverName === "turso") {
-    return createSQLiteExtensions();
+    return [...createSQLiteExtensions(), new LocalSettingSidebar()];
   } else if (driverName === "sqlite" || driverName === "starbase") {
-    return createSQLiteExtensions();
+    return [...createSQLiteExtensions(), new LocalSettingSidebar()];
   } else if (driverName === "mysql") {
     return createMySQLExtensions();
   } else if (driverName === "dolt") {

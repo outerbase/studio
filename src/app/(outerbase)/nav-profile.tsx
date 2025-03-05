@@ -17,6 +17,7 @@ import {
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { localSettingDialog } from "./local-setting-dialog";
 import { useSession } from "./session-provider";
 
 export default function NavigationProfile() {
@@ -88,7 +89,7 @@ export default function NavigationProfile() {
           <DropdownMenuItem
             className="justify-between"
             onClick={() => {
-              router.push(`/local-setting`);
+              localSettingDialog.show({}).then().catch();
             }}
           >
             Local Setting
