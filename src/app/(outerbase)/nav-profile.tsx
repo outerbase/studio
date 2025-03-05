@@ -85,6 +85,16 @@ export default function NavigationProfile() {
         </div>
 
         <div className="p-2">
+          <DropdownMenuItem
+            className="justify-between"
+            onClick={() => {
+              router.push(`/local-setting`);
+            }}
+          >
+            Local Setting
+            <Gear size={20} />
+          </DropdownMenuItem>
+
           {session && (
             <DropdownMenuItem
               className="justify-between"

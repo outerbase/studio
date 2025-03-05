@@ -4,6 +4,7 @@ import { ConfigProvider } from "@/context/config-provider";
 import { DriverProvider } from "@/context/driver-provider";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import { BeforeQueryPipeline } from "@/core/query-pipeline";
+import { AgentBaseDriver } from "@/drivers/agent/base";
 import type { BaseDriver } from "@/drivers/base-driver";
 import { CollaborationBaseDriver } from "@/drivers/collaboration-driver-base";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
@@ -15,6 +16,7 @@ interface StudioProps {
   driver: BaseDriver;
   extensions?: StudioExtensionManager;
   collaboration?: CollaborationBaseDriver;
+  agentDriver?: AgentBaseDriver;
   docDriver?: SavedDocDriver;
   name: string;
   color: string;
@@ -32,6 +34,7 @@ export function Studio({
   extensions,
   containerClassName,
   docDriver,
+  agentDriver,
 }: Readonly<StudioProps>) {
   const extensionRef = useRef<StudioExtensionManager | undefined | null>(
     extensions
@@ -92,8 +95,16 @@ export function Studio({
       onBack,
       extensions: finalExtensionManager,
       containerClassName,
+      agentDriver,
     };
-  }, [name, color, onBack, finalExtensionManager, containerClassName]);
+  }, [
+    name,
+    color,
+    onBack,
+    finalExtensionManager,
+    containerClassName,
+    agentDriver,
+  ]);
 
   return (
     <DriverProvider

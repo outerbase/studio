@@ -263,3 +263,19 @@ export async function getOuterbaseEmbedChart(
 
   return await result.json();
 }
+
+export async function sendOuterbaseBaseAnalytics(
+  workspaceId: string,
+  baseId: string
+) {
+  return requestOuterbase(
+    `/api/v1/workspace/${workspaceId}/base/${baseId}/analytics`,
+    "POST",
+    {
+      data: {
+        path: "/[workspaceId]/[baseId]/settings/database",
+      },
+      type: "page_view",
+    }
+  );
+}

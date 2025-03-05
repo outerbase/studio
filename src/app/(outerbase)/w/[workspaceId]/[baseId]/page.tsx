@@ -10,8 +10,12 @@ import {
 } from "@/core/standard-extension";
 import DataCatalogExtension from "@/extensions/data-catalog";
 import OuterbaseExtension from "@/extensions/outerbase";
-import { getOuterbaseBase } from "@/outerbase-cloud/api";
-import { OuterbaseAPISource } from "@/outerbase-cloud/api-type";
+import {
+  getOuterbaseBase,
+  sendOuterbaseBaseAnalytics,
+} from "@/outerbase-cloud/api";
+import { OuterbaseAPIBaseCredential } from "@/outerbase-cloud/api-type";
+import { getOuterbaseBaseCredential } from "@/outerbase-cloud/api-workspace";
 import DataCatalogOuterbaseDriver from "@/outerbase-cloud/data-catalog-driver";
 import { OuterbaseMySQLDriver } from "@/outerbase-cloud/database/mysql";
 import { OuterbasePostgresDriver } from "@/outerbase-cloud/database/postgresql";
@@ -26,7 +30,7 @@ export default function OuterbaseSourcePage() {
     baseId: string;
   }>();
   const [name, setName] = useState<string>("");
-  const [source, setSource] = useState<OuterbaseAPISource>();
+  const [credential, setCredential] = useState<OuterbaseAPIBaseCredential>();
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -34,24 +38,32 @@ export default function OuterbaseSourcePage() {
 
     getOuterbaseBase(workspaceId, baseId).then((base) => {
       if (!base) return;
-      setSource(base.sources[0]);
+
       setName(base.name);
+      getOuterbaseBaseCredential(workspaceId, base.sources[0]?.id ?? "").then(
+        setCredential
+      );
     });
   }, [workspaceId, baseId]);
 
   const savedDocDriver = useMemo(() => {
-    if (!workspaceId || !source?.id || !baseId) return null;
-    return new OuterbaseQueryDriver(workspaceId, baseId, source.id);
-  }, [workspaceId, baseId, source?.id]);
+    if (!workspaceId || !credential?.id || !baseId) return null;
+    return new OuterbaseQueryDriver(workspaceId, baseId, credential.id);
+  }, [workspaceId, baseId, credential?.id]);
+
+  // We need to send analytics to update the last used time
+  useEffect(() => {
+    sendOuterbaseBaseAnalytics(workspaceId, baseId).then().catch();
+  }, [workspaceId, baseId]);
 
   const [outerbaseDriver, extensions] = useMemo(() => {
-    if (!workspaceId || !source) return [null, null];
+    if (!workspaceId || !credential) return [null, null];
 
-    const dialect = source.type;
+    const dialect = credential.type;
     const outerbaseConfig = {
       workspaceId,
-      sourceId: source.id,
-      baseId: source.base_id,
+      sourceId: credential.id,
+      baseId,
       token: localStorage.getItem("ob-token") ?? "",
     };
 
@@ -70,7 +82,7 @@ export default function OuterbaseSourcePage() {
       ];
     } else if (dialect === "mysql") {
       return [
-        new OuterbaseMySQLDriver(outerbaseConfig),
+        new OuterbaseMySQLDriver(outerbaseConfig, credential.database),
         new StudioExtensionManager([
           ...createMySQLExtensions(),
           ...outerbaseSpecifiedDrivers,
@@ -85,7 +97,7 @@ export default function OuterbaseSourcePage() {
         ...outerbaseSpecifiedDrivers,
       ]),
     ];
-  }, [workspaceId, source]);
+  }, [workspaceId, credential, baseId]);
 
   if (!outerbaseDriver || !savedDocDriver) {
     return <PageLoading>Loading Base ...</PageLoading>;

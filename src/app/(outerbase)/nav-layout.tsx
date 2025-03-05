@@ -26,19 +26,10 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
           <NavigationProfile />
         </div>
 
-        {/* <div className="px-2">
-          <Input
-            size="base"
-            className="bg-secondary"
-            placeholder="Search for anything"
-            preText={<MagnifyingGlass className="mr-2" />}
-          />
-        </div> */}
-
         <div className="flex flex-1 flex-col overflow-scroll border-b pb-2">
           <SidebarMenuHeader text="Workspace" />
           <SidebarMenuItem
-            selected={pathname === "/local"}
+            selected={pathname === "/local" || pathname === "/local-setting"}
             text="Local Workspace"
             icon={Database}
             href="/local"

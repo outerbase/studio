@@ -62,6 +62,10 @@ export interface OuterbaseAPISourceInput {
   connection_id?: string;
 }
 
+export interface OuterbaseAPIBaseCredential extends OuterbaseAPISourceInput {
+  id: string;
+}
+
 export interface OuterbaseAPISource {
   model: "source";
   type: string;

@@ -37,11 +37,12 @@ export interface PromptSelectedFragment {
   fullText: string;
   startLineNumber: number;
   endLineNumber: number;
+  sessionId: string;
 }
 
 export type PromptCallback = (
   promptQuery: string,
-  selected?: PromptSelectedFragment
+  selected: PromptSelectedFragment
 ) => Promise<string>;
 
 class PlaceholderWidget extends WidgetType {
@@ -69,6 +70,9 @@ class PromptWidget extends WidgetType {
   ) {
     super();
 
+    // Generate unique session id for this prompt
+    const sessionId = crypto.randomUUID();
+
     plugin.lock();
     this.container = document.createElement("div");
 
@@ -84,6 +88,7 @@ class PromptWidget extends WidgetType {
     const getSelectionLines = () => {
       const startLineNumber = view.state.doc.lineAt(from).number;
       const endLineNumber = view.state.doc.lineAt(to).number;
+
       return Array.from(
         { length: endLineNumber - startLineNumber + 1 },
         (_, i) => startLineNumber + i
@@ -150,6 +155,7 @@ class PromptWidget extends WidgetType {
           text: suggestedText ?? selectedOriginalText,
           fullText: view.state.doc.toString(),
           startLineNumber,
+          sessionId,
           endLineNumber: view.state.doc.lineAt(
             startPosition + suggestedText.length
           ).number,
@@ -555,7 +561,7 @@ export class CodeMirrorPromptPlugin {
     ];
   }
 
-  async getSuggestion(promptQuery: string, selected?: PromptSelectedFragment) {
+  async getSuggestion(promptQuery: string, selected: PromptSelectedFragment) {
     if (this.promptCallback) {
       return this.promptCallback(promptQuery, selected);
     }
