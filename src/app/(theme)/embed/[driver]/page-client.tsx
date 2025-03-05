@@ -13,6 +13,7 @@ import {
 } from "@/drivers/iframe-driver";
 import ElectronSavedDocs from "@/drivers/saved-doc/electron-saved-doc";
 import DoltExtension from "@/extensions/dolt";
+import { useAgentFromLocalStorage } from "@/lib/ai-agent-storage";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
@@ -37,6 +38,8 @@ export default function EmbedPageClient({
     return new StudioExtensionManager(createEmbedExtensions(driverName));
   }, [driverName]);
 
+  const agentDriver = useAgentFromLocalStorage(driver);
+
   useEffect(() => {
     return driver.listen();
   }, [driver]);
@@ -48,6 +51,7 @@ export default function EmbedPageClient({
       docDriver={savedDocDriver}
       name={searchParams.get("name") || "Unnamed Connection"}
       color={searchParams.get("color") || "gray"}
+      agentDriver={agentDriver}
     />
   );
 }

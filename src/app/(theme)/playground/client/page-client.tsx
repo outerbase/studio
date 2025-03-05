@@ -10,6 +10,7 @@ import { StudioExtensionManager } from "@/core/extension-manager";
 import { createSQLiteExtensions } from "@/core/standard-extension";
 import SqljsDriver from "@/drivers/sqljs-driver";
 import { localDb } from "@/indexdb";
+import { useAgentFromLocalStorage } from "@/lib/ai-agent-storage";
 import downloadFileFromUrl from "@/lib/download-file";
 import { saveAs } from "file-saver";
 import {
@@ -42,6 +43,8 @@ export default function PlaygroundEditorBody({
 
   const [handler, setHandler] = useState<FileSystemFileHandle>();
   const [fileName, setFilename] = useState("");
+
+  const agentDriver = useAgentFromLocalStorage(driver);
 
   /**
    * Initialize the SQL.js library.
@@ -274,12 +277,13 @@ export default function PlaygroundEditorBody({
           name="Playground"
           driver={driver}
           containerClassName="w-full h-full"
+          agentDriver={agentDriver}
         />
       );
     }
 
     return <div></div>;
-  }, [databaseLoading, preloadDatabase, driver, extensions]);
+  }, [databaseLoading, preloadDatabase, driver, extensions, agentDriver]);
 
   return (
     <>
