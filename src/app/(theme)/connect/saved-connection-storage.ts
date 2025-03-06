@@ -1,5 +1,3 @@
-import { ApiUser } from "@/lib/api/api-database-response";
-
 export type SupportedDriver =
   | "turso"
   | "rqlite"
@@ -27,9 +25,6 @@ export interface SavedConnectionItem {
   name: string;
   description?: string;
   label?: SavedConnectionLabel;
-  shared?: {
-    sharedBy: ApiUser;
-  };
 }
 
 export interface SavedConnectionItemConfigConfig {

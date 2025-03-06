@@ -5,9 +5,9 @@
 // All recorded data will be stored in the Starbase Database.
 
 import { headers } from "next/headers";
-import zod from "zod";
 import { after, NextRequest, NextResponse } from "next/server";
-import { insertTrackingRecord } from "@/lib/api/insert-tracking-record";
+import zod from "zod";
+import { insertTrackingRecord } from "./insert-tracking-record";
 
 const eventBodySchema = zod.object({
   events: zod
