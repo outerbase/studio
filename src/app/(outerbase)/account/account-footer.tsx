@@ -1,4 +1,6 @@
+"use client";
 import { useSession } from "@/app/(outerbase)/session-provider";
+import CopyableText from "@/components/copyable-text";
 import { Button } from "@/components/orbit/button";
 import { Input } from "@/components/orbit/input";
 import { Label } from "@/components/orbit/label";
@@ -11,8 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { isValidEmail } from "@/lib/validation";
 import { deleteOuterbaseUser } from "@/outerbase-cloud/api-account";
-import { Check, Copy } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -20,22 +21,10 @@ export default function AccountFooter() {
   const { session } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const copyToClipboard = async () => {
-    if (!session) return;
-    try {
-      await navigator.clipboard.writeText(session?.user.email);
-      setCopied(true);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-    }
-  };
-
   const onClose = () => {
-    setCopied(false);
     setOpen(false);
     setEmail("");
     setLoading(false);
@@ -87,14 +76,9 @@ export default function AccountFooter() {
             <span className="text-primary font-medium italic">cannot</span> be
             undone.
           </DialogDescription>
-          <Button onClick={copyToClipboard}>
-            {session?.user.email}
-            {copied ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-          </Button>
+
+          <CopyableText text={session?.user.email ?? ""} />
+
           <Label title="Enter your email address to confirm:">
             <Input
               value={email}

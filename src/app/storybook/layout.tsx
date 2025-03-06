@@ -1,9 +1,10 @@
+"use client";
 import ClientOnly from "@/components/client-only";
 import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
 import ThemeToggle from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Component, Layers2 } from "lucide-react";
+import { DiamondsFour, Stack } from "@phosphor-icons/react";
 import ThemeLayout from "../(theme)/theme_layout";
 
 export default function StorybookRootLayout({
@@ -20,73 +21,69 @@ export default function StorybookRootLayout({
               <ThemeToggle />
             </div>
 
-            <SidebarMenuItem
-              icon={Layers2}
-              text="Guideline"
-              href="/storybook"
-            />
+            <SidebarMenuItem icon={Stack} text="Guideline" href="/storybook" />
             <SidebarMenuHeader text="Shadcn UI" />
 
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Dialog"
               href="https://ui.shadcn.com/docs/components/dialog"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Create Dialog"
               href="/storybook/create-dialog"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Dropdown Menu"
               href="https://ui.shadcn.com/docs/components/dropdown-menu"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Popover"
               href="https://ui.shadcn.com/docs/components/popover"
             />
 
             <SidebarMenuHeader text="Orbit Design System" />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Avatar"
               href="/storybook/avatar"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Button"
               href="/storybook/button"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Input"
               href="/storybook/input"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Label"
               href="/storybook/label"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Loader"
               href="/storybook/loader"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Menu bar"
               href="/storybook/menu-bar"
             />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Select"
               href="/storybook/select"
             />
 
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Toggle"
               href="/storybook/toggle"
             />
@@ -94,17 +91,17 @@ export default function StorybookRootLayout({
             <Separator />
             <SidebarMenuHeader text="Advanced UI Components" />
             <SidebarMenuItem
-              icon={Layers2}
+              icon={Stack}
               text="Toolbar"
               href="/storybook/toolbar"
             />
             <SidebarMenuItem
-              icon={Component}
+              icon={DiamondsFour}
               text="List View"
               href="/storybook/listview"
             />
             <SidebarMenuItem
-              icon={Component}
+              icon={DiamondsFour}
               text="Chart Editor"
               href="/storybook/chart-editor"
             />

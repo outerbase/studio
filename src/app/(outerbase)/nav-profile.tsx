@@ -1,3 +1,4 @@
+"use client";
 import { Avatar } from "@/components/orbit/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import {

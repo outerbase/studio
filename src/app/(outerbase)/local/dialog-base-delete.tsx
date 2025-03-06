@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 import { removeLocalConnection } from "./hooks";
 
@@ -60,9 +59,9 @@ export const deleteLocalBaseDialog = createDialog<{
           disabled={loading || baseName !== name}
           onClick={deleteClicked}
           variant={"destructive"}
+          loading={loading}
         >
-          {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}I
-          understand, delete this base
+          I understand, delete this base
         </Button>
         <Button variant={"secondary"} onClick={() => close(undefined)}>
           Cancel

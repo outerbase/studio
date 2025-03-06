@@ -8,7 +8,7 @@ import {
   requestResetPassword,
   resetPassword,
 } from "@/outerbase-cloud/api-account";
-import { SendHorizonal } from "lucide-react";
+import { PaperPlaneTilt } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -85,7 +85,7 @@ export default function PasswordResetPage() {
               <div className="flex flex-col items-start gap-5">
                 <div className="text-3xl font-medium text-white">{title}</div>
                 <div className="flex flex-row items-center gap-2">
-                  {isSent && <SendHorizonal />}
+                  {isSent && <PaperPlaneTilt />}
 
                   <p className="text-base text-neutral-400">
                     {description}

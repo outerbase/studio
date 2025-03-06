@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 import { deleteLocalDashboard } from "./hooks";
 
@@ -60,12 +59,12 @@ export const deleteLocalBoardDialog = createDialog<{
 
       <DialogFooter>
         <Button
+          loading={loading}
           variant={"destructive"}
           disabled={loading || boardName !== name}
           onClick={deleteClicked}
         >
-          {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}I
-          understand, delete this board
+          I understand, delete this board
         </Button>
         <Button variant={"secondary"} onClick={() => close(undefined)}>
           Cancel

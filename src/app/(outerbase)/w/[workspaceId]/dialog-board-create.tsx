@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { createOuterbaseDashboard } from "@/outerbase-cloud/api";
 import { OuterbaseAPIDashboardDetail } from "@/outerbase-cloud/api-type";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 
 export const createBoardDialog = createDialog<
@@ -52,10 +51,10 @@ export const createBoardDialog = createDialog<
 
       <DialogFooter>
         <Button
+          loading={loading}
           disabled={loading || name.length === 0}
           onClick={createBoardClicked}
         >
-          {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}
           Create Board
         </Button>
         <Button variant={"secondary"} onClick={() => close(undefined)}>

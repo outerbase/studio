@@ -1,7 +1,7 @@
 import CopyableText from "@/components/copyable-text";
 import { createDialog } from "@/components/create-dialog";
 import LabelInput from "@/components/label-input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   DialogDescription,
   DialogFooter,
@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteOuterbaseBase } from "@/outerbase-cloud/api";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 
 export const deleteBaseDialog = createDialog<{
@@ -62,12 +61,12 @@ export const deleteBaseDialog = createDialog<{
 
       <DialogFooter>
         <Button
+          loading={loading}
           disabled={loading || baseName !== name}
           onClick={deleteClicked}
           variant={"destructive"}
         >
-          {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}I
-          understand, delete this base
+          I understand, delete this base
         </Button>
         <Button variant={"secondary"} onClick={() => close(undefined)}>
           Cancel

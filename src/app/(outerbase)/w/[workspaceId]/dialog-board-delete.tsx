@@ -1,7 +1,7 @@
 import CopyableText from "@/components/copyable-text";
 import { createDialog } from "@/components/create-dialog";
 import LabelInput from "@/components/label-input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/orbit/button";
 import {
   DialogDescription,
   DialogFooter,
@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteOuterbaseDashboard } from "@/outerbase-cloud/api";
-import { LucideLoader } from "lucide-react";
 import { useCallback, useState } from "react";
 
 export const deleteBoardDialog = createDialog<{
@@ -61,12 +60,12 @@ export const deleteBoardDialog = createDialog<{
 
       <DialogFooter>
         <Button
+          loading={loading}
           variant={"destructive"}
           disabled={loading || boardName !== name}
           onClick={deleteClicked}
         >
-          {loading && <LucideLoader className="mr-2 h-4 w-4 animate-spin" />}I
-          understand, delete this board
+          I understand, delete this board
         </Button>
         <Button variant={"secondary"} onClick={() => close(undefined)}>
           Cancel

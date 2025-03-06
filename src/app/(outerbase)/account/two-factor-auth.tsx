@@ -9,7 +9,7 @@ import {
   submitVerifyPhone2FA,
   verifyOuterbase2FAOTP,
 } from "@/outerbase-cloud/api-account";
-import { CheckCircle2 } from "lucide-react";
+import { Check } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -292,7 +292,7 @@ export default function TwoFactorAuth() {
               />
               {sms && (
                 <div className="text-primary flex flex-row items-center gap-2 text-base">
-                  <CheckCircle2 className="h-4 w-4" color="green" />
+                  <Check className="h-4 w-4" color="green" />
                   SMS sent
                 </div>
               )}
