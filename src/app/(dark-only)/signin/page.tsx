@@ -2,6 +2,7 @@
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/orbit/button";
 import {
+  getOuterbaseGoogleURL,
   getOuterbaseSession,
   loginOuterbaseByPassword,
 } from "@/outerbase-cloud/api";
@@ -44,6 +45,12 @@ export default function SigninPage() {
       });
   }, [email, password, router]);
 
+  const onGoogleLoginClicked = useCallback(() => {
+    getOuterbaseGoogleURL().then((redirectUrl) => {
+      router.push(redirectUrl);
+    });
+  }, [router]);
+
   return (
     <>
       <div
@@ -64,6 +71,10 @@ export default function SigninPage() {
 
           <h1 className="text-2xl font-bold">Welcome back</h1>
           <p>Sign in to your existing account</p>
+        </div>
+
+        <div>
+          <Button onClick={onGoogleLoginClicked}>Login with Google</Button>
         </div>
 
         <form

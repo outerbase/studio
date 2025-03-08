@@ -12,7 +12,7 @@ import {
 import { isValidEmail } from "@/lib/validation";
 import { deleteOuterbaseUser } from "@/outerbase-cloud/api-account";
 import { Check, Copy } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 

@@ -279,3 +279,24 @@ export async function sendOuterbaseBaseAnalytics(
     }
   );
 }
+
+export async function getOuterbaseGoogleURL() {
+  // Getting the current use
+  const domain = window.location.host;
+  const protocol = window.location.protocol;
+  const redirect = `${protocol}//${domain}/oauth/google`;
+
+  const response = await requestOuterbase<{ url: string }>(
+    "/api/v1/auth/oauth/google?" + new URLSearchParams({ redirect })
+  );
+
+  return response.url;
+}
+
+export async function getOuterbaseSessionFromGoogleCode(code: string) {
+  return requestOuterbase<OuterbaseAPISession>(
+    "/api/v1/auth/oauth/google",
+    "POST",
+    { code, action: "sign_in" }
+  );
+}
