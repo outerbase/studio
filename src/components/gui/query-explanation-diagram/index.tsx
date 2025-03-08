@@ -17,12 +17,14 @@ import { NestedLoop } from "./node-type/nested-loop";
 import { TableBlock } from "./node-type/table-block";
 import { OperationBlock } from "./node-type/operation-block";
 import { UnionBlock } from "./node-type/union-block";
+import { useTheme } from "next-themes";
 
 interface LayoutFlowProps {
   items: ExplanationMysql;
 }
 
 function QueryExplanationFlow(props: LayoutFlowProps) {
+  const { forcedTheme, resolvedTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -56,8 +58,11 @@ function QueryExplanationFlow(props: LayoutFlowProps) {
     }
   }, [props, loading, setEdges, setNodes]);
 
+  const appTheme = (forcedTheme ?? resolvedTheme) as "dark" | "light";
+
   return (
     <ReactFlow
+      colorMode={appTheme}
       nodes={nodes}
       edges={edges}
       onNodesChange={onNodesChange}

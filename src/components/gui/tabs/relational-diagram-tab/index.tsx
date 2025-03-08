@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import SchemaNameSelect from "../../schema-editor/schema-name-select";
 import { Toolbar } from "../../toolbar";
 import { DownloadImageDiagram } from "./download-image-diagram";
+import { useTheme } from "next-themes";
 
 const NODE_MARGIN = 50;
 const MAX_NODE_WIDTH = 300;
@@ -212,7 +213,7 @@ function mapSchema(
   const relationshipTopPosition =
     layoutRelationship.nodes.length === 0
       ? 0
-      : Math.min(...layoutRelationship.nodes.map((x) => x.position.y)) ?? 0;
+      : (Math.min(...layoutRelationship.nodes.map((x) => x.position.y)) ?? 0);
 
   // Calculate estimate area of the nodes without relationship
   const area =
@@ -279,6 +280,7 @@ function mapSchema(
 }
 
 function LayoutFlow() {
+  const { forcedTheme, resolvedTheme } = useTheme();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { schema: initialSchema, currentSchemaName, refresh } = useSchema();
@@ -296,6 +298,8 @@ function LayoutFlow() {
   const nodeTypes = {
     databaseSchema: DatabaseSchemaNode,
   };
+
+  const appTheme = (forcedTheme ?? resolvedTheme) as "dark" | "light";
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden">
@@ -368,6 +372,7 @@ function LayoutFlow() {
       {selectedSchema && (
         <div className="relative flex-1 overflow-hidden">
           <ReactFlow
+            colorMode={appTheme}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -375,7 +380,7 @@ function LayoutFlow() {
             fitView
             nodeTypes={nodeTypes}
           >
-            <Background />
+            <Background bgColor={appTheme === "dark" ? "#0a0a0a" : "white"} />
             <Controls />
             <MiniMap />
           </ReactFlow>
