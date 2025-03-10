@@ -1,8 +1,8 @@
 "use server";
 
 import StarbaseDriver from "@/drivers/starbase-driver";
-import { type TrackEventItem } from "../tracking";
 import { env } from "@/env";
+import { type TrackEventItem } from "../../../lib/tracking";
 
 export async function insertTrackingRecord(
   deviceId: string,

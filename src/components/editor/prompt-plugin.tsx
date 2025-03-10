@@ -1,3 +1,4 @@
+import AgentDriverList from "@/drivers/agent/list";
 import { unifiedMergeView } from "@codemirror/merge";
 import {
   Compartment,
@@ -38,6 +39,7 @@ export interface PromptSelectedFragment {
   startLineNumber: number;
   endLineNumber: number;
   sessionId: string;
+  selectedModel?: string;
 }
 
 export type PromptCallback = (
@@ -147,7 +149,7 @@ class PromptWidget extends WidgetType {
     // If the result of a query arrives and the counter has changed, the result is ignored.
     let queryCounter = 1;
 
-    const onGenerate = async (promptText: string) => {
+    const onGenerate = async (promptText: string, selectedModel?: string) => {
       try {
         const expectedQueryCounter = queryCounter;
 
@@ -159,6 +161,7 @@ class PromptWidget extends WidgetType {
           endLineNumber: view.state.doc.lineAt(
             startPosition + suggestedText.length
           ).number,
+          selectedModel,
         });
 
         // This prevent when we close the widget before
@@ -240,6 +243,7 @@ class PromptWidget extends WidgetType {
         onSubmit={onGenerate}
         onReject={onReject}
         onCancel={onCancel}
+        agentDriver={plugin.agents}
       />
     );
   }
@@ -325,6 +329,7 @@ export class CodeMirrorPromptPlugin {
   public isActive = false;
   activeWidget?: PromptWidget;
   promptCallback?: PromptCallback;
+  public agents?: AgentDriverList;
 
   /**
    * This is for locking when prompt is open. This is to prevent
