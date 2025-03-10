@@ -28,7 +28,6 @@ END;
         dialect="sqlite"
         value={value}
         onChange={setValue}
-        enablePrompt
         onPrompt={async (prompt, selected) => {
           const selectedText = selected?.text;
 

@@ -322,22 +322,21 @@ export default function QueryWindow({
     []
   );
 
-  const promptConversationIds = useRef<Record<string, string>>({});
   const onPrompt = useCallback(
     async (promptQuery: string, option: PromptSelectedFragment) => {
       if (!agentDriver) return "";
 
-      const agentResponse = await agentDriver.promptInline(
+      const agentResponse = await agentDriver.run(
+        option.selectedModel ?? "gemma-7b-it",
         promptQuery,
-        promptConversationIds.current[option.sessionId],
+        option.sessionId,
         {
           selected: option?.text ?? "",
           schema: schema,
         }
       );
 
-      promptConversationIds.current[option.sessionId] = agentResponse.id;
-      return agentResponse.result;
+      return agentResponse;
     },
     [agentDriver, schema]
   );
@@ -419,8 +418,8 @@ export default function QueryWindow({
           </div>
           <div className="grow overflow-hidden p-2">
             <SqlEditor
-              enablePrompt={!!agentDriver}
               onPrompt={onPrompt}
+              agents={agentDriver}
               ref={editorRef}
               dialect={databaseDriver.getFlags().dialect}
               value={code}

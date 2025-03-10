@@ -4,7 +4,7 @@ import { ConfigProvider } from "@/context/config-provider";
 import { DriverProvider } from "@/context/driver-provider";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import { BeforeQueryPipeline } from "@/core/query-pipeline";
-import { AgentBaseDriver } from "@/drivers/agent/base";
+import AgentDriverList from "@/drivers/agent/list";
 import type { BaseDriver } from "@/drivers/base-driver";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
 import { useEffect, useMemo, useRef } from "react";
@@ -14,7 +14,7 @@ import { FullEditorProvider } from "./providers/full-editor-provider";
 interface StudioProps {
   driver: BaseDriver;
   extensions?: StudioExtensionManager;
-  agentDriver?: AgentBaseDriver;
+  agentDriver?: AgentDriverList;
   docDriver?: SavedDocDriver;
   name: string;
   color: string;

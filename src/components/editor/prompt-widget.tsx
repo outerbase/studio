@@ -1,16 +1,27 @@
 "use client";
 
+import AgentDriverList from "@/drivers/agent/list";
 import { cn } from "@/lib/utils";
-import { X } from "@phosphor-icons/react";
-import { useCallback, useRef, useState } from "react";
+import { Check, X } from "@phosphor-icons/react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { CloudflareIcon } from "../icons/outerbase-icon";
 import { Button } from "../orbit/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 interface CodeMirrorPromptWidgetProps {
+  agentDriver?: AgentDriverList;
   onClose?: () => void;
   onCancel?: () => void;
   onAccept?: () => void;
   onReject?: () => void;
-  onSubmit?: (query: string) => Promise<void>;
+  onSubmit?: (query: string, selectedModel?: string) => Promise<void>;
 }
 
 export function CodeMirrorPromptWidget({
@@ -19,12 +30,21 @@ export function CodeMirrorPromptWidget({
   onSubmit,
   onAccept,
   onReject,
+  agentDriver,
 }: CodeMirrorPromptWidgetProps) {
   const textareaClassName =
     "absolute left-0 right-0 resize-none p-1 p-2 outline-none";
 
   const fakeTextareaRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const agentList = useMemo(() => {
+    if (!agentDriver) return [];
+    return agentDriver.list();
+  }, [agentDriver]);
+  const [selectedAgent, setSelectedAgent] = useState(() =>
+    agentDriver?.getDefaultModelName()
+  );
 
   const [previousPrompt, setPreviousPrompt] = useState("");
   const [error, setError] = useState("");
@@ -58,7 +78,7 @@ export function CodeMirrorPromptWidget({
       setError("");
       cancelTriggered.current = false;
 
-      onSubmit(prompt)
+      onSubmit(prompt, selectedAgent)
         .then(() => {
           if (!cancelTriggered.current) {
             setPreviousPrompt(prompt);
@@ -77,7 +97,7 @@ export function CodeMirrorPromptWidget({
           setLoading(false);
         });
     }
-  }, [onSubmit, prompt]);
+  }, [onSubmit, prompt, selectedAgent]);
 
   const triggerReject = useCallback(() => {
     if (onReject) onReject();
@@ -162,7 +182,11 @@ export function CodeMirrorPromptWidget({
         </div>
       </div>
 
-      {error && <div className="p-2 text-sm text-red-500">{error}</div>}
+      {error && (
+        <div className="line-clamp-1 p-2 text-sm text-red-500">
+          {error.split("\n")[0]}
+        </div>
+      )}
 
       <div className="flex h-10 items-center gap-1 p-2">
         {(showSubmitButton || showSubmitEditButton) && (
@@ -192,6 +216,54 @@ export function CodeMirrorPromptWidget({
           <Button variant="ghost" size="sm" onClick={triggerCancel}>
             ⌘⌫ Cancel
           </Button>
+        )}
+
+        <div className="flex-1" />
+
+        {agentList.length > 0 && (
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {selectedAgent !== "gpt-4o mini" && (
+                  <CloudflareIcon className="inline-flex h-4 w-4 text-orange-500" />
+                )}
+                {selectedAgent}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="start">
+              {agentList.map((group) => (
+                <DropdownMenuGroup key={group.name}>
+                  <DropdownMenuLabel>{group.title}</DropdownMenuLabel>
+                  {group.agents.map((agent) => (
+                    <DropdownMenuItem
+                      disabled={!agent.available}
+                      inset={selectedAgent !== agent.name}
+                      key={agent.name}
+                      onClick={() => {
+                        setSelectedAgent(agent.name);
+                        if (agentDriver) {
+                          agentDriver.setDefaultModelName(agent.name);
+                        }
+                      }}
+                    >
+                      {agent.name === selectedAgent ? (
+                        <Check className="mr-2 h-4 w-4" />
+                      ) : null}
+                      {agent.name}
+                      {agent.free ? (
+                        <div className="flex flex-1 justify-end">
+                          <span className="bg-secondary text-secondary-foreground rounded px-2 text-sm">
+                            free tier
+                          </span>
+                        </div>
+                      ) : null}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
         {!previousPrompt && !loading ? (
