@@ -13,16 +13,19 @@ export default class CloudflareAgentDriver extends CommonAgentDriverImplementati
   }
 
   async query(messages: CommonAgentMessage[]): Promise<string> {
-    const response = await fetch("http://127.0.0.1:8787/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: messages,
-      }),
-    });
+    const response = await fetch(
+      "https://agent.libsqlstudio.com/chat/complete",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: messages,
+        }),
+      }
+    );
 
     const jsonResponse = (await response.json()) as { response: string };
     return jsonResponse.response;
