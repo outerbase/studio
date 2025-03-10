@@ -13,7 +13,7 @@ import {
 } from "@/core/standard-extension";
 import { createLocalDriver } from "@/drivers/helpers";
 import IndexdbSavedDoc from "@/drivers/saved-doc/indexdb-saved-doc";
-import { useAgentFromLocalStorage } from "@/lib/ai-agent-storage";
+import { useAvailableAIAgents } from "@/lib/ai-agent-storage";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -57,7 +57,7 @@ export default function ClientPageBody() {
     return new StudioExtensionManager(createStandardExtensions());
   }, [driver]);
 
-  const agentDriver = useAgentFromLocalStorage(driver);
+  const agentDriver = useAvailableAIAgents(driver);
 
   const docDriver = useMemo(() => {
     if (conn) {

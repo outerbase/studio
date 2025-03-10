@@ -26,8 +26,6 @@ export const localSettingDialog = createDialog(({ close }) => {
   }, []);
 
   const onSaveClicked = useCallback(() => {
-    if (!token) return;
-
     updateAgentFromLocalStorage({
       provider: "openai",
       model: "gpt-4o-mini",

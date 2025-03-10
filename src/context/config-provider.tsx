@@ -1,5 +1,5 @@
 import { StudioExtensionManager } from "@/core/extension-manager";
-import { AgentBaseDriver } from "@/drivers/agent/base";
+import AgentDriverList from "@/drivers/agent/list";
 import { noop } from "lodash";
 import type { PropsWithChildren } from "react";
 import { createContext, useContext } from "react";
@@ -10,7 +10,7 @@ interface ConfigContextProps {
   onBack?: () => void;
   extensions: StudioExtensionManager;
   containerClassName?: string;
-  agentDriver?: AgentBaseDriver;
+  agentDriver?: AgentDriverList;
 }
 
 const ConfigContext = createContext<ConfigContextProps>({

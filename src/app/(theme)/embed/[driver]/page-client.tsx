@@ -14,7 +14,7 @@ import {
 import ElectronSavedDocs from "@/drivers/saved-doc/electron-saved-doc";
 import DoltExtension from "@/extensions/dolt";
 import LocalSettingSidebar from "@/extensions/local-setting-sidebar";
-import { useAgentFromLocalStorage } from "@/lib/ai-agent-storage";
+import { useAvailableAIAgents } from "@/lib/ai-agent-storage";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
@@ -39,7 +39,7 @@ export default function EmbedPageClient({
     return new StudioExtensionManager(createEmbedExtensions(driverName));
   }, [driverName]);
 
-  const agentDriver = useAgentFromLocalStorage(driver);
+  const agentDriver = useAvailableAIAgents(driver);
 
   useEffect(() => {
     return driver.listen();

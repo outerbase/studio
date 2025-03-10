@@ -18,9 +18,9 @@ export abstract class AgentBaseDriver {
    * @param previousId Previous message id. If not provided, it is a new conversation
    * @param option
    */
-  abstract promptInline(
+  abstract run(
     message: string,
     previousId: string | undefined,
     option: AgentPromptOption
-  ): Promise<AgentPromptResponse>;
+  ): Promise<string>;
 }

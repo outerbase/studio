@@ -23,6 +23,7 @@ import {
   PromptCallback,
 } from "@/components/editor/prompt-plugin";
 import { createVariableHighlightPlugin } from "@/components/editor/sql-editor/variable-highlight-plugin";
+import AgentDriverList from "@/drivers/agent/list";
 import { SupportedDialect } from "@/drivers/base-driver";
 import sqliteFunctionList from "@/drivers/sqlite/function-tooltip.json";
 import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
@@ -46,8 +47,8 @@ interface SqlEditorProps {
   /**
    * Prompt Support
    */
-  enablePrompt?: boolean;
   onPrompt?: PromptCallback;
+  agents?: AgentDriverList;
 
   value: string;
   dialect: SupportedDialect;
@@ -75,11 +76,10 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
       onCursorChange,
       readOnly,
       fontSize,
+      agents,
       onFontSizeChanged,
       variableList,
       highlightVariable,
-
-      enablePrompt,
       onPrompt,
     }: SqlEditorProps,
     ref
@@ -94,14 +94,15 @@ const SqlEditor = forwardRef<ReactCodeMirrorRef, SqlEditorProps>(
     }, [schema]);
 
     const promptPlugin = useMemo(() => {
-      return enablePrompt ? new CodeMirrorPromptPlugin() : null;
-    }, [enablePrompt]);
+      return agents ? new CodeMirrorPromptPlugin() : null;
+    }, [agents]);
 
     useEffect(() => {
       if (promptPlugin && onPrompt) {
         promptPlugin.handleSuggestion(onPrompt);
+        promptPlugin.agents = agents;
       }
-    }, [promptPlugin, onPrompt]);
+    }, [promptPlugin, onPrompt, agents]);
 
     const keyExtensions = useMemo(() => {
       return keymap.of([
