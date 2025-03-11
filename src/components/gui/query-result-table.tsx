@@ -136,7 +136,7 @@ export default function ResultTable({
 
   const renderHeader = useCallback(
     (header: OptimizeTableHeaderWithIndexProps) => {
-      const extensionMenu = extensions.getQueryHeaderContextMenu(header);
+      const extensionMenu = extensions.getQueryHeaderContextMenu(header, data);
       const extensionMenuItems = extensionMenu.map((item) => {
         if (item.component) {
           return (

@@ -203,6 +203,11 @@ export default function GenericCell({
   }, [header, value]);
 
   const content = useMemo(() => {
+    if (header.decorator) {
+      const decoratorContent = header.decorator(value);
+      if (decoratorContent !== null) return decoratorContent;
+    }
+
     if (value === null) {
       return <span className={textBaseStyle}>NULL</span>;
     }

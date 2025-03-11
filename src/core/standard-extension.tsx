@@ -3,6 +3,7 @@
  */
 
 import ColumnDescriptorExtension from "@/extensions/column-descriptor";
+import DataDecoratorExtension from "@/extensions/data-decorator";
 import QueryHistoryConsoleLogExtension from "@/extensions/query-console-log";
 import TriggerEditorExtension from "@/extensions/trigger-editor";
 import ViewEditorExtension from "@/extensions/view-editor";
@@ -12,6 +13,7 @@ export function createStandardExtensions() {
     new QueryHistoryConsoleLogExtension(),
     new ViewEditorExtension(),
     new ColumnDescriptorExtension(),
+    new DataDecoratorExtension(),
   ];
 }
 

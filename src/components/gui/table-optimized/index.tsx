@@ -19,6 +19,8 @@ import TableFakeRowPadding from "./table-fake-row-padding";
 import TableHeaderList from "./table-header-list";
 import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
 
+export type TableCellDecorator = (value: unknown) => ReactElement | null;
+
 export interface TableHeaderMetadata {
   from?: {
     schema: string;
@@ -51,6 +53,8 @@ export interface OptimizeTableHeaderProps {
     iconClassName?: string;
     tooltip?: string;
   };
+
+  decorator?: TableCellDecorator;
 
   setting: {
     resizable: boolean;
@@ -279,12 +283,14 @@ export default function OptimizeTable({
     return () => internalState.removeChangeListener(changeCallback);
   }, [internalState, rerender]);
 
+  const headerRevision = internalState.headerRevision;
   const headerWithIndex = useMemo(() => {
     // Attach the actual index
     const headers = internalState.getHeaders().map((header, idx) => ({
       ...header,
       index: idx,
       sticky: idx === stickyHeaderIndex,
+      headerRevision, // this is basically useless, but we do it to ignore deps warning
     }));
 
     // We will rearrange the index based on specified index
@@ -297,7 +303,7 @@ export default function OptimizeTable({
       ...(stickyHeaderIndex !== undefined ? [headers[stickyHeaderIndex]] : []),
       ...headerAfterArranged.filter((x) => x.index !== stickyHeaderIndex),
     ];
-  }, [internalState, arrangeHeaderIndex, stickyHeaderIndex]);
+  }, [internalState, arrangeHeaderIndex, stickyHeaderIndex, headerRevision]);
 
   const { visibileRange, onHeaderResize } = useTableVisibilityRecalculation({
     containerRef,
