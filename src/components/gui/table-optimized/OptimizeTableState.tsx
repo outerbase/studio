@@ -5,7 +5,7 @@ import {
 import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import deepEqual from "deep-equal";
-import { OptimizeTableHeaderProps } from ".";
+import { OptimizeTableHeaderProps, TableCellDecorator } from ".";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -42,6 +42,7 @@ export default class OptimizeTableState {
   public gutterColumnWidth = 40;
 
   protected headers: OptimizeTableHeaderProps[] = [];
+  public headerRevision = 1;
   protected headerWidth: number[] = [];
 
   protected editMode = false;
@@ -201,6 +202,28 @@ export default class OptimizeTableState {
   // ------------------------------------------------
   getHeaders() {
     return this.headers;
+  }
+
+  updateHeaderDecorator(
+    header: OptimizeTableHeaderProps,
+    decorator: TableCellDecorator | undefined
+  ) {
+    const idx = this.headers.findIndex((h) => h.name === header.name);
+
+    if (idx >= 0) {
+      this.headers = this.headers.map((h) => {
+        if (h.name === header.name) {
+          return {
+            ...h,
+            decorator,
+          };
+        }
+        return h;
+      });
+
+      this.headerRevision++;
+      this.broadcastChange();
+    }
   }
 
   getValue(y: number, x: number): unknown {

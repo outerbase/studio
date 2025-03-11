@@ -1,4 +1,5 @@
 import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
+import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
 import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
@@ -28,7 +29,8 @@ type CreateResourceMenuHandler = (
 ) => StudioExtensionMenuItem | undefined;
 
 type QueryHeaderResultMenuHandler = (
-  header: OptimizeTableHeaderProps
+  header: OptimizeTableHeaderProps,
+  state: OptimizeTableState
 ) => StudioExtensionMenuItem | undefined;
 
 type AfterFetchSchemaHandler = (schema: DatabaseSchemas) => void;
@@ -120,9 +122,12 @@ export class StudioExtensionManager extends StudioExtensionContext {
       .filter(Boolean) as StudioExtensionMenuItem[];
   }
 
-  getQueryHeaderContextMenu(header: OptimizeTableHeaderProps) {
+  getQueryHeaderContextMenu(
+    header: OptimizeTableHeaderProps,
+    state: OptimizeTableState
+  ) {
     return this.queryResultHeaderContextMenu
-      .map((handler) => handler(header))
+      .map((handler) => handler(header, state))
       .filter(Boolean) as StudioExtensionMenuItem[];
   }
 
