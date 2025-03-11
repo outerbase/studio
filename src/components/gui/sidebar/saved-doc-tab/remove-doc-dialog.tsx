@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { SavedDocData } from "@/drivers/saved-doc/saved-doc-driver";
 import { useCallback, useState } from "react";
 
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function RemoveDocDialog({ doc, onClose, onComplete }: Props) {
-  const { docDriver } = useDatabaseDriver();
+  const { docDriver } = useStudioContext();
   const [loading, setLoading] = useState(false);
 
   const onDeleteClicked = useCallback(() => {

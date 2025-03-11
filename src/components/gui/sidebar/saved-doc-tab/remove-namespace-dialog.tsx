@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import {
   SavedDocData,
   SavedDocNamespace,
@@ -24,7 +24,7 @@ export default function RemoveNamespaceDialog({
   onComplete,
   value,
 }: Props) {
-  const { docDriver } = useDatabaseDriver();
+  const { docDriver } = useStudioContext();
   const [loading, setLoading] = useState(false);
 
   const onDeleteClicked = useCallback(() => {

@@ -10,8 +10,7 @@ import {
   useState,
 } from "react";
 import { useAutoComplete } from "./auto-complete-provider";
-import { useConfig } from "./config-provider";
-import { useDatabaseDriver } from "./driver-provider";
+import { useStudioContext } from "./driver-provider";
 
 type AutoCompletionSchema = Record<string, Record<string, string[]> | string[]>;
 
@@ -68,8 +67,7 @@ export function SchemaProvider({ children }: Readonly<PropsWithChildren>) {
   const { updateTableList, updateTableSchema } = useAutoComplete();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
-  const { databaseDriver } = useDatabaseDriver();
-  const { extensions } = useConfig();
+  const { databaseDriver, extensions } = useStudioContext();
 
   const [schema, setSchema] = useState<DatabaseSchemas>({});
   const [currentSchema, setCurrentSchema] = useState<DatabaseSchemaItem[]>([]);

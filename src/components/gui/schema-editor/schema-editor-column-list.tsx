@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import {
   DatabaseTableColumn,
   DatabaseTableColumnChange,
@@ -104,7 +104,7 @@ function ColumnItemType({
   onChange: (type: string) => void;
   disabled?: boolean;
 }) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
 
   if (
     databaseDriver.columnTypeSelector.type === "dropdown" &&

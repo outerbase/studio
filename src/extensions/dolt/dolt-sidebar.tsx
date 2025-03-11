@@ -19,7 +19,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { cn } from "@/lib/utils";
 import { GitBranch, Minus, Plus, Table } from "@phosphor-icons/react";
@@ -51,7 +51,7 @@ function DoltCommitLog({
   const { modal: createBranchModal, openModal: openCreateBranch } =
     useDoltCreateBranchModal(refreshStatus);
 
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const { showDialog: showCommonDialog } = useCommonDialog();
 
   const onResetClicked = useCallback(
@@ -167,7 +167,7 @@ function DoltChangeItem({
   status: DoltStatusResultItem;
   refreshStatus: () => void;
 }) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [loading, setLoading] = useState(false);
 
   const onStageClicked = useCallback(
@@ -251,7 +251,7 @@ function DoltChanges({
   statusList: DoltStatusResultItem[];
   refreshStatus: () => void;
 }) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [loading, setLoading] = useState(false);
   const [commitMessage, setCommitMessage] = useState("");
 
@@ -344,7 +344,7 @@ function DoltChanges({
 
 export default function DoltSidebar() {
   const { currentSchemaName } = useSchema();
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [branchList, setBranchList] = useState<string[]>([]);
   const [selectedBranch, setSelectedBranch] = useState("main");
   const [commitList, setCommitList] = useState<DoltCommitResultItem[]>([]);

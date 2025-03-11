@@ -1,28 +1,28 @@
-import { useDatabaseDriver } from "@/context/driver-provider";
-import {
-  SavedDocData,
-  SavedDocGroupByNamespace,
-  SavedDocNamespace,
-} from "@/drivers/saved-doc/saved-doc-driver";
 import { ListView, ListViewItem } from "@/components/listview";
-import { LucideTrash } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import RenameNamespaceDialog from "./rename-namespace-dialog";
-import RemoveDocDialog from "./remove-doc-dialog";
-import { TAB_PREFIX_SAVED_QUERY } from "@/const";
-import RemoveNamespaceDialog from "./remove-namespace-dialog";
-import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Binoculars, Folder, Plus } from "@phosphor-icons/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import CreateNamespaceDialog from "./create-namespace-button";
-import { scc } from "@/core/command";
+import { TAB_PREFIX_SAVED_QUERY } from "@/const";
+import { useStudioContext } from "@/context/driver-provider";
 import { OpenContextMenuList } from "@/core/channel-builtin";
+import { scc } from "@/core/command";
+import {
+  SavedDocData,
+  SavedDocGroupByNamespace,
+  SavedDocNamespace,
+} from "@/drivers/saved-doc/saved-doc-driver";
+import { cn } from "@/lib/utils";
+import { Binoculars, Folder, Plus } from "@phosphor-icons/react";
+import { LucideTrash } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import CreateNamespaceDialog from "./create-namespace-button";
+import RemoveDocDialog from "./remove-doc-dialog";
+import RemoveNamespaceDialog from "./remove-namespace-dialog";
+import RenameNamespaceDialog from "./rename-namespace-dialog";
 
 type SavedDocListData =
   | {
@@ -56,7 +56,7 @@ function mapDoc(
 }
 
 export default function SavedDocTab() {
-  const { docDriver } = useDatabaseDriver();
+  const { docDriver } = useStudioContext();
   const [selected, setSelected] = useState<string>();
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -157,7 +157,7 @@ export default function SavedDocTab() {
 
       <div className="flex grow flex-col">
         <div className="mx-2 mb-5 flex items-center justify-between px-2 pt-4">
-          <h1 className="text-xl font-medium text-primary">Queries</h1>
+          <h1 className="text-primary text-xl font-medium">Queries</h1>
 
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>

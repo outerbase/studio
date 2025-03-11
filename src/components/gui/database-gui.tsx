@@ -1,29 +1,28 @@
 "use client";
+import QueryWindow from "@/components/gui/tabs/query-tab";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import WindowTabs, { WindowTabItemProps } from "./windows-tab";
-import QueryWindow from "@/components/gui/tabs/query-tab";
-import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import SchemaView from "./schema-sidebar";
+import SidebarTab, { SidebarTabItem } from "./sidebar-tab";
 import ToolSidebar from "./sidebar/tools-sidebar";
+import WindowTabs, { WindowTabItemProps } from "./windows-tab";
 
-import { useDatabaseDriver } from "@/context/driver-provider";
-import SavedDocTab from "./sidebar/saved-doc-tab";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
-import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
-import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
-import { useConfig } from "@/context/config-provider";
-import { cn } from "@/lib/utils";
 import { scc } from "@/core/command";
 import {
   tabCloseChannel,
   tabOpenChannel,
   tabReplaceChannel,
 } from "@/core/extension-tab";
+import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
+import { cn } from "@/lib/utils";
+import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
+import SavedDocTab from "./sidebar/saved-doc-tab";
 
 export default function DatabaseGui() {
   const DEFAULT_WIDTH = 300;
@@ -34,8 +33,8 @@ export default function DatabaseGui() {
     setDefaultWidthPercentage((DEFAULT_WIDTH / window.innerWidth) * 100);
   }, []);
 
-  const { databaseDriver, docDriver } = useDatabaseDriver();
-  const { extensions, containerClassName } = useConfig();
+  const { databaseDriver, docDriver, extensions, containerClassName } =
+    useStudioContext();
 
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const { currentSchemaName } = useSchema();

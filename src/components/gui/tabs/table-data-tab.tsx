@@ -6,7 +6,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-// import { Button } from "@/components/ui/button";
+
 import { Button } from "@/components/orbit/button";
 import {
   Tooltip,
@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAutoComplete } from "@/context/auto-complete-provider";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import {
   ColumnSortOption,
@@ -50,7 +50,7 @@ export default function TableDataWindow({
 }: TableDataContentProps) {
   const { updateTableSchema } = useAutoComplete();
   const { schema } = useSchema();
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [error, setError] = useState<string>();
   const [executeError, setExecuteError] = useState<string | null>(null);
 

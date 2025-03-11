@@ -19,8 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TAB_PREFIX_SAVED_QUERY } from "@/const";
-import { useConfig } from "@/context/config-provider";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import {
   SavedDocData,
@@ -71,7 +70,7 @@ export default function QueryWindow({
   initialSavedKey,
   initialNamespace,
 }: QueryWindowProps) {
-  const { databaseDriver, docDriver } = useDatabaseDriver();
+  const { databaseDriver, docDriver, agentDriver } = useStudioContext();
   const { refresh: refreshSchema, autoCompleteSchema } = useSchema();
   const [code, setCode] = useState(initialCode ?? "");
   const editorRef = useRef<ReactCodeMirrorRef>(null);
@@ -91,8 +90,6 @@ export default function QueryWindow({
   );
   const [savedKey, setSavedKey] = useState<string | undefined>(initialSavedKey);
   const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
-
-  const { agentDriver } = useConfig();
   const { schema } = useSchema();
 
   useEffect(() => {

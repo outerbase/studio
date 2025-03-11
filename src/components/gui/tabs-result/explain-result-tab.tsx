@@ -1,15 +1,15 @@
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { QueryExplanation } from "../query-explanation";
+import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseResultSet } from "@/drivers/base-driver";
+import { QueryExplanation } from "../query-explanation";
 
 export default function ExplainResultTab({
   data,
 }: {
   data: DatabaseResultSet;
 }) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   return (
-    <div className="flex flex-col h-full w-full border-t">
+    <div className="flex h-full w-full flex-col border-t">
       <div className="grow overflow-hidden">
         <QueryExplanation
           data={data}

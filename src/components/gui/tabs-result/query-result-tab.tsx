@@ -1,19 +1,19 @@
+import { useStudioContext } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
+import { MultipleQueryResult } from "@/lib/sql/multiple-query";
 import { useMemo, useState } from "react";
+import AggregateResultButton from "../aggregate-result/aggregate-result-button";
 import ExportResultButton from "../export/export-result-button";
 import ResultTable from "../query-result-table";
 import ResultStats from "../result-stat";
 import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import AggregateResultButton from "../aggregate-result/aggregate-result-button";
-import { MultipleQueryResult } from "@/lib/sql/multiple-query";
-import { useSchema } from "@/context/schema-provider";
 
 export default function QueryResult({
   result,
 }: {
   result: MultipleQueryResult;
 }) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const { schema } = useSchema();
 
   // We cache the schema to prevent re-initial

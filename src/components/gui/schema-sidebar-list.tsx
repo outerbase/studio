@@ -1,5 +1,4 @@
-import { useConfig } from "@/context/config-provider";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { OpenContextMenuList } from "@/core/channel-builtin";
 import { scc } from "@/core/command";
@@ -124,8 +123,7 @@ function flattenSchemaGroup(
 }
 
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
-  const { databaseDriver } = useDatabaseDriver();
-  const { extensions } = useConfig();
+  const { databaseDriver, extensions } = useStudioContext();
   const [selected, setSelected] = useState("");
   const { refresh, schema, currentSchemaName } = useSchema();
   const [editSchema, setEditSchema] = useState<string | null>(null);

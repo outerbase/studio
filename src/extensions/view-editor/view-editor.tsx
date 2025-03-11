@@ -1,11 +1,11 @@
 import { Input } from "@/components/ui/input";
+import { useStudioContext } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
 import { DatabaseViewSchema } from "@/drivers/base-driver";
 import { produce } from "immer";
-import SqlEditor from "../../components/gui/sql-editor";
-import { useDatabaseDriver } from "@/context/driver-provider";
 import { useMemo } from "react";
-import { useSchema } from "@/context/schema-provider";
 import SchemaNameSelect from "../../components/gui/schema-editor/schema-name-select";
+import SqlEditor from "../../components/gui/sql-editor";
 
 interface Props {
   value: DatabaseViewSchema;
@@ -14,7 +14,7 @@ interface Props {
 
 export default function ViewEditor(props: Props) {
   const { value, onChange } = props;
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const { autoCompleteSchema, schema } = useSchema();
 
   const extendedAutoCompleteSchema = useMemo(() => {
@@ -26,7 +26,7 @@ export default function ViewEditor(props: Props) {
 
   return (
     <>
-      <div className="px-4 py-2 flex flex-row gap-2">
+      <div className="flex flex-row gap-2 px-4 py-2">
         <Input
           value={value.name}
           placeholder="View Name"

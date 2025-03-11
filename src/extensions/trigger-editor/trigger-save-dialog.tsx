@@ -1,3 +1,4 @@
+import CodePreview from "@/components/gui/code-preview";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -5,13 +6,12 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
-import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTriggerSchema } from "@/drivers/base-driver";
-import CodePreview from "@/components/gui/code-preview";
+import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
+import { useCallback, useState } from "react";
 import { triggerEditorExtensionTab } from ".";
 
 interface Props {
@@ -22,30 +22,28 @@ interface Props {
 
 export function TriggerSaveDialog(props: Props) {
   const { refresh: refreshSchema } = useSchema();
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [isExecuting, setIsExecuting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const onSave = useCallback(() => {
     setIsExecuting(true);
     databaseDriver
-      .transaction(
-        props.previewScript
-      )
+      .transaction(props.previewScript)
       .then(() => {
         refreshSchema();
         triggerEditorExtensionTab.replace({
           schemaName: props.trigger.schemaName,
-          name: props.trigger.name ?? '',
-          tableName: props.trigger.tableName
-        })
+          name: props.trigger.name ?? "",
+          tableName: props.trigger.tableName,
+        });
         props.onClose();
       })
       .catch((err) => setErrorMessage((err as Error).message))
       .finally(() => {
         setIsExecuting(false);
       });
-  }, [databaseDriver, props, refreshSchema])
+  }, [databaseDriver, props, refreshSchema]);
 
   return (
     <AlertDialog open onOpenChange={props.onClose}>
@@ -53,8 +51,8 @@ export function TriggerSaveDialog(props: Props) {
         <AlertDialogTitle>Preview</AlertDialogTitle>
 
         {errorMessage && (
-          <div className="text-sm text-red-500 font-mono flex gap-4 justify-end items-end">
-            <LucideAlertCircle className="w-12 h-12" />
+          <div className="flex items-end justify-end gap-4 font-mono text-sm text-red-500">
+            <LucideAlertCircle className="h-12 w-12" />
             <p>{errorMessage}</p>
           </div>
         )}
@@ -65,9 +63,9 @@ export function TriggerSaveDialog(props: Props) {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button onClick={onSave}>
             {isExecuting ? (
-              <LucideLoader className="w-4 h-4 mr-2 animate-spin" />
+              <LucideLoader className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <LucideSave className="w-4 h-4 mr-2" />
+              <LucideSave className="mr-2 h-4 w-4" />
             )}
             Continue
           </Button>
