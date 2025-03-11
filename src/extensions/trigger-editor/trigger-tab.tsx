@@ -1,12 +1,12 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseTriggerSchema } from "@/drivers/base-driver";
 import { produce } from "immer";
 import { isEqual } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TriggerController } from "./trigger-controller";
-import { TriggerSaveDialog } from "./trigger-save-dialog";
 import TriggerEditor from "./trigger-editor";
+import { TriggerSaveDialog } from "./trigger-save-dialog";
 
 export interface TriggerTabProps {
   name: string;
@@ -29,7 +29,7 @@ export default function TriggerTab({
   schemaName,
   tableName,
 }: TriggerTabProps) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [isSaving, setIsSaving] = useState(false);
 
   // If name is specified, it means the trigger is already exist
@@ -76,7 +76,7 @@ export default function TriggerTab({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden w-full h-full">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       {isSaving && (
         <TriggerSaveDialog
           onClose={toggleSaving}

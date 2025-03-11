@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCommonDialog } from "@/components/common-dialog";
+import OpacityLoading from "@/components/gui/loading-opacity";
+import { useStudioContext } from "@/context/driver-provider";
+import { useSchema } from "@/context/schema-provider";
 import { DatabaseViewSchema } from "@/drivers/base-driver";
 import { produce } from "immer";
 import { isEqual } from "lodash";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { useCommonDialog } from "@/components/common-dialog";
 import { LucideLoader, LucideSave } from "lucide-react";
-import { useSchema } from "@/context/schema-provider";
-import OpacityLoading from "@/components/gui/loading-opacity";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { viewEditorExtensionTab } from ".";
 import { ViewController } from "./view-controller";
 import ViewEditor from "./view-editor";
-import { viewEditorExtensionTab } from ".";
 
 export interface ViewTabProps {
   name: string;
@@ -25,7 +25,7 @@ const EMPTY_DEFAULT_VIEW: DatabaseViewSchema = {
 export default function ViewTab(props: ViewTabProps) {
   const { showDialog } = useCommonDialog();
   const { refresh: refreshSchema, currentSchemaName } = useSchema();
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
 
   // If name is specified, it means the trigger is already exist
   const [loading, setLoading] = useState(!!props.name);

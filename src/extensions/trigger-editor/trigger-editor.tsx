@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import {
   DatabaseTriggerSchema,
@@ -25,7 +25,7 @@ export interface TriggerEditorProps {
 }
 
 export default function TriggerEditor({ value, onChange }: TriggerEditorProps) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const { autoCompleteSchema, schema } = useSchema();
 
   const extendedAutoCompleteSchema = useMemo(() => {

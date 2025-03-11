@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/context/config-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useMemo } from "react";
 import ServerLoadingAnimation from "../icons/server-loading";
 
@@ -11,7 +11,7 @@ export default function ConnectingDialog({
   message?: string;
   onRetry?: () => void;
 }>) {
-  const { name, onBack } = useConfig();
+  const { name, onBack } = useStudioContext();
 
   const isElectron = useMemo(() => {
     return typeof window !== "undefined" && window.outerbaseIpc;
@@ -56,7 +56,7 @@ export default function ConnectingDialog({
   }
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center flex-col gap-4">
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-4">
       <ServerLoadingAnimation />
       {body}
     </div>

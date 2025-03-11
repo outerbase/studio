@@ -2,7 +2,7 @@ import SchemaNameSelect from "@/components/gui/schema-editor/schema-name-select"
 import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import { Input } from "@/components/orbit/input";
 import { Toggle } from "@/components/orbit/toggle";
-import { useConfig } from "@/context/config-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTableSchema } from "@/drivers/base-driver";
 import { MagnifyingGlass } from "@phosphor-icons/react";
@@ -31,7 +31,7 @@ export default function DataCatalogModelTab() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setRevision] = useState(1);
 
-  const { extensions } = useConfig();
+  const { extensions } = useStudioContext();
 
   const driver = useMemo(() => {
     const dataCatalogExtension =

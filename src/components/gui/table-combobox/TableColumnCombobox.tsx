@@ -1,4 +1,4 @@
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import type { DatabaseTableSchema } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
@@ -29,7 +29,7 @@ export default function TableColumnCombobox({
   disabled?: boolean;
   borderless?: boolean;
 }>) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [open, setOpen] = useState(false);
   const [schema, setSchema] = useState<DatabaseTableSchema>();
 

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { MagicWand } from "@phosphor-icons/react";
 import { produce } from "immer";
 import { LucideLoader } from "lucide-react";
@@ -30,7 +30,7 @@ export default function DataCatalogTableColumnModal({
   const { driver } = useDataCatalogContext();
   const modelColumn = driver.getColumn(schemaName, tableName, columnName);
 
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [column, setColumn] = useState<DataCatalogColumnInput>(() => ({
     definition: modelColumn?.definition || "",
     samples: modelColumn?.samples || [],

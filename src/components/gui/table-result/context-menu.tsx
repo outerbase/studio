@@ -1,16 +1,16 @@
-import { useCallback } from "react";
-import { KEY_BINDING } from "@/lib/key-matcher";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useFullEditor } from "../providers/full-editor-provider";
+import { useStudioContext } from "@/context/driver-provider";
+import { openContextMenuFromEvent } from "@/core/channel-builtin";
 import {
   exportRowsToExcel,
   exportRowsToJson,
   exportRowsToSqlInsert,
 } from "@/lib/export-helper";
+import { KEY_BINDING } from "@/lib/key-matcher";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
+import { useCallback } from "react";
+import { useFullEditor } from "../providers/full-editor-provider";
+import OptimizeTableState from "../table-optimized/OptimizeTableState";
 import TableStateActions from "../table-optimized/table-state-actions";
-import { openContextMenuFromEvent } from "@/core/channel-builtin";
-import { useConfig } from "@/context/config-provider";
 
 export default function useTableResultContextMenu({
   tableName,
@@ -24,7 +24,7 @@ export default function useTableResultContextMenu({
   pasteCallback: (state: OptimizeTableState) => void;
 }) {
   const { openEditor } = useFullEditor();
-  const { extensions } = useConfig();
+  const { extensions } = useStudioContext();
 
   return useCallback(
     ({

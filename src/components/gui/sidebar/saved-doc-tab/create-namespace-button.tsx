@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { SavedDocNamespace } from "@/drivers/saved-doc/saved-doc-driver";
 import { useCallback, useState } from "react";
 
@@ -20,7 +20,7 @@ export default function CreateNamespaceDialog({
   onCreated,
   onClose,
 }: CreateNamespaceButtonProps) {
-  const { docDriver } = useDatabaseDriver();
+  const { docDriver } = useStudioContext();
   const [namespace, setNamespace] = useState("");
   const [error, setError] = useState("");
 
@@ -64,7 +64,7 @@ export default function CreateNamespaceDialog({
           onChange={(e) => setNamespace(e.currentTarget.value)}
         />
 
-        {error && <div className="text-xs text-red-500 -mt-2">{error}</div>}
+        {error && <div className="-mt-2 text-xs text-red-500">{error}</div>}
 
         <DialogFooter>
           <Button onClick={onCreateNamespace}>Create</Button>
