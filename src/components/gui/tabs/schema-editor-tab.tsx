@@ -1,5 +1,5 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import { createTableSchemaDraft } from "@/lib/sql/sql-generate.schema";
 import { cloneDeep } from "lodash";
@@ -26,7 +26,7 @@ export default function SchemaEditorTab({
   schemaName,
   tableName,
 }: Readonly<SchemaEditorTabProps>) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [schema, setSchema] = useState<DatabaseTableSchemaChange>({
     ...EMPTY_SCHEMA,
     schemaName,

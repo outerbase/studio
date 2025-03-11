@@ -6,7 +6,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import {
@@ -31,7 +31,7 @@ export default function SchemaSaveDialog({
   onClose: () => void;
   fetchTable: (schemeName: string, tableName: string) => Promise<void>;
 }) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const { refresh: refreshSchema } = useSchema();
   const [isExecuting, setIsExecuting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");

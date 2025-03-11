@@ -1,20 +1,20 @@
-import React, { PropsWithChildren } from "react";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
+import { PropsWithChildren } from "react";
 
+import { scc } from "@/core/command";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "../../../ui/context-menu";
-import { scc } from "@/core/command";
 
 export default function ContextMenuERD({
   schemaName,
   tableName,
   children,
 }: PropsWithChildren<{ schemaName: string; tableName: string }>) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
 
   const handleEditTable = () => {
     scc.tabs.openBuiltinSchema({

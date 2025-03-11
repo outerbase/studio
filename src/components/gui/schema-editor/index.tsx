@@ -1,4 +1,4 @@
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
 import { checkSchemaChange } from "@/lib/sql/sql-generate.schema";
 import { LucideCode, LucideCopy, LucidePlus, LucideSave } from "lucide-react";
@@ -27,7 +27,7 @@ export default function SchemaEditor({
   onSave,
   onDiscard,
 }: Readonly<Props>) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const isCreateScript = value.name.old === "";
 
   const onAddColumn = useCallback(() => {

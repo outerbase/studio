@@ -2,8 +2,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { WEBSITE_NAME } from "@/const";
 import { AutoCompleteProvider } from "@/context/auto-complete-provider";
-import { useConfig } from "@/context/config-provider";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { SchemaProvider } from "@/context/schema-provider";
 import { useEffect } from "react";
 import { DialogProvider } from "../create-dialog";
@@ -11,7 +10,7 @@ import ContextMenuHandler from "./context-menu-handler";
 import DatabaseGui from "./database-gui";
 
 function MainConnection() {
-  const { databaseDriver: driver } = useDatabaseDriver();
+  const { databaseDriver: driver } = useStudioContext();
 
   useEffect(() => {
     return () => {
@@ -28,7 +27,7 @@ function MainConnection() {
 }
 
 function MainConnectionContainer() {
-  const { name } = useConfig();
+  const { name } = useStudioContext();
 
   useEffect(() => {
     document.title = name + " - " + WEBSITE_NAME;

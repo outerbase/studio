@@ -1,23 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useStudioContext } from "@/context/driver-provider";
 import { useSchema } from "@/context/schema-provider";
+import { DatabaseSchemaChange } from "@/drivers/base-driver";
 import { LucideAlertCircle, LucideLoader, LucideSave } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { DatabaseSchemaChange } from "@/drivers/base-driver";
 
-export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?: string; onClose: () => void; }) {
-  const { databaseDriver } = useDatabaseDriver();
+export function SchemaDatabaseCreateForm({
+  schemaName,
+  onClose,
+}: {
+  schemaName?: string;
+  onClose: () => void;
+}) {
+  const { databaseDriver } = useStudioContext();
   const { schema, refresh: refreshSchema } = useSchema();
   const [isExecuting, setIsExecuting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [value, setValue] = useState<DatabaseSchemaChange>({
     name: {
-      new: '',
-      old: ''
+      new: "",
+      old: "",
     },
-    createScript: '',
-    collate: ''
+    createScript: "",
+    collate: "",
   });
 
   const previewScript = useMemo(() => {
@@ -27,52 +33,60 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
   const onSave = useCallback(() => {
     {
       setIsExecuting(true);
-      databaseDriver.transaction([previewScript]).then(() => {
-        refreshSchema();
-        onClose();
-      }).catch((err) => setErrorMessage((err as Error).message)).finally(() => {
-        setIsExecuting(false);
-      })
+      databaseDriver
+        .transaction([previewScript])
+        .then(() => {
+          refreshSchema();
+          onClose();
+        })
+        .catch((err) => setErrorMessage((err as Error).message))
+        .finally(() => {
+          setIsExecuting(false);
+        });
     }
-  }, [databaseDriver, onClose, previewScript, refreshSchema])
+  }, [databaseDriver, onClose, previewScript, refreshSchema]);
 
-  const schemaNames = Object.keys(schema).filter(s => s !== schemaName).map(s => s);
-  const schemaNameExists = schemaNames.includes(value.name.new || '');
+  const schemaNames = Object.keys(schema)
+    .filter((s) => s !== schemaName)
+    .map((s) => s);
+  const schemaNameExists = schemaNames.includes(value.name.new || "");
 
   return (
-    <div className="flex h-full flex-col overflow-hidden relative">
+    <div className="relative flex h-full flex-col overflow-hidden">
       {errorMessage && (
-        <div className="text-sm text-red-500 font-mono flex gap-4 justify-end items-end">
-          <LucideAlertCircle className="w-12 h-12" />
+        <div className="flex items-end justify-end gap-4 font-mono text-sm text-red-500">
+          <LucideAlertCircle className="h-12 w-12" />
           <p>{errorMessage}</p>
         </div>
       )}
-      <div className="flex gap-2 shrink-0 grow-0 py-4 px-1 border-neutral-200 dark:border-neutral-800">
+      <div className="flex shrink-0 grow-0 gap-2 border-neutral-200 px-1 py-4 dark:border-neutral-800">
         <div className="w-full">
-          <div className="text-xs font-medium mb-1">Schema Name</div>
+          <div className="mb-1 text-xs font-medium">Schema Name</div>
           <Input
             placeholder="Schema Name"
-            value={value.name.new || value.name.old || ''}
+            value={value.name.new || value.name.old || ""}
             onChange={(e) => {
               setValue({
                 ...value,
                 name: {
                   ...value.name,
-                  new: e.currentTarget.value
-                }
-              })
+                  new: e.currentTarget.value,
+                },
+              });
             }}
             disabled={!!schemaName}
-            className={`w-full ${schemaNameExists ? 'border-red-600' : ''}`}
+            className={`w-full ${schemaNameExists ? "border-red-600" : ""}`}
           />
-          {
-            schemaNameExists && <small className="text-xs text-red-500">The schema name `{value.name.new}` already exists.</small>
-          }
+          {schemaNameExists && (
+            <small className="text-xs text-red-500">
+              The schema name `{value.name.new}` already exists.
+            </small>
+          )}
         </div>
       </div>
-      <div className="w-full flex flex-col pt-3">
-        <div className="grow-0 shrink-0">
-          <div className="p-1 flex gap-2 justify-end">
+      <div className="flex w-full flex-col pt-3">
+        <div className="shrink-0 grow-0">
+          <div className="flex justify-end gap-2 p-1">
             <Button
               variant="ghost"
               disabled={!!schemaNameExists}
@@ -80,9 +94,9 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
               onClick={onSave}
             >
               {isExecuting ? (
-                <LucideLoader className="w-4 h-4 mr-2 animate-spin" />
+                <LucideLoader className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <LucideSave className="w-4 h-4 mr-2" />
+                <LucideSave className="mr-2 h-4 w-4" />
               )}
               Save
             </Button>
@@ -90,5 +104,5 @@ export function SchemaDatabaseCreateForm({ schemaName, onClose }: { schemaName?:
         </div>
       </div>
     </div>
-  )
+  );
 }

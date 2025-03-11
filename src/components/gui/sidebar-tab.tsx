@@ -1,4 +1,4 @@
-import { useConfig } from "@/context/config-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
@@ -40,14 +40,10 @@ export default function SidebarTab({ tabs }: Readonly<SidebarTabProps>) {
   const disableToggle =
     searchParams.get("disableThemeToggle") === "1" || forcedTheme;
 
-  const config = useConfig();
+  const config = useStudioContext();
 
   return (
-    <div
-      className={cn(
-        "flex h-full bg-neutral-50 dark:bg-neutral-950"
-      )}
-    >
+    <div className={cn("flex h-full bg-neutral-50 dark:bg-neutral-950")}>
       <div className={cn("shrink-0")}>
         <div className="flex h-full flex-col gap-4 border-r border-neutral-200 p-3 dark:border-neutral-800">
           <DropdownMenu modal={false}>

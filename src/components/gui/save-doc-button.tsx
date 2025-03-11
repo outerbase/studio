@@ -1,12 +1,12 @@
+import { useStudioContext } from "@/context/driver-provider";
 import {
   SavedDocData,
   SavedDocInput,
   SavedDocNamespace,
 } from "@/drivers/saved-doc/saved-doc-driver";
-import { Button } from "../ui/button";
-import { useDatabaseDriver } from "@/context/driver-provider";
-import { useCallback, useState } from "react";
 import { LucideFolderGit, LucideLoader } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ export default function SaveDocButton({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { docDriver } = useDatabaseDriver();
+  const { docDriver } = useStudioContext();
   const [namespaceList, setNamespaceList] = useState<SavedDocNamespace[]>([]);
 
   const onSaveQuery = useCallback(
@@ -86,7 +86,7 @@ export default function SaveDocButton({
           variant={"secondary"}
         >
           {loading ? (
-            <LucideLoader className="w-4 h-4 animate-spin mr-2" />
+            <LucideLoader className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <></>
           )}
@@ -104,7 +104,7 @@ export default function SaveDocButton({
                 onSaveQuery(n.id);
               }}
             >
-              <LucideFolderGit className="w-4 h-4 mr-2" /> {n.name}
+              <LucideFolderGit className="mr-2 h-4 w-4" /> {n.name}
             </DropdownMenuItem>
           );
         })}

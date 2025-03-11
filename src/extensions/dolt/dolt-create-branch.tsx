@@ -8,12 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { GitBranch, Loader } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 export default function useDoltCreateBranchModal(refreshStatus: () => void) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -56,7 +56,7 @@ export default function useDoltCreateBranchModal(refreshStatus: () => void) {
             {commitHash ? (
               <>
                 Creating new branch from{" "}
-                <span className="bg-muted rounded inline-flex font-mono px-2">
+                <span className="bg-muted inline-flex rounded px-2 font-mono">
                   {commitHash}
                 </span>
               </>
@@ -80,9 +80,9 @@ export default function useDoltCreateBranchModal(refreshStatus: () => void) {
           <DialogFooter>
             <Button disabled={!branchName || loading} onClick={onSaveClicked}>
               {loading ? (
-                <Loader className="mr-2 w-4 h-4 animate-spin" />
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <GitBranch className="mr-2 w-4 h-4" />
+                <GitBranch className="mr-2 h-4 w-4" />
               )}
               Create
             </Button>

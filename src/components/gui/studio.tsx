@@ -1,7 +1,9 @@
 "use client";
 import MainScreen from "@/components/gui/main-connection";
-import { ConfigProvider } from "@/context/config-provider";
-import { DriverProvider } from "@/context/driver-provider";
+import {
+  StudioContextProps,
+  StudioContextProvider,
+} from "@/context/driver-provider";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import { BeforeQueryPipeline } from "@/core/query-pipeline";
 import AgentDriverList from "@/drivers/agent/list";
@@ -85,7 +87,7 @@ export function Studio({
     return () => finalExtensionManager.cleanup();
   }, [finalExtensionManager]);
 
-  const config = useMemo(() => {
+  const studioContextValue: StudioContextProps = useMemo(() => {
     return {
       name,
       color,
@@ -93,6 +95,8 @@ export function Studio({
       extensions: finalExtensionManager,
       containerClassName,
       agentDriver,
+      databaseDriver: proxyDriver,
+      docDriver,
     };
   }, [
     name,
@@ -101,17 +105,17 @@ export function Studio({
     finalExtensionManager,
     containerClassName,
     agentDriver,
+    proxyDriver,
+    docDriver,
   ]);
 
   return (
-    <DriverProvider driver={proxyDriver} docDriver={docDriver}>
-      <ConfigProvider config={config}>
-        <CommonDialogProvider>
-          <FullEditorProvider>
-            <MainScreen />
-          </FullEditorProvider>
-        </CommonDialogProvider>
-      </ConfigProvider>
-    </DriverProvider>
+    <StudioContextProvider value={studioContextValue}>
+      <CommonDialogProvider>
+        <FullEditorProvider>
+          <MainScreen />
+        </FullEditorProvider>
+      </CommonDialogProvider>
+    </StudioContextProvider>
   );
 }

@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useDatabaseDriver } from "@/context/driver-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseTableColumnConstraint } from "@/drivers/base-driver";
 import { ChevronsUpDown } from "lucide-react";
 import { ChangeEvent, useCallback, useMemo } from "react";
@@ -20,7 +20,7 @@ export default function ColumnDefaultValueInput({
   disabled?: boolean;
   onChange: (constraint: DatabaseTableColumnConstraint) => void;
 }>) {
-  const { databaseDriver } = useDatabaseDriver();
+  const { databaseDriver } = useStudioContext();
   const display = useMemo(() => {
     if (
       constraint?.defaultValue !== undefined &&

@@ -1,7 +1,7 @@
 import { Toolbar, ToolbarFiller } from "@/components/gui/toolbar";
 import { Button } from "@/components/orbit/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useConfig } from "@/context/config-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { useEffect, useState } from "react";
 import DataCatalogExtension from ".";
 import { DataCatalogEntryModal } from "./data-catalog-entry-modal";
@@ -10,7 +10,7 @@ import EmptyTermDefinition from "./empty-definition";
 import TermDefinitionList from "./term-definition-list";
 
 export default function DataCatalogTab() {
-  const { extensions } = useConfig();
+  const { extensions } = useStudioContext();
   const dataCatalogExtension =
     extensions.getExtension<DataCatalogExtension>("data-catalog");
   const driver = dataCatalogExtension?.driver;

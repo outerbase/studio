@@ -2,7 +2,7 @@ import OptimizeTable, {
   OptimizeTableHeaderWithIndexProps,
 } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
-import { useConfig } from "@/context/config-provider";
+import { useStudioContext } from "@/context/driver-provider";
 import { ColumnSortOption } from "@/drivers/base-driver";
 import { exportDataAsDelimitedText } from "@/lib/export-helper";
 import { KEY_BINDING } from "@/lib/key-matcher";
@@ -52,7 +52,8 @@ function Header({
 
   if (internalState.getSelectedColIndex().includes(colIndex)) {
     if (internalState.isFullSelectionCol(colIndex)) {
-      textClass = "grow line-clamp-1 font-mono font-bold text-black dark:text-white font-bold";
+      textClass =
+        "grow line-clamp-1 font-mono font-bold text-black dark:text-white font-bold";
       thClass =
         "flex grow items-center px-2 overflow-hidden bg-neutral-100 dark:bg-neutral-900";
     } else {
@@ -126,7 +127,7 @@ export default function ResultTable({
 }: ResultTableProps) {
   const [stickyHeaderIndex, setStickHeaderIndex] = useState<number>();
 
-  const { extensions } = useConfig();
+  const { extensions } = useStudioContext();
 
   const headerIndex = useMemo(() => {
     if (visibleColumnIndexList) return visibleColumnIndexList;
