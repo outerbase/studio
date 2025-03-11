@@ -269,6 +269,7 @@ export function buildTableResultHeader(
     }
 
     return {
+      store: new Map(),
       name: column.name,
       display: {
         text: column.displayName,

@@ -43,6 +43,7 @@ export interface TableHeaderMetadata {
 
   columnSchema?: DatabaseTableColumn;
 }
+
 export interface OptimizeTableHeaderProps {
   name: string;
 
@@ -64,6 +65,7 @@ export interface OptimizeTableHeaderProps {
   onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
 
   metadata: TableHeaderMetadata;
+  store: Map<string, unknown>;
 }
 
 export interface OptimizeTableHeaderWithIndexProps

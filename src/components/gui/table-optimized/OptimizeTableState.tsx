@@ -5,7 +5,6 @@ import {
 import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import deepEqual from "deep-equal";
-import { produce } from "immer";
 import { OptimizeTableHeaderProps, TableCellDecorator } from ".";
 
 export interface OptimizeTableRowValue {
@@ -212,8 +211,14 @@ export default class OptimizeTableState {
     const idx = this.headers.findIndex((h) => h.name === header.name);
 
     if (idx >= 0) {
-      this.headers = produce(this.headers, (draft) => {
-        draft[idx].decorator = decorator;
+      this.headers = this.headers.map((h) => {
+        if (h.name === header.name) {
+          return {
+            ...h,
+            decorator,
+          };
+        }
+        return h;
       });
 
       this.headerRevision++;
