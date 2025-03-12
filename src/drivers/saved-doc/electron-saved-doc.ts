@@ -1,4 +1,5 @@
 "use client";
+import { generateId } from "@/lib/generate-id";
 import {
   SavedDocData,
   SavedDocDriver,
@@ -32,7 +33,7 @@ export default class ElectronSavedDocs implements SavedDocDriver {
 
       this.cacheDocs = {
         workspace: [],
-      }
+      };
 
       return this.cacheNamespaceList;
     } else {
@@ -60,7 +61,7 @@ export default class ElectronSavedDocs implements SavedDocDriver {
     await this.getNamespaces();
 
     const now = Math.floor(Date.now() / 1000);
-    const id = window.crypto.randomUUID();
+    const id = generateId();
 
     const namespace = {
       id,
@@ -119,7 +120,7 @@ export default class ElectronSavedDocs implements SavedDocDriver {
         (n) => n.id === namespace
       )!,
       type,
-      id: window.crypto.randomUUID(),
+      id: generateId(),
     };
 
     if (this.cacheDocs[r.namespace.id]) {

@@ -4,6 +4,7 @@ import {
   DatabaseTableConstraintChange,
   DatabaseTableSchemaChange,
 } from "@/drivers/base-driver";
+import { generateId } from "@/lib/generate-id";
 import { cn } from "@/lib/utils";
 import {
   LucideArrowUpRight,
@@ -410,7 +411,7 @@ export default function SchemaEditorConstraintList({
         constraints: [
           ...prev.constraints,
           {
-            id: window.crypto.randomUUID(),
+            id: generateId(),
             new: con,
             old: null,
           },

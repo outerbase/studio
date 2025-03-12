@@ -1,3 +1,4 @@
+import { generateId } from "@/lib/generate-id";
 import {
   BaseDriver,
   DatabaseSchemas,
@@ -61,7 +62,7 @@ export default abstract class CommonAgentDriverImplementation extends AgentBaseD
     option: AgentPromptOption
   ): Promise<string> {
     const session = this.history[previousId ?? ""] ?? {
-      id: previousId || crypto.randomUUID(),
+      id: previousId || generateId(),
       createdAt: Date.now(),
       messages: [],
     };
