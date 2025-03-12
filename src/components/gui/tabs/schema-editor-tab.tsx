@@ -1,6 +1,7 @@
 import OpacityLoading from "@/components/gui/loading-opacity";
 import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import { generateId } from "@/lib/generate-id";
 import { createTableSchemaDraft } from "@/lib/sql/sql-generate.schema";
 import { cloneDeep } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -74,7 +75,7 @@ export default function SchemaEditorTab({
           }))
           .filter((col) => col.old),
         constraints: prev.constraints.map((con) => ({
-          id: window.crypto.randomUUID(),
+          id: generateId(),
           old: con.old,
           new: cloneDeep(con.old),
         })),

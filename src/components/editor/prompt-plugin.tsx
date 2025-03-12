@@ -1,4 +1,5 @@
 import AgentDriverList from "@/drivers/agent/list";
+import { generateId } from "@/lib/generate-id";
 import { unifiedMergeView } from "@codemirror/merge";
 import {
   Compartment,
@@ -73,7 +74,7 @@ class PromptWidget extends WidgetType {
     super();
 
     // Generate unique session id for this prompt
-    const sessionId = crypto.randomUUID();
+    const sessionId = generateId();
 
     plugin.lock();
     this.container = document.createElement("div");

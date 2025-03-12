@@ -1,3 +1,4 @@
+import { generateId } from "./generate-id";
 import { throttleEvent } from "./tracking-throttle";
 
 export interface TrackEventItem {
@@ -39,7 +40,7 @@ export function sendAnalyticEvents(events: TrackEventItem[]) {
 
   let deviceId = localStorage.getItem("od-id");
   if (!deviceId) {
-    deviceId = crypto.randomUUID();
+    deviceId = generateId();
     localStorage.setItem("od-id", deviceId);
   }
 

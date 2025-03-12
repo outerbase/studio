@@ -1,5 +1,6 @@
 import { useStudioContext } from "@/context/driver-provider";
 import { DatabaseTableSchemaChange } from "@/drivers/base-driver";
+import { generateId } from "@/lib/generate-id";
 import { checkSchemaChange } from "@/lib/sql/sql-generate.schema";
 import { LucideCode, LucideCopy, LucidePlus, LucideSave } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
@@ -51,7 +52,7 @@ export default function SchemaEditor({
       columns: [
         ...value.columns,
         {
-          key: window.crypto.randomUUID(),
+          key: generateId(),
           old: null,
           new: newColumn,
         },

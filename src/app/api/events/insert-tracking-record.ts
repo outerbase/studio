@@ -2,6 +2,7 @@
 
 import StarbaseDriver from "@/drivers/starbase-driver";
 import { env } from "@/env";
+import { generateId } from "@/lib/generate-id";
 import { type TrackEventItem } from "../../../lib/tracking";
 
 export async function insertTrackingRecord(
@@ -26,7 +27,7 @@ export async function insertTrackingRecord(
         (event) =>
           "(" +
           [
-            crypto.randomUUID(),
+            generateId(),
             Date.now(),
             deviceId,
             event.name,
