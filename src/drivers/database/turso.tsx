@@ -95,7 +95,10 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
           authToken: authToken,
           intMode: bigInt ? "bigint" : "number",
         })
-      )
+      ),
+      {
+        supportBigInt: bigInt,
+      }
     );
   }
 

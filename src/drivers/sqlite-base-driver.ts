@@ -27,16 +27,19 @@ import { parseCreateViewScript } from "./sqlite/sql-parse-view";
 import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 
 export class SqliteLikeBaseDriver extends CommonSQLImplement {
-  protected supportPragmaList = true;
+  protected supportPragmaList = false;
+  protected supportBigInt = false;
 
   constructor(
     protected _db: QueryableBaseDriver,
     protected options?: {
-      supportPragmaList: boolean;
+      supportPragmaList?: boolean;
+      supportBigInt?: boolean;
     }
   ) {
     super();
-    this.supportPragmaList = options?.supportPragmaList ?? true;
+    this.supportPragmaList = options?.supportPragmaList ?? false;
+    this.supportBigInt = options?.supportBigInt ?? false;
   }
 
   query(stmt: string): Promise<DatabaseResultSet> {
@@ -80,7 +83,7 @@ export class SqliteLikeBaseDriver extends CommonSQLImplement {
   getFlags(): DriverFlags {
     return {
       supportRowId: true,
-      supportBigInt: false,
+      supportBigInt: this.supportBigInt,
       supportModifyColumn: false,
       supportInsertReturning: true,
       supportUpdateReturning: true,
