@@ -1,6 +1,7 @@
 import { ColumnType } from "@outerbase/sdk-transform";
 import {
   ColumnTypeSelector,
+  DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseSchemas,
   DatabaseTableColumn,
@@ -10,6 +11,7 @@ import {
   DatabaseTriggerSchema,
   DatabaseViewSchema,
   DriverFlags,
+  QueryableBaseDriver,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -59,7 +61,27 @@ interface PostgresConstraintRow {
   reference_column_name: string;
 }
 
-export default abstract class PostgresLikeDriver extends CommonSQLImplement {
+export default class PostgresLikeDriver extends CommonSQLImplement {
+  constructor(protected _db: QueryableBaseDriver) {
+    super();
+  }
+
+  query(stmt: string): Promise<DatabaseResultSet> {
+    return this._db.query(stmt);
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.transaction(stmts);
+  }
+
+  batch(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.batch ? this._db.batch(stmts) : super.batch(stmts);
+  }
+
+  close(): void {
+    // Do nothing
+  }
+
   columnTypeSelector: ColumnTypeSelector = POSTGRES_DATA_TYPE_SUGGESTION;
 
   escapeId(id: string) {

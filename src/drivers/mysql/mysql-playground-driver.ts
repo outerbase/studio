@@ -1,4 +1,4 @@
-import { DatabaseResultSet } from "../base-driver";
+import { DatabaseResultSet, QueryableBaseDriver } from "../base-driver";
 import MySQLLikeDriver from "./mysql-driver";
 
 type PromiseResolveReject = {
@@ -6,35 +6,11 @@ type PromiseResolveReject = {
   reject: (value: { message: string }) => void;
 };
 
-export default class MySQLPlaygroundDriver extends MySQLLikeDriver {
-  protected ws: WebSocket;
+class MySQLPlaygroundQueryable implements QueryableBaseDriver {
   protected counter = 0;
   protected queryPromise: Record<number, PromiseResolveReject> = {};
 
-  constructor(roomName: string, { onReady }: { onReady: () => void }) {
-    super();
-    this.ws = new WebSocket(`wss://mysql-playground-ws.fly.dev/${roomName}`);
-
-    this.ws.addEventListener("message", (e) => {
-      const data = JSON.parse(e.data);
-
-      if (data.type === "ready") {
-        onReady();
-      } else if (!data.id) {
-        console.log("No id in message", data);
-        return;
-      } else if (!this.queryPromise[data.id]) {
-        console.log("No promise for id", data.id);
-        return;
-      } else if (data.error) {
-        this.queryPromise[data.id].reject({ message: data.error });
-        delete this.queryPromise[data.id];
-      } else {
-        this.queryPromise[data.id].resolve(data.data);
-        delete this.queryPromise[data.id];
-      }
-    });
-  }
+  constructor(protected ws: WebSocket) {}
 
   query(stmt: string): Promise<DatabaseResultSet> {
     return new Promise((resolve, reject) => {
@@ -63,6 +39,39 @@ export default class MySQLPlaygroundDriver extends MySQLLikeDriver {
           statements: stmts,
         })
       );
+    });
+  }
+}
+
+export default class MySQLPlaygroundDriver extends MySQLLikeDriver {
+  protected ws: WebSocket;
+  protected counter = 0;
+  protected queryPromise: Record<number, PromiseResolveReject> = {};
+
+  constructor(roomName: string, { onReady }: { onReady: () => void }) {
+    const ws = new WebSocket(`wss://mysql-playground-ws.fly.dev/${roomName}`);
+
+    super(new MySQLPlaygroundQueryable(ws));
+    this.ws = ws;
+
+    this.ws.addEventListener("message", (e) => {
+      const data = JSON.parse(e.data);
+
+      if (data.type === "ready") {
+        onReady();
+      } else if (!data.id) {
+        console.log("No id in message", data);
+        return;
+      } else if (!this.queryPromise[data.id]) {
+        console.log("No promise for id", data.id);
+        return;
+      } else if (data.error) {
+        this.queryPromise[data.id].reject({ message: data.error });
+        delete this.queryPromise[data.id];
+      } else {
+        this.queryPromise[data.id].resolve(data.data);
+        delete this.queryPromise[data.id];
+      }
     });
   }
 

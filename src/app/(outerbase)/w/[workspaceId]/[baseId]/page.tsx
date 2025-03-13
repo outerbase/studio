@@ -8,6 +8,9 @@ import {
   createPostgreSQLExtensions,
   createSQLiteExtensions,
 } from "@/core/standard-extension";
+import MySQLLikeDriver from "@/drivers/mysql/mysql-driver";
+import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
+import { SqliteLikeBaseDriver } from "@/drivers/sqlite-base-driver";
 import DataCatalogExtension from "@/extensions/data-catalog";
 import OuterbaseExtension from "@/extensions/outerbase";
 import {
@@ -17,9 +20,7 @@ import {
 import { OuterbaseAPIBaseCredential } from "@/outerbase-cloud/api-type";
 import { getOuterbaseBaseCredential } from "@/outerbase-cloud/api-workspace";
 import DataCatalogOuterbaseDriver from "@/outerbase-cloud/data-catalog-driver";
-import { OuterbaseMySQLDriver } from "@/outerbase-cloud/database/mysql";
-import { OuterbasePostgresDriver } from "@/outerbase-cloud/database/postgresql";
-import { OuterbaseSqliteDriver } from "@/outerbase-cloud/database/sqlite";
+import { OuterbaseQueryable } from "@/outerbase-cloud/database/query";
 import OuterbaseQueryDriver from "@/outerbase-cloud/query-driver";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -74,7 +75,7 @@ export default function OuterbaseSourcePage() {
 
     if (dialect === "postgres") {
       return [
-        new OuterbasePostgresDriver(outerbaseConfig),
+        new PostgresLikeDriver(new OuterbaseQueryable(outerbaseConfig)),
         new StudioExtensionManager([
           ...createPostgreSQLExtensions(),
           ...outerbaseSpecifiedDrivers,
@@ -82,7 +83,10 @@ export default function OuterbaseSourcePage() {
       ];
     } else if (dialect === "mysql") {
       return [
-        new OuterbaseMySQLDriver(outerbaseConfig, credential.database),
+        new MySQLLikeDriver(
+          new OuterbaseQueryable(outerbaseConfig),
+          credential.database
+        ),
         new StudioExtensionManager([
           ...createMySQLExtensions(),
           ...outerbaseSpecifiedDrivers,
@@ -91,7 +95,7 @@ export default function OuterbaseSourcePage() {
     }
 
     return [
-      new OuterbaseSqliteDriver(outerbaseConfig),
+      new SqliteLikeBaseDriver(new OuterbaseQueryable(outerbaseConfig)),
       new StudioExtensionManager([
         ...createSQLiteExtensions(),
         ...outerbaseSpecifiedDrivers,

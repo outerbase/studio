@@ -6,12 +6,11 @@ import {
   createPostgreSQLExtensions,
   createSQLiteExtensions,
 } from "@/core/standard-extension";
-import {
-  IframeMySQLDriver,
-  IframePostgresDriver,
-  IframeSQLiteDriver,
-} from "@/drivers/iframe-driver";
+import { EmbedQueryable } from "@/drivers/iframe-driver";
+import MySQLLikeDriver from "@/drivers/mysql/mysql-driver";
+import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
 import ElectronSavedDocs from "@/drivers/saved-doc/electron-saved-doc";
+import { SqliteLikeBaseDriver } from "@/drivers/sqlite-base-driver";
 import DoltExtension from "@/extensions/dolt";
 import LocalSettingSidebar from "@/extensions/local-setting-sidebar";
 import { useAvailableAIAgents } from "@/lib/ai-agent-storage";
@@ -25,8 +24,9 @@ export default function EmbedPageClient({
 }) {
   const searchParams = useSearchParams();
 
-  const driver = useMemo(() => {
-    return createDatabaseDriver(driverName);
+  const [driver, queryable] = useMemo(() => {
+    const queryable = new EmbedQueryable();
+    return [createDatabaseDriver(driverName, queryable), queryable];
   }, [driverName]);
 
   const savedDocDriver = useMemo(() => {
@@ -42,8 +42,8 @@ export default function EmbedPageClient({
   const agentDriver = useAvailableAIAgents(driver);
 
   useEffect(() => {
-    return driver.listen();
-  }, [driver]);
+    return queryable.listen();
+  }, [queryable]);
 
   return (
     <Studio
@@ -57,25 +57,20 @@ export default function EmbedPageClient({
   );
 }
 
-function createDatabaseDriver(driverName: string) {
+function createDatabaseDriver(driverName: string, queryable: EmbedQueryable) {
   if (driverName === "turso") {
-    return new IframeSQLiteDriver({
-      supportPragmaList: false,
-      supportBigInt: true,
-    });
+    return new SqliteLikeBaseDriver(queryable);
   } else if (driverName === "sqlite") {
-    return new IframeSQLiteDriver();
+    return new SqliteLikeBaseDriver(queryable);
   } else if (driverName === "starbase") {
-    return new IframeSQLiteDriver({
-      supportPragmaList: false,
-    });
+    return new SqliteLikeBaseDriver(queryable);
   } else if (driverName === "mysql" || driverName === "dolt") {
-    return new IframeMySQLDriver();
+    return new MySQLLikeDriver(queryable, "");
   } else if (driverName === "postgres") {
-    return new IframePostgresDriver();
+    return new PostgresLikeDriver(queryable);
   }
 
-  return new IframeSQLiteDriver();
+  return new SqliteLikeBaseDriver(queryable);
 }
 
 function createEmbedExtensions(driverName: string) {

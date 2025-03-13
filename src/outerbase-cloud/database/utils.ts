@@ -1,8 +1,9 @@
 import { DatabaseResultSet } from "@/drivers/base-driver";
+import MySQLLikeDriver from "@/drivers/mysql/mysql-driver";
+import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
+import { SqliteLikeBaseDriver } from "@/drivers/sqlite-base-driver";
 import { OuterbaseAPIQueryRaw, OuterbaseDatabaseConfig } from "../api-type";
-import { OuterbaseMySQLDriver } from "./mysql";
-import { OuterbasePostgresDriver } from "./postgresql";
-import { OuterbaseSqliteDriver } from "./sqlite";
+import { OuterbaseQueryable } from "./query";
 
 export function transformOuterbaseResult(
   result: OuterbaseAPIQueryRaw
@@ -24,11 +25,13 @@ export function createOuterbaseDatabaseDriver(
   type: string,
   config: OuterbaseDatabaseConfig
 ) {
+  const queryable = new OuterbaseQueryable(config);
+
   if (type === "postgres") {
-    return new OuterbasePostgresDriver(config);
+    return new PostgresLikeDriver(queryable);
   } else if (type === "mysql") {
-    return new OuterbaseMySQLDriver(config);
+    return new MySQLLikeDriver(queryable);
   }
 
-  return new OuterbaseSqliteDriver(config);
+  return new SqliteLikeBaseDriver(queryable);
 }

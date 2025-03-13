@@ -5,6 +5,7 @@ import {
   DatabaseTableColumn,
   DatabaseTableSchema,
   DriverFlags,
+  QueryableBaseDriver,
   SelectFromTableOptions,
 } from "../base-driver";
 import PostgresLikeDriver from "../postgres/postgres-driver";
@@ -67,30 +68,11 @@ const WAEGenericColumns: DatabaseTableColumn[] = [
   { name: "double20", type: "Float64" },
 ];
 
-export default class CloudflareWAEDriver extends PostgresLikeDriver {
-  getFlags(): DriverFlags {
-    return {
-      defaultSchema: "main",
-      dialect: "sqlite",
-      optionalSchema: true,
-      supportRowId: false,
-      supportBigInt: false,
-      supportModifyColumn: false,
-      supportCreateUpdateTable: false,
-      supportCreateUpdateDatabase: false,
-      supportInsertReturning: false,
-      supportUpdateReturning: false,
-      supportCreateUpdateTrigger: false,
-      supportUseStatement: false,
-    };
-  }
-
+class WAEQueryable implements QueryableBaseDriver {
   constructor(
     protected accountId: string,
     protected token: string
-  ) {
-    super();
-  }
+  ) {}
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await fetch("/proxy/wae", {
@@ -137,6 +119,32 @@ export default class CloudflareWAEDriver extends PostgresLikeDriver {
 
   async transaction(stmt: string[]): Promise<DatabaseResultSet[]> {
     return Promise.all(stmt.map((s) => this.query(s)));
+  }
+}
+
+export default class CloudflareWAEDriver extends PostgresLikeDriver {
+  getFlags(): DriverFlags {
+    return {
+      defaultSchema: "main",
+      dialect: "sqlite",
+      optionalSchema: true,
+      supportRowId: false,
+      supportBigInt: false,
+      supportModifyColumn: false,
+      supportCreateUpdateTable: false,
+      supportCreateUpdateDatabase: false,
+      supportInsertReturning: false,
+      supportUpdateReturning: false,
+      supportCreateUpdateTrigger: false,
+      supportUseStatement: false,
+    };
+  }
+
+  constructor(
+    protected accountId: string,
+    protected token: string
+  ) {
+    super(new WAEQueryable(accountId, token));
   }
 
   async schemas(): Promise<DatabaseSchemas> {

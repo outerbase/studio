@@ -1,25 +1,13 @@
-import { DatabaseResultSet, DriverFlags } from "@/drivers/base-driver";
-import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
+import { DatabaseResultSet, QueryableBaseDriver } from "@/drivers/base-driver";
 import { runOuterbaseQueryBatch, runOuterbaseQueryRaw } from "../api";
 import { OuterbaseDatabaseConfig } from "../api-type";
 import { transformOuterbaseResult } from "./utils";
 
-export class OuterbasePostgresDriver extends PostgresLikeDriver {
-  supportPragmaList = false;
-
+export class OuterbaseQueryable implements QueryableBaseDriver {
   protected workspaceId: string;
   protected sourceId: string;
 
-  getFlags(): DriverFlags {
-    return {
-      ...super.getFlags(),
-      supportBigInt: false,
-    };
-  }
-
   constructor({ workspaceId, sourceId }: OuterbaseDatabaseConfig) {
-    super();
-
     this.workspaceId = workspaceId;
     this.sourceId = sourceId;
   }
@@ -42,9 +30,5 @@ export class OuterbasePostgresDriver extends PostgresLikeDriver {
 
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     return this.batch(stmts);
-  }
-
-  close() {
-    // Nothing to do
   }
 }

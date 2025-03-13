@@ -1,12 +1,5 @@
 "use client";
-import {
-  DatabaseResultSet,
-  DriverFlags,
-  QueryableBaseDriver,
-} from "./base-driver";
-import MySQLLikeDriver from "./mysql/mysql-driver";
-import PostgresLikeDriver from "./postgres/postgres-driver";
-import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
+import { DatabaseResultSet, QueryableBaseDriver } from "./base-driver";
 
 type ParentResponseData =
   | {
@@ -97,7 +90,7 @@ class ElectronConnection {
   }
 }
 
-class EmbedQueryable implements QueryableBaseDriver {
+export class EmbedQueryable implements QueryableBaseDriver {
   protected conn =
     typeof window !== "undefined" && window?.outerbaseIpc
       ? new ElectronConnection()
@@ -106,98 +99,6 @@ class EmbedQueryable implements QueryableBaseDriver {
   listen() {
     this.conn.listen();
   }
-
-  async query(stmt: string): Promise<DatabaseResultSet> {
-    const r = await this.conn.query(stmt);
-    return r;
-  }
-
-  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
-    const r = this.conn.transaction(stmts);
-    return r;
-  }
-}
-
-export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
-  protected supportBigInt = false;
-  protected conn: EmbedQueryable;
-
-  constructor(options?: {
-    supportPragmaList?: boolean;
-    supportBigInt?: boolean;
-  }) {
-    const conn = new EmbedQueryable();
-    super(conn);
-    this.conn = conn;
-
-    if (options?.supportPragmaList !== undefined) {
-      this.supportPragmaList = options.supportPragmaList;
-    }
-
-    if (options?.supportBigInt !== undefined) {
-      this.supportBigInt = options.supportBigInt;
-    }
-  }
-
-  getFlags(): DriverFlags {
-    return {
-      ...super.getFlags(),
-      supportCreateUpdateTable: true,
-      supportModifyColumn: true,
-      supportBigInt: this.supportBigInt,
-    };
-  }
-
-  listen() {
-    this.conn.listen();
-  }
-
-  close(): void {}
-}
-
-export class IframeMySQLDriver extends MySQLLikeDriver {
-  protected conn =
-    typeof window !== "undefined" && window?.outerbaseIpc
-      ? new ElectronConnection()
-      : new IframeConnection();
-
-  listen() {
-    this.conn.listen();
-  }
-
-  close(): void {}
-
-  async query(stmt: string): Promise<DatabaseResultSet> {
-    const r = await this.conn.query(stmt);
-    return r;
-  }
-
-  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
-    const r = this.conn.transaction(stmts);
-    return r;
-  }
-}
-
-export class IframeDoltDriver extends IframeMySQLDriver {
-  getFlags(): DriverFlags {
-    return {
-      ...super.getFlags(),
-      dialect: "dolt",
-    };
-  }
-}
-
-export class IframePostgresDriver extends PostgresLikeDriver {
-  protected conn =
-    typeof window !== "undefined" && window?.outerbaseIpc
-      ? new ElectronConnection()
-      : new IframeConnection();
-
-  listen() {
-    this.conn.listen();
-  }
-
-  close(): void {}
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
