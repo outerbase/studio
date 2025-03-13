@@ -134,7 +134,12 @@ export async function updateLocalConnection(
   };
 
   await localDb.connection.put(data);
+
   mutate("/connections/local");
+  mutate("/connections/local/" + id, data, {
+    optimisticData: data,
+    revalidate: false,
+  });
 
   return data;
 }

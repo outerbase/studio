@@ -32,7 +32,7 @@ export function StarbasePageBody() {
     if (conn && conn.content.driver === "starbase") {
       if (conn.content.starbase_type === "hyperdrive") {
         setDriverType("postgres");
-      } else if (conn.content.starbase_type === "sqlite") {
+      } else if (conn.content.starbase_type !== "external") {
         setDriverType("sqlite");
       }
 
@@ -56,7 +56,7 @@ export function StarbasePageBody() {
     queryable.query("SELECT VERSION() AS v").then((result) => {
       if ((result.rows[0].v as string).includes("PostgreSQL"))
         setDriverType("postgres");
-      else setDriverType("sqlite");
+      else setDriverType("mysql");
     });
   }, [driverType, queryable]);
 
