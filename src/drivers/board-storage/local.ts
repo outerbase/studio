@@ -1,13 +1,14 @@
 import { DashboardProps } from "@/components/board";
 import { ChartValue } from "@/components/chart/chart-type";
 import { LocalDashboardData, localDb } from "@/indexdb";
+import { generateId } from "@/lib/generate-id";
 import { IBoardStorageDriver } from "./base";
 
 export default class LocalBoardStorage implements IBoardStorageDriver {
   constructor(protected board: LocalDashboardData) {}
 
   async add(chart: ChartValue): Promise<ChartValue | undefined> {
-    const id = crypto.randomUUID();
+    const id = generateId();
     const now = Date.now();
 
     const data: ChartValue = {

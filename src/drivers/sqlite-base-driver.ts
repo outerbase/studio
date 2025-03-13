@@ -15,6 +15,7 @@ import {
   DatabaseValue,
   DatabaseViewSchema,
   DriverFlags,
+  QueryableBaseDriver,
   SelectFromTableOptions,
 } from "./base-driver";
 
@@ -25,8 +26,33 @@ import CommonSQLImplement from "./common-sql-imp";
 import { parseCreateViewScript } from "./sqlite/sql-parse-view";
 import generateSqlSchemaChange from "./sqlite/sqlite-generate-schema";
 
-export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
-  supportPragmaList = true;
+export class SqliteLikeBaseDriver extends CommonSQLImplement {
+  protected supportPragmaList = false;
+  protected supportBigInt = false;
+
+  constructor(
+    protected _db: QueryableBaseDriver,
+    protected options?: {
+      supportPragmaList?: boolean;
+      supportBigInt?: boolean;
+    }
+  ) {
+    super();
+    this.supportPragmaList = options?.supportPragmaList ?? false;
+    this.supportBigInt = options?.supportBigInt ?? false;
+  }
+
+  query(stmt: string): Promise<DatabaseResultSet> {
+    return this._db.query(stmt);
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.transaction(stmts);
+  }
+
+  batch(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.batch ? this._db.batch(stmts) : super.batch(stmts);
+  }
 
   columnTypeSelector: ColumnTypeSelector = {
     type: "dropdown",
@@ -57,7 +83,7 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
   getFlags(): DriverFlags {
     return {
       supportRowId: true,
-      supportBigInt: false,
+      supportBigInt: this.supportBigInt,
       supportModifyColumn: false,
       supportInsertReturning: true,
       supportUpdateReturning: true,
@@ -329,12 +355,13 @@ export abstract class SqliteLikeBaseDriver extends CommonSQLImplement {
     const orderPart =
       options.orderBy && options.orderBy.length > 0
         ? options.orderBy
-          .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
-          .join(", ")
+            .map((r) => `${this.escapeId(r.columnName)} ${r.by}`)
+            .join(", ")
         : "";
 
-    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${whereRaw ? ` WHERE ${whereRaw} ` : ""
-      } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
+    const sql = `SELECT ${injectRowIdColumn ? "rowid, " : ""}* FROM ${this.escapeId(schemaName)}.${this.escapeId(tableName)}${
+      whereRaw ? ` WHERE ${whereRaw} ` : ""
+    } ${orderPart ? ` ORDER BY ${orderPart}` : ""} LIMIT ${escapeSqlValue(options.limit)} OFFSET ${escapeSqlValue(options.offset)};`;
 
     let data = await this.query(sql);
 

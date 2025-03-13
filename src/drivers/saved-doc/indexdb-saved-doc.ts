@@ -1,4 +1,5 @@
 import { localDb } from "@/indexdb";
+import { generateId } from "@/lib/generate-id";
 import {
   SavedDocData,
   SavedDocDriver,
@@ -18,7 +19,7 @@ export default class IndexdbSavedDoc implements SavedDocDriver {
 
   async createNamespace(name: string): Promise<SavedDocNamespace> {
     const now = Math.floor(Date.now() / 1000);
-    const id = window.crypto.randomUUID();
+    const id = generateId();
 
     await localDb.namespace.add({
       id,
@@ -92,7 +93,7 @@ export default class IndexdbSavedDoc implements SavedDocDriver {
     data: SavedDocInput
   ): Promise<SavedDocData> {
     const now = Math.floor(Date.now() / 1000);
-    const id = window.crypto.randomUUID();
+    const id = generateId();
 
     const namespaceData = await localDb.namespace.get(namespace);
     if (!namespaceData) throw new Error("Namespace does not exist");

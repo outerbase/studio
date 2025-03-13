@@ -1,10 +1,11 @@
-import deepEqual from "deep-equal";
 import {
   DatabaseTableColumnChange,
   DatabaseTableSchema,
   DatabaseTableSchemaChange,
 } from "@/drivers/base-driver";
+import deepEqual from "deep-equal";
 import { cloneDeep } from "lodash";
+import { generateId } from "../generate-id";
 
 export function checkSchemaColumnChange(change: DatabaseTableColumnChange) {
   return !deepEqual(change.old, change.new);
@@ -33,12 +34,12 @@ export function createTableSchemaDraft(
       new: schema.tableName,
     },
     columns: schema.columns.map((col) => ({
-      key: window.crypto.randomUUID(),
+      key: generateId(),
       old: col,
       new: cloneDeep(col),
     })),
     constraints: (schema.constraints ?? []).map((con) => ({
-      id: window.crypto.randomUUID(),
+      id: generateId(),
       old: con,
       new: cloneDeep(con),
     })),

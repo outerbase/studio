@@ -41,12 +41,11 @@ export default function LocalEditBasePage() {
     setValidateErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    setLoading(true);
     const tmp = await updateLocalConnection(baseId, template.localTo(value));
     router.push(
       tmp?.content.driver === "sqlite-filehandler"
         ? `/playground/client?s=${tmp?.content.id}`
-        : `/client/s/${tmp?.content.driver ?? "turso"}?p=${tmp?.content.id}`
+        : `/client/s/${tmp?.content.driver ?? "turso"}?p=${baseId}`
     );
   }, [template, value, router, baseId]);
 

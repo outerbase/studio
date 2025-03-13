@@ -1,4 +1,5 @@
 import { localDb } from "@/indexdb";
+import { generateId } from "@/lib/generate-id";
 import { cn } from "@/lib/utils";
 import { LucideFile, LucideFolderClosed } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -52,7 +53,7 @@ async function openFileHandler() {
     ],
   });
 
-  const id = crypto.randomUUID();
+  const id = generateId();
   localDb.file_handler.add({ id, handler: newFileHandler }).then();
 
   return id;

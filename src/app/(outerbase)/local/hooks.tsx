@@ -1,5 +1,6 @@
 import { SavedConnectionRawLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
 import { LocalConnectionData, LocalDashboardData, localDb } from "@/indexdb";
+import { generateId } from "@/lib/generate-id";
 import parseSafeJson from "@/lib/json-safe";
 import useSWR, { mutate } from "swr";
 
@@ -18,7 +19,7 @@ export function useLocalDashboardList() {
 }
 
 export async function createLocalDashboard(boardName: string) {
-  const id = crypto.randomUUID();
+  const id = generateId();
   const now = Date.now();
 
   const data: LocalDashboardData = {
@@ -103,7 +104,7 @@ export async function removeLocalConnection(id: string) {
 export async function createLocalConnection(
   config: SavedConnectionRawLocalStorage
 ): Promise<LocalConnectionData> {
-  const id = crypto.randomUUID();
+  const id = generateId();
 
   const data = {
     id,
@@ -133,7 +134,12 @@ export async function updateLocalConnection(
   };
 
   await localDb.connection.put(data);
+
   mutate("/connections/local");
+  mutate("/connections/local/" + id, data, {
+    optimisticData: data,
+    revalidate: false,
+  });
 
   return data;
 }

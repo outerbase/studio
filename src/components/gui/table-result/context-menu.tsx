@@ -5,6 +5,7 @@ import {
   exportRowsToJson,
   exportRowsToSqlInsert,
 } from "@/lib/export-helper";
+import { generateId } from "@/lib/generate-id";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import { useCallback } from "react";
@@ -34,7 +35,7 @@ export default function useTableResultContextMenu({
       state: OptimizeTableState;
       event: React.MouseEvent;
     }) => {
-      const randomUUID = crypto.randomUUID();
+      const randomUUID = generateId();
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const hasFocus = !!state.getFocus();
 

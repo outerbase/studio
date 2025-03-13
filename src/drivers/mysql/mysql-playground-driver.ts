@@ -1,4 +1,4 @@
-import { DatabaseResultSet } from "../base-driver";
+import { DatabaseResultSet, QueryableBaseDriver } from "../base-driver";
 import MySQLLikeDriver from "./mysql-driver";
 
 type PromiseResolveReject = {
@@ -6,15 +6,14 @@ type PromiseResolveReject = {
   reject: (value: { message: string }) => void;
 };
 
-export default class MySQLPlaygroundDriver extends MySQLLikeDriver {
-  protected ws: WebSocket;
+class MySQLPlaygroundQueryable implements QueryableBaseDriver {
   protected counter = 0;
   protected queryPromise: Record<number, PromiseResolveReject> = {};
 
-  constructor(roomName: string, { onReady }: { onReady: () => void }) {
-    super();
-    this.ws = new WebSocket(`wss://mysql-playground-ws.fly.dev/${roomName}`);
-
+  constructor(
+    protected ws: WebSocket,
+    onReady: () => void
+  ) {
     this.ws.addEventListener("message", (e) => {
       const data = JSON.parse(e.data);
 
@@ -64,6 +63,18 @@ export default class MySQLPlaygroundDriver extends MySQLLikeDriver {
         })
       );
     });
+  }
+}
+
+export default class MySQLPlaygroundDriver extends MySQLLikeDriver {
+  protected ws: WebSocket;
+  protected counter = 0;
+  protected queryPromise: Record<number, PromiseResolveReject> = {};
+
+  constructor(roomName: string, { onReady }: { onReady: () => void }) {
+    const ws = new WebSocket(`wss://mysql-playground-ws.fly.dev/${roomName}`);
+    super(new MySQLPlaygroundQueryable(ws, onReady));
+    this.ws = ws;
   }
 
   ping(): void {

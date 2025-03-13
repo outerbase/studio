@@ -7,8 +7,6 @@ import "./globals.css";
 const siteDescription = `${WEBSITE_NAME} is a fully-featured, lightweight GUI client for managing SQLite-based databases like Turso, LibSQL, and rqlite. It runs entirely in your browser, so there's no need to download anything`;
 
 import { DialogProvider } from "@/components/create-dialog";
-import { Inter } from "next/font/google";
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: WEBSITE_NAME,
@@ -37,7 +35,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body>
         {children}
         <DialogProvider slot="default" />
       </body>

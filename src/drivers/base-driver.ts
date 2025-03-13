@@ -278,6 +278,15 @@ export interface DatabaseSchemaChange {
   collate?: string;
 }
 
+export interface QueryableBaseDriver {
+  query(stmt: string): Promise<DatabaseResultSet>;
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]>;
+
+  // This is optional. We can always fallback to multiple query
+  // This is just optimization for driver that support batch query
+  batch?(stmts: string[]): Promise<DatabaseResultSet[]>;
+}
+
 export abstract class BaseDriver {
   // Flags
   abstract getFlags(): DriverFlags;

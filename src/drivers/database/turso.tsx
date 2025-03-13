@@ -1,18 +1,14 @@
 import {
-  createClient,
-  Client,
-  InStatement,
-  ResultSet,
-} from "@libsql/client/web";
-import { createClient as createClientStateless } from "libsql-stateless-easy";
-import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
   DriverFlags,
+  QueryableBaseDriver,
 } from "@/drivers/base-driver";
-import { convertSqliteType } from "./sqlite/sql-helper";
-import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
+import { Client, InStatement, ResultSet } from "@libsql/client/web";
+import { createClient as createClientStateless } from "libsql-stateless-easy";
+import { SqliteLikeBaseDriver } from "../sqlite-base-driver";
+import { convertSqliteType } from "../sqlite/sql-helper";
 
 export function transformRawResult(raw: ResultSet): DatabaseResultSet {
   const headerSet = new Set();
@@ -67,43 +63,9 @@ export function transformRawResult(raw: ResultSet): DatabaseResultSet {
   };
 }
 
-export default class TursoDriver extends SqliteLikeBaseDriver {
-  protected client: Client;
-  protected endpoint: string = "";
-  protected authToken = "";
-  protected bigInt = false;
-
-  constructor(url: string, authToken: string, bigInt: boolean = false) {
-    super();
-    this.endpoint = url;
-    this.authToken = authToken;
-    this.bigInt = bigInt;
-
-    if (
-      url.startsWith("libsql://") ||
-      url.startsWith("http://") ||
-      url.startsWith("https://")
-    ) {
-      this.client = createClientStateless({
-        url: this.endpoint.replace(/^libsql:\/\//, "https://"),
-        authToken: this.authToken,
-        intMode: bigInt ? "bigint" : "number",
-      });
-    } else {
-      this.client = createClient({
-        url: this.endpoint,
-        authToken: this.authToken,
-        intMode: bigInt ? "bigint" : "number",
-      });
-    }
-  }
-
-  override getFlags(): DriverFlags {
-    return {
-      ...super.getFlags(),
-      supportBigInt: this.bigInt,
-      supportModifyColumn: true,
-    };
+export class TursoQueryable implements QueryableBaseDriver {
+  constructor(protected client: Client) {
+    this.client = client;
   }
 
   async query(stmt: InStatement) {
@@ -114,5 +76,37 @@ export default class TursoDriver extends SqliteLikeBaseDriver {
 
   async transaction(stmt: InStatement[]) {
     return (await this.client.batch(stmt, "write")).map(transformRawResult);
+  }
+}
+
+export default class TursoDriver extends SqliteLikeBaseDriver {
+  constructor(
+    url: string,
+    authToken: string,
+    protected bigInt: boolean = false
+  ) {
+    super(
+      new TursoQueryable(
+        createClientStateless({
+          url: url
+            .replace(/^libsql:\/\//, "https://")
+            .replace(/^ws:\/\//, "http://")
+            .replace(/^wss:\/\//, "https://"),
+          authToken: authToken,
+          intMode: bigInt ? "bigint" : "number",
+        })
+      ),
+      {
+        supportBigInt: bigInt,
+      }
+    );
+  }
+
+  override getFlags(): DriverFlags {
+    return {
+      ...super.getFlags(),
+      supportBigInt: this.bigInt,
+      supportModifyColumn: true,
+    };
   }
 }
