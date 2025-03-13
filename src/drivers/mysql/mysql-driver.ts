@@ -2,6 +2,7 @@ import { ColumnType } from "@outerbase/sdk-transform";
 import { format } from "sql-formatter";
 import {
   ColumnTypeSelector,
+  DatabaseResultSet,
   DatabaseSchemaChange,
   DatabaseSchemaItem,
   DatabaseSchemas,
@@ -12,6 +13,7 @@ import {
   DatabaseTriggerSchema,
   DatabaseViewSchema,
   DriverFlags,
+  QueryableBaseDriver,
   TriggerOperation,
   TriggerWhen,
 } from "../base-driver";
@@ -125,13 +127,37 @@ function mapColumn(column: MySqlColumn): DatabaseTableColumn {
   return result;
 }
 
-export default abstract class MySQLLikeDriver extends CommonSQLImplement {
+export default class MySQLLikeDriver extends CommonSQLImplement {
   columnTypeSelector: ColumnTypeSelector = MYSQL_DATA_TYPE_SUGGESTION;
 
   // If this is specified, we only show the tables in this database
   // Outerbase Cloud does not support the USE statement because it runs in non-interactive mode
   // It does not make sense to show other databases.
   selectedDatabase: string = "";
+
+  constructor(
+    protected _db: QueryableBaseDriver,
+    selectedDatabase = ""
+  ) {
+    super();
+    this.selectedDatabase = selectedDatabase;
+  }
+
+  query(stmt: string): Promise<DatabaseResultSet> {
+    return this._db.query(stmt);
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.transaction(stmts);
+  }
+
+  batch(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.batch ? this._db.batch(stmts) : super.batch(stmts);
+  }
+
+  close(): void {
+    // Do nothing
+  }
 
   escapeId(id: string) {
     return `\`${id.replace(/`/g, "``")}\``;

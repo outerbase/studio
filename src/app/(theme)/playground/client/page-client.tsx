@@ -8,7 +8,7 @@ import {
 import ScreenDropZone from "@/components/screen-dropzone";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import { createSQLiteExtensions } from "@/core/standard-extension";
-import SqljsDriver from "@/drivers/sqljs-driver";
+import SqljsDriver from "@/drivers/database/sqljs";
 import { localDb } from "@/indexdb";
 import { useAvailableAIAgents } from "@/lib/ai-agent-storage";
 import downloadFileFromUrl from "@/lib/download-file";

@@ -1,6 +1,7 @@
 import { ColumnType } from "@outerbase/sdk-transform";
 import {
   ColumnTypeSelector,
+  DatabaseResultSet,
   DatabaseSchemaItem,
   DatabaseSchemas,
   DatabaseTableColumn,
@@ -10,6 +11,7 @@ import {
   DatabaseTriggerSchema,
   DatabaseViewSchema,
   DriverFlags,
+  QueryableBaseDriver,
 } from "../base-driver";
 import CommonSQLImplement from "../common-sql-imp";
 import { escapeSqlValue } from "../sqlite/sql-helper";
@@ -59,7 +61,27 @@ interface PostgresConstraintRow {
   reference_column_name: string;
 }
 
-export default abstract class PostgresLikeDriver extends CommonSQLImplement {
+export default class PostgresLikeDriver extends CommonSQLImplement {
+  constructor(protected _db: QueryableBaseDriver) {
+    super();
+  }
+
+  query(stmt: string): Promise<DatabaseResultSet> {
+    return this._db.query(stmt);
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.transaction(stmts);
+  }
+
+  batch(stmts: string[]): Promise<DatabaseResultSet[]> {
+    return this._db.batch ? this._db.batch(stmts) : super.batch(stmts);
+  }
+
+  close(): void {
+    // Do nothing
+  }
+
   columnTypeSelector: ColumnTypeSelector = POSTGRES_DATA_TYPE_SUGGESTION;
 
   escapeId(id: string) {
@@ -98,26 +120,12 @@ export default abstract class PostgresLikeDriver extends CommonSQLImplement {
   }
 
   async schemas(): Promise<DatabaseSchemas> {
-    const schemaResult = (
-      await this.query(
-        `SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('information_schema', 'pg_catalog', 'pg_toast')`
-      )
-    ).rows as unknown as PostgresSchemaRow[];
-
-    const tableResult = (
-      await this.query(
-        "SELECT *, pg_total_relation_size(quote_ident(table_schema) || '.' || quote_ident(table_name)) AS table_size FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast');"
-      )
-    ).rows as unknown as PostgresTableRow[];
-
-    const columnsResult = (
-      await this.query(
-        "SELECT * FROM information_schema.columns WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast')"
-      )
-    ).rows as unknown as PostgresColumnRow[];
-
-    const constraintResult = (
-      await this.query(`SELECT
+    const schemaSql = `SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('information_schema', 'pg_catalog', 'pg_toast')`;
+    const tableSql =
+      "SELECT *, pg_total_relation_size(quote_ident(table_schema) || '.' || quote_ident(table_name)) AS table_size FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast');";
+    const columnSql =
+      "SELECT * FROM information_schema.columns WHERE table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast')";
+    const constraintSql = `SELECT
 	tc.constraint_name,
 	tc.table_schema,
 	tc.table_name,
@@ -140,8 +148,20 @@ FROM
 		ccu.constraint_name = kcu.constraint_name
 	)
 WHERE
-	tc.table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast')`)
-    ).rows as unknown as PostgresConstraintRow[];
+	tc.table_schema NOT IN ('information_schema', 'pg_catalog', 'pg_toast')`;
+
+    const result = await this.batch([
+      schemaSql,
+      tableSql,
+      columnSql,
+      constraintSql,
+    ]);
+
+    const schemaResult = result[0].rows as unknown as PostgresSchemaRow[];
+    const tableResult = result[1].rows as unknown as PostgresTableRow[];
+    const columnsResult = result[2].rows as unknown as PostgresColumnRow[];
+    const constraintResult = result[3]
+      .rows as unknown as PostgresConstraintRow[];
 
     const schemas: DatabaseSchemas = {};
 

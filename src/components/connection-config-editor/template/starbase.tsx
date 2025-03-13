@@ -16,6 +16,20 @@ const template: CommonConnectionConfigTemplate = [
   {
     columns: [
       {
+        name: "starbase_type",
+        label: "Starbase Type",
+        type: "options",
+        options: [
+          { value: "internal", content: "Internal" },
+          { value: "external", content: "External" },
+          { value: "hyperdrive", content: "Hyperdrive" },
+        ],
+      },
+    ],
+  },
+  {
+    columns: [
+      {
         name: "token",
         label: "Access Token",
         type: "textarea",
@@ -54,6 +68,7 @@ export const StarbaseConnectionTemplate: ConnectionTemplateList = {
       name: value.name,
       host: value.url,
       token: value.token,
+      starbase_type: value.starbase_type,
     };
   },
   localTo: (value) => {
@@ -62,6 +77,7 @@ export const StarbaseConnectionTemplate: ConnectionTemplateList = {
       driver: "starbase",
       url: value.host,
       token: value.token,
+      starbase_type: value.starbase_type,
     };
   },
   remoteFrom: (value) => {

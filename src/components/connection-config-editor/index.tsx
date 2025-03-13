@@ -16,6 +16,7 @@ import { CommonDialogProvider } from "../common-dialog";
 import FileHandlerPicker from "../filehandler-picker";
 import { Input } from "../orbit/input";
 import { Label } from "../orbit/label";
+import { MenuBar } from "../orbit/menu-bar";
 import { Toggle } from "../orbit/toggle";
 import { Textarea } from "../ui/textarea";
 
@@ -160,6 +161,26 @@ export function ConnectionConfigEditor({
                       </div>
                     </Label>
                   );
+                } else if (
+                  column.type === "options" &&
+                  column.options &&
+                  column.options.length > 0
+                ) {
+                  return (
+                    <div key={column.name}>
+                      <MenuBar
+                        value={value["starbase_type"] ?? ""}
+                        items={column.options}
+                        onChange={(e) => {
+                          onChange(
+                            produce(value, (draft) => {
+                              draft[column.name] = e as never;
+                            })
+                          );
+                        }}
+                      />
+                    </div>
+                  );
                 }
 
                 return (
@@ -193,12 +214,16 @@ export interface CommonConnectionConfig {
   // Primarily used for loading the SQLite database file
   // from the browser using the File System Access API
   filehandler?: string;
+
+  // Starbase specified configuration
+  starbase_type?: string;
 }
 
 interface CommonConnectionConfigColumn {
   name: keyof CommonConnectionConfig;
   label: string;
-  type: "text" | "password" | "file" | "textarea" | "checkbox";
+  type: "text" | "password" | "file" | "textarea" | "checkbox" | "options";
+  options?: { value: string; content: string }[];
   required?: boolean;
   placeholder?: string;
   size?: string;

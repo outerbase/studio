@@ -57,4 +57,5 @@ export interface SavedConnectionRawLocalStorage {
   file_handler?: string;
   description?: string;
   last_used?: number;
+  starbase_type?: string;
 }
