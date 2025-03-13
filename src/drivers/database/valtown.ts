@@ -1,15 +1,9 @@
+import { DatabaseResultSet, QueryableBaseDriver } from "@/drivers/base-driver";
 import { InStatement, ResultSet } from "@libsql/client";
-import { transformRawResult } from "./turso-driver";
-import { DatabaseResultSet } from "@/drivers/base-driver";
-import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
+import { transformRawResult } from "./turso";
 
-export default class ValtownDriver extends SqliteLikeBaseDriver {
-  protected token: string;
-
-  constructor(token: string) {
-    super();
-    this.token = token;
-  }
+export class ValtownQueryable implements QueryableBaseDriver {
+  constructor(protected token: string) {}
 
   async transaction(stmts: InStatement[]): Promise<DatabaseResultSet[]> {
     const r = await fetch(`https://api.val.town/v1/sqlite/batch`, {
@@ -41,9 +35,5 @@ export default class ValtownDriver extends SqliteLikeBaseDriver {
     const json = await r.json();
 
     return transformRawResult(json as ResultSet);
-  }
-
-  close(): void {
-    // do nothing
   }
 }

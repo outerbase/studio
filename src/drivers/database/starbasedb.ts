@@ -3,8 +3,8 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
-} from "./base-driver";
-import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
+  QueryableBaseDriver,
+} from "../base-driver";
 
 interface StarbaseResult {
   columns: string[];
@@ -42,11 +42,11 @@ function transformRawResult(raw: StarbaseResult): DatabaseResultSet {
 
   const rows = values
     ? values.map((r) =>
-      headers.reduce((a, b, idx) => {
-        a[b.name] = r[idx];
-        return a;
-      }, {} as DatabaseRow)
-    )
+        headers.reduce((a, b, idx) => {
+          a[b.name] = r[idx];
+          return a;
+        }, {} as DatabaseRow)
+      )
     : [];
 
   return {
@@ -61,21 +61,23 @@ function transformRawResult(raw: StarbaseResult): DatabaseResultSet {
   };
 }
 
-export default class StarbaseDriver extends SqliteLikeBaseDriver {
-  supportPragmaList: boolean = false;
-  protected headers: Record<string, string> = {};
+export class StarbaseQuery implements QueryableBaseDriver {
   protected url: string;
 
-  constructor(url: string, headers: Record<string, string>) {
-    super();
-    this.headers = headers;
-    this.url = url;
+  constructor(
+    protected _url: string,
+    protected token: string
+  ) {
+    this.url = `${_url.replace(/\/$/, "")}/query/raw`;
   }
 
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = await fetch(this.url, {
       method: "POST",
-      headers: { ...this.headers, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         transaction: stmts.map((s) => ({ sql: s })),
       }),
@@ -90,7 +92,10 @@ export default class StarbaseDriver extends SqliteLikeBaseDriver {
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await fetch(this.url, {
       method: "POST",
-      headers: { ...this.headers, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ sql: stmt }),
     });
 

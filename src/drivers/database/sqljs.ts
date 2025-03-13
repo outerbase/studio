@@ -1,25 +1,17 @@
-import { InStatement } from "@libsql/client";
 import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
+  QueryableBaseDriver,
 } from "@/drivers/base-driver";
-import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
+import { InStatement } from "@libsql/client";
 import { BindParams, Database } from "sql.js";
+import { SqliteLikeBaseDriver } from "../sqlite-base-driver";
 
-export default class SqljsDriver extends SqliteLikeBaseDriver {
-  protected db: Database;
-  protected hasRowsChanged: boolean = false;
+class SqljsQueryable implements QueryableBaseDriver {
+  public hasRowsChanged: boolean = false;
 
-  constructor(sqljs: Database) {
-    super();
-    this.db = sqljs;
-  }
-
-  reload(sqljs: Database) {
-    this.db = sqljs;
-    this.hasRowsChanged = false;
-  }
+  constructor(protected db: Database) {}
 
   async transaction(stmts: InStatement[]): Promise<DatabaseResultSet[]> {
     const r: DatabaseResultSet[] = [];
@@ -86,16 +78,28 @@ export default class SqljsDriver extends SqliteLikeBaseDriver {
       },
     };
   }
+}
+
+export default class SqljsDriver extends SqliteLikeBaseDriver {
+  protected queryable: SqljsQueryable;
+
+  constructor(sqljs: Database) {
+    const queryable = new SqljsQueryable(sqljs);
+    super(queryable);
+
+    this.queryable = queryable;
+  }
+
+  reload(sqljs: Database) {
+    this.queryable = new SqljsQueryable(sqljs);
+    this._db = this.queryable;
+  }
 
   resetChange() {
-    this.hasRowsChanged = false;
+    this.queryable.hasRowsChanged = false;
   }
 
   hasChanged() {
-    return this.hasRowsChanged;
-  }
-
-  close(): void {
-    // do nothing
+    return this.queryable.hasRowsChanged;
   }
 }

@@ -1,22 +1,26 @@
 "use client";
-import { DatabaseResultSet, DriverFlags } from "./base-driver";
+import {
+  DatabaseResultSet,
+  DriverFlags,
+  QueryableBaseDriver,
+} from "./base-driver";
 import MySQLLikeDriver from "./mysql/mysql-driver";
 import PostgresLikeDriver from "./postgres/postgres-driver";
 import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
 
 type ParentResponseData =
   | {
-    type: "query";
-    id: number;
-    data: DatabaseResultSet;
-    error?: string;
-  }
+      type: "query";
+      id: number;
+      data: DatabaseResultSet;
+      error?: string;
+    }
   | {
-    type: "transaction";
-    id: number;
-    data: DatabaseResultSet[];
-    error?: string;
-  };
+      type: "transaction";
+      id: number;
+      data: DatabaseResultSet[];
+      error?: string;
+    };
 
 type PromiseResolveReject = {
   resolve: (value: any) => void;
@@ -93,19 +97,39 @@ class ElectronConnection {
   }
 }
 
-export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
+class EmbedQueryable implements QueryableBaseDriver {
   protected conn =
     typeof window !== "undefined" && window?.outerbaseIpc
       ? new ElectronConnection()
       : new IframeConnection();
 
+  listen() {
+    this.conn.listen();
+  }
+
+  async query(stmt: string): Promise<DatabaseResultSet> {
+    const r = await this.conn.query(stmt);
+    return r;
+  }
+
+  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    const r = this.conn.transaction(stmts);
+    return r;
+  }
+}
+
+export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
   protected supportBigInt = false;
+  protected conn: EmbedQueryable;
 
   constructor(options?: {
     supportPragmaList?: boolean;
     supportBigInt?: boolean;
   }) {
-    super();
+    const conn = new EmbedQueryable();
+    super(conn);
+    this.conn = conn;
+
     if (options?.supportPragmaList !== undefined) {
       this.supportPragmaList = options.supportPragmaList;
     }
@@ -128,17 +152,7 @@ export class IframeSQLiteDriver extends SqliteLikeBaseDriver {
     this.conn.listen();
   }
 
-  close(): void { }
-
-  async query(stmt: string): Promise<DatabaseResultSet> {
-    const r = await this.conn.query(stmt);
-    return r;
-  }
-
-  transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
-    const r = this.conn.transaction(stmts);
-    return r;
-  }
+  close(): void {}
 }
 
 export class IframeMySQLDriver extends MySQLLikeDriver {
@@ -151,7 +165,7 @@ export class IframeMySQLDriver extends MySQLLikeDriver {
     this.conn.listen();
   }
 
-  close(): void { }
+  close(): void {}
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);
@@ -183,7 +197,7 @@ export class IframePostgresDriver extends PostgresLikeDriver {
     this.conn.listen();
   }
 
-  close(): void { }
+  close(): void {}
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await this.conn.query(stmt);

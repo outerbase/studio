@@ -2,9 +2,9 @@ import {
   DatabaseHeader,
   DatabaseResultSet,
   DatabaseRow,
+  QueryableBaseDriver,
 } from "@/drivers/base-driver";
-import { convertSqliteType } from "./sqlite/sql-helper";
-import { SqliteLikeBaseDriver } from "./sqlite-base-driver";
+import { convertSqliteType } from "../sqlite/sql-helper";
 
 interface RqliteResult {
   columns?: string[];
@@ -67,17 +67,12 @@ export function transformRawResult(raw: RqliteResult): DatabaseResultSet {
   };
 }
 
-export default class RqliteDriver extends SqliteLikeBaseDriver {
-  protected endpoint: string;
-  protected username?: string;
-  protected password?: string;
-
-  constructor(url: string, username?: string, password?: string) {
-    super();
-    this.endpoint = url;
-    this.username = username;
-    this.password = password;
-  }
+export class RqliteQueryable implements QueryableBaseDriver {
+  constructor(
+    protected endpoint: string,
+    protected username?: string,
+    protected password?: string
+  ) {}
 
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     let headers: HeadersInit = {
@@ -113,9 +108,5 @@ export default class RqliteDriver extends SqliteLikeBaseDriver {
 
   async query(stmt: string): Promise<DatabaseResultSet> {
     return (await this.transaction([stmt]))[0];
-  }
-
-  close(): void {
-    // do nothing
   }
 }
