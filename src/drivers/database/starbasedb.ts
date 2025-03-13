@@ -63,21 +63,28 @@ function transformRawResult(raw: StarbaseResult): DatabaseResultSet {
 
 export class StarbaseQuery implements QueryableBaseDriver {
   protected url: string;
+  protected headers: Record<string, string>;
 
   constructor(
     protected _url: string,
-    protected token: string
+    protected token: string,
+    protected type: string = "internal"
   ) {
     this.url = `${_url.replace(/\/$/, "")}/query/raw`;
+    this.headers = {
+      Authorization: `Bearer ${this.token}`,
+      "Content-Type": "application/json",
+    };
+
+    if (type !== "internal") {
+      this.headers["X-Starbase-Source"] = type;
+    }
   }
 
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
     const r = await fetch(this.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-        "Content-Type": "application/json",
-      },
+      headers: this.headers,
       body: JSON.stringify({
         transaction: stmts.map((s) => ({ sql: s })),
       }),
@@ -92,10 +99,7 @@ export class StarbaseQuery implements QueryableBaseDriver {
   async query(stmt: string): Promise<DatabaseResultSet> {
     const r = await fetch(this.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-        "Content-Type": "application/json",
-      },
+      headers: this.headers,
       body: JSON.stringify({ sql: stmt }),
     });
 
