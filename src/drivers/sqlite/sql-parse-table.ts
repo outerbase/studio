@@ -1,14 +1,14 @@
-import type { SyntaxNode, TreeCursor } from "@lezer/common";
 import type {
-  DatabaseTableColumn,
   DatabaseColumnConflict,
+  DatabaseTableColumn,
   DatabaseTableColumnConstraint,
+  DatabaseTableFts5,
   DatabaseTableSchema,
   SqlOrder,
-  DatabaseTableFts5,
 } from "@/drivers/base-driver";
-import { unescapeIdentity } from "./sql-helper";
 import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
+import type { SyntaxNode, TreeCursor } from "@lezer/common";
+import { unescapeIdentity } from "./sql-helper";
 
 export class Cursor {
   protected ptr: SyntaxNode | null;
@@ -286,6 +286,7 @@ export function parseColumnConstraint(
       cursor.next();
     } else if (cursor.type() === "Parens") {
       defaultExpression = cursor.read();
+      cursor.next();
     } else if (
       cursor.match("current_timestamp") ||
       cursor.match("current_time") ||
@@ -295,6 +296,7 @@ export function parseColumnConstraint(
       cursor.match("null")
     ) {
       defaultExpression = cursor.read();
+      cursor.next();
     }
 
     return {

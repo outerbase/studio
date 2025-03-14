@@ -280,3 +280,71 @@ it("parse strict and without row id table", () => {
     withoutRowId: true,
   } as DatabaseTableSchema);
 });
+
+// Regression test for https://github.com/outerbase/studio/issues/403
+it("parse table with foreign key and default", () => {
+  const sql = `CREATE TABLE "suggestions"(
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  "entry" INTEGER NOT NULL REFERENCES "entries"("id"),
+  "user" INTEGER NOT NULL REFERENCES "users"("id"),
+  "scoreBy" INTEGER DEFAULT NULL REFERENCES "users"("id"),
+  "updatedAt" INTEGER NOT NULL DEFAULT (UNIXEPOCH())
+)`;
+
+  expect(p(sql)).toEqual({
+    tableName: "suggestions",
+    schemaName: "main",
+    autoIncrement: true,
+    pk: ["id"],
+    columns: [
+      {
+        name: "id",
+        type: "INTEGER",
+        pk: true,
+        constraint: { notNull: true, primaryKey: true, autoIncrement: true },
+      },
+      {
+        name: "entry",
+        type: "INTEGER",
+        constraint: {
+          notNull: true,
+          foreignKey: {
+            foreignSchemaName: "main",
+            foreignTableName: "entries",
+            foreignColumns: ["id"],
+          },
+        },
+      },
+      {
+        name: "user",
+        type: "INTEGER",
+        constraint: {
+          notNull: true,
+          foreignKey: {
+            foreignSchemaName: "main",
+            foreignTableName: "users",
+            foreignColumns: ["id"],
+          },
+        },
+      },
+      {
+        name: "scoreBy",
+        type: "INTEGER",
+        constraint: {
+          foreignKey: {
+            foreignSchemaName: "main",
+            foreignTableName: "users",
+            foreignColumns: ["id"],
+          },
+          defaultExpression: "NULL",
+        },
+      },
+      {
+        name: "updatedAt",
+        type: "INTEGER",
+        constraint: { notNull: true, defaultExpression: "(UNIXEPOCH())" },
+      },
+    ],
+    constraints: [],
+  } as DatabaseTableSchema);
+});
