@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import OptimizeTableState, {
   TableSelectionRange,
-} from "../table-optimized/OptimizeTableState";
+} from "../table-optimized/optimize-table-state";
 
 export type ExportTarget = "clipboard" | "file";
 type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";

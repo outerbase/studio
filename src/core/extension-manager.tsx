@@ -1,5 +1,5 @@
 import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
-import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
 import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";

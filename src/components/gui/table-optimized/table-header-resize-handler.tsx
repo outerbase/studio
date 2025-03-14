@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function TableHeaderResizeHandler({
   idx,
@@ -58,7 +58,7 @@ export default function TableHeaderResizeHandler({
               tableWrapper.scrollLeft += gain;
             }
 
-            onResize(idx, width);
+            onResize(idx - 1, width);
 
             if (table) {
               const columns = table.style.gridTemplateColumns.split(" ");

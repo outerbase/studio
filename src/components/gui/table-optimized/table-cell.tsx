@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { OptimizeTableHeaderWithIndexProps } from ".";
 import tableResultCellRenderer from "../table-result/render-cell";
-import OptimizeTableState from "./OptimizeTableState";
+import OptimizeTableState from "./optimize-table-state";
 
 export default function OptimizeTableCell({
   state,
@@ -53,7 +53,8 @@ export default function OptimizeTableCell({
     isSelected && "border-neutral-950 dark:border-neutral-50",
     isBorderBottom && "border-b border-b-neutral-950 dark:border-b-neutral-50",
     isBorderRight && "border-r border-r-neutral-950 dark:border-r-neutral-50",
-    isFocus && "shadow-[0_0_0_1px_rgba(0,0,0,0.5)_inset] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset]",
+    isFocus &&
+      "shadow-[0_0_0_1px_rgba(0,0,0,0.5)_inset] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset]",
     isSticky && "sticky",
     cellBackgroundColor
   );

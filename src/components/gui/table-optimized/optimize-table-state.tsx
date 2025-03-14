@@ -495,7 +495,7 @@ export default class OptimizeTableState {
   }
 
   setHeaderWidth(idx: number, newWidth: number) {
-    return (this.headerWidth[idx] = newWidth);
+    this.headerWidth[idx] = newWidth;
   }
 
   getHeaderWidth() {

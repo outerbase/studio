@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { OptimizeTableHeaderWithIndexProps } from ".";
-import OptimizeTableState from "./OptimizeTableState";
+import OptimizeTableState from "./optimize-table-state";
 import TableHeader from "./table-header";
 
 export default function TableHeaderList({
@@ -28,9 +28,7 @@ export default function TableHeaderList({
     <thead>
       <tr>
         <th className="sticky left-0 z-30 bg-neutral-50 dark:bg-neutral-950">
-          <div className="libsql-table-cell flex h-full items-center justify-end pr-2 font-mono font-bold">
-            
-          </div>
+          <div className="libsql-table-cell flex h-full items-center justify-end pr-2 font-mono font-bold"></div>
         </th>
         {headers.map((header, idx) => {
           return (

@@ -34,7 +34,7 @@ import AggregateResultButton from "../aggregate-result/aggregate-result-button";
 import ExportResultButton from "../export/export-result-button";
 import OpacityLoading from "../loading-opacity";
 import ResultStats from "../result-stat";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import OptimizeTableState from "../table-optimized/optimize-table-state";
 import useTableResultColumnFilter from "../table-result/filter-column";
 import { Toolbar } from "../toolbar";
 import { useCurrentTab } from "../windows-tab";
