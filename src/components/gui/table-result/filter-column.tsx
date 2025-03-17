@@ -14,10 +14,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, ListChecks, LucideSettings2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import OptimizeTableState from "../table-optimized/optimize-table-state";
 
 import { Button } from "@/components/orbit/button";
-
 
 export default function useTableResultColumnFilter({
   state,
@@ -39,11 +38,15 @@ export default function useTableResultColumnFilter({
   const filterColumnButton = (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={"secondary"} size={"sm"} className="ml-[3px] bg-neutral-200 border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700 flex items-center gap-1">
+        <Button
+          variant={"secondary"}
+          size={"sm"}
+          className="ml-[3px] flex items-center gap-1 border-neutral-300 bg-neutral-200 dark:border-neutral-700 dark:bg-neutral-800"
+        >
           <LucideSettings2 className="h-3 w-4" />
           Columns
           {!!columnFilterBadge && (
-            <span className="h-4 w-4 ml-1 transform-y-[-2px] rounded-[1px] bg-neutral-700 border border-neutral-600 text-[11px] text-secondary text-secondary-foreground">
+            <span className="transform-y-[-2px] text-secondary text-secondary-foreground ml-1 h-4 w-4 rounded-[1px] border border-neutral-600 bg-neutral-700 text-[11px]">
               {columnFilterBadge}
             </span>
           )}
@@ -58,7 +61,7 @@ export default function useTableResultColumnFilter({
                 onClick={() => {
                   setColumnIndexList(headers.map((_, idx) => idx));
                 }}
-                className="relative mx-1 my-1 flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-semibold outline-hidden hover:bg-secondary aria-selected:bg-accent aria-selected:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
+                className="hover:bg-secondary aria-selected:bg-accent aria-selected:text-accent-foreground relative mx-1 my-1 flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm font-semibold outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50"
               >
                 <ListChecks className="mr-2 h-4 w-4" />
                 Select all columns

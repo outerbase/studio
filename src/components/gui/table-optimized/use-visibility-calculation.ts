@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
-import { getVisibleCellRange } from "./helper";
-import { OptimizeTableHeaderWithIndexProps } from ".";
 import useElementResize from "@/components/hooks/useElementResize";
-import OptimizeTableState from "./OptimizeTableState";
+import { useCallback, useEffect, useState } from "react";
+import { OptimizeTableHeaderWithIndexProps } from ".";
+import { getVisibleCellRange } from "./helper";
+import OptimizeTableState from "./optimize-table-state";
 
 export default function useTableVisibilityRecalculation({
   containerRef,

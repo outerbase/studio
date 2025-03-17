@@ -1,7 +1,7 @@
 import OptimizeTable, {
   OptimizeTableHeaderWithIndexProps,
 } from "@/components/gui/table-optimized";
-import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
 import { useStudioContext } from "@/context/driver-provider";
 import { ColumnSortOption } from "@/drivers/base-driver";
 import { exportDataAsDelimitedText } from "@/lib/export-helper";

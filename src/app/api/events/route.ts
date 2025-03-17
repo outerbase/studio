@@ -5,7 +5,7 @@
 // All recorded data will be stored in the Starbase Database.
 
 import { headers } from "next/headers";
-import { after, NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import zod from "zod";
 import { insertTrackingRecord } from "./insert-tracking-record";
 
@@ -55,11 +55,7 @@ export const POST = async (req: NextRequest) => {
   }
 
   // Save the event
-  after(() => {
-    insertTrackingRecord(deviceId, validate.data.events.slice(0, 50))
-      .then()
-      .catch();
-  });
+  await insertTrackingRecord(deviceId, validate.data.events.slice(0, 50));
 
   return NextResponse.json(
     {

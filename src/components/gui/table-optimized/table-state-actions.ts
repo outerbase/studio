@@ -1,4 +1,4 @@
-import OptimizeTableState from "./OptimizeTableState";
+import OptimizeTableState from "./optimize-table-state";
 
 export default class TableStateActions {
   static duplicateRow(state: OptimizeTableState) {

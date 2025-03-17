@@ -1,5 +1,9 @@
-import { ExportOptions, ExportSelection, ExportTarget } from "@/components/gui/export/export-result-button";
-import OptimizeTableState from "@/components/gui/table-optimized/OptimizeTableState";
+import {
+  ExportOptions,
+  ExportSelection,
+  ExportTarget,
+} from "@/components/gui/export/export-result-button";
+import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
 import { getSingleTableName } from "@/components/gui/tabs/query-tab";
 import {
   escapeDelimitedValue,

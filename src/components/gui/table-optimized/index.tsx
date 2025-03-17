@@ -12,12 +12,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import OptimizeTableState from "./OptimizeTableState";
+import OptimizeTableState from "./optimize-table-state";
 import OptimizeTableCell from "./table-cell";
 import TableFakeBodyPadding from "./table-fake-body-padding";
 import TableFakeRowPadding from "./table-fake-row-padding";
 import TableHeaderList from "./table-header-list";
-import useTableVisibilityRecalculation from "./useTableVisibilityRecalculation";
+import useTableVisibilityRecalculation from "./use-visibility-calculation";
 
 export type TableCellDecorator = (value: unknown) => ReactElement | null;
 
@@ -138,7 +138,7 @@ function renderCellList({
     headers.map((header) => headerSizes[header.index] + "px").join(" ");
 
   const onHeaderSizeWithRemap = (idx: number, newWidth: number) => {
-    onHeaderResize(headerSizes[headers[idx]?.index ?? 0] ?? 150, newWidth);
+    onHeaderResize(headers[idx]?.index ?? 0, newWidth);
   };
 
   const windowArray = new Array(rowEnd - rowStart)

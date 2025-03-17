@@ -10,7 +10,7 @@ import { KEY_BINDING } from "@/lib/key-matcher";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import { useCallback } from "react";
 import { useFullEditor } from "../providers/full-editor-provider";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
+import OptimizeTableState from "../table-optimized/optimize-table-state";
 import TableStateActions from "../table-optimized/table-state-actions";
 
 export default function useTableResultContextMenu({

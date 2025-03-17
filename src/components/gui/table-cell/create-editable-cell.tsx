@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import GenericCell from "./generic-cell";
 import { DatabaseValue } from "@/drivers/base-driver";
-import OptimizeTableState from "../table-optimized/OptimizeTableState";
-import { useFullEditor } from "../providers/full-editor-provider";
-import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 import { cn } from "@/lib/utils";
 import { ColumnType } from "@outerbase/sdk-transform";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFullEditor } from "../providers/full-editor-provider";
+import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import OptimizeTableState from "../table-optimized/optimize-table-state";
+import GenericCell from "./generic-cell";
 
 export interface TableEditableCell<T = unknown> {
   value: DatabaseValue<T>;
@@ -92,8 +92,8 @@ function InputCellEditor({
       type="text"
       className={
         align === "right"
-          ? "h-full w-full border-0 bg-inherit pl-2 pr-2 text-right font-mono outline-hidden"
-          : "h-full w-full border-0 bg-inherit pl-2 pr-2 font-mono outline-hidden"
+          ? "h-full w-full border-0 bg-inherit pr-2 pl-2 text-right font-mono outline-hidden"
+          : "h-full w-full border-0 bg-inherit pr-2 pl-2 font-mono outline-hidden"
       }
       value={value ?? ""}
     />

@@ -1,11 +1,11 @@
+import { LucideCheck, LucideChevronDown } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { buttonVariants } from "../../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import ListButtonItem from "../list-button-item";
 import OptimizeTableState, {
   AggregateFunction,
-} from "../table-optimized/OptimizeTableState";
-import { useCallback, useEffect, useState } from "react";
-import ListButtonItem from "../list-button-item";
-import { LucideCheck, LucideChevronDown } from "lucide-react";
+} from "../table-optimized/optimize-table-state";
 export interface AggregateResult {
   sum: number | string | undefined;
   avg: number | string | undefined;
@@ -74,7 +74,7 @@ export default function AggregateResultButton({
       <PopoverTrigger>
         <div className={buttonVariants({ variant: "ghost", size: "sm" })}>
           {displayResult}{" "}
-          {!!displayResult && <LucideChevronDown className="w-4 h-4 ml-2" />}
+          {!!displayResult && <LucideChevronDown className="ml-2 h-4 w-4" />}
         </div>
       </PopoverTrigger>
       <PopoverContent className="p-0">
