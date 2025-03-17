@@ -10,6 +10,7 @@
   "kv_namespaces": [
     {
       "binding": "NEXT_CACHE_WORKERS_KV",
+      "id": "$CACHE_WORKER_KV",
     },
   ],
 }
