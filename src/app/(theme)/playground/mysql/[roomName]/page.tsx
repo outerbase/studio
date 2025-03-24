@@ -1,7 +1,7 @@
+import ClientOnly from "@/components/client-only";
 import { Metadata } from "next";
 import ThemeLayout from "../../../theme_layout";
 import MySQLPlaygroundPageClient from "./page-client";
-import ClientOnly from "@/components/client-only";
 
 export const metadata: Metadata = {
   title:
@@ -24,6 +24,8 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+
+export const runtime = "edge";
 
 interface MySQLPlaygroundProps {
   params: Promise<{ roomName: string }>;
