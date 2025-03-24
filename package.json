@@ -1,6 +1,6 @@
 {
   "name": "@outerbase/studio",
-  "version": "0.10",
+  "version": "0.10.1",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3008",
