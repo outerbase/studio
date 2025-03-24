@@ -18,6 +18,8 @@ import { deleteBaseDialog } from "./dialog-base-delete";
 import { createBoardDialog } from "./dialog-board-create";
 import { deleteBoardDialog } from "./dialog-board-delete";
 
+export const runtime = "edge";
+
 export default function WorkspaceListPage() {
   const router = useRouter();
   const {
