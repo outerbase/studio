@@ -21,8 +21,7 @@
     "build:worker": "opennextjs-cloudflare",
     "dev:worker": "wrangler dev --port 8771",
     "preview:worker": "npm run build:worker && npm run dev:worker",
-    "deploy:worker": "npm run build:worker && wrangler deploy",
-    "prepare:worker": "cp wrangler.jsonc.example wrangler.jsonc && KV_ID_ESC=$(printf '%s' \"$KV_ID\" | sed 's/[&/]/\\\\&/g') && sed -i'' -e \"s/\\\"id\\\": \\\"kv_id\\\"/\\\"id\\\": \\\"$KV_ID_ESC\\\"/\" wrangler.jsonc"
+    "deploy:worker": "npm run build:worker && wrangler deploy"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
@@ -88,7 +87,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.474.0",
     "motion": "^12.4.3",
-    "next": "15.1.4",
+    "next": "15.2.3",
     "next-themes": "^0.4.4",
     "react": "19.0.0",
     "react-color": "^2.19.3",

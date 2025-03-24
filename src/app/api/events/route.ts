@@ -20,6 +20,8 @@ const eventBodySchema = zod.object({
     .min(1),
 });
 
+export const runtime = "edge";
+
 export async function OPTIONS() {
   // Handle preflight requests
   return new NextResponse(null, {
