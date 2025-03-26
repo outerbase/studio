@@ -352,7 +352,7 @@ export default function TableDataWindow({
                     onChange={(e) => setLimit(e.currentTarget.value)}
                     onBlur={(e) => {
                       try {
-                        const finalValue = parseInt(e.currentTarget.value);
+                        const finalValue = Math.max(0, parseInt(e.currentTarget.value));
                         if (finalValue !== finalLimit) {
                           setFinalLimit(finalValue);
                         }
@@ -375,10 +375,11 @@ export default function TableDataWindow({
                     onChange={(e) => setOffset(e.currentTarget.value)}
                     onBlur={(e) => {
                       try {
-                        const finalValue = parseInt(e.currentTarget.value);
+                        const finalValue = Math.max(0, parseInt(e.currentTarget.value));
                         if (finalValue !== finalOffset) {
                           setFinalOffset(finalValue);
                         }
+                        setOffset(finalValue.toString());
                       } catch (e) {
                         setOffset(finalOffset.toString());
                       }
