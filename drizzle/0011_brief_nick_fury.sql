@@ -1,1 +1,0 @@
-ALTER TABLE database ADD `database_name` text;
