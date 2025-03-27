@@ -17,7 +17,7 @@ import OptimizeTableState, {
 } from "../table-optimized/optimize-table-state";
 
 export type ExportTarget = "clipboard" | "file";
-type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";
+export type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";
 export type ExportSelection =
   | "complete"
   | "selected_row"
