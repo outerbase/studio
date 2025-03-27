@@ -5,11 +5,8 @@ import {
 } from "@/components/icons/outerbase-icon";
 import {
   CloudflareIcon,
-  DigitalOceanIcon,
-  NeonIcon,
   RQLiteIcon,
   StarbaseIcon,
-  SupabaseIcon,
   TursoIcon,
   ValTownIcon,
 } from "@/components/resource-card/icon";
@@ -20,35 +17,25 @@ export function getCreateResourceTypeList(
 ): NewResourceType[] {
   return [
     {
-      name: "Supabase",
-      icon: SupabaseIcon,
-      href: workspaceId ? "" : "",
-      comingSoon: true,
-      thirdParty: true,
-    },
-    {
-      name: "Cloudflare",
-      icon: CloudflareIcon,
-      href: workspaceId ? "" : "",
-      thirdParty: true,
-      comingSoon: true,
-    },
-    {
-      name: "Cloudflare (Manual)",
+      name: "Cloudflare D1",
       icon: CloudflareIcon,
       href: workspaceId ? "" : "/local/new-base/cloudflare-d1",
+      colorClassName: "text-orange-500",
+      cloudflare: true,
+    },
+    {
+      name: "Durable Object",
+      icon: CloudflareIcon,
+      href: workspaceId ? "" : "/local/new-base/durable-object",
+      colorClassName: "text-orange-500",
+      cloudflare: true,
     },
     {
       name: "Worker Analytics Engine",
       icon: CloudflareIcon,
+      colorClassName: "text-orange-500",
       href: workspaceId ? "" : "/local/new-base/cloudflare-wae",
-    },
-    {
-      name: "Neon",
-      icon: NeonIcon,
-      href: workspaceId ? "" : "",
-      comingSoon: true,
-      thirdParty: true,
+      cloudflare: true,
     },
     {
       name: "StarbaseDB",
@@ -58,25 +45,9 @@ export function getCreateResourceTypeList(
         : "/local/new-base/starbase",
     },
     {
-      name: "Turso/LibSQL (Manual)",
+      name: "Turso/LibSQL",
       icon: TursoIcon,
       href: workspaceId ? "" : "/local/new-base/turso",
-    },
-    {
-      name: "Turso",
-      icon: TursoIcon,
-      thirdParty: true,
-      comingSoon: true,
-      href: workspaceId
-        ? `/w/${workspaceId}/new-base/turso`
-        : "/local/new-base/turso",
-    },
-    {
-      name: "DigitalOcean",
-      icon: DigitalOceanIcon,
-      comingSoon: true,
-      href: workspaceId ? "" : "",
-      thirdParty: true,
     },
     {
       name: "Postgres",
@@ -107,5 +78,5 @@ export function getCreateResourceTypeList(
       icon: RQLiteIcon,
       href: workspaceId ? "" : "/local/new-base/rqlite",
     },
-  ].filter((resource) => resource.href || resource.comingSoon);
+  ].filter((resource) => resource.href);
 }
