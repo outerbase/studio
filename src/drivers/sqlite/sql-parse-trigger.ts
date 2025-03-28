@@ -1,94 +1,95 @@
-import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
-import { Cursor, parseColumnList } from "./sql-parse-table";
 import {
   DatabaseTriggerSchema,
-  TriggerWhen,
   TriggerOperation,
+  TriggerWhen,
 } from "@/drivers/base-driver";
+import { tokenizeSql } from "@outerbase/sdk-transform";
+import { CursorV2, parseColumnList } from "./sql-parse-table";
 
-export function parseCreateTriggerScript(schemaName: string, sql: string): DatabaseTriggerSchema {
-  const tree = sqliteDialect.language.parser.parse(sql);
-  const ptr = tree.cursor();
-  ptr.firstChild();
-  ptr.firstChild();
-  const cursor = new Cursor(ptr, sql);
-  cursor.expectKeyword("CREATE");
-  cursor.expectKeywordOptional("TEMP");
-  cursor.expectKeywordOptional("TEMPORARY");
-  cursor.expectKeyword("TRIGGER");
-  cursor.expectKeywordsOptional(["IF", "NOT", "EXIST"]);
+export function parseCreateTriggerScript(
+  schemaName: string,
+  sql: string
+): DatabaseTriggerSchema {
+  const cursor = new CursorV2(tokenizeSql(sql, "sqlite"));
+
+  cursor.expectToken("CREATE");
+  cursor.expectTokenOptional("TEMP");
+  cursor.expectTokenOptional("TEMPORARY");
+  cursor.expectToken("TRIGGER");
+  cursor.expectTokensOptional(["IF", "NOT", "EXIST"]);
   const name = cursor.consumeIdentifier();
 
   let when: TriggerWhen = "BEFORE";
 
-  if (cursor.matchKeyword("BEFORE")) {
+  if (cursor.match("BEFORE")) {
     cursor.next();
-  } else if (cursor.matchKeyword("AFTER")) {
+  } else if (cursor.match("AFTER")) {
     when = "AFTER";
     cursor.next();
-  } else if (cursor.matchKeywords(["INSTEAD", "OF"])) {
+  } else if (cursor.match("INSTEAD")) {
+    cursor.expectTokens(["INSTEAD", "OF"]);
     when = "INSTEAD_OF";
-    cursor.next();
-    cursor.next();
   }
 
   let operation: TriggerOperation = "INSERT";
   let columnNames;
 
-  if (cursor.matchKeyword("DELETE")) {
+  if (cursor.match("DELETE")) {
     operation = "DELETE";
     cursor.next();
-  } else if (cursor.matchKeyword("INSERT")) {
+  } else if (cursor.match("INSERT")) {
     operation = "INSERT";
     cursor.next();
-  } else if (cursor.matchKeyword("UPDATE")) {
+  } else if (cursor.match("UPDATE")) {
     operation = "UPDATE";
     cursor.next();
-    if (cursor.matchKeyword("OF")) {
+    if (cursor.match("OF")) {
       cursor.next();
       columnNames = parseColumnList(cursor);
     }
   }
 
-  cursor.expectKeyword("ON");
+  cursor.expectToken("ON");
   const tableName = cursor.consumeIdentifier();
-  cursor.expectKeywordsOptional(["FOR", "EACH", "ROW"]);
+  cursor.expectTokensOptional(["FOR", "EACH", "ROW"]);
 
   let whenExpression = "";
-  const fromExpression = cursor.node()?.from;
+  const fromExpression = cursor.getPointer();
   let toExpression;
 
-  if (cursor.matchKeyword("WHEN")) {
+  if (cursor.match("WHEN")) {
     // Loop till the end or meet the BEGIN
     cursor.next();
 
     while (!cursor.end()) {
-      toExpression = cursor.node()?.to;
-      if (cursor.matchKeyword("BEGIN")) break;
+      toExpression = cursor.getPointer();
+      if (cursor.match("BEGIN")) break;
       cursor.next();
     }
   }
 
-  if (fromExpression) {
-    whenExpression = sql.substring(fromExpression, toExpression);
+  if (fromExpression && toExpression) {
+    whenExpression = cursor.toStringRange(fromExpression, toExpression);
   }
 
-  cursor.expectKeyword("BEGIN");
+  cursor.expectToken("BEGIN");
 
   let statement = "";
-  const fromStatement = cursor.node()?.from;
+  const fromStatement = cursor.getPointer();
   let toStatement;
 
   while (!cursor.end()) {
-    toStatement = cursor.node()?.to;
-    if (cursor.matchKeyword(";")) {
-      break;
+    toStatement = cursor.getPointer();
+    if (cursor.match(";")) {
+      cursor.next();
+      if (cursor.match("END")) break;
+    } else {
+      cursor.next();
     }
-    cursor.next();
   }
 
-  if (fromStatement) {
-    statement = sql.substring(fromStatement, toStatement);
+  if (fromStatement && toStatement) {
+    statement = cursor.toStringRange(fromStatement, toStatement + 1);
   }
 
   return {
