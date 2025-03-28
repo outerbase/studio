@@ -1,39 +1,39 @@
-import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
+import { tokenizeSql } from "@outerbase/sdk-transform";
 import { DatabaseViewSchema } from "../base-driver";
-import { Cursor } from "./sql-parse-table";
+import { CursorV2 } from "./sql-parse-table";
 
 export function parseCreateViewScript(
   schemaName: string,
   sql: string
 ): DatabaseViewSchema {
-  const tree = sqliteDialect.language.parser.parse(sql);
-  const ptr = tree.cursor();
-  ptr.firstChild();
-  ptr.firstChild();
-  const cursor = new Cursor(ptr, sql);
-  cursor.expectKeyword("CREATE");
-  cursor.expectKeywordOptional("TEMP");
-  cursor.expectKeywordOptional("TEMPORARY");
-  cursor.expectKeyword("VIEW");
-  cursor.expectKeywordsOptional(["IF", "NOT", "EXIST"]);
+  const cursor = new CursorV2(tokenizeSql(sql, "sqlite"));
+
+  cursor.expectToken("CREATE");
+  cursor.expectTokenOptional("TEMP");
+  cursor.expectTokenOptional("TEMPORARY");
+  cursor.expectToken("VIEW");
+  cursor.expectTokensOptional(["IF", "NOT", "EXIST"]);
+
   const name = cursor.consumeIdentifier();
 
-  cursor.expectKeyword("AS");
+  cursor.expectToken("AS");
 
   let statement = "";
-  const fromStatement = cursor.node()?.from;
+  const fromStatement = cursor.getPointer();
   let toStatement;
 
   while (!cursor.end()) {
-    toStatement = cursor.node()?.to;
-    if (cursor.matchKeyword(";")) {
+    toStatement = cursor.getPointer();
+
+    if (cursor.match(";")) {
       break;
     }
+
     cursor.next();
   }
 
-  if (fromStatement) {
-    statement = sql.substring(fromStatement, toStatement);
+  if (fromStatement && toStatement) {
+    statement = cursor.toStringRange(fromStatement, toStatement);
   }
 
   return {

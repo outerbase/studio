@@ -325,6 +325,8 @@ export class SqliteLikeBaseDriver extends CommonSQLImplement {
     const schema = await this.tableSchema(schemaName, tableName);
     let injectRowIdColumn = false;
 
+    console.log(schema);
+
     // If there is no primary key, we will fallback to rowid.
     // But we need to make sure there is no rowid column
     if (
