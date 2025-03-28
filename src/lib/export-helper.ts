@@ -265,7 +265,7 @@ export async function exportTableData(
   }
 
   const headers = Object.keys(result.rows[0]);
-  const records = result.rows.map(row => headers.map(header => row[header]));
+  const records = result.rows.map((row: { [x: string]: string; }) => headers.map(header => row[header]));
 
   const formatHandlers = {
     csv: () => exportDataAsDelimitedText(headers, records, ",", "\n", '"', exportTarget),
@@ -290,3 +290,5 @@ export async function exportTableData(
     throw new Error(`Unsupported export format: ${format}`);
   }
 }
+// TODO: maybe we should move export related types here
+export type { ExportFormat };

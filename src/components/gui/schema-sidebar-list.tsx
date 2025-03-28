@@ -4,7 +4,7 @@ import { OpenContextMenuList } from "@/core/channel-builtin";
 import { scc } from "@/core/command";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
-import { exportTableData } from "@/lib/export-helper";
+import { ExportFormat, exportTableData } from "@/lib/export-helper";
 import { Table } from "@phosphor-icons/react";
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -218,7 +218,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
                     databaseDriver,
                     schemaName,
                     selectedName,
-                    format,
+                    format as ExportFormat,
                     "file"
                   );
                   downloadExportTable(format, handler);
