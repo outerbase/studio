@@ -16,7 +16,15 @@ export default class LocalBoardStorage implements IBoardStorageDriver {
       id,
     };
 
-    this.board.charts.push(data);
+    // Handle potentially undefined charts property
+    // This is a temporary fix until we can address the type inconsistency
+    // where charts is sometimes an array and sometimes undefined
+    if (Array.isArray(this.board.charts)) {
+      this.board.charts.push(data);
+    } else {
+      this.board.charts = [data];
+    }
+
     this.board.updated_at = now;
 
     localDb.board.put({ id: this.board.id, content: this.board });
