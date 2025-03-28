@@ -1,1 +1,0 @@
-ALTER TABLE database ADD `deleted_at` integer;
