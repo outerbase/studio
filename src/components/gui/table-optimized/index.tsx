@@ -1,5 +1,4 @@
 "use client";
-
 import { DatabaseTableColumn } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
 import { ColumnType } from "@outerbase/sdk-transform";
@@ -17,6 +16,7 @@ import OptimizeTableCell from "./table-cell";
 import TableFakeBodyPadding from "./table-fake-body-padding";
 import TableFakeRowPadding from "./table-fake-row-padding";
 import TableHeaderList from "./table-header-list";
+import "./table.css";
 import useTableVisibilityRecalculation from "./use-visibility-calculation";
 
 export type TableCellDecorator = (value: unknown) => ReactElement | null;
