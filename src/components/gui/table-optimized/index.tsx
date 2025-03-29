@@ -84,10 +84,7 @@ export interface OptimizeTableCellRenderProps {
 
 interface TableCellListCommonProps {
   internalState: OptimizeTableState;
-  renderHeader: (
-    props: OptimizeTableHeaderWithIndexProps,
-    idx: number
-  ) => ReactElement;
+  renderHeader: (props: OptimizeTableHeaderWithIndexProps) => ReactElement;
   renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
   onHeaderContextMenu?: (
