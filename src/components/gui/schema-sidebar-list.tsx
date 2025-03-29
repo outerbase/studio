@@ -162,12 +162,14 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     setSelected("");
   }, [setSelected, search]);
 
-  const exportFormats = [
-    { title: "Export as CSV", format: "csv" },
-    { title: "Export as Excel", format: "xlsx" },
-    { title: "Export as JSON", format: "json" },
-    { title: "Export as SQL INSERT", format: "sql" },
-  ];
+  const exportFormats = useMemo(() => {
+    return [
+      { title: "Export as CSV", format: "csv" },
+      { title: "Export as Excel", format: "xlsx" },
+      { title: "Export as JSON", format: "json" },
+      { title: "Export as SQL INSERT", format: "sql" },
+    ];
+  }, []);
 
   const prepareContextMenu = useCallback(
     (item?: DatabaseSchemaItem) => {
@@ -247,7 +249,7 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         { title: "Refresh", onClick: () => refresh() },
       ].filter(Boolean) as OpenContextMenuList;
     },
-    [refresh, databaseDriver, currentSchemaName, extensions]
+    [refresh, databaseDriver, currentSchemaName, extensions, exportFormats]
   );
 
   const listViewItems = useMemo(() => {
