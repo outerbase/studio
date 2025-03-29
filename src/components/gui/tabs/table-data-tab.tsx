@@ -161,7 +161,7 @@ export default function TableDataWindow({
 
   const onDiscard = useCallback(() => {
     if (data) {
-      data.disardAllChange();
+      data.discardAllChange();
     }
   }, [data]);
 
@@ -352,7 +352,10 @@ export default function TableDataWindow({
                     onChange={(e) => setLimit(e.currentTarget.value)}
                     onBlur={(e) => {
                       try {
-                        const finalValue = Math.max(0, parseInt(e.currentTarget.value));
+                        const finalValue = Math.max(
+                          0,
+                          parseInt(e.currentTarget.value)
+                        );
                         if (finalValue !== finalLimit) {
                           setFinalLimit(finalValue);
                         }
@@ -375,7 +378,10 @@ export default function TableDataWindow({
                     onChange={(e) => setOffset(e.currentTarget.value)}
                     onBlur={(e) => {
                       try {
-                        const finalValue = Math.max(0, parseInt(e.currentTarget.value));
+                        const finalValue = Math.max(
+                          0,
+                          parseInt(e.currentTarget.value)
+                        );
                         if (finalValue !== finalOffset) {
                           setFinalOffset(finalValue);
                         }
