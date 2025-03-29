@@ -1,4 +1,5 @@
 import {
+  ExportFormat,
   ExportOptions,
   ExportSelection,
   ExportTarget,
@@ -245,3 +246,49 @@ export function convertExcelStringToArray(data: string): string[][] {
   const lines = data.split("\r\n");
   return lines.map((line) => line.split("\t"));
 }
+
+export async function exportTableData(
+  databaseDriver: any,
+  schemaName: string,
+  tableName: string,
+  format: ExportFormat,
+  exportTarget: ExportTarget,
+  options?: ExportOptions
+): Promise<string | Blob> {
+  console.log("Exporting", schemaName, tableName, format, exportTarget, options);
+  const result = await databaseDriver.query(
+    `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)}`
+  );
+  console.log("QueryResults", result);
+  if (!result.rows || result.rows.length === 0) {
+    return "";
+  }
+
+  const headers = Object.keys(result.rows[0]);
+  const records = result.rows.map((row: { [x: string]: string; }) => headers.map(header => row[header]));
+
+  const formatHandlers = {
+    csv: () => exportDataAsDelimitedText(headers, records, ",", "\n", '"', exportTarget),
+    json: () => exportRowsToJson(headers, records, exportTarget),
+    sql: () => exportRowsToSqlInsert(tableName, headers, records, exportTarget),
+    xlsx: () => exportToExcel(records, headers, tableName, exportTarget),
+    delimited: () =>
+      exportDataAsDelimitedText(
+        headers,
+        records,
+        options?.fieldSeparator || ",",
+        options?.lineTerminator || "\n",
+        options?.encloser || '"',
+        exportTarget
+      ),
+  };
+
+  const handler = formatHandlers[format];
+  if (handler) {
+    return handler();
+  } else {
+    throw new Error(`Unsupported export format: ${format}`);
+  }
+}
+// TODO: maybe we should move export related types here
+export type { ExportFormat };

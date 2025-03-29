@@ -4,6 +4,7 @@ import { OpenContextMenuList } from "@/core/channel-builtin";
 import { scc } from "@/core/command";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
+import { ExportFormat, exportTableData } from "@/lib/export-helper";
 import { Table } from "@phosphor-icons/react";
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -122,6 +123,31 @@ function flattenSchemaGroup(
   return schemaGroup;
 }
 
+// Copy of export-result-button.tsx
+async function downloadExportTable(
+  format: string,
+  handler: Promise<string | Blob>
+) {
+  try {
+    if (!format) return;
+    const content = await handler;
+    if (!content) return;
+    // TODO: more mimeTypes support
+    const blob =
+      content instanceof Blob
+        ? content
+        : new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `export.${format === "delimited" ? "csv" : format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(`Failed to download exported ${format} file:`, error);
+  }
+}
+
 export default function SchemaList({ search }: Readonly<SchemaListProps>) {
   const { databaseDriver, extensions } = useStudioContext();
   const [selected, setSelected] = useState("");
@@ -136,10 +162,18 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
     setSelected("");
   }, [setSelected, search]);
 
+  const exportFormats = [
+    { title: "Export as CSV", format: "csv" },
+    { title: "Export as Excel", format: "xlsx" },
+    { title: "Export as JSON", format: "json" },
+    { title: "Export as SQL INSERT", format: "sql" },
+  ];
+
   const prepareContextMenu = useCallback(
     (item?: DatabaseSchemaItem) => {
       const selectedName = item?.name;
       const isTable = item?.type === "table";
+      const schemaName = item?.schemaName ?? currentSchemaName;
 
       const createMenuSection = {
         title: "Create",
@@ -173,6 +207,26 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
           ].filter(Boolean)
         : [];
 
+      const exportSection =
+        isTable && selectedName
+          ? {
+              title: "Export Table",
+              sub: exportFormats.map(({ title, format }) => ({
+                title,
+                onClick: async () => {
+                  const handler = exportTableData(
+                    databaseDriver,
+                    schemaName,
+                    selectedName,
+                    format as ExportFormat,
+                    "file"
+                  );
+                  downloadExportTable(format, handler);
+                },
+              })),
+            }
+          : undefined;
+
       return [
         createMenuSection,
         {
@@ -184,6 +238,8 @@ export default function SchemaList({ search }: Readonly<SchemaListProps>) {
         },
         { separator: true },
 
+        // Export Section
+        exportSection,
         // Modification Section
         ...modificationSection,
         modificationSection.length > 0 ? { separator: true } : undefined,
