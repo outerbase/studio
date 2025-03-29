@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
+import tableResultCellRenderer from "./table-result/render-cell";
 
 interface ResultTableProps {
   data: OptimizeTableState;
@@ -419,6 +420,7 @@ export default function ResultTable({
       renderHeader={renderHeader}
       rowHeight={35}
       onKeyDown={onKeyDown}
+      renderCell={tableResultCellRenderer}
     />
   );
 }

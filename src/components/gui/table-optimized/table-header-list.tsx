@@ -12,10 +12,7 @@ export default function TableHeaderList({
   state,
 }: {
   headers: OptimizeTableHeaderWithIndexProps[];
-  renderHeader: (
-    props: OptimizeTableHeaderWithIndexProps,
-    idx: number
-  ) => ReactElement;
+  renderHeader: (props: OptimizeTableHeaderWithIndexProps) => ReactElement;
   onHeaderResize: (idx: number, newWidth: number) => void;
   sticky: boolean;
   onHeaderContextMenu?: (

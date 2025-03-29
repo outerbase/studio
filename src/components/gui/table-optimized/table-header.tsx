@@ -19,10 +19,7 @@ export default function TableHeader({
   state: OptimizeTableState;
   onHeaderResize: (idx: number, newWidth: number) => void;
   onContextMenu?: React.MouseEventHandler;
-  renderHeader: (
-    props: OptimizeTableHeaderWithIndexProps,
-    idx: number
-  ) => ReactElement;
+  renderHeader: (props: OptimizeTableHeaderWithIndexProps) => ReactElement;
 }) {
   const className = cn(sticky ? "sticky z-30" : undefined, "bg-background");
 
@@ -36,7 +33,7 @@ export default function TableHeader({
         left: sticky ? state.gutterColumnWidth : undefined,
       }}
     >
-      {renderHeader(header, idx)}
+      {renderHeader(header)}
       {header.setting.resizable && (
         <TableHeaderResizeHandler idx={idx + 1} onResize={onHeaderResize} />
       )}

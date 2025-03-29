@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
-import { OptimizeTableHeaderWithIndexProps } from ".";
-import tableResultCellRenderer from "../table-result/render-cell";
+import { ReactElement, useMemo } from "react";
+import {
+  OptimizeTableCellRenderProps,
+  OptimizeTableHeaderWithIndexProps,
+} from ".";
 import OptimizeTableState from "./optimize-table-state";
 
 export default function OptimizeTableCell({
@@ -9,11 +11,13 @@ export default function OptimizeTableCell({
   header,
   rowIndex,
   colIndex,
+  renderCell,
 }: {
   state: OptimizeTableState;
   rowIndex: number;
   colIndex: number;
   header: OptimizeTableHeaderWithIndexProps;
+  renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
 }) {
   const { isFocus, isSelected, isBorderBottom, isBorderRight } =
     state.getCellStatus(rowIndex, colIndex);
@@ -91,7 +95,7 @@ export default function OptimizeTableCell({
       }}
     >
       <div className={className}>
-        {tableResultCellRenderer({
+        {renderCell({
           x: colIndex,
           y: rowIndex,
           state: state,

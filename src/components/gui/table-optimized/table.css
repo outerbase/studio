@@ -1,0 +1,73 @@
+.libsql-cell {
+  line-height: 34px;
+  height: 35px;
+}
+
+.libsql-table {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  position: relative;
+  font-size: 12px;
+  user-select: none;
+}
+
+.libsql-table table {
+  position: absolute;
+  display: grid;
+  border-collapse: collapse;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  table-layout: fixed;
+}
+
+.libsql-table tr,
+.libsql-table thead,
+.libsql-table tbody {
+  display: contents;
+}
+
+.libsql-table td,
+.libsql-table th {
+  @apply border-r border-b;
+  overflow: hidden;
+}
+
+.libsql-table-cell {
+  overflow: hidden;
+  flex-grow: 1;
+  white-space: nowrap;
+}
+
+.libsql-table th {
+  position: sticky;
+  top: 0;
+  user-select: none;
+  padding: 0px;
+  height: 35px;
+  line-height: 35px;
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  z-index: 10;
+}
+
+.libsql-table th.sticky {
+  z-index: 20;
+}
+
+.libsql-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: col-resize;
+  background: var(--color-critical);
+  opacity: 0;
+}
+
+.libsql-resizer:hover {
+  opacity: 0.5;
+}

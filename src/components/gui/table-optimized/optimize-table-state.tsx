@@ -301,7 +301,7 @@ export default class OptimizeTableState {
     return this.headers.length;
   }
 
-  disardAllChange() {
+  discardAllChange() {
     const newRows: OptimizeTableRowValue[] = [];
 
     for (const row of Object.values(this.changeLogs)) {
