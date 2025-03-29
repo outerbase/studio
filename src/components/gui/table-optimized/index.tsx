@@ -88,6 +88,7 @@ interface TableCellListCommonProps {
     props: OptimizeTableHeaderWithIndexProps,
     idx: number
   ) => ReactElement;
+  renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
   rowHeight: number;
   onHeaderContextMenu?: (
     e: React.MouseEvent,
@@ -120,6 +121,7 @@ interface RenderCellListProps extends TableCellListCommonProps {
 function renderCellList({
   hasSticky,
   customStyles,
+  renderCell,
   headers,
   rowEnd,
   rowStart,
@@ -195,6 +197,7 @@ function renderCellList({
             colIndex={headers[0].index}
             rowIndex={absoluteRowIndex}
             header={headers[0]}
+            renderCell={renderCell}
           />
         )}
 
@@ -220,6 +223,7 @@ function renderCellList({
               colIndex={header.index}
               rowIndex={absoluteRowIndex}
               header={header}
+              renderCell={renderCell}
             />
           );
         })}
@@ -256,6 +260,7 @@ export default function OptimizeTable({
   stickyHeaderIndex,
   internalState,
   renderHeader,
+  renderCell,
   rowHeight,
   renderAhead,
   onContextMenu,
@@ -321,6 +326,7 @@ export default function OptimizeTable({
   return useMemo(() => {
     const common = {
       headers: headerWithIndex,
+      renderCell,
       rowEnd,
       rowStart,
       colEnd,
@@ -375,5 +381,6 @@ export default function OptimizeTable({
     onKeyDown,
     revision,
     renderHeader,
+    renderCell,
   ]);
 }
