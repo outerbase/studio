@@ -1,8 +1,6 @@
-import {
-  OptimizeTableHeaderProps,
-  TableHeaderMetadata,
-} from "@/components/gui/table-optimized";
+import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
+import { TableHeaderMetadata } from "@/components/gui/table-result/type";
 import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";

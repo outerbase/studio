@@ -3,11 +3,9 @@ import { cn } from "@/lib/utils";
 import { ColumnType } from "@outerbase/sdk-transform";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFullEditor } from "../providers/full-editor-provider";
-import {
-  OptimizeTableHeaderWithIndexProps,
-  TableHeaderMetadata,
-} from "../table-optimized";
+import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
+import { TableHeaderMetadata } from "../table-result/type";
 import GenericCell from "./generic-cell";
 
 export interface TableEditableCell<T = unknown> {

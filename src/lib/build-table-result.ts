@@ -1,7 +1,5 @@
-import {
-  OptimizeTableHeaderProps,
-  TableHeaderMetadata,
-} from "@/components/gui/table-optimized";
+import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
+import { TableHeaderMetadata } from "@/components/gui/table-result/type";
 import {
   BaseDriver,
   DatabaseResultSet,

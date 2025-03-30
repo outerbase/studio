@@ -1,7 +1,5 @@
 "use client";
-import { DatabaseTableColumn } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
-import { ColumnType } from "@outerbase/sdk-transform";
 import { Icon } from "@phosphor-icons/react";
 import React, {
   ReactElement,
@@ -20,30 +18,6 @@ import "./table.css";
 import useTableVisibilityRecalculation from "./use-visibility-calculation";
 
 export type TableCellDecorator = (value: unknown) => ReactElement | null;
-
-export interface TableHeaderMetadata {
-  from?: {
-    schema: string;
-    table: string;
-    column: string;
-  };
-
-  // Primary key
-  isPrimaryKey: boolean;
-
-  // Foreign key reference
-  referenceTo?: {
-    schema: string;
-    table: string;
-    column: string;
-  };
-
-  type?: ColumnType;
-  originalType?: string;
-
-  columnSchema?: DatabaseTableColumn;
-}
-
 export interface OptimizeTableHeaderProps<MetadataType = unknown> {
   name: string;
 

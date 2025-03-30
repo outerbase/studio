@@ -1,6 +1,5 @@
 import OptimizeTable, {
   OptimizeTableHeaderWithIndexProps,
-  TableHeaderMetadata,
 } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
 import { useStudioContext } from "@/context/driver-provider";
@@ -29,6 +28,7 @@ import {
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
 import tableResultCellRenderer from "./table-result/render-cell";
+import { TableHeaderMetadata } from "./table-result/type";
 
 interface ResultTableProps {
   data: OptimizeTableState<TableHeaderMetadata>;

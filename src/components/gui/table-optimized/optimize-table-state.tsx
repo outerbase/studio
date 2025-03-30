@@ -5,11 +5,8 @@ import {
 import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import deepEqual from "deep-equal";
-import {
-  OptimizeTableHeaderProps,
-  TableCellDecorator,
-  TableHeaderMetadata,
-} from ".";
+import { OptimizeTableHeaderProps, TableCellDecorator } from ".";
+import { TableHeaderMetadata } from "../table-result/type";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;

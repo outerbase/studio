@@ -1,4 +1,4 @@
-import { TableHeaderMetadata } from ".";
+import { TableHeaderMetadata } from "../table-result/type";
 import OptimizeTableState from "./optimize-table-state";
 
 export default class TableStateActions {

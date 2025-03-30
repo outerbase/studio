@@ -6,10 +6,8 @@ import BigNumberCell from "../table-cell/big-number-cell";
 import GenericCell from "../table-cell/generic-cell";
 import NumberCell from "../table-cell/number-cell";
 import TextCell from "../table-cell/text-cell";
-import {
-  OptimizeTableCellRenderProps,
-  TableHeaderMetadata,
-} from "../table-optimized";
+import { OptimizeTableCellRenderProps } from "../table-optimized";
+import { TableHeaderMetadata } from "./type";
 
 function detectTextEditorType(
   value: DatabaseValue<string>

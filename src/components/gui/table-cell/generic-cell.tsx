@@ -11,10 +11,8 @@ import { isLinkString } from "@/lib/validation";
 import { ColumnType } from "@outerbase/sdk-transform";
 import { LucideArrowUpRight, LucideLoader } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  OptimizeTableHeaderWithIndexProps,
-  TableHeaderMetadata,
-} from "../table-optimized";
+import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import { TableHeaderMetadata } from "../table-result/type";
 import DisplayLinkCell from "./display-link-cell";
 
 interface TableCellProps<T = unknown> {
