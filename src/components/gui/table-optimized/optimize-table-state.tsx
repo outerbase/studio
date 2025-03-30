@@ -5,7 +5,11 @@ import {
 import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import deepEqual from "deep-equal";
-import { OptimizeTableHeaderProps, TableCellDecorator } from ".";
+import {
+  OptimizeTableHeaderProps,
+  TableCellDecorator,
+  TableHeaderMetadata,
+} from ".";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -26,7 +30,7 @@ export interface TableSelectionRange {
   y2: number;
 }
 
-export default class OptimizeTableState {
+export default class OptimizeTableState<HeaderMetadata = unknown> {
   protected focus: [number, number] | null = null;
   protected data: OptimizeTableRowValue[] = [];
 
@@ -41,7 +45,7 @@ export default class OptimizeTableState {
   // We primary use it to display row number at the moment
   public gutterColumnWidth = 40;
 
-  protected headers: OptimizeTableHeaderProps[] = [];
+  protected headers: OptimizeTableHeaderProps<HeaderMetadata>[] = [];
   public headerRevision = 1;
   protected headerWidth: number[] = [];
 
@@ -58,7 +62,7 @@ export default class OptimizeTableState {
   protected sql: string = "";
 
   static createFromResult(props: BuildTableResultProps) {
-    const r = new OptimizeTableState(
+    const r = new OptimizeTableState<TableHeaderMetadata>(
       buildTableResultHeader(props),
       props.result.rows.map((r) => ({ ...r }))
     );
@@ -75,7 +79,7 @@ export default class OptimizeTableState {
   }
 
   constructor(
-    headers: OptimizeTableHeaderProps[],
+    headers: OptimizeTableHeaderProps<HeaderMetadata>[],
     data: Record<string, unknown>[]
   ) {
     this.headers = headers;

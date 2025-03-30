@@ -4,7 +4,7 @@ import type { OptimizeTableHeaderWithIndexProps } from ".";
 import OptimizeTableState from "./optimize-table-state";
 import TableHeaderResizeHandler from "./table-header-resize-handler";
 
-export default function TableHeader({
+export default function TableHeader<HeaderMetadata = unknown>({
   idx,
   header,
   onHeaderResize,
@@ -15,11 +15,13 @@ export default function TableHeader({
 }: {
   idx: number;
   sticky: boolean;
-  header: OptimizeTableHeaderWithIndexProps;
-  state: OptimizeTableState;
+  header: OptimizeTableHeaderWithIndexProps<HeaderMetadata>;
+  state: OptimizeTableState<HeaderMetadata>;
   onHeaderResize: (idx: number, newWidth: number) => void;
   onContextMenu?: React.MouseEventHandler;
-  renderHeader: (props: OptimizeTableHeaderWithIndexProps) => ReactElement;
+  renderHeader: (
+    props: OptimizeTableHeaderWithIndexProps<HeaderMetadata>
+  ) => ReactElement;
 }) {
   const className = cn(sticky ? "sticky z-30" : undefined, "bg-background");
 

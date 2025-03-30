@@ -11,7 +11,10 @@ import { isLinkString } from "@/lib/validation";
 import { ColumnType } from "@outerbase/sdk-transform";
 import { LucideArrowUpRight, LucideLoader } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import {
+  OptimizeTableHeaderWithIndexProps,
+  TableHeaderMetadata,
+} from "../table-optimized";
 import DisplayLinkCell from "./display-link-cell";
 
 interface TableCellProps<T = unknown> {
@@ -21,7 +24,7 @@ interface TableCellProps<T = unknown> {
   focus?: boolean;
   onFocus?: () => void;
   onDoubleClick?: () => void;
-  header: OptimizeTableHeaderWithIndexProps;
+  header: OptimizeTableHeaderWithIndexProps<TableHeaderMetadata>;
 }
 
 interface SneakpeakProps {

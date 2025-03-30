@@ -12,6 +12,7 @@ import { ChartValue } from "../chart/chart-type";
 import EditChartMenu from "../chart/edit-chart-menu";
 import ResultTable from "../gui/query-result-table";
 import SqlEditor from "../gui/sql-editor";
+import { TableHeaderMetadata } from "../gui/table-optimized";
 import OptimizeTableState from "../gui/table-optimized/optimize-table-state";
 import { Button } from "../orbit/button";
 import { MenuBar } from "../orbit/menu-bar";
@@ -34,7 +35,8 @@ export default function BoardChartEditor({
     storage,
     resolvedFilterValue,
   } = useBoardContext();
-  const [result, setResult] = useState<OptimizeTableState>();
+  const [result, setResult] =
+    useState<OptimizeTableState<TableHeaderMetadata>>();
 
   const [value, setValue] = useState<ChartValue>(() => {
     if (initialValue) return initialValue;

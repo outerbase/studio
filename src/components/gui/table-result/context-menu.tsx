@@ -10,6 +10,7 @@ import { KEY_BINDING } from "@/lib/key-matcher";
 import { LucidePlus, LucideTrash2 } from "lucide-react";
 import { useCallback } from "react";
 import { useFullEditor } from "../providers/full-editor-provider";
+import { TableHeaderMetadata } from "../table-optimized";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
 import TableStateActions from "../table-optimized/table-state-actions";
 
@@ -20,9 +21,9 @@ export default function useTableResultContextMenu({
   pasteCallback,
 }: {
   tableName?: string;
-  data: OptimizeTableState;
-  copyCallback: (state: OptimizeTableState) => void;
-  pasteCallback: (state: OptimizeTableState) => void;
+  data: OptimizeTableState<TableHeaderMetadata>;
+  copyCallback: (state: OptimizeTableState<TableHeaderMetadata>) => void;
+  pasteCallback: (state: OptimizeTableState<TableHeaderMetadata>) => void;
 }) {
   const { openEditor } = useFullEditor();
   const { extensions } = useStudioContext();
@@ -32,7 +33,7 @@ export default function useTableResultContextMenu({
       state,
       event,
     }: {
-      state: OptimizeTableState;
+      state: OptimizeTableState<TableHeaderMetadata>;
       event: React.MouseEvent;
     }) => {
       const randomUUID = generateId();

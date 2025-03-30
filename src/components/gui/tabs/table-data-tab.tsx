@@ -34,6 +34,7 @@ import AggregateResultButton from "../aggregate-result/aggregate-result-button";
 import ExportResultButton from "../export/export-result-button";
 import OpacityLoading from "../loading-opacity";
 import ResultStats from "../result-stat";
+import { TableHeaderMetadata } from "../table-optimized";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
 import useTableResultColumnFilter from "../table-result/filter-column";
 import { Toolbar } from "../toolbar";
@@ -55,7 +56,7 @@ export default function TableDataWindow({
   const [executeError, setExecuteError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<OptimizeTableState>();
+  const [data, setData] = useState<OptimizeTableState<TableHeaderMetadata>>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
   const [stat, setStat] = useState<DatabaseResultStat>();
   const [sortColumns, setSortColumns] = useState<ColumnSortOption[]>([]);

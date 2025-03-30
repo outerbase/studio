@@ -3,7 +3,10 @@ import { cn } from "@/lib/utils";
 import { ColumnType } from "@outerbase/sdk-transform";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFullEditor } from "../providers/full-editor-provider";
-import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import {
+  OptimizeTableHeaderWithIndexProps,
+  TableHeaderMetadata,
+} from "../table-optimized";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
 import GenericCell from "./generic-cell";
 
@@ -16,7 +19,7 @@ export interface TableEditableCell<T = unknown> {
   state: OptimizeTableState;
   onChange?: (newValue: DatabaseValue<T>) => void;
   editor?: "input" | "json" | "text";
-  header: OptimizeTableHeaderWithIndexProps;
+  header: OptimizeTableHeaderWithIndexProps<TableHeaderMetadata>;
 }
 
 interface TabeEditableCellProps<T = unknown> {

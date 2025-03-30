@@ -6,7 +6,7 @@ import {
 } from ".";
 import OptimizeTableState from "./optimize-table-state";
 
-export default function OptimizeTableCell({
+export default function OptimizeTableCell<HeaderMetadata = unknown>({
   state,
   header,
   rowIndex,
@@ -16,8 +16,10 @@ export default function OptimizeTableCell({
   state: OptimizeTableState;
   rowIndex: number;
   colIndex: number;
-  header: OptimizeTableHeaderWithIndexProps;
-  renderCell: (props: OptimizeTableCellRenderProps) => ReactElement;
+  header: OptimizeTableHeaderWithIndexProps<HeaderMetadata>;
+  renderCell: (
+    props: OptimizeTableCellRenderProps<HeaderMetadata>
+  ) => ReactElement;
 }) {
   const { isFocus, isSelected, isBorderBottom, isBorderRight } =
     state.getCellStatus(rowIndex, colIndex);

@@ -1,5 +1,6 @@
 import OptimizeTable, {
   OptimizeTableHeaderWithIndexProps,
+  TableHeaderMetadata,
 } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
 import { useStudioContext } from "@/context/driver-provider";
@@ -30,7 +31,7 @@ import useTableResultContextMenu from "./table-result/context-menu";
 import tableResultCellRenderer from "./table-result/render-cell";
 
 interface ResultTableProps {
-  data: OptimizeTableState;
+  data: OptimizeTableState<TableHeaderMetadata>;
   tableName?: string;
   onSortColumnChange?: (columns: ColumnSortOption[]) => void;
   sortColumns?: ColumnSortOption[];
@@ -136,7 +137,7 @@ export default function ResultTable({
   }, [data, visibleColumnIndexList]);
 
   const renderHeader = useCallback(
-    (header: OptimizeTableHeaderWithIndexProps) => {
+    (header: OptimizeTableHeaderWithIndexProps<TableHeaderMetadata>) => {
       const extensionMenu = extensions.getQueryHeaderContextMenu(header, data);
       const extensionMenuItems = extensionMenu.map((item) => {
         if (item.component) {
