@@ -24,9 +24,9 @@ export default function TableHeaderList<HeaderMetadata = unknown>({
   state: OptimizeTableState<HeaderMetadata>;
 }) {
   return (
-    <thead>
-      <tr>
-        <th className="left-0 z-20! bg-neutral-50 dark:bg-neutral-950"></th>
+    <thead className="contents">
+      <tr className="contents">
+        <th className="sticky top-0 left-0 z-30 border-r border-b bg-neutral-50 dark:bg-neutral-950"></th>
         {headers.map((header, idx) => {
           return (
             <TableHeader

@@ -179,7 +179,7 @@ export default function GenericCell({
   onDoubleClick,
   header,
 }: TableCellProps) {
-  const className = cn("libsql-cell font-mono flex", "pl-2 pr-2");
+  const className = cn("h-[35px] leading-[35px] font-mono flex", "pl-2 pr-2");
   const isAlignRight = align === "right";
 
   const textBaseStyle = cn(

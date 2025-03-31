@@ -14,7 +14,6 @@ import OptimizeTableCell from "./table-cell";
 import TableFakeBodyPadding from "./table-fake-body-padding";
 import TableFakeRowPadding from "./table-fake-row-padding";
 import TableHeaderList from "./table-header-list";
-import "./table.css";
 import useTableVisibilityRecalculation from "./use-visibility-calculation";
 
 export type TableCellDecorator = (value: unknown) => ReactElement | null;
@@ -128,26 +127,32 @@ function renderCellList<HeaderMetadata = unknown>({
   const cells = windowArray.map((row, rowIndex) => {
     const absoluteRowIndex = rowIndex + rowStart;
 
-    let textClass =
-      "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono";
-    let tdClass = "sticky left-0 bg-neutral-50 dark:bg-neutral-950";
+    let textClass = "flex items-center justify-end h-full pr-2 font-mono";
+    let tdClass =
+      "sticky left-0 bg-neutral-50 dark:bg-neutral-950 border-r border-b";
 
     if (internalState.getSelectedRowIndex().includes(absoluteRowIndex)) {
       if (internalState.isFullSelectionRow(absoluteRowIndex)) {
         textClass = cn(
-          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono",
+          "flex items-center justify-end h-full pr-2 font-mono",
           "bg-neutral-100 dark:bg-neutral-900 border-red-900 text-black dark:text-white font-bold"
         );
-        tdClass = "sticky left-0 bg-neutral-100 dark:bg-blue-800";
+        tdClass =
+          "sticky left-0 bg-neutral-100 dark:bg-blue-800 border-r border-b";
       } else {
         textClass =
-          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono dark:text-white font-bold";
-        tdClass = "sticky left-0 bg-neutral-100 dark:bg-neutral-900";
+          "flex items-center justify-end h-full pr-2 font-mono dark:text-white font-bold";
+        tdClass =
+          "sticky left-0 bg-neutral-100 dark:bg-neutral-900 border-r border-b";
       }
     }
 
     return (
-      <tr key={absoluteRowIndex} data-row={absoluteRowIndex}>
+      <tr
+        key={absoluteRowIndex}
+        data-row={absoluteRowIndex}
+        className="contents"
+      >
         <td
           className={tdClass}
           style={{ zIndex: 15 }}
@@ -210,7 +215,10 @@ function renderCellList<HeaderMetadata = unknown>({
   });
 
   return (
-    <table style={{ ...customStyles, gridTemplateColumns: templateSizes }}>
+    <table
+      className="absolute top-0 left-0 box-border grid"
+      style={{ ...customStyles, gridTemplateColumns: templateSizes }}
+    >
       <TableHeaderList
         state={internalState}
         renderHeader={renderHeader}
@@ -328,7 +336,9 @@ export default function OptimizeTable<HeaderMetadata = unknown>({
         style={{
           outline: "none",
         }}
-        className={"libsql-table"}
+        className={
+          "relative h-full w-full overflow-auto text-[12px] select-none"
+        }
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
           e.preventDefault();

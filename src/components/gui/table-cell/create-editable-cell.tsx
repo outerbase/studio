@@ -1,5 +1,4 @@
 import { DatabaseValue } from "@/drivers/base-driver";
-import { cn } from "@/lib/utils";
 import { ColumnType } from "@outerbase/sdk-transform";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFullEditor } from "../providers/full-editor-provider";
@@ -148,7 +147,7 @@ export default function createEditableCell<T = unknown>({
       (editor === undefined || editor === "input")
     ) {
       return (
-        <div className={cn("libsql-cell flex")}>
+        <div className={"flex h-[35px] leading-[35px]"}>
           <InputCellEditor
             state={state}
             readOnly={state.getReadOnlyMode()}
