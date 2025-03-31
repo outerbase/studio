@@ -1,4 +1,5 @@
 import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
+import { TableHeaderMetadata } from "@/components/gui/table-result/type";
 import {
   BaseDriver,
   DatabaseResultSet,
@@ -16,7 +17,7 @@ export interface BuildTableResultProps {
 }
 
 function pipeAttachColumnViaSchemas(
-  headers: OptimizeTableHeaderProps[],
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[],
   { tableSchema, schemas, driver }: BuildTableResultProps
 ) {
   // If there is already table schema, we use it instead because it is more accurate.
@@ -54,7 +55,7 @@ function pipeAttachColumnViaSchemas(
 }
 
 function pipeWithTableSchema(
-  headers: OptimizeTableHeaderProps[],
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[],
   { tableSchema, driver }: BuildTableResultProps
 ) {
   if (!tableSchema) return;
@@ -122,7 +123,7 @@ function pipeWithTableSchema(
  * the readonly status of each column according to the table schema.
  */
 function pipeEditableTable(
-  headers: OptimizeTableHeaderProps[],
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[],
   { schemas }: BuildTableResultProps
 ) {
   const tables: {
@@ -197,7 +198,7 @@ function pipeEditableTable(
 }
 
 export function pipeVirtualColumnAsReadOnly(
-  headers: OptimizeTableHeaderProps[]
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[]
 ) {
   for (const header of headers) {
     if (header.metadata.columnSchema?.constraint?.generatedExpression) {
@@ -207,7 +208,7 @@ export function pipeVirtualColumnAsReadOnly(
 }
 
 export function pipeCalculateInitialSize(
-  headers: OptimizeTableHeaderProps[],
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[],
   { result }: BuildTableResultProps
 ) {
   for (const header of headers) {
@@ -237,7 +238,9 @@ export function pipeCalculateInitialSize(
   }
 }
 
-export function pipeColumnIcon(headers: OptimizeTableHeaderProps[]) {
+export function pipeColumnIcon(
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[]
+) {
   for (const header of headers) {
     if (header.metadata.isPrimaryKey) {
       header.display.icon = LucideKey;
@@ -254,7 +257,7 @@ export function pipeColumnIcon(headers: OptimizeTableHeaderProps[]) {
 
 export function buildTableResultHeader(
   props: BuildTableResultProps
-): OptimizeTableHeaderProps[] {
+): OptimizeTableHeaderProps<TableHeaderMetadata>[] {
   const { result } = props;
 
   const headers = result.headers.map((column) => {
@@ -283,7 +286,7 @@ export function buildTableResultHeader(
         originalType: column.originalType,
         ...(from ? { from } : {}),
       },
-    } as OptimizeTableHeaderProps;
+    } as OptimizeTableHeaderProps<TableHeaderMetadata>;
   });
 
   pipeWithTableSchema(headers, props);

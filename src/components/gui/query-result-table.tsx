@@ -27,9 +27,11 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import useTableResultContextMenu from "./table-result/context-menu";
+import tableResultCellRenderer from "./table-result/render-cell";
+import { TableHeaderMetadata } from "./table-result/type";
 
 interface ResultTableProps {
-  data: OptimizeTableState;
+  data: OptimizeTableState<TableHeaderMetadata>;
   tableName?: string;
   onSortColumnChange?: (columns: ColumnSortOption[]) => void;
   sortColumns?: ColumnSortOption[];
@@ -135,7 +137,7 @@ export default function ResultTable({
   }, [data, visibleColumnIndexList]);
 
   const renderHeader = useCallback(
-    (header: OptimizeTableHeaderWithIndexProps) => {
+    (header: OptimizeTableHeaderWithIndexProps<TableHeaderMetadata>) => {
       const extensionMenu = extensions.getQueryHeaderContextMenu(header, data);
       const extensionMenuItems = extensionMenu.map((item) => {
         if (item.component) {
@@ -419,6 +421,7 @@ export default function ResultTable({
       renderHeader={renderHeader}
       rowHeight={35}
       onKeyDown={onKeyDown}
+      renderCell={tableResultCellRenderer}
     />
   );
 }

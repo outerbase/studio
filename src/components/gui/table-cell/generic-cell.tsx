@@ -12,6 +12,7 @@ import { ColumnType } from "@outerbase/sdk-transform";
 import { LucideArrowUpRight, LucideLoader } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
+import { TableHeaderMetadata } from "../table-result/type";
 import DisplayLinkCell from "./display-link-cell";
 
 interface TableCellProps<T = unknown> {
@@ -21,7 +22,7 @@ interface TableCellProps<T = unknown> {
   focus?: boolean;
   onFocus?: () => void;
   onDoubleClick?: () => void;
-  header: OptimizeTableHeaderWithIndexProps;
+  header: OptimizeTableHeaderWithIndexProps<TableHeaderMetadata>;
 }
 
 interface SneakpeakProps {
@@ -178,7 +179,7 @@ export default function GenericCell({
   onDoubleClick,
   header,
 }: TableCellProps) {
-  const className = cn("libsql-cell font-mono flex", "pl-2 pr-2");
+  const className = cn("h-[35px] leading-[35px] font-mono flex", "pl-2 pr-2");
   const isAlignRight = align === "right";
 
   const textBaseStyle = cn(

@@ -1,19 +1,25 @@
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
-import { OptimizeTableHeaderWithIndexProps } from ".";
-import tableResultCellRenderer from "../table-result/render-cell";
+import { ReactElement, useMemo } from "react";
+import {
+  OptimizeTableCellRenderProps,
+  OptimizeTableHeaderWithIndexProps,
+} from ".";
 import OptimizeTableState from "./optimize-table-state";
 
-export default function OptimizeTableCell({
+export default function OptimizeTableCell<HeaderMetadata = unknown>({
   state,
   header,
   rowIndex,
   colIndex,
+  renderCell,
 }: {
   state: OptimizeTableState;
   rowIndex: number;
   colIndex: number;
-  header: OptimizeTableHeaderWithIndexProps;
+  header: OptimizeTableHeaderWithIndexProps<HeaderMetadata>;
+  renderCell: (
+    props: OptimizeTableCellRenderProps<HeaderMetadata>
+  ) => ReactElement;
 }) {
   const { isFocus, isSelected, isBorderBottom, isBorderRight } =
     state.getCellStatus(rowIndex, colIndex);
@@ -49,7 +55,7 @@ export default function OptimizeTableCell({
   }
 
   const cellClassName = cn(
-    "box-border hover:bg-neutral-100 dark:hover:bg-neutral-800",
+    "overflow-hidden border-r border-b box-border hover:bg-neutral-100 dark:hover:bg-neutral-800",
     isSelected && "border-neutral-950 dark:border-neutral-50",
     isBorderBottom && "border-b border-b-neutral-950 dark:border-b-neutral-50",
     isBorderRight && "border-r border-r-neutral-950 dark:border-r-neutral-50",
@@ -58,8 +64,6 @@ export default function OptimizeTableCell({
     isSticky && "sticky",
     cellBackgroundColor
   );
-
-  const className = cn("libsql-table-cell");
 
   return (
     <td
@@ -90,8 +94,8 @@ export default function OptimizeTableCell({
         }
       }}
     >
-      <div className={className}>
-        {tableResultCellRenderer({
+      <div className={"flex-1 overflow-hidden whitespace-nowrap"}>
+        {renderCell({
           x: colIndex,
           y: rowIndex,
           state: state,

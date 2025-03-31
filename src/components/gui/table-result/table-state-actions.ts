@@ -1,7 +1,8 @@
-import OptimizeTableState from "./optimize-table-state";
+import OptimizeTableState from "../table-optimized/optimize-table-state";
+import { TableHeaderMetadata } from "./type";
 
 export default class TableStateActions {
-  static duplicateRow(state: OptimizeTableState) {
+  static duplicateRow(state: OptimizeTableState<TableHeaderMetadata>) {
     const rowIndex = state.getFocus()?.y;
     if (!rowIndex) return;
 
@@ -21,7 +22,9 @@ export default class TableStateActions {
     }
   }
 
-  static duplicateRowWithoutKey(state: OptimizeTableState) {
+  static duplicateRowWithoutKey(
+    state: OptimizeTableState<TableHeaderMetadata>
+  ) {
     const rowIndex = state.getFocus()?.y;
     if (!rowIndex) return;
 

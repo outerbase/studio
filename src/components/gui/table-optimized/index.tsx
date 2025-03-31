@@ -1,8 +1,5 @@
 "use client";
-
-import { DatabaseTableColumn } from "@/drivers/base-driver";
 import { cn } from "@/lib/utils";
-import { ColumnType } from "@outerbase/sdk-transform";
 import { Icon } from "@phosphor-icons/react";
 import React, {
   ReactElement,
@@ -20,31 +17,7 @@ import TableHeaderList from "./table-header-list";
 import useTableVisibilityRecalculation from "./use-visibility-calculation";
 
 export type TableCellDecorator = (value: unknown) => ReactElement | null;
-
-export interface TableHeaderMetadata {
-  from?: {
-    schema: string;
-    table: string;
-    column: string;
-  };
-
-  // Primary key
-  isPrimaryKey: boolean;
-
-  // Foreign key reference
-  referenceTo?: {
-    schema: string;
-    table: string;
-    column: string;
-  };
-
-  type?: ColumnType;
-  originalType?: string;
-
-  columnSchema?: DatabaseTableColumn;
-}
-
-export interface OptimizeTableHeaderProps {
+export interface OptimizeTableHeaderProps<MetadataType = unknown> {
   name: string;
 
   display: {
@@ -64,62 +37,67 @@ export interface OptimizeTableHeaderProps {
 
   onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
 
-  metadata: TableHeaderMetadata;
+  metadata: MetadataType;
   store: Map<string, unknown>;
 }
 
-export interface OptimizeTableHeaderWithIndexProps
-  extends OptimizeTableHeaderProps {
+export interface OptimizeTableHeaderWithIndexProps<MetadataType = unknown>
+  extends OptimizeTableHeaderProps<MetadataType> {
   index: number;
   sticky: boolean;
 }
 
-export interface OptimizeTableCellRenderProps {
+export interface OptimizeTableCellRenderProps<MetadataType = unknown> {
   y: number;
   x: number;
   state: OptimizeTableState;
-  header: OptimizeTableHeaderWithIndexProps;
+  header: OptimizeTableHeaderWithIndexProps<MetadataType>;
   isFocus: boolean;
 }
 
-interface TableCellListCommonProps {
-  internalState: OptimizeTableState;
+interface TableCellListCommonProps<MetadataType = unknown> {
+  internalState: OptimizeTableState<MetadataType>;
   renderHeader: (
-    props: OptimizeTableHeaderWithIndexProps,
-    idx: number
+    props: OptimizeTableHeaderWithIndexProps<MetadataType>
+  ) => ReactElement;
+  renderCell: (
+    props: OptimizeTableCellRenderProps<MetadataType>
   ) => ReactElement;
   rowHeight: number;
   onHeaderContextMenu?: (
     e: React.MouseEvent,
-    header: OptimizeTableHeaderWithIndexProps
+    header: OptimizeTableHeaderWithIndexProps<MetadataType>
   ) => void;
   onContextMenu?: (props: {
-    state: OptimizeTableState;
+    state: OptimizeTableState<MetadataType>;
     event: React.MouseEvent;
   }) => void;
   onKeyDown?: (state: OptimizeTableState, event: React.KeyboardEvent) => void;
 }
 
-export interface OptimizeTableProps extends TableCellListCommonProps {
+export interface OptimizeTableProps<HeaderMetadata = unknown>
+  extends TableCellListCommonProps<HeaderMetadata> {
   arrangeHeaderIndex: number[];
   stickyHeaderIndex?: number;
   renderAhead: number;
 }
 
-interface RenderCellListProps extends TableCellListCommonProps {
+interface RenderCellListProps<HeaderMetadata = unknown>
+  extends TableCellListCommonProps<HeaderMetadata> {
   hasSticky: boolean;
   onHeaderResize: (idx: number, newWidth: number) => void;
   customStyles?: React.CSSProperties;
-  headers: OptimizeTableHeaderWithIndexProps[];
+  headers: OptimizeTableHeaderWithIndexProps<HeaderMetadata>[];
   rowEnd: number;
   rowStart: number;
   colEnd: number;
   colStart: number;
 }
 
-function renderCellList({
+function renderCellList<HeaderMetadata = unknown>({
   hasSticky,
   customStyles,
+  renderCell,
   headers,
   rowEnd,
   rowStart,
@@ -130,7 +108,7 @@ function renderCellList({
   renderHeader,
   internalState,
   onHeaderContextMenu,
-}: RenderCellListProps) {
+}: RenderCellListProps<HeaderMetadata>) {
   const headerSizes = internalState.getHeaderWidth();
 
   const templateSizes =
@@ -149,26 +127,32 @@ function renderCellList({
   const cells = windowArray.map((row, rowIndex) => {
     const absoluteRowIndex = rowIndex + rowStart;
 
-    let textClass =
-      "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono";
-    let tdClass = "sticky left-0 bg-neutral-50 dark:bg-neutral-950";
+    let textClass = "flex items-center justify-end h-full pr-2 font-mono";
+    let tdClass =
+      "sticky left-0 bg-neutral-50 dark:bg-neutral-950 border-r border-b";
 
     if (internalState.getSelectedRowIndex().includes(absoluteRowIndex)) {
       if (internalState.isFullSelectionRow(absoluteRowIndex)) {
         textClass = cn(
-          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono",
+          "flex items-center justify-end h-full pr-2 font-mono",
           "bg-neutral-100 dark:bg-neutral-900 border-red-900 text-black dark:text-white font-bold"
         );
-        tdClass = "sticky left-0 bg-neutral-100 dark:bg-blue-800";
+        tdClass =
+          "sticky left-0 bg-neutral-100 dark:bg-blue-800 border-r border-b";
       } else {
         textClass =
-          "libsql-table-cell flex items-center justify-end h-full pr-2 font-mono dark:text-white font-bold";
-        tdClass = "sticky left-0 bg-neutral-100 dark:bg-neutral-900";
+          "flex items-center justify-end h-full pr-2 font-mono dark:text-white font-bold";
+        tdClass =
+          "sticky left-0 bg-neutral-100 dark:bg-neutral-900 border-r border-b";
       }
     }
 
     return (
-      <tr key={absoluteRowIndex} data-row={absoluteRowIndex}>
+      <tr
+        key={absoluteRowIndex}
+        data-row={absoluteRowIndex}
+        className="contents"
+      >
         <td
           className={tdClass}
           style={{ zIndex: 15 }}
@@ -195,6 +179,7 @@ function renderCellList({
             colIndex={headers[0].index}
             rowIndex={absoluteRowIndex}
             header={headers[0]}
+            renderCell={renderCell}
           />
         )}
 
@@ -220,6 +205,7 @@ function renderCellList({
               colIndex={header.index}
               rowIndex={absoluteRowIndex}
               header={header}
+              renderCell={renderCell}
             />
           );
         })}
@@ -229,7 +215,10 @@ function renderCellList({
   });
 
   return (
-    <table style={{ ...customStyles, gridTemplateColumns: templateSizes }}>
+    <table
+      className="absolute top-0 left-0 box-border grid"
+      style={{ ...customStyles, gridTemplateColumns: templateSizes }}
+    >
       <TableHeaderList
         state={internalState}
         renderHeader={renderHeader}
@@ -252,17 +241,18 @@ function renderCellList({
   );
 }
 
-export default function OptimizeTable({
+export default function OptimizeTable<HeaderMetadata = unknown>({
   stickyHeaderIndex,
   internalState,
   renderHeader,
+  renderCell,
   rowHeight,
   renderAhead,
   onContextMenu,
   onHeaderContextMenu,
   onKeyDown,
   arrangeHeaderIndex,
-}: OptimizeTableProps) {
+}: OptimizeTableProps<HeaderMetadata>) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // This is our trigger re-render the whole table
@@ -304,7 +294,7 @@ export default function OptimizeTable({
     return [
       ...(stickyHeaderIndex !== undefined ? [headers[stickyHeaderIndex]] : []),
       ...headerAfterArranged.filter((x) => x.index !== stickyHeaderIndex),
-    ];
+    ] as OptimizeTableHeaderWithIndexProps<HeaderMetadata>[];
   }, [internalState, arrangeHeaderIndex, stickyHeaderIndex, headerRevision]);
 
   const { visibileRange, onHeaderResize } = useTableVisibilityRecalculation({
@@ -321,6 +311,7 @@ export default function OptimizeTable({
   return useMemo(() => {
     const common = {
       headers: headerWithIndex,
+      renderCell,
       rowEnd,
       rowStart,
       colEnd,
@@ -345,7 +336,9 @@ export default function OptimizeTable({
         style={{
           outline: "none",
         }}
-        className={"libsql-table"}
+        className={
+          "relative h-full w-full overflow-auto text-[12px] select-none"
+        }
         onContextMenu={(e) => {
           if (onContextMenu) onContextMenu({ state: internalState, event: e });
           e.preventDefault();
@@ -375,5 +368,6 @@ export default function OptimizeTable({
     onKeyDown,
     revision,
     renderHeader,
+    renderCell,
   ]);
 }
