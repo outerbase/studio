@@ -1,4 +1,3 @@
-import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import deepEqual from "deep-equal";
 import { OptimizeTableHeaderProps, TableCellDecorator } from ".";
@@ -10,8 +9,6 @@ export interface OptimizeTableRowValue {
   isNewRow?: boolean;
   isRemoved?: boolean;
 }
-
-export type AggregateFunction = "sum" | "avg" | "min" | "max" | "count";
 
 type TableChangeEventCallback = (state: OptimizeTableState) => void;
 
@@ -50,7 +47,6 @@ export default class OptimizeTableState<HeaderMetadata = unknown> {
 
   protected changeCounter = 1;
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
-  protected defaultAggregateFunction: AggregateFunction = "sum";
   protected sql: string = "";
 
   constructor(
@@ -788,126 +784,10 @@ export default class OptimizeTableState<HeaderMetadata = unknown> {
     return { isFocus, isSelected, isBorderBottom, isBorderRight };
   }
 
-  getSelectionAggregatedResult() {
-    let sum = undefined;
-    let avg = undefined;
-    let min = undefined;
-    let max = undefined;
-    let count = 0;
-    let detectedDataType = undefined;
-
-    const selectedCell = new Set<string>();
-    for (const range of this.selectionRanges) {
-      for (let x = range.x1; x <= range.x2; x++) {
-        for (let y = range.y1; y <= range.y2; y++) {
-          const key = `${x}-${y}`;
-          if (selectedCell.has(key)) {
-            continue;
-          }
-          selectedCell.add(key);
-
-          const value = this.getValue(y, x);
-
-          if (value !== null && value !== undefined && value !== "") {
-            // detect first valid element data type
-            if (detectedDataType === undefined) {
-              if (!isNaN(Number(value))) {
-                detectedDataType = "number";
-              } else if (
-                typeof value === "string" &&
-                !isNaN(Date.parse(value))
-              ) {
-                detectedDataType = "date";
-              }
-            }
-
-            if (detectedDataType === "number") {
-              const parsed = Number(value);
-              if (!isNaN(parsed)) {
-                sum = sum !== undefined ? sum + parsed : parsed;
-                min =
-                  min !== undefined
-                    ? (min as number) < parsed
-                      ? min
-                      : parsed
-                    : parsed;
-                max =
-                  max !== undefined
-                    ? (max as number) > parsed
-                      ? max
-                      : parsed
-                    : parsed;
-              }
-            } else if (
-              detectedDataType === "date" &&
-              (isValidDate(value as string) || isValidDateTime(value as string))
-            ) {
-              const parsed = Date.parse(value as string);
-              if (!isNaN(parsed)) {
-                min =
-                  min !== undefined
-                    ? Date.parse(min as string) < parsed
-                      ? min
-                      : value
-                    : value;
-                max =
-                  max !== undefined
-                    ? Date.parse(max as string) > parsed
-                      ? max
-                      : value
-                    : value;
-              }
-            }
-          }
-          count = count + 1;
-        }
-      }
-    }
-    if (sum !== undefined && count > 0) {
-      avg = sum / count;
-    }
-    if (detectedDataType === "number") {
-      return {
-        sum: formatNumber(sum),
-        avg: formatNumber(avg),
-        min: formatNumber(min as number),
-        max: formatNumber(max as number),
-        count: formatNumber(count),
-      };
-    }
-    return {
-      min,
-      max,
-      count,
-    };
-  }
-
-  setDefaultAggregateFunction(functionName: AggregateFunction) {
-    this.defaultAggregateFunction = functionName;
-  }
-  getDefaultAggregateFunction() {
-    return this.defaultAggregateFunction;
-  }
   setSql(sql: string) {
     this.sql = sql;
   }
   getSql() {
     return this.sql;
   }
-}
-
-function isValidDate(value: string): boolean {
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(value)) return false;
-
-  const parsedDate = new Date(value);
-  return !isNaN(parsedDate.getTime());
-}
-
-function isValidDateTime(value: string): boolean {
-  const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
-  if (!dateTimeRegex.test(value)) return false;
-
-  const parsedDate = new Date(value);
-  return !isNaN(parsedDate.getTime());
 }
