@@ -20,7 +20,7 @@ function generateSql({
     CREATE TRIGGER ${name}
     ${whenString}${operation}${columnNameString} ON ${tableName}
     BEGIN
-      ${statement};
+      ${statement}
     END;
   `;
 }
@@ -44,14 +44,19 @@ describe("parse trigger", () => {
 
     const insert = parseCreateTriggerScript(
       "main",
-      generateSql({ name, operation: "INSERT", tableName, statement })
+      generateSql({
+        name,
+        operation: "INSERT",
+        tableName,
+        statement: statement + statement,
+      })
     );
     expect(insert).toMatchObject({
       name: name,
       when: "BEFORE",
       operation: "INSERT",
       tableName: tableName,
-      statement: statement,
+      statement: statement + statement,
     });
 
     const updateOf = parseCreateTriggerScript(

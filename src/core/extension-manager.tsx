@@ -1,5 +1,6 @@
 import { OptimizeTableHeaderProps } from "@/components/gui/table-optimized";
 import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
+import { TableHeaderMetadata } from "@/components/gui/table-result/type";
 import { DatabaseSchemaItem, DatabaseSchemas } from "@/drivers/base-driver";
 import { ReactElement } from "react";
 import { IStudioExtension } from "./extension-base";
@@ -29,8 +30,8 @@ type CreateResourceMenuHandler = (
 ) => StudioExtensionMenuItem | undefined;
 
 type QueryHeaderResultMenuHandler = (
-  header: OptimizeTableHeaderProps,
-  state: OptimizeTableState
+  header: OptimizeTableHeaderProps<TableHeaderMetadata>,
+  state: OptimizeTableState<TableHeaderMetadata>
 ) => StudioExtensionMenuItem | undefined;
 
 type AfterFetchSchemaHandler = (schema: DatabaseSchemas) => void;
@@ -123,8 +124,8 @@ export class StudioExtensionManager extends StudioExtensionContext {
   }
 
   getQueryHeaderContextMenu(
-    header: OptimizeTableHeaderProps,
-    state: OptimizeTableState
+    header: OptimizeTableHeaderProps<TableHeaderMetadata>,
+    state: OptimizeTableState<TableHeaderMetadata>
   ) {
     return this.queryResultHeaderContextMenu
       .map((handler) => handler(header, state))

@@ -18,9 +18,9 @@ export default function TableFakeBodyPadding({
   const paddingBottom = (rowCount - rowEnd) * rowHeight;
 
   return (
-    <tbody>
+    <tbody className="contents">
       {!!paddingTop && (
-        <tr key="padding-top">
+        <tr key="padding-top" className="contents">
           <td
             style={{
               height: paddingTop,
@@ -33,7 +33,7 @@ export default function TableFakeBodyPadding({
       {children}
 
       {!!paddingBottom && (
-        <tr key="padding-bottom">
+        <tr className="contents" key="padding-bottom">
           <td
             style={{
               height: paddingBottom,

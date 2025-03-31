@@ -13,6 +13,8 @@ import EditChartMenu from "../chart/edit-chart-menu";
 import ResultTable from "../gui/query-result-table";
 import SqlEditor from "../gui/sql-editor";
 import OptimizeTableState from "../gui/table-optimized/optimize-table-state";
+import { createTableStateFromResult } from "../gui/table-result/helper";
+import { TableHeaderMetadata } from "../gui/table-result/type";
 import { Button } from "../orbit/button";
 import { MenuBar } from "../orbit/menu-bar";
 import { createAutoBoardChartValue } from "./board-auto-value";
@@ -34,7 +36,8 @@ export default function BoardChartEditor({
     storage,
     resolvedFilterValue,
   } = useBoardContext();
-  const [result, setResult] = useState<OptimizeTableState>();
+  const [result, setResult] =
+    useState<OptimizeTableState<TableHeaderMetadata>>();
 
   const [value, setValue] = useState<ChartValue>(() => {
     if (initialValue) return initialValue;
@@ -102,7 +105,7 @@ export default function BoardChartEditor({
         .query(sourceId, sqlWithVariables)
         .then((newResult) => {
           setResult(
-            OptimizeTableState.createFromResult({
+            createTableStateFromResult({
               result: newResult,
               driver: sourceDriver.getDriver(sourceId),
               schemas: schema,

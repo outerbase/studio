@@ -7,6 +7,7 @@ import GenericCell from "../table-cell/generic-cell";
 import NumberCell from "../table-cell/number-cell";
 import TextCell from "../table-cell/text-cell";
 import { OptimizeTableCellRenderProps } from "../table-optimized";
+import { TableHeaderMetadata } from "./type";
 
 function detectTextEditorType(
   value: DatabaseValue<string>
@@ -47,7 +48,7 @@ export default function tableResultCellRenderer({
   state,
   header,
   isFocus,
-}: OptimizeTableCellRenderProps) {
+}: OptimizeTableCellRenderProps<TableHeaderMetadata>) {
   const editMode = isFocus && state.isInEditMode();
   const value = state.getValue(y, x);
   const valueType = determineCellType(value);

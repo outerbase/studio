@@ -4,7 +4,7 @@ import type { OptimizeTableHeaderWithIndexProps } from ".";
 import OptimizeTableState from "./optimize-table-state";
 import TableHeaderResizeHandler from "./table-header-resize-handler";
 
-export default function TableHeader({
+export default function TableHeader<HeaderMetadata = unknown>({
   idx,
   header,
   onHeaderResize,
@@ -15,16 +15,18 @@ export default function TableHeader({
 }: {
   idx: number;
   sticky: boolean;
-  header: OptimizeTableHeaderWithIndexProps;
-  state: OptimizeTableState;
+  header: OptimizeTableHeaderWithIndexProps<HeaderMetadata>;
+  state: OptimizeTableState<HeaderMetadata>;
   onHeaderResize: (idx: number, newWidth: number) => void;
   onContextMenu?: React.MouseEventHandler;
   renderHeader: (
-    props: OptimizeTableHeaderWithIndexProps,
-    idx: number
+    props: OptimizeTableHeaderWithIndexProps<HeaderMetadata>
   ) => ReactElement;
 }) {
-  const className = cn(sticky ? "sticky z-30" : undefined, "bg-background");
+  const className = cn(
+    sticky ? "z-30" : undefined,
+    "bg-background border-r border-b overflow-hidden sticky top-0 h-[35px] leading-[35px] flex text-left z-10 p-0"
+  );
 
   return (
     <th
@@ -36,7 +38,7 @@ export default function TableHeader({
         left: sticky ? state.gutterColumnWidth : undefined,
       }}
     >
-      {renderHeader(header, idx)}
+      {renderHeader(header)}
       {header.setting.resizable && (
         <TableHeaderResizeHandler idx={idx + 1} onResize={onHeaderResize} />
       )}

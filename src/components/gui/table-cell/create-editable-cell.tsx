@@ -1,10 +1,10 @@
 import { DatabaseValue } from "@/drivers/base-driver";
-import { cn } from "@/lib/utils";
 import { ColumnType } from "@outerbase/sdk-transform";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFullEditor } from "../providers/full-editor-provider";
 import { OptimizeTableHeaderWithIndexProps } from "../table-optimized";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
+import { TableHeaderMetadata } from "../table-result/type";
 import GenericCell from "./generic-cell";
 
 export interface TableEditableCell<T = unknown> {
@@ -16,7 +16,7 @@ export interface TableEditableCell<T = unknown> {
   state: OptimizeTableState;
   onChange?: (newValue: DatabaseValue<T>) => void;
   editor?: "input" | "json" | "text";
-  header: OptimizeTableHeaderWithIndexProps;
+  header: OptimizeTableHeaderWithIndexProps<TableHeaderMetadata>;
 }
 
 interface TabeEditableCellProps<T = unknown> {
@@ -147,7 +147,7 @@ export default function createEditableCell<T = unknown>({
       (editor === undefined || editor === "input")
     ) {
       return (
-        <div className={cn("libsql-cell flex")}>
+        <div className={"flex h-[35px] leading-[35px]"}>
           <InputCellEditor
             state={state}
             readOnly={state.getReadOnlyMode()}

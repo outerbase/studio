@@ -36,6 +36,8 @@ import OpacityLoading from "../loading-opacity";
 import ResultStats from "../result-stat";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
 import useTableResultColumnFilter from "../table-result/filter-column";
+import { createTableStateFromResult } from "../table-result/helper";
+import { TableHeaderMetadata } from "../table-result/type";
 import { Toolbar } from "../toolbar";
 import { useCurrentTab } from "../windows-tab";
 
@@ -55,7 +57,7 @@ export default function TableDataWindow({
   const [executeError, setExecuteError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<OptimizeTableState>();
+  const [data, setData] = useState<OptimizeTableState<TableHeaderMetadata>>();
   const [tableSchema, setTableSchema] = useState<DatabaseTableSchema>();
   const [stat, setStat] = useState<DatabaseResultStat>();
   const [sortColumns, setSortColumns] = useState<ColumnSortOption[]>([]);
@@ -92,7 +94,7 @@ export default function TableDataWindow({
             orderBy: sortColumns,
           });
 
-        const tableState = OptimizeTableState.createFromResult({
+        const tableState = createTableStateFromResult({
           driver: databaseDriver,
           result: dataResult,
           tableSchema: schemaResult,
@@ -161,7 +163,7 @@ export default function TableDataWindow({
 
   const onDiscard = useCallback(() => {
     if (data) {
-      data.disardAllChange();
+      data.discardAllChange();
     }
   }, [data]);
 
@@ -352,7 +354,10 @@ export default function TableDataWindow({
                     onChange={(e) => setLimit(e.currentTarget.value)}
                     onBlur={(e) => {
                       try {
-                        const finalValue = parseInt(e.currentTarget.value);
+                        const finalValue = Math.max(
+                          0,
+                          parseInt(e.currentTarget.value)
+                        );
                         if (finalValue !== finalLimit) {
                           setFinalLimit(finalValue);
                         }
@@ -375,10 +380,14 @@ export default function TableDataWindow({
                     onChange={(e) => setOffset(e.currentTarget.value)}
                     onBlur={(e) => {
                       try {
-                        const finalValue = parseInt(e.currentTarget.value);
+                        const finalValue = Math.max(
+                          0,
+                          parseInt(e.currentTarget.value)
+                        );
                         if (finalValue !== finalOffset) {
                           setFinalOffset(finalValue);
                         }
+                        setOffset(finalValue.toString());
                       } catch (e) {
                         setOffset(finalOffset.toString());
                       }

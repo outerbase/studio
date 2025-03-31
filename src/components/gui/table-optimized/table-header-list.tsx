@@ -3,7 +3,7 @@ import { OptimizeTableHeaderWithIndexProps } from ".";
 import OptimizeTableState from "./optimize-table-state";
 import TableHeader from "./table-header";
 
-export default function TableHeaderList({
+export default function TableHeaderList<HeaderMetadata = unknown>({
   headers,
   onHeaderResize,
   renderHeader,
@@ -11,25 +11,22 @@ export default function TableHeaderList({
   onHeaderContextMenu,
   state,
 }: {
-  headers: OptimizeTableHeaderWithIndexProps[];
+  headers: OptimizeTableHeaderWithIndexProps<HeaderMetadata>[];
   renderHeader: (
-    props: OptimizeTableHeaderWithIndexProps,
-    idx: number
+    props: OptimizeTableHeaderWithIndexProps<HeaderMetadata>
   ) => ReactElement;
   onHeaderResize: (idx: number, newWidth: number) => void;
   sticky: boolean;
   onHeaderContextMenu?: (
     e: React.MouseEvent,
-    header: OptimizeTableHeaderWithIndexProps
+    header: OptimizeTableHeaderWithIndexProps<HeaderMetadata>
   ) => void;
-  state: OptimizeTableState;
+  state: OptimizeTableState<HeaderMetadata>;
 }) {
   return (
-    <thead>
-      <tr>
-        <th className="sticky left-0 z-30 bg-neutral-50 dark:bg-neutral-950">
-          <div className="libsql-table-cell flex h-full items-center justify-end pr-2 font-mono font-bold"></div>
-        </th>
+    <thead className="contents">
+      <tr className="contents">
+        <th className="sticky top-0 left-0 z-30 border-r border-b bg-neutral-50 dark:bg-neutral-950"></th>
         {headers.map((header, idx) => {
           return (
             <TableHeader

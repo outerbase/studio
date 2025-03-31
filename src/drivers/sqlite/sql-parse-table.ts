@@ -6,125 +6,154 @@ import type {
   DatabaseTableSchema,
   SqlOrder,
 } from "@/drivers/base-driver";
-import { sqliteDialect } from "@/drivers/sqlite/sqlite-dialect";
-import type { SyntaxNode, TreeCursor } from "@lezer/common";
+import { Token, tokenizeSql } from "@outerbase/sdk-transform";
 import { unescapeIdentity } from "./sql-helper";
 
-export class Cursor {
-  protected ptr: SyntaxNode | null;
-  protected sql = "";
+// This class represents a new cursor implementation for SQL parsing that operates on an array of strings
+// rather than an Abstract Syntax Tree (AST). This approach is designed to reduce dependency on
+// code-mirror's AST which may be subject to change, providing more stability for our parsing logic.
+export class CursorV2 {
+  private ptr: number = 0;
 
-  constructor(ptr: TreeCursor, sql: string) {
-    this.ptr = ptr.node;
-    this.sql = sql;
-  }
-
-  expectKeyword(keyword: string) {
-    const errorMessage = `Expect ${keyword} keywords, but not found`;
-
-    if (!this.ptr) throw new Error(errorMessage);
-    if (!this.matchKeyword(keyword)) throw new Error(errorMessage);
-
-    this.ptr = this.ptr.nextSibling;
-  }
-
-  expectKeywordOptional(keyword: string) {
-    if (this.ptr) {
-      if (this.matchKeyword(keyword)) {
-        this.next();
-      }
+  constructor(private tokens: Token[]) {
+    // Trim whitespace tokens from the beginning and end
+    while (this.tokens.length > 0 && this.tokens[0].type === "WHITESPACE") {
+      this.tokens.shift();
     }
-  }
 
-  expectKeywordsOptional(keywords: string[]) {
-    if (keywords.length === 0) return;
-    if (this.matchKeyword(keywords[0] ?? "")) {
-      this.next();
-      for (const k of keywords.slice(1)) {
-        this.expectKeyword(k);
-      }
+    while (
+      this.tokens.length > 0 &&
+      this.tokens[this.tokens.length - 1].type === "WHITESPACE"
+    ) {
+      this.tokens.pop();
     }
+
+    this.tokens = tokens;
   }
 
-  consumeIdentifier() {
-    if (this.ptr) {
-      const id = unescapeIdentity(this.read());
-      this.next();
-      return id;
-    }
-    return "";
+  getPointer() {
+    return this.ptr;
   }
 
-  readKeyword(): string {
-    if (this.ptr && this.ptr.type.name === "Keyword") {
-      const keyword = this.read();
-      this.next();
-      return keyword;
-    }
-    return "";
-  }
-
-  next() {
-    this.ptr = this.ptr?.nextSibling ?? null;
-  }
-
-  matchKeyword(keyword: string) {
-    if (this.ptr && this.ptr.type.name !== "Keyword") return false;
-    return this.read().toUpperCase() === keyword.toUpperCase();
-  }
-
-  matchKeywords(keywords: string[]) {
-    if (this.ptr && this.ptr.type.name !== "Keyword") return false;
-    const currentValue = this.read().toUpperCase();
-    return keywords.some((keyword) => keyword.toUpperCase() === currentValue);
-  }
-
-  match(keyword: string) {
-    if (!this.ptr) return false;
-    return this.read().toUpperCase() === keyword.toUpperCase();
+  toStringRange(start: number, end: number) {
+    return this.tokens
+      .slice(start, end)
+      .map((t) => t.value)
+      .join("");
   }
 
   read(): string {
-    if (this.ptr?.node) {
-      return this.sql.substring(this.ptr.node.from, this.ptr.node.to);
+    if (this.end()) return "";
+    return this.tokens[this.ptr].value;
+  }
+
+  consumeBlock(): string {
+    if (this.match("(")) {
+      return this.consumeParen().toString();
+    } else {
+      return this.consume();
     }
-    return "";
   }
 
-  node(): SyntaxNode | undefined {
-    return this.ptr?.node;
+  currentType() {
+    return this.tokens[this.ptr].type;
   }
 
-  type(): string | undefined {
-    return this.ptr?.type.name;
-  }
+  consumeParen(): CursorV2 {
+    if (this.read() !== "(") throw new Error("Expecting (");
 
-  enterParens(): Cursor | null {
-    if (this.ptr?.firstChild) {
-      if (this.ptr.firstChild.name !== "(") return null;
-      if (!this.ptr.firstChild.nextSibling) return null;
-      return new Cursor(this.ptr.firstChild.nextSibling.cursor(), this.sql);
+    const start = this.ptr + 1;
+    let counter = 1;
+
+    // Find the matching closing paren
+    while (counter > 0) {
+      if (!this.next()) throw new Error("Expecting closing paren");
+      if (this.read() === "(") counter++;
+      if (this.read() === ")") counter--;
     }
 
-    return null;
+    const newCursor = new CursorV2(this.tokens.slice(start, this.ptr));
+    this.next();
+
+    return newCursor;
+  }
+
+  consume() {
+    const value = this.read();
+    this.next();
+    return value;
+  }
+
+  consumeIdentifier() {
+    const value = unescapeIdentity(this.read());
+    this.next();
+    return value;
+  }
+
+  expectToken(value: string) {
+    if (!this.match(value)) throw new Error(`Expecting ${value}`);
+    this.next();
+  }
+
+  expectTokenOptional(value: string) {
+    if (this.match(value)) this.next();
+  }
+
+  expectTokensOptional(values: string[]) {
+    if (values.length === 0) return;
+    if (this.read() === values[0]) {
+      this.next();
+      for (const v of values.slice(1)) {
+        this.expectToken(v);
+      }
+    }
+  }
+
+  expectTokens(values: string[]) {
+    for (const v of values) {
+      this.expectToken(v);
+    }
+  }
+
+  /**
+   * Next will skip to valid non-whitespace token
+   * @returns true if there is a next token, false otherwise
+   */
+  next() {
+    for (this.ptr = this.ptr + 1; this.ptr < this.tokens.length; this.ptr++) {
+      if (this.currentType() !== "WHITESPACE") {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  match(value: string) {
+    if (this.end()) return false;
+    return this.read().toLowerCase() === value.toLowerCase();
+  }
+
+  matchTokens(values: string[]) {
+    return values.some((v) => this.read().toLowerCase() === v.toLowerCase());
   }
 
   end() {
-    return this.ptr === null;
+    return this.ptr >= this.tokens.length;
   }
-}
 
-export function buildSyntaxCursor(sql: string): Cursor {
-  const r = sqliteDialect.language.parser.parse(sql).cursor();
-  r.firstChild();
-  r.firstChild();
+  toString() {
+    return this.tokens.map((t) => t.value).join("");
+  }
 
-  return new Cursor(r, sql);
+  toStringWithParen() {
+    return "(" + this.toString() + ")";
+  }
 }
 
 function parseColumnDef(
   schemaName: string,
-  cursor: Cursor
+  cursor: CursorV2
 ): DatabaseTableColumn | null {
   const columnName = cursor.consumeIdentifier();
   if (!columnName) return null;
@@ -134,9 +163,8 @@ function parseColumnDef(
 
   // Handle case such as VARCHAR(255) where we need to read
   // something inside the parens
-  if (cursor.type() === "Parens") {
-    dataType += cursor.read();
-    cursor.next();
+  if (cursor.match("(")) {
+    dataType += cursor.consumeParen().toStringWithParen();
   }
 
   const constraint = parseColumnConstraint(schemaName, cursor);
@@ -150,12 +178,12 @@ function parseColumnDef(
 }
 
 function parseConstraintConflict(
-  cursor: Cursor
+  cursor: CursorV2
 ): DatabaseColumnConflict | undefined {
-  if (!cursor.matchKeyword("ON")) return;
+  if (!cursor.match("ON")) return;
   cursor.next();
 
-  if (!cursor.matchKeyword("CONFLICT")) return;
+  if (!cursor.match("CONFLICT")) return;
   cursor.next();
 
   if (!cursor.end()) {
@@ -167,7 +195,7 @@ function parseConstraintConflict(
   return;
 }
 
-export function parseColumnList(columnPtr: Cursor) {
+export function parseColumnList(columnPtr: CursorV2) {
   const columns: string[] = [];
 
   while (!columnPtr.end()) {
@@ -182,44 +210,41 @@ export function parseColumnList(columnPtr: Cursor) {
 
 export function parseColumnConstraint(
   schemaName: string,
-  cursor: Cursor
+  cursor: CursorV2
 ): DatabaseTableColumnConstraint | undefined {
-  if (cursor.matchKeyword("CONSTRAINT")) {
+  if (cursor.match("CONSTRAINT")) {
     cursor.next();
-    const constraintName = cursor.consumeIdentifier();
+    const constraintName = cursor.consume();
 
     return {
       ...parseColumnConstraint(schemaName, cursor),
       name: constraintName,
     };
-  } else if (cursor.matchKeyword("PRIMARY")) {
+  } else if (cursor.match("PRIMARY")) {
     let primaryKeyOrder: SqlOrder | undefined;
     let primaryColumns: string[] | undefined;
     let autoIncrement = false;
 
     cursor.next();
-    if (!cursor.matchKeyword("KEY"))
-      throw new Error("PRIMARY must follow by KEY");
+    if (!cursor.match("KEY")) throw new Error("PRIMARY must follow by KEY");
 
     cursor.next();
 
-    const parens = cursor.enterParens();
-    if (parens) {
-      primaryColumns = parseColumnList(parens);
-      cursor.next();
+    if (cursor.match("(")) {
+      primaryColumns = parseColumnList(cursor.consumeParen());
     }
 
-    if (cursor.matchKeyword("ASC")) {
+    if (cursor.match("ASC")) {
       primaryKeyOrder = "ASC";
       cursor.next();
-    } else if (cursor.matchKeyword("DESC")) {
+    } else if (cursor.match("DESC")) {
       primaryKeyOrder = "DESC";
       cursor.next();
     }
 
     const conflict = parseConstraintConflict(cursor);
 
-    if (cursor.matchKeyword("AUTOINCREMENT")) {
+    if (cursor.match("AUTOINCREMENT")) {
       autoIncrement = true;
       cursor.next();
     }
@@ -232,7 +257,7 @@ export function parseColumnConstraint(
       primaryKeyConflict: conflict,
       ...parseColumnConstraint(schemaName, cursor),
     };
-  } else if (cursor.matchKeyword("NOT")) {
+  } else if (cursor.match("NOT")) {
     cursor.next();
     if (!cursor.match("NULL")) throw new Error("NOT should follow by NULL");
     cursor.next();
@@ -243,15 +268,13 @@ export function parseColumnConstraint(
       notNullConflict: conflict,
       ...parseColumnConstraint(schemaName, cursor),
     };
-  } else if (cursor.matchKeyword("UNIQUE")) {
+  } else if (cursor.match("UNIQUE")) {
     let uniqueColumns: string[] | undefined;
 
     cursor.next();
 
-    const parens = cursor.enterParens();
-    if (parens) {
-      uniqueColumns = parseColumnList(parens);
-      cursor.next();
+    if (cursor.read() === "(") {
+      uniqueColumns = parseColumnList(cursor.consumeParen());
     }
 
     const conflict = parseConstraintConflict(cursor);
@@ -262,16 +285,16 @@ export function parseColumnConstraint(
       uniqueColumns,
       ...parseColumnConstraint(schemaName, cursor),
     };
-  } else if (cursor.matchKeyword("DEFAULT")) {
+  } else if (cursor.match("DEFAULT")) {
     let defaultValue: unknown;
     let defaultExpression: string | undefined;
 
     cursor.next();
 
-    if (cursor.type() === "String") {
+    if (cursor.currentType() === "STRING") {
       defaultValue = cursor.read().slice(1, -1);
       cursor.next();
-    } else if (cursor.type() === "Operator") {
+    } else if (cursor.currentType() === "OPERATOR") {
       if (cursor.match("+")) {
         cursor.next();
         defaultValue = Number(cursor.read());
@@ -281,12 +304,11 @@ export function parseColumnConstraint(
         defaultValue = -Number(cursor.read());
         cursor.next();
       }
-    } else if (cursor.type() === "Number") {
+    } else if (cursor.currentType() === "NUMBER") {
       defaultValue = Number(cursor.read());
       cursor.next();
-    } else if (cursor.type() === "Parens") {
-      defaultExpression = cursor.read();
-      cursor.next();
+    } else if (cursor.match("(")) {
+      defaultExpression = cursor.consumeParen().toString();
     } else if (
       cursor.match("current_timestamp") ||
       cursor.match("current_time") ||
@@ -304,7 +326,7 @@ export function parseColumnConstraint(
       defaultExpression,
       ...parseColumnConstraint(schemaName, cursor),
     };
-  } else if (cursor.matchKeyword("CHECK")) {
+  } else if (cursor.match("CHECK")) {
     cursor.next();
 
     const expr = cursor.read();
@@ -314,7 +336,7 @@ export function parseColumnConstraint(
       checkExpression: expr,
       ...parseColumnConstraint(schemaName, cursor),
     };
-  } else if (cursor.matchKeyword("COLLATE")) {
+  } else if (cursor.match("COLLATE")) {
     cursor.next();
 
     const collationName = cursor.read();
@@ -324,18 +346,15 @@ export function parseColumnConstraint(
       collate: collationName,
       ...parseColumnConstraint(schemaName, cursor),
     };
-  } else if (cursor.matchKeyword("FOREIGN")) {
+  } else if (cursor.match("FOREIGN")) {
     cursor.next();
 
     if (!cursor.match("KEY")) throw new Error("FOREIGN should follow by KEY");
     cursor.next();
 
-    const parens = cursor.enterParens();
-
-    if (!parens) throw new Error("FOREIGN KEY should follow by column list");
-
+    const parens = cursor.consumeParen();
     const columns = parseColumnList(parens);
-    cursor.next();
+
     const refConstraint = parseColumnConstraint(schemaName, cursor);
 
     return {
@@ -346,7 +365,7 @@ export function parseColumnConstraint(
         columns,
       },
     };
-  } else if (cursor.matchKeyword("REFERENCES")) {
+  } else if (cursor.match("REFERENCES")) {
     cursor.next();
     const foreignTableName = cursor.consumeIdentifier();
     let foreignColumns: string[] = [];
@@ -355,14 +374,12 @@ export function parseColumnConstraint(
     // We may visit more rule in the future, but at the moment
     // it is too complex to handle all the rules.
     // We will just grab foreign key column first
-    while (!cursor.end() && cursor.type() !== "Parens" && !cursor.match(",")) {
+    while (!cursor.end() && !cursor.match("(") && !cursor.match(",")) {
       cursor.next();
     }
 
-    const columnPtr = cursor.enterParens();
-
-    if (columnPtr) {
-      foreignColumns = parseColumnList(columnPtr);
+    if (cursor.match("(")) {
+      foreignColumns = parseColumnList(cursor.consumeParen());
     }
 
     return {
@@ -383,12 +400,10 @@ export function parseColumnConstraint(
       throw new Error("GENERATED ALWAYS should follow by AS");
 
     cursor.next();
-    const expr = cursor.read();
+    const expr = cursor.consumeBlock();
 
     cursor.next();
-    const virtualColumnType = cursor.matchKeyword("STORED")
-      ? "STORED"
-      : "VIRTUAL";
+    const virtualColumnType = cursor.match("STORED") ? "STORED" : "VIRTUAL";
 
     return {
       generatedType: virtualColumnType,
@@ -402,7 +417,7 @@ export function parseColumnConstraint(
 
 function parseTableDefinition(
   schemaName: string,
-  cursor: Cursor
+  cursor: CursorV2
 ): {
   columns: DatabaseTableColumn[];
   constraints: DatabaseTableColumnConstraint[];
@@ -415,7 +430,7 @@ function parseTableDefinition(
     moveNext = false;
 
     if (
-      cursor.matchKeywords([
+      cursor.matchTokens([
         "CONSTRAINT",
         "PRIMARY",
         "UNIQUE",
@@ -444,6 +459,8 @@ function parseTableDefinition(
     cursor.next();
   }
 
+  // console.log(columns, constraints);
+
   for (const constraint of constraints) {
     if (constraint.primaryKey && constraint.primaryColumns) {
       for (const pkColumn of constraint.primaryColumns) {
@@ -468,7 +485,7 @@ function parseTableDefinition(
   return { columns, constraints };
 }
 
-function parseFTS5(cursor: Cursor | null): DatabaseTableFts5 {
+function parseFTS5(cursor: CursorV2): DatabaseTableFts5 {
   if (!cursor) return {};
 
   let content: string | undefined;
@@ -505,7 +522,7 @@ function parseFTS5(cursor: Cursor | null): DatabaseTableFts5 {
   };
 }
 
-function parseTableOption(cursor: Cursor):
+function parseTableOption(cursor: CursorV2):
   | {
       strict?: boolean;
       withoutRowId?: boolean;
@@ -539,19 +556,15 @@ export function parseCreateTableScript(
   schemaName: string,
   sql: string
 ): DatabaseTableSchema {
-  const tree = sqliteDialect.language.parser.parse(sql);
-  const ptr = tree.cursor();
+  const cursor = new CursorV2(tokenizeSql(sql, "sqlite"));
 
-  ptr.firstChild();
-  ptr.firstChild();
+  cursor.expectToken("CREATE");
+  cursor.expectTokenOptional("TEMP");
+  cursor.expectTokenOptional("TEMPORARY");
+  cursor.expectTokenOptional("VIRTUAL");
+  cursor.expectToken("TABLE");
+  cursor.expectTokensOptional(["IF", "NOT", "EXIST"]);
 
-  const cursor = new Cursor(ptr, sql);
-  cursor.expectKeyword("CREATE");
-  cursor.expectKeywordOptional("TEMP");
-  cursor.expectKeywordOptional("TEMPORARY");
-  cursor.expectKeywordOptional("VIRTUAL");
-  cursor.expectKeyword("TABLE");
-  cursor.expectKeywordsOptional(["IF", "NOT", "EXIST"]);
   const tableName = cursor.consumeIdentifier();
 
   // Check for FTS5
@@ -561,19 +574,15 @@ export function parseCreateTableScript(
     cursor.next();
     if (cursor.match("FTS5")) {
       cursor.next();
-      fts5 = parseFTS5(cursor.enterParens());
-      cursor.next();
+      fts5 = parseFTS5(cursor.consumeParen());
     }
   }
 
-  const defCursor = cursor.enterParens();
-  const defs = defCursor
-    ? parseTableDefinition(schemaName, defCursor)
+  const defs = cursor.match("(")
+    ? parseTableDefinition(schemaName, cursor.consumeParen())
     : { columns: [], constraints: [] };
 
-  cursor.next();
   // Parsing table options
-
   const pk = defs.columns.filter((col) => col.pk).map((col) => col.name);
 
   const autoIncrement = defs.columns.some(
