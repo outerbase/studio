@@ -1,12 +1,7 @@
-import {
-  buildTableResultHeader,
-  BuildTableResultProps,
-} from "@/lib/build-table-result";
 import { formatNumber } from "@/lib/convertNumber";
 import { selectArrayFromIndexList } from "@/lib/export-helper";
 import deepEqual from "deep-equal";
 import { OptimizeTableHeaderProps, TableCellDecorator } from ".";
-import { TableHeaderMetadata } from "../table-result/type";
 
 export interface OptimizeTableRowValue {
   raw: Record<string, unknown>;
@@ -57,23 +52,6 @@ export default class OptimizeTableState<HeaderMetadata = unknown> {
   protected changeLogs: Record<number, OptimizeTableRowValue> = {};
   protected defaultAggregateFunction: AggregateFunction = "sum";
   protected sql: string = "";
-
-  static createFromResult(props: BuildTableResultProps) {
-    const r = new OptimizeTableState<TableHeaderMetadata>(
-      buildTableResultHeader(props),
-      props.result.rows.map((r) => ({ ...r }))
-    );
-
-    if (r.getRowsCount() >= 1000) {
-      r.gutterColumnWidth = 50;
-    }
-
-    if (r.getRowsCount() >= 10000) {
-      r.gutterColumnWidth = 60;
-    }
-
-    return r;
-  }
 
   constructor(
     headers: OptimizeTableHeaderProps<HeaderMetadata>[],

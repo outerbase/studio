@@ -6,7 +6,7 @@ import AggregateResultButton from "../aggregate-result/aggregate-result-button";
 import ExportResultButton from "../export/export-result-button";
 import ResultTable from "../query-result-table";
 import ResultStats from "../result-stat";
-import OptimizeTableState from "../table-optimized/optimize-table-state";
+import { createTableStateFromResult } from "../table-result/helper";
 
 export default function QueryResult({
   result,
@@ -22,7 +22,7 @@ export default function QueryResult({
   const [cachedSchemas] = useState(schema);
 
   const data = useMemo(() => {
-    const state = OptimizeTableState.createFromResult({
+    const state = createTableStateFromResult({
       driver: databaseDriver,
       result: result.result,
       schemas: cachedSchemas,

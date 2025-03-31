@@ -36,6 +36,7 @@ import OpacityLoading from "../loading-opacity";
 import ResultStats from "../result-stat";
 import OptimizeTableState from "../table-optimized/optimize-table-state";
 import useTableResultColumnFilter from "../table-result/filter-column";
+import { createTableStateFromResult } from "../table-result/helper";
 import { TableHeaderMetadata } from "../table-result/type";
 import { Toolbar } from "../toolbar";
 import { useCurrentTab } from "../windows-tab";
@@ -93,7 +94,7 @@ export default function TableDataWindow({
             orderBy: sortColumns,
           });
 
-        const tableState = OptimizeTableState.createFromResult({
+        const tableState = createTableStateFromResult({
           driver: databaseDriver,
           result: dataResult,
           tableSchema: schemaResult,
