@@ -26,9 +26,7 @@ export default function TableHeaderList<HeaderMetadata = unknown>({
   return (
     <thead>
       <tr>
-        <th className="sticky left-0 z-30 bg-neutral-50 dark:bg-neutral-950">
-          <div className="libsql-table-cell flex h-full items-center justify-end pr-2 font-mono font-bold"></div>
-        </th>
+        <th className="left-0 z-20! bg-neutral-50 dark:bg-neutral-950"></th>
         {headers.map((header, idx) => {
           return (
             <TableHeader

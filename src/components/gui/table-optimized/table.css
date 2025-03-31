@@ -52,22 +52,3 @@
   flex-direction: row;
   z-index: 10;
 }
-
-.libsql-table th.sticky {
-  z-index: 20;
-}
-
-.libsql-resizer {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 10px;
-  cursor: col-resize;
-  background: var(--color-critical);
-  opacity: 0;
-}
-
-.libsql-resizer:hover {
-  opacity: 0.5;
-}
