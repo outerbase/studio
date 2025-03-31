@@ -1,5 +1,5 @@
-import { TableHeaderMetadata } from "../table-result/type";
-import OptimizeTableState from "./optimize-table-state";
+import OptimizeTableState from "../table-optimized/optimize-table-state";
+import { TableHeaderMetadata } from "./type";
 
 export default class TableStateActions {
   static duplicateRow(state: OptimizeTableState<TableHeaderMetadata>) {
