@@ -14,10 +14,7 @@ interface SchemaEditorTabProps {
 }
 
 const EMPTY_SCHEMA: DatabaseTableSchemaChange = {
-  name: {
-    old: "",
-    new: "",
-  },
+  name: { old: "", new: "" },
   columns: [],
   constraints: [],
   createScript: "",
@@ -66,6 +63,7 @@ export default function SchemaEditorTab({
   const onDiscard = useCallback(() => {
     setSchema((prev) => {
       return {
+        schemaName: prev.schemaName,
         name: { ...prev.name, new: prev.name.old },
         columns: prev.columns
           .map((col) => ({
