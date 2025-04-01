@@ -5,10 +5,11 @@ import { scc } from "@/core/command";
 import { DatabaseSchemaItem } from "@/drivers/base-driver";
 import { triggerEditorExtensionTab } from "@/extensions/trigger-editor";
 import { ExportFormat, exportTableData } from "@/lib/export-helper";
-import { Table } from "@phosphor-icons/react";
+import { Icon, Table } from "@phosphor-icons/react";
 import { LucideCog, LucideDatabase, LucideView } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ListView, ListViewItem } from "../listview";
+import { CloudflareIcon } from "../resource-card/icon";
 import SchemaCreateDialog from "./schema-editor/schema-create";
 
 interface SchemaListProps {
@@ -39,12 +40,17 @@ function prepareListViewItem(
     let icon = Table;
     let iconClassName = "";
 
+    console.log("ss", s);
+
     if (s.type === "trigger") {
       icon = LucideCog;
       iconClassName = "text-purple-500";
     } else if (s.type === "view") {
       icon = LucideView;
       iconClassName = "text-green-600 dark:text-green-300";
+    } else if (s.type === "table" && s.name === "_cf_KV") {
+      icon = CloudflareIcon as Icon;
+      iconClassName = "text-orange-500";
     }
 
     return {
