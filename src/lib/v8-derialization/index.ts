@@ -78,6 +78,11 @@ function deserializeValue(df: DataView, offset: number): [unknown, number] {
       // Null
       return [null, offset + 1];
     }
+    // Undefined value
+    case "_".charCodeAt(0): {
+      // Undefined
+      return [undefined, offset + 1];
+    }
     // Double precision floating point
     case "N".charCodeAt(0): {
       // Double (8 bytes, 64-bit IEEE 754)

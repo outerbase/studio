@@ -63,31 +63,29 @@ function CloudflareKvValue({
       buffer = new Uint8Array(rawBuffer).buffer;
     }
 
-    console.log(buffer, rawBuffer);
-
     return deserializeV8(buffer);
   }, [y, x, state]);
 
   if (value.error) {
     return (
-      <div className="text-red h-[35px] px-2 leading-[35px]">
+      <div className="h-[35px] px-2 font-mono leading-[35px] text-red-500!">
         Error: {value.error}
       </div>
     );
   }
 
-  let humanReadableValue: string | null = "";
+  let displayValue: string | null = "";
   console.log(value.value);
 
   if (value.value !== undefined) {
     if (typeof value.value === "string") {
-      humanReadableValue = value.value;
+      displayValue = value.value;
     } else if (value.value === null) {
-      humanReadableValue = null;
+      displayValue = null;
     } else if (typeof value.value === "object") {
-      humanReadableValue = JSON.stringify(value.value, null);
+      displayValue = JSON.stringify(value.value, null);
     } else {
-      humanReadableValue = String(value.value);
+      displayValue = String(value.value);
     }
   }
 
@@ -95,9 +93,9 @@ function CloudflareKvValue({
     <TextCell
       header={header}
       state={state}
-      editor={detectTextEditorType(humanReadableValue)}
+      editor={detectTextEditorType(displayValue)}
       editMode={false}
-      value={humanReadableValue}
+      value={displayValue}
       valueType={ColumnType.TEXT}
       focus={isFocus}
       onChange={(newValue) => {

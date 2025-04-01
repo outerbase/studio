@@ -60,8 +60,15 @@ describe("V8 Deserialization", () => {
 
   it("object", () => {
     expect(
-      p("FF0F6F220568656C6C6F2205776F726C6422066E756D626572490A7B02")
-        .value as Record<string, unknown>
+      p("FF0F6F220568656C6C6F2205776F726C6422066E756D626572490A7B02").value
     ).toEqual({ hello: "world", number: 5 });
+  });
+
+  it("object with undefined", () => {
+    expect(
+      p(
+        "FF0F6F220568656C6C6F2205776F726C6422036172724103490249044906240003220275645F7B03"
+      ).value
+    ).toEqual({ hello: "world", arr: [1, 2, 3], ud: undefined });
   });
 });
