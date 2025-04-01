@@ -49,4 +49,19 @@ describe("V8 Deserialization", () => {
   it("big number", () => {
     expect(p("FF0F5A10D20A1FEB8CA954AB").value).toBe(12345678901234567890n);
   });
+
+  it("array", () => {
+    expect(p("FF0F4103220568656C6C6F2205776F726C64490A240003").value).toEqual([
+      "hello",
+      "world",
+      5,
+    ]);
+  });
+
+  it("object", () => {
+    expect(
+      p("FF0F6F220568656C6C6F2205776F726C6422066E756D626572490A7B02")
+        .value as Record<string, unknown>
+    ).toEqual({ hello: "world", number: 5 });
+  });
 });
