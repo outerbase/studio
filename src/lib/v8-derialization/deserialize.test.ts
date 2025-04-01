@@ -71,4 +71,9 @@ describe("V8 Deserialization", () => {
       ).value
     ).toEqual({ hello: "world", arr: [1, 2, 3], ud: undefined });
   });
+
+  it("date", () => {
+    const date = new Date(1743508780000);
+    expect(p("FF0F4400003E8B135F7942").value).toEqual(date);
+  });
 });

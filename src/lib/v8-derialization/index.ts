@@ -93,6 +93,12 @@ function deserializeValue(df: DataView, offset: number): [unknown, number] {
     case "Z".charCodeAt(0): {
       return deserializeBigInt(df, offset + 1);
     }
+    // Date
+    case "D".charCodeAt(0): {
+      // Date: milliseconds since epoch as double (8 bytes, 64-bit IEEE 754)
+      const millisSinceEpoch = df.getFloat64(offset + 1, true); // true = little endian
+      return [new Date(millisSinceEpoch), offset + 1 + 8];
+    }
     case "A".charCodeAt(0): {
       return deserializeDenseJSArray(df, offset + 1);
     }
