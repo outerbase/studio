@@ -66,16 +66,7 @@ function CloudflareKvValue({
     return deserializeV8(buffer);
   }, [y, x, state]);
 
-  if (value.error) {
-    return (
-      <div className="h-[35px] px-2 font-mono leading-[35px] text-red-500!">
-        Error: {value.error}
-      </div>
-    );
-  }
-
   let displayValue: string | null = "";
-  console.log(value.value);
 
   if (value.value !== undefined) {
     if (typeof value.value === "string") {
@@ -83,10 +74,27 @@ function CloudflareKvValue({
     } else if (value.value === null) {
       displayValue = null;
     } else if (typeof value.value === "object") {
-      displayValue = JSON.stringify(value.value, null);
+      // Protect from circular references
+      try {
+        displayValue = JSON.stringify(value.value, null);
+      } catch (e) {
+        if (e instanceof Error) {
+          value.error = e.message;
+        } else {
+          value.error = String(e);
+        }
+      }
     } else {
       displayValue = String(value.value);
     }
+  }
+
+  if (value.error) {
+    return (
+      <div className="h-[35px] px-2 font-mono leading-[35px] text-red-500!">
+        Error: {value.error}
+      </div>
+    );
   }
 
   return (

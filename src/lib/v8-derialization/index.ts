@@ -5,6 +5,36 @@
  * Reference: https://github.com/v8/v8/blob/master/src/objects/value-serializer.cc
  */
 
+/**
+ * Class to track object references during deserialization
+ */
+class ObjectRegistry {
+  private objects: Map<number, unknown> = new Map();
+  private nextId: number = 0;
+
+  /**
+   * Register an object and get its ID
+   */
+  register(obj: unknown): number {
+    const id = this.nextId++;
+    this.objects.set(id, obj);
+    return id;
+  }
+
+  /**
+   * Get an object by its ID
+   */
+  get(id: number): unknown {
+    const obj = this.objects.get(id);
+    if (obj === undefined) {
+      throw new Error(
+        `Object reference not found: ${id} (available: ${[...this.objects.keys()].join(", ")})`
+      );
+    }
+    return obj;
+  }
+}
+
 interface DeserializationResponse {
   error?: string;
   value: unknown;
@@ -27,7 +57,9 @@ export function deserializeV8(buffer: ArrayBuffer): DeserializationResponse {
   }
 
   try {
-    const [value] = deserializeValue(df, 2);
+    // Create a registry to track objects for reference handling
+    const registry = new ObjectRegistry();
+    const [value] = deserializeValue(df, 2, registry);
     return { value };
   } catch (e) {
     if (e instanceof Error) {
@@ -38,7 +70,11 @@ export function deserializeV8(buffer: ArrayBuffer): DeserializationResponse {
   }
 }
 
-function deserializeValue(df: DataView, offset: number): [unknown, number] {
+function deserializeValue(
+  df: DataView,
+  offset: number,
+  registry: ObjectRegistry = new ObjectRegistry()
+): [unknown, number] {
   const type = df.getUint8(offset);
 
   switch (type) {
@@ -100,11 +136,18 @@ function deserializeValue(df: DataView, offset: number): [unknown, number] {
       return [new Date(millisSinceEpoch), offset + 1 + 8];
     }
     case "A".charCodeAt(0): {
-      return deserializeDenseJSArray(df, offset + 1);
+      return deserializeDenseJSArray(df, offset + 1, registry);
     }
     case "o".charCodeAt(0): {
       // JavaScript Object
-      return deserializeJSObject(df, offset + 1);
+      return deserializeJSObject(df, offset + 1, registry);
+    }
+    // Object reference
+    case "^".charCodeAt(0): {
+      // Reference to a previously deserialized object
+      const [refId, bytesRead] = decodeVarint(df, offset + 1);
+      const referencedObject = registry.get(refId);
+      return [referencedObject, offset + 1 + bytesRead];
     }
 
     default:
@@ -118,23 +161,29 @@ function deserializeValue(df: DataView, offset: number): [unknown, number] {
  * Deserializes a JavaScript object
  * @param df DataView containing the serialized data
  * @param offset Current offset in the DataView (after the type byte)
+ * @param registry Registry to track object references
  */
 function deserializeJSObject(
   df: DataView,
-  offset: number
+  offset: number,
+  registry: ObjectRegistry
 ): [Record<string | number, unknown>, number] {
   const obj: Record<string | number, unknown> = {};
+
+  // Register the object before populating it (enables handling circular references)
+  registry.register(obj);
+
   let currentOffset = offset;
   let propertyCount = 0;
 
   // Keep reading key-value pairs until we find the end marker
   while (df.getUint8(currentOffset) !== "{".charCodeAt(0)) {
     // Read property key
-    const [key, keyOffset] = deserializeValue(df, currentOffset);
+    const [key, keyOffset] = deserializeValue(df, currentOffset, registry);
     currentOffset = keyOffset;
 
     // Read property value
-    const [value, valueOffset] = deserializeValue(df, currentOffset);
+    const [value, valueOffset] = deserializeValue(df, currentOffset, registry);
     currentOffset = valueOffset;
 
     // Set property on object
@@ -166,18 +215,24 @@ function deserializeJSObject(
  * Deserializes a dense JavaScript array
  * @param df DataView containing the serialized data
  * @param offset Current offset in the DataView (after the type byte)
+ * @param registry Registry to track object references
  */
 function deserializeDenseJSArray(
   df: DataView,
-  offset: number
+  offset: number,
+  registry: ObjectRegistry
 ): [unknown[], number] {
-  const [length, bytesRead] = decodeVarint(df, offset);
   const array: unknown[] = [];
+
+  // Register the array before populating it (enables handling circular references)
+  registry.register(array);
+
+  const [length, bytesRead] = decodeVarint(df, offset);
   let currentOffset = offset + bytesRead;
 
   // Read each array element
   for (let i = 0; i < length; i++) {
-    const [value, nextOffset] = deserializeValue(df, currentOffset);
+    const [value, nextOffset] = deserializeValue(df, currentOffset, registry);
     array.push(value);
     currentOffset = nextOffset;
   }
@@ -200,11 +255,11 @@ function deserializeDenseJSArray(
   // Read properties if any (key-value pairs)
   for (let i = 0; i < numProperties; i++) {
     // Read property key
-    const [key, keyOffset] = deserializeValue(df, currentOffset);
+    const [key, keyOffset] = deserializeValue(df, currentOffset, registry);
     currentOffset = keyOffset;
 
     // Read property value
-    const [value, valueOffset] = deserializeValue(df, currentOffset);
+    const [value, valueOffset] = deserializeValue(df, currentOffset, registry);
     currentOffset = valueOffset;
 
     // Set property on array
