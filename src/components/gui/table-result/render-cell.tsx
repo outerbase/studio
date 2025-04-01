@@ -1,7 +1,9 @@
 import BlobCell from "@/components/gui/table-cell/blob-cell";
 import { DatabaseValue } from "@/drivers/base-driver";
 import parseSafeJson from "@/lib/json-safe";
+import { deserializeV8 } from "@/lib/v8-derialization";
 import { ColumnType } from "@outerbase/sdk-transform";
+import { useMemo } from "react";
 import BigNumberCell from "../table-cell/big-number-cell";
 import GenericCell from "../table-cell/generic-cell";
 import NumberCell from "../table-cell/number-cell";
@@ -42,16 +44,86 @@ function determineCellType(value: unknown) {
   return undefined;
 }
 
-export default function tableResultCellRenderer({
-  y,
-  x,
-  state,
-  header,
-  isFocus,
-}: OptimizeTableCellRenderProps<TableHeaderMetadata>) {
+function CloudflareKvValue({
+  props,
+}: {
+  props: OptimizeTableCellRenderProps<TableHeaderMetadata>;
+}) {
+  const { y, x, state, header, isFocus } = props;
+
+  const value = useMemo(() => {
+    const rawBuffer = state.getValue(y, x);
+    let buffer = new ArrayBuffer();
+
+    if (rawBuffer instanceof ArrayBuffer) {
+      buffer = rawBuffer;
+    } else if (rawBuffer instanceof Uint8Array) {
+      buffer = rawBuffer.buffer as ArrayBuffer;
+    } else if (rawBuffer instanceof Array) {
+      buffer = new Uint8Array(rawBuffer).buffer;
+    }
+
+    console.log(buffer, rawBuffer);
+
+    return deserializeV8(buffer);
+  }, [y, x, state]);
+
+  if (value.error) {
+    return (
+      <div className="text-red h-[35px] px-2 leading-[35px]">
+        Error: {value.error}
+      </div>
+    );
+  }
+
+  let humanReadableValue: string | null = "";
+  console.log(value.value);
+
+  if (value.value !== undefined) {
+    if (typeof value.value === "string") {
+      humanReadableValue = value.value;
+    } else if (value.value === null) {
+      humanReadableValue = null;
+    } else if (typeof value.value === "object") {
+      humanReadableValue = JSON.stringify(value.value, null);
+    } else {
+      humanReadableValue = String(value.value);
+    }
+  }
+
+  return (
+    <TextCell
+      header={header}
+      state={state}
+      editor={detectTextEditorType(humanReadableValue)}
+      editMode={false}
+      value={humanReadableValue}
+      valueType={ColumnType.TEXT}
+      focus={isFocus}
+      onChange={(newValue) => {
+        state.changeValue(y, x, newValue);
+      }}
+    />
+  );
+}
+
+export default function tableResultCellRenderer(
+  props: OptimizeTableCellRenderProps<TableHeaderMetadata>
+) {
+  const { y, x, state, header, isFocus } = props;
+
   const editMode = isFocus && state.isInEditMode();
   const value = state.getValue(y, x);
+
   const valueType = determineCellType(value);
+
+  // Check if it is Cloudflare KV type
+  if (
+    header.metadata?.from?.table === "_cf_KV" &&
+    header.metadata?.from?.column === "value"
+  ) {
+    return <CloudflareKvValue props={props} />;
+  }
 
   switch (valueType ?? header.metadata.type) {
     case ColumnType.INTEGER:

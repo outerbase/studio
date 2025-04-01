@@ -207,6 +207,16 @@ export function pipeVirtualColumnAsReadOnly(
   }
 }
 
+export function pipeCloudflareSpecialTable(
+  headers: OptimizeTableHeaderProps<TableHeaderMetadata>[]
+) {
+  for (const header of headers) {
+    if (header.metadata.from?.table === "_cf_KV") {
+      header.setting.readonly = true;
+    }
+  }
+}
+
 export function pipeCalculateInitialSize(
   headers: OptimizeTableHeaderProps<TableHeaderMetadata>[],
   { result }: BuildTableResultProps
@@ -293,6 +303,7 @@ export function buildTableResultHeader(
   pipeAttachColumnViaSchemas(headers, props);
   pipeEditableTable(headers, props);
   pipeVirtualColumnAsReadOnly(headers);
+  pipeCloudflareSpecialTable(headers);
   pipeCalculateInitialSize(headers, props);
   pipeColumnIcon(headers);
 
