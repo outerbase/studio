@@ -1,7 +1,9 @@
 import BlobCell from "@/components/gui/table-cell/blob-cell";
 import { DatabaseValue } from "@/drivers/base-driver";
 import parseSafeJson from "@/lib/json-safe";
+import { deserializeV8 } from "@/lib/v8-derialization";
 import { ColumnType } from "@outerbase/sdk-transform";
+import { useMemo } from "react";
 import BigNumberCell from "../table-cell/big-number-cell";
 import GenericCell from "../table-cell/generic-cell";
 import NumberCell from "../table-cell/number-cell";
@@ -42,16 +44,92 @@ function determineCellType(value: unknown) {
   return undefined;
 }
 
-export default function tableResultCellRenderer({
-  y,
-  x,
-  state,
-  header,
-  isFocus,
-}: OptimizeTableCellRenderProps<TableHeaderMetadata>) {
+function CloudflareKvValue({
+  props,
+}: {
+  props: OptimizeTableCellRenderProps<TableHeaderMetadata>;
+}) {
+  const { y, x, state, header, isFocus } = props;
+
+  const value = useMemo(() => {
+    const rawBuffer = state.getValue(y, x);
+    let buffer = new ArrayBuffer();
+
+    if (rawBuffer instanceof ArrayBuffer) {
+      buffer = rawBuffer;
+    } else if (rawBuffer instanceof Uint8Array) {
+      buffer = rawBuffer.buffer as ArrayBuffer;
+    } else if (rawBuffer instanceof Array) {
+      buffer = new Uint8Array(rawBuffer).buffer;
+    }
+
+    return deserializeV8(buffer);
+  }, [y, x, state]);
+
+  let displayValue: string | null = "";
+
+  if (value.value !== undefined) {
+    if (typeof value.value === "string") {
+      displayValue = value.value;
+    } else if (value.value === null) {
+      displayValue = null;
+    } else if (typeof value.value === "object") {
+      // Protect from circular references
+      try {
+        displayValue = JSON.stringify(value.value, null);
+      } catch (e) {
+        if (e instanceof Error) {
+          value.error = e.message;
+        } else {
+          value.error = String(e);
+        }
+      }
+    } else {
+      displayValue = String(value.value);
+    }
+  }
+
+  if (value.error) {
+    return (
+      <div className="h-[35px] px-2 font-mono leading-[35px] text-red-500!">
+        Error: {value.error}
+      </div>
+    );
+  }
+
+  return (
+    <TextCell
+      header={header}
+      state={state}
+      editor={detectTextEditorType(displayValue)}
+      editMode={false}
+      value={displayValue}
+      valueType={ColumnType.TEXT}
+      focus={isFocus}
+      onChange={(newValue) => {
+        state.changeValue(y, x, newValue);
+      }}
+    />
+  );
+}
+
+export default function tableResultCellRenderer(
+  props: OptimizeTableCellRenderProps<TableHeaderMetadata>
+) {
+  const { y, x, state, header, isFocus } = props;
+
   const editMode = isFocus && state.isInEditMode();
   const value = state.getValue(y, x);
+
   const valueType = determineCellType(value);
+
+  // Check if it is Cloudflare KV type
+  if (
+    header.metadata?.from?.table === "_cf_KV" &&
+    header.metadata?.from?.column === "value"
+  ) {
+    return <CloudflareKvValue props={props} />;
+  }
 
   switch (valueType ?? header.metadata.type) {
     case ColumnType.INTEGER:
