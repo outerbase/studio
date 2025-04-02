@@ -25,8 +25,6 @@ import OuterbaseQueryDriver from "@/outerbase-cloud/query-driver";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-export const runtime = "edge";
-
 export default function OuterbaseSourcePage() {
   const { workspaceId, baseId } = useParams<{
     workspaceId: string;

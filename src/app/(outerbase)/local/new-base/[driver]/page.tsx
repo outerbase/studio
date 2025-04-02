@@ -14,8 +14,6 @@ import { useCallback, useMemo, useState } from "react";
 import { mutate } from "swr";
 import { createLocalConnection } from "../../hooks";
 
-export const runtime = "edge";
-
 export default function LocalNewBasePage() {
   const { driver } = useParams<{ driver: string }>();
   const router = useRouter();

@@ -12,8 +12,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { getLocalConnection, updateLocalConnection } from "../../hooks";
 
-export const runtime = "edge";
-
 export default function LocalEditBasePage() {
   const router = useRouter();
   const { baseId } = useParams<{ baseId: string }>();

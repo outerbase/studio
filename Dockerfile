@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 # Building app
-RUN npm run build:next
+RUN npm run build
 
 # Copy only standalone server to new image
 FROM node:20-alpine
