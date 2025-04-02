@@ -5,12 +5,12 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS",
+    "binding": "ASSETS"
   },
   "kv_namespaces": [
     {
       "binding": "NEXT_CACHE_WORKERS_KV",
-      "id": "kv_id",
-    },
-  ],
+      "id": "kv_id"
+    }
+  ]
 }
