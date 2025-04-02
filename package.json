@@ -5,23 +5,17 @@
   "scripts": {
     "dev": "next dev -p 3008",
     "dev-https": "next dev --experimental-https",
-    "build": "next build",
     "start": "next start",
+    "build:next": "next build",
     "tsc": "tsc --noEmit --skipLibCheck",
     "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch",
     "staged": "npm run typecheck && npm run lint && jest",
     "typecheck": "tsc --noEmit --skipLibCheck",
     "format": "prettier --check .",
-    "format:fix": "prettier --write .",
     "lint": "next lint",
-    "lint:fix": "next lint --fix .",
     "dialect": "node build-dialect.js",
-    "build:worker": "opennextjs-cloudflare",
-    "dev:worker": "wrangler dev --port 8771",
-    "preview:worker": "npm run build:worker && npm run dev:worker",
-    "deploy:worker": "npm run build:worker && wrangler deploy"
+    "build": "opennextjs-cloudflare",
+    "deploy": "npm run build && wrangler deploy"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
@@ -132,6 +126,7 @@
     "tailwindcss": "^4.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.6.0"
   }
 }
