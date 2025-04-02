@@ -17,8 +17,6 @@ import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
-export const runtime = "edge";
-
 export default function WorkspaceNewBasePage() {
   const { driver, workspaceId } = useParams<{
     driver: string;

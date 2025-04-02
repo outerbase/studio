@@ -25,8 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const runtime = "edge";
-
 interface PlaygroundEditorProps {
   searchParams: Promise<{ template?: string; url?: string }>;
 }

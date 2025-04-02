@@ -6,7 +6,7 @@
     "dev": "next dev -p 3008",
     "dev-https": "next dev --experimental-https",
     "start": "next start",
-    "build:next": "next build",
+    "build": "next build",
     "tsc": "tsc --noEmit --skipLibCheck",
     "test": "jest",
     "staged": "npm run typecheck && npm run lint && jest",
@@ -14,8 +14,8 @@
     "format": "prettier --check .",
     "lint": "next lint",
     "dialect": "node build-dialect.js",
-    "build": "opennextjs-cloudflare",
-    "deploy": "npm run build && wrangler deploy"
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "overrides": {
     "@libsql/client": "^0.5.3"
