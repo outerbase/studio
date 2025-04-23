@@ -9,6 +9,8 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getLocalConnectionList, useLocalDashboardList } from "../../hooks";
 
+export const runtime = "edge";
+
 function LocalBoardWithDataPage({
   initialValue,
 }: {

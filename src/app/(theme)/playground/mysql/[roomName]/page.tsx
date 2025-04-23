@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const runtime = "edge";
+
 interface MySQLPlaygroundProps {
   params: Promise<{ roomName: string }>;
 }

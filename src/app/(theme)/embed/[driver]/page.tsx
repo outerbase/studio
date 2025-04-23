@@ -13,6 +13,8 @@ export interface EmbedPageProps {
   }>;
 }
 
+export const runtime = "edge";
+
 export default async function EmbedPage(props: EmbedPageProps) {
   const searchParams = await props.searchParams;
   const driver = (await props.params).driver;
