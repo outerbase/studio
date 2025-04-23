@@ -24,8 +24,8 @@ export default function TableHeader<HeaderMetadata = unknown>({
   ) => ReactElement;
 }) {
   const className = cn(
-    sticky ? "z-30" : undefined,
-    "bg-background border-r border-b overflow-hidden sticky top-0 h-[35px] leading-[35px] flex text-left z-10 p-0"
+    sticky ? "z-30" : "z-10",
+    "bg-background border-r border-b overflow-hidden sticky top-0 h-[35px] leading-[35px] flex text-left p-0"
   );
 
   return (
