@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import {
   LucideChevronDown,
   LucidePin,
+  LucidePinOff,
   LucideSortAsc,
   LucideSortDesc,
 } from "lucide-react";
@@ -161,18 +162,22 @@ export default function ResultTable({
         );
       });
 
+      const handleOnPinColumnClick = () => {
+        setStickHeaderIndex(
+          header.index === stickyHeaderIndex ? undefined : header.index
+        );
+      };
+
       return (
         <Header key={header.name} header={header} internalState={data}>
           {extensionMenuItems}
-          <DropdownMenuItem
-            onClick={() => {
-              setStickHeaderIndex(
-                header.index === stickyHeaderIndex ? undefined : header.index
-              );
-            }}
-          >
-            <LucidePin className="mr-2 h-4 w-4" />
-            Pin Header
+          <DropdownMenuItem onClick={handleOnPinColumnClick}>
+            {header.sticky ? (
+              <LucidePinOff className="mr-2 h-4 w-4" />
+            ) : (
+              <LucidePin className="mr-2 h-4 w-4" />
+            )}
+            {header.sticky ? "Unpin Header" : "Pin Header"}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
