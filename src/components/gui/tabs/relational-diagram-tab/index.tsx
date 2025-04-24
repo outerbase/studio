@@ -23,11 +23,12 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { LucideRefreshCcw } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import SchemaNameSelect from "../../schema-editor/schema-name-select";
 import { Toolbar } from "../../toolbar";
 import { DownloadImageDiagram } from "./download-image-diagram";
-import { useTheme } from "next-themes";
+import ERDTableColumnEdge from "./erd-table-column-edge";
 
 const NODE_MARGIN = 50;
 const MAX_NODE_WIDTH = 300;
@@ -89,7 +90,7 @@ function mapSchema(
         foreignKeyList.add(`${item.name}.${column.name}`);
 
         initialEdges.push({
-          type: "smoothstep",
+          type: "erdTableColumn",
           markerEnd: {
             type: MarkerType.ArrowClosed,
             width: 14,
@@ -129,7 +130,7 @@ function mapSchema(
         foreignKeyList.add(`${item.name}.${columnName}`);
 
         initialEdges.push({
-          type: "smoothstep",
+          type: "erdTableColumn",
           markerEnd: {
             type: MarkerType.ArrowClosed,
             width: 14,
@@ -299,6 +300,10 @@ function LayoutFlow() {
     databaseSchema: DatabaseSchemaNode,
   };
 
+  const edgeTypes = {
+    erdTableColumn: ERDTableColumnEdge,
+  };
+
   const appTheme = (forcedTheme ?? resolvedTheme) as "dark" | "light";
 
   return (
@@ -379,6 +384,7 @@ function LayoutFlow() {
             onEdgesChange={onEdgesChange}
             fitView
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
           >
             <Background bgColor={appTheme === "dark" ? "#0a0a0a" : "white"} />
             <Controls />
