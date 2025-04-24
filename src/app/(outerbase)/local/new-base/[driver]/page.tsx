@@ -9,7 +9,7 @@ import { ConnectionTemplateDictionary } from "@/components/connection-config-edi
 import { Button } from "@/components/orbit/button";
 import { getDatabaseFriendlyName } from "@/components/resource-card/utils";
 import { ArrowLeft, ArrowRight, FloppyDisk } from "@phosphor-icons/react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { mutate } from "swr";
 import { createLocalConnection } from "../../hooks";
@@ -19,7 +19,15 @@ export const runtime = "edge";
 export default function LocalNewBasePage() {
   const { driver } = useParams<{ driver: string }>();
   const router = useRouter();
-  const [value, setValue] = useState<CommonConnectionConfig>({ name: "" });
+  const searchParams = useSearchParams()
+  const [value, setValue] = useState<CommonConnectionConfig>({
+    name: "",
+    host: searchParams.get("url") ?? "",
+    ...(driver === "starbase" ? {
+      starbase_type: searchParams.get("type") ?? "internal"
+    } : {}),
+    token: searchParams.get("access-key") ?? ""
+   });
   const [loading, setLoading] = useState(false);
   const [validateErrors, setValidateErrors] = useState<Record<string, string>>(
     {}
