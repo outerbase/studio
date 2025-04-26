@@ -1,5 +1,6 @@
 import { DatabaseValue } from "@/drivers/base-driver";
 import { hex } from "@/lib/bit-operation";
+import { parseUserInput } from "@/lib/export-helper";
 import { ColumnType } from "@outerbase/sdk-transform";
 
 export function escapeIdentity(str: string) {
@@ -21,9 +22,9 @@ export function escapeSqlBinary(value: ArrayBuffer) {
   return `x'${hex(value)}'`;
 }
 
-export function escapeSqlValue(value: unknown) {
+export function escapeSqlValue(value: unknown, nullValue: string = "NULL") {
   if (value === undefined) return "DEFAULT";
-  if (value === null) return "NULL";
+  if (value === null) return parseUserInput(nullValue);
   if (typeof value === "string") return escapeSqlString(value);
   if (typeof value === "number") return value.toString();
   if (typeof value === "bigint") return value.toString();
@@ -84,10 +85,11 @@ export function escapeDelimitedValue(
   value: unknown,
   fieldSeparator: string,
   lineTerminator: string,
-  encloser: string
+  encloser: string,
+  nullValue: string = "NULL"
 ): string {
   if (value === null || value === undefined) {
-    return "NULL";
+    return nullValue;
   }
 
   const stringValue = value.toString();
