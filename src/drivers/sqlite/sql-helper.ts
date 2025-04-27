@@ -31,8 +31,7 @@ export function escapeSqlValue(value: unknown, nullValue: string = "NULL") {
   if (value instanceof ArrayBuffer) return escapeSqlBinary(value);
   if (Array.isArray(value))
     return escapeSqlBinary(Uint8Array.from(value).buffer);
-  // eslint-disable-next-line @typescript-eslint/no-base-to-string
-  throw new Error(value.toString() + " is unrecongize type of value");
+  return "Invalid Value";
 }
 
 export function extractInputValue(input: string): string | number {
