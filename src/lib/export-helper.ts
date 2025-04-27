@@ -161,6 +161,81 @@ export function exportDataAsDelimitedText(
   return content;
 }
 
+export function exportRowsToXml(
+  headers: string[],
+  records: unknown[][],
+  exportTarget?: ExportTarget
+): string {
+  const escapeXml = (unsafe: string) =>
+    unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<rows>\n';
+
+  for (const record of records) {
+    xml += "  <row>\n";
+    for (let i = 0; i < headers.length; i++) {
+      const header = escapeXml(headers[i]);
+      const value = record[i] != null ? escapeXml(String(record[i])) : "";
+      xml += `    <${header}>${value}</${header}>\n`;
+    }
+    xml += "  </row>\n";
+  }
+
+  xml += "</rows>";
+
+  if (exportTarget === "clipboard") {
+    copyToClipboard(xml);
+    return "";
+  }
+
+  return xml;
+}
+
+export function exportToMarkdown(
+  headers: string[],
+  records: unknown[][],
+  exportTarget?: ExportTarget
+) {
+  let result = `| ${headers.join(" | ")} | \n`;
+  result += `| ${headers.map(() => "---").join(" | ")} | \n`;
+
+  for (const record of records) {
+    const row = record.map((value) => `| ${value} `).join(" ") + " |";
+    result += row + "\n";
+  }
+
+  if (exportTarget === "clipboard") {
+    copyToClipboard(result);
+    return "";
+  }
+
+  return result;
+}
+
+export function exportToTSV(
+  headers: string[],
+  records: unknown[][],
+  exportTarget?: ExportTarget
+) {
+  let result = `${headers.join("\t")}\n`;
+  for (const record of records) {
+    const row = record.join("\t");
+    result += row + "\n";
+  }
+
+  if (exportTarget === "clipboard") {
+    copyToClipboard(result);
+    return "";
+  }
+
+  return result;
+}
+
 export function getFormatHandlers(
   data: OptimizeTableState,
   exportTarget: ExportTarget,
@@ -223,6 +298,9 @@ export function getFormatHandlers(
         parseUserInput(exportOptions?.encloser || "") || '"',
         exportTarget
       ),
+    xml: () => exportRowsToXml(headers, records, exportTarget),
+    md: () => exportToMarkdown(headers, records, exportTarget),
+    tsv: () => exportToTSV(headers, records, exportTarget),
   };
 }
 
@@ -255,7 +333,14 @@ export async function exportTableData(
   exportTarget: ExportTarget,
   options?: ExportOptions
 ): Promise<string | Blob> {
-  console.log("Exporting", schemaName, tableName, format, exportTarget, options);
+  console.log(
+    "Exporting",
+    schemaName,
+    tableName,
+    format,
+    exportTarget,
+    options
+  );
   const result = await databaseDriver.query(
     `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)}`
   );
@@ -265,10 +350,13 @@ export async function exportTableData(
   }
 
   const headers = Object.keys(result.rows[0]);
-  const records = result.rows.map((row: { [x: string]: string; }) => headers.map(header => row[header]));
+  const records = result.rows.map((row: { [x: string]: string }) =>
+    headers.map((header) => row[header])
+  );
 
   const formatHandlers = {
-    csv: () => exportDataAsDelimitedText(headers, records, ",", "\n", '"', exportTarget),
+    csv: () =>
+      exportDataAsDelimitedText(headers, records, ",", "\n", '"', exportTarget),
     json: () => exportRowsToJson(headers, records, exportTarget),
     sql: () => exportRowsToSqlInsert(tableName, headers, records, exportTarget),
     xlsx: () => exportToExcel(records, headers, tableName, exportTarget),
@@ -281,6 +369,9 @@ export async function exportTableData(
         options?.encloser || '"',
         exportTarget
       ),
+    xml: () => exportRowsToXml(headers, records, exportTarget),
+    md: () => exportToMarkdown(headers, records, exportTarget),
+    tsv: () => exportToTSV(headers, records, exportTarget),
   };
 
   const handler = formatHandlers[format];

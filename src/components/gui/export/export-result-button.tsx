@@ -17,7 +17,15 @@ import OptimizeTableState, {
 } from "../table-optimized/optimize-table-state";
 
 export type ExportTarget = "clipboard" | "file";
-export type ExportFormat = "csv" | "delimited" | "json" | "sql" | "xlsx";
+export type ExportFormat =
+  | "csv"
+  | "delimited"
+  | "json"
+  | "sql"
+  | "xlsx"
+  | "xml"
+  | "md"
+  | "tsv";
 export type ExportSelection =
   | "complete"
   | "selected_row"
@@ -144,7 +152,7 @@ export default function ExportResultButton({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `export.${format === "delimited" ? "csv" : format}`;
+    a.download = `export.${format === "delimited" ? "csv" : format === "xml" ? "xml" : format === "md" ? "md" : format === "tsv" ? "tsv" : format}`;
     a.click();
     URL.revokeObjectURL(url);
   }, [
@@ -325,6 +333,33 @@ export default function ExportResultButton({
                     className="flex-1 font-normal"
                   >
                     Excel
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="xml" id="export-format-xml" />
+                  <Label
+                    htmlFor="export-format-xml"
+                    className="flex-1 font-normal"
+                  >
+                    XML
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="md" id="export-format-md" />
+                  <Label
+                    htmlFor="export-format-md"
+                    className="flex-1 font-normal"
+                  >
+                    Markdown
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="tsv" id="export-format-tsv" />
+                  <Label
+                    htmlFor="export-format-tsv"
+                    className="flex-1 font-normal"
+                  >
+                    TSV
                   </Label>
                 </div>
               </RadioGroup>
