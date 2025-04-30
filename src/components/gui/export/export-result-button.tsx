@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getFormatHandlers } from "@/lib/export-helper";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import OptimizeTableState, {
   TableSelectionRange,
@@ -31,10 +31,31 @@ export type ExportSelection =
   | "selected_row"
   | "selected_col"
   | "selected_range";
+
+const csvDelimeter = {
+  fieldSeparator: ",",
+  lineTerminator: "\\n",
+  encloser: '"',
+  nullValue: "NULL",
+};
+const excelDelimeter = {
+  fieldSeparator: "\\t",
+  lineTerminator: "\\r\\n",
+  encloser: '"',
+  nullValue: "NULL",
+};
+
+const textDelimeter = {
+  fieldSeparator: "\\t",
+  lineTerminator: "\\n",
+  encloser: '"',
+  nullValue: "NULL",
+};
 export interface ExportOptions {
   fieldSeparator?: string;
   lineTerminator?: string;
   encloser?: string;
+  nullValue?: string;
 }
 
 interface selectionCount {
@@ -48,6 +69,7 @@ interface ExportSettings {
   target: ExportTarget;
   selection: ExportSelection;
   options?: ExportOptions;
+  formatTemplate?: Record<string, ExportOptions>;
 }
 
 export default function ExportResultButton({
@@ -55,41 +77,48 @@ export default function ExportResultButton({
 }: {
   data: OptimizeTableState;
 }) {
-  const csvDelimeter = useMemo(
-    () => ({
-      fieldSeparator: ",",
-      lineTerminator: "\\n",
-      encloser: '"',
-    }),
-    []
-  );
-  const excelDiliemter = {
-    fieldSeparator: "\\t",
-    lineTerminator: "\\r\\n",
-    encloser: '"',
-  };
-
-  const saveSetting = (settings: ExportSettings) => {
+  const getDefaultOption = useCallback((format: ExportFormat) => {
+    switch (format) {
+      case "csv":
+        return csvDelimeter;
+      case "xlsx":
+        return excelDelimeter;
+      case "delimited":
+        return textDelimeter;
+      default:
+        return null;
+    }
+  }, []);
+  const saveSettingToStorage = (settings: ExportSettings) => {
+    settings.formatTemplate = {
+      ...settings.formatTemplate,
+      ...(settings.options ? { [settings.format]: settings.options } : {}),
+    };
     localStorage.setItem("export_settings", JSON.stringify(settings));
   };
 
-  const exportSettings = useCallback(() => {
+  const getSettingFromStorage = useCallback(() => {
     const settings = localStorage.getItem("export_settings");
     if (settings) {
-      return JSON.parse(settings) as ExportSettings;
+      const settingValue = JSON.parse(settings) as ExportSettings;
+      return {
+        ...settingValue,
+        options:
+          settingValue.formatTemplate?.[settingValue.format] || csvDelimeter,
+      };
     }
     return {
       format: "csv",
       target: "clipboard",
       selection: "complete",
-      options: csvDelimeter,
+      options: getDefaultOption("csv"),
     } as ExportSettings;
-  }, [csvDelimeter]);
+  }, [getDefaultOption]);
 
-  const [format, setFormat] = useState<ExportFormat>(exportSettings().format);
-  const [exportTarget, setExportTarget] = useState<ExportTarget>(
-    exportSettings().target
+  const [exportSetting, setExportSetting] = useState<ExportSettings>(
+    getSettingFromStorage()
   );
+
   const [selectionCount, setSelectionCount] = useState<selectionCount>({
     rows: 0,
     cols: 0,
@@ -97,28 +126,8 @@ export default function ExportResultButton({
   });
   const [exportSelection, setExportSelection] = useState<ExportSelection>(
     () => {
-      const savedSelection = exportSettings().selection;
+      const savedSelection = exportSetting.selection;
       return validateExportSelection(savedSelection, selectionCount);
-    }
-  );
-  const [delimitedOptions, setDelimitedOptions] = useState<ExportOptions>(
-    exportSettings().options || {
-      fieldSeparator: ",",
-      lineTerminator: "\\n",
-      encloser: '"',
-    }
-  );
-  const [exportOptions, setExportOptions] = useState<ExportOptions | null>(
-    () => {
-      if (format === "csv") {
-        return csvDelimeter;
-      } else if (format === "xlsx") {
-        return excelDiliemter;
-      } else if (format === "delimited") {
-        return delimitedOptions;
-      } else {
-        return null;
-      }
     }
   );
 
@@ -128,19 +137,19 @@ export default function ExportResultButton({
   const [open, setOpen] = useState(false);
 
   const onExportClicked = useCallback(() => {
-    if (!format) return;
+    if (!exportSetting.format) return;
 
     let content = "";
 
     const formatHandlers = getFormatHandlers(
       data,
-      exportTarget,
+      exportSetting.target,
       exportSelection,
-      exportOptions,
+      exportSetting.options!,
       selectedRangeIndex
     );
 
-    const handler = formatHandlers[format];
+    const handler = formatHandlers[exportSetting.format];
     if (handler) {
       content = handler();
     }
@@ -152,15 +161,15 @@ export default function ExportResultButton({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `export.${format === "delimited" ? "csv" : format === "xml" ? "xml" : format === "md" ? "md" : format === "tsv" ? "tsv" : format}`;
+    a.download = `export.${exportSetting.format === "delimited" ? "csv" : exportSetting.format}`;
     a.click();
     URL.revokeObjectURL(url);
   }, [
-    format,
+    exportSetting.format,
+    exportSetting.target,
+    exportSetting.options,
     data,
-    exportTarget,
     exportSelection,
-    exportOptions,
     selectedRangeIndex,
   ]);
 
@@ -181,32 +190,13 @@ export default function ExportResultButton({
 
   useEffect(() => {
     setExportSelection(
-      validateExportSelection(exportSettings().selection, selectionCount)
+      validateExportSelection(exportSetting.selection, selectionCount)
     );
-  }, [exportSettings, selectionCount]);
+  }, [exportSetting, selectionCount]);
 
   useEffect(() => {
-    saveSetting({
-      ...exportSettings(),
-      format,
-      selection: exportSelection,
-      target: exportTarget,
-    });
-    if (format === "delimited") {
-      saveSetting({
-        ...exportSettings(),
-        options: exportOptions ?? csvDelimeter,
-      });
-      if (exportOptions) setDelimitedOptions(exportOptions);
-    }
-  }, [
-    csvDelimeter,
-    exportOptions,
-    exportSelection,
-    exportSettings,
-    exportTarget,
-    format,
-  ]);
+    saveSettingToStorage(exportSetting);
+  }, [exportSelection, exportSetting]);
 
   const SelectedRange = ({
     ranges,
@@ -252,9 +242,12 @@ export default function ExportResultButton({
 
             <RadioGroup
               className="flex gap-4"
-              defaultValue={exportTarget}
+              defaultValue={exportSetting.target}
               onValueChange={(e) => {
-                setExportTarget(e as ExportTarget);
+                setExportSetting((prev) => ({
+                  ...prev,
+                  target: e as ExportTarget,
+                }));
               }}
             >
               <div className="flex items-center space-x-2">
@@ -273,18 +266,17 @@ export default function ExportResultButton({
               <small>Output format</small>
               <RadioGroup
                 className="mt-2 flex flex-col gap-3"
-                defaultValue={format}
+                defaultValue={exportSetting.format}
                 onValueChange={(e) => {
-                  setFormat(e as ExportFormat);
-                  if (e === "csv") {
-                    setExportOptions(csvDelimeter);
-                  } else if (e === "xlsx") {
-                    setExportOptions(excelDiliemter);
-                  } else if (e === "delimited") {
-                    setExportOptions(delimitedOptions);
-                  } else {
-                    setExportOptions(null);
-                  }
+                  setExportSetting((prev) => ({
+                    ...prev,
+                    format: e as ExportFormat,
+                    options: exportSetting.formatTemplate?.[
+                      e as ExportFormat
+                    ] || {
+                      ...getDefaultOption(e as ExportFormat),
+                    },
+                  }));
                 }}
               >
                 <div className="flex items-center space-x-2">
@@ -450,14 +442,17 @@ export default function ExportResultButton({
                     <span className="w-[120px] text-sm">Field separator:</span>
                     <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
                       <input
-                        disabled={format !== "delimited"}
+                        disabled={exportSetting.format !== "delimited"}
                         type="text"
                         className="flex-1 bg-transparent text-sm font-light outline-hidden"
-                        value={exportOptions?.fieldSeparator || ""}
+                        value={exportSetting.options?.fieldSeparator || ""}
                         onChange={(e) => {
-                          setExportOptions({
-                            ...exportOptions,
-                            fieldSeparator: e.target.value,
+                          setExportSetting({
+                            ...exportSetting,
+                            options: {
+                              ...exportSetting.options,
+                              fieldSeparator: e.target.value,
+                            },
                           });
                         }}
                       />
@@ -467,14 +462,17 @@ export default function ExportResultButton({
                     <span className="w-[120px] text-sm">Line terminator:</span>
                     <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
                       <input
-                        disabled={format !== "delimited"}
+                        disabled={exportSetting.format !== "delimited"}
                         type="text"
                         className="flex-1 bg-transparent text-sm font-light outline-hidden"
-                        value={exportOptions?.lineTerminator || ""}
+                        value={exportSetting.options?.lineTerminator || ""}
                         onChange={(e) => {
-                          setExportOptions({
-                            ...exportOptions,
-                            lineTerminator: e.target.value,
+                          setExportSetting({
+                            ...exportSetting,
+                            options: {
+                              ...exportSetting.options,
+                              lineTerminator: e.target.value,
+                            },
                           });
                         }}
                       />
@@ -485,14 +483,36 @@ export default function ExportResultButton({
                     <span className="w-[120px] text-sm">Encloser:</span>
                     <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
                       <input
-                        disabled={format !== "delimited"}
+                        disabled={exportSetting.format !== "delimited"}
                         type="text"
                         className="flex-1 bg-transparent text-sm font-light outline-hidden"
-                        value={exportOptions?.encloser || ""}
+                        value={exportSetting.options?.encloser || ""}
                         onChange={(e) => {
-                          setExportOptions({
-                            ...exportOptions,
-                            encloser: e.target.value,
+                          setExportSetting({
+                            ...exportSetting,
+                            options: {
+                              ...exportSetting.options,
+                              encloser: e.target.value,
+                            },
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <span className="w-[120px] text-sm">NULL Value:</span>
+                    <div className="flex h-[28px] w-[120px] items-center rounded-md bg-white px-3 py-2.5 text-base text-neutral-900 outline outline-1 outline-neutral-200 focus:outline-neutral-400/70 dark:bg-neutral-900 dark:text-white dark:outline-neutral-800 dark:focus:outline-neutral-600">
+                      <input
+                        type="text"
+                        className="flex-1 bg-transparent text-sm font-light outline-hidden"
+                        value={exportSetting.options?.nullValue || ""}
+                        onChange={(e) => {
+                          setExportSetting({
+                            ...exportSetting,
+                            options: {
+                              ...exportSetting.options,
+                              nullValue: e.target.value,
+                            },
                           });
                         }}
                       />
