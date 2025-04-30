@@ -1,5 +1,6 @@
 import { DatabaseValue } from "@/drivers/base-driver";
 import { hex } from "@/lib/bit-operation";
+import { parseUserInput } from "@/lib/export-helper";
 import { ColumnType } from "@outerbase/sdk-transform";
 
 export function escapeIdentity(str: string) {
@@ -21,17 +22,16 @@ export function escapeSqlBinary(value: ArrayBuffer) {
   return `x'${hex(value)}'`;
 }
 
-export function escapeSqlValue(value: unknown) {
+export function escapeSqlValue(value: unknown, nullValue: string = "NULL") {
   if (value === undefined) return "DEFAULT";
-  if (value === null) return "NULL";
+  if (value === null) return parseUserInput(nullValue);
   if (typeof value === "string") return escapeSqlString(value);
   if (typeof value === "number") return value.toString();
   if (typeof value === "bigint") return value.toString();
   if (value instanceof ArrayBuffer) return escapeSqlBinary(value);
   if (Array.isArray(value))
     return escapeSqlBinary(Uint8Array.from(value).buffer);
-  // eslint-disable-next-line @typescript-eslint/no-base-to-string
-  throw new Error(value.toString() + " is unrecongize type of value");
+  return "Invalid Value";
 }
 
 export function extractInputValue(input: string): string | number {
@@ -84,10 +84,11 @@ export function escapeDelimitedValue(
   value: unknown,
   fieldSeparator: string,
   lineTerminator: string,
-  encloser: string
+  encloser: string,
+  nullValue: string = "NULL"
 ): string {
   if (value === null || value === undefined) {
-    return "NULL";
+    return nullValue;
   }
 
   const stringValue = value.toString();

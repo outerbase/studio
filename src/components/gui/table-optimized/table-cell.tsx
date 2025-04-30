@@ -34,7 +34,7 @@ export default function OptimizeTableCell<HeaderMetadata = unknown>({
     return { zIndex: 15, left: state.gutterColumnWidth + "px" };
   }, [state.gutterColumnWidth, isSticky]);
 
-  let cellBackgroundColor = "bg-transparent";
+  let cellBackgroundColor = "bg-background";
 
   if (isSelected) {
     if (isRemoved) {
