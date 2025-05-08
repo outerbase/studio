@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 
+import { SQLWhereEditor } from "@/components/editor/sql-where-editor";
 import { Button } from "@/components/orbit/button";
 import {
   Tooltip,
@@ -23,6 +24,7 @@ import {
 } from "@/drivers/base-driver";
 import { KEY_BINDING } from "@/lib/key-matcher";
 import { commitChange } from "@/lib/sql/sql-execute-helper";
+import { Check, Spinner, Warning } from "@phosphor-icons/react";
 import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 import {
   LucideArrowLeft,
@@ -220,7 +222,7 @@ export default function TableDataWindow({
       )}
       <div className="shrink-0 grow-0 border-b border-neutral-200 py-2 dark:border-neutral-800">
         <Toolbar>
-          <div className="ml-2 flex flex-1 items-center gap-2">
+          <div className="ml-2 flex grow-0 items-center gap-2">
             <Button
               variant={"secondary"}
               onClick={() => setRevision((prev) => prev + 1)}
@@ -242,43 +244,34 @@ export default function TableDataWindow({
             </Button>
           </div>
 
-          <div className="mx-2 flex max-w-1/3 grow">
-            <div className="flex w-full items-center overflow-hidden rounded border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950">
+          <div className="mx-2 flex grow">
+            <div className="flex w-full grow items-center overflow-hidden rounded border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950">
               {filterColumnButton}
-              <input
-                type="text"
-                placeholder="eg: id=5"
+              <SQLWhereEditor
+                schema={tableSchema}
                 value={whereInput}
-                onChange={(e) => setWhereInput(e.currentTarget.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setWhere(e.currentTarget.value);
-                  }
-                }}
-                className="h-full grow p-2 pr-2 pl-3 font-mono text-sm outline-hidden"
+                onChange={setWhereInput}
+                placeholder="Please input where clause"
               />
+              <Button
+                size="sm"
+                onClick={() => {
+                  setWhere(whereInput);
+                }}
+              >
+                {loading && <Spinner className="h-4 w-4 animate-spin" />}
+                {!loading &&
+                  (whereInput === where ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Warning className="h-4 w-4" />
+                  ))}
+                Apply
+              </Button>
             </div>
           </div>
 
-          <div className="mr-2 flex flex-1 flex-row-reverse items-center gap-2">
-            {/* <ToolbarButton
-              text="Save"
-              // icon={<LucideSaveAll className="h-4 w-4" />}
-              tooltip={`Commit your changes (${KEY_BINDING.commit.toString()})`}
-              disabled={!changeNumber || isExecuting}
-              loading={isExecuting}
-              onClick={onCommit}
-              badge={changeNumber ? changeNumber.toString() : ""}
-            />
-
-            <ToolbarButton
-              text="Discard"
-              tooltip={`Dicard all changes (${KEY_BINDING.discard.toString()})`}
-              destructive
-              disabled={!changeNumber}
-              onClick={onDiscard}
-            /> */}
-
+          <div className="mr-2 flex flex-1 grow-0 flex-row-reverse items-center gap-2">
             {changeNumber ? (
               <>
                 <Button
