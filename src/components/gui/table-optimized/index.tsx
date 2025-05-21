@@ -30,10 +30,7 @@ export interface OptimizeTableHeaderProps<MetadataType = unknown> {
 
   decorator?: TableCellDecorator;
 
-  setting: {
-    resizable: boolean;
-    readonly: boolean;
-  };
+  setting: { resizable: boolean; readonly: boolean };
 
   onContextMenu?: (e: React.MouseEvent, headerIndex: number) => void;
 
@@ -289,11 +286,12 @@ export default function OptimizeTable<HeaderMetadata = unknown>({
     const headerAfterArranged = arrangeHeaderIndex.map((arrangedIndex) => {
       return headers[arrangedIndex];
     });
-
     // Sticky will also alter the specified index
     return [
       ...(stickyHeaderIndex !== undefined ? [headers[stickyHeaderIndex]] : []),
-      ...headerAfterArranged.filter((x) => x.index !== stickyHeaderIndex),
+      ...headerAfterArranged.filter(
+        (x) => x !== undefined && x.index !== stickyHeaderIndex
+      ),
     ] as OptimizeTableHeaderWithIndexProps<HeaderMetadata>[];
   }, [internalState, arrangeHeaderIndex, stickyHeaderIndex, headerRevision]);
 
@@ -333,9 +331,7 @@ export default function OptimizeTable<HeaderMetadata = unknown>({
           if (onKeyDown) onKeyDown(internalState, e);
         }}
         ref={containerRef}
-        style={{
-          outline: "none",
-        }}
+        style={{ outline: "none" }}
         className={
           "relative h-full w-full overflow-auto text-[12px] select-none"
         }
