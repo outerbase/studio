@@ -154,7 +154,7 @@ export default function LocalConnectionPage() {
           >
             <MySQLIcon className="h-10 w-10" />
             <div className="flex flex-col gap-1 text-left">
-              <span className="text-base font-bold">MySQL Playgorund</span>
+              <span className="text-base font-bold">MySQL Playground</span>
               <span className="text-sm">
                 Spin up cloud MySQL sandbox instance
               </span>
