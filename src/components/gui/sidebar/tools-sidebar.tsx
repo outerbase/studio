@@ -1,7 +1,7 @@
 "use client";
 import { scc } from "@/core/command";
 import ListButtonItem from "../list-button-item";
-import { StackMinus, TreeStructure } from "@phosphor-icons/react";
+import { DownloadSimple, StackMinus, TreeStructure } from "@phosphor-icons/react";
 
 export default function SettingSidebar() {
   return (
@@ -19,6 +19,13 @@ export default function SettingSidebar() {
           scc.tabs.openBuiltinMassDropTable({});
         }}
         icon={StackMinus}
+      />
+      <ListButtonItem
+        text="Dump Database to File"
+        onClick={() => {
+          scc.tabs.openBuiltinDumpDatabase({});
+        }}
+        icon={DownloadSimple}
       />
     </div>
   );

@@ -5,6 +5,7 @@
 
 import { builtinOpenERDTab } from "../builtin-tab/open-erd-tab";
 import { builtinMassDropTableTab } from "../builtin-tab/open-mass-drop-table";
+import { builtinOpenDumpDatabaseTab } from "../builtin-tab/open-dump-database";
 import { builtinOpenQueryTab } from "../builtin-tab/open-query-tab";
 import { builtinOpenSchemaTab } from "../builtin-tab/open-schema-tab";
 import { builtinOpenTableTab } from "../builtin-tab/open-table-tab";
@@ -17,6 +18,7 @@ export const scc = {
     openBuiltinSchema: builtinOpenSchemaTab.open,
     openBuiltinERD: builtinOpenERDTab.open,
     openBuiltinMassDropTable: builtinMassDropTableTab.open,
+    openBuiltinDumpDatabase: builtinOpenDumpDatabaseTab.open,
 
     close: (keys: string[]) => {
       tabCloseChannel.send(keys);
