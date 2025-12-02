@@ -106,6 +106,7 @@ export default class PostgresLikeDriver extends CommonSQLImplement {
       supportUpdateReturning: true,
       supportCreateUpdateTrigger: false,
       supportUseStatement: true,
+      supportDumpDatabase: false,
     };
   }
 
@@ -434,5 +435,9 @@ WHERE
 
   inferTypeFromHeader(): ColumnType | undefined {
     return undefined;
+  }
+
+  dumpDatabase(): Promise<{ data: Blob | Uint8Array | ArrayBuffer | string; filename?: string; mimeType?: string; }> {
+    throw new Error("Not implemented");
   }
 }
