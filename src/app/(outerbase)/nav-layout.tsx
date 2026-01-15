@@ -1,22 +1,13 @@
 "use client";
-import {
-  SidebarMenuHeader,
-  SidebarMenuItem,
-  SidebarMenuLoadingItem,
-} from "@/components/sidebar-menu";
+import { SidebarMenuHeader, SidebarMenuItem } from "@/components/sidebar-menu";
 import { cn } from "@/lib/utils";
 import { Database, List } from "@phosphor-icons/react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { PropsWithChildren, useState } from "react";
-import { useWorkspaces } from "./workspace-provider";
 
 export default function NavigationLayout({ children }: PropsWithChildren) {
-  const router = useRouter();
   const [mobileToggle, setMobileToggle] = useState(false);
-
-  const { workspaces, loading: workspaceLoading } = useWorkspaces();
   const pathname = usePathname();
-  const { workspaceId } = useParams<{ workspaceId?: string }>();
 
   return (
     <div className="flex w-screen flex-col lg:h-screen lg:flex-row">
@@ -55,40 +46,6 @@ export default function NavigationLayout({ children }: PropsWithChildren) {
               icon={Database}
               href="/local"
             />
-
-            {workspaces.map((workspace) => {
-              return (
-                <SidebarMenuItem
-                  key={workspace.id}
-                  text={workspace.name}
-                  icon={Database}
-                  onClick={
-                    workspace.short_name === workspaceId
-                      ? undefined
-                      : () => {
-                          router.push(`/w/${workspace.short_name}`);
-                        }
-                  }
-                  selected={workspace.short_name === workspaceId}
-                  badge={
-                    !workspace.is_enterprise &&
-                    workspace.subscription.plan === "starter" ? (
-                      <span className="mr-2 rounded border border-neutral-200 bg-white px-1.5 py-0.5 text-sm font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
-                        Free
-                      </span>
-                    ) : undefined
-                  }
-                />
-              );
-            })}
-
-            {workspaceLoading && (
-              <>
-                <SidebarMenuLoadingItem />
-                <SidebarMenuLoadingItem />
-                <SidebarMenuLoadingItem />
-              </>
-            )}
           </div>
         </div>
       </div>
