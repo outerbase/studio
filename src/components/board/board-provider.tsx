@@ -1,6 +1,6 @@
 import { BoardSourceDriver } from "@/drivers/board-source/base-source";
 import { IBoardStorageDriver } from "@/drivers/board-storage/base";
-import { noop } from "lodash";
+import noop from "lodash/noop";
 import {
   createContext,
   Dispatch,

@@ -1,5 +1,7 @@
 "use client";
-import { noop } from "lodash";
+import { Icon } from "@phosphor-icons/react";
+import noop from "lodash/noop";
+import { Loader } from "lucide-react";
 import {
   PropsWithChildren,
   ReactElement,
@@ -8,6 +10,8 @@ import {
   useContext,
   useState,
 } from "react";
+import CodePreview from "../gui/code-preview";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,10 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Button } from "../ui/button";
-import { Icon } from "@phosphor-icons/react";
-import { Loader } from "lucide-react";
-import CodePreview from "../gui/code-preview";
 
 interface ShowDialogProps {
   title: string;
@@ -75,7 +75,7 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
             </DialogHeader>
 
             {errorMessage && (
-              <div className="text-sm text-red-500 font-mono flex gap-4 items-end">
+              <div className="flex items-end gap-4 font-mono text-sm text-red-500">
                 <p>{errorMessage}</p>
               </div>
             )}
@@ -118,9 +118,9 @@ export function CommonDialogProvider({ children }: PropsWithChildren) {
                       });
                   }}
                 >
-                  {loading && <Loader className="w-4 h-4 mr-2 animate-spin" />}
+                  {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
                   {action.icon && !loading && (
-                    <action.icon className="w-4 h-4 mr-2" />
+                    <action.icon className="mr-2 h-4 w-4" />
                   )}
                   {action.text}
                 </Button>

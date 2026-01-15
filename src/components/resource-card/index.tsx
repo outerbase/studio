@@ -5,7 +5,7 @@ import {
   DotsThreeVertical,
   Triangle,
 } from "@phosphor-icons/react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { PropsWithChildren, useState } from "react";
 import {
   DropdownMenu,
@@ -41,7 +41,7 @@ export default function ResourceCard({
 
   return (
     <Link
-      href={href}
+      to={href}
       className={cn(
         "group relative flex h-36 w-[302px] flex-col justify-between overflow-hidden rounded-md border border-neutral-200 bg-white p-3.5 hover:border-neutral-300 focus:outline-none focus:*:opacity-100 focus-visible:ring focus-visible:ring-blue-600 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700/75",
         className

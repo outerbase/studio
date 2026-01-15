@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { ReactElement } from "react";
 
 interface SidebarMenuItemProps {
@@ -60,7 +60,7 @@ export function SidebarMenuItem({
     if (href.startsWith("https://")) {
       return (
         <Link
-          href={href}
+          to={href}
           className={cn(className, selected ? "bg-selected" : "")}
           target="_blank"
         >
@@ -70,10 +70,7 @@ export function SidebarMenuItem({
     }
 
     return (
-      <Link
-        href={href}
-        className={cn(className, selected ? "bg-selected" : "")}
-      >
+      <Link to={href} className={cn(className, selected ? "bg-selected" : "")}>
         {body}
       </Link>
     );

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import noop from "lodash/noop";
 import {
   createContext,
   Fragment,
@@ -10,7 +11,6 @@ import {
   useState,
 } from "react";
 import JsonEditor from "../json-editor";
-import { noop } from "lodash";
 
 interface FullEditorContextValue {
   openEditor: (option: FullEditorOption) => void;
@@ -47,10 +47,10 @@ function FullEditorSheet({ option }: { option: FullEditorOption }) {
     <Sheet open>
       <SheetContent
         hideCloseButton
-        className="border-none sm:max-w-[1000px] sm:w-[70vw] overflow-hidden flex p-0"
+        className="flex overflow-hidden border-none p-0 sm:w-[70vw] sm:max-w-[1000px]"
       >
-        <div className="flex flex-col grow overflow-hidden">
-          <div className="p-4 flex gap-2">
+        <div className="flex grow flex-col overflow-hidden">
+          <div className="flex gap-2 p-4">
             <div className="grow" />
             <Button onClick={option.onCancel} variant={"destructive"}>
               Close
@@ -76,7 +76,7 @@ function FullEditorSheet({ option }: { option: FullEditorOption }) {
           {option.format === "text" && (
             <textarea
               autoFocus
-              className="grow p-4 w-full outline-hidden bg-inherit font-mono"
+              className="w-full grow bg-inherit p-4 font-mono outline-hidden"
               value={value}
               onChange={(e) => setValue(e.currentTarget.value)}
               readOnly={option.readOnly}

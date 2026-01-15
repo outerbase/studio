@@ -1,12 +1,12 @@
 import { Loader } from "@/components/orbit/loader";
 import { cn } from "@/lib/utils";
-import Link, { LinkProps } from "next/link";
+import { Link } from "@tanstack/react-router";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   as?: React.ElementType;
   children?: React.ReactNode;
   displayContent?: "items-first" | "items-last"; // used for children of component
-  href?: LinkProps["href"];
+  href?: string;
   loading?: boolean;
   shape?: "base" | "square";
   size?: "sm" | "base" | "lg";
