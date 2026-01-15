@@ -1,5 +1,4 @@
 "use client";
-import PageTracker from "@/components/page-tracker";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ThemeProvider } from "next-themes";
@@ -34,7 +33,6 @@ export default function ThemeLayout({
         </TooltipProvider>
         <Toaster />
       </ThemeProvider>
-      <PageTracker />
       <Script async defer src="https://buttons.github.io/buttons.js" />
     </>
   );
