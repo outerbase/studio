@@ -23,8 +23,6 @@ export async function exportTableData(
   let hasMore = true;
   let headers: string[] = [];
   let allProcessedRows: string[] = [];
-
-  // 1. Get headers from first row
   const firstChunk = await databaseDriver.query(
     `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT 1 OFFSET 0`
   );
@@ -32,13 +30,11 @@ export async function exportTableData(
   if (!firstChunk.rows || firstChunk.rows.length === 0) return "";
   headers = Object.keys(firstChunk.rows[0]);
 
-  // Add headers to CSV if needed
   if (format === "csv" || format === "delimited") {
      const sep = options?.fieldSeparator || ",";
      allProcessedRows.push(headers.map(h => escapeDelimitedValue(h, sep)).join(sep));
   }
 
-  // 2. Paginated Loop
   while (hasMore) {
     const result = await databaseDriver.query(
       `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT ${limit} OFFSET ${offset}`
@@ -49,33 +45,25 @@ export async function exportTableData(
       break;
     }
 
-    const records = result.rows.map((row: any) =>
-      headers.map((header) => row[header])
-    );
+    const records = result.rows.map((row: any) => headers.map((header) => row[header]));
 
-    let chunkContent = "";
     if (format === "csv" || format === "delimited") {
       const sep = options?.fieldSeparator || ",";
       const term = options?.lineTerminator || "\n";
-      chunkContent = records.map((row: any) => 
-        row.map((cell: any) => escapeDelimitedValue(cell, sep)).join(sep)
-      ).join(term);
+      allProcessedRows.push(records.map((row: any) => row.map((cell: any) => escapeDelimitedValue(cell, sep)).join(sep)).join(term));
     } else if (format === "sql") {
-      chunkContent = records.map((record: any) => {
+      allProcessedRows.push(records.map((record: any) => {
         const valuePart = record.map((v: any) => escapeSqlValue(v)).join(", ");
         return `INSERT INTO ${escapeIdentity(tableName)} (${headers.map(escapeIdentity).join(", ")}) VALUES (${valuePart});`;
-      }).join("\n");
-    } else {
-      chunkContent = JSON.stringify(result.rows).slice(1, -1);
+      }).join("\n"));
     }
 
-    allProcessedRows.push(chunkContent);
-    
-    if (result.rows.length < limit) {
-      hasMore = false;
-    } else {
-      offset += limit;
-    }
+    if (result.rows.length < limit) hasMore = false;
+    else offset += limit;
+  }
+
+  return allProcessedRows.join(options?.lineTerminator || "\n");
+}
   }
 
   return allProcessedRows.join(options?.lineTerminator || "\n");
