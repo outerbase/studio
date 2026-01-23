@@ -1,32 +1,13 @@
-import {
-  ExportFormat,
-  ExportOptions,
-  ExportSelection,
-  ExportTarget,
-} from "@/components/gui/export/export-result-button";
-import {
-  escapeDelimitedValue,
-  escapeIdentity,
-  escapeSqlValue,
-} from "@/drivers/sqlite/sql-helper";
+import { ExportFormat, ExportOptions, ExportTarget } from '@/components/gui/export/export-result-button';
+import { escapeDelimitedValue, escapeIdentity, escapeSqlValue } from '@/drivers/sqlite/sql-helper';
 
-export async function exportTableData(
-  databaseDriver: any,
-  schemaName: string,
-  tableName: string,
-  format: ExportFormat,
-  exportTarget: ExportTarget,
-  options?: ExportOptions
-): Promise<string | Blob> {
+export async function exportTableData(databaseDriver: any, schemaName: string, tableName: string, format: ExportFormat, exportTarget: ExportTarget, options?: ExportOptions): Promise<string | Blob> {
   const limit = 2000;
   let offset = 0;
   let hasMore = true;
   let headers: string[] = [];
   let allProcessedRows: string[] = [];
-  const firstChunk = await databaseDriver.query(
-    `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT 1 OFFSET 0`
-  );
-  
+  const firstChunk = await databaseDriver.query(`SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT 1 OFFSET 0`);
   if (!firstChunk.rows || firstChunk.rows.length === 0) return "";
   headers = Object.keys(firstChunk.rows[0]);
 
@@ -36,17 +17,10 @@ export async function exportTableData(
   }
 
   while (hasMore) {
-    const result = await databaseDriver.query(
-      `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT ${limit} OFFSET ${offset}`
-    );
-
-    if (!result.rows || result.rows.length === 0) {
-      hasMore = false;
-      break;
-    }
+    const result = await databaseDriver.query(`SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)} LIMIT ${limit} OFFSET ${offset}`);
+    if (!result.rows || result.rows.length === 0) { hasMore = false; break; }
 
     const records = result.rows.map((row: any) => headers.map((header) => row[header]));
-
     if (format === "csv" || format === "delimited") {
       const sep = options?.fieldSeparator || ",";
       const term = options?.lineTerminator || "\n";
@@ -57,14 +31,8 @@ export async function exportTableData(
         return `INSERT INTO ${escapeIdentity(tableName)} (${headers.map(escapeIdentity).join(", ")}) VALUES (${valuePart});`;
       }).join("\n"));
     }
-
     if (result.rows.length < limit) hasMore = false;
     else offset += limit;
   }
-
-  return allProcessedRows.join(options?.lineTerminator || "\n");
-}
-  }
-
   return allProcessedRows.join(options?.lineTerminator || "\n");
 }
