@@ -19,7 +19,6 @@ import {
   tabOpenChannel,
   tabReplaceChannel,
 } from "@/core/extension-tab";
-import { normalizedPathname, sendAnalyticEvents } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import { Binoculars, GearSix, Table } from "@phosphor-icons/react";
 import SavedDocTab from "./sidebar/saved-doc-tab";
@@ -179,20 +178,6 @@ export default function DatabaseGui() {
   useEffect(() => {
     const currentTab = tabs[selectedTabIndex];
     if (currentTab && currentTab.key !== previousLogTabKey.current) {
-      // We don't log the first tab because it's already logged in the main screen.
-      if (previousLogTabKey.current) {
-        sendAnalyticEvents([
-          {
-            name: "page_view",
-            data: {
-              path: normalizedPathname(window.location.pathname),
-              tab: currentTab.type,
-              tab_key: currentTab.key,
-            },
-          },
-        ]);
-      }
-
       previousLogTabKey.current = currentTab.key;
     }
   }, [tabs, selectedTabIndex, previousLogTabKey]);

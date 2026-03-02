@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { CaretDown, ChartBar, MagnifyingGlass } from "@phosphor-icons/react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { PropsWithChildren, useMemo, useState } from "react";
 import { getCreateResourceTypeList } from "./new-resource-list";
 
@@ -36,8 +36,7 @@ function CreateResourceItem({
 
   return (
     <Link
-      prefetch={false}
-      href={data.href}
+      to={data.href}
       className={cn(
         "hover:bg-secondary flex w-full cursor-pointer items-center justify-start rounded p-2 text-base",
         { "bg-secondary": selected }

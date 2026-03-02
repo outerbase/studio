@@ -2,7 +2,7 @@
 import { getOuterbaseWorkspace } from "@/outerbase-cloud/api";
 import { OuterbaseAPIWorkspace } from "@/outerbase-cloud/api-type";
 import { produce } from "immer";
-import { noop } from "lodash";
+import noop from "lodash/noop";
 import { useParams } from "next/navigation";
 import {
   createContext,

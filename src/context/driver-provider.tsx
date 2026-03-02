@@ -2,7 +2,7 @@ import { StudioExtensionManager } from "@/core/extension-manager";
 import AgentDriverList from "@/drivers/agent/list";
 import type { BaseDriver } from "@/drivers/base-driver";
 import { SavedDocDriver } from "@/drivers/saved-doc/saved-doc-driver";
-import { noop } from "lodash";
+import noop from "lodash/noop";
 import { type PropsWithChildren, createContext, useContext } from "react";
 
 export interface StudioContextProps {
