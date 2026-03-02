@@ -127,6 +127,6 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.7.1",
     "typescript": "^5",
-    "wrangler": "^4.6.0"
+    "wrangler": "^4.59.3"
   }
 }
