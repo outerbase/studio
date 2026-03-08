@@ -15,21 +15,8 @@ interface OuterbaseChartProps {
 }
 
 const TextComponent = ({ value }: OuterbaseChartProps) => {
-  let markdown = value.params.options?.text ?? "";
+  const markdown = value.params.options?.text ?? "";
 
-  // Bold (**text** or __text__)
-  markdown = markdown.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
-  markdown = markdown.replace(/__(.*?)__/g, "<b>$1</b>");
-
-  // Italic (*text* or _text_)
-  markdown = markdown.replace(/\*(.*?)\*/g, "<i>$1</i>");
-  markdown = markdown.replace(/_(.*?)_/g, "<i>$1</i>");
-
-  // Underline (__text__)
-  markdown = markdown.replace(/~~(.*?)~~/g, "<u>$1</u>");
-
-  // Line break (double space followed by a newline)
-  markdown = markdown.replace(/ {2}\n/g, "<br>");
   return (
     <div className="h-full w-full">
       <p
@@ -41,11 +28,7 @@ const TextComponent = ({ value }: OuterbaseChartProps) => {
         }}
         className="flex-1 self-start text-neutral-900 dark:text-neutral-100"
       >
-        <span
-          dangerouslySetInnerHTML={{
-            __html: markdown,
-          }}
-        ></span>
+        <span>{markdown}</span>
       </p>
     </div>
   );
