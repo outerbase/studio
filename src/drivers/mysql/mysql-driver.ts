@@ -181,6 +181,7 @@ export default class MySQLLikeDriver extends CommonSQLImplement {
       supportInsertReturning: false,
       supportUpdateReturning: false,
       supportCreateUpdateTrigger: true,
+      supportDumpDatabase: false,
     };
   }
 
@@ -448,13 +449,13 @@ export default class MySQLLikeDriver extends CommonSQLImplement {
           foreignKey:
             constraint.CONSTRAINT_TYPE === "FOREIGN KEY"
               ? {
-                  columns: columnList.map((c) => c.COLUMN_NAME),
-                  foreignColumns: columnList.map(
-                    (c) => c.REFERENCED_COLUMN_NAME
-                  ),
-                  foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
-                  foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
-                }
+                columns: columnList.map((c) => c.COLUMN_NAME),
+                foreignColumns: columnList.map(
+                  (c) => c.REFERENCED_COLUMN_NAME
+                ),
+                foreignSchemaName: columnList[0].REFERENCED_TABLE_SCHEMA,
+                foreignTableName: columnList[0].REFERENCED_TABLE_NAME,
+              }
               : undefined,
         };
       }
@@ -549,5 +550,9 @@ export default class MySQLLikeDriver extends CommonSQLImplement {
 
   inferTypeFromHeader(): ColumnType | undefined {
     return undefined;
+  }
+
+  dumpDatabase(): Promise<{ data: Blob | Uint8Array | ArrayBuffer | string; filename?: string; mimeType?: string; }> {
+    throw new Error("MySQL dump is not supported.");
   }
 }

@@ -244,6 +244,9 @@ export interface DriverFlags {
   supportRowId: boolean;
   supportCreateUpdateDatabase: boolean;
   supportCreateUpdateTrigger: boolean;
+
+  // Optional capabilities
+  supportDumpDatabase?: boolean;
 }
 
 export interface DatabaseTableColumnChange {
@@ -354,4 +357,12 @@ export abstract class BaseDriver {
   abstract dropView(schemaName: string, name: string): string;
 
   abstract view(schemaName: string, name: string): Promise<DatabaseViewSchema>;
+
+  // Optional: Drivers that support full database dump can override this.
+  // Default implementation throws to indicate unsupported capability.
+  abstract dumpDatabase(): Promise<{
+    data: Blob | Uint8Array | ArrayBuffer | string;
+    filename?: string;
+    mimeType?: string;
+  }>
 }
