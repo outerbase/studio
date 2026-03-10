@@ -97,7 +97,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^0.6.6",
+    "@opennextjs/cloudflare": "^1.14.7",
     "@tailwindcss/postcss": "^4.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
