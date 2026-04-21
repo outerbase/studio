@@ -4,10 +4,12 @@ import { Studio } from "@/components/gui/studio";
 import PageLoading from "@/components/page-loading";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import {
+  createClickHouseExtensions,
   createMySQLExtensions,
   createPostgreSQLExtensions,
   createSQLiteExtensions,
 } from "@/core/standard-extension";
+import ClickHouseLikeDriver from "@/drivers/clickhouse/clickhouse-driver";
 import MySQLLikeDriver from "@/drivers/mysql/mysql-driver";
 import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
 import { SqliteLikeBaseDriver } from "@/drivers/sqlite-base-driver";
@@ -91,6 +93,17 @@ export default function OuterbaseSourcePage() {
         ),
         new StudioExtensionManager([
           ...createMySQLExtensions(),
+          ...outerbaseSpecifiedDrivers,
+        ]),
+      ];
+    } else if (dialect === "clickhouse") {
+      return [
+        new ClickHouseLikeDriver(
+          new OuterbaseQueryable(outerbaseConfig),
+          credential.database
+        ),
+        new StudioExtensionManager([
+          ...createClickHouseExtensions(),
           ...outerbaseSpecifiedDrivers,
         ]),
       ];

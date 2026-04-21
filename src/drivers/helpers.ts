@@ -1,4 +1,6 @@
 import { SavedConnectionRawLocalStorage } from "@/app/(theme)/connect/saved-connection-storage";
+import ClickHouseLikeDriver from "./clickhouse/clickhouse-driver";
+import { ClickHouseHttpQueryable } from "./clickhouse/clickhouse-http";
 import { CloudflareD1Queryable } from "./database/cloudflare-d1";
 import CloudflareWAEDriver from "./database/cloudflare-wae";
 import { RqliteQueryable } from "./database/rqlite";
@@ -26,6 +28,15 @@ export function createLocalDriver(conn: SavedConnectionRawLocalStorage) {
     return new SqliteLikeBaseDriver(new StarbaseQuery(conn.url!, conn.token!));
   } else if (conn.driver === "cloudflare-wae") {
     return new CloudflareWAEDriver(conn.username!, conn.token!);
+  } else if (conn.driver === "clickhouse") {
+    return new ClickHouseLikeDriver(
+      new ClickHouseHttpQueryable({
+        url: conn.url!,
+        username: conn.username,
+        password: conn.password,
+        database: conn.database,
+      })
+    );
   }
 
   return new TursoDriver(conn.url!, conn.token!, true);

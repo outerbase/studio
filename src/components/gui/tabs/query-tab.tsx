@@ -34,7 +34,17 @@ import {
 } from "@/lib/sql/multiple-query";
 import { sendAnalyticEvents } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
+import type { SupportedDialect as SdkSupportedDialect } from "@outerbase/sdk-transform";
 import { tokenizeSql } from "@outerbase/sdk-transform";
+import type { SupportedDialect } from "@/drivers/base-driver";
+
+// The SDK's tokenizer/parser does not ship a ClickHouse grammar yet.
+// ClickHouse's SQL surface — backtick-quoted identifiers, `--` comments,
+// standard string literals — is closest to MySQL, so fall back to MySQL
+// tokenization rules for dialects the SDK doesn't know about.
+function toSdkDialect(d: SupportedDialect): SdkSupportedDialect {
+  return d === "clickhouse" ? "mysql" : d;
+}
 import { CaretDown } from "@phosphor-icons/react";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import {
@@ -96,7 +106,10 @@ export default function QueryWindow({
     const timer = setTimeout(() => {
       setPlaceholders((prev) => {
         const newPlaceholders: Record<string, string> = {};
-        const token = tokenizeSql(code, databaseDriver.getFlags().dialect);
+        const token = tokenizeSql(
+          code,
+          toSdkDialect(databaseDriver.getFlags().dialect)
+        );
 
         const foundPlaceholders = token
           .filter((t) => t.type === "PLACEHOLDER")
@@ -168,7 +181,7 @@ export default function QueryWindow({
       for (let i = 0; i < finalStatements.length; i++) {
         const token = tokenizeSql(
           finalStatements[i],
-          databaseDriver.getFlags().dialect
+          toSdkDialect(databaseDriver.getFlags().dialect)
         );
 
         // Defensive measurement

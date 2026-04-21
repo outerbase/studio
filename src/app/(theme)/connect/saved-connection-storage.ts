@@ -5,7 +5,8 @@ export type SupportedDriver =
   | "starbase"
   | "cloudflare-d1"
   | "cloudflare-wae"
-  | "sqlite-filehandler";
+  | "sqlite-filehandler"
+  | "clickhouse";
 
 export type SavedConnectionStorage = "remote" | "local";
 export type SavedConnectionLabel = "gray" | "red" | "yellow" | "green" | "blue";

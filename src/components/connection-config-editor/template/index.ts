@@ -1,4 +1,5 @@
 import { ConnectionTemplateList } from "@/app/(outerbase)/base-template";
+import { ClickHouseConnectionTemplate } from "./clickhouse";
 import { CloudflareConnectionTemplate } from "./cloudflare";
 import { CloudflareWAEConnectionTemplate } from "./cloudflare-wae";
 import { MySQLConnectionTemplate } from "./mysql";
@@ -25,4 +26,5 @@ export const ConnectionTemplateDictionary: Record<
 
   mysql: MySQLConnectionTemplate,
   postgres: PostgresConnectionTemplate,
+  clickhouse: ClickHouseConnectionTemplate,
 };

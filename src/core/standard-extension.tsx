@@ -28,3 +28,8 @@ export function createMySQLExtensions() {
 export function createPostgreSQLExtensions() {
   return createStandardExtensions();
 }
+
+export function createClickHouseExtensions() {
+  // ClickHouse has no trigger system, so skip TriggerEditorExtension.
+  return createStandardExtensions();
+}

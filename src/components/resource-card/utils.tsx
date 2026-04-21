@@ -6,7 +6,12 @@ import {
   SQLiteIcon,
   TursoIcon,
 } from "../icons/outerbase-icon";
-import { CloudflareIcon, StarbaseIcon, ValTownIcon } from "./icon";
+import {
+  ClickHouseIcon,
+  CloudflareIcon,
+  StarbaseIcon,
+  ValTownIcon,
+} from "./icon";
 import {
   BoardVisual,
   GeneralVisual,
@@ -33,6 +38,7 @@ export function getDatabaseFriendlyName(type: string) {
   if (type === "bigquery") return "BigQuery";
   if (type === "valtown") return "ValTown";
   if (type === "board") return "Board";
+  if (type === "clickhouse") return "ClickHouse";
 
   return type;
 }
@@ -52,6 +58,7 @@ export function getDatabaseIcon(type: string) {
   if (type === "rqlite") return RqliteIcon;
   if (type === "sqlite") return SQLiteIcon;
   if (type === "board") return ChartBar;
+  if (type === "clickhouse") return ClickHouseIcon;
 
   return Database;
 }
