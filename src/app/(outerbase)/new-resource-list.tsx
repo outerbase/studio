@@ -4,6 +4,7 @@ import {
   SQLiteIcon,
 } from "@/components/icons/outerbase-icon";
 import {
+  ClickHouseIcon,
   CloudflareIcon,
   RQLiteIcon,
   StarbaseIcon,
@@ -62,6 +63,13 @@ export function getCreateResourceTypeList(
       href: workspaceId
         ? `/w/${workspaceId}/new-base/mysql`
         : "/local/new-base/mysql",
+    },
+    {
+      name: "ClickHouse",
+      icon: ClickHouseIcon,
+      href: workspaceId
+        ? `/w/${workspaceId}/new-base/clickhouse`
+        : "/local/new-base/clickhouse",
     },
     {
       name: "SQLite",

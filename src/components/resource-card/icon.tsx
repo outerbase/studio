@@ -167,6 +167,26 @@ export const SupabaseIcon = ({ className }: IconProps) => (
   </svg>
 );
 
+export const ClickHouseIcon = ({ className }: IconProps) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    {/* Simplified placeholder glyph: 5 vertical bars evoking the
+        ClickHouse brand mark. Replace with the official SVG when
+        brand assets are added. */}
+    <rect x="3" y="3" width="3" height="18" fill="currentColor" />
+    <rect x="7.5" y="3" width="3" height="18" fill="currentColor" />
+    <rect x="12" y="3" width="3" height="18" fill="currentColor" />
+    <rect x="16.5" y="3" width="3" height="18" fill="currentColor" />
+    <rect x="21" y="10.5" width="3" height="3" fill="currentColor" />
+  </svg>
+);
+
 export const ValTownIcon = ({ className }: IconProps) => (
   <svg
     width="24"

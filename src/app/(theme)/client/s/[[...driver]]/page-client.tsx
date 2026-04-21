@@ -6,6 +6,7 @@ import {
 import { Studio } from "@/components/gui/studio";
 import { StudioExtensionManager } from "@/core/extension-manager";
 import {
+  createClickHouseExtensions,
   createMySQLExtensions,
   createPostgreSQLExtensions,
   createSQLiteExtensions,
@@ -52,6 +53,8 @@ export default function ClientPageBody() {
       return new StudioExtensionManager(createSQLiteExtensions());
     } else if (dialet === "postgres") {
       return new StudioExtensionManager(createPostgreSQLExtensions());
+    } else if (dialet === "clickhouse") {
+      return new StudioExtensionManager(createClickHouseExtensions());
     }
 
     return new StudioExtensionManager(createStandardExtensions());

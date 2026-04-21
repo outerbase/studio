@@ -1,4 +1,5 @@
 import { DatabaseResultSet } from "@/drivers/base-driver";
+import ClickHouseLikeDriver from "@/drivers/clickhouse/clickhouse-driver";
 import MySQLLikeDriver from "@/drivers/mysql/mysql-driver";
 import PostgresLikeDriver from "@/drivers/postgres/postgres-driver";
 import { SqliteLikeBaseDriver } from "@/drivers/sqlite-base-driver";
@@ -31,6 +32,8 @@ export function createOuterbaseDatabaseDriver(
     return new PostgresLikeDriver(queryable);
   } else if (type === "mysql") {
     return new MySQLLikeDriver(queryable);
+  } else if (type === "clickhouse") {
+    return new ClickHouseLikeDriver(queryable);
   }
 
   return new SqliteLikeBaseDriver(queryable);
