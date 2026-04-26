@@ -11,6 +11,21 @@ const template: CommonConnectionConfigTemplate = [
         required: true,
         placeholder: "Hostname or IP address",
       },
+      {
+        name: "port",
+        label: "Port",
+        type: "number",
+        required: true,
+        placeholder: "4001",
+        defaultValue: 4001,
+      },
+      {
+        name: "useSSL",
+        label: "Use SSL",
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+      },
     ],
   },
   {
@@ -48,21 +63,4 @@ const instruction = (
 export const RqliteConnectionTemplate: ConnectionTemplateList = {
   template,
   instruction,
-  localFrom: (value) => {
-    return {
-      name: value.name,
-      host: value.url,
-      username: value.username,
-      password: value.password,
-    };
-  },
-  localTo: (value) => {
-    return {
-      name: value.name,
-      driver: "rqlite",
-      url: value.host,
-      username: value.username,
-      password: value.password,
-    };
-  },
 };
