@@ -68,13 +68,47 @@ export function transformRawResult(raw: RqliteResult): DatabaseResultSet {
 }
 
 export class RqliteQueryable implements QueryableBaseDriver {
+  private connectionVerified = false;
+
   constructor(
     protected endpoint: string,
     protected username?: string,
     protected password?: string
   ) {}
 
+  /**
+   * Probes the rqlite node by requesting the root path and verifying the
+   * X-Rqlite-Version response header, as recommended by the rqlite project:
+   * https://github.com/rqlite/rqlite/blob/master/cmd/rqlite/main.go#L101
+   */
+  async testConnection(): Promise<void> {
+    let response: Response;
+
+    try {
+      response = await fetch(this.endpoint + "/", {
+        method: "GET",
+        redirect: "manual",
+      });
+    } catch (err) {
+      throw new Error(
+        `Cannot reach rqlite at ${this.endpoint}: ${(err as Error).message}`
+      );
+    }
+
+    if (!response.headers.get("X-Rqlite-Version")) {
+      throw new Error(
+        `The server at ${this.endpoint} does not appear to be an rqlite node ` +
+          `(X-Rqlite-Version header missing). Verify the URL and port.`
+      );
+    }
+  }
+
   async transaction(stmts: string[]): Promise<DatabaseResultSet[]> {
+    if (!this.connectionVerified) {
+      await this.testConnection();
+      this.connectionVerified = true;
+    }
+
     let headers: HeadersInit = {
       "Content-Type": "application/json",
     };
