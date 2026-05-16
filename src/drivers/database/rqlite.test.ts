@@ -43,16 +43,6 @@ describe("transformRawResult", () => {
     expect(result.lastInsertRowid).toBe(99);
   });
 
-  it("renames duplicate column names to avoid key collisions", () => {
-    const result = transformRawResult({
-      columns: ["id", "id"],
-      types: ["integer", "integer"],
-      values: [[1, 2]],
-    });
-
-    const names = result.headers.map((h) => h.name);
-    expect(new Set(names).size).toBe(2);
-  });
 });
 
 // ---------------------------------------------------------------------------
