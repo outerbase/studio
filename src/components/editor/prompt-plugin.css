@@ -6,7 +6,8 @@
   background: #f5f5f5;
 }
 
-.dark .prompt-line-selected {
+.dark .prompt-line-selected,
+:host(.dark) .prompt-line-selected {
   background: #222;
 }
 
@@ -14,7 +15,8 @@
   background-color: #fab1a0 !important;
 }
 
-.dark .cm-deletedChunk {
+.dark .cm-deletedChunk,
+:host(.dark) .cm-deletedChunk {
   background-color: #b54b4b !important;
 }
 
@@ -26,7 +28,8 @@
   background-color: #55efc4 !important;
 }
 
-.dark .cm-changedLine {
+.dark .cm-changedLine,
+:host(.dark) .cm-changedLine {
   background-color: #2f6542 !important;
 }
 

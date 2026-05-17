@@ -1,7 +1,16 @@
 @import "tailwindcss";
 @import "./styles/markdown.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * `dark:` Tailwind variant. The default `&:is(.dark *)` matches an element
+ * inside a `.dark` ancestor in the same DOM tree. That breaks for consumers
+ * that mount Studio inside an open Shadow Root (e.g. to keep Tailwind's
+ * preflight from leaking into a host app), because descendant combinators
+ * can't cross the shadow boundary - the `.dark` class lives on the shadow
+ * host, which is outside the shadow tree. Add `:host(.dark) *` so the
+ * variant also matches when `.dark` is on the host element.
+ */
+@custom-variant dark (&:where(.dark *, :host(.dark) *));
 @custom-variant interactive (&:where(.interactive, .interactive *));
 @custom-variant toggle (&:where(.toggle, .toggle *));
 @custom-variant square (&:where(.square, .square *));
@@ -225,7 +234,10 @@
     overscroll-behavior-x: none;
   }
 
-  :root {
+  /* `:host` is added so the same tokens reach consumers that mount Studio
+     inside a Shadow Root; `:root` matches Document.documentElement only. */
+  :root,
+  :host {
     --color-table-grid: #eee;
     --color-table-change: #f6e58d;
 
@@ -244,7 +256,8 @@
 }
 
 @layer base {
-  :root {
+  :root,
+  :host {
     --background: #fff;
     --foreground: #444;
 
@@ -283,7 +296,8 @@
     --scroll-bar-hover: #ccc;
   }
 
-  .dark {
+  .dark,
+  :host(.dark) {
     --background: #0a0a0a;
     --foreground: #aaa;
 
@@ -361,7 +375,8 @@
 
 /* FROM ORBIT DESIGN SYSTEM */
 
-.dark {
+.dark,
+:host(.dark) {
   /* Component colors */
 
   /* Base colors */
@@ -527,7 +542,8 @@
   outline: none !important;
 }
 
-.dark .cm-table-name {
+.dark .cm-table-name,
+:host(.dark) .cm-table-name {
   color: #fd79a8;
 }
 
