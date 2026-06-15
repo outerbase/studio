@@ -6,12 +6,56 @@ import {
 } from "@/components/gui/export/export-result-button";
 import OptimizeTableState from "@/components/gui/table-optimized/optimize-table-state";
 import { getSingleTableName } from "@/components/gui/tabs/query-tab";
+import { BaseDriver } from "@/drivers/base-driver";
 import {
   escapeDelimitedValue,
   escapeIdentity,
   escapeSqlValue,
 } from "@/drivers/sqlite/sql-helper";
 import { toast } from "sonner";
+
+const BATCH_SIZE = 1000;
+
+async function* queryTableInBatches(
+  driver: BaseDriver,
+  schemaName: string,
+  tableName: string,
+  batchSize: number = BATCH_SIZE
+): AsyncGenerator<{ headers: string[]; records: unknown[][] }> {
+  let offset = 0;
+  let hasMore = true;
+  let headers: string[] | null = null;
+
+  while (hasMore) {
+    const result = await driver.selectTable(schemaName, tableName, {
+      limit: batchSize,
+      offset,
+    });
+
+    const rows = result.data.rows;
+
+    if (rows.length === 0) {
+      hasMore = false;
+      break;
+    }
+
+    if (!headers) {
+      headers = result.data.headers.map((h) => h.name);
+    }
+
+    const records = rows.map((row) =>
+      headers!.map((header) => row[header])
+    );
+
+    yield { headers: headers!, records };
+
+    offset += rows.length;
+
+    if (rows.length < batchSize) {
+      hasMore = false;
+    }
+  }
+}
 
 export function selectArrayFromIndexList<T = unknown>(
   data: T[],
@@ -303,49 +347,198 @@ export function convertExcelStringToArray(data: string): string[][] {
 }
 
 export async function exportTableData(
-  databaseDriver: any,
+  databaseDriver: BaseDriver,
   schemaName: string,
   tableName: string,
   format: ExportFormat,
   exportTarget: ExportTarget,
   options?: ExportOptions
 ): Promise<string | Blob> {
-  const result = await databaseDriver.query(
-    `SELECT * FROM ${databaseDriver.escapeId(schemaName)}.${databaseDriver.escapeId(tableName)}`
-  );
-  console.log("QueryResults", result);
-  if (!result.rows || result.rows.length === 0) {
-    return "";
+  // For xlsx, we need to collect all data first since the xlsx library
+  // requires the full dataset at once. For other formats, we stream.
+  if (format === "xlsx") {
+    const allRecords: unknown[][] = [];
+    let headers: string[] = [];
+
+    for await (const batch of queryTableInBatches(
+      databaseDriver,
+      schemaName,
+      tableName
+    )) {
+      if (headers.length === 0) {
+        headers = batch.headers;
+      }
+      allRecords.push(...batch.records);
+    }
+
+    return exportToExcel(
+      allRecords,
+      headers,
+      tableName,
+      exportTarget,
+      options?.nullValue || "NULL"
+    );
   }
 
-  const headers = Object.keys(result.rows[0]);
-  const records = result.rows.map((row: { [x: string]: string }) =>
-    headers.map((header) => row[header])
-  );
+  // Stream processing for csv, json, sql, delimited
+  if (format === "csv") {
+    const resultParts: string[] = [];
+    let headers: string[] = [];
+    let isFirstBatch = true;
 
-  const formatHandlers = {
-    csv: () =>
-      exportDataAsDelimitedText(headers, records, ",", "\n", '"', exportTarget),
-    json: () => exportRowsToJson(headers, records, exportTarget),
-    sql: () => exportRowsToSqlInsert(tableName, headers, records, exportTarget),
-    xlsx: () => exportToExcel(records, headers, tableName, exportTarget),
-    delimited: () =>
-      exportDataAsDelimitedText(
-        headers,
-        records,
-        options?.fieldSeparator || ",",
-        options?.lineTerminator || "\n",
-        options?.encloser || '"',
-        exportTarget
-      ),
-  };
+    for await (const batch of queryTableInBatches(
+      databaseDriver,
+      schemaName,
+      tableName
+    )) {
+      if (isFirstBatch) {
+        headers = batch.headers;
+        const escapedHeaders = headers.map((v) =>
+          escapeDelimitedValue(v, ",", "\n", '"')
+        );
+        if (headers.length > 0) {
+          resultParts.push(escapedHeaders.join(","));
+        }
+        isFirstBatch = false;
+      }
 
-  const handler = formatHandlers[format];
-  if (handler) {
-    return handler();
-  } else {
-    throw new Error(`Unsupported export format: ${format}`);
+      for (const record of batch.records) {
+        const escapedRecord = record.map((v) =>
+          escapeDelimitedValue(v, ",", "\n", '"', options?.nullValue || "NULL")
+        );
+        resultParts.push(escapedRecord.join(","));
+      }
+    }
+
+    const content = resultParts.join("\n");
+    if (exportTarget === "clipboard") {
+      copyToClipboard(content);
+      return "";
+    }
+    return content;
   }
+
+  if (format === "delimited") {
+    const fieldSeparator = parseUserInput(options?.fieldSeparator || "") || ",";
+    const lineTerminator = parseUserInput(options?.lineTerminator || "") || "\n";
+    const textEncloser = parseUserInput(options?.encloser || "") || '"';
+    const nullValue = options?.nullValue || "NULL";
+
+    const resultParts: string[] = [];
+    let headers: string[] = [];
+    let isFirstBatch = true;
+
+    for await (const batch of queryTableInBatches(
+      databaseDriver,
+      schemaName,
+      tableName
+    )) {
+      if (isFirstBatch) {
+        headers = batch.headers;
+        const escapedHeaders = headers.map((v) =>
+          escapeDelimitedValue(v, fieldSeparator, lineTerminator, textEncloser)
+        );
+        if (headers.length > 0) {
+          resultParts.push(escapedHeaders.join(fieldSeparator));
+        }
+        isFirstBatch = false;
+      }
+
+      for (const record of batch.records) {
+        const escapedRecord = record.map((v) =>
+          escapeDelimitedValue(v, fieldSeparator, lineTerminator, textEncloser, nullValue)
+        );
+        resultParts.push(escapedRecord.join(fieldSeparator));
+      }
+    }
+
+    const content = resultParts.join(lineTerminator);
+    if (exportTarget === "clipboard") {
+      copyToClipboard(content);
+      return "";
+    }
+    return content;
+  }
+
+  if (format === "json") {
+    const allRecordsAsObjects: Record<string, unknown>[] = [];
+    let headers: string[] = [];
+
+    for await (const batch of queryTableInBatches(
+      databaseDriver,
+      schemaName,
+      tableName
+    )) {
+      if (headers.length === 0) {
+        headers = batch.headers;
+      }
+
+      for (const record of batch.records) {
+        const recordWithBigIntAsString = record.map((value) =>
+          typeof value === "bigint" ? value.toString() : value
+        );
+
+        const obj = recordWithBigIntAsString.reduce<Record<string, unknown>>(
+          (acc, value, index) => {
+            const header = headers[index];
+            if (header !== undefined) {
+              acc[header] =
+                value === null && options?.nullValue
+                  ? parseUserInput(options.nullValue)
+                  : value;
+            }
+            return acc;
+          },
+          {}
+        );
+        allRecordsAsObjects.push(obj);
+      }
+    }
+
+    const content = JSON.stringify(allRecordsAsObjects, null, 2);
+    if (exportTarget === "clipboard") {
+      copyToClipboard(content);
+      return "";
+    }
+    return content;
+  }
+
+  if (format === "sql") {
+    const resultParts: string[] = [];
+    let headers: string[] = [];
+    let isFirstBatch = true;
+
+    for await (const batch of queryTableInBatches(
+      databaseDriver,
+      schemaName,
+      tableName
+    )) {
+      if (isFirstBatch) {
+        headers = batch.headers;
+        isFirstBatch = false;
+      }
+
+      const headersPart = headers.map(escapeIdentity).join(", ");
+      for (const record of batch.records) {
+        const valuePart = record
+          .map((value) => escapeSqlValue(value, options?.nullValue || "NULL"))
+          .join(", ");
+        const line = `INSERT INTO ${escapeIdentity(
+          tableName
+        )}(${headersPart}) VALUES(${valuePart});`;
+        resultParts.push(line);
+      }
+    }
+
+    const content = resultParts.join("\n");
+    if (exportTarget === "clipboard") {
+      copyToClipboard(content);
+      return "";
+    }
+    return content;
+  }
+
+  throw new Error(`Unsupported export format: ${format}`);
 }
 // TODO: maybe we should move export related types here
 export type { ExportFormat };
