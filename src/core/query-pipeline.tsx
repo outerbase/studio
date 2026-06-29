@@ -18,7 +18,7 @@ export class BeforeQueryPipeline {
     this.metadata[name] = value;
   }
 
-  getStatments() {
+  getStatements() {
     return this.statements;
   }
 
