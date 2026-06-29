@@ -6,7 +6,7 @@ export default class QueryHistoryConsoleLogExtension extends StudioExtension {
 
   init(studio: StudioExtensionContext): void {
     studio.registerBeforeQuery(async (payload) => {
-      const statements = payload.getStatments();
+      const statements = payload.getStatements();
 
       if (statements.length === 1) {
         console.group("Query");

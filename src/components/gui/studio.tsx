@@ -58,7 +58,7 @@ export function Studio({
               await extensionRef.current.beforeQuery(beforePipeline);
             }
 
-            return await target.query(beforePipeline.getStatments()[0]);
+            return await target.query(beforePipeline.getStatements()[0]);
           };
         } else if (property === "transaction" || property === "batch") {
           return async (statements: string[]) => {
@@ -70,7 +70,7 @@ export function Studio({
               await extensionRef.current.beforeQuery(beforePipeline);
             }
 
-            return await target.transaction(beforePipeline.getStatments());
+            return await target.transaction(beforePipeline.getStatements());
           };
         }
 
